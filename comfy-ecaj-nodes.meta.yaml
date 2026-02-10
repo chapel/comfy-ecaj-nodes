@@ -129,6 +129,37 @@ workflows:
         content: |-
           Merge the PR.
           Use: gh pr merge (prefer merge commit to preserve trailers)
+  - _ulid: 01KH4D3QHJSWS40QETS1K5ER2N
+    id: inbox-triage
+    trigger: session-start
+    description: Systematic processing of inbox items into specs and tasks.
+    steps:
+      - type: action
+        content: |-
+          Get context and list inbox items.
+          Use: kspec session start --full
+          Use: kspec inbox list
+      - type: action
+        content: |-
+          Categorize items by type:
+          - Bugs
+          - Spec gaps
+          - Quick wins
+          - Larger features (need plan mode)
+          - Delete candidates
+      - type: decision
+        content: Process each item - is it still relevant?
+        options:
+          - No -> delete it
+          - Yes, spec exists -> promote to task
+          - Yes, need spec -> create spec first
+          - Unclear -> leave for later
+      - type: action
+        content: |-
+          For behavior changes, follow spec-first approach:
+          1. Check if spec covers the change
+          2. Create or update spec with AC if needed
+          3. Derive task or promote inbox item
 conventions: []
 observations: []
 includes: []
