@@ -1,0 +1,20 @@
+kynetic_meta: "1.0"
+agents:
+  - _ulid: 01KH4D20YRV8MXAEMAC70AKQQZ
+    id: claude
+    name: Claude Code Agent
+    description: Primary development agent for this project.
+    capabilities:
+      - code
+      - test
+      - refactor
+      - review
+    tools:
+      - kspec
+      - git
+      - uv
+    conventions: []
+workflows: []
+conventions: []
+observations: []
+includes: []
