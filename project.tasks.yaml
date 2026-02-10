@@ -218,6 +218,15 @@
         Test by constructing MockModelPatcher instances with different key patterns
         and asserting detected arch.
         Files: nodes/entry.py, optionally lib/arch_detect.py.
+    - _ulid: 01KH4J2TE18PEKWAPSGFSQG9N8
+      created_at: 2026-02-10T19:57:32.482Z
+      author: "@claude"
+      content: "NF-1 scope clarification: v1 detects SDXL and Z-Image as supported architectures. Flux
+        (double_blocks) and Qwen (transformer_blocks) should be detected and produce a clear
+        UnsupportedArchitectureError with a message like 'Detected Flux architecture but no WIDEN
+        loader is available yet. Supported: sdxl, zimage.' This way the detection code is
+        future-proof but the error path is explicit."
+      supersedes: null
   todos: []
 - _ulid: 01KH4HA46729EXG3GT8QCW2F44
   slugs:
