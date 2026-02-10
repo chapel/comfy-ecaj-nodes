@@ -28,4 +28,16 @@
         sections). Sections 6.8 (Exit Node Algorithm), 6.9 (Memory Strategy), and 6.10 (Per-Block
         Control) were written this session — they are complete but newer than the rest of the doc."
       supersedes: null
+    - _ulid: 01KH4DZTRTJSRZ7CT7QCZT534V
+      created_at: 2026-02-10T18:46:00.218Z
+      author: "@claude"
+      content: "Key design decisions already resolved (in §6.7 and §6.10): (1) Auto-detect architecture at
+        Entry time from state dict keys. (2) Explicit backbone input on Merge node, defaults to
+        base. (3) LoRA file selection via folder_paths.get_filename_list standard dropdown. (4) Exit
+        node produces MODEL, saved via built-in ComfyUI save nodes. (5) Per-block control uses
+        Option B — explicit BLOCK_CONFIG type wired into Merge (block_t_factor) and LoRA
+        (block_strength) inputs. (6) One generic Block Config node per architecture (not two),
+        semantics carried by input names on consumers. (7) Deferred execution — recipe nodes do zero
+        GPU work, Exit runs full batched pipeline."
+      supersedes: null
   todos: []
