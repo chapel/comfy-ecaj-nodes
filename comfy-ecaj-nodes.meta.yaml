@@ -90,6 +90,45 @@ workflows:
           - Friction patterns: kspec meta observe friction
           - Success patterns: kspec meta observe success
           - Open questions: kspec meta question add
+  - _ulid: 01KH4D3C8G9G78XHVVJXB0B874
+    id: pr-review-merge
+    trigger: pr-merge
+    description: Quality gate for reviewing and merging PRs. Ensures all CI passes, reviews addressed,
+      and threads resolved before merge.
+    steps:
+      - type: check
+        content: All CI checks complete (none pending or running)
+        on_fail: Wait for CI to finish. Do not merge while checks are running.
+      - type: check
+        content: All CI checks pass (green)
+        on_fail: Fix failures, push changes, wait for CI to re-run and pass.
+      - type: action
+        content: |-
+          Read ALL review comments on the PR.
+          Use: gh pr view --comments or GitHub UI
+      - type: check
+        content: All review feedback addressed
+        on_fail: Fix each issue raised by reviewers. Push changes and wait for re-review if needed.
+      - type: action
+        content: |-
+          Check for @claude mentions or other requests in comments.
+          Complete any actions the PR agent could not.
+      - type: check
+        content: All requested actions completed
+        on_fail: Complete the actions yourself before proceeding.
+      - type: check
+        content: All review threads resolved in GitHub UI
+        on_fail: Click Resolve conversation on each thread after addressing.
+      - type: decision
+        content: Ready to merge?
+        options:
+          - Yes - all checks green, all reviews addressed, all threads resolved
+          - No - need user approval to merge with known issues
+          - Skip - user explicitly said to merge anyway
+      - type: action
+        content: |-
+          Merge the PR.
+          Use: gh pr merge (prefer merge commit to preserve trailers)
 conventions: []
 observations: []
 includes: []
