@@ -517,6 +517,13 @@
         filter_delta zeros low-importance entries, merge_weights routes correctly.
         Compare against merge-router by running both on same input and checking allclose.
         Files: lib/widen.py, lib/divergence.py, lib/ranking.py, lib/numerical_config.py.
+    - _ulid: 01KH4J2PAHPASF7QZ33EHV4RNX
+      created_at: 2026-02-10T19:57:28.274Z
+      author: "@claude"
+      content: "NF-2 fix: Also port lib/sparsity.py from src/core/sparsity.py (sparsemax, entmax). This
+        was listed in design doc S5 as required core algorithm but was missing from the files list.
+        WIDENConfig.sparsity_method references it."
+      supersedes: null
   todos: []
 - _ulid: 01KH4HA47F493S53EWKW4EA9SF
   slugs:
