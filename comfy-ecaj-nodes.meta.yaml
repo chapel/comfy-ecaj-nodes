@@ -250,5 +250,12 @@ conventions:
       - Include Spec trailer when implementing spec item
       - Keep subject line under 72 characters
     examples: []
+  - _ulid: 01KH4D54RSWVY7TE2E8RBV892W
+    domain: notes
+    rules:
+      - Add notes during work, not just at end
+      - Include context for decisions made
+      - Reference related commits, PRs, or issues
+    examples: []
 observations: []
 includes: []
