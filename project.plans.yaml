@@ -122,3 +122,904 @@ plans:
 
           Foundation specs are project-level infrastructure. They should be completed
           before WIDEN feature work begins, as they establish patterns all nodes follow.
+  - _ulid: 01KH4HA42F7WBQQC8KXVFKN5WT
+    slugs:
+      - plan-widen-merge-feature-specs
+    title: WIDEN Merge — Feature Specs
+    content: >
+      # WIDEN Merge — Feature Specs
+
+
+      ## Specs
+
+
+      ```yaml
+
+      - title: Recipe Type System
+        slug: recipe-system
+        type: feature
+        description: |
+          The WIDEN custom ComfyUI type and its recipe dataclasses. All recipe
+          objects are frozen (immutable) to prevent aliasing bugs with ComfyUI
+          caching and graph fan-out. Fields use tuples, not lists. Recipe objects
+          hold no GPU tensors -- they are pure recipe descriptions.
+        acceptance_criteria:
+          - id: ac-1
+            given: any recipe dataclass instance
+            when: a field is assigned after construction
+            then: a FrozenInstanceError is raised
+          - id: ac-2
+            given: a RecipeCompose with existing branches
+            when: a new branch is appended
+            then: a new RecipeCompose is returned with a new tuple (persistent tree semantics)
+          - id: ac-3
+            given: any recipe object
+            when: inspected for GPU tensors
+            then: no torch.Tensor objects are found (only references and metadata)
+          - id: ac-4
+            given: RecipeBase, RecipeLoRA, RecipeCompose, and RecipeMerge classes
+            when: imported from lib.recipe
+            then: all four are available and constructible with documented fields
+          - id: ac-5
+            given: nodes that output WIDEN type and nodes that accept WIDEN input
+            when: ComfyUI loads the node pack
+            then: WIDEN wire connections are valid between nodes in the graph editor
+        implementation_notes: |
+          Partially implemented in lib/recipe.py -- has all 4 dataclasses but
+          missing BlockConfig (added later in per-block-control). The WIDEN custom
+          type is registered implicitly by ComfyUI when a node declares
+          RETURN_TYPES = ("WIDEN",) -- no explicit registration needed, but verify
+          this works by checking that ComfyUI type system allows connections between
+          nodes sharing the custom type name. AC-5 can be tested by constructing a
+          mock workflow JSON with WIDEN connections and validating against ComfyUI
+          graph validation, or by testing in a running ComfyUI instance. For the
+          task: verify existing dataclasses match design doc section 6.6, ensure all
+          fields use tuples (not lists), verify frozen=True on all, add __all__
+          export list. Consider adding RecipeNode = Union[RecipeBase, RecipeLoRA,
+          RecipeCompose, RecipeMerge] type alias for type checking.
+          Files: lib/recipe.py.
+
+      - title: Entry Node
+        slug: entry-node
+        type: feature
+        description: |
+          Boundary from ComfyUI MODEL world to WIDEN recipe world. Wraps a
+          ModelPatcher reference in a RecipeBase. Auto-detects architecture
+          (SDXL, Z-Image, Flux, Qwen) by inspecting state dict key patterns.
+          Zero GPU work -- just stores reference and arch tag.
+        acceptance_criteria:
+          - id: ac-1
+            given: a ComfyUI MODEL (ModelPatcher) input
+            when: Entry node executes
+            then: it returns a RecipeBase wrapping the ModelPatcher reference
+          - id: ac-2
+            given: an SDXL model with diffusion_model.input_blocks keys
+            when: architecture detection runs
+            then: arch field is set to sdxl
+          - id: ac-3
+            given: a Z-Image model with diffusion_model.layers keys and noise_refiner
+            when: architecture detection runs
+            then: arch field is set to zimage
+          - id: ac-4
+            given: Entry node executes
+            when: output is inspected
+            then: no GPU memory is allocated and no tensors are copied
+          - id: ac-5
+            given: a model whose state dict keys match none of the known architecture patterns
+            when: architecture detection runs
+            then: it raises a clear error listing supported architectures
+        implementation_notes: |
+          Stub in nodes/entry.py. Architecture detection function should live in
+          lib/arch_detect.py (or inline if small) -- inspect model.model_state_dict()
+          keys for patterns: SDXL has input_blocks, middle_block, output_blocks;
+          Z-Image has layers.N. plus noise_refiner; Flux has double_blocks; Qwen
+          has transformer_blocks at depth 60. Check patterns in order of specificity
+          (Z-Image before generic layers). For unsupported arch error, include first
+          5 state dict key prefixes in the error message for debugging. ModelPatcher
+          is stored as-is in RecipeBase (reference only, no clone, no tensor ops).
+          Test by constructing MockModelPatcher instances with different key patterns
+          and asserting detected arch.
+          Files: nodes/entry.py, optionally lib/arch_detect.py.
+
+      - title: LoRA Node
+        slug: lora-node
+        type: feature
+        description: |
+          Declares a LoRA to be applied as part of the recipe. Uses our own
+          loader (not ComfyUI built-in) for deferred loading enabling batched
+          bmm apply at Exit time. Chains via optional prev input to form sets
+          (multiple LoRAs applied to the same base).
+        acceptance_criteria:
+          - id: ac-1
+            given: a LoRA file path and strength value
+            when: LoRA node executes
+            then: it returns a RecipeLoRA with the file path and strength in its loras tuple
+          - id: ac-2
+            given: two LoRA nodes chained via prev connection
+            when: the second node executes
+            then: the output RecipeLoRA contains both LoRAs in its loras tuple forming a set
+          - id: ac-3
+            given: the LoRA node in ComfyUI UI
+            when: the node renders
+            then: lora_name shows a dropdown via folder_paths.get_filename_list loras
+          - id: ac-4
+            given: a LoRA node with no prev connection
+            when: it executes
+            then: the output RecipeLoRA has a single-element loras tuple
+          - id: ac-5
+            given: a LoRA node with strength 0.0
+            when: it executes
+            then: |
+              the LoRA still appears in the recipe (strength=0 is the executor
+              concern, not the recipe builder concern)
+        implementation_notes: |
+          Stub in nodes/lora.py. The lora_name input must change from STRING type
+          to use folder_paths.get_filename_list(loras) -- the ComfyUI pattern is:
+          import folder_paths then lora_name: (folder_paths.get_filename_list(loras),)
+          as a combo input. Full file path resolved at Exit time via
+          folder_paths.get_full_path(loras, lora_name). The prev input receives a
+          RecipeLoRA from a previous LoRA node -- extract its .loras tuple and
+          concatenate: new_loras = prev.loras + (dict(path=lora_name, strength=strength),).
+          If prev is None, create single-element tuple. For the task: update
+          INPUT_TYPES to use folder_paths combo, implement add_lora() method,
+          handle prev chaining with tuple concatenation. Edge case: prev might
+          be None (optional input).
+          Files: nodes/lora.py.
+
+      - title: Compose Node
+        slug: compose-node
+        type: feature
+        description: |
+          Accumulates branches for simultaneous WIDEN merging. Pure recipe building
+          with zero computation. Chain multiple Compose nodes to accumulate any
+          number of branches for the Merge node.
+        acceptance_criteria:
+          - id: ac-1
+            given: a branch WIDEN input and no compose input
+            when: Compose node executes
+            then: it returns RecipeCompose with a single-element branches tuple
+          - id: ac-2
+            given: a branch input and a compose chain from a previous Compose
+            when: Compose node executes
+            then: it returns RecipeCompose with the new branch appended to existing branches
+          - id: ac-3
+            given: three Compose nodes chained together
+            when: the final output is inspected
+            then: all three branches are present in order
+          - id: ac-4
+            given: a RecipeBase wired directly to the branch input
+            when: Compose node executes
+            then: |
+              it raises an error because branch must be a LoRA spec, compose group,
+              or merge result -- a raw base without LoRAs is not a valid compose branch
+        implementation_notes: |
+          Stub in nodes/compose.py. Implementation: if compose is provided and is a
+          RecipeCompose, extract its .branches tuple and append the new branch:
+          RecipeCompose(branches=compose.branches + (branch,)). If compose is None,
+          create RecipeCompose(branches=(branch,)). For AC-4 validation: check
+          isinstance(branch, RecipeBase) and raise ValueError with message about
+          needing to apply LoRAs first or use as a Merge base input. Valid branch
+          types: RecipeLoRA, RecipeCompose, RecipeMerge. Also validate that compose
+          input when provided is a RecipeCompose (not some other recipe type).
+          Files: nodes/compose.py.
+
+      - title: Merge Node
+        slug: merge-node
+        type: feature
+        description: |
+          The recipe builder for WIDEN merge operations. Produces RecipeMerge
+          which the Exit node evaluates. Compose target triggers merge_weights,
+          single target triggers filter_delta. Optional backbone override for
+          explicit WIDEN importance reference.
+        acceptance_criteria:
+          - id: ac-1
+            given: base and target WIDEN inputs with a t_factor value
+            when: Merge node executes
+            then: it returns a RecipeMerge with base, target, and t_factor stored
+          - id: ac-2
+            given: no backbone input connected
+            when: Merge node executes
+            then: backbone field is None in the RecipeMerge
+          - id: ac-3
+            given: an explicit backbone input connected
+            when: Merge node executes
+            then: the backbone reference is stored in RecipeMerge
+          - id: ac-4
+            given: a Merge output
+            when: wired to another Merge base input
+            then: it forms a valid chain for sequential merging
+          - id: ac-5
+            given: a RecipeLoRA or RecipeCompose wired to the base input
+            when: Merge node executes
+            then: |
+              it raises an error because base must be RecipeBase or RecipeMerge
+          - id: ac-6
+            given: t_factor is -1.0
+            when: stored in RecipeMerge
+            then: the value is preserved (Exit interprets -1.0 as passthrough with no WIDEN)
+        implementation_notes: |
+          Stub in nodes/merge.py. Implementation: validate base is RecipeBase or
+          RecipeMerge (raise ValueError with specific message if not). Validate
+          target is RecipeLoRA, RecipeCompose, or RecipeMerge (not RecipeBase).
+          Then construct RecipeMerge(base=base, target=target, backbone=backbone,
+          t_factor=t_factor). The t_factor slider range is -1.0 to 5.0, step 0.05
+          (already correct in stub). -1.0 means passthrough -- interpreted by Exit
+          node, not Merge node. Backbone defaults to None when not connected
+          (optional input). For the task: add isinstance validation checks at top
+          of merge(), construct and return RecipeMerge.
+          Files: nodes/merge.py.
+
+      - title: Exit Node
+        slug: exit-node
+        type: feature
+        description: |
+          The only node that performs GPU computation. Receives the complete recipe
+          tree, validates it, executes the full batched GPU pipeline, and returns
+          a ComfyUI MODEL with merged weights as set patches. Handles IS_CHANGED
+          for LoRA file monitoring and reports progress.
+        acceptance_criteria:
+          - id: ac-1
+            given: a valid recipe tree ending in RecipeMerge
+            when: Exit node executes
+            then: it returns a ComfyUI MODEL (ModelPatcher clone) with set patches
+          - id: ac-2
+            given: an invalid recipe tree with type mismatches
+            when: Exit node validates
+            then: it raises ValueError naming the invalid type and its position in the tree
+          - id: ac-3
+            given: a recipe tree with compose target containing multiple branches
+            when: Exit evaluates the merge step
+            then: it calls merge_weights for simultaneous parameter routing
+          - id: ac-4
+            given: a recipe tree with single LoRA target
+            when: Exit evaluates the merge step
+            then: it calls filter_delta for importance filtering
+          - id: ac-5
+            given: a chain where RecipeMerge base is another RecipeMerge
+            when: Exit evaluates
+            then: inner merge evaluates first and its result becomes the base for outer merge
+          - id: ac-6
+            given: a RecipeCompose with a single branch
+            when: Exit evaluates the merge step
+            then: it treats it as filter_delta not merge_weights (single-branch passthrough)
+          - id: ac-7
+            given: the Exit node output MODEL
+            when: a downstream ComfyUI LoRA node applies additional patches
+            then: the additional LoRA patches apply additively on top of the set patches
+          - id: ac-8
+            given: the base ModelPatcher uses bf16 weights
+            when: set patches are installed
+            then: patch tensors match the base model storage dtype
+        implementation_notes: |
+          Stub in nodes/exit.py. This is the most complex node -- it orchestrates
+          everything. The execute() method: (1) Validate recipe tree structure by
+          walking recursively and checking types at each node. (2) Call batched
+          executor from lib/executor.py which handles phases 1-3. (3) Install
+          results as set patches on a ModelPatcher clone. The IS_CHANGED classmethod
+          must walk recipe tree to find all RecipeLoRA nodes, resolve file paths via
+          folder_paths.get_full_path(loras, name), and return hash of (mtime, size)
+          tuples. Use os.path.getmtime() and os.path.getsize(). If any file missing,
+          return float(NaN) to force re-execution. Progress reporting via
+          comfy.utils.ProgressBar(total_steps) -- get total from executor. Downstream
+          LoRA compat: set patches work because ComfyUI calculate_weight() processes
+          patches in list order -- set replaces first, then subsequent LoRA patches
+          add on top. Depends on lib/executor.py, lib/recipe.py, all node implementations.
+          Files: nodes/exit.py.
+
+      - title: Exit Recipe Analysis
+        slug: exit-recipe-analysis
+        type: requirement
+        parent: "@exit-node"
+        acceptance_criteria:
+          - id: ac-1
+            given: a recipe tree
+            when: Exit walks to the root
+            then: it finds the RecipeBase and extracts model_patcher and arch tag
+          - id: ac-2
+            given: multiple RecipeLoRA nodes in the tree
+            when: synthetic set IDs are assigned
+            then: |
+              each unique RecipeLoRA group gets a distinct set ID and two LoRAs
+              chained via prev share the same set ID
+          - id: ac-3
+            given: a recipe with LoRA references
+            when: LoRA files are loaded
+            then: the architecture-appropriate loader is selected based on the arch tag
+          - id: ac-4
+            given: loaded LoRA files
+            when: the affected-key map is built
+            then: each set ID maps to the set of base model parameter keys that set modifies
+          - id: ac-5
+            given: keys not affected by any LoRA set
+            when: the executor processes keys
+            then: those keys are skipped entirely with no work performed
+          - id: ac-6
+            given: a recipe referencing a LoRA file that does not exist
+            when: Exit loads LoRAs
+            then: it raises FileNotFoundError naming the missing file and which LoRA node referenced it
+        implementation_notes: |
+          This phase happens at start of execute() in nodes/exit.py or in
+          lib/executor.py entry point. Tree walk: recursive function following
+          RecipeMerge.base links until hitting RecipeBase. Collect all RecipeLoRA
+          nodes by walking .target and .base recursively. Set ID assignment:
+          identity-based -- with frozen dataclasses, chained LoRAs produce a single
+          RecipeLoRA with a multi-element tuple, so each unique RecipeLoRA instance
+          equals one set. LoRA loading: select loader from lib/lora/{arch}.py based
+          on RecipeBase.arch. Resolve file paths with folder_paths.get_full_path(loras,
+          name). Build affected-key map by calling loader.affected_keys for each set.
+          The tree walk and set ID assignment is the most critical piece -- get the
+          identity semantics right.
+          Files: lib/executor.py, references lib/lora/base.py interface.
+
+      - title: Exit Batched Evaluation
+        slug: exit-batched-eval
+        type: requirement
+        parent: "@exit-node"
+        acceptance_criteria:
+          - id: ac-1
+            given: a recipe tree with a compose target
+            when: batched evaluation runs
+            then: merge_weights_batched is called with all branch results and the backbone
+          - id: ac-2
+            given: a recipe tree with a single LoRA target
+            when: batched evaluation runs
+            then: filter_delta_batched is called with the applied LoRA delta and backbone
+          - id: ac-3
+            given: a chain of RecipeMerge nodes
+            when: evaluation recurses
+            then: inner merges evaluate first and results become the base for outer merges
+          - id: ac-4
+            given: the WIDEN algorithm produces results
+            when: they are returned from evaluation
+            then: all result tensors are on GPU (transferred to CPU in patch installation phase)
+        implementation_notes: |
+          This is the inner evaluation loop in lib/executor.py. For each OpSignature
+          group, for each chunk of B keys: stack base tensors to GPU, walk recipe
+          tree recursively. Tree walker dispatches on recipe node type: RecipeMerge
+          with RecipeCompose target -> evaluate each branch then call
+          widen.merge_weights_batched() (or filter_delta_batched if single branch).
+          RecipeMerge with RecipeLoRA target -> call _apply_lora_set_batched_gpu()
+          to get delta then widen.filter_delta_batched(). Chain: if RecipeMerge.base
+          is another RecipeMerge, recurse on inner merge first. Backbone: use
+          RecipeMerge.backbone if not None, else use base tensor. Port recursive
+          evaluation from merge-router evaluate_node_batched() (~lines 850-950 of
+          scripts/lora_chain_merge.py), adapting from config dict traversal to
+          recipe dataclass traversal.
+          Files: lib/executor.py.
+
+      - title: Exit Patch Installation
+        slug: exit-patch-install
+        type: requirement
+        parent: "@exit-node"
+        acceptance_criteria:
+          - id: ac-1
+            given: merged tensors from batched evaluation
+            when: patch installation runs
+            then: original ModelPatcher is cloned via clone() and merged weights added as set patches
+          - id: ac-2
+            given: set patches to install
+            when: add_patches is called
+            then: |
+              each key is prefixed with diffusion_model. to match ModelPatcher namespace
+          - id: ac-3
+            given: merged tensors
+            when: stored as patches
+            then: all tensors are on CPU (transferred from GPU during this phase)
+          - id: ac-4
+            given: the base model uses bf16 storage dtype
+            when: set patch tensors are created
+            then: they match the base model storage dtype
+          - id: ac-5
+            given: IS_CHANGED is called twice with no LoRA file changes
+            when: hashes are compared
+            then: they are identical enabling a cache hit
+          - id: ac-6
+            given: IS_CHANGED is called and a LoRA file has been modified
+            when: the hash is computed
+            then: it differs from the previous call triggering a cache miss
+        implementation_notes: |
+          After batched evaluation produces dict of {key: merged_tensor_on_gpu},
+          transfer each to CPU with .cpu(), cast to base model storage dtype with
+          .to(base_dtype). Get base dtype from first value in
+          model_patcher.model_state_dict(). Clone model: merged = model_patcher.clone().
+          Build patch dict: {f"diffusion_model.{k}": ("set", tensor) for k, tensor in
+          merged_state.items()}. Install: merged.add_patches(patches, strength_patch=1.0).
+          Note: the set patch format for add_patches is a tuple (strength, ("set", tensor),
+          strength_model, None, None) -- check that add_patches handles the format or if
+          raw tuple is needed. Verify against ComfyUI comfy/model_patcher.py add_patches
+          and comfy/lora.py calculate_weight for exact format. IS_CHANGED: implement as
+          @classmethod on WIDENExitNode -- receives same args as execute(). Walk recipe
+          to collect all LoRA file paths, compute hashlib.sha256 of (path, mtime, size)
+          tuples sorted by path. Return hex digest.
+          Files: nodes/exit.py.
+
+      - title: WIDEN Core Algorithm
+        slug: widen-core
+        type: feature
+        description: |
+          Port of the WIDEN algorithm from merge-router src/core/. Includes
+          filter_delta (single-model importance filtering), merge_weights
+          (multi-model parameter routing), ranking mechanisms, divergence
+          metrics, and batched variants for GPU-vectorized operation.
+          Pure algorithm code with no ComfyUI imports.
+        acceptance_criteria:
+          - id: ac-1
+            given: base and delta tensors
+            when: filter_delta is called with a t_factor
+            then: importance-filtered delta is returned with low-importance parameters zeroed
+          - id: ac-2
+            given: multiple model tensors and a backbone
+            when: merge_weights is called
+            then: each parameter is routed to the most-important contributor via calibrated softmax
+          - id: ac-3
+            given: batched inputs of shape [B, *param_shape]
+            when: filter_delta_batched or merge_weights_batched is called
+            then: results match per-key variants applied individually
+          - id: ac-4
+            given: lib/widen.py
+            when: imported
+            then: no ComfyUI modules are imported (pure torch and stdlib)
+          - id: ac-5
+            given: the WIDEN implementation
+            when: compared against merge-router src/core/widen.py
+            then: algorithm behavior is equivalent for identical inputs within float tolerance
+          - id: ac-6
+            given: bf16 or fp16 input tensors
+            when: WIDEN computation runs
+            then: internal computation uses fp32 for numerical stability
+          - id: ac-7
+            given: no advanced configuration
+            when: WIDEN is initialized
+            then: |
+              it uses default WIDENConfig values with ranking_strategy=percentile,
+              sparsity_method=softmax, s_calibration=1.0
+          - id: ac-8
+            given: a non-OOM error during filter_delta_batched
+            when: the error is caught
+            then: unfiltered delta is used as passthrough and a warning is logged
+          - id: ac-9
+            given: a non-OOM error during merge_weights_batched
+            when: the error is caught
+            then: simple averaging is used as fallback and a warning is logged
+        implementation_notes: |
+          Port from ~/Projects/merge-router/src/core/widen.py. Key classes/functions
+          to port: WIDEN class with filter_delta(), merge_weights(),
+          filter_delta_batched(), merge_weights_batched(), _disentangle(),
+          _rank_importance(), _calibrate(). Also port WIDENConfig dataclass with
+          fields: n_models, t_factor, s_calibration, ranking_strategy,
+          sparsity_method, calibration_mode, dtype. Port supporting modules:
+          lib/divergence.py from src/core/divergence.py (divergence metrics),
+          lib/ranking.py from src/core/ranking.py (ranking mechanisms),
+          lib/numerical_config.py from src/core/numerical_config.py (eps values
+          per dtype). Strip: any CLI imports, config file parsing, logging setup
+          (use stdlib logging). Keep: all torch operations, numerical stability
+          handling (upcast to fp32 for computation, downcast result back), batched
+          variants operating on [B, *shape] tensors. Fallback behavior (AC-8, AC-9)
+          from merge-router lines ~905-928 in scripts/lora_chain_merge.py -- wrap
+          batched WIDEN calls in try/except, on non-OOM error fall back to passthrough
+          (filter_delta) or averaging (merge_weights), log warning via logging.warning().
+          Test by creating small synthetic tensors (e.g., 8x8 float32) and verifying
+          filter_delta zeros low-importance entries, merge_weights routes correctly.
+          Compare against merge-router by running both on same input and checking allclose.
+          Files: lib/widen.py, lib/divergence.py, lib/ranking.py, lib/numerical_config.py.
+
+      - title: Batched Pipeline Executor
+        slug: batched-executor
+        type: feature
+        description: |
+          OpSignature-based parameter grouping and batched GPU evaluation.
+          Groups parameters by (affecting_sets, shape, ndim), computes optimal
+          batch sizes based on free VRAM, applies LoRAs via torch.bmm, and
+          handles OOM backoff. Ported from merge-router lora_chain_merge.py.
+        acceptance_criteria:
+          - id: ac-1
+            given: a set of parameter keys with varying shapes and affecting sets
+            when: grouped by OpSignature
+            then: keys with identical shape and affecting sets are in the same group
+          - id: ac-2
+            given: a batch of parameters and LoRA DeltaSpecs
+            when: bmm LoRA apply runs
+            then: torch.bmm produces correct deltas matching per-key application
+          - id: ac-3
+            given: available VRAM and parameter shapes
+            when: compute_batch_size is called
+            then: it returns a batch size targeting 70 percent of free VRAM
+          - id: ac-4
+            given: a torch.cuda.OutOfMemoryError during batch evaluation
+            when: OOM backoff triggers
+            then: the failed chunk retries at batch size 1 while other chunks continue normally
+          - id: ac-5
+            given: the executor completes evaluation
+            when: merged tensors are produced
+            then: all result tensors are on CPU ready for set patch installation
+          - id: ac-6
+            given: a base model with bf16 storage dtype
+            when: batched evaluation produces merged results
+            then: output tensors match the base model storage dtype
+          - id: ac-7
+            given: a LoRA with LoKr weights
+            when: batched apply runs
+            then: LoKr weights use per-key torch.kron on GPU instead of bmm
+        implementation_notes: |
+          Port from ~/Projects/merge-router/scripts/lora_chain_merge.py. Key pieces:
+          OpSignature frozen dataclass with affecting_sets (frozenset), shape (tuple),
+          ndim (int). DeltaSpec dataclass with fields for LoRA factors (up, down,
+          scale, alpha, kind, rank, key_index). compute_batch_size(shape, n_models,
+          dtype, free_vram) formula: B = floor(free_vram * 0.7 / (numel(shape) *
+          dtype_bytes * (3 + 3 * n_models))). _apply_lora_set_batched_gpu(base_batch,
+          delta_specs, ...) -- partition specs by (kind, rank), stack up/down matrices,
+          torch.bmm(down, up) for standard LoRA, torch.kron per-key for LoKr, scatter
+          deltas back by key_index. OOM backoff: wrap chunk evaluation in try/except
+          torch.cuda.OutOfMemoryError, on catch call torch.cuda.empty_cache() and retry
+          with B=1. Define DeltaSpec in lib/types.py or lib/executor.py and import from
+          lib/lora/ loaders. The executor is the main integration point -- it calls into
+          lib/widen.py for WIDEN ops, lib/lora/*.py for LoRA loading, and walks the
+          recipe tree from lib/recipe.py.
+          Files: lib/executor.py, lib/types.py (for DeltaSpec/OpSignature if shared).
+
+      - title: Architecture-Specific LoRA Loaders
+        slug: lora-loaders
+        type: feature
+        description: |
+          LoRA loading with architecture-specific key mapping. Each architecture
+          has distinct key naming conventions and special handling requirements.
+          Loaders produce DeltaSpec objects for the batched executor pipeline.
+        acceptance_criteria:
+          - id: ac-1
+            given: a LoRA file and a detected architecture tag
+            when: the appropriate loader is selected
+            then: the correct architecture-specific loader handles key mapping
+          - id: ac-2
+            given: any architecture loader
+            when: it processes a LoRA file
+            then: it produces DeltaSpec objects compatible with the batched executor
+          - id: ac-3
+            given: a new architecture needs LoRA support
+            when: a loader module is added to lib/lora/
+            then: it integrates without modifying existing loaders (pluggable design)
+          - id: ac-4
+            given: any loader
+            when: it implements the loader interface
+            then: |
+              it provides load(path) for loading, affected_keys property for the
+              key set, get_delta_specs(keys) returning DeltaSpecs, and cleanup()
+              for resource release
+        implementation_notes: |
+          Define loader interface in lib/lora/base.py as an abstract base class or
+          protocol: class LoRALoader(ABC) with @abstractmethod load(self, path, strength),
+          @property affected_keys -> set[str], get_delta_specs(self, keys) -> list[DeltaSpec],
+          cleanup(self). Each architecture implements in its own module. DeltaSpec
+          dataclass (in lib/types.py or lib/executor.py) needs: key, key_index, kind
+          (standard/lokr/qkv), rank, up (Tensor), down (Tensor), scale, alpha, offset
+          (optional tuple for QKV). Loader selection: simple dict lookup in executor
+          like {"sdxl": SDXLLoader, "zimage": ZImageLoader}. For AC-3 pluggable design:
+          use registry pattern or just the dict -- adding new arch means adding one entry.
+          Files: lib/lora/base.py, lib/lora/__init__.py (registry).
+
+      - title: SDXL LoRA Loader
+        slug: sdxl-loader
+        type: requirement
+        parent: "@lora-loaders"
+        acceptance_criteria:
+          - id: ac-1
+            given: an SDXL LoRA safetensors file
+            when: loaded with the SDXL loader
+            then: |
+              LoRA keys are mapped to diffusion_model input_blocks, middle_block,
+              and output_blocks keys
+          - id: ac-2
+            given: SDXL LoRA factors (up, down, alpha)
+            when: DeltaSpecs are produced
+            then: each spec contains correct rank, kind, and factor tensors
+        implementation_notes: |
+          Port from merge-router or implement fresh. SDXL LoRA key mapping: keys follow
+          patterns like lora_unet_input_blocks_0_0_op.lora_down.weight -> base key
+          input_blocks.0.0.weight. ComfyUI own comfy/lora.py has model_lora_keys_unet()
+          that builds this mapping. Options: (1) Use ComfyUI key mapping function and
+          wrap in our loader interface, (2) Implement standalone for consistency.
+          Recommend option (1) for SDXL since ComfyUI handles all edge cases (attention,
+          proj_in/out, time_embed). Load safetensors with safetensors.torch.load_file(),
+          map keys, extract up/down/alpha per key, construct DeltaSpec objects. Standard
+          LoRA: kind=standard, up=lora_up.weight, down=lora_down.weight, alpha from lora
+          key or default to rank.
+          Files: lib/lora/sdxl.py.
+
+      - title: Z-Image LoRA Loader
+        slug: zimage-loader
+        type: requirement
+        parent: "@lora-loaders"
+        acceptance_criteria:
+          - id: ac-1
+            given: a Z-Image LoRA file with separate to_q, to_k, to_v keys
+            when: loaded with Z-Image loader
+            then: QKV keys are fused into the base model attention.qkv.weight layout
+          - id: ac-2
+            given: a Z-Image LoRA with Diffusers-style key names
+            when: key mapping runs
+            then: keys are correctly mapped to S3-DiT parameter names
+          - id: ac-3
+            given: Z-Image LoRA factors
+            when: DeltaSpecs are produced
+            then: |
+              QKV-fused specs have correct offset indexing for the fused weight
+              where q occupies 0 to 3840, k occupies 3840 to 7680, and v occupies
+              7680 to 11520
+        implementation_notes: |
+          Port from ~/Projects/merge-router/scripts/zimage_lora_merge.py. Key function:
+          _parse_lora_key(key) which maps Diffusers LoRA key names to S3-DiT base model
+          keys and identifies QKV components. Z-Image base model uses fused
+          attention.qkv.weight (11520x3840 = 3x3840) but LoRAs have separate
+          to_q/to_k/to_v. The loader must: (1) Parse each LoRA key to identify
+          target parameter and QKV component. (2) For QKV keys, create DeltaSpecs
+          with kind=qkv and offset=(0, q_start, q_len) indicating which third of
+          the fused weight this LoRA targets. The offset tuple is (dimension=0,
+          start, length) where start is 0/3840/7680 for q/k/v respectively and
+          length is 3840. (3) Handle non-QKV keys (FFN, norm, etc.) as standard
+          LoRA. Also handle LoKr weights if present -- these have lokr_w1, lokr_w2
+          instead of lora_up/lora_down, use kind=lokr. The Diffusers key mapping
+          handles patterns like transformer_blocks.0.attn.to_q -> layers.0.attention.qkv
+          (with offset for q portion).
+          Files: lib/lora/zimage.py.
+
+      - title: Memory Management
+        slug: memory-management
+        type: feature
+        description: |
+          GPU memory lifecycle during and after merge execution. Covers per-chunk
+          tensor cleanup, between-group GC cycles, loader resource teardown, and
+          ensuring all final patches are CPU-only.
+        acceptance_criteria:
+          - id: ac-1
+            given: batched evaluation processes a chunk of parameters
+            when: the chunk completes and results transfer to CPU
+            then: all GPU tensors for that chunk are deleted and freed
+          - id: ac-2
+            given: an OpSignature group completes all chunks
+            when: transitioning to the next group
+            then: gc.collect() and torch.cuda.empty_cache() are called
+          - id: ac-3
+            given: all LoRA files have been loaded and evaluation is complete
+            when: cleanup runs
+            then: all loader resources are freed including delta caches and file handles
+          - id: ac-4
+            given: the complete merge execution
+            when: final merged patches are produced
+            then: all patch tensors are on CPU with no GPU tensor references remaining
+          - id: ac-5
+            given: peak GPU usage during a chunk
+            when: compared to compute_batch_size estimate
+            then: actual usage does not exceed the estimate by more than 20 percent
+        implementation_notes: |
+          Memory management is woven throughout lib/executor.py. Key patterns to port
+          from merge-router scripts/lora_chain_merge.py: (1) Per-chunk cleanup: after
+          transferring results to CPU, explicitly del base_batch and gpu intermediates
+          then gc.collect() and torch.cuda.empty_cache(). (2) Per-group cleanup: between
+          OpSignature groups, call gc.collect() + torch.cuda.empty_cache(). (3) Loader
+          cleanup: after evaluation completes, call loader.cleanup() for each loader
+          (which calls clear_delta_cache() and drops cached LoRA state). (4) Final
+          cleanup: ensure returned merged_state dict contains only CPU tensors. The
+          merge-router source has ~8 explicit gc.collect/empty_cache calls -- identify
+          each and port the pattern. For AC-5 testing: use torch.cuda.max_memory_allocated()
+          before/after chunk and compare to compute_batch_size prediction. This is a
+          cross-cutting concern -- its ACs affect implementation in lib/executor.py
+          primarily, also nodes/exit.py (loader cleanup after execute completes) and
+          lib/lora/base.py (cleanup interface).
+          Files: lib/executor.py (primary), nodes/exit.py (loader teardown),
+          lib/lora/base.py (cleanup interface).
+
+      - title: Per-Block Control
+        slug: per-block-control
+        type: feature
+        description: |
+          BLOCK_CONFIG custom type enabling per-block t_factor and LoRA strength
+          overrides. Architecture-specific config nodes expose block group sliders.
+          Uses Option B design with explicit config type wired to consuming nodes.
+        acceptance_criteria:
+          - id: ac-1
+            given: no BLOCK_CONFIG inputs connected to any node
+            when: the workflow executes
+            then: all nodes behave identically to pre-block-control behavior
+          - id: ac-2
+            given: architecture-specific block config nodes exist
+            when: a user creates a block config for their model architecture
+            then: block group sliders are available with float range 0.0 to 2.0
+          - id: ac-3
+            given: a single BLOCK_CONFIG output
+            when: connected to multiple consuming nodes
+            then: it fans out correctly to each consumer
+        implementation_notes: |
+          Adds BLOCK_CONFIG custom ComfyUI type. Architecture-specific config nodes
+          go in nodes/block_config_sdxl.py, nodes/block_config_zimage.py. Each
+          exposes sliders for its architecture block groups: SDXL has input_blocks
+          (groups of 3: IN00-02, IN03-05, IN06-08), middle_block, output_blocks
+          (groups of 3). Z-Image has layers (groups of 5: L00-04, L05-09, ... L25-29),
+          noise_refiner, context_refiner. Each slider FLOAT range 0.0-2.0, step 0.05.
+          ComfyUI allows typing values outside slider range so -1.0 is accessible.
+          The node produces a BlockConfig dataclass (in lib/recipe.py). Backwards
+          compatibility: when block_config fields on RecipeMerge/RecipeLoRA are None,
+          executor uses global t_factor/strength -- no special casing needed.
+          Files: nodes/block_config_sdxl.py, nodes/block_config_zimage.py,
+          lib/recipe.py (BlockConfig dataclass).
+
+      - title: Block Config Type
+        slug: block-config-type
+        type: requirement
+        parent: "@per-block-control"
+        acceptance_criteria:
+          - id: ac-1
+            given: a BlockConfig dataclass
+            when: constructed with arch and block_overrides
+            then: it is frozen and stores per-block float values as a tuple of pairs
+          - id: ac-2
+            given: RecipeLoRA and RecipeMerge dataclasses
+            when: block_config field is present
+            then: it accepts BlockConfig or None
+        implementation_notes: |
+          Add to lib/recipe.py: @dataclass(frozen=True) class BlockConfig with fields
+          arch (str), block_overrides (tuple), layer_type_overrides (tuple). The
+          block_overrides is a tuple of (block_pattern, value) pairs e.g.,
+          (("IN00-02", 0.5), ("MID", 1.0), ...). The layer_type_overrides is a tuple
+          of (layer_type, value) pairs for cross-cutting layer type control (attention,
+          feed_forward, norm, etc.). Add block_config: object = None field to both
+          RecipeLoRA and RecipeMerge -- since frozen, this means defining new versions
+          with the additional field. Field defaults to None for backwards compat. The
+          arch field must match RecipeBase.arch -- validated at Exit time.
+          Files: lib/recipe.py.
+
+      - title: Merge Per-Block T-Factor
+        slug: merge-block-config
+        type: requirement
+        parent: "@per-block-control"
+        acceptance_criteria:
+          - id: ac-1
+            given: a BLOCK_CONFIG connected to Merge block_t_factor input
+            when: Exit evaluates the merge step
+            then: per-block t_factor overrides are applied instead of global t_factor
+          - id: ac-2
+            given: no BLOCK_CONFIG connected to Merge
+            when: Exit evaluates
+            then: global t_factor applies to all blocks (backwards compatible)
+        implementation_notes: |
+          Merge node gains optional block_t_factor input of type BLOCK_CONFIG in
+          INPUT_TYPES. When present, stored in RecipeMerge.block_config. At Exit
+          evaluation time, for each parameter key, executor: (1) classifies key into
+          block group using architecture-specific patterns (e.g., for SDXL
+          input_blocks.3. -> IN03-05), (2) looks up block group in
+          BlockConfig.block_overrides, (3) uses override value as t_factor instead
+          of global RecipeMerge.t_factor. If key block group not in overrides, falls
+          back to global t_factor. Block classification function should live in
+          lib/block_classify.py with one function per arch.
+          Files: nodes/merge.py (add input), lib/executor.py (use block config
+          during eval), lib/block_classify.py (key-to-block mapping).
+
+      - title: LoRA Per-Block Strength
+        slug: lora-block-config
+        type: requirement
+        parent: "@per-block-control"
+        acceptance_criteria:
+          - id: ac-1
+            given: a BLOCK_CONFIG connected to LoRA node block_strength input
+            when: Exit applies LoRA deltas
+            then: per-block strength scaling is applied to LoRA deltas
+          - id: ac-2
+            given: no BLOCK_CONFIG connected to LoRA node
+            when: Exit applies LoRA deltas
+            then: global strength applies uniformly (backwards compatible)
+        implementation_notes: |
+          LoRA node gains optional block_strength input of type BLOCK_CONFIG in
+          INPUT_TYPES. When present, stored in RecipeLoRA.block_config. At Exit time
+          during batched LoRA apply phase (_apply_lora_set_batched_gpu), for each
+          parameter key in batch: (1) classify key into block group, (2) look up
+          override strength in BlockConfig, (3) multiply LoRA delta by per-block
+          strength instead of global strength. This scales LoRA contribution before
+          WIDEN sees it. During DeltaSpec processing, scale each spec effective
+          strength by per-block override. Since batching groups keys by OpSignature
+          (same shape + affecting sets), and per-block strength varies by key, need
+          to apply scaling per-key within batch -- either as diagonal scaling matrix
+          or by splitting batch by block group.
+          Files: nodes/lora.py (add input), lib/executor.py (per-block scaling
+          in LoRA apply).
+      ```
+
+
+      ## Tasks
+
+
+      derive_from_specs: true
+
+
+      ## Implementation Notes
+
+
+      Architecture scope: SDXL and Z-Image are concrete requirements with
+
+      implementation detail. Flux and Qwen support is planned but not specced
+
+      as requirements -- loaders can be added as new requirement specs under
+
+      lora-loaders when ready.
+
+
+      The dependency chain for implementation:
+
+      1. recipe-system (standalone, pure Python)
+
+      2. widen-core (standalone, pure torch)
+
+      3. entry-node, lora-node, compose-node, merge-node (depend on recipe-system)
+
+      4. lora-loaders (depend on arch knowledge, produce DeltaSpecs)
+
+      5. batched-executor (depends on widen-core + lora-loaders + recipe-system)
+
+      6. memory-management (depends on batched-executor + lora-loaders)
+
+      7. exit-node + sub-reqs (depends on batched-executor + recipe-system + memory-management)
+
+      8. per-block-control (layers on top of everything)
+    status: active
+    derived_tasks:
+      - "@implement-recipe-type-system"
+      - "@implement-entry-node"
+      - "@implement-lora-node"
+      - "@implement-compose-node"
+      - "@implement-merge-node"
+      - "@implement-exit-node"
+      - "@implement-exit-recipe-analysis"
+      - "@implement-exit-batched-evaluation"
+      - "@implement-exit-patch-installation"
+      - "@implement-widen-core-algorithm"
+      - "@implement-batched-pipeline-executor"
+      - "@implement-architecture-specific-lora-loaders"
+      - "@implement-sdxl-lora-loader"
+      - "@implement-z-image-lora-loader"
+      - "@implement-memory-management"
+      - "@implement-per-block-control"
+      - "@implement-block-config-type"
+      - "@implement-merge-per-block-t-factor"
+      - "@implement-lora-per-block-strength"
+    derived_specs:
+      - "@recipe-system"
+      - "@entry-node"
+      - "@lora-node"
+      - "@compose-node"
+      - "@merge-node"
+      - "@exit-node"
+      - "@exit-recipe-analysis"
+      - "@exit-batched-eval"
+      - "@exit-patch-install"
+      - "@widen-core"
+      - "@batched-executor"
+      - "@lora-loaders"
+      - "@sdxl-loader"
+      - "@zimage-loader"
+      - "@memory-management"
+      - "@per-block-control"
+      - "@block-config-type"
+      - "@merge-block-config"
+      - "@lora-block-config"
+    source_path: /tmp/widen-plan.md
+    created_at: 2026-02-10T19:44:03.151Z
+    approved_at: null
+    completed_at: null
+    notes:
+      - _ulid: 01KH4HA42FBM7ZS0H0EKPMES8T
+        created_at: 2026-02-10T19:44:03.151Z
+        author: "@claude"
+        content: |-
+          Implementation notes:
+
+          Architecture scope: SDXL and Z-Image are concrete requirements with
+          implementation detail. Flux and Qwen support is planned but not specced
+          as requirements -- loaders can be added as new requirement specs under
+          lora-loaders when ready.
+
+          The dependency chain for implementation:
+          1. recipe-system (standalone, pure Python)
+          2. widen-core (standalone, pure torch)
+          3. entry-node, lora-node, compose-node, merge-node (depend on recipe-system)
+          4. lora-loaders (depend on arch knowledge, produce DeltaSpecs)
+          5. batched-executor (depends on widen-core + lora-loaders + recipe-system)
+          6. memory-management (depends on batched-executor + lora-loaders)
+          7. exit-node + sub-reqs (depends on batched-executor + recipe-system + memory-management)
+          8. per-block-control (layers on top of everything)

@@ -14,3 +14,695 @@ relates_to: []
 tests: []
 traits: []
 notes: []
+features:
+  - _ulid: 01KH4HA42FZ8MM2XN4FZS75SVZ
+    slugs:
+      - recipe-system
+    title: Recipe Type System
+    type: feature
+    tags: []
+    description: |
+      The WIDEN custom ComfyUI type and its recipe dataclasses. All recipe
+      objects are frozen (immutable) to prevent aliasing bugs with ComfyUI
+      caching and graph fan-out. Fields use tuples, not lists. Recipe objects
+      hold no GPU tensors -- they are pure recipe descriptions.
+    acceptance_criteria:
+      - id: ac-1
+        given: any recipe dataclass instance
+        when: a field is assigned after construction
+        then: a FrozenInstanceError is raised
+      - id: ac-2
+        given: a RecipeCompose with existing branches
+        when: a new branch is appended
+        then: a new RecipeCompose is returned with a new tuple (persistent tree semantics)
+      - id: ac-3
+        given: any recipe object
+        when: inspected for GPU tensors
+        then: no torch.Tensor objects are found (only references and metadata)
+      - id: ac-4
+        given: RecipeBase, RecipeLoRA, RecipeCompose, and RecipeMerge classes
+        when: imported from lib.recipe
+        then: all four are available and constructible with documented fields
+      - id: ac-5
+        given: nodes that output WIDEN type and nodes that accept WIDEN input
+        when: ComfyUI loads the node pack
+        then: WIDEN wire connections are valid between nodes in the graph editor
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.152Z
+  - _ulid: 01KH4HA42KCZR0ME6AH4G0WXHY
+    slugs:
+      - entry-node
+    title: Entry Node
+    type: feature
+    tags: []
+    description: |
+      Boundary from ComfyUI MODEL world to WIDEN recipe world. Wraps a
+      ModelPatcher reference in a RecipeBase. Auto-detects architecture
+      (SDXL, Z-Image, Flux, Qwen) by inspecting state dict key patterns.
+      Zero GPU work -- just stores reference and arch tag.
+    acceptance_criteria:
+      - id: ac-1
+        given: a ComfyUI MODEL (ModelPatcher) input
+        when: Entry node executes
+        then: it returns a RecipeBase wrapping the ModelPatcher reference
+      - id: ac-2
+        given: an SDXL model with diffusion_model.input_blocks keys
+        when: architecture detection runs
+        then: arch field is set to sdxl
+      - id: ac-3
+        given: a Z-Image model with diffusion_model.layers keys and noise_refiner
+        when: architecture detection runs
+        then: arch field is set to zimage
+      - id: ac-4
+        given: Entry node executes
+        when: output is inspected
+        then: no GPU memory is allocated and no tensors are copied
+      - id: ac-5
+        given: a model whose state dict keys match none of the known architecture patterns
+        when: architecture detection runs
+        then: it raises a clear error listing supported architectures
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.155Z
+  - _ulid: 01KH4HA42PAEFBHY5GT1D1YZVP
+    slugs:
+      - lora-node
+    title: LoRA Node
+    type: feature
+    tags: []
+    description: |
+      Declares a LoRA to be applied as part of the recipe. Uses our own
+      loader (not ComfyUI built-in) for deferred loading enabling batched
+      bmm apply at Exit time. Chains via optional prev input to form sets
+      (multiple LoRAs applied to the same base).
+    acceptance_criteria:
+      - id: ac-1
+        given: a LoRA file path and strength value
+        when: LoRA node executes
+        then: it returns a RecipeLoRA with the file path and strength in its loras tuple
+      - id: ac-2
+        given: two LoRA nodes chained via prev connection
+        when: the second node executes
+        then: the output RecipeLoRA contains both LoRAs in its loras tuple forming a set
+      - id: ac-3
+        given: the LoRA node in ComfyUI UI
+        when: the node renders
+        then: lora_name shows a dropdown via folder_paths.get_filename_list loras
+      - id: ac-4
+        given: a LoRA node with no prev connection
+        when: it executes
+        then: the output RecipeLoRA has a single-element loras tuple
+      - id: ac-5
+        given: a LoRA node with strength 0.0
+        when: it executes
+        then: |
+          the LoRA still appears in the recipe (strength=0 is the executor
+          concern, not the recipe builder concern)
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.158Z
+  - _ulid: 01KH4HA42SFZP4GCSWT6SS2TZ4
+    slugs:
+      - compose-node
+    title: Compose Node
+    type: feature
+    tags: []
+    description: |
+      Accumulates branches for simultaneous WIDEN merging. Pure recipe building
+      with zero computation. Chain multiple Compose nodes to accumulate any
+      number of branches for the Merge node.
+    acceptance_criteria:
+      - id: ac-1
+        given: a branch WIDEN input and no compose input
+        when: Compose node executes
+        then: it returns RecipeCompose with a single-element branches tuple
+      - id: ac-2
+        given: a branch input and a compose chain from a previous Compose
+        when: Compose node executes
+        then: it returns RecipeCompose with the new branch appended to existing branches
+      - id: ac-3
+        given: three Compose nodes chained together
+        when: the final output is inspected
+        then: all three branches are present in order
+      - id: ac-4
+        given: a RecipeBase wired directly to the branch input
+        when: Compose node executes
+        then: |
+          it raises an error because branch must be a LoRA spec, compose group,
+          or merge result -- a raw base without LoRAs is not a valid compose branch
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.162Z
+  - _ulid: 01KH4HA42XHMGZN46F7TF54G2B
+    slugs:
+      - merge-node
+    title: Merge Node
+    type: feature
+    tags: []
+    description: |
+      The recipe builder for WIDEN merge operations. Produces RecipeMerge
+      which the Exit node evaluates. Compose target triggers merge_weights,
+      single target triggers filter_delta. Optional backbone override for
+      explicit WIDEN importance reference.
+    acceptance_criteria:
+      - id: ac-1
+        given: base and target WIDEN inputs with a t_factor value
+        when: Merge node executes
+        then: it returns a RecipeMerge with base, target, and t_factor stored
+      - id: ac-2
+        given: no backbone input connected
+        when: Merge node executes
+        then: backbone field is None in the RecipeMerge
+      - id: ac-3
+        given: an explicit backbone input connected
+        when: Merge node executes
+        then: the backbone reference is stored in RecipeMerge
+      - id: ac-4
+        given: a Merge output
+        when: wired to another Merge base input
+        then: it forms a valid chain for sequential merging
+      - id: ac-5
+        given: a RecipeLoRA or RecipeCompose wired to the base input
+        when: Merge node executes
+        then: |
+          it raises an error because base must be RecipeBase or RecipeMerge
+      - id: ac-6
+        given: t_factor is -1.0
+        when: stored in RecipeMerge
+        then: the value is preserved (Exit interprets -1.0 as passthrough with no WIDEN)
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.165Z
+  - _ulid: 01KH4HA4303B95N2GJDWJTD4GZ
+    slugs:
+      - exit-node
+    title: Exit Node
+    type: feature
+    tags: []
+    description: |
+      The only node that performs GPU computation. Receives the complete recipe
+      tree, validates it, executes the full batched GPU pipeline, and returns
+      a ComfyUI MODEL with merged weights as set patches. Handles IS_CHANGED
+      for LoRA file monitoring and reports progress.
+    acceptance_criteria:
+      - id: ac-1
+        given: a valid recipe tree ending in RecipeMerge
+        when: Exit node executes
+        then: it returns a ComfyUI MODEL (ModelPatcher clone) with set patches
+      - id: ac-2
+        given: an invalid recipe tree with type mismatches
+        when: Exit node validates
+        then: it raises ValueError naming the invalid type and its position in the tree
+      - id: ac-3
+        given: a recipe tree with compose target containing multiple branches
+        when: Exit evaluates the merge step
+        then: it calls merge_weights for simultaneous parameter routing
+      - id: ac-4
+        given: a recipe tree with single LoRA target
+        when: Exit evaluates the merge step
+        then: it calls filter_delta for importance filtering
+      - id: ac-5
+        given: a chain where RecipeMerge base is another RecipeMerge
+        when: Exit evaluates
+        then: inner merge evaluates first and its result becomes the base for outer merge
+      - id: ac-6
+        given: a RecipeCompose with a single branch
+        when: Exit evaluates the merge step
+        then: it treats it as filter_delta not merge_weights (single-branch passthrough)
+      - id: ac-7
+        given: the Exit node output MODEL
+        when: a downstream ComfyUI LoRA node applies additional patches
+        then: the additional LoRA patches apply additively on top of the set patches
+      - id: ac-8
+        given: the base ModelPatcher uses bf16 weights
+        when: set patches are installed
+        then: patch tensors match the base model storage dtype
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.168Z
+    requirements:
+      - _ulid: 01KH4HA434GERCYP2X4V28802Z
+        slugs:
+          - exit-recipe-analysis
+        title: Exit Recipe Analysis
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: a recipe tree
+            when: Exit walks to the root
+            then: it finds the RecipeBase and extracts model_patcher and arch tag
+          - id: ac-2
+            given: multiple RecipeLoRA nodes in the tree
+            when: synthetic set IDs are assigned
+            then: |
+              each unique RecipeLoRA group gets a distinct set ID and two LoRAs
+              chained via prev share the same set ID
+          - id: ac-3
+            given: a recipe with LoRA references
+            when: LoRA files are loaded
+            then: the architecture-appropriate loader is selected based on the arch tag
+          - id: ac-4
+            given: loaded LoRA files
+            when: the affected-key map is built
+            then: each set ID maps to the set of base model parameter keys that set modifies
+          - id: ac-5
+            given: keys not affected by any LoRA set
+            when: the executor processes keys
+            then: those keys are skipped entirely with no work performed
+          - id: ac-6
+            given: a recipe referencing a LoRA file that does not exist
+            when: Exit loads LoRAs
+            then: it raises FileNotFoundError naming the missing file and which LoRA node referenced it
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-10T19:44:03.172Z
+      - _ulid: 01KH4HA438KQPGVN0FZHHDFSYF
+        slugs:
+          - exit-batched-eval
+        title: Exit Batched Evaluation
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: a recipe tree with a compose target
+            when: batched evaluation runs
+            then: merge_weights_batched is called with all branch results and the backbone
+          - id: ac-2
+            given: a recipe tree with a single LoRA target
+            when: batched evaluation runs
+            then: filter_delta_batched is called with the applied LoRA delta and backbone
+          - id: ac-3
+            given: a chain of RecipeMerge nodes
+            when: evaluation recurses
+            then: inner merges evaluate first and results become the base for outer merges
+          - id: ac-4
+            given: the WIDEN algorithm produces results
+            when: they are returned from evaluation
+            then: all result tensors are on GPU (transferred to CPU in patch installation phase)
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-10T19:44:03.177Z
+      - _ulid: 01KH4HA43E6W8V2Z0EFAWE0TQ5
+        slugs:
+          - exit-patch-install
+        title: Exit Patch Installation
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: merged tensors from batched evaluation
+            when: patch installation runs
+            then: original ModelPatcher is cloned via clone() and merged weights added as set patches
+          - id: ac-2
+            given: set patches to install
+            when: add_patches is called
+            then: |
+              each key is prefixed with diffusion_model. to match ModelPatcher namespace
+          - id: ac-3
+            given: merged tensors
+            when: stored as patches
+            then: all tensors are on CPU (transferred from GPU during this phase)
+          - id: ac-4
+            given: the base model uses bf16 storage dtype
+            when: set patch tensors are created
+            then: they match the base model storage dtype
+          - id: ac-5
+            given: IS_CHANGED is called twice with no LoRA file changes
+            when: hashes are compared
+            then: they are identical enabling a cache hit
+          - id: ac-6
+            given: IS_CHANGED is called and a LoRA file has been modified
+            when: the hash is computed
+            then: it differs from the previous call triggering a cache miss
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-10T19:44:03.182Z
+  - _ulid: 01KH4HA43J7SSD59Y6GR7BKN1G
+    slugs:
+      - widen-core
+    title: WIDEN Core Algorithm
+    type: feature
+    tags: []
+    description: |
+      Port of the WIDEN algorithm from merge-router src/core/. Includes
+      filter_delta (single-model importance filtering), merge_weights
+      (multi-model parameter routing), ranking mechanisms, divergence
+      metrics, and batched variants for GPU-vectorized operation.
+      Pure algorithm code with no ComfyUI imports.
+    acceptance_criteria:
+      - id: ac-1
+        given: base and delta tensors
+        when: filter_delta is called with a t_factor
+        then: importance-filtered delta is returned with low-importance parameters zeroed
+      - id: ac-2
+        given: multiple model tensors and a backbone
+        when: merge_weights is called
+        then: each parameter is routed to the most-important contributor via calibrated softmax
+      - id: ac-3
+        given: batched inputs of shape [B, *param_shape]
+        when: filter_delta_batched or merge_weights_batched is called
+        then: results match per-key variants applied individually
+      - id: ac-4
+        given: lib/widen.py
+        when: imported
+        then: no ComfyUI modules are imported (pure torch and stdlib)
+      - id: ac-5
+        given: the WIDEN implementation
+        when: compared against merge-router src/core/widen.py
+        then: algorithm behavior is equivalent for identical inputs within float tolerance
+      - id: ac-6
+        given: bf16 or fp16 input tensors
+        when: WIDEN computation runs
+        then: internal computation uses fp32 for numerical stability
+      - id: ac-7
+        given: no advanced configuration
+        when: WIDEN is initialized
+        then: |
+          it uses default WIDENConfig values with ranking_strategy=percentile,
+          sparsity_method=softmax, s_calibration=1.0
+      - id: ac-8
+        given: a non-OOM error during filter_delta_batched
+        when: the error is caught
+        then: unfiltered delta is used as passthrough and a warning is logged
+      - id: ac-9
+        given: a non-OOM error during merge_weights_batched
+        when: the error is caught
+        then: simple averaging is used as fallback and a warning is logged
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.186Z
+  - _ulid: 01KH4HA43RMA4PGDRWR8FFRMND
+    slugs:
+      - batched-executor
+    title: Batched Pipeline Executor
+    type: feature
+    tags: []
+    description: |
+      OpSignature-based parameter grouping and batched GPU evaluation.
+      Groups parameters by (affecting_sets, shape, ndim), computes optimal
+      batch sizes based on free VRAM, applies LoRAs via torch.bmm, and
+      handles OOM backoff. Ported from merge-router lora_chain_merge.py.
+    acceptance_criteria:
+      - id: ac-1
+        given: a set of parameter keys with varying shapes and affecting sets
+        when: grouped by OpSignature
+        then: keys with identical shape and affecting sets are in the same group
+      - id: ac-2
+        given: a batch of parameters and LoRA DeltaSpecs
+        when: bmm LoRA apply runs
+        then: torch.bmm produces correct deltas matching per-key application
+      - id: ac-3
+        given: available VRAM and parameter shapes
+        when: compute_batch_size is called
+        then: it returns a batch size targeting 70 percent of free VRAM
+      - id: ac-4
+        given: a torch.cuda.OutOfMemoryError during batch evaluation
+        when: OOM backoff triggers
+        then: the failed chunk retries at batch size 1 while other chunks continue normally
+      - id: ac-5
+        given: the executor completes evaluation
+        when: merged tensors are produced
+        then: all result tensors are on CPU ready for set patch installation
+      - id: ac-6
+        given: a base model with bf16 storage dtype
+        when: batched evaluation produces merged results
+        then: output tensors match the base model storage dtype
+      - id: ac-7
+        given: a LoRA with LoKr weights
+        when: batched apply runs
+        then: LoKr weights use per-key torch.kron on GPU instead of bmm
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.192Z
+  - _ulid: 01KH4HA43YH91JRARAHVJE40AZ
+    slugs:
+      - lora-loaders
+    title: Architecture-Specific LoRA Loaders
+    type: feature
+    tags: []
+    description: |
+      LoRA loading with architecture-specific key mapping. Each architecture
+      has distinct key naming conventions and special handling requirements.
+      Loaders produce DeltaSpec objects for the batched executor pipeline.
+    acceptance_criteria:
+      - id: ac-1
+        given: a LoRA file and a detected architecture tag
+        when: the appropriate loader is selected
+        then: the correct architecture-specific loader handles key mapping
+      - id: ac-2
+        given: any architecture loader
+        when: it processes a LoRA file
+        then: it produces DeltaSpec objects compatible with the batched executor
+      - id: ac-3
+        given: a new architecture needs LoRA support
+        when: a loader module is added to lib/lora/
+        then: it integrates without modifying existing loaders (pluggable design)
+      - id: ac-4
+        given: any loader
+        when: it implements the loader interface
+        then: |
+          it provides load(path) for loading, affected_keys property for the
+          key set, get_delta_specs(keys) returning DeltaSpecs, and cleanup()
+          for resource release
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.198Z
+    requirements:
+      - _ulid: 01KH4HA445WEG2RT7V1XGK45D3
+        slugs:
+          - sdxl-loader
+        title: SDXL LoRA Loader
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: an SDXL LoRA safetensors file
+            when: loaded with the SDXL loader
+            then: |
+              LoRA keys are mapped to diffusion_model input_blocks, middle_block,
+              and output_blocks keys
+          - id: ac-2
+            given: SDXL LoRA factors (up, down, alpha)
+            when: DeltaSpecs are produced
+            then: each spec contains correct rank, kind, and factor tensors
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-10T19:44:03.205Z
+      - _ulid: 01KH4HA44C16BTA406DSC3V4HZ
+        slugs:
+          - zimage-loader
+        title: Z-Image LoRA Loader
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: a Z-Image LoRA file with separate to_q, to_k, to_v keys
+            when: loaded with Z-Image loader
+            then: QKV keys are fused into the base model attention.qkv.weight layout
+          - id: ac-2
+            given: a Z-Image LoRA with Diffusers-style key names
+            when: key mapping runs
+            then: keys are correctly mapped to S3-DiT parameter names
+          - id: ac-3
+            given: Z-Image LoRA factors
+            when: DeltaSpecs are produced
+            then: |
+              QKV-fused specs have correct offset indexing for the fused weight
+              where q occupies 0 to 3840, k occupies 3840 to 7680, and v occupies
+              7680 to 11520
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-10T19:44:03.212Z
+  - _ulid: 01KH4HA44KN101QT0AHV6JVW5J
+    slugs:
+      - memory-management
+    title: Memory Management
+    type: feature
+    tags: []
+    description: |
+      GPU memory lifecycle during and after merge execution. Covers per-chunk
+      tensor cleanup, between-group GC cycles, loader resource teardown, and
+      ensuring all final patches are CPU-only.
+    acceptance_criteria:
+      - id: ac-1
+        given: batched evaluation processes a chunk of parameters
+        when: the chunk completes and results transfer to CPU
+        then: all GPU tensors for that chunk are deleted and freed
+      - id: ac-2
+        given: an OpSignature group completes all chunks
+        when: transitioning to the next group
+        then: gc.collect() and torch.cuda.empty_cache() are called
+      - id: ac-3
+        given: all LoRA files have been loaded and evaluation is complete
+        when: cleanup runs
+        then: all loader resources are freed including delta caches and file handles
+      - id: ac-4
+        given: the complete merge execution
+        when: final merged patches are produced
+        then: all patch tensors are on CPU with no GPU tensor references remaining
+      - id: ac-5
+        given: peak GPU usage during a chunk
+        when: compared to compute_batch_size estimate
+        then: actual usage does not exceed the estimate by more than 20 percent
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.219Z
+  - _ulid: 01KH4HA44TE1N5S7YYJJZK082G
+    slugs:
+      - per-block-control
+    title: Per-Block Control
+    type: feature
+    tags: []
+    description: |
+      BLOCK_CONFIG custom type enabling per-block t_factor and LoRA strength
+      overrides. Architecture-specific config nodes expose block group sliders.
+      Uses Option B design with explicit config type wired to consuming nodes.
+    acceptance_criteria:
+      - id: ac-1
+        given: no BLOCK_CONFIG inputs connected to any node
+        when: the workflow executes
+        then: all nodes behave identically to pre-block-control behavior
+      - id: ac-2
+        given: architecture-specific block config nodes exist
+        when: a user creates a block config for their model architecture
+        then: block group sliders are available with float range 0.0 to 2.0
+      - id: ac-3
+        given: a single BLOCK_CONFIG output
+        when: connected to multiple consuming nodes
+        then: it fans out correctly to each consumer
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:44:03.226Z
+    requirements:
+      - _ulid: 01KH4HA4529G5BGA25WXD1VJWQ
+        slugs:
+          - block-config-type
+        title: Block Config Type
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: a BlockConfig dataclass
+            when: constructed with arch and block_overrides
+            then: it is frozen and stores per-block float values as a tuple of pairs
+          - id: ac-2
+            given: RecipeLoRA and RecipeMerge dataclasses
+            when: block_config field is present
+            then: it accepts BlockConfig or None
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-10T19:44:03.234Z
+      - _ulid: 01KH4HA45A5T7Y0CDAT62T796Y
+        slugs:
+          - merge-block-config
+        title: Merge Per-Block T-Factor
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: a BLOCK_CONFIG connected to Merge block_t_factor input
+            when: Exit evaluates the merge step
+            then: per-block t_factor overrides are applied instead of global t_factor
+          - id: ac-2
+            given: no BLOCK_CONFIG connected to Merge
+            when: Exit evaluates
+            then: global t_factor applies to all blocks (backwards compatible)
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-10T19:44:03.242Z
+      - _ulid: 01KH4HA45N4GVEC484HN367MX4
+        slugs:
+          - lora-block-config
+        title: LoRA Per-Block Strength
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: a BLOCK_CONFIG connected to LoRA node block_strength input
+            when: Exit applies LoRA deltas
+            then: per-block strength scaling is applied to LoRA deltas
+          - id: ac-2
+            given: no BLOCK_CONFIG connected to LoRA node
+            when: Exit applies LoRA deltas
+            then: global strength applies uniformly (backwards compatible)
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-10T19:44:03.253Z
