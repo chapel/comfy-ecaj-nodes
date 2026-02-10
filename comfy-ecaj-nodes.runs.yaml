@@ -3,8 +3,19 @@ runs:
   - _ulid: 01KH4W39GTC4929DAWPENZ207A
     workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 5
     started_at: 2026-02-10T22:52:33.690Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-10T22:52:33.690Z
+        completed_at: 2026-02-10T22:53:08.633Z
+        inputs:
+          feature_description: "Testing strategy for comfy-ecaj-nodes: unit tests for pure lib code, node
+            testing via mock entry/exit for graph validation, and CI pipeline"
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-10T22:53:08.633Z
+        completed_at: 2026-02-10T22:53:08.633Z
     initiated_by: "@claude"
