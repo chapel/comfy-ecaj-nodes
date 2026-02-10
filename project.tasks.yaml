@@ -1,0 +1,24 @@
+- title: Port design doc into kspec specs and tasks
+  description: Translate the ComfyUI node pack design document
+    (~/Projects/merge-router/docs/comfyui-node-pack-design.md) into kspec spec items (modules,
+    features, requirements with acceptance criteria) and derive implementation tasks. This should be
+    done as a design session with review checkpoints — not all at once.
+  type: task
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 1
+  slugs:
+    - port-design-doc
+  tags:
+    - setup
+    - design
+  depends_on: []
+  _ulid: 01KH4DWQ6BNTGB4PE6PXKS1K24
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-10T18:44:18.251Z
+  notes: []
+  todos: []
