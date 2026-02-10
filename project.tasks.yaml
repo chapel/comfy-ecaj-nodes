@@ -369,6 +369,17 @@
         patches in list order -- set replaces first, then subsequent LoRA patches
         add on top. Depends on lib/executor.py, lib/recipe.py, all node implementations.
         Files: nodes/exit.py.
+    - _ulid: 01KH4J2YGZ6J2K44BEG1QRPB5N
+      created_at: 2026-02-10T19:57:36.671Z
+      author: "@claude"
+      content: "NF-3 scope clarification: This task implements the WIDENExitNode class shell in
+        nodes/exit.py ONLY — INPUT_TYPES, RETURN_TYPES, the execute() method that validates the
+        recipe tree then delegates to lib/executor.py, the IS_CHANGED classmethod, and progress bar
+        setup. The actual executor internals (recipe analysis, batched evaluation, patch
+        installation) are implemented in separate sub-requirement tasks that write to
+        lib/executor.py. This task wires the node to the executor, it does not implement the
+        executor."
+      supersedes: null
   todos: []
 - _ulid: 01KH4HA46PY9P8S7PZ0D32WZDD
   slugs:
