@@ -119,7 +119,8 @@
   plan_ref: "@plan-foundation-project-infrastructure"
   status: pending
   blocked_by: []
-  depends_on: []
+  depends_on:
+    - "@implement-recipe-type-system"
   context: []
   priority: 1
   tags: []
@@ -333,7 +334,6 @@
   depends_on:
     - "@implement-batched-pipeline-executor"
     - "@implement-recipe-type-system"
-    - "@implement-memory-management"
   context: []
   priority: 2
   tags: []
@@ -372,6 +372,7 @@
   blocked_by: []
   depends_on:
     - "@implement-exit-node"
+    - "@implement-architecture-specific-lora-loaders"
   context: []
   priority: 2
   tags: []
@@ -408,6 +409,8 @@
   blocked_by: []
   depends_on:
     - "@implement-exit-node"
+    - "@implement-widen-core-algorithm"
+    - "@implement-batched-pipeline-executor"
   context: []
   priority: 2
   tags: []
@@ -674,6 +677,7 @@
   status: pending
   blocked_by: []
   depends_on:
+    - "@implement-exit-node"
     - "@implement-batched-pipeline-executor"
     - "@implement-architecture-specific-lora-loaders"
   context: []
