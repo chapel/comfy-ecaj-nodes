@@ -1,0 +1,124 @@
+kynetic_plans: "1.0"
+plans:
+  - _ulid: 01KH4H1VQ6QVKYZ61M38YV672C
+    slugs:
+      - plan-foundation-project-infrastructure
+    title: Foundation — Project Infrastructure
+    content: |
+      # Foundation — Project Infrastructure
+
+      ## Specs
+
+      ```yaml
+      - title: ComfyUI Packaging
+        slug: comfyui-packaging
+        type: feature
+        description: |
+          Node registration, Python packaging, and ComfyUI integration infrastructure.
+          Covers __init__.py NODE_CLASS_MAPPINGS, pyproject.toml with [tool.comfy],
+          requirements.txt, and CATEGORY namespace (ecaj/*).
+        acceptance_criteria:
+          - id: ac-1
+            given: comfy-ecaj-nodes is installed in ComfyUI custom_nodes
+            when: ComfyUI starts
+            then: all registered nodes appear under the ecaj category in the node menu
+          - id: ac-2
+            given: a new node class is added to a nodes/ module
+            when: it is added to NODE_CLASS_MAPPINGS in __init__.py
+            then: ComfyUI discovers it without changes to other files
+          - id: ac-3
+            given: pyproject.toml defines [tool.comfy] metadata
+            when: the package is published to the ComfyUI registry
+            then: it displays as ECAJ Nodes with publisher ecaj
+          - id: ac-4
+            given: the CATEGORY namespace uses ecaj/merge for WIDEN nodes
+            when: future non-merge nodes are added
+            then: they use ecaj/<domain> following the established lowercase pattern
+        implementation_notes: |
+          Skeleton exists in __init__.py (5 WIDEN mappings) and pyproject.toml.
+          Validate NODE_CLASS_MAPPINGS pattern works with ComfyUI node discovery.
+          CATEGORY must use lowercase ecaj/ prefix with sub-categories per capability
+          area (e.g., ecaj/merge for WIDEN nodes). Existing stubs use ECAJ/merge --
+          update all to lowercase ecaj/merge. For the task: review ComfyUI's
+          nodes_core.py loading path, verify pyproject.toml [tool.comfy] fields match
+          registry requirements (PublisherId, DisplayName, Icon), ensure requirements.txt
+          lists only dependencies ComfyUI doesn't already provide (torch and safetensors
+          are provided by ComfyUI -- check if we need them at all), update CATEGORY on
+          all 5 existing node stubs from ECAJ/merge to ecaj/merge.
+          Files: __init__.py, pyproject.toml, requirements.txt, nodes/entry.py,
+          nodes/lora.py, nodes/compose.py, nodes/merge.py, nodes/exit.py.
+
+      - title: Testing Infrastructure
+        slug: testing-infrastructure
+        type: feature
+        description: |
+          pytest configuration, ComfyUI mocking strategy, and test fixtures for
+          recipe tree construction. Must support testing nodes without a running
+          ComfyUI instance.
+        acceptance_criteria:
+          - id: ac-1
+            given: a developer runs pytest from the project root
+            when: tests execute
+            then: all tests pass without requiring a running ComfyUI instance
+          - id: ac-2
+            given: a test needs a ModelPatcher-like object
+            when: it uses the mock fixture
+            then: |
+              the mock provides model_state_dict(), clone(), add_patches(),
+              get_key_patches(), patches_uuid, and model.diffusion_model state
+              dict access
+          - id: ac-3
+            given: a test needs a recipe tree
+            when: it uses recipe fixtures
+            then: |
+              pre-built recipe trees for single-LoRA, multi-LoRA set, compose,
+              and chain patterns are available
+          - id: ac-4
+            given: tests for nodes that use ComfyUI APIs like folder_paths
+            when: they run without ComfyUI installed
+            then: the APIs are mocked via conftest.py fixtures
+        implementation_notes: |
+          Create tests/conftest.py with: (1) MockModelPatcher class -- needs
+          model_state_dict(filter_prefix) returning a dict of fake tensors keyed like
+          diffusion_model.input_blocks.0.0.weight, clone() returning a new
+          MockModelPatcher, add_patches(patches, strength_patch, strength_model)
+          storing patches, get_key_patches(filter_prefix) returning patch data,
+          patches_uuid property. Use small tensors (e.g., 4x4 float32) for speed.
+          (2) Recipe tree fixtures -- recipe_base() returning RecipeBase with
+          MockModelPatcher and arch=sdxl, recipe_single_lora(), recipe_lora_set()
+          (2 LoRAs chained), recipe_compose() (2 branches), recipe_chain() (2
+          sequential merges), recipe_full() (compose + chain like hyphoria example
+          from design doc section 6.5). (3) Mock folder_paths module --
+          get_filename_list(loras) returning [test.safetensors]. (4) pytest config
+          in pyproject.toml [tool.pytest.ini_options] with testpaths=[tests].
+          Files: tests/conftest.py, pyproject.toml (pytest config section).
+      ```
+
+      ## Tasks
+
+      derive_from_specs: true
+
+      ## Implementation Notes
+
+      Foundation specs are project-level infrastructure. They should be completed
+      before WIDEN feature work begins, as they establish patterns all nodes follow.
+    status: active
+    derived_tasks:
+      - "@implement-comfyui-packaging"
+      - "@implement-testing-infrastructure"
+    derived_specs:
+      - "@comfyui-packaging"
+      - "@testing-infrastructure"
+    source_path: /tmp/foundation-plan.md
+    created_at: 2026-02-10T19:39:32.454Z
+    approved_at: null
+    completed_at: null
+    notes:
+      - _ulid: 01KH4H1VQ7PHVBZ7BHBJMKYDJE
+        created_at: 2026-02-10T19:39:32.455Z
+        author: "@claude"
+        content: |-
+          Implementation notes:
+
+          Foundation specs are project-level infrastructure. They should be completed
+          before WIDEN feature work begins, as they establish patterns all nodes follow.

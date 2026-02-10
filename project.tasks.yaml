@@ -74,3 +74,75 @@
         files now use full paths. Project structure section updated to comfy-ecaj-nodes/.
       supersedes: null
   todos: []
+- _ulid: 01KH4H1VQFJC261BXN6377A7XS
+  slugs:
+    - implement-comfyui-packaging
+  title: Implement ComfyUI Packaging
+  type: task
+  spec_ref: "@comfyui-packaging"
+  plan_ref: "@plan-foundation-project-infrastructure"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags: []
+  vcs_refs: []
+  created_at: 2026-02-10T19:39:32.463Z
+  notes:
+    - _ulid: 01KH4H1VQF30CM22CSZ4A997WD
+      created_at: 2026-02-10T19:39:32.463Z
+      author: "@claude"
+      content: |
+        Implementation notes:
+
+        Skeleton exists in __init__.py (5 WIDEN mappings) and pyproject.toml.
+        Validate NODE_CLASS_MAPPINGS pattern works with ComfyUI node discovery.
+        CATEGORY must use lowercase ecaj/ prefix with sub-categories per capability
+        area (e.g., ecaj/merge for WIDEN nodes). Existing stubs use ECAJ/merge --
+        update all to lowercase ecaj/merge. For the task: review ComfyUI's
+        nodes_core.py loading path, verify pyproject.toml [tool.comfy] fields match
+        registry requirements (PublisherId, DisplayName, Icon), ensure requirements.txt
+        lists only dependencies ComfyUI doesn't already provide (torch and safetensors
+        are provided by ComfyUI -- check if we need them at all), update CATEGORY on
+        all 5 existing node stubs from ECAJ/merge to ecaj/merge.
+        Files: __init__.py, pyproject.toml, requirements.txt, nodes/entry.py,
+        nodes/lora.py, nodes/compose.py, nodes/merge.py, nodes/exit.py.
+  todos: []
+- title: Implement Testing Infrastructure
+  type: task
+  spec_ref: "@testing-infrastructure"
+  plan_ref: "@plan-foundation-project-infrastructure"
+  priority: 3
+  slugs:
+    - implement-testing-infrastructure
+  tags: []
+  depends_on: []
+  notes:
+    - _ulid: 01KH4H1VQK71QYFPXSF52PYAVJ
+      created_at: 2026-02-10T19:39:32.467Z
+      author: "@claude"
+      content: |
+        Implementation notes:
+
+        Create tests/conftest.py with: (1) MockModelPatcher class -- needs
+        model_state_dict(filter_prefix) returning a dict of fake tensors keyed like
+        diffusion_model.input_blocks.0.0.weight, clone() returning a new
+        MockModelPatcher, add_patches(patches, strength_patch, strength_model)
+        storing patches, get_key_patches(filter_prefix) returning patch data,
+        patches_uuid property. Use small tensors (e.g., 4x4 float32) for speed.
+        (2) Recipe tree fixtures -- recipe_base() returning RecipeBase with
+        MockModelPatcher and arch=sdxl, recipe_single_lora(), recipe_lora_set()
+        (2 LoRAs chained), recipe_compose() (2 branches), recipe_chain() (2
+        sequential merges), recipe_full() (compose + chain like hyphoria example
+        from design doc section 6.5). (3) Mock folder_paths module --
+        get_filename_list(loras) returning [test.safetensors]. (4) pytest config
+        in pyproject.toml [tool.pytest.ini_options] with testpaths=[tests].
+        Files: tests/conftest.py, pyproject.toml (pytest config section).
+  _ulid: 01KH4H1VQK0HMMA7NP2BTSFZEA
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-10T19:39:32.467Z
+  todos: []

@@ -14,3 +14,77 @@ relates_to: []
 tests: []
 traits: []
 notes: []
+features:
+  - _ulid: 01KH4H1VQ7C0N628PHPV5815P2
+    slugs:
+      - comfyui-packaging
+    title: ComfyUI Packaging
+    type: feature
+    tags: []
+    description: |
+      Node registration, Python packaging, and ComfyUI integration infrastructure.
+      Covers __init__.py NODE_CLASS_MAPPINGS, pyproject.toml with [tool.comfy],
+      requirements.txt, and CATEGORY namespace (ecaj/*).
+    acceptance_criteria:
+      - id: ac-1
+        given: comfy-ecaj-nodes is installed in ComfyUI custom_nodes
+        when: ComfyUI starts
+        then: all registered nodes appear under the ecaj category in the node menu
+      - id: ac-2
+        given: a new node class is added to a nodes/ module
+        when: it is added to NODE_CLASS_MAPPINGS in __init__.py
+        then: ComfyUI discovers it without changes to other files
+      - id: ac-3
+        given: pyproject.toml defines [tool.comfy] metadata
+        when: the package is published to the ComfyUI registry
+        then: it displays as ECAJ Nodes with publisher ecaj
+      - id: ac-4
+        given: the CATEGORY namespace uses ecaj/merge for WIDEN nodes
+        when: future non-merge nodes are added
+        then: they use ecaj/<domain> following the established lowercase pattern
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:39:32.455Z
+  - _ulid: 01KH4H1VQBN1XN9AY8BN31W9GV
+    slugs:
+      - testing-infrastructure
+    title: Testing Infrastructure
+    type: feature
+    tags: []
+    description: |
+      pytest configuration, ComfyUI mocking strategy, and test fixtures for
+      recipe tree construction. Must support testing nodes without a running
+      ComfyUI instance.
+    acceptance_criteria:
+      - id: ac-1
+        given: a developer runs pytest from the project root
+        when: tests execute
+        then: all tests pass without requiring a running ComfyUI instance
+      - id: ac-2
+        given: a test needs a ModelPatcher-like object
+        when: it uses the mock fixture
+        then: |
+          the mock provides model_state_dict(), clone(), add_patches(),
+          get_key_patches(), patches_uuid, and model.diffusion_model state
+          dict access
+      - id: ac-3
+        given: a test needs a recipe tree
+        when: it uses recipe fixtures
+        then: |
+          pre-built recipe trees for single-LoRA, multi-LoRA set, compose,
+          and chain patterns are available
+      - id: ac-4
+        given: tests for nodes that use ComfyUI APIs like folder_paths
+        when: they run without ComfyUI installed
+        then: the APIs are mocked via conftest.py fixtures
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-10T19:39:32.459Z
