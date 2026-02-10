@@ -54,6 +54,42 @@ workflows:
         content: |-
           Create PR.
           Use: /pr skill or gh pr create
+  - _ulid: 01KH4D2XWDYBF7V5FW6GA497JC
+    id: session-reflect
+    trigger: session-end
+    description: Structured reflection after work sessions. Surfaces learnings, identifies friction, and
+      captures improvements.
+    steps:
+      - type: action
+        content: |-
+          Identify what worked well this session.
+          Be specific. Consider: workflows, tools, communication, decisions.
+      - type: action
+        content: |-
+          Identify friction points - where things were harder than needed.
+          Focus on systemic issues, not one-off mistakes.
+      - type: action
+        content: |-
+          Check if friction points are already tracked.
+          Search specs, tasks, AND inbox before proposing new improvements.
+      - type: action
+        content: |-
+          For untracked friction, propose concrete improvements.
+          Include: what it would do, how it helps, rough scope.
+      - type: decision
+        content: Present findings to user - ask about each improvement one at a time
+        options:
+          - Worth capturing -> proceed to capture
+          - Needs refinement -> discuss and refine
+          - Not worth it -> skip
+          - Done with reflection -> complete workflow
+      - type: action
+        content: |-
+          Capture approved items:
+          - Actionable improvements: kspec inbox add
+          - Friction patterns: kspec meta observe friction
+          - Success patterns: kspec meta observe success
+          - Open questions: kspec meta question add
 conventions: []
 observations: []
 includes: []
