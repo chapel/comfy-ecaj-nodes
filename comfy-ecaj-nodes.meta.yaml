@@ -192,6 +192,55 @@ workflows:
           Report findings.
           List all MUST-FIX issues that block PR creation.
           Non-blocking suggestions can be noted separately.
+  - _ulid: 01KH4D4MGKTBM16W1NFT9TMQJS
+    id: pr-review-loop
+    trigger: loop-pr-review
+    description: PR review subagent workflow for loop mode. Runs local review, verifies AC coverage and
+      spec alignment, fixes issues, waits for CI, and merges with quality gates.
+    steps:
+      - type: action
+        content: |-
+          Run local review workflow first.
+          Use: /local-review skill
+      - type: check
+        content: |-
+          Verify all spec ACs linked to task have test coverage.
+          Check test files for AC annotations.
+        on_fail: Add missing test coverage before continuing.
+      - type: check
+        content: |-
+          Verify implementation matches spec requirements.
+          Read spec, read implementation, compare.
+        on_fail: Fix misalignment between spec and implementation.
+      - type: decision
+        content: Evaluate local-review findings.
+        options:
+          - MUST-FIX issues, can fix -> Fix and continue
+          - MUST-FIX issues, cannot fix -> Mark needs_review, EXIT
+          - Only advisory issues -> Continue with merge
+          - No issues -> Continue with merge
+      - type: action
+        content: Push changes (if any fixes were made).
+      - type: check
+        content: |-
+          Wait for CI to complete and pass.
+          CRITICAL: Re-verify CI after ANY push.
+        on_fail: "If CI fails: investigate, fix, push, return to this step."
+      - type: action
+        content: |-
+          Post review summary as PR comment.
+          Use: gh pr comment
+      - type: action
+        content: |-
+          Follow PR review merge gates.
+          Use: kspec workflow start @pr-review-merge
+      - type: check
+        content: Verify PR was successfully merged.
+        on_fail: Check for conflicts or protection rules.
+      - type: action
+        content: |-
+          Mark task completed with PR reference.
+          Use: kspec task complete @task --reason "Merged in PR #N"
 conventions: []
 observations: []
 includes: []
