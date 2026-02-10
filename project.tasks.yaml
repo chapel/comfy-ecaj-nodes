@@ -110,6 +110,7 @@
         Files: __init__.py, pyproject.toml, requirements.txt, nodes/entry.py,
         nodes/lora.py, nodes/compose.py, nodes/merge.py, nodes/exit.py.
   todos: []
+  automation: eligible
 - _ulid: 01KH4H1VQK0HMMA7NP2BTSFZEA
   slugs:
     - implement-testing-infrastructure
@@ -148,6 +149,7 @@
         in pyproject.toml [tool.pytest.ini_options] with testpaths=[tests].
         Files: tests/conftest.py, pyproject.toml (pytest config section).
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA460E5KKNBG2WJJK17GX
   slugs:
     - implement-recipe-type-system
@@ -184,6 +186,7 @@
         RecipeCompose, RecipeMerge] type alias for type checking.
         Files: lib/recipe.py.
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA463BT1D6RF0ZD1DRW2P
   slugs:
     - implement-entry-node
@@ -228,6 +231,7 @@
         future-proof but the error path is explicit."
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA46729EXG3GT8QCW2F44
   slugs:
     - implement-lora-node
@@ -264,6 +268,7 @@
         be None (optional input).
         Files: nodes/lora.py.
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA46AAJBFFJ5JAVM9EM2H
   slugs:
     - implement-compose-node
@@ -297,6 +302,7 @@
         input when provided is a RecipeCompose (not some other recipe type).
         Files: nodes/compose.py.
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA46DNS18CPRTTECH915J
   slugs:
     - implement-merge-node
@@ -331,6 +337,7 @@
         of merge(), construct and return RecipeMerge.
         Files: nodes/merge.py.
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA46HJ6V0VC67XRPWSGB5
   slugs:
     - implement-exit-node
@@ -381,6 +388,7 @@
         executor."
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA46PY9P8S7PZ0D32WZDD
   slugs:
     - implement-exit-recipe-analysis
@@ -418,6 +426,7 @@
         identity semantics right.
         Files: lib/executor.py, references lib/lora/base.py interface.
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA46X4V9RHXW26VP36FD9
   slugs:
     - implement-exit-batched-evaluation
@@ -470,6 +479,7 @@
         WIDEN functions instead of the base tensor."
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA4733VECXNH5H4M4AA2B
   slugs:
     - implement-exit-patch-installation
@@ -508,6 +518,7 @@
         tuples sorted by path. Return hex digest.
         Files: nodes/exit.py.
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA47BN0SVNJWSRGXBNJ2W
   slugs:
     - implement-widen-core-algorithm
@@ -558,6 +569,7 @@
         WIDENConfig.sparsity_method references it."
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA47F493S53EWKW4EA9SF
   slugs:
     - implement-batched-pipeline-executor
@@ -611,6 +623,7 @@
         850) belongs to the exit-batched-eval task."
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA47M05Q979790FR6MC9J
   slugs:
     - implement-architecture-specific-lora-loaders
@@ -645,6 +658,7 @@
         use registry pattern or just the dict -- adding new arch means adding one entry.
         Files: lib/lora/base.py, lib/lora/__init__.py (registry).
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA47ST02A5Y0G5ZABFP2D
   slugs:
     - implement-sdxl-lora-loader
@@ -680,6 +694,7 @@
         key or default to rank.
         Files: lib/lora/sdxl.py.
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA47Z3DSGDJ07S2V7DNRD
   slugs:
     - implement-z-image-lora-loader
@@ -719,6 +734,7 @@
         (with offset for q portion).
         Files: lib/lora/zimage.py.
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA4865JG16KMN5YXENCYH
   slugs:
     - implement-memory-management
@@ -771,6 +787,7 @@
         to add the ~8 cleanup points from merge-router's pattern."
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA48ERX1APFPSJS5E1Y7F
   slugs:
     - implement-per-block-control
@@ -809,6 +826,7 @@
         Files: nodes/block_config_sdxl.py, nodes/block_config_zimage.py,
         lib/recipe.py (BlockConfig dataclass).
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA48PV4PF188MY0H239GA
   slugs:
     - implement-block-config-type
@@ -843,6 +861,7 @@
         arch field must match RecipeBase.arch -- validated at Exit time.
         Files: lib/recipe.py.
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA48WYR6H4E0QV888VSD2
   slugs:
     - implement-merge-per-block-t-factor
@@ -879,6 +898,7 @@
         Files: nodes/merge.py (add input), lib/executor.py (use block config
         during eval), lib/block_classify.py (key-to-block mapping).
   todos: []
+  automation: eligible
 - _ulid: 01KH4HA493AA51NFWN2NGQA6GA
   slugs:
     - implement-lora-per-block-strength
@@ -929,3 +949,4 @@
         multiply: delta_batch *= strength_vector."
       supersedes: null
   todos: []
+  automation: eligible
