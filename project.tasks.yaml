@@ -10,7 +10,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -74,6 +74,7 @@
         files now use full paths. Project structure section updated to comfy-ecaj-nodes/.
       supersedes: null
   todos: []
+  started_at: 2026-02-10T19:47:05.721Z
 - _ulid: 01KH4H1VQFJC261BXN6377A7XS
   slugs:
     - implement-comfyui-packaging
