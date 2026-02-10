@@ -14,7 +14,46 @@ agents:
       - git
       - uv
     conventions: []
-workflows: []
+workflows:
+  - _ulid: 01KH4D2G8XEYKRQNNZR9HC6S8A
+    id: task-work-session
+    trigger: manual
+    description: Core pattern for working on a task. Full lifecycle from start through PR merge.
+    steps:
+      - type: check
+        content: |-
+          Check for existing in_progress or pending_review tasks.
+          Use: kspec session start (shows active work first)
+          Priority: pending_review > in_progress > ready
+        on_fail: Inherit existing work instead of starting new.
+      - type: action
+        content: |-
+          Choose task to work on.
+          Use: kspec tasks ready to see available tasks
+      - type: check
+        content: |-
+          Verify work is not already done.
+          Check git history and existing code.
+        on_fail: Mark task complete with Already implemented reason
+      - type: action
+        content: |-
+          Start the task.
+          Use: kspec task start @task
+      - type: action
+        content: |-
+          Work on the task, adding notes as you go.
+          Use: kspec task note @task "What you are doing..."
+      - type: check
+        content: All changes committed
+        on_fail: "Commit changes with Task: @task trailer."
+      - type: action
+        content: |-
+          Submit task for review.
+          Use: kspec task submit @task
+      - type: action
+        content: |-
+          Create PR.
+          Use: /pr skill or gh pr create
 conventions: []
 observations: []
 includes: []
