@@ -241,6 +241,14 @@ workflows:
         content: |-
           Mark task completed with PR reference.
           Use: kspec task complete @task --reason "Merged in PR #N"
-conventions: []
+conventions:
+  - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
+    domain: commits
+    rules:
+      - Use conventional commit format (feat, fix, docs, refactor, test, chore)
+      - Include Task trailer when completing task work
+      - Include Spec trailer when implementing spec item
+      - Keep subject line under 72 characters
+    examples: []
 observations: []
 includes: []
