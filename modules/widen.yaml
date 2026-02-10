@@ -539,6 +539,11 @@ features:
             given: SDXL LoRA factors (up, down, alpha)
             when: DeltaSpecs are produced
             then: each spec contains correct rank, kind, and factor tensors
+          - id: ac-3
+            given: an SDXL LoRA with attention keys containing attn patterns
+            when: key mapping runs
+            then: attention keys including proj_in, proj_out, and to_q/to_k/to_v are correctly mapped to their
+              base model counterparts
         depends_on: []
         implements: []
         relates_to: []
