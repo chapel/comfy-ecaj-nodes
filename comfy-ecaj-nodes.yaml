@@ -6,3 +6,4 @@ project:
 includes:
   - modules/main.yaml
   - modules/foundation.yaml
+  - modules/widen.yaml

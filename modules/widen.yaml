@@ -1,0 +1,16 @@
+_ulid: 01KH4GZW6PAQEQR1GSK88TE64W
+slugs:
+  - widen
+title: WIDEN Merge
+type: module
+status:
+  maturity: draft
+  implementation: not_started
+description: WIDEN-based model merging — weight disentanglement for intelligent parameter-level composition
+tags: []
+depends_on: []
+implements: []
+relates_to: []
+tests: []
+traits: []
+notes: []
