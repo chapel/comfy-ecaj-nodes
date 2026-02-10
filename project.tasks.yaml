@@ -906,4 +906,16 @@
         or by splitting batch by block group.
         Files: nodes/lora.py (add input), lib/executor.py (per-block scaling
         in LoRA apply).
+    - _ulid: 01KH4J41ABBBKTGH8J7ZTBNFB0
+      created_at: 2026-02-10T19:58:12.299Z
+      author: "@claude"
+      content: "NF-8 design decision resolved: Apply per-block strength as a per-key scaling vector within
+        the batch. After computing the LoRA delta for the full batch via torch.bmm, multiply each
+        key's delta by its per-block strength scalar. The scaling vector is constructed during
+        recipe analysis by classifying each key to a block group via lib/block_classify.py and
+        looking up the BlockConfig override. This avoids splitting the batch and preserves the bmm
+        optimization. Implementation: after _apply_lora_set_batched_gpu() returns the delta batch
+        [B, *shape], compute a strength vector [B, 1, 1] from per-key block classifications, then
+        multiply: delta_batch *= strength_vector."
+      supersedes: null
   todos: []
