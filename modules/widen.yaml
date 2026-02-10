@@ -329,6 +329,10 @@ features:
             given: the WIDEN algorithm produces results
             when: they are returned from evaluation
             then: all result tensors are on GPU (transferred to CPU in patch installation phase)
+          - id: ac-5
+            given: a RecipeMerge with an explicit backbone reference that differs from the base
+            when: batched evaluation runs the WIDEN step
+            then: the backbone model (not the base) is used as the importance reference for WIDEN analysis
         depends_on: []
         implements: []
         relates_to: []
