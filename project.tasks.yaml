@@ -85,7 +85,7 @@
   blocked_by: []
   depends_on: []
   context: []
-  priority: 3
+  priority: 1
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:39:32.463Z
@@ -120,7 +120,7 @@
   blocked_by: []
   depends_on: []
   context: []
-  priority: 3
+  priority: 1
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:39:32.467Z
@@ -157,7 +157,7 @@
   blocked_by: []
   depends_on: []
   context: []
-  priority: 3
+  priority: 1
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.264Z
@@ -194,7 +194,7 @@
   depends_on:
     - "@implement-recipe-type-system"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.267Z
@@ -229,7 +229,7 @@
   depends_on:
     - "@implement-recipe-type-system"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.271Z
@@ -265,7 +265,7 @@
   depends_on:
     - "@implement-recipe-type-system"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.274Z
@@ -298,7 +298,7 @@
   depends_on:
     - "@implement-recipe-type-system"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.277Z
@@ -334,7 +334,7 @@
     - "@implement-recipe-type-system"
     - "@implement-memory-management"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.281Z
@@ -372,7 +372,7 @@
   depends_on:
     - "@implement-exit-node"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.286Z
@@ -408,7 +408,7 @@
   depends_on:
     - "@implement-exit-node"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.293Z
@@ -445,7 +445,7 @@
   depends_on:
     - "@implement-exit-node"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.299Z
@@ -482,7 +482,7 @@
   blocked_by: []
   depends_on: []
   context: []
-  priority: 3
+  priority: 1
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.307Z
@@ -528,7 +528,7 @@
     - "@implement-architecture-specific-lora-loaders"
     - "@implement-recipe-type-system"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.311Z
@@ -567,7 +567,7 @@
   depends_on:
     - "@implement-recipe-type-system"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.316Z
@@ -601,7 +601,7 @@
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.321Z
@@ -636,7 +636,7 @@
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.327Z
@@ -676,7 +676,7 @@
     - "@implement-batched-pipeline-executor"
     - "@implement-architecture-specific-lora-loaders"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.334Z
