@@ -1,0 +1,16 @@
+_ulid: 01KH4GZQCR8XA36RA1DGFJ46H7
+slugs:
+  - foundation
+title: Foundation
+type: module
+status:
+  maturity: draft
+  implementation: not_started
+description: Project-level infrastructure shared by all node packs
+tags: []
+depends_on: []
+implements: []
+relates_to: []
+tests: []
+traits: []
+notes: []
