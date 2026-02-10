@@ -1,24 +1,31 @@
-- title: Port design doc into kspec specs and tasks
+- _ulid: 01KH4DWQ6BNTGB4PE6PXKS1K24
+  slugs:
+    - port-design-doc
+  title: Port design doc into kspec specs and tasks
+  type: task
   description: Translate the ComfyUI node pack design document
     (~/Projects/merge-router/docs/comfyui-node-pack-design.md) into kspec spec items (modules,
     features, requirements with acceptance criteria) and derive implementation tasks. This should be
     done as a design session with review checkpoints — not all at once.
-  type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 1
-  slugs:
-    - port-design-doc
   tags:
     - setup
     - design
-  depends_on: []
-  _ulid: 01KH4DWQ6BNTGB4PE6PXKS1K24
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-10T18:44:18.251Z
-  notes: []
+  notes:
+    - _ulid: 01KH4DZDER1NSMEDTPRYEWBNDB
+      created_at: 2026-02-10T18:45:46.584Z
+      author: "@claude"
+      content: "Source document: ~/Projects/merge-router/docs/comfyui-node-pack-design.md (627+ lines, 8
+        sections). Sections 6.8 (Exit Node Algorithm), 6.9 (Memory Strategy), and 6.10 (Per-Block
+        Control) were written this session — they are complete but newer than the rest of the doc."
+      supersedes: null
   todos: []
