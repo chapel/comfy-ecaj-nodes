@@ -456,6 +456,19 @@
         scripts/lora_chain_merge.py), adapting from config dict traversal to
         recipe dataclass traversal.
         Files: lib/executor.py.
+    - _ulid: 01KH4J3H45X4PGJCNH8W986KB6
+      created_at: 2026-02-10T19:57:55.717Z
+      author: "@claude"
+      content: "NF-6 boundary clarification: This task implements the RECIPE TREE WALKER in
+        lib/executor.py — the evaluate_node_batched() function (~line 850 in merge-router
+        scripts/lora_chain_merge.py) adapted for recipe dataclasses. It dispatches to primitives
+        from @implement-batched-pipeline-executor (OpSignature grouping,
+        _apply_lora_set_batched_gpu, compute_batch_size) and WIDEN functions from
+        @implement-widen-core-algorithm (filter_delta_batched, merge_weights_batched). This task is
+        the glue between recipe traversal and the batched primitives. Also handles backbone
+        override: when RecipeMerge.backbone is not None, pass it as the importance reference to
+        WIDEN functions instead of the base tensor."
+      supersedes: null
   todos: []
 - _ulid: 01KH4HA4733VECXNH5H4M4AA2B
   slugs:
