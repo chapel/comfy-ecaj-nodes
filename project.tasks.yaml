@@ -12,6 +12,7 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: null
   depends_on: []
   context: []
   priority: 1
@@ -21,6 +22,7 @@
   vcs_refs: []
   created_at: 2026-02-10T18:44:18.251Z
   started_at: 2026-02-10T19:47:05.721Z
+  completed_at: 2026-02-10T21:40:56.673Z
   notes:
     - _ulid: 01KH4DZDER1NSMEDTPRYEWBNDB
       created_at: 2026-02-10T18:45:46.584Z
@@ -75,8 +77,6 @@
         files now use full paths. Project structure section updated to comfy-ecaj-nodes/.
       supersedes: null
   todos: []
-  completed_at: 2026-02-10T21:40:56.673Z
-  closed_reason: null
 - _ulid: 01KH4H1VQFJC261BXN6377A7XS
   slugs:
     - implement-comfyui-packaging
@@ -124,6 +124,7 @@
   blocked_by: []
   depends_on:
     - "@implement-recipe-type-system"
+    - "@implement-comfyui-packaging"
   context: []
   priority: 1
   tags: []
@@ -199,7 +200,8 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-recipe-type-system"
+    - "@implement-testing-infrastructure"
+    - "@implement-comfyui-packaging"
   context: []
   priority: 2
   tags: []
@@ -244,7 +246,8 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-recipe-type-system"
+    - "@implement-testing-infrastructure"
+    - "@implement-comfyui-packaging"
   context: []
   priority: 2
   tags: []
@@ -281,7 +284,8 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-recipe-type-system"
+    - "@implement-testing-infrastructure"
+    - "@implement-comfyui-packaging"
   context: []
   priority: 2
   tags: []
@@ -315,7 +319,8 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-recipe-type-system"
+    - "@implement-testing-infrastructure"
+    - "@implement-comfyui-packaging"
   context: []
   priority: 2
   tags: []
@@ -350,8 +355,10 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-batched-pipeline-executor"
-    - "@implement-recipe-type-system"
+    - "@implement-exit-recipe-analysis"
+    - "@implement-exit-batched-evaluation"
+    - "@implement-exit-patch-installation"
+    - "@implement-comfyui-packaging"
   context: []
   priority: 2
   tags: []
@@ -401,7 +408,6 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-exit-node"
     - "@implement-architecture-specific-lora-loaders"
   context: []
   priority: 2
@@ -439,9 +445,8 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-exit-node"
-    - "@implement-widen-core-algorithm"
     - "@implement-batched-pipeline-executor"
+    - "@implement-exit-recipe-analysis"
   context: []
   priority: 2
   tags: []
@@ -492,7 +497,7 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-exit-node"
+    - "@implement-testing-infrastructure"
   context: []
   priority: 2
   tags: []
@@ -583,8 +588,7 @@
   blocked_by: []
   depends_on:
     - "@implement-widen-core-algorithm"
-    - "@implement-architecture-specific-lora-loaders"
-    - "@implement-recipe-type-system"
+    - "@implement-testing-infrastructure"
   context: []
   priority: 2
   tags: []
@@ -636,7 +640,7 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-recipe-type-system"
+    - "@implement-testing-infrastructure"
   context: []
   priority: 2
   tags: []
@@ -748,8 +752,6 @@
   blocked_by: []
   depends_on:
     - "@implement-exit-node"
-    - "@implement-batched-pipeline-executor"
-    - "@implement-architecture-specific-lora-loaders"
   context: []
   priority: 2
   tags: []
@@ -800,9 +802,9 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-exit-node"
-    - "@implement-recipe-type-system"
-    - "@implement-batched-pipeline-executor"
+    - "@implement-block-config-type"
+    - "@implement-comfyui-packaging"
+    - "@implement-testing-infrastructure"
   context: []
   priority: 3
   tags: []
@@ -839,7 +841,7 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-per-block-control"
+    - "@implement-recipe-type-system"
   context: []
   priority: 3
   tags: []
@@ -876,6 +878,7 @@
   depends_on:
     - "@implement-per-block-control"
     - "@implement-merge-node"
+    - "@implement-exit-node"
   context: []
   priority: 3
   tags: []
@@ -913,6 +916,7 @@
   depends_on:
     - "@implement-per-block-control"
     - "@implement-lora-node"
+    - "@implement-exit-node"
   context: []
   priority: 3
   tags: []
