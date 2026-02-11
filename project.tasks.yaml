@@ -587,6 +587,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.293Z
+  started_at: 2026-02-11T03:36:17.464Z
   notes:
     - _ulid: 01KH4HA46X9JT6J2TFQA337BTM
       created_at: 2026-02-10T19:44:03.293Z
@@ -620,9 +621,18 @@
         override: when RecipeMerge.backbone is not None, pass it as the importance reference to
         WIDEN functions instead of the base tensor."
       supersedes: null
+    - _ulid: 01KH5CGSAYSTMJKAFNCFXSR4DH
+      created_at: 2026-02-11T03:39:33.086Z
+      author: "@claude"
+      content: "Implemented evaluate_recipe() tree walker in lib/executor.py. Function dispatches on
+        recipe node type: RecipeCompose→merge_weights_batched (AC-1),
+        RecipeLoRA→filter_delta_batched (AC-2), chained RecipeMerge→recursive evaluation (AC-3).
+        Results stay on GPU (AC-4). Backbone override passed to WIDEN functions when
+        RecipeMerge.backbone is not None (AC-5). Added 13 tests covering all 5 ACs with
+        MockLoRALoader and MockWIDEN fixtures. All 269 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T03:36:17.464Z
 - _ulid: 01KH4HA4733VECXNH5H4M4AA2B
   slugs:
     - implement-exit-patch-installation
