@@ -49,6 +49,9 @@ features:
     traits: []
     notes: []
     created: 2026-02-10T19:39:32.455Z
+    status:
+      maturity: draft
+      implementation: in_progress
   - _ulid: 01KH4H1VQBN1XN9AY8BN31W9GV
     slugs:
       - testing-infrastructure
