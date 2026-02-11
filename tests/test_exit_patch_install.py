@@ -75,7 +75,7 @@ class TestInstallMergedPatches:
 
         # Get the patch tensor
         patch_entry = result.patches[key][0]
-        patch_tensor = patch_entry[1][1]  # ("set", tensor)
+        patch_tensor = patch_entry[1][1][0]  # ("set", (tensor,))
         assert patch_tensor.device.type == "cpu"
 
     # AC: @exit-patch-install ac-4
@@ -86,7 +86,7 @@ class TestInstallMergedPatches:
         result = install_merged_patches(mock_model_patcher, merged_state)
 
         patch_entry = result.patches[key][0]
-        patch_tensor = patch_entry[1][1]
+        patch_tensor = patch_entry[1][1][0]
         assert patch_tensor.dtype == torch.float32
 
     # AC: @exit-patch-install ac-4
@@ -103,7 +103,7 @@ class TestInstallMergedPatches:
         result = install_merged_patches(patcher, merged_state)
 
         patch_entry = result.patches[key][0]
-        patch_tensor = patch_entry[1][1]
+        patch_tensor = patch_entry[1][1][0]
         assert patch_tensor.dtype == torch.bfloat16
 
     def test_handles_multiple_keys(self, mock_model_patcher: MockModelPatcher):

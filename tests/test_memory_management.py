@@ -322,7 +322,7 @@ class TestCpuOnlyPatches:
         install_merged_patches(mock_patcher, merged_state)
 
         # Verify patches are CPU tensors
-        for key, (patch_type, tensor) in patches_received.items():
+        for key, (patch_type, (tensor,)) in patches_received.items():
             assert tensor.device == torch.device("cpu")
 
     def test_chunked_evaluation_returns_cpu_tensors(self):
@@ -375,7 +375,7 @@ class TestCpuOnlyPatches:
 
         install_merged_patches(mock_patcher, merged_state)
 
-        for key, (patch_type, tensor) in patches_received.items():
+        for key, (patch_type, (tensor,)) in patches_received.items():
             assert tensor.dtype == torch.bfloat16
 
 
