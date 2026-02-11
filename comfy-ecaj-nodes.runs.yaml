@@ -89,7 +89,7 @@ runs:
   - _ulid: 01KH50QDZKY91JSHEXR5BGW4V2
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 6
     started_at: 2026-02-11T00:13:27.923Z
     step_results:
@@ -109,5 +109,11 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-11T00:13:52.771Z
-        completed_at: 2026-02-11T00:13:52.771Z
+        completed_at: 2026-02-11T00:14:05.181Z
+        notes: Searched specs, tasks, inbox - none of the friction points are tracked. Points 2-4 are
+          kynetic-spec upstream issues. Points 1 and 5 are local/process.
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-11T00:14:05.181Z
+        completed_at: 2026-02-11T00:14:05.181Z
     initiated_by: "@claude"
