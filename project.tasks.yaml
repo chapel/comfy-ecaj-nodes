@@ -1096,7 +1096,7 @@
   type: task
   spec_ref: "@per-block-control"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-block-config-type"
@@ -1142,6 +1142,14 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T04:26:48.695Z
+  closed_reason: "Merged in PR #19. Implemented per-block control with BLOCK_CONFIG custom ComfyUI
+    type. Created WIDENBlockConfigSDXLNode (7 block group sliders: IN00-02, IN03-05, IN06-08, MID,
+    OUT00-02, OUT03-05, OUT06-08) and WIDENBlockConfigZImageNode (8 block group sliders: L00-04
+    through L25-29, noise_refiner, context_refiner). Each slider is FLOAT 0.0-2.0 with step 0.05.
+    Added optional BLOCK_CONFIG input to WIDENLoRANode and WIDENMergeNode for fan-out support. All 3
+    ACs verified: AC-1 (no block_config = pre-block-control behavior), AC-2 (architecture-specific
+    sliders 0.0-2.0), AC-3 (fan-out to multiple consumers). 22 tests pass."
 - _ulid: 01KH4HA48PV4PF188MY0H239GA
   slugs:
     - implement-block-config-type
