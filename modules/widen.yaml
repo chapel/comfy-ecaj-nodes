@@ -473,11 +473,11 @@ features:
     title: Batched Pipeline Executor
     type: feature
     tags: []
-    description: |
-      OpSignature-based parameter grouping and batched GPU evaluation.
-      Groups parameters by (affecting_sets, shape, ndim), computes optimal
-      batch sizes based on free VRAM, applies LoRAs via torch.bmm, and
-      handles OOM backoff. Ported from merge-router lora_chain_merge.py.
+    description: OpSignature-based parameter grouping and batched GPU evaluation. Groups parameters by
+      (shape, ndim) for maximum batch utilization. Per-set LoRA filtering is handled by the loader
+      at evaluation time, not at the grouping stage. Computes optimal batch sizes based on free
+      VRAM, applies LoRAs via torch.bmm, and handles OOM backoff. Ported from merge-router
+      lora_chain_merge.py.
     acceptance_criteria:
       - id: ac-1
         given: a set of parameter keys with varying shapes
