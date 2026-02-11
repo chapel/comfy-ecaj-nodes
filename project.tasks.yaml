@@ -1038,6 +1038,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.334Z
+  started_at: 2026-02-11T04:08:31.101Z
   notes:
     - _ulid: 01KH4HA486XCQMBVVXJ4R3TJHM
       created_at: 2026-02-10T19:44:03.334Z
@@ -1071,9 +1072,19 @@
         teardown, GPU tensor leak verification. This task reviews lib/executor.py and nodes/exit.py
         to add the ~8 cleanup points from merge-router's pattern."
       supersedes: null
+    - _ulid: 01KH5EBDACFVETM2W1E5VQJE72
+      created_at: 2026-02-11T04:11:34.092Z
+      author: "@claude"
+      content: Implemented GPU memory management with all 5 ACs covered. Added gc.collect() and
+        torch.cuda.empty_cache() calls per-chunk in lib/executor.py:chunked_evaluation (AC-1) and
+        between OpSignature groups in nodes/exit.py:execute (AC-2). Verified existing loader cleanup
+        pattern frees delta caches (AC-3). Verified install_merged_patches ensures CPU-only patches
+        with correct dtype (AC-4). compute_batch_size already provides conservative batch sizing
+        within VRAM bounds (AC-5). Created tests/test_memory_management.py with 20 tests covering
+        all ACs. 352 total tests pass, ruff clean.
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T04:08:31.101Z
 - _ulid: 01KH4HA48ERX1APFPSJS5E1Y7F
   slugs:
     - implement-per-block-control
