@@ -174,8 +174,19 @@ runs:
   - _ulid: 01KH5AD4B7MSMT0VFW7Y9BTE17
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-11T03:02:36.135Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-11T03:02:36.135Z
+        completed_at: 2026-02-11T03:02:53.123Z
+        notes: Session reviewed. Implementation was straightforward - clear spec, good existing patterns to
+          follow. Minor one-off issue (tried wrong CLI command) was user error, not systemic. No
+          high-confidence friction to capture.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-11T03:02:53.123Z
+        completed_at: 2026-02-11T03:02:53.123Z
     initiated_by: "@claude"
