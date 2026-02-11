@@ -620,6 +620,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.299Z
+  started_at: 2026-02-11T03:05:39.107Z
   notes:
     - _ulid: 01KH4HA473ZK9FSNE9X2012HTK
       created_at: 2026-02-10T19:44:03.299Z
@@ -641,9 +642,19 @@
         to collect all LoRA file paths, compute hashlib.sha256 of (path, mtime, size)
         tuples sorted by path. Return hex digest.
         Files: nodes/exit.py.
+    - _ulid: 01KH5AQ1QPKBHNYK5HPDFVY9QX
+      created_at: 2026-02-11T03:08:01.142Z
+      author: "@claude"
+      content: "Implemented install_merged_patches() helper and IS_CHANGED classmethod.
+        install_merged_patches clones ModelPatcher, builds set patches with diffusion_model. prefix,
+        transfers tensors to CPU and casts to base dtype. IS_CHANGED walks recipe tree to collect
+        LoRA paths, computes SHA-256 hash from (path, mtime, size) tuples for cache key. All 6 ACs
+        covered by 26 tests: AC-1 (clone and set patches), AC-2 (diffusion_model. prefix), AC-3 (CPU
+        transfer), AC-4 (dtype matching), AC-5 (identical hash on no changes), AC-6 (different hash
+        on modifications). All 185 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T03:05:39.107Z
 - _ulid: 01KH4HA47BN0SVNJWSRGXBNJ2W
   slugs:
     - implement-widen-core-algorithm
