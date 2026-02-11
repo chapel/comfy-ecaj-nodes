@@ -1,0 +1,273 @@
+{
+  "generated_at": "2026-02-11T03:41:01.790Z",
+  "branch": "feat/exit-batched-eval",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-11T03:41:01.790Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KH4HA46X",
+      "title": "Implement Exit Batched Evaluation",
+      "started_at": "2026-02-11T03:36:17.464Z",
+      "priority": 2,
+      "spec_ref": "@exit-batched-eval",
+      "note_count": 3,
+      "last_note_at": "2026-02-11T03:39:33.086Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KH4HA46X",
+      "task_title": "Implement Exit Batched Evaluation",
+      "task_status": "pending_review",
+      "note_ulid": "01KH5CGS",
+      "created_at": "2026-02-11T03:39:33.086Z",
+      "author": "@claude",
+      "content": "Implemented evaluate_recipe() tree walker in lib/executor.py. Function dispatches on recipe node type: RecipeCompose→merge_weights_batched (AC-1), RecipeLoRA→filter_delta_batched (AC-2), chained RecipeMerge→recursive evaluation (AC-3). Results stay on GPU (AC-4). Backbone override passed to WIDEN functions when RecipeMerge.backbone is not None (AC-5). Added 13 tests covering all 5 ACs with MockLoRALoader and MockWIDEN fixtures. All 269 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA46P",
+      "task_title": "Implement Exit Recipe Analysis",
+      "task_status": "completed",
+      "note_ulid": "01KH5C3X",
+      "created_at": "2026-02-11T03:32:31.805Z",
+      "author": "@claude",
+      "content": "Implemented exit recipe analysis in lib/analysis.py with pure torch/stdlib (no ComfyUI imports). Created AnalysisResult dataclass with model_patcher, arch, set_affected map, loader, and affected_keys. Implemented _walk_to_base() for AC-1, _collect_lora_sets() with object identity-based set IDs for AC-2, architecture loader selection via get_loader() for AC-3, affected-key map tracking during load for AC-4, get_keys_to_process() for AC-5, and FileNotFoundError with context for AC-6. Added 22 tests covering all 6 ACs. All 258 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA47M",
+      "task_title": "Implement Architecture-Specific LoRA Loaders",
+      "task_status": "completed",
+      "note_ulid": "01KH5BKS",
+      "created_at": "2026-02-11T03:23:42.722Z",
+      "author": "@claude",
+      "content": "Implemented architecture-specific LoRA loaders with pluggable registry design. Created LoRALoader ABC in lib/lora/base.py with load(), affected_keys, get_delta_specs(), cleanup() interface. Implemented SDXLLoader for kohya/A1111 LoRA format with key mapping. Implemented ZImageLoader with QKV fusing support (to_q/to_k/to_v → fused qkv.weight). Created LOADER_REGISTRY in lib/lora/__init__.py for pluggable architecture selection. All 4 ACs covered by 21 tests: AC-1 (architecture selection/key mapping), AC-2 (DeltaSpec production), AC-3 (pluggable design), AC-4 (interface contract). All 236 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA47F",
+      "task_title": "Implement Batched Pipeline Executor",
+      "task_status": "completed",
+      "note_ulid": "01KH5B4X",
+      "created_at": "2026-02-11T03:15:35.069Z",
+      "author": "@claude",
+      "content": "Implemented batched pipeline executor primitives in lib/executor.py. Created OpSignature (frozen dataclass for parameter grouping by shape/affecting_sets), DeltaSpec (LoRA delta specification), compile_batch_groups (groups keys by OpSignature), compute_batch_size (targets 70% free VRAM), apply_lora_batch_gpu (torch.bmm for standard LoRA, torch.kron for LoKr), and chunked_evaluation (OOM backoff wrapper with CPU result transfer and dtype matching). All 7 ACs covered by 30 tests: AC-1 (grouping), AC-2 (bmm), AC-3 (70% VRAM), AC-4 (OOM backoff), AC-5 (CPU results), AC-6 (dtype matching), AC-7 (LoKr kron). All 215 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA473",
+      "task_title": "Implement Exit Patch Installation",
+      "task_status": "completed",
+      "note_ulid": "01KH5AQ1",
+      "created_at": "2026-02-11T03:08:01.142Z",
+      "author": "@claude",
+      "content": "Implemented install_merged_patches() helper and IS_CHANGED classmethod. install_merged_patches clones ModelPatcher, builds set patches with diffusion_model. prefix, transfers tensors to CPU and casts to base dtype. IS_CHANGED walks recipe tree to collect LoRA paths, computes SHA-256 hash from (path, mtime, size) tuples for cache key. All 6 ACs covered by 26 tests: AC-1 (clone and set patches), AC-2 (diffusion_model. prefix), AC-3 (CPU transfer), AC-4 (dtype matching), AC-5 (identical hash on no changes), AC-6 (different hash on modifications). All 185 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA46X",
+      "task_title": "Implement Exit Batched Evaluation",
+      "task_status": "pending_review",
+      "note_ulid": "01KH4J3H",
+      "created_at": "2026-02-10T19:57:55.717Z",
+      "author": "@claude",
+      "content": "NF-6 boundary clarification: This task implements the RECIPE TREE WALKER in lib/executor.py — the evaluate_node_batched() function (~line 850 in merge-router scripts/lora_chain_merge.py) adapted for recipe dataclasses. It dispatches to primitives from @implement-batched-pipeline-executor (OpSignature grouping, _apply_lora_set_batched_gpu, compute_batch_size) and WIDEN functions from @implement-widen-core-algorithm (filter_delta_batched, merge_weights_batched). This task is the glue between recipe traversal and the batched primitives. Also handles backbone override: when RecipeMerge.backbone is not None, pass it as the importance reference to WIDEN functions instead of the base tensor."
+    },
+    {
+      "task_ref": "01KH4HA46X",
+      "task_title": "Implement Exit Batched Evaluation",
+      "task_status": "pending_review",
+      "note_ulid": "01KH4HA4",
+      "created_at": "2026-02-10T19:44:03.293Z",
+      "author": "@claude",
+      "content": "Implementation notes:\n\nThis is the inner evaluation loop in lib/executor.py. For each OpSignature\ngroup, for each chunk of B keys: stack base tensors to GPU, walk recipe\ntree recursively. Tree walker dispatches on recipe node type: RecipeMerge\nwith RecipeCompose target -> evaluate each branch then call\nwiden.merge_weights_batched() (or filter_delta_batched if single branch).\nRecipeMerge with RecipeLoRA target -> call _apply_lora_set_batched_gpu()\nto get delta then widen.filter_delta_batched(). Chain: if RecipeMerge.base\nis another RecipeMerge, recurse on inner merge first. Backbone: use\nRecipeMerge.backbone if not None, else use base tensor. Port recursive\nevaluation from merge-router evaluate_node_batched() (~lines 850-950 of\nscripts/lora_chain_merge.py), adapting from config dict traversal to\nrecipe dataclass traversal.\nFiles: lib/executor.py.\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [
+    {
+      "ref": "01KH4HA47S",
+      "title": "Implement SDXL LoRA Loader",
+      "priority": 2,
+      "spec_ref": "@sdxl-loader",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA47Z",
+      "title": "Implement Z-Image LoRA Loader",
+      "priority": 2,
+      "spec_ref": "@zimage-loader",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA48P",
+      "title": "Implement Block Config Type",
+      "priority": 3,
+      "spec_ref": "@block-config-type",
+      "tags": []
+    },
+    {
+      "ref": "01KH508VE1",
+      "title": "Implement ComfyUI Mocking and Fixtures",
+      "priority": 3,
+      "spec_ref": "@comfyui-mocking",
+      "tags": []
+    }
+  ],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KH4HA46P",
+      "title": "Implement Exit Recipe Analysis",
+      "completed_at": "2026-02-11T03:35:17.741Z",
+      "closed_reason": "Merged in PR #12. Implemented exit recipe analysis in lib/analysis.py with all 6 ACs covered: tree walk to RecipeBase (AC-1), object identity-based set ID assignment (AC-2), architecture loader selection (AC-3), affected-key map tracking (AC-4), key filtering for processing (AC-5), and FileNotFoundError with context (AC-6). 22 tests verify all acceptance criteria."
+    },
+    {
+      "ref": "01KH4HA47M",
+      "title": "Implement Architecture-Specific LoRA Loaders",
+      "completed_at": "2026-02-11T03:26:45.215Z",
+      "closed_reason": "Merged in PR #11. Implemented architecture-specific LoRA loaders with pluggable registry design. Created LoRALoader ABC in lib/lora/base.py with load(), affected_keys, get_delta_specs(), cleanup() interface. Implemented SDXLLoader for kohya/A1111 format and ZImageLoader with QKV fusing support. All 4 ACs covered with 21 tests: AC-1 (architecture selection/key mapping), AC-2 (DeltaSpec production), AC-3 (pluggable design), AC-4 (interface contract)."
+    },
+    {
+      "ref": "01KH4HA47F",
+      "title": "Implement Batched Pipeline Executor",
+      "completed_at": "2026-02-11T03:18:03.688Z",
+      "closed_reason": "Merged in PR #10. Implemented batched pipeline executor primitives: OpSignature (parameter grouping), DeltaSpec (LoRA delta specs), compile_batch_groups (shape/affecting_sets grouping), compute_batch_size (70% VRAM targeting), apply_lora_batch_gpu (torch.bmm for standard LoRA, torch.kron for LoKr), and chunked_evaluation (OOM backoff wrapper). All 7 ACs covered by 30 tests."
+    },
+    {
+      "ref": "01KH4HA473",
+      "title": "Implement Exit Patch Installation",
+      "completed_at": "2026-02-11T03:10:24.420Z",
+      "closed_reason": "Merged in PR #9. Implemented install_merged_patches() helper with ModelPatcher cloning, diffusion_model. key prefixing, CPU transfer, and base dtype matching. Added IS_CHANGED classmethod using SHA-256 hash of LoRA file (path, mtime, size) tuples for cache invalidation. All 6 acceptance criteria covered by 26 tests."
+    },
+    {
+      "ref": "01KH4HA46D",
+      "title": "Implement Merge Node",
+      "completed_at": "2026-02-11T03:04:40.091Z",
+      "closed_reason": "Merged in PR #8. Implemented Merge node with base/target type validation. merge() validates base is RecipeBase or RecipeMerge (rejects RecipeLoRA/RecipeCompose with helpful error message suggesting Entry node or Merge output). All 6 ACs covered by 23 tests: AC-1 (RecipeMerge with fields), AC-2 (no backbone defaults None), AC-3 (backbone stored), AC-4 (merge chaining), AC-5 (invalid base rejection), AC-6 (t_factor -1.0 preserved). All tests pass, ruff clean."
+    },
+    {
+      "ref": "01KH4HA46A",
+      "title": "Implement Compose Node",
+      "completed_at": "2026-02-11T02:58:53.235Z",
+      "closed_reason": "Merged in PR #7. Implemented Compose node that accumulates branches for WIDEN merging. Uses RecipeCompose.with_branch() for persistent semantics. Validates branch types (accepts RecipeLoRA, RecipeCompose, RecipeMerge; rejects raw RecipeBase with helpful error). All 4 ACs covered by 17 tests."
+    },
+    {
+      "ref": "01KH4HA467",
+      "title": "Implement LoRA Node",
+      "completed_at": "2026-02-11T02:54:03.844Z",
+      "closed_reason": "Merged in PR #6. Implemented LoRA node with folder_paths dropdown, RecipeLoRA output with path/strength tuples, prev chaining for LoRA sets, and zero-strength preservation. All 5 ACs have test coverage (12 tests total)."
+    },
+    {
+      "ref": "01KH4HA463",
+      "title": "Implement Entry Node",
+      "completed_at": "2026-02-11T02:49:00.440Z",
+      "closed_reason": "Merged in PR #5. Implemented WIDEN Entry Node with architecture detection (SDXL, Z-Image supported; Flux/Qwen detected but unsupported). All 5 ACs covered by 17 tests. No GPU memory allocation or tensor copying."
+    },
+    {
+      "ref": "01KH4HA47B",
+      "title": "Implement WIDEN Core Algorithm",
+      "completed_at": "2026-02-11T02:43:54.707Z",
+      "closed_reason": "Merged in PR #4. Implemented WIDEN core algorithm port from merge-router with 5 modules (numerical_config.py, sparsity.py, ranking.py, divergence.py, widen.py). All 9 ACs covered with 32 tests: filter_delta zeros low-importance (AC-1), merge_weights routes via softmax (AC-2), batched variants match per-key (AC-3), no ComfyUI imports (AC-4), deterministic behavior (AC-5), fp16/bf16 use fp32 (AC-6), default config values (AC-7), filter_delta_batched fallback (AC-8), merge_weights_batched fallback (AC-9)."
+    },
+    {
+      "ref": "01KH4HA460",
+      "title": "Implement Recipe Type System",
+      "completed_at": "2026-02-11T02:32:59.881Z",
+      "closed_reason": "Merged in PR #3. Implemented recipe type system with frozen dataclasses, tuple fields, RecipeCompose.with_branch() for persistent tree semantics, RecipeNode type alias, and __all__ exports. All 5 ACs have test coverage: AC-1 (frozen), AC-2 (persistent semantics), AC-3 (no GPU tensors), AC-4 (importable/constructible), AC-5 (WIDEN wire connections)."
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "f33b06d",
+      "full_hash": "f33b06dc61467f29c3a3017d1c65492715dff3b7",
+      "date": "2026-02-11T03:39:49.000Z",
+      "message": "feat: implement exit batched evaluation with recipe tree walker",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "b73a1fd",
+      "full_hash": "b73a1fd28bf9fc4ef6ad226b894d8fe170a71a37",
+      "date": "2026-02-11T03:35:09.000Z",
+      "message": "Merge pull request #12 from chapel/feat/exit-recipe-analysis",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "c082af1",
+      "full_hash": "c082af122eadadca00d5d3c37d0d4cebd1c5cc12",
+      "date": "2026-02-11T03:32:52.000Z",
+      "message": "feat: implement exit recipe analysis with tree walk and set ID assignment",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "e329863",
+      "full_hash": "e3298636584fa4ad6a2776348377c3daf46eb16d",
+      "date": "2026-02-11T03:26:34.000Z",
+      "message": "Merge pull request #11 from chapel/feat/lora-loaders",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "7173206",
+      "full_hash": "7173206149ce7d8dcdd2154bfaa89e03d0225755",
+      "date": "2026-02-11T03:23:53.000Z",
+      "message": "feat: implement architecture-specific LoRA loaders",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "19d12db",
+      "full_hash": "19d12dbf1999c2a7b636d8c119f865892aa8bd91",
+      "date": "2026-02-11T03:17:55.000Z",
+      "message": "Merge pull request #10 from chapel/feat/batched-executor",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "b20b103",
+      "full_hash": "b20b103bc12fa4d7ebb0acd7256a2ef8073b09e2",
+      "date": "2026-02-11T03:15:51.000Z",
+      "message": "feat: implement batched pipeline executor primitives",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "2f111b3",
+      "full_hash": "2f111b3b3741d7c9bede30d314153b467945365f",
+      "date": "2026-02-11T03:10:13.000Z",
+      "message": "Merge pull request #9 from chapel/feat/exit-patch-install",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "27d3fe8",
+      "full_hash": "27d3fe848dd56142b3fbb63f52bff114fa216945",
+      "date": "2026-02-11T03:08:11.000Z",
+      "message": "feat: implement exit patch installation with IS_CHANGED caching",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "e100108",
+      "full_hash": "e100108b2b10782eb2f31a1af54b9e6326259ceb",
+      "date": "2026-02-11T03:04:26.000Z",
+      "message": "Merge pull request #8 from chapel/feat/merge-node",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": false,
+    "staged": [],
+    "unstaged": [],
+    "untracked": [
+      "uv.lock"
+    ]
+  },
+  "inbox_items": [],
+  "stats": {
+    "total_tasks": 25,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 4,
+    "blocked": 0,
+    "completed": 14,
+    "inbox_items": 0
+  }
+}
