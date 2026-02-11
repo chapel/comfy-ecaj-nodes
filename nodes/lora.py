@@ -64,6 +64,4 @@ class WIDENLoRANode:
             # First in chain: single-element tuple
             loras = (new_lora,)
 
-        result = RecipeLoRA(loras=loras, block_config=block_config)
-        print(f"[WIDEN LoRA] loras={len(result.loras)}, path={lora_name}")
-        return (result,)
+        return (RecipeLoRA(loras=loras, block_config=block_config),)

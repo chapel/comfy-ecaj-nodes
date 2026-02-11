@@ -274,13 +274,11 @@ class WIDENExitNode:
         Raises:
             ValueError: If recipe tree structure is invalid
         """
-        print(f"[WIDEN Exit] execute called, widen type={type(widen).__name__}")
         # AC-2: Validate recipe tree structure
         _validate_recipe_tree(widen)
 
         # Quick check: must end in RecipeMerge for actual merging
         if isinstance(widen, RecipeBase):
-            print("[WIDEN Exit] RecipeBase only — returning clone (no LoRAs)")
             return (widen.model_patcher.clone(),)  # type: ignore[attr-defined]
 
         if not isinstance(widen, RecipeMerge):
@@ -293,11 +291,7 @@ class WIDENExitNode:
         # Build resolver that searches all ComfyUI LoRA directories
         lora_path_resolver = _build_lora_resolver()
 
-        print("[WIDEN Exit] analyzing recipe...")
         analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
-        n_sets = len(analysis.set_affected)
-        n_keys = len(analysis.affected_keys)
-        print(f"[WIDEN Exit] analysis done: {n_sets} sets, {n_keys} keys")
 
         try:
             model_patcher = analysis.model_patcher
