@@ -1,0 +1,213 @@
+{
+  "generated_at": "2026-02-11T02:24:46.185Z",
+  "branch": "main",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-11T02:24:46.185Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KH4H1VQF",
+      "title": "Implement ComfyUI Packaging",
+      "started_at": "2026-02-11T01:44:24.977Z",
+      "priority": 1,
+      "spec_ref": "@comfyui-packaging",
+      "note_count": 2,
+      "last_note_at": "2026-02-11T01:44:34.803Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    },
+    {
+      "ref": "01KH4H1VQK",
+      "title": "Implement Testing Infrastructure",
+      "started_at": "2026-02-11T01:44:45.085Z",
+      "priority": 1,
+      "spec_ref": "@testing-infrastructure",
+      "note_count": 3,
+      "last_note_at": "2026-02-11T01:44:56.926Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    },
+    {
+      "ref": "01KH508VF",
+      "title": "Implement CI Pipeline",
+      "started_at": "2026-02-11T02:20:48.141Z",
+      "priority": 3,
+      "spec_ref": "@ci-pipeline",
+      "note_count": 2,
+      "last_note_at": "2026-02-11T02:21:10.806Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KH508VF",
+      "task_title": "Implement CI Pipeline",
+      "task_status": "pending_review",
+      "note_ulid": "01KH5819",
+      "created_at": "2026-02-11T02:21:10.806Z",
+      "author": "@claude",
+      "content": "Added .github/workflows/ci.yml with two jobs: lint (ruff via astral-sh/ruff-action) and test (pytest with CPU torch via uv). Triggers on push to main and all PRs."
+    },
+    {
+      "task_ref": "01KH4H1VQK",
+      "task_title": "Implement Testing Infrastructure",
+      "task_status": "pending_review",
+      "note_ulid": "01KH55YY",
+      "created_at": "2026-02-11T01:44:56.926Z",
+      "author": "@claude",
+      "content": "Created tests/conftest.py with: MockModelPatcher (4x4 float32 tensors, SDXL-like keys, model_state_dict/clone/add_patches/get_key_patches/patches_uuid), recipe fixtures (mock_model_patcher, recipe_base, recipe_single_lora, recipe_multi_lora, recipe_compose, recipe_chain), autouse ComfyUI API mocks (folder_paths, comfy, comfy.utils, comfy.model_management). Created 3 test files: test_packaging.py (5 smoke tests for node attributes/CATEGORY), test_recipe.py (13 tests for frozen/tuple/structure), test_mock_model_patcher.py (15 tests for mock fidelity). All 33 tests pass without ComfyUI, ruff clean."
+    },
+    {
+      "task_ref": "01KH4H1VQF",
+      "task_title": "Implement ComfyUI Packaging",
+      "task_status": "pending_review",
+      "note_ulid": "01KH55Y8",
+      "created_at": "2026-02-11T01:44:34.803Z",
+      "author": "@claude",
+      "content": "Fixed CATEGORY casing ECAJ/merge -> ecaj/merge in all 5 node stubs. Updated pyproject.toml: empty runtime deps, dev deps (pytest/ruff/torch), pytest config with importlib mode, ruff config (line-length=99, py310, isort+pyflakes+pyupgrade). Made requirements.txt comment-only. Added setuptools package discovery for flat layout. Made __init__.py safe to import outside ComfyUI (try/except for relative imports). Added root conftest.py with collect_ignore."
+    },
+    {
+      "task_ref": "01KH4H1VQK",
+      "task_title": "Implement Testing Infrastructure",
+      "task_status": "pending_review",
+      "note_ulid": "01KH54VW",
+      "created_at": "2026-02-11T01:25:48.545Z",
+      "author": "@claude",
+      "content": "Dependencies cleared (was: @implement-comfyui-mocking-and-fixtures, @implement-node-graph-testing, @implement-ci-pipeline)"
+    },
+    {
+      "task_ref": "01KH4DWQ",
+      "task_title": "Port design doc into kspec specs and tasks",
+      "task_status": "completed",
+      "note_ulid": "01KH4E5K",
+      "created_at": "2026-02-10T18:49:09.366Z",
+      "author": "@claude",
+      "content": "Design doc moved to docs/design.md in this project (copied from ~/Projects/merge-router/docs/comfyui-node-pack-design.md). References to merge-router source files now use full paths. Project structure section updated to comfy-ecaj-nodes/."
+    },
+    {
+      "task_ref": "01KH4DWQ",
+      "task_title": "Port design doc into kspec specs and tasks",
+      "task_status": "completed",
+      "note_ulid": "01KH4E0P",
+      "created_at": "2026-02-10T18:46:28.279Z",
+      "author": "@claude",
+      "content": "What NOT to port as specs: merge.py JSON config runner, CLI argument parsing, safetensors save logic, training infrastructure, Nu scripts. These are replaced by the ComfyUI node graph. The design doc §5 has the full port/no-port list."
+    },
+    {
+      "task_ref": "01KH4DWQ",
+      "task_title": "Port design doc into kspec specs and tasks",
+      "task_status": "completed",
+      "note_ulid": "01KH4E0D",
+      "created_at": "2026-02-10T18:46:19.705Z",
+      "author": "@claude",
+      "content": "User preference: this should be done as a design session with review checkpoints — present spec decomposition incrementally for approval, not all at once. Use /spec-plan workflow. Stub node files and recipe dataclasses already exist in the project (nodes/*.py, lib/recipe.py) which can inform AC writing."
+    },
+    {
+      "task_ref": "01KH4DWQ",
+      "task_title": "Port design doc into kspec specs and tasks",
+      "task_status": "completed",
+      "note_ulid": "01KH4E05",
+      "created_at": "2026-02-10T18:46:10.959Z",
+      "author": "@claude",
+      "content": "Suggested module structure for specs: (1) nodes module — Entry, LoRA, Compose, Merge, Exit node specs with ACs for each. (2) core-algorithm module — WIDEN, divergence, ranking, numerical config (ported from merge-router). (3) executor module — batched pipeline, OpSignature grouping, GPU LoRA apply, OOM backoff. (4) lora-loading module — architecture-specific loaders (SDXL, Z-Image, Qwen), key mapping, QKV fusing. (5) block-config module — per-block control, architecture-specific Block Config nodes, BLOCK_CONFIG type."
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [
+    {
+      "ref": "01KH4HA460",
+      "title": "Implement Recipe Type System",
+      "priority": 1,
+      "spec_ref": "@recipe-system",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA47B",
+      "title": "Implement WIDEN Core Algorithm",
+      "priority": 1,
+      "spec_ref": "@widen-core",
+      "tags": []
+    }
+  ],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KH4DWQ",
+      "title": "Port design doc into kspec specs and tasks",
+      "completed_at": "2026-02-10T21:40:56.673Z",
+      "closed_reason": null
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "a442dd5",
+      "full_hash": "a442dd5ace3379f79dbac2e29fc17a48f7cda2cf",
+      "date": "2026-02-11T02:23:55.000Z",
+      "message": "Merge pull request #2 from chapel/feat/ci-pipeline",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "29e14c3",
+      "full_hash": "29e14c3c6893cc3b582042d0dbd724aa6299e5a4",
+      "date": "2026-02-11T02:21:29.000Z",
+      "message": "feat: add GitHub Actions CI workflow",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "8d95a47",
+      "full_hash": "8d95a47c81a0354210ddccebdb6d4ae80b474377",
+      "date": "2026-02-11T02:17:30.000Z",
+      "message": "feat: add packaging config and testing infrastructure (#1)",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "902d7fc",
+      "full_hash": "902d7fcc689deedd83eb66e0ed372b478d4dc173",
+      "date": "2026-02-11T01:03:37.000Z",
+      "message": "feat: add ralph loop workflow hooks and guard scripts",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ceca80c",
+      "full_hash": "ceca80c50b6e67c186f9e2b6a5fb646497f7b1c1",
+      "date": "2026-02-11T00:41:24.000Z",
+      "message": "docs: add WIP readme",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "f01cdc1",
+      "full_hash": "f01cdc12c8afcbe8db70baacc1b0ddca757ef1b4",
+      "date": "2026-02-11T00:26:14.000Z",
+      "message": "feat: scaffold comfy-ecaj-nodes with WIDEN merge node stubs and recipe system",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "c94385c",
+      "full_hash": "c94385c5606761f05a41b9acff32bddf01e74dec",
+      "date": "2026-02-10T10:21:10.000Z",
+      "message": "chore: add .kspec/ to .gitignore for shadow branch",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": true,
+    "staged": [],
+    "unstaged": [],
+    "untracked": []
+  },
+  "inbox_items": [],
+  "stats": {
+    "total_tasks": 25,
+    "in_progress": 0,
+    "pending_review": 3,
+    "ready": 2,
+    "blocked": 0,
+    "completed": 1,
+    "inbox_items": 0
+  }
+}

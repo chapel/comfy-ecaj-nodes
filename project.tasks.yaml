@@ -200,7 +200,7 @@
   type: task
   spec_ref: "@recipe-system"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -240,6 +240,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T02:32:59.881Z
+  closed_reason: "Merged in PR #3. Implemented recipe type system with frozen dataclasses, tuple
+    fields, RecipeCompose.with_branch() for persistent tree semantics, RecipeNode type alias, and
+    __all__ exports. All 5 ACs have test coverage: AC-1 (frozen), AC-2 (persistent semantics), AC-3
+    (no GPU tensors), AC-4 (importable/constructible), AC-5 (WIDEN wire connections)."
 - _ulid: 01KH4HA463BT1D6RF0ZD1DRW2P
   slugs:
     - implement-entry-node
