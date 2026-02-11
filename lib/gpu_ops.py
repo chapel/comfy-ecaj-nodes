@@ -109,10 +109,11 @@ def _compute_deltas(
     group: list[DeltaSpec],
     device: str,
     dtype: torch.dtype,
-) -> list[tuple[int, torch.Tensor]]:
+) -> list[tuple[DeltaSpec, torch.Tensor]]:
     """Compute LoRA deltas for a group of same-rank standard specs.
 
-    Returns list of (key_index, delta_tensor) pairs.
+    Returns list of (spec, delta_tensor) pairs so callers can access
+    spec.key_index, spec.offset, spec.target_shape without a linear search.
 
     Args:
         group: List of DeltaSpec with same rank
@@ -120,7 +121,7 @@ def _compute_deltas(
         dtype: Computation dtype
 
     Returns:
-        List of (key_index, delta) tuples
+        List of (DeltaSpec, delta) tuples
     """
     if len(group) == 1:
         spec = group[0]
@@ -128,7 +129,7 @@ def _compute_deltas(
         down_gpu = spec.down.to(device, dtype=dtype)
         delta = spec.scale * (up_gpu @ down_gpu)
         del up_gpu, down_gpu
-        return [(spec.key_index, delta)]
+        return [(spec, delta)]
     else:
         ups = torch.stack([s.up for s in group]).to(device, dtype=dtype)
         downs = torch.stack([s.down for s in group]).to(device, dtype=dtype)
@@ -137,7 +138,7 @@ def _compute_deltas(
         )
         deltas = torch.bmm(ups, downs) * scales.view(-1, 1, 1)
         del ups, downs, scales
-        return [(spec.key_index, deltas[i]) for i, spec in enumerate(group)]
+        return [(spec, deltas[i]) for i, spec in enumerate(group)]
 
 
 def apply_lora_batch_gpu(
@@ -201,8 +202,8 @@ def apply_lora_batch_gpu(
             # Use DeltaSpec.offset as source of truth for slice placement
             # when available; fall back to hardcoded hidden // 3 otherwise
             pairs = _compute_deltas(group, device, dtype)
-            for key_index, delta in pairs:
-                spec = next(s for s in group if s.key_index == key_index)
+            for spec, delta in pairs:
+                key_index = spec.key_index
                 if spec.offset is not None:
                     start, length = spec.offset
                     result[key_index, start : start + length] += delta
@@ -220,11 +221,10 @@ def apply_lora_batch_gpu(
             # AC: @batched-executor ac-2
             # Standard LoRA: deduplicated single/batched path
             pairs = _compute_deltas(group, device, dtype)
-            for key_index, delta in pairs:
-                spec = next(s for s in group if s.key_index == key_index)
+            for spec, delta in pairs:
                 if spec.target_shape is not None:
                     delta = delta.view(spec.target_shape)
-                result[key_index] += delta
+                result[spec.key_index] += delta
                 del delta
 
     return result
@@ -271,7 +271,10 @@ def chunked_evaluation(
         try:
             # Stack base tensors and move to GPU
             base_stack = torch.stack([base_tensors[k].cpu() for k in chunk_keys])
-            base_gpu = base_stack.to(device, dtype=dtype)
+            if device != "cpu" and base_stack.numel() > 65536:
+                base_gpu = base_stack.pin_memory().to(device, dtype=dtype)
+            else:
+                base_gpu = base_stack.to(device, dtype=dtype)
             del base_stack
 
             # Evaluate the chunk
@@ -288,10 +291,10 @@ def chunked_evaluation(
                 results[key] = merged_cpu[i]
 
             # AC: @memory-management ac-1
-            # Free GPU memory after chunk completes and results are on CPU
-            gc.collect()
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
+            # GPU tensors freed via del statements above after results
+            # transfer to CPU. Periodic gc.collect() runs between
+            # OpSignature groups (in exit.py), not per-chunk, to avoid
+            # GPU sync overhead that blocks kernel queuing.
 
         except torch.cuda.OutOfMemoryError:
             # AC: @batched-executor ac-4

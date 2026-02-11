@@ -10,6 +10,7 @@ This module is pure Python with no external dependencies.
 # AC: @lora-block-config ac-1
 """
 
+import functools
 import re
 from collections.abc import Callable
 
@@ -21,6 +22,7 @@ __all__ = [
 ]
 
 
+@functools.lru_cache(maxsize=4096)
 def classify_key_sdxl(key: str) -> str | None:
     """Classify an SDXL parameter key into a block group.
 
@@ -76,6 +78,7 @@ def classify_key_sdxl(key: str) -> str | None:
     return None
 
 
+@functools.lru_cache(maxsize=4096)
 def classify_key_zimage(key: str) -> str | None:
     """Classify a Z-Image/S3-DiT parameter key into a block group.
 
