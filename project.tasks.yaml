@@ -2085,6 +2085,7 @@
     - correctness
   vcs_refs: []
   created_at: 2026-02-11T19:32:25.782Z
+  started_at: 2026-02-11T19:33:55.036Z
   notes:
     - _ulid: 01KH731V18HTSHWJZQ7GT3KYVC
       created_at: 2026-02-11T19:32:34.984Z
@@ -2097,5 +2098,10 @@
         patches or model loading) while others are CPU. Fix: ensure all tensors are moved to CPU
         before stacking, e.g. base_tensors[k].cpu(), or move uniformly to device before stack."
       supersedes: null
+    - _ulid: 01KH736YY6Q847Q475Q6VK7J46
+      created_at: 2026-02-11T19:35:22.823Z
+      author: "@claude"
+      content: "Fix: added .cpu() call in chunked_evaluation torch.stack to normalize mixed-device tensors
+        from model_state_dict(). Added regression test. All 494 tests pass, ruff clean."
+      supersedes: null
   todos: []
-  started_at: 2026-02-11T19:33:55.036Z
