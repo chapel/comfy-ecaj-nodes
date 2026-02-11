@@ -5,9 +5,6 @@ Tests for @merge-block-config acceptance criteria:
 - AC-2: No BLOCK_CONFIG connected means global t_factor applies (backwards compatible)
 """
 
-import torch
-import pytest
-
 from lib.block_classify import (
     classify_key,
     classify_key_sdxl,
@@ -16,7 +13,6 @@ from lib.block_classify import (
 )
 from lib.executor import _get_block_t_factors
 from lib.recipe import BlockConfig, RecipeBase, RecipeLoRA, RecipeMerge
-
 
 # =============================================================================
 # Block Classification Tests
@@ -30,7 +26,8 @@ class TestBlockClassifySDXL:
         """Input blocks 0-2 classify as IN00-02."""
         # AC: @merge-block-config ac-1
         assert classify_key_sdxl("input_blocks.0.0.proj_in.weight") == "IN00-02"
-        assert classify_key_sdxl("input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight") == "IN00-02"
+        key = "input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"
+        assert classify_key_sdxl(key) == "IN00-02"
         assert classify_key_sdxl("input_blocks.2.1.proj_out.weight") == "IN00-02"
 
     def test_input_block_3_to_5(self):
@@ -211,7 +208,9 @@ class TestGetBlockTFactors:
         keys = ["input_blocks.0.0.weight", "middle_block.0.weight", "output_blocks.3.0.weight"]
         default_t = 1.0
 
-        groups = _get_block_t_factors(keys, block_config=None, arch="sdxl", default_t_factor=default_t)
+        groups = _get_block_t_factors(
+            keys, block_config=None, arch="sdxl", default_t_factor=default_t
+        )
 
         # All keys should be in the default t_factor group
         assert len(groups) == 1
@@ -227,7 +226,9 @@ class TestGetBlockTFactors:
         config = BlockConfig(arch="sdxl", block_overrides=(("IN00-02", 0.5),))
         default_t = 1.0
 
-        groups = _get_block_t_factors(keys, block_config=config, arch=None, default_t_factor=default_t)
+        groups = _get_block_t_factors(
+            keys, block_config=config, arch=None, default_t_factor=default_t
+        )
 
         # Without arch, can't classify, so all keys use default
         assert len(groups) == 1
@@ -256,7 +257,9 @@ class TestGetBlockTFactors:
         )
         default_t = 1.0
 
-        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=default_t)
+        groups = _get_block_t_factors(
+            keys, block_config=config, arch="sdxl", default_t_factor=default_t
+        )
 
         # Should have 3 groups: 0.5, 1.2, and 1.0 (default)
         assert len(groups) == 3
@@ -281,7 +284,9 @@ class TestGetBlockTFactors:
         )
         default_t = 1.0
 
-        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=default_t)
+        groups = _get_block_t_factors(
+            keys, block_config=config, arch="sdxl", default_t_factor=default_t
+        )
 
         # Both keys don't match any block, use default
         assert len(groups) == 1
@@ -309,7 +314,9 @@ class TestGetBlockTFactors:
         )
         default_t = 1.0
 
-        groups = _get_block_t_factors(keys, block_config=config, arch="zimage", default_t_factor=default_t)
+        groups = _get_block_t_factors(
+            keys, block_config=config, arch="zimage", default_t_factor=default_t
+        )
 
         assert len(groups) == 4
         assert groups[0.3] == [0]   # L00-04
@@ -403,7 +410,9 @@ class TestBlockConfigEdgeCases:
         config = BlockConfig(arch="sdxl", block_overrides=())
         default_t = 1.0
 
-        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=default_t)
+        groups = _get_block_t_factors(
+            keys, block_config=config, arch="sdxl", default_t_factor=default_t
+        )
 
         # No overrides, all use default
         assert len(groups) == 1
@@ -421,7 +430,9 @@ class TestBlockConfigEdgeCases:
             block_overrides=(("IN00-02", 0.5),),
         )
 
-        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
+        groups = _get_block_t_factors(
+            keys, block_config=config, arch="sdxl", default_t_factor=1.0
+        )
 
         assert len(groups) == 1
         assert groups[0.5] == [0, 1, 2]
@@ -440,7 +451,9 @@ class TestBlockConfigEdgeCases:
         )
 
         # Classify as sdxl - IN00-02 would match if BlockConfig arch matched
-        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
+        groups = _get_block_t_factors(
+            keys, block_config=config, arch="sdxl", default_t_factor=1.0
+        )
 
         # Should still apply the IN00-02 override since we look up by block name
         assert groups[0.5] == [0]
