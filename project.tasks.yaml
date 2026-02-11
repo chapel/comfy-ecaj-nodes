@@ -980,6 +980,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.327Z
+  started_at: 2026-02-11T04:01:28.519Z
   notes:
     - _ulid: 01KH4HA47ZYK7SM6X6WGWT9GZ8
       created_at: 2026-02-10T19:44:03.327Z
@@ -1002,9 +1003,20 @@
         handles patterns like transformer_blocks.0.attn.to_q -> layers.0.attention.qkv
         (with offset for q portion).
         Files: lib/lora/zimage.py.
+    - _ulid: 01KH5DZ7M8RZ57Y5JBMC9ZQPD4
+      created_at: 2026-02-11T04:04:55.048Z
+      author: "@claude"
+      content: "Implemented Z-Image LoRA Loader with complete @zimage-loader AC coverage. Added
+        DeltaSpec.offset field for QKV slice indexing (AC-3). Enhanced _parse_zimage_lora_key() to
+        handle Diffusers key patterns including transformer./diffusion_model. prefixes, LyCORIS
+        format with lycoris_ prefix, and to_out.0→out mapping (AC-2). QKV keys now fuse into single
+        qkv.weight with proper offset tuples: q=(0,3840), k=(3840,3840), v=(7680,3840) (AC-1). Added
+        _normalize_lycoris_key() for underscore→dot conversion preserving compound names. Created
+        tests/test_zimage_loader.py with 20 tests covering all 3 ACs. All 332 tests pass, ruff
+        clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T04:01:28.519Z
 - _ulid: 01KH4HA4865JG16KMN5YXENCYH
   slugs:
     - implement-memory-management
