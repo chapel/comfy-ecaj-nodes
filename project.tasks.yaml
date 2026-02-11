@@ -1938,7 +1938,7 @@
     install_merged_patches correctness, and possible dtype/device mismatches. Test with actual
     ComfyUI runtime."
   spec_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -1950,13 +1950,11 @@
   created_at: 2026-02-11T18:48:14.607Z
   notes: []
   todos: []
-- title: Optimize batched GPU pipeline performance
+  started_at: 2026-02-11T18:48:22.108Z
+- _ulid: 01KH70GQ9YAPG64C3JJVAA1WZ0
+  slugs: []
+  title: Optimize batched GPU pipeline performance
   type: task
-  priority: 3
-  spec_ref: null
-  tags:
-    - performance
-    - gpu
   description: "Performance: batched GPU pipeline is ~2-3x slower than merge-router reference. Key
     bottlenecks: (1) Excessive gc.collect()+empty_cache() after every chunk AND every OpSig group —
     reference only cleans between stages (~60 vs ~30 cleanups). Files: gpu_ops.py:292-294,
@@ -1966,12 +1964,15 @@
     after delta computation. Files: gpu_ops.py:205,224. (4) No pin_memory for async CPU→GPU
     transfers. Priority order: remove per-chunk cleanup (30-40% win), pre-group by block (4x fewer
     groups), pre-build index dict, add pin_memory."
-  _ulid: 01KH70GQ9YAPG64C3JJVAA1WZ0
-  slugs: []
+  spec_ref: null
   status: pending
   blocked_by: []
   depends_on: []
   context: []
+  priority: 3
+  tags:
+    - performance
+    - gpu
   vcs_refs: []
   created_at: 2026-02-11T18:48:16.958Z
   notes: []
