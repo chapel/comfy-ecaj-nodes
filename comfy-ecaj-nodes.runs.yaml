@@ -245,6 +245,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-11T03:33:22.765Z
+    completed_at: 2026-02-11T03:34:12.390Z
     step_results:
       - step_index: 0
         status: completed
@@ -274,4 +275,11 @@ runs:
         notes: Nothing to capture. Session completed successfully with no new friction patterns or notable
           successes beyond the existing documented patterns.
     initiated_by: "@claude"
-    completed_at: 2026-02-11T03:34:12.390Z
+  - _ulid: 01KH5D396JH2GG66S81ENC3XHK
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-11T03:49:39.154Z
+    step_results: []
+    initiated_by: "@claude"
