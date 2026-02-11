@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import hashlib
 import os
 from typing import TYPE_CHECKING
@@ -377,8 +378,15 @@ class WIDENExitNode:
 
                 merged_state.update(group_results)
 
+                # AC: @memory-management ac-2
+                # Cleanup between groups: gc.collect() and empty_cache()
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+
         finally:
-            # Cleanup loader resources
+            # AC: @memory-management ac-3
+            # Cleanup loader resources (delta caches and file handles)
             loader.cleanup()
 
         # Phase 3: Install merged weights as set patches

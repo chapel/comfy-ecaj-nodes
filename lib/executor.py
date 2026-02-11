@@ -10,6 +10,7 @@ This module provides the core primitives for batched GPU evaluation:
 This module is pure torch and stdlib - no ComfyUI imports.
 """
 
+import gc
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -285,6 +286,9 @@ def chunked_evaluation(
     # AC: @batched-executor ac-6
     Output tensors match the base model storage dtype.
 
+    # AC: @memory-management ac-1
+    After chunk completes and results transfer to CPU, GPU tensors are freed.
+
     Args:
         keys: List of parameter keys to evaluate
         base_tensors: Dict of key -> CPU tensor for base weights
@@ -319,9 +323,16 @@ def chunked_evaluation(
             for i, key in enumerate(chunk_keys):
                 results[key] = merged_cpu[i]
 
+            # AC: @memory-management ac-1
+            # Free GPU memory after chunk completes and results are on CPU
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
         except torch.cuda.OutOfMemoryError:
             # AC: @batched-executor ac-4
             # OOM backoff: clear cache and retry with batch_size=1
+            gc.collect()
             torch.cuda.empty_cache()
 
             for key in chunk_keys:
@@ -337,8 +348,16 @@ def chunked_evaluation(
                     del merged_gpu
 
                     results[key] = merged_cpu[0]
+
+                    # AC: @memory-management ac-1
+                    # Free GPU memory after each single-key evaluation in OOM path
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+
                 except torch.cuda.OutOfMemoryError:
                     # Even single-key evaluation failed; propagate
+                    gc.collect()
                     torch.cuda.empty_cache()
                     raise
 
