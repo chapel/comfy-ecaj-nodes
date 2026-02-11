@@ -462,6 +462,37 @@ class TestResultsOnCpu:
         for k, v in results.items():
             assert v.device == torch.device("cpu")
 
+    def test_base_tensors_normalized_to_cpu_before_stack(self):
+        """chunked_evaluation normalizes base_tensors to CPU before stacking.
+
+        Regression: model_state_dict() can return a mix of GPU and CPU tensors.
+        torch.stack requires uniform device, so chunked_evaluation calls .cpu()
+        on each tensor before stacking. Without CUDA we verify .cpu() is a
+        safe no-op for CPU tensors and non-contiguous tensors.
+        """
+        keys = ["k0", "k1"]
+        base = {
+            "k0": torch.randn(4, 4),
+            "k1": torch.randn(8, 4)[::2],  # non-contiguous slice
+        }
+
+        def eval_fn(batch_keys, batch_gpu):
+            return batch_gpu * 2
+
+        results = chunked_evaluation(
+            keys,
+            base,
+            eval_fn,
+            batch_size=2,
+            device="cpu",
+            dtype=torch.float32,
+            storage_dtype=torch.float32,
+        )
+        assert len(results) == 2
+        for k, v in results.items():
+            assert v.device == torch.device("cpu")
+            assert torch.allclose(v, base[k] * 2, atol=1e-5)
+
     def test_results_ready_for_patching(self):
         """Results should be independent tensors suitable for patching."""
         # AC: @batched-executor ac-5

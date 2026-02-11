@@ -270,7 +270,7 @@ def chunked_evaluation(
     for chunk_keys in chunked(keys, batch_size):
         try:
             # Stack base tensors and move to GPU
-            base_stack = torch.stack([base_tensors[k] for k in chunk_keys])
+            base_stack = torch.stack([base_tensors[k].cpu() for k in chunk_keys])
             base_gpu = base_stack.to(device, dtype=dtype)
             del base_stack
 
