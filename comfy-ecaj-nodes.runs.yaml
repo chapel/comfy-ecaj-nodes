@@ -423,7 +423,7 @@ runs:
   - _ulid: 01KH6TZD6XQ04T47G2JSZRW79X
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-11T17:11:26.685Z
     step_results:
@@ -437,5 +437,12 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-11T17:11:44.115Z
-        completed_at: 2026-02-11T17:11:44.115Z
+        completed_at: 2026-02-11T17:12:07.966Z
+        notes: "Identified: (1) Existing friction 01KH5HAK now resolved by this session. (2) Success:
+          detailed handoff docs with root cause analysis. (3) Skipping one-off Python import
+          machinery friction (not systemic)."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-11T17:12:07.966Z
+        completed_at: 2026-02-11T17:12:07.966Z
     initiated_by: "@claude"
