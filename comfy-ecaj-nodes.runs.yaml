@@ -515,7 +515,7 @@ runs:
   - _ulid: 01KH71PG6HTG4P4KD9FTTZ30RE
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-11T19:08:54.865Z
     step_results:
@@ -529,5 +529,13 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-11T19:09:42.359Z
-        completed_at: 2026-02-11T19:09:42.359Z
+        completed_at: 2026-02-11T19:09:50.423Z
+        notes: "Friction: (1) inbox-vs-task confusion — one-off, not systemic. (2) mock divergence from
+          production — already tracked at 01KH6Y5J and observation 01KH6Y61. (3) speculated about
+          precision cause without reading code — one-off. Success: reference comparison debugging
+          highly effective — captured as observation 01KH71QQ. No new untracked items to capture."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-11T19:09:50.423Z
+        completed_at: 2026-02-11T19:09:50.423Z
     initiated_by: "@claude"
