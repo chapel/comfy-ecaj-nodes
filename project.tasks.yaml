@@ -252,7 +252,7 @@
   type: task
   spec_ref: "@entry-node"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
@@ -302,6 +302,10 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T02:49:00.440Z
+  closed_reason: "Merged in PR #5. Implemented WIDEN Entry Node with architecture detection (SDXL,
+    Z-Image supported; Flux/Qwen detected but unsupported). All 5 ACs covered by 17 tests. No GPU
+    memory allocation or tensor copying."
 - _ulid: 01KH4HA46729EXG3GT8QCW2F44
   slugs:
     - implement-lora-node
