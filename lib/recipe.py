@@ -7,12 +7,26 @@ with ComfyUI's caching and graph fan-out. Fields use tuples, not lists.
 from dataclasses import dataclass
 
 __all__ = [
+    "BlockConfig",
     "RecipeBase",
     "RecipeLoRA",
     "RecipeCompose",
     "RecipeMerge",
     "RecipeNode",
 ]
+
+
+@dataclass(frozen=True)
+class BlockConfig:
+    """Per-block weight configuration for LoRA/merge operations.
+
+    Stores architecture identifier and block-level overrides as tuples of pairs.
+    Frozen to maintain immutability guarantees with ComfyUI's caching.
+    """
+
+    arch: str  # Must match RecipeBase.arch at Exit time
+    block_overrides: tuple  # ((block_pattern, float), ...) e.g., (("IN00-02", 0.5), ...)
+    layer_type_overrides: tuple = ()  # ((layer_type, float), ...) for cross-cutting control
 
 
 @dataclass(frozen=True)
@@ -28,6 +42,7 @@ class RecipeLoRA:
     """LoRA node output — one or more LoRAs to apply as a group (a 'set')."""
 
     loras: tuple  # ({"path": str, "strength": float}, ...)
+    block_config: object = None  # BlockConfig or None
 
 
 @dataclass(frozen=True)
@@ -52,6 +67,7 @@ class RecipeMerge:
     target: object  # WIDEN (RecipeLoRA, RecipeCompose, or RecipeMerge)
     backbone: object  # WIDEN or None — explicit backbone override
     t_factor: float
+    block_config: object = None  # BlockConfig or None
 
 
 # Type alias for any recipe node
