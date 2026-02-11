@@ -1,6 +1,9 @@
 """WIDEN Block Config Z-Image Node — Architecture-specific block weight configuration."""
 
-from lib.recipe import BlockConfig
+try:
+    from ..lib.recipe import BlockConfig
+except ImportError:
+    from lib.recipe import BlockConfig
 
 
 class WIDENBlockConfigZImageNode:

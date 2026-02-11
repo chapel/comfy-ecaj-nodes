@@ -1,6 +1,9 @@
 """WIDEN Compose Node — Accumulates branches for simultaneous merge."""
 
-from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+try:
+    from ..lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+except ImportError:
+    from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
 
 class WIDENComposeNode:

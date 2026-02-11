@@ -13,12 +13,20 @@ from dataclasses import dataclass
 
 import torch
 
-from lib.gpu_ops import apply_lora_batch_gpu
-from lib.per_block import (
-    _apply_per_block_lora_strength,
-    _apply_widen_filter_per_block,
-    _apply_widen_merge_per_block,
-)
+try:
+    from .gpu_ops import apply_lora_batch_gpu
+    from .per_block import (
+        _apply_per_block_lora_strength,
+        _apply_widen_filter_per_block,
+        _apply_widen_merge_per_block,
+    )
+except ImportError:
+    from lib.gpu_ops import apply_lora_batch_gpu
+    from lib.per_block import (
+        _apply_per_block_lora_strength,
+        _apply_widen_filter_per_block,
+        _apply_widen_merge_per_block,
+    )
 
 
 @dataclass
@@ -109,7 +117,10 @@ def _eval_node(
         [B, *shape] evaluated weights on GPU, or list of tensors for RecipeCompose
     """
     # Import here to avoid circular import
-    from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+    try:
+        from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+    except ImportError:
+        from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
     if isinstance(node, RecipeBase):
         # Base node - return current base unchanged
@@ -185,7 +196,10 @@ def _eval_base_for_merge(
     Raises:
         ValueError: If base type is invalid
     """
-    from lib.recipe import RecipeBase, RecipeMerge
+    try:
+        from .recipe import RecipeBase, RecipeMerge
+    except ImportError:
+        from lib.recipe import RecipeBase, RecipeMerge
 
     if isinstance(node.base, RecipeMerge):
         # Recursive merge - evaluate inner merge first
@@ -216,7 +230,10 @@ def _eval_target(
     Returns:
         Merged/filtered weights tensor
     """
-    from lib.recipe import RecipeCompose, RecipeLoRA, RecipeMerge
+    try:
+        from .recipe import RecipeCompose, RecipeLoRA, RecipeMerge
+    except ImportError:
+        from lib.recipe import RecipeCompose, RecipeLoRA, RecipeMerge
 
     merge_block_config = getattr(node, "block_config", None)
     use_per_block = merge_block_config is not None and ctx.arch is not None

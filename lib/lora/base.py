@@ -16,7 +16,10 @@ from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from collections.abc import Set as AbstractSet
 
-from lib.executor import DeltaSpec
+try:
+    from ..executor import DeltaSpec
+except ImportError:
+    from lib.executor import DeltaSpec
 
 __all__ = ["LoRALoader"]
 

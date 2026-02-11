@@ -9,15 +9,26 @@ from typing import TYPE_CHECKING
 
 import torch
 
-from lib.analysis import analyze_recipe, get_keys_to_process
-from lib.executor import (
-    chunked_evaluation,
-    compile_batch_groups,
-    compute_batch_size,
-    evaluate_recipe,
-)
-from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
-from lib.widen import WIDEN, WIDENConfig
+try:
+    from ..lib.analysis import analyze_recipe, get_keys_to_process
+    from ..lib.executor import (
+        chunked_evaluation,
+        compile_batch_groups,
+        compute_batch_size,
+        evaluate_recipe,
+    )
+    from ..lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
+    from ..lib.widen import WIDEN, WIDENConfig
+except ImportError:
+    from lib.analysis import analyze_recipe, get_keys_to_process
+    from lib.executor import (
+        chunked_evaluation,
+        compile_batch_groups,
+        compute_batch_size,
+        evaluate_recipe,
+    )
+    from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
+    from lib.widen import WIDEN, WIDENConfig
 
 if TYPE_CHECKING:
     pass
