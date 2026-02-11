@@ -403,6 +403,9 @@ features:
         status:
           maturity: draft
           implementation: implemented
+    status:
+      maturity: draft
+      implementation: in_progress
   - _ulid: 01KH4HA43J7SSD59Y6GR7BKN1G
     slugs:
       - widen-core
