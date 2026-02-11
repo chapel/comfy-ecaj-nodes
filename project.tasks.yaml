@@ -123,8 +123,9 @@
   status: pending
   blocked_by: []
   depends_on:
-    - "@implement-recipe-type-system"
-    - "@implement-comfyui-packaging"
+    - "@implement-comfyui-mocking-and-fixtures"
+    - "@implement-node-graph-testing"
+    - "@implement-ci-pipeline"
   context: []
   priority: 1
   tags: []
