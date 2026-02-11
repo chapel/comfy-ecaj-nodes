@@ -507,7 +507,7 @@ features:
     created: 2026-02-10T19:44:03.192Z
     status:
       maturity: draft
-      implementation: in_progress
+      implementation: implemented
   - _ulid: 01KH4HA43YH91JRARAHVJE40AZ
     slugs:
       - lora-loaders
