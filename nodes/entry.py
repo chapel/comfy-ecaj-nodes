@@ -96,6 +96,7 @@ class WIDENEntryNode:
         AC: @entry-node ac-4 — no GPU memory allocated, no tensor copies
         """
         arch = detect_architecture(model)
+        print(f"[WIDEN Entry] arch={arch}")
         # Store reference only — no clone, no tensor ops (AC-4)
         recipe = RecipeBase(model_patcher=model, arch=arch)
         return (recipe,)

@@ -93,6 +93,7 @@ class WIDENMergeNode:
         # AC-1, AC-2, AC-3, AC-6: Build RecipeMerge with all fields
         # backbone is None when not connected (AC-2), stored when connected (AC-3)
         # t_factor of -1.0 is preserved as-is (AC-6) — Exit node interprets it
+        print(f"[WIDEN Merge] base={type(base).__name__}, target={type(target).__name__}, t={t_factor}")
         return (
             RecipeMerge(
                 base=base,
