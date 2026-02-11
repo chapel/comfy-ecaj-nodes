@@ -1678,70 +1678,33 @@
   created_at: 2026-02-11T05:42:34.804Z
   notes: []
   todos: []
-- title: Unify scalar/batched codepaths in widen.py and divergence.py
-  description: >-
-    STRUCTURAL: ~200 lines of duplicated scalar/batched code in widen.py plus duplicated dimension
-    dispatch in both widen.py and divergence.py. This duplication already produced the flat/non-flat
-    parity bug.
-
-
-    WIDEN.PY PAIRS TO UNIFY:
-
-    - filter_delta / filter_delta_batched
-
-    - merge_weights / merge_weights_batched
-
-    - _merge_1d_params / _merge_1d_params_batched
-
-    - _build_importance_masks / _build_importance_masks_batched
-
-    - WeightDisentangler: 8 methods (4 scalar + 4 batched)
-
-
-    APPROACH: Make batched canonical ([B, ...] tensors). Scalar calls become thin wrappers:
-    unsqueeze(0) -> call batched -> squeeze(0).
-
-
-    DIMENSION DISPATCH: Use reshape-to-canonical approach:
-
-    - Non-batched: [out, *tail] -> [1, out, K]
-
-    - Batched: [B, out, *tail] -> [B, out, K]
-
-
-    DIVERGENCE.PY: Same dim dispatch duplication. Flatten non-output axes generically. Also prefer
-    reshape() over view() (lib/divergence.py:49,57,91,100).
-
-
-    ALSO FIX:
-
-    - Remove unused WIDENConfig.n_models field (lib/widen.py:31)
-
-    - Fix RankingMechanism.exact_rank() unstable sort: add stable=True (lib/ranking.py:49 vs 157)
-
-    - Fix soft_rank output contract: normalize to [0,1] to match other strategies
-    (lib/ranking.py:84)
-
-
-    VERIFICATION: All scalar tests pass unchanged, add parity tests scalar(x)==batched([x])[0], ruff
-    clean
+- title: Split executor.py into focused modules
+  description: "STRUCTURAL: lib/executor.py is 883 lines mixing 4 distinct concerns. evaluate_recipe
+    alone is ~230 lines with nested closures. Codex confirmed coupling hides correctness bugs. SPLIT
+    INTO: 1) lib/batch_groups.py (OpSignature, compile_batch_groups), 2) lib/gpu_ops.py (DeltaSpec,
+    apply_lora_batch_gpu, chunked_evaluation, compute_batch_size, chunked), 3) lib/per_block.py
+    (per-block control functions), 4) lib/recipe_eval.py (evaluate_recipe with EvalContext dataclass
+    and helpers), 5) lib/executor.py as facade/re-export. MIGRATION ORDER: data types first, pure
+    helpers, gpu ops, per-block, recipe_eval last. ADDITIONAL FIXES: deduplicate
+    apply_lora_batch_gpu (4 paths to 2), fix QKV to use DeltaSpec.offset, fix type contract for
+    _eval_node, guard torch.cuda.empty_cache, fix backbone override. DEPENDS ON fix-lora-set-scoping
+    completing first."
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
   priority: 2
   slugs:
-    - unify-scalar-batched
+    - split-executor
   tags:
     - refactor
     - review-finding
-  depends_on:
-    - 01KH5KGY
-  _ulid: 01KH5KMVY3QERHS3AT7896GM85
+  depends_on: []
+  _ulid: 01KH5KNGFJNFN8ZFD5FTA6NZG8
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-11T05:44:06.851Z
+  created_at: 2026-02-11T05:44:27.890Z
   notes: []
   todos: []
