@@ -10,3 +10,14 @@ inbox:
       - correctness
       - runtime
     added_by: "@claude"
+  - _ulid: 01KH6Y5JPJ1G6FEHKBMV3N1YV4
+    text: Audit MockModelPatcher for mock/production divergences. The key prefix mismatch bug
+      (model_state_dict prefixed vs model.diffusion_model.state_dict unprefixed) was invisible to
+      tests because the mock faithfully reproduced the same inconsistency. Review all
+      MockModelPatcher API surfaces against real ComfyUI ModelPatcher behavior to catch similar
+      hidden mismatches.
+    created_at: 2026-02-11T18:07:14.642Z
+    tags:
+      - testing
+      - review-finding
+    added_by: "@claude"
