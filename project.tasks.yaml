@@ -1678,7 +1678,11 @@
   created_at: 2026-02-11T05:42:34.804Z
   notes: []
   todos: []
-- title: Split executor.py into focused modules
+- _ulid: 01KH5KNGFJNFN8ZFD5FTA6NZG8
+  slugs:
+    - split-executor
+  title: Split executor.py into focused modules
+  type: task
   description: "STRUCTURAL: lib/executor.py is 883 lines mixing 4 distinct concerns. evaluate_recipe
     alone is ~230 lines with nested closures. Codex confirmed coupling hides correctness bugs. SPLIT
     INTO: 1) lib/batch_groups.py (OpSignature, compile_batch_groups), 2) lib/gpu_ops.py (DeltaSpec,
@@ -1689,22 +1693,46 @@
     apply_lora_batch_gpu (4 paths to 2), fix QKV to use DeltaSpec.offset, fix type contract for
     _eval_node, guard torch.cuda.empty_cache, fix backbone override. DEPENDS ON fix-lora-set-scoping
     completing first."
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
+  tags:
+    - refactor
+    - review-finding
+  vcs_refs: []
+  created_at: 2026-02-11T05:44:27.890Z
+  notes: []
+  todos: []
+- title: Unify scalar/batched codepaths in widen.py and divergence.py
+  description: "STRUCTURAL: ~200 lines of duplicated scalar/batched code in widen.py plus dim dispatch
+    duplication in both widen.py and divergence.py. Already caused the flat/non-flat parity bug.
+    PAIRS TO UNIFY: filter_delta/batched, merge_weights/batched, _merge_1d_params/batched,
+    _build_importance_masks/batched, WeightDisentangler 8 methods. APPROACH: Make batched canonical,
+    scalar becomes unsqueeze(0)->batched->squeeze(0). DIMENSION DISPATCH: reshape-to-canonical,
+    flatten non-output axes. DIVERGENCE.PY: same treatment, prefer reshape() over view(). ALSO FIX:
+    remove unused WIDENConfig.n_models, add stable=True to exact_rank, normalize soft_rank to [0,1].
+    DEPENDS ON fix-batched-parity completing first."
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
   priority: 2
   slugs:
-    - split-executor
+    - unify-scalar-batched
   tags:
     - refactor
     - review-finding
   depends_on: []
-  _ulid: 01KH5KNGFJNFN8ZFD5FTA6NZG8
+  _ulid: 01KH5KNKD2PFVCBKPN04G1PCXD
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-11T05:44:27.890Z
+  created_at: 2026-02-11T05:44:30.882Z
   notes: []
   todos: []
