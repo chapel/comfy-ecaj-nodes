@@ -40,6 +40,7 @@ runs:
     current_step: 7
     total_steps: 8
     started_at: 2026-02-11T00:04:55.835Z
+    completed_at: 2026-02-11T00:06:27.398Z
     step_results:
       - step_index: 0
         status: completed
@@ -85,4 +86,11 @@ runs:
         notes: Deferring implementation start - plan and specs created, dependencies wired, convention
           established.
     initiated_by: "@claude"
-    completed_at: 2026-02-11T00:06:27.398Z
+  - _ulid: 01KH50QDZKY91JSHEXR5BGW4V2
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-11T00:13:27.923Z
+    step_results: []
+    initiated_by: "@claude"
