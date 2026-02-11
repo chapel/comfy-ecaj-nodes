@@ -1958,6 +1958,15 @@
         indexed the first row instead of unpacking a 1-tuple. Every output neuron got identical
         values = full corruption. Fixed in nodes/exit.py:123, updated 5 test files."
       supersedes: null
+    - _ulid: 01KH70H6M68QE1AHER6PWQM3EZ
+      created_at: 2026-02-11T18:48:32.646Z
+      author: "@claude"
+      content: "Bug 2 (e1bcdd1): Both SDXL and Z-Image loaders hardcoded alpha=rank, ignoring the .alpha
+        tensor stored in LoRA safetensors files. Correct formula is scale=strength*alpha/rank. When
+        alpha!=rank (common), delta magnitudes were wrong causing output divergence from
+        merge-router reference. Fixed both loaders to read .alpha keys from file, defaulting to rank
+        when absent."
+      supersedes: null
   todos: []
 - _ulid: 01KH70GQ9YAPG64C3JJVAA1WZ0
   slugs: []
