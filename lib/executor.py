@@ -373,6 +373,78 @@ def chunked_evaluation(
     return results
 
 
+def _apply_per_block_lora_strength(
+    keys: list[str],
+    base: torch.Tensor,
+    lora_applied: torch.Tensor,
+    block_config: BlockConfig,
+    arch: str,
+    device: str,
+    dtype: torch.dtype,
+) -> torch.Tensor:
+    """Apply per-block strength scaling to LoRA deltas.
+
+    Computes delta = lora_applied - base, scales each key's delta by its
+    per-block strength override, and returns base + scaled_delta.
+
+    # AC: @lora-block-config ac-1
+    Per-block strength scaling is applied to LoRA deltas when block_config present.
+
+    Args:
+        keys: List of B parameter keys being evaluated
+        base: [B, *shape] base weights before LoRA
+        lora_applied: [B, *shape] weights after LoRA application
+        block_config: BlockConfig with block_overrides for strength scaling
+        arch: Architecture name for block classification
+        device: GPU device string
+        dtype: Computation dtype
+
+    Returns:
+        [B, *shape] weights with per-block scaled LoRA deltas
+    """
+    from lib.block_classify import classify_key
+
+    # Build lookup dict from block_overrides
+    block_overrides = dict(block_config.block_overrides)
+
+    # Check if any key has a non-1.0 override
+    has_overrides = False
+    for key in keys:
+        block_group = classify_key(key, arch)
+        if block_group is not None and block_group in block_overrides:
+            if block_overrides[block_group] != 1.0:
+                has_overrides = True
+                break
+
+    if not has_overrides:
+        # All keys use default strength of 1.0 - no scaling needed
+        return lora_applied
+
+    # Compute delta and apply per-block scaling
+    delta = lora_applied - base
+
+    # Build strength multiplier for each key
+    strength_multipliers = []
+    for key in keys:
+        block_group = classify_key(key, arch)
+        if block_group is not None and block_group in block_overrides:
+            strength_multipliers.append(block_overrides[block_group])
+        else:
+            # No override - use 1.0 (unchanged)
+            strength_multipliers.append(1.0)
+
+    # Create scaling tensor [B, 1, 1, ...] for broadcasting
+    scales = torch.tensor(strength_multipliers, device=device, dtype=dtype)
+    # Reshape for broadcasting: [B] -> [B, 1, 1, ...] based on delta ndim
+    for _ in range(delta.dim() - 1):
+        scales = scales.unsqueeze(-1)
+
+    # Apply scaling to delta
+    scaled_delta = delta * scales
+
+    return base + scaled_delta
+
+
 def _get_block_t_factors(
     keys: list[str],
     block_config: BlockConfig | None,
@@ -627,7 +699,13 @@ def evaluate_recipe(
         current: torch.Tensor,
         recipe_lora: RecipeLoRA,
     ) -> torch.Tensor:
-        """Apply a LoRA set to current weights.
+        """Apply a LoRA set to current weights with per-block strength scaling.
+
+        # AC: @lora-block-config ac-1
+        When block_config is present, per-block strength scaling is applied.
+
+        # AC: @lora-block-config ac-2
+        When no block_config, global strength applies uniformly.
 
         Args:
             current: [B, *shape] current weights on GPU
@@ -649,6 +727,15 @@ def evaluate_recipe(
 
         # Apply deltas using batched GPU application
         result = apply_lora_batch_gpu(keys, current, delta_specs, device, dtype)
+
+        # AC: @lora-block-config ac-1, ac-2
+        # Apply per-block strength scaling if block_config is present
+        lora_block_config = getattr(recipe_lora, "block_config", None)
+        if lora_block_config is not None and arch is not None:
+            result = _apply_per_block_lora_strength(
+                keys, current, result, lora_block_config, arch, device, dtype
+            )
+
         return result
 
     def _eval_node(
