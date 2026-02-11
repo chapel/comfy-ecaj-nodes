@@ -1454,7 +1454,11 @@
       supersedes: null
   todos: []
   automation: eligible
-- title: Fix LoRA set scoping bug in executor and loader API
+- _ulid: 01KH5KGMYRRPD5W18RMR3WBHFB
+  slugs:
+    - fix-lora-set-scoping
+  title: Fix LoRA set scoping bug in executor and loader API
+  type: bug
   description: >-
     CORRECTNESS BUG: LoRA set IDs are looked up in evaluate_recipe (lib/executor.py:717) but never
     passed to the loader API. loader.get_delta_specs(keys, key_indices) has no set_id parameter, and
@@ -1486,22 +1490,70 @@
     - Test: missing set_id raises explicit error, not silent no-op
 
     - All 467 existing tests must pass
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 1
+  tags:
+    - correctness
+    - review-finding
+  vcs_refs: []
+  created_at: 2026-02-11T05:41:48.628Z
+  notes: []
+  todos: []
+- title: Fix filter_delta_batched scalar parity bug for mixed flat/non-flat batches
+  description: >-
+    CORRECTNESS BUG: filter_delta_batched violates scalar parity for mixed flat/non-flat batches.
+    Early-exit uses (var < eps).all() globally across entire batch, not per-sample. If one batch
+    item is non-flat, flat items still go through ranking/masking and get attenuated, while scalar
+    filter_delta would passthrough unchanged. Violates AC-3 (batched matches per-key behavior).
+
+
+    REPRO: Batch item 0 = constant nonzero 1D delta (flat variance), Batch item 1 = non-flat delta.
+    Batched output for item 0 is attenuated while scalar returns unchanged.
+
+
+    FIX: Compute per-sample flat mask and blend passthrough vs filtered outputs per sample.
+    Location: lib/widen.py:503-533.
+
+
+    ALSO FIX WHILE HERE:
+
+    - merge_weights vs merge_weights_batched inconsistency: empty weights_list raises IndexError in
+    scalar but returns backbone fallback in batched
+
+    - Unknown sparsity_method silently falls back to softmax instead of raising ValueError
+
+    - Both paths should validate inputs identically
+
+
+    VERIFICATION:
+
+    - Test: mixed flat/non-flat batch produces identical results to per-item scalar calls
+
+    - Test: empty weights_list behavior consistent (both raise or both handle gracefully)
+
+    - Test: invalid sparsity_method raises ValueError
   type: bug
   spec_ref: null
   meta_ref: null
   plan_ref: null
   priority: 1
   slugs:
-    - fix-lora-set-scoping
+    - fix-batched-parity
   tags:
     - correctness
     - review-finding
   depends_on: []
-  _ulid: 01KH5KGMYRRPD5W18RMR3WBHFB
+  _ulid: 01KH5KGYTSTC0BK7XM3GP5N2K7
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-11T05:41:48.628Z
+  created_at: 2026-02-11T05:41:58.745Z
   notes: []
   todos: []
