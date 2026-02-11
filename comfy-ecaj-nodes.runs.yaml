@@ -426,6 +426,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-11T17:11:26.685Z
+    completed_at: 2026-02-11T17:12:43.744Z
     step_results:
       - step_index: 0
         status: completed
@@ -454,4 +455,11 @@ runs:
         notes: "All items captured in step 3: resolved 01KH5HAK, created success 01KH6V1D. No additional
           items needed."
     initiated_by: "@claude"
-    completed_at: 2026-02-11T17:12:43.744Z
+  - _ulid: 01KH6XZN55CA7GCFSXZ3V46Z11
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-11T18:04:00.549Z
+    step_results: []
+    initiated_by: "@claude"
