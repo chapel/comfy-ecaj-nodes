@@ -2161,4 +2161,13 @@
         500 tests pass, ruff clean. 6 regression tests added for the cache. Still needs real ComfyUI
         testing to confirm the fix works end-to-end.
       supersedes: null
+    - _ulid: 01KH760X5Q6ZGS3RNTCGXFGNBT
+      created_at: 2026-02-11T20:24:30.135Z
+      author: "@claude"
+      content: "v2 fix: replaced OOM-causing cache approach with _unpatch_loaded_clones(). Uses ComfyUI's
+        own model_unload() to restore clean weights from the loaded clone's backup before reading
+        model_state_dict(). Zero memory overhead. 497 tests pass, ruff clean. Commit on main:
+        3f6952d. Awaiting user confirmation in real ComfyUI — first attempt (cache approach) caused
+        OOM kill due to cloning all affected keys to CPU RAM."
+      supersedes: null
   todos: []
