@@ -509,6 +509,20 @@ workflows:
           Start implementation.
           Use: kspec task start @first-task
           Then follow /task-work for task lifecycle.
+  - _ulid: 01KH53VJMS1TPSTYMWCPHJZMTR
+    id: session-start
+    trigger: session-start
+    description: Get context at the beginning of a work session.
+    steps:
+      - type: action
+        content: Run kspec session start to get context
+      - type: check
+        content: Are there active (in_progress) tasks?
+        on_fail: Pick from ready tasks or triage inbox
+      - type: action
+        content: Review ready tasks and inbox items
+      - type: action
+        content: Start work on chosen task via kspec task start
 conventions:
   - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
     domain: commits
