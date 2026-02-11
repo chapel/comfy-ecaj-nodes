@@ -37,8 +37,18 @@ runs:
   - _ulid: 01KH507SWV0N6P4XDYGWX6JE1X
     workflow_ref: "@01KH4W2EVRR14Z55XSGY646P3C"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 8
     started_at: 2026-02-11T00:04:55.835Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-11T00:04:55.835Z
+        completed_at: 2026-02-11T00:05:01.128Z
+        inputs:
+          plan_file_path: /home/chapel/Projects/comfy-ecaj-nodes/.claude/plans/testing-strategy.md
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-11T00:05:01.128Z
+        completed_at: 2026-02-11T00:05:01.128Z
     initiated_by: "@claude"
