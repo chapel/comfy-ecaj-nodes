@@ -713,17 +713,25 @@ def evaluate_recipe(
 
         Returns:
             [B, *shape] weights with LoRA applied
+
+        Raises:
+            RuntimeError: If the RecipeLoRA has no set_id mapping (indicates
+                a bug in recipe analysis -- every RecipeLoRA must be registered).
         """
         set_id = set_id_map.get(id(recipe_lora))
         if set_id is None:
-            # No LoRA data for this set
-            return current
+            raise RuntimeError(
+                "RecipeLoRA has no set_id mapping. This indicates a bug in "
+                "recipe analysis -- every RecipeLoRA must be registered in "
+                "set_id_map before evaluation. "
+                f"RecipeLoRA loras: {recipe_lora.loras!r}"
+            )
 
         # Build key_indices for DeltaSpec
         key_indices = {k: i for i, k in enumerate(keys)}
 
-        # Get delta specs from loader for this set
-        delta_specs = loader.get_delta_specs(keys, key_indices)
+        # Get delta specs from loader scoped to this set
+        delta_specs = loader.get_delta_specs(keys, key_indices, set_id=set_id)
 
         # Apply deltas using batched GPU application
         result = apply_lora_batch_gpu(keys, current, delta_specs, device, dtype)

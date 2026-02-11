@@ -271,14 +271,17 @@ class TestAC3PluggableDesign:
         # AC: @lora-loaders ac-3
         # Create a mock loader
         class MockLoader(LoRALoader):
-            def load(self, path: str, strength: float = 1.0) -> None:
+            def load(self, path: str, strength: float = 1.0, set_id: str | None = None) -> None:
                 pass
 
             @property
             def affected_keys(self) -> set[str]:
                 return set()
 
-            def get_delta_specs(self, keys, key_indices) -> list[DeltaSpec]:
+            def affected_keys_for_set(self, set_id: str) -> set[str]:
+                return set()
+
+            def get_delta_specs(self, keys, key_indices, set_id=None) -> list[DeltaSpec]:
                 return []
 
             def cleanup(self) -> None:

@@ -190,10 +190,7 @@ def analyze_recipe(
     for set_id, recipe_lora in lora_sets.items():
         set_key = str(set_id)  # Convert int id to string key
 
-        # Track keys before loading this set
-        keys_before = set(loader.affected_keys)
-
-        # Load all LoRAs in this set
+        # Load all LoRAs in this set, tagged with set_key
         for lora_spec in recipe_lora.loras:
             lora_name = lora_spec["path"]
             strength = lora_spec["strength"]
@@ -213,12 +210,11 @@ def analyze_recipe(
                     f"(referenced by LoRA node with strength {strength})"
                 ) from None
 
-            # Load the LoRA file
-            loader.load(full_path, strength)
+            # Load the LoRA file into the specific set
+            loader.load(full_path, strength, set_id=set_key)
 
-        # AC-4: Keys added by this set
-        keys_after = set(loader.affected_keys)
-        set_affected[set_key] = keys_after - keys_before
+        # AC-4: Keys added by this set (queried from the set-scoped API)
+        set_affected[set_key] = loader.affected_keys_for_set(set_key)
 
     # All affected keys across all sets
     affected_keys = set(loader.affected_keys)

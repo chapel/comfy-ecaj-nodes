@@ -32,7 +32,7 @@ from lib.lora.base import LoRALoader
 __all__ = ["ZImageLoader"]
 
 # Z-Image hidden dimension for QKV (3840 per head component)
-# Full QKV shape: (11520, 3840) where 11520 = 3 × 3840
+# Full QKV shape: (11520, 3840) where 11520 = 3 x 3840
 _ZIMAGE_HIDDEN_DIM = 3840
 
 # QKV offset mapping: component -> (start_row, length)
@@ -83,7 +83,7 @@ def _normalize_lycoris_key(key: str) -> str:
     LyCORIS keys use underscore-separated paths with a lycoris_ prefix.
     This normalizes them to dot-separated paths matching ComfyUI format.
 
-    Example: lycoris_layers_0_adaLN_modulation_0 → layers.0.adaLN_modulation.0
+    Example: lycoris_layers_0_adaLN_modulation_0 -> layers.0.adaLN_modulation.0
     """
     if not key.startswith("lycoris_"):
         return key
@@ -91,9 +91,9 @@ def _normalize_lycoris_key(key: str) -> str:
     # Strip lycoris_ prefix
     key = key[len("lycoris_") :]
 
-    # Convert numeric indices: _N_ → .N. and _N at end → .N
-    key = re.sub(r"_(\d+)_", r".\1.", key)  # _N_ → .N.
-    key = re.sub(r"_(\d+)$", r".\1", key)   # _N at end → .N
+    # Convert numeric indices: _N_ -> .N. and _N at end -> .N
+    key = re.sub(r"_(\d+)_", r".\1.", key)  # _N_ -> .N.
+    key = re.sub(r"_(\d+)$", r".\1", key)   # _N at end -> .N
 
     # Replace compound names with placeholders (using markers without underscores)
     placeholders = {}
@@ -189,7 +189,7 @@ def _parse_zimage_lora_key(lora_key: str) -> tuple[str | None, str, str | None]:
         qkv_component = "v"
         model_key = base_path.replace(".to_v", ".qkv")
     elif ".attention.to_out.0" in base_path:
-        # Map to_out.0 → out
+        # Map to_out.0 -> out
         model_key = base_path.replace(".attention.to_out.0", ".attention.out")
         qkv_component = None
     else:
@@ -210,6 +210,7 @@ class ZImageLoader(LoRALoader):
     Z-Image's base model uses fused attention.qkv weights, but LoRAs
     provide separate to_q/to_k/to_v. This loader maps them correctly
     and produces DeltaSpec objects with appropriate qkv_* kinds.
+    Data is segmented by set_id for correct scoping.
 
     # AC: @lora-loaders ac-1
     Architecture-specific loader for Z-Image key mapping with QKV fusing.
@@ -220,22 +221,30 @@ class ZImageLoader(LoRALoader):
 
     def __init__(self) -> None:
         """Initialize empty loader state."""
-        # Standard LoRA data: model_key → list of (up, down, scale)
-        self._lora_data: dict[str, list[tuple[torch.Tensor, torch.Tensor, float]]] = (
-            defaultdict(list)
-        )
-        # QKV LoRA data: model_key → list of (up, down, scale, qkv_component)
-        self._qkv_data: dict[
-            str, list[tuple[torch.Tensor, torch.Tensor, float, str]]
-        ] = defaultdict(list)
+        # Standard LoRA data segmented by set:
+        # set_id -> model_key -> list of (up, down, scale)
+        self._lora_data_by_set: dict[
+            str, dict[str, list[tuple[torch.Tensor, torch.Tensor, float]]]
+        ] = defaultdict(lambda: defaultdict(list))
+        # QKV LoRA data segmented by set:
+        # set_id -> model_key -> list of (up, down, scale, qkv_component)
+        self._qkv_data_by_set: dict[
+            str, dict[str, list[tuple[torch.Tensor, torch.Tensor, float, str]]]
+        ] = defaultdict(lambda: defaultdict(list))
+        # Per-set affected keys
+        self._affected_by_set: dict[str, set[str]] = defaultdict(set)
+        # Global affected keys (union of all sets)
         self._affected: set[str] = set()
 
-    def load(self, path: str, strength: float = 1.0) -> None:
-        """Load a LoRA safetensors file.
+    def load(self, path: str, strength: float = 1.0, set_id: str | None = None) -> None:
+        """Load a LoRA safetensors file into the given set.
 
         # AC: @lora-loaders ac-1
         Handles Z-Image key mapping with QKV fusing.
         """
+        # Use a default set_id if none provided (backward compat)
+        effective_set_id = set_id if set_id is not None else "__default__"
+
         # Collect tensors by layer path and direction
         layer_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
         # Track which keys have QKV components
@@ -276,36 +285,59 @@ class ZImageLoader(LoRALoader):
             if qkv_comp is not None:
                 # QKV component - extract actual model key
                 model_key = layer_key.rsplit(":", 1)[0]
-                self._qkv_data[model_key].append((up, down, scale, qkv_comp))
+                self._qkv_data_by_set[effective_set_id][model_key].append(
+                    (up, down, scale, qkv_comp)
+                )
+                self._affected_by_set[effective_set_id].add(model_key)
                 self._affected.add(model_key)
             else:
                 # Standard LoRA
-                self._lora_data[layer_key].append((up, down, scale))
+                self._lora_data_by_set[effective_set_id][layer_key].append(
+                    (up, down, scale)
+                )
+                self._affected_by_set[effective_set_id].add(layer_key)
                 self._affected.add(layer_key)
 
     @property
     def affected_keys(self) -> set[str]:
-        """Return keys that loaded LoRAs modify.
+        """Return keys that loaded LoRAs modify (all sets).
 
         # AC: @lora-loaders ac-4
         """
         return self._affected
 
+    def affected_keys_for_set(self, set_id: str) -> set[str]:
+        """Return keys modified by a specific LoRA set.
+
+        # AC: @lora-loaders ac-4
+        """
+        return self._affected_by_set.get(set_id, set())
+
     def get_delta_specs(
         self,
         keys: Sequence[str],
         key_indices: dict[str, int],
+        set_id: str | None = None,
     ) -> list[DeltaSpec]:
         """Produce DeltaSpec objects for batched GPU evaluation.
 
         # AC: @lora-loaders ac-2
         Produces DeltaSpec objects compatible with batched executor,
         including qkv_q/qkv_k/qkv_v kinds for fused attention weights.
+        When set_id is provided, only returns deltas from that set.
 
         # AC: @zimage-loader ac-3
         QKV-fused specs include offset indexing: q=(0,3840), k=(3840,3840), v=(7680,3840)
         """
         specs: list[DeltaSpec] = []
+
+        # Determine which data sources to iterate
+        if set_id is not None:
+            lora_sources = [self._lora_data_by_set.get(set_id, {})]
+            qkv_sources = [self._qkv_data_by_set.get(set_id, {})]
+        else:
+            lora_sources = list(self._lora_data_by_set.values())
+            qkv_sources = list(self._qkv_data_by_set.values())
 
         for key in keys:
             key_idx = key_indices.get(key)
@@ -313,35 +345,37 @@ class ZImageLoader(LoRALoader):
                 continue
 
             # Handle standard LoRA data
-            if key in self._lora_data:
-                for up, down, scale in self._lora_data[key]:
-                    if up.dim() == 2 and down.dim() == 2:
-                        spec = DeltaSpec(
-                            kind="standard",
-                            key_index=key_idx,
-                            up=up,
-                            down=down,
-                            scale=scale,
-                        )
-                        specs.append(spec)
+            for lora_data in lora_sources:
+                if key in lora_data:
+                    for up, down, scale in lora_data[key]:
+                        if up.dim() == 2 and down.dim() == 2:
+                            spec = DeltaSpec(
+                                kind="standard",
+                                key_index=key_idx,
+                                up=up,
+                                down=down,
+                                scale=scale,
+                            )
+                            specs.append(spec)
 
             # Handle QKV LoRA data
             # # AC: @zimage-loader ac-3
-            if key in self._qkv_data:
-                for up, down, scale, qkv_comp in self._qkv_data[key]:
-                    if up.dim() == 2 and down.dim() == 2:
-                        kind = f"qkv_{qkv_comp}"
-                        # Get offset for this QKV component
-                        offset = _QKV_OFFSETS[qkv_comp]
-                        spec = DeltaSpec(
-                            kind=kind,
-                            key_index=key_idx,
-                            up=up,
-                            down=down,
-                            scale=scale,
-                            offset=offset,
-                        )
-                        specs.append(spec)
+            for qkv_data in qkv_sources:
+                if key in qkv_data:
+                    for up, down, scale, qkv_comp in qkv_data[key]:
+                        if up.dim() == 2 and down.dim() == 2:
+                            kind = f"qkv_{qkv_comp}"
+                            # Get offset for this QKV component
+                            offset = _QKV_OFFSETS[qkv_comp]
+                            spec = DeltaSpec(
+                                kind=kind,
+                                key_index=key_idx,
+                                up=up,
+                                down=down,
+                                scale=scale,
+                                offset=offset,
+                            )
+                            specs.append(spec)
 
         return specs
 
@@ -350,6 +384,7 @@ class ZImageLoader(LoRALoader):
 
         # AC: @lora-loaders ac-4
         """
-        self._lora_data.clear()
-        self._qkv_data.clear()
+        self._lora_data_by_set.clear()
+        self._qkv_data_by_set.clear()
+        self._affected_by_set.clear()
         self._affected.clear()
