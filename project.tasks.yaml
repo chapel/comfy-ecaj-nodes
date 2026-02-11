@@ -1031,6 +1031,9 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #17. Implemented GPU memory management with gc.collect() and
+    torch.cuda.empty_cache() calls per-chunk and between OpSignature groups. Loader cleanup in
+    finally block frees delta caches. All 5 ACs covered with 20 tests in test_memory_management.py."
   depends_on:
     - "@implement-exit-node"
   context: []
@@ -1039,6 +1042,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.334Z
   started_at: 2026-02-11T04:08:31.101Z
+  completed_at: 2026-02-11T04:15:06.700Z
   notes:
     - _ulid: 01KH4HA486XCQMBVVXJ4R3TJHM
       created_at: 2026-02-10T19:44:03.334Z
@@ -1085,10 +1089,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T04:15:06.700Z
-  closed_reason: "Merged in PR #17. Implemented GPU memory management with gc.collect() and
-    torch.cuda.empty_cache() calls per-chunk and between OpSignature groups. Loader cleanup in
-    finally block frees delta caches. All 5 ACs covered with 20 tests in test_memory_management.py."
 - _ulid: 01KH4HA48ERX1APFPSJS5E1Y7F
   slugs:
     - implement-per-block-control
@@ -1135,7 +1135,7 @@
   type: task
   spec_ref: "@block-config-type"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-recipe-type-system"
@@ -1163,6 +1163,7 @@
         Files: lib/recipe.py.
   todos: []
   automation: eligible
+  started_at: 2026-02-11T04:15:55.148Z
 - _ulid: 01KH4HA48WYR6H4E0QV888VSD2
   slugs:
     - implement-merge-per-block-t-factor
