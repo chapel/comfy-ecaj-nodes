@@ -321,6 +321,9 @@ features:
         traits: []
         notes: []
         created: 2026-02-10T19:44:03.172Z
+        status:
+          maturity: draft
+          implementation: in_progress
       - _ulid: 01KH4HA438KQPGVN0FZHHDFSYF
         slugs:
           - exit-batched-eval
