@@ -228,7 +228,7 @@ features:
     created: 2026-02-10T19:44:03.165Z
     status:
       maturity: draft
-      implementation: in_progress
+      implementation: implemented
   - _ulid: 01KH4HA4303B95N2GJDWJTD4GZ
     slugs:
       - exit-node
