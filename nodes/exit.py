@@ -213,23 +213,19 @@ def _compute_recipe_hash(
     return hasher.hexdigest()
 
 
-def _build_lora_resolver() -> Callable[[str], str | None] | None:
+def _build_lora_resolver() -> Callable[[str], str | None]:
     """Build a LoRA path resolver using ComfyUI's folder_paths.
 
     Returns a callable that resolves LoRA names (including nested paths like
     "z-image/Mystic.safetensors") to their full filesystem path by searching
-    all registered LoRA directories. Returns None if folder_paths is not
-    available (e.g. outside ComfyUI runtime).
+    all registered LoRA directories.
     """
-    try:
-        import folder_paths
+    import folder_paths
 
-        def resolver(lora_name: str) -> str | None:
-            return folder_paths.get_full_path("loras", lora_name)
+    def resolver(lora_name: str) -> str | None:
+        return folder_paths.get_full_path("loras", lora_name)
 
-        return resolver
-    except ImportError:
-        return None
+    return resolver
 
 
 class WIDENExitNode:
