@@ -426,6 +426,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.277Z
+  started_at: 2026-02-11T02:59:47.138Z
   notes:
     - _ulid: 01KH4HA46D87PGPQBEVJMMND53
       created_at: 2026-02-10T19:44:03.277Z
@@ -443,9 +444,18 @@
         (optional input). For the task: add isinstance validation checks at top
         of merge(), construct and return RecipeMerge.
         Files: nodes/merge.py.
+    - _ulid: 01KH5ABPDGFY83D0SQ5XDGRMG2
+      created_at: 2026-02-11T03:01:49.105Z
+      author: "@claude"
+      content: "Implemented Merge node with base/target type validation. merge() validates base is
+        RecipeBase or RecipeMerge (rejects RecipeLoRA/RecipeCompose with helpful error), accepts
+        RecipeLoRA/RecipeCompose/RecipeMerge as target. All 6 ACs covered by 23 tests: AC-1 (returns
+        RecipeMerge with fields), AC-2 (no backbone defaults None), AC-3 (backbone stored when
+        provided), AC-4 (merge chaining via base), AC-5 (RecipeLoRA/RecipeCompose rejected as base),
+        AC-6 (t_factor -1.0 preserved). All 159 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T02:59:47.138Z
 - _ulid: 01KH4HA46HJ6V0VC67XRPWSGB5
   slugs:
     - implement-exit-node
