@@ -522,7 +522,7 @@
   type: task
   spec_ref: "@exit-recipe-analysis"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
@@ -564,6 +564,12 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T03:35:17.741Z
+  closed_reason: "Merged in PR #12. Implemented exit recipe analysis in lib/analysis.py with all 6 ACs
+    covered: tree walk to RecipeBase (AC-1), object identity-based set ID assignment (AC-2),
+    architecture loader selection (AC-3), affected-key map tracking (AC-4), key filtering for
+    processing (AC-5), and FileNotFoundError with context (AC-6). 22 tests verify all acceptance
+    criteria."
 - _ulid: 01KH4HA46X4V9RHXW26VP36FD9
   slugs:
     - implement-exit-batched-evaluation
