@@ -738,7 +738,7 @@
   type: task
   spec_ref: "@batched-executor"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-widen-core-algorithm"
@@ -797,6 +797,12 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T03:18:03.688Z
+  closed_reason: "Merged in PR #10. Implemented batched pipeline executor primitives: OpSignature
+    (parameter grouping), DeltaSpec (LoRA delta specs), compile_batch_groups (shape/affecting_sets
+    grouping), compute_batch_size (70% VRAM targeting), apply_lora_batch_gpu (torch.bmm for standard
+    LoRA, torch.kron for LoKr), and chunked_evaluation (OOM backoff wrapper). All 7 ACs covered by
+    30 tests."
 - _ulid: 01KH4HA47M05Q979790FR6MC9J
   slugs:
     - implement-architecture-specific-lora-loaders
