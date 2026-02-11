@@ -2,7 +2,7 @@ kynetic_runs: "1.0"
 runs:
   - _ulid: 01KH4W39GTC4929DAWPENZ207A
     workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
-    status: active
+    status: completed
     current_step: 4
     total_steps: 5
     started_at: 2026-02-10T22:52:33.690Z
@@ -29,5 +29,8 @@ runs:
       - step_index: 4
         status: completed
         started_at: 2026-02-11T00:04:36.847Z
-        completed_at: 2026-02-11T00:04:36.847Z
+        completed_at: 2026-02-11T00:04:51.381Z
+        notes: Import path chosen - 3 new specs (comfyui-mocking, node-graph-testing, ci-pipeline) plus
+          restructured parent
     initiated_by: "@claude"
+    completed_at: 2026-02-11T00:04:51.381Z
