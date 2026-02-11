@@ -480,9 +480,10 @@ features:
       handles OOM backoff. Ported from merge-router lora_chain_merge.py.
     acceptance_criteria:
       - id: ac-1
-        given: a set of parameter keys with varying shapes and affecting sets
+        given: a set of parameter keys with varying shapes
         when: grouped by OpSignature
-        then: keys with identical shape and affecting sets are in the same group
+        then: keys with identical shape are in the same group; per-set LoRA filtering is handled by the
+          loader at evaluation time
       - id: ac-2
         given: a batch of parameters and LoRA DeltaSpecs
         when: bmm LoRA apply runs
