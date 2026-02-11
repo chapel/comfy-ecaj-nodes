@@ -534,5 +534,14 @@ conventions:
       - The local-review workflow checks for AC annotation coverage before PR
       - Tests must not require a running ComfyUI instance or GPU
     examples: []
-observations: []
+observations:
+  - _ulid: 01KH5140KRDP91DHZCZ3Z2G0XZ
+    type: success
+    content: "Parallel subagent research during spec-plan-design: Launching a general-purpose subagent
+      for ComfyUI testing research while continuing main conversation was efficient and produced
+      comprehensive findings without blocking the planning flow."
+    created_at: 2026-02-11T00:20:20.216Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
