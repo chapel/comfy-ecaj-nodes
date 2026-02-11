@@ -1059,7 +1059,7 @@
   type: task
   spec_ref: "@ci-pipeline"
   plan_ref: "@plan-testing-strategy"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
@@ -1082,3 +1082,4 @@
         Files: .github/workflows/test.yml, pyproject.toml (ruff + pytest config)
   todos: []
   automation: eligible
+  started_at: 2026-02-11T02:20:48.141Z
