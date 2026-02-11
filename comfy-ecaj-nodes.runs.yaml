@@ -515,8 +515,19 @@ runs:
   - _ulid: 01KH71PG6HTG4P4KD9FTTZ30RE
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-11T19:08:54.865Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-11T19:08:54.865Z
+        completed_at: 2026-02-11T19:09:42.359Z
+        notes: Reviewed session. One success pattern captured (reference comparison debugging). Mock
+          divergence already tracked. No new friction items — inbox/task confusion was one-off,
+          speculation was one-off.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-11T19:09:42.359Z
+        completed_at: 2026-02-11T19:09:42.359Z
     initiated_by: "@claude"
