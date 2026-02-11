@@ -1267,6 +1267,10 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #21. Implemented LoRA per-block strength scaling:
+    _apply_per_block_lora_strength helper in lib/executor.py scales LoRA deltas by BlockConfig
+    overrides. AC-1: BLOCK_CONFIG with per-block strengths scales LoRA deltas per-key. AC-2: No
+    block_config means global strength applies uniformly. 14 tests in test_lora_block_strength.py."
   depends_on:
     - "@implement-per-block-control"
     - "@implement-lora-node"
@@ -1277,6 +1281,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.363Z
   started_at: 2026-02-11T04:39:41.971Z
+  completed_at: 2026-02-11T04:45:26.430Z
   notes:
     - _ulid: 01KH4HA49389ZJ52761QNKPQ3X
       created_at: 2026-02-10T19:44:03.363Z
@@ -1325,11 +1330,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T04:45:26.430Z
-  closed_reason: "Merged in PR #21. Implemented LoRA per-block strength scaling:
-    _apply_per_block_lora_strength helper in lib/executor.py scales LoRA deltas by BlockConfig
-    overrides. AC-1: BLOCK_CONFIG with per-block strengths scales LoRA deltas per-key. AC-2: No
-    block_config means global strength applies uniformly. 14 tests in test_lora_block_strength.py."
 - _ulid: 01KH508VE1GEDSBP3VENYEF2R0
   slugs:
     - implement-comfyui-mocking-and-fixtures
@@ -1337,7 +1337,7 @@
   type: task
   spec_ref: "@comfyui-mocking"
   plan_ref: "@plan-testing-strategy"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
@@ -1362,6 +1362,7 @@
         Files: tests/conftest.py, tests/mocks/__init__.py, tests/mocks/mock_comfy.py
   todos: []
   automation: eligible
+  started_at: 2026-02-11T04:46:59.375Z
 - _ulid: 01KH508VEVHA4ZME2CDZ275XKS
   slugs:
     - implement-node-graph-testing
