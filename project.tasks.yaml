@@ -208,6 +208,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.264Z
+  started_at: 2026-02-11T02:28:43.363Z
   notes:
     - _ulid: 01KH4HA46066MMF0GVC5BDX526
       created_at: 2026-02-10T19:44:03.264Z
@@ -228,9 +229,17 @@
         export list. Consider adding RecipeNode = Union[RecipeBase, RecipeLoRA,
         RecipeCompose, RecipeMerge] type alias for type checking.
         Files: lib/recipe.py.
+    - _ulid: 01KH58K0JPCQZHDM7Z3ZB6P5M0
+      created_at: 2026-02-11T02:30:51.734Z
+      author: "@claude"
+      content: "Completed Recipe Type System: added RecipeCompose.with_branch() for persistent tree
+        semantics (AC-2), added RecipeNode type alias, added __all__ exports. Added 18 new tests: 4
+        for AC-2 (with_branch returns new instance, original unchanged), 4 for AC-3 (no GPU tensors
+        in recipe objects), 3 for AC-4 (all classes importable/constructible), 7 for AC-5 (WIDEN
+        wire connections between nodes). All 58 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T02:28:43.363Z
 - _ulid: 01KH4HA463BT1D6RF0ZD1DRW2P
   slugs:
     - implement-entry-node
