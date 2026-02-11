@@ -458,7 +458,7 @@ runs:
   - _ulid: 01KH6XZN55CA7GCFSXZ3V46Z11
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 4
+    current_step: 5
     total_steps: 6
     started_at: 2026-02-11T18:04:00.549Z
     step_results:
@@ -502,5 +502,10 @@ runs:
       - step_index: 4
         status: completed
         started_at: 2026-02-11T18:04:47.860Z
-        completed_at: 2026-02-11T18:04:47.860Z
+        completed_at: 2026-02-11T18:07:20.149Z
+        notes: Captured mock audit as inbox 01KH6Y5J. User approved.
+      - step_index: 5
+        status: completed
+        started_at: 2026-02-11T18:07:20.149Z
+        completed_at: 2026-02-11T18:07:20.149Z
     initiated_by: "@claude"
