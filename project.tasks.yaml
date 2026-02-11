@@ -2068,22 +2068,33 @@
         tests/test_sdxl_loader.py, tests/test_zimage_loader.py."
       supersedes: null
   todos: []
-- title: Fix device mismatch in chunked_evaluation torch.stack
+- _ulid: 01KH731J1SG2XVAKCSJNK0QTPA
+  slugs: []
+  title: Fix device mismatch in chunked_evaluation torch.stack
   type: bug
   spec_ref: null
   meta_ref: null
   plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 1
-  slugs: []
   tags:
     - runtime
     - correctness
-  depends_on: []
-  _ulid: 01KH731J1SG2XVAKCSJNK0QTPA
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-11T19:32:25.782Z
-  notes: []
+  notes:
+    - _ulid: 01KH731V18HTSHWJZQ7GT3KYVC
+      created_at: 2026-02-11T19:32:34.984Z
+      author: "@claude"
+      content: "RuntimeError at gpu_ops.py:273 in chunked_evaluation: torch.stack fails because
+        base_tensors dict contains a mix of CUDA and CPU tensors. The stack call is:
+        torch.stack([base_tensors[k] for k in chunk_keys]). base_tensors comes from exit.py:386 as
+        {k: base_state[k] for k in group_keys} where base_state = model_patcher.model_state_dict().
+        Some keys in model_state_dict() are returning GPU-resident tensors (likely from prior set
+        patches or model loading) while others are CPU. Fix: ensure all tensors are moved to CPU
+        before stacking, e.g. base_tensors[k].cpu(), or move uniformly to device before stack."
+      supersedes: null
   todos: []
