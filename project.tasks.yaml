@@ -1615,7 +1615,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -1628,6 +1628,9 @@
   started_at: 2026-02-11T07:29:44.549Z
   notes: []
   todos: []
+  completed_at: 2026-02-11T07:29:47.246Z
+  closed_reason: "Merged in PR #26. Replaced 3 placeholder pass tests, fixed MockModelPatcher.clone()
+    fidelity, strengthened assertions, deduplicated _DIFFUSION_PREFIX."
 - _ulid: 01KH5KJ21MWX1JS1QCN873N9KZ
   slugs:
     - harden-validation
