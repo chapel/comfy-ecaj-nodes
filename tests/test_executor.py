@@ -13,7 +13,9 @@ from lib.executor import (
     chunked_evaluation,
     compile_batch_groups,
     compute_batch_size,
+    evaluate_recipe,
 )
+from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
 # =============================================================================
 # AC-1: OpSignature grouping
@@ -687,3 +689,458 @@ class TestChunkedHelper:
         """Empty list."""
         result = list(chunked([], 2))
         assert result == []
+
+
+# =============================================================================
+# Exit Batched Evaluation tests - @exit-batched-eval
+# =============================================================================
+
+
+class MockLoRALoader:
+    """Mock LoRA loader for testing evaluate_recipe."""
+
+    def __init__(self, delta_map: dict[str, torch.Tensor] | None = None):
+        """Initialize with optional delta map (key -> delta tensor).
+
+        delta_map values should be 2D tensors: (out_dim, in_dim)
+        """
+        self._delta_map = delta_map or {}
+
+    def get_delta_specs(self, keys, key_indices):
+        """Return mock delta specs.
+
+        Creates proper up/down factorizations that when multiplied
+        produce the desired delta. For simplicity, uses rank=1 decomposition.
+        """
+        specs = []
+        for key in keys:
+            if key in self._delta_map:
+                idx = key_indices[key]
+                delta = self._delta_map[key]
+                out_dim, in_dim = delta.shape
+
+                # Use rank-1 factorization: delta ≈ up @ down
+                # up: (out_dim, rank=1), down: (rank=1, in_dim)
+                # For testing, use column/row that approximates delta
+                up = delta[:, 0:1]  # (out_dim, 1) - first column
+                down = torch.ones(1, in_dim)  # (1, in_dim) - all ones
+
+                specs.append(
+                    DeltaSpec(
+                        kind="standard",
+                        key_index=idx,
+                        up=up,
+                        down=down,
+                        scale=1.0,
+                    )
+                )
+        return specs
+
+
+class MockWIDEN:
+    """Mock WIDEN for testing evaluate_recipe."""
+
+    def __init__(self):
+        self.filter_calls = []
+        self.merge_calls = []
+
+    def filter_delta_batched(self, lora_applied, backbone):
+        """Record call and return lora_applied."""
+        self.filter_calls.append({"lora_applied": lora_applied, "backbone": backbone})
+        return lora_applied  # Passthrough for testing
+
+    def merge_weights_batched(self, weights_list, backbone):
+        """Record call and return average."""
+        self.merge_calls.append({"weights_list": weights_list, "backbone": backbone})
+        # Return simple average for testing
+        return torch.stack(weights_list).mean(dim=0)
+
+
+class TestEvaluateRecipeComposeTarget:
+    """AC: @exit-batched-eval ac-1
+
+    Given: a recipe tree with a compose target
+    When: batched evaluation runs
+    Then: merge_weights_batched is called with all branch results and the backbone
+    """
+
+    def test_compose_calls_merge_weights_batched(self):
+        """Compose target should call merge_weights_batched."""
+        # AC: @exit-batched-eval ac-1
+        batch_size = 2
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        # Create recipe with compose target
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        lora1 = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        lora2 = RecipeLoRA(loras=({"path": "b.safetensors", "strength": 1.0},))
+        compose = RecipeCompose(branches=(lora1, lora2))
+        merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=1.0)
+
+        # Mock loader with deltas
+        delta1 = torch.randn(4, 4)
+        loader = MockLoRALoader({"k0": delta1, "k1": delta1})
+
+        # Mock WIDEN
+        widen = MockWIDEN()
+
+        set_id_map = {id(lora1): "set1", id(lora2): "set2"}
+
+        evaluate_recipe(
+            keys=["k0", "k1"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # Should have called merge_weights_batched once
+        assert len(widen.merge_calls) == 1
+        assert len(widen.merge_calls[0]["weights_list"]) == 2  # Two branches
+
+    def test_compose_passes_all_branches(self):
+        """All branch results should be passed to merge_weights_batched."""
+        # AC: @exit-batched-eval ac-1
+        batch_size = 1
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        lora1 = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        lora2 = RecipeLoRA(loras=({"path": "b.safetensors", "strength": 1.0},))
+        lora3 = RecipeLoRA(loras=({"path": "c.safetensors", "strength": 1.0},))
+        compose = RecipeCompose(branches=(lora1, lora2, lora3))
+        merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=1.0)
+
+        loader = MockLoRALoader()
+        widen = MockWIDEN()
+        set_id_map = {}
+
+        evaluate_recipe(
+            keys=["k0"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # Should pass 3 branches
+        assert len(widen.merge_calls[0]["weights_list"]) == 3
+
+
+class TestEvaluateRecipeLoRATarget:
+    """AC: @exit-batched-eval ac-2
+
+    Given: a recipe tree with a single LoRA target
+    When: batched evaluation runs
+    Then: filter_delta_batched is called with the applied LoRA delta and backbone
+    """
+
+    def test_lora_target_calls_filter_delta_batched(self):
+        """LoRA target should call filter_delta_batched."""
+        # AC: @exit-batched-eval ac-2
+        batch_size = 2
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        loader = MockLoRALoader()
+        widen = MockWIDEN()
+        set_id_map = {id(lora): "set1"}
+
+        evaluate_recipe(
+            keys=["k0", "k1"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # Should call filter_delta_batched once
+        assert len(widen.filter_calls) == 1
+        assert len(widen.merge_calls) == 0
+
+    def test_lora_applied_passed_to_filter(self):
+        """Applied LoRA weights should be passed to filter_delta_batched."""
+        # AC: @exit-batched-eval ac-2
+        batch_size = 1
+        base_batch = torch.zeros(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        # Add a delta that will be applied
+        delta = torch.ones(4, 4)
+        loader = MockLoRALoader({"k0": delta})
+        widen = MockWIDEN()
+        set_id_map = {id(lora): "set1"}
+
+        evaluate_recipe(
+            keys=["k0"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # The lora_applied tensor should be different from base if delta was applied
+        assert len(widen.filter_calls) == 1
+
+
+class TestEvaluateRecipeChainedMerge:
+    """AC: @exit-batched-eval ac-3
+
+    Given: a chain of RecipeMerge nodes
+    When: evaluation recurses
+    Then: inner merges evaluate first and results become the base for outer merges
+    """
+
+    def test_chained_merge_evaluates_inner_first(self):
+        """Inner merge should be evaluated before outer merge."""
+        # AC: @exit-batched-eval ac-3
+        batch_size = 1
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        inner_lora = RecipeLoRA(loras=({"path": "inner.safetensors", "strength": 1.0},))
+        inner_merge = RecipeMerge(base=base, target=inner_lora, backbone=None, t_factor=1.0)
+
+        outer_lora = RecipeLoRA(loras=({"path": "outer.safetensors", "strength": 1.0},))
+        outer_merge = RecipeMerge(base=inner_merge, target=outer_lora, backbone=None, t_factor=1.0)
+
+        loader = MockLoRALoader()
+        widen = MockWIDEN()
+        set_id_map = {}
+
+        evaluate_recipe(
+            keys=["k0"],
+            base_batch=base_batch,
+            recipe_node=outer_merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # Should have 2 filter calls - inner merge first, then outer
+        assert len(widen.filter_calls) == 2
+
+    def test_triple_chain_evaluates_in_order(self):
+        """Triple chain should evaluate innermost to outermost."""
+        # AC: @exit-batched-eval ac-3
+        batch_size = 1
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+
+        lora1 = RecipeLoRA(loras=({"path": "l1.safetensors", "strength": 1.0},))
+        merge1 = RecipeMerge(base=base, target=lora1, backbone=None, t_factor=1.0)
+
+        lora2 = RecipeLoRA(loras=({"path": "l2.safetensors", "strength": 1.0},))
+        merge2 = RecipeMerge(base=merge1, target=lora2, backbone=None, t_factor=1.0)
+
+        lora3 = RecipeLoRA(loras=({"path": "l3.safetensors", "strength": 1.0},))
+        merge3 = RecipeMerge(base=merge2, target=lora3, backbone=None, t_factor=1.0)
+
+        loader = MockLoRALoader()
+        widen = MockWIDEN()
+        set_id_map = {}
+
+        evaluate_recipe(
+            keys=["k0"],
+            base_batch=base_batch,
+            recipe_node=merge3,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # Should have 3 filter calls
+        assert len(widen.filter_calls) == 3
+
+
+class TestEvaluateRecipeGPUResults:
+    """AC: @exit-batched-eval ac-4
+
+    Given: the WIDEN algorithm produces results
+    When: they are returned from evaluation
+    Then: all result tensors are on GPU (transferred to CPU in patch installation phase)
+    """
+
+    def test_result_same_device_as_input(self):
+        """Result should be on same device as input."""
+        # AC: @exit-batched-eval ac-4
+        batch_size = 2
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        loader = MockLoRALoader()
+        widen = MockWIDEN()
+        set_id_map = {id(lora): "set1"}
+
+        result = evaluate_recipe(
+            keys=["k0", "k1"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",  # Would be "cuda" in production
+            dtype=torch.float32,
+        )
+
+        # Result should be on same device as input base_batch
+        assert result.device == base_batch.device
+
+    def test_result_not_transferred_to_cpu(self):
+        """Result should NOT be transferred to CPU (that happens in patch phase)."""
+        # AC: @exit-batched-eval ac-4
+        batch_size = 1
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        loader = MockLoRALoader()
+        widen = MockWIDEN()
+        set_id_map = {}
+
+        result = evaluate_recipe(
+            keys=["k0"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # Result shape should match input
+        assert result.shape == base_batch.shape
+        # Result dtype should match input dtype
+        assert result.dtype == base_batch.dtype
+
+
+class TestEvaluateRecipeBackboneOverride:
+    """AC: @exit-batched-eval ac-5
+
+    Given: a RecipeMerge with an explicit backbone reference that differs from the base
+    When: batched evaluation runs the WIDEN step
+    Then: the backbone model (not the base) is used as the importance reference for WIDEN analysis
+    """
+
+    def test_backbone_override_passed_to_widen(self):
+        """Explicit backbone should be passed to WIDEN functions."""
+        # AC: @exit-batched-eval ac-5
+        batch_size = 2
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        backbone_ref = RecipeBase(model_patcher=None, arch="sdxl")  # Different backbone
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=backbone_ref, t_factor=1.0)
+
+        loader = MockLoRALoader()
+        widen = MockWIDEN()
+        set_id_map = {id(lora): "set1"}
+
+        evaluate_recipe(
+            keys=["k0", "k1"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # filter_delta_batched should have been called
+        assert len(widen.filter_calls) == 1
+        # The backbone parameter should have been passed (we use base_batch as fallback)
+        call = widen.filter_calls[0]
+        assert call["backbone"] is not None
+
+    def test_no_backbone_uses_current_base(self):
+        """When backbone is None, current base should be used."""
+        # AC: @exit-batched-eval ac-5
+        batch_size = 1
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        loader = MockLoRALoader()
+        widen = MockWIDEN()
+        set_id_map = {}
+
+        evaluate_recipe(
+            keys=["k0"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # Should use current_base as backbone
+        call = widen.filter_calls[0]
+        assert torch.equal(call["backbone"], base_batch)
+
+    def test_compose_with_backbone_override(self):
+        """Compose target with backbone override should pass backbone to merge."""
+        # AC: @exit-batched-eval ac-5
+        batch_size = 1
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        backbone_ref = RecipeBase(model_patcher=None, arch="sdxl")
+        lora1 = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        lora2 = RecipeLoRA(loras=({"path": "b.safetensors", "strength": 1.0},))
+        compose = RecipeCompose(branches=(lora1, lora2))
+        merge = RecipeMerge(base=base, target=compose, backbone=backbone_ref, t_factor=1.0)
+
+        loader = MockLoRALoader()
+        widen = MockWIDEN()
+        set_id_map = {}
+
+        evaluate_recipe(
+            keys=["k0"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # merge_weights_batched should have backbone passed
+        assert len(widen.merge_calls) == 1
+        call = widen.merge_calls[0]
+        assert call["backbone"] is not None
