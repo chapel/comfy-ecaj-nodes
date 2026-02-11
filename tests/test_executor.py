@@ -940,6 +940,14 @@ class TestEvaluateRecipeChainedMerge:
 
         # Should have 2 filter calls - inner merge first, then outer
         assert len(widen.filter_calls) == 2
+        # Verify order: inner call uses base_batch as backbone,
+        # outer call's backbone is inner's result (which is base_batch
+        # since no deltas and filter passthrough returns lora_applied)
+        inner_call = widen.filter_calls[0]
+        outer_call = widen.filter_calls[1]
+        assert torch.equal(inner_call["backbone"], base_batch)
+        # Outer backbone should equal inner result (inner's lora_applied passthrough)
+        assert torch.equal(outer_call["backbone"], inner_call["lora_applied"])
 
     def test_triple_chain_evaluates_in_order(self):
         """Triple chain should evaluate innermost to outermost."""
@@ -973,8 +981,16 @@ class TestEvaluateRecipeChainedMerge:
             dtype=torch.float32,
         )
 
-        # Should have 3 filter calls
+        # Should have 3 filter calls in order: innermost to outermost
         assert len(widen.filter_calls) == 3
+        # Verify order: each subsequent call's backbone should equal the
+        # previous call's result (lora_applied passthrough since no deltas)
+        first_call = widen.filter_calls[0]
+        second_call = widen.filter_calls[1]
+        third_call = widen.filter_calls[2]
+        assert torch.equal(first_call["backbone"], base_batch)
+        assert torch.equal(second_call["backbone"], first_call["lora_applied"])
+        assert torch.equal(third_call["backbone"], second_call["lora_applied"])
 
 
 class TestEvaluateRecipeGPUResults:

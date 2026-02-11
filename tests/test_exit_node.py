@@ -31,8 +31,8 @@ class TestExitNodeReturnsModel:
 
         # Result is a clone, not the original
         assert result is not mock_model_patcher
-        # Clone has independent patches dict
-        assert result.patches_uuid != mock_model_patcher.patches_uuid
+        # Clone copies patches_uuid from source (matching real ComfyUI behavior)
+        assert result.patches_uuid == mock_model_patcher.patches_uuid
 
     def test_execute_with_lora_returns_patched_model(self, mock_model_patcher, tmp_path):
         """Exit with LoRA recipe should return model with set patches."""
@@ -240,9 +240,56 @@ class TestComposeCallsMergeWeights:
     def test_compose_target_uses_merge_weights(self, mock_model_patcher):
         """Compose with multiple branches should call merge_weights_batched."""
         # AC: @exit-node ac-3
-        # This is tested at the executor level - see test_executor.py
-        # TestEvaluateRecipeComposeTarget.test_compose_calls_merge_weights_batched
-        pass  # Integration tested via executor tests
+        from lib.executor import evaluate_recipe
+
+        batch_size = 2
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        lora_b = RecipeLoRA(loras=({"path": "b.safetensors", "strength": 0.8},))
+        compose = RecipeCompose(branches=(lora_a, lora_b))
+        merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=1.0)
+
+        class MockLoader:
+            def get_delta_specs(self, keys, key_indices, set_id=None):
+                return []
+
+        class MockWIDEN:
+            def __init__(self):
+                self.merge_calls = []
+                self.filter_calls = []
+
+            def merge_weights_batched(self, weights_list, backbone):
+                self.merge_calls.append(
+                    {"weights_list": weights_list, "backbone": backbone}
+                )
+                return torch.stack(weights_list).mean(dim=0)
+
+            def filter_delta_batched(self, lora_applied, backbone):
+                self.filter_calls.append(
+                    {"lora_applied": lora_applied, "backbone": backbone}
+                )
+                return lora_applied
+
+        loader = MockLoader()
+        widen = MockWIDEN()
+        set_id_map = {id(lora_a): "set_a", id(lora_b): "set_b"}
+
+        evaluate_recipe(
+            keys=["k0", "k1"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        assert len(widen.merge_calls) == 1
+        assert len(widen.merge_calls[0]["weights_list"]) == 2
+        assert len(widen.filter_calls) == 0
 
 
 # =============================================================================
@@ -261,9 +308,53 @@ class TestLoRACallsFilterDelta:
     def test_lora_target_uses_filter_delta(self, mock_model_patcher):
         """LoRA target should call filter_delta_batched."""
         # AC: @exit-node ac-4
-        # This is tested at the executor level - see test_executor.py
-        # TestEvaluateRecipeLoRATarget.test_lora_target_calls_filter_delta_batched
-        pass  # Integration tested via executor tests
+        from lib.executor import evaluate_recipe
+
+        batch_size = 2
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        class MockLoader:
+            def get_delta_specs(self, keys, key_indices, set_id=None):
+                return []
+
+        class MockWIDEN:
+            def __init__(self):
+                self.filter_calls = []
+                self.merge_calls = []
+
+            def filter_delta_batched(self, lora_applied, backbone):
+                self.filter_calls.append(
+                    {"lora_applied": lora_applied, "backbone": backbone}
+                )
+                return lora_applied
+
+            def merge_weights_batched(self, weights_list, backbone):
+                self.merge_calls.append(
+                    {"weights_list": weights_list, "backbone": backbone}
+                )
+                return torch.stack(weights_list).mean(dim=0)
+
+        loader = MockLoader()
+        widen = MockWIDEN()
+        set_id_map = {id(lora): "set1"}
+
+        evaluate_recipe(
+            keys=["k0", "k1"],
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        assert len(widen.filter_calls) == 1
+        assert len(widen.merge_calls) == 0
 
 
 # =============================================================================
@@ -282,9 +373,60 @@ class TestChainedMergeOrder:
     def test_chained_merge_inner_first(self, mock_model_patcher):
         """Inner merge should evaluate before outer merge."""
         # AC: @exit-node ac-5
-        # This is tested at the executor level - see test_executor.py
-        # TestEvaluateRecipeChainedMerge.test_chained_merge_evaluates_inner_first
-        pass  # Integration tested via executor tests
+        from lib.executor import evaluate_recipe
+
+        batch_size = 1
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        inner_lora = RecipeLoRA(
+            loras=({"path": "inner.safetensors", "strength": 1.0},)
+        )
+        inner_merge = RecipeMerge(
+            base=base, target=inner_lora, backbone=None, t_factor=1.0
+        )
+
+        outer_lora = RecipeLoRA(
+            loras=({"path": "outer.safetensors", "strength": 1.0},)
+        )
+        outer_merge = RecipeMerge(
+            base=inner_merge, target=outer_lora, backbone=None, t_factor=1.0
+        )
+
+        class MockLoader:
+            def get_delta_specs(self, keys, key_indices, set_id=None):
+                return []
+
+        call_order = []
+
+        class MockWIDEN:
+            def filter_delta_batched(self, lora_applied, backbone):
+                call_order.append("filter")
+                return lora_applied
+
+            def merge_weights_batched(self, weights_list, backbone):
+                call_order.append("merge")
+                return torch.stack(weights_list).mean(dim=0)
+
+        loader = MockLoader()
+        widen = MockWIDEN()
+        set_id_map = {id(inner_lora): "set_inner", id(outer_lora): "set_outer"}
+
+        evaluate_recipe(
+            keys=["k0"],
+            base_batch=base_batch,
+            recipe_node=outer_merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # Should have 2 filter calls: inner merge first, then outer
+        assert len(call_order) == 2
+        assert call_order[0] == "filter"  # inner
+        assert call_order[1] == "filter"  # outer
 
 
 # =============================================================================

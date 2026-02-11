@@ -53,9 +53,19 @@ class TestClone:
         assert key in cl.patches
         assert key not in mp.patches
 
-    def test_clone_different_uuid(self):
+    def test_clone_copies_uuid(self):
+        """clone() copies patches_uuid from source, matching real ComfyUI behavior."""
         mp = MockModelPatcher()
         cl = mp.clone()
+        assert cl.patches_uuid == mp.patches_uuid
+
+    def test_clone_uuid_diverges_after_add_patches(self):
+        """After add_patches, clone UUID diverges from source."""
+        mp = MockModelPatcher()
+        cl = mp.clone()
+        assert cl.patches_uuid == mp.patches_uuid
+        key = "diffusion_model.input_blocks.0.0.weight"
+        cl.add_patches({key: torch.zeros(4, 4)})
         assert cl.patches_uuid != mp.patches_uuid
 
 

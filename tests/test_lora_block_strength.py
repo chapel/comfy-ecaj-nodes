@@ -314,15 +314,57 @@ class TestBackwardsCompatibility:
         When: Exit applies LoRA deltas
         Then: global strength applies uniformly (backwards compatible)
         """
-        # This is verified by the fact that _apply_per_block_lora_strength
-        # is only called when block_config is not None
+        from lib.executor import evaluate_recipe
+
         lora = RecipeLoRA(
             loras=({"path": "test.safetensors", "strength": 0.8},),
             block_config=None,
         )
-
-        # block_config is None means no per-block scaling is applied
         assert lora.block_config is None
+
+        # Run through evaluate_recipe to verify uniform strength
+        keys = ["input_blocks.0.0.weight", "middle_block.0.weight"]
+        batch_size = 2
+        base_batch = torch.zeros(batch_size, 4, 4)
+
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        class MockLoader:
+            def get_delta_specs(self, keys_arg, key_indices, set_id=None):
+                return []
+
+        class MockWIDEN:
+            def __init__(self):
+                self.filter_calls = []
+
+            def filter_delta_batched(self, lora_applied, backbone):
+                self.filter_calls.append(
+                    {"lora_applied": lora_applied.clone(), "backbone": backbone.clone()}
+                )
+                return lora_applied
+
+        loader = MockLoader()
+        widen = MockWIDEN()
+        set_id_map = {id(lora): "set1"}
+
+        evaluate_recipe(
+            keys=keys,
+            base_batch=base_batch,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+            arch="sdxl",
+        )
+
+        # filter_delta_batched should be called once, and lora_applied
+        # should be the unscaled result (uniform strength, no per-block scaling)
+        assert len(widen.filter_calls) == 1
+        # With no deltas from loader, lora_applied equals base_batch
+        assert torch.equal(widen.filter_calls[0]["lora_applied"], base_batch)
 
     def test_recipe_merge_chain_preserves_lora_block_config(self):
         """RecipeMerge correctly preserves LoRA block_config in tree.
