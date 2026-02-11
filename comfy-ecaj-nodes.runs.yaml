@@ -552,7 +552,7 @@ runs:
   - _ulid: 01KH7F6VQK1E14CE6A9KBNCKVR
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-11T23:05:02.452Z
     step_results:
@@ -632,5 +632,21 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-11T23:05:57.570Z
-        completed_at: 2026-02-11T23:05:57.570Z
+        completed_at: 2026-02-11T23:06:11.515Z
+        notes: >-
+          ## Capture decisions
+
+
+          1. Friction: ported grouping criteria not verified → CAPTURED as observation 01KH7F8S
+
+          2. Success: dual reviewer pattern → SKIP, already tracked as 01KH6Y5Y
+
+          3. MockModelPatcher divergence → SKIP, already tracked as inbox 01KH6Y5J + observation
+          01KH6Y61
+
+          4. monkeypatch raising=False → SKIP, one-off
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-11T23:06:11.515Z
+        completed_at: 2026-02-11T23:06:11.515Z
     initiated_by: "@claude"
