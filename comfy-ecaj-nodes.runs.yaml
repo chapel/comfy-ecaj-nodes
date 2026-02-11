@@ -552,7 +552,7 @@ runs:
   - _ulid: 01KH7F6VQK1E14CE6A9KBNCKVR
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-11T23:05:02.452Z
     step_results:
@@ -601,5 +601,36 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-11T23:05:27.500Z
-        completed_at: 2026-02-11T23:05:27.500Z
+        completed_at: 2026-02-11T23:05:57.570Z
+        notes: >-
+          ## High-confidence items
+
+
+          ### Friction (1 item, systemic)
+
+          - **Grouping over-constraining discovered late**: OpSignature included affecting_sets
+          which was never used during evaluation — the loader already filters by set_id. This caused
+          massive group fragmentation (200+ groups vs ~10). Pattern: when porting code from a
+          reference implementation, verify each grouping criterion is actually consumed downstream,
+          not just structurally present. This was only caught when the user asked about batch sizes.
+
+
+          Already tracked:
+
+          - MockModelPatcher.clone() identity issue → covered by inbox 01KH6Y5J and observation
+          01KH6Y61
+
+          - monkeypatch raising=False → one-off, not systemic
+
+
+          ### Success (1 item)
+
+          - **Dual reviewer agreement with complementary findings**: pr-review caught code-level
+          suggestions, Codex caught spec/implementation divergence. Both approved correctness
+          independently. This is the second session confirming this pattern (01KH6Y5Y already
+          captures it).
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-11T23:05:57.570Z
+        completed_at: 2026-02-11T23:05:57.570Z
     initiated_by: "@claude"
