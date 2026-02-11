@@ -458,8 +458,20 @@ runs:
   - _ulid: 01KH6XZN55CA7GCFSXZ3V46Z11
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 6
     started_at: 2026-02-11T18:04:00.549Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-11T18:04:00.549Z
+        completed_at: 2026-02-11T18:04:14.705Z
+        notes: "What worked: parallel codex+claude review, debug prints for live diagnosis, user runtime
+          testing essential. Friction: (1) mock reproduced the key prefix bug so tests passed while
+          runtime failed, (2) silent except ImportError wasted time, (3) stacked bugs made diagnosis
+          harder"
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-11T18:04:14.705Z
+        completed_at: 2026-02-11T18:04:14.705Z
     initiated_by: "@claude"
