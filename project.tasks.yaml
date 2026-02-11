@@ -2120,7 +2120,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -2171,3 +2171,7 @@
         OOM kill due to cloning all affected keys to CPU RAM."
       supersedes: null
   todos: []
+  completed_at: 2026-02-11T20:35:39.491Z
+  closed_reason: Fix confirmed working in real ComfyUI. _unpatch_loaded_clones() forces any loaded
+    clone to fully unload via model_unload() before reading model_state_dict(), restoring clean base
+    weights. Zero memory overhead. 497 tests pass.
