@@ -1068,6 +1068,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-11T00:05:30.218Z
+  started_at: 2026-02-11T02:20:48.141Z
   notes:
     - _ulid: 01KH508VFBT2H54M5F3RHDF08Z
       created_at: 2026-02-11T00:05:30.219Z
@@ -1080,6 +1081,11 @@
         run pytest. Add ruff for linting. Single ubuntu-latest runner to start
         (extend to matrix later). Add pyproject.toml [tool.ruff] config.
         Files: .github/workflows/test.yml, pyproject.toml (ruff + pytest config)
+    - _ulid: 01KH58198P2XYEND6VHT87WAE3
+      created_at: 2026-02-11T02:21:10.806Z
+      author: "@claude"
+      content: "Added .github/workflows/ci.yml with two jobs: lint (ruff via astral-sh/ruff-action) and
+        test (pytest with CPU torch via uv). Triggers on push to main and all PRs."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T02:20:48.141Z
