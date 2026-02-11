@@ -202,6 +202,10 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #3. Implemented recipe type system with frozen dataclasses, tuple
+    fields, RecipeCompose.with_branch() for persistent tree semantics, RecipeNode type alias, and
+    __all__ exports. All 5 ACs have test coverage: AC-1 (frozen), AC-2 (persistent semantics), AC-3
+    (no GPU tensors), AC-4 (importable/constructible), AC-5 (WIDEN wire connections)."
   depends_on: []
   context: []
   priority: 1
@@ -209,6 +213,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.264Z
   started_at: 2026-02-11T02:28:43.363Z
+  completed_at: 2026-02-11T02:32:59.881Z
   notes:
     - _ulid: 01KH4HA46066MMF0GVC5BDX526
       created_at: 2026-02-10T19:44:03.264Z
@@ -240,11 +245,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T02:32:59.881Z
-  closed_reason: "Merged in PR #3. Implemented recipe type system with frozen dataclasses, tuple
-    fields, RecipeCompose.with_branch() for persistent tree semantics, RecipeNode type alias, and
-    __all__ exports. All 5 ACs have test coverage: AC-1 (frozen), AC-2 (persistent semantics), AC-3
-    (no GPU tensors), AC-4 (importable/constructible), AC-5 (WIDEN wire connections)."
 - _ulid: 01KH4HA463BT1D6RF0ZD1DRW2P
   slugs:
     - implement-entry-node
@@ -588,7 +588,7 @@
   type: task
   spec_ref: "@widen-core"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -632,6 +632,7 @@
       supersedes: null
   todos: []
   automation: eligible
+  started_at: 2026-02-11T02:33:53.360Z
 - _ulid: 01KH4HA47F493S53EWKW4EA9SF
   slugs:
     - implement-batched-pipeline-executor
