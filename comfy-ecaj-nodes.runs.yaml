@@ -89,7 +89,7 @@ runs:
   - _ulid: 01KH50QDZKY91JSHEXR5BGW4V2
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-11T00:13:27.923Z
     step_results:
@@ -102,5 +102,12 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-11T00:13:39.329Z
-        completed_at: 2026-02-11T00:13:39.329Z
+        completed_at: 2026-02-11T00:13:52.771Z
+        notes: "Friction: (1) spec-plan workflows not ported to new projects, (2) plan import --update
+          doesnt update ACs, (3) assess automation --all doesnt show saved status, (4) depends vs
+          depends_on JSON field confusion, (5) long slug typos causing atomic batch rollback"
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-11T00:13:52.771Z
+        completed_at: 2026-02-11T00:13:52.771Z
     initiated_by: "@claude"
