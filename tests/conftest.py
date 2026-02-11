@@ -169,8 +169,12 @@ def _make_stub_module(name: str) -> ModuleType:
 @pytest.fixture(autouse=True)
 def _mock_comfyui_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     """Inject stub modules so imports like 'import folder_paths' don't fail."""
+    folder_paths_mod = _make_stub_module("folder_paths")
+    # Mock get_filename_list for LoRA node dropdown (AC-3 @lora-node)
+    folder_paths_mod.get_filename_list = lambda folder: ["test_lora.safetensors"]
+
     stubs = {
-        "folder_paths": _make_stub_module("folder_paths"),
+        "folder_paths": folder_paths_mod,
         "comfy": _make_stub_module("comfy"),
         "comfy.utils": _make_stub_module("comfy.utils"),
         "comfy.model_management": _make_stub_module("comfy.model_management"),
