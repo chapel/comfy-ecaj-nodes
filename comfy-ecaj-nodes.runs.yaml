@@ -552,8 +552,54 @@ runs:
   - _ulid: 01KH7F6VQK1E14CE6A9KBNCKVR
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-11T23:05:02.452Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-11T23:05:02.452Z
+        completed_at: 2026-02-11T23:05:27.500Z
+        notes: >-
+          ## Session Review
+
+
+          ### What worked well
+
+          1. **Parallel dual reviews (pr-review + codex)** — Caught complementary issues. pr-review
+          found code-level suggestions, Codex caught the spec/implementation divergence on ac-1.
+          Running them in parallel was efficient.
+
+          2. **Incremental plan-then-implement** — Planning the perf optimizations upfront
+          identified that B2 (block pre-grouping) was deferred, then user feedback prompted adding
+          it. The plan structure made it easy to add.
+
+          3. **Previous session context recovery** — Picking up PR 33 from a context-exhausted
+          session worked smoothly. Git status + gh pr view gave enough context to understand the
+          state.
+
+          4. **Test-first verification** — Running tests after each change caught the
+          monkeypatch.setattr raising issue immediately.
+
+
+          ### Friction points
+
+          1. **monkeypatch.setattr raising=False** — The conftest comfy stub doesn't have
+          current_loaded_models, so monkeypatch.setattr fails by default. This is a recurring
+          pattern when adding new comfy APIs to test against. The stub should proactively include
+          commonly-used attributes.
+
+          2. **MockModelPatcher.clone() not matching real ComfyUI behavior** — clone() created a new
+          .model object instead of sharing it. This caused is_clone() to fail. Had to fix the mock
+          to match real behavior. Pattern: when adding mock methods that depend on object identity,
+          verify the mock's object graph matches the real one.
+
+          3. **OpSignature over-constraining discovered late** — The affecting_sets fragmentation
+          was only identified when the user asked "are you ensuring larger batches go through."
+          Could have been caught earlier during initial bottleneck analysis if we'd traced through
+          the eval pipeline to see whether affecting_sets was actually used.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-11T23:05:27.500Z
+        completed_at: 2026-02-11T23:05:27.500Z
     initiated_by: "@claude"
