@@ -1029,7 +1029,7 @@
   type: task
   spec_ref: "@memory-management"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@implement-exit-node"
