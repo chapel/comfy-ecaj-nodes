@@ -1678,75 +1678,70 @@
   created_at: 2026-02-11T05:42:34.804Z
   notes: []
   todos: []
-- title: Split executor.py into focused modules
+- title: Unify scalar/batched codepaths in widen.py and divergence.py
   description: >-
-    STRUCTURAL: lib/executor.py is 883 lines mixing 4 distinct concerns with high cyclomatic
-    complexity. evaluate_recipe alone is ~230 lines with nested closures. Codex confirmed the
-    coupling is hiding correctness bugs.
+    STRUCTURAL: ~200 lines of duplicated scalar/batched code in widen.py plus duplicated dimension
+    dispatch in both widen.py and divergence.py. This duplication already produced the flat/non-flat
+    parity bug.
 
 
-    SPLIT INTO:
+    WIDEN.PY PAIRS TO UNIFY:
 
-    1. lib/batch_groups.py - OpSignature, compile_batch_groups
+    - filter_delta / filter_delta_batched
 
-    2. lib/gpu_ops.py - DeltaSpec, apply_lora_batch_gpu, chunked_evaluation, compute_batch_size,
-    chunked
+    - merge_weights / merge_weights_batched
 
-    3. lib/per_block.py - _apply_per_block_lora_strength, _get_block_t_factors,
-    _apply_widen_filter_per_block, _apply_widen_merge_per_block
+    - _merge_1d_params / _merge_1d_params_batched
 
-    4. lib/recipe_eval.py - evaluate_recipe decomposed with EvalContext dataclass and explicit
-    helpers (_eval_base_for_merge, _resolve_backbone, _eval_target, _apply_merge_result,
-    _apply_filter, _apply_merge)
+    - _build_importance_masks / _build_importance_masks_batched
 
-    5. lib/executor.py - keep as compatibility facade/re-export
+    - WeightDisentangler: 8 methods (4 scalar + 4 batched)
 
 
-    MIGRATION ORDER (incremental, safe):
-
-    1. Move data types first (DeltaSpec, OpSignature), re-export from executor.py
-
-    2. Move pure helpers (compile_batch_groups, compute_batch_size, chunked)
-
-    3. Move apply_lora_batch_gpu + tests
-
-    4. Move per-block functions
-
-    5. Move evaluate_recipe last with EvalContext decomposition
+    APPROACH: Make batched canonical ([B, ...] tensors). Scalar calls become thin wrappers:
+    unsqueeze(0) -> call batched -> squeeze(0).
 
 
-    ADDITIONAL FIXES DURING SPLIT:
+    DIMENSION DISPATCH: Use reshape-to-canonical approach:
 
-    - Deduplicate apply_lora_batch_gpu single-vs-batched matmul (4 paths -> 2)
+    - Non-batched: [out, *tail] -> [1, out, K]
 
-    - Fix QKV: use DeltaSpec.offset for slice placement instead of hardcoded hidden//3
-
-    - Fix type contract: _eval_node returns Tensor | list[Tensor], make explicit
-
-    - Guard all torch.cuda.empty_cache() with torch.cuda.is_available()
-
-    - Fix backbone override: evaluate node.backbone subtree or fail loudly
+    - Batched: [B, out, *tail] -> [B, out, K]
 
 
-    VERIFICATION: All 467 tests pass after each step, ruff clean, new tests for QKV offset and
-    backbone
+    DIVERGENCE.PY: Same dim dispatch duplication. Flatten non-output axes generically. Also prefer
+    reshape() over view() (lib/divergence.py:49,57,91,100).
+
+
+    ALSO FIX:
+
+    - Remove unused WIDENConfig.n_models field (lib/widen.py:31)
+
+    - Fix RankingMechanism.exact_rank() unstable sort: add stable=True (lib/ranking.py:49 vs 157)
+
+    - Fix soft_rank output contract: normalize to [0,1] to match other strategies
+    (lib/ranking.py:84)
+
+
+    VERIFICATION: All scalar tests pass unchanged, add parity tests scalar(x)==batched([x])[0], ruff
+    clean
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
   priority: 2
   slugs:
-    - split-executor
+    - unify-scalar-batched
   tags:
     - refactor
     - review-finding
   depends_on:
-    - 01KH5KGM
-  _ulid: 01KH5KMG04RARQCWASARVXM7SN
+    - 01KH5KGY
+  _ulid: 01KH5KMVY3QERHS3AT7896GM85
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-11T05:43:54.628Z
+  created_at: 2026-02-11T05:44:06.851Z
   notes: []
   todos: []
