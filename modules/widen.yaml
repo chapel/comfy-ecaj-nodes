@@ -98,7 +98,7 @@ features:
     created: 2026-02-10T19:44:03.155Z
     status:
       maturity: draft
-      implementation: in_progress
+      implementation: implemented
   - _ulid: 01KH4HA42PAEFBHY5GT1D1YZVP
     slugs:
       - lora-node
