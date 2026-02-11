@@ -956,3 +956,90 @@
       supersedes: null
   todos: []
   automation: eligible
+- _ulid: 01KH508VE1GEDSBP3VENYEF2R0
+  slugs:
+    - implement-comfyui-mocking-and-fixtures
+  title: Implement ComfyUI Mocking and Fixtures
+  type: task
+  spec_ref: "@comfyui-mocking"
+  plan_ref: "@plan-testing-strategy"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags: []
+  vcs_refs: []
+  created_at: 2026-02-11T00:05:30.177Z
+  notes:
+    - _ulid: 01KH508VE1T9JEBJV2R50E10ZD
+      created_at: 2026-02-11T00:05:30.177Z
+      author: "@claude"
+      content: |
+        Implementation notes:
+
+        Use ComfyUI's own pattern from tests-unit/ and ComfyUI_Selectors:
+        sys.modules patching in conftest.py before node imports. MockModelPatcher
+        should use small tensors (4x4 float32) for speed. Recipe fixtures build
+        on lib/recipe.py dataclasses. Arch fixtures provide representative state
+        dict key sets for detection testing.
+        Files: tests/conftest.py, tests/mocks/__init__.py, tests/mocks/mock_comfy.py
+  todos: []
+- _ulid: 01KH508VEVHA4ZME2CDZ275XKS
+  slugs:
+    - implement-node-graph-testing
+  title: Implement Node Graph Testing
+  type: task
+  spec_ref: "@node-graph-testing"
+  plan_ref: "@plan-testing-strategy"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags: []
+  vcs_refs: []
+  created_at: 2026-02-11T00:05:30.203Z
+  notes:
+    - _ulid: 01KH508VEVQ633FW8E9Y3NX9TP
+      created_at: 2026-02-11T00:05:30.203Z
+      author: "@claude"
+      content: |
+        Implementation notes:
+
+        Create tests/test_graph.py with helper functions that instantiate node
+        classes and call their FUNCTION methods directly to build recipe trees.
+        The mock executor is a lightweight tree walker (separate from the real
+        executor) that returns an operation plan (list of {op: filter_delta|merge_weights,
+        keys: ...}) without touching GPU. This validates the Exit node's recipe
+        analysis logic independently.
+        Files: tests/test_graph.py, tests/helpers/graph_builder.py
+  todos: []
+- title: Implement CI Pipeline
+  type: task
+  spec_ref: "@ci-pipeline"
+  plan_ref: "@plan-testing-strategy"
+  priority: 3
+  slugs:
+    - implement-ci-pipeline
+  tags: []
+  depends_on: []
+  notes:
+    - _ulid: 01KH508VFBT2H54M5F3RHDF08Z
+      created_at: 2026-02-11T00:05:30.219Z
+      author: "@claude"
+      content: |
+        Implementation notes:
+
+        Follow ComfyUI's test-unit.yml pattern: install CPU-only torch via
+        --index-url https://download.pytorch.org/whl/cpu, install project deps,
+        run pytest. Add ruff for linting. Single ubuntu-latest runner to start
+        (extend to matrix later). Add pyproject.toml [tool.ruff] config.
+        Files: .github/workflows/test.yml, pyproject.toml (ruff + pytest config)
+  _ulid: 01KH508VFBCS29YV4HX4J1QTST
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-11T00:05:30.218Z
+  todos: []

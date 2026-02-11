@@ -88,3 +88,128 @@ features:
     traits: []
     notes: []
     created: 2026-02-10T19:39:32.459Z
+    requirements:
+      - _ulid: 01KH508VCWZRE8Q6NT56X3MXD7
+        slugs:
+          - comfyui-mocking
+        title: ComfyUI Mocking and Fixtures
+        type: requirement
+        tags: []
+        description: |
+          pytest conftest.py with sys.modules mocking for ComfyUI imports,
+          MockModelPatcher class, and recipe tree fixtures. The base layer that
+          all other tests depend on.
+        acceptance_criteria:
+          - id: ac-1
+            given: a test needs a ModelPatcher-like object
+            when: it uses the mock_model_patcher fixture
+            then: |
+              the mock provides model_state_dict(filter_prefix) returning a dict
+              of small fake tensors keyed like diffusion_model.input_blocks.0.0.weight,
+              clone() returning a new MockModelPatcher, add_patches() storing patches,
+              get_key_patches() returning patch data, and patches_uuid property
+          - id: ac-2
+            given: a test needs a recipe tree
+            when: it uses recipe fixtures
+            then: |
+              pre-built recipe trees are available for single-LoRA, multi-LoRA set,
+              compose (2 branches), chain (2 sequential merges), and full
+              (compose + chain) patterns
+          - id: ac-3
+            given: tests for nodes that import ComfyUI modules like folder_paths
+            when: they run without ComfyUI installed
+            then: |
+              ComfyUI modules are mocked via sys.modules patching in conftest.py
+              before any node module is imported
+          - id: ac-4
+            given: a test needs fake SDXL or Z-Image state dict keys
+            when: it uses arch-specific fixtures
+            then: |
+              fixture provides a dict with representative key patterns for each
+              supported architecture (input_blocks for SDXL, layers + noise_refiner
+              for Z-Image)
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-11T00:05:30.140Z
+      - _ulid: 01KH508VD63383F1GR9V1X9F9K
+        slugs:
+          - node-graph-testing
+        title: Node Graph Testing
+        type: requirement
+        tags: []
+        description: |
+          Integration tests that validate the recipe graph building pipeline.
+          Uses mock entry node to feed RecipeBase into the node chain, validates
+          recipe tree structure through LoRA/Compose/Merge, and uses a mock
+          executor path in Exit to verify the tree would produce correct operation
+          sequences (filter_delta vs merge_weights) without GPU execution.
+        acceptance_criteria:
+          - id: ac-1
+            given: a mock Entry node producing a RecipeBase with arch sdxl
+            when: wired to LoRA node then to Merge node
+            then: |
+              the resulting RecipeMerge contains the correct base (RecipeBase)
+              and target (RecipeLoRA with the specified LoRA) and t_factor
+          - id: ac-2
+            given: a recipe graph with compose target containing 3 branches
+            when: the mock executor analyzes the tree
+            then: it identifies this as a merge_weights operation (not filter_delta)
+          - id: ac-3
+            given: a recipe graph with single LoRA target
+            when: the mock executor analyzes the tree
+            then: it identifies this as a filter_delta operation
+          - id: ac-4
+            given: a chain of two Merge nodes (inner merge feeds outer base)
+            when: the mock executor walks the tree
+            then: it identifies inner merge must evaluate first and feeds into outer
+          - id: ac-5
+            given: an invalid recipe graph (e.g. RecipeBase wired to compose branch)
+            when: validation runs
+            then: a clear error is raised naming the invalid type and position
+          - id: ac-6
+            given: a complete graph matching the hyphoria workflow from design doc 6.5
+            when: built and validated through the node chain
+            then: the recipe tree structure matches the expected compose-merge-chain pattern
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-11T00:05:30.150Z
+      - _ulid: 01KH508VDJJNRN312NV7Y260HZ
+        slugs:
+          - ci-pipeline
+        title: CI Pipeline
+        type: requirement
+        tags: []
+        description: |
+          GitHub Actions workflow for automated testing. Initial scope is
+          unit tests with CPU-only torch and ruff linting on push/PR. Designed
+          to be extended later with comfy-test registration and workflow smoke tests.
+        acceptance_criteria:
+          - id: ac-1
+            given: a push to any branch or a PR is opened
+            when: GitHub Actions runs
+            then: |
+              pytest executes with CPU-only PyTorch on ubuntu-latest and all
+              tests pass
+          - id: ac-2
+            given: the CI workflow
+            when: linting step runs
+            then: ruff check passes with no errors
+          - id: ac-3
+            given: CI completes
+            when: results are reported
+            then: PR shows green check for both test and lint jobs
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-11T00:05:30.162Z
