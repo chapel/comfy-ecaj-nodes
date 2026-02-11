@@ -803,4 +803,14 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KH5HAKP98WMBZXARWR21BD4N
+    type: friction
+    content: "pytest vs ComfyUI __init__.py: Root __init__.py with relative imports (from .nodes.x)
+      breaks pytest Package collector. Fix requires three-part solution: (1) try/except ImportError
+      in __init__.py, (2) collect_ignore = ['__init__.py'] in root conftest.py, (3)
+      --import-mode=importlib in pytest config. Took 6 iterations to discover this pattern."
+    created_at: 2026-02-11T05:03:33.577Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
