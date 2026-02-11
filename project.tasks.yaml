@@ -2037,22 +2037,32 @@
         for async transfers on large batches. Fix: add pin_memory option in gpu_ops.py:273-274."
       supersedes: null
   todos: []
-- title: Add unit tests for LoRA alpha reading from safetensors
+- _ulid: 01KH70WT78G1NNBJCNC9PH7JDC
+  slugs: []
+  title: Add unit tests for LoRA alpha reading from safetensors
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 2
-  slugs: []
   tags:
     - testing
     - correctness
-  depends_on: []
-  _ulid: 01KH70WT78G1NNBJCNC9PH7JDC
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-11T18:54:53.160Z
-  notes: []
+  notes:
+    - _ulid: 01KH70X1M1S20E8QECK2ARVN6N
+      created_at: 2026-02-11T18:55:00.737Z
+      author: "@claude"
+      content: "Both SDXL and Z-Image loaders now read .alpha keys from safetensors files (commits
+        e1bcdd1). Existing test fixtures (sdxl_lora_with_alpha etc.) don't include .alpha tensor
+        keys, so only the default alpha=rank path is covered. Need tests with safetensors files
+        containing .alpha scalars where alpha \\!= rank to verify correct scale computation (scale =
+        strength * alpha / rank). Files: lib/lora/sdxl.py, lib/lora/zimage.py,
+        tests/test_sdxl_loader.py, tests/test_zimage_loader.py."
+      supersedes: null
   todos: []
