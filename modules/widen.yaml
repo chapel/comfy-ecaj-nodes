@@ -606,7 +606,7 @@ features:
         created: 2026-02-10T19:44:03.212Z
     status:
       maturity: draft
-      implementation: in_progress
+      implementation: implemented
   - _ulid: 01KH4HA44KN101QT0AHV6JVW5J
     slugs:
       - memory-management
