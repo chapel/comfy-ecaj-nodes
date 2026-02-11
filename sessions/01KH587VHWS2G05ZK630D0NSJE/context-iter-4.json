@@ -1,0 +1,277 @@
+{
+  "generated_at": "2026-02-11T02:48:01.246Z",
+  "branch": "feat/entry-node",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-11T02:48:01.246Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KH4HA463",
+      "title": "Implement Entry Node",
+      "started_at": "2026-02-11T02:44:49.090Z",
+      "priority": 2,
+      "spec_ref": "@entry-node",
+      "note_count": 3,
+      "last_note_at": "2026-02-11T02:46:29.393Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KH4HA463",
+      "task_title": "Implement Entry Node",
+      "task_status": "pending_review",
+      "note_ulid": "01KH59FM",
+      "created_at": "2026-02-11T02:46:29.393Z",
+      "author": "@claude",
+      "content": "Implemented Entry Node with architecture detection. Created detect_architecture() function with pattern matching for SDXL (input_blocks/middle_block/output_blocks), Z-Image (layers + noise_refiner), Flux (double_blocks), and Qwen (60+ transformer_blocks). Flux/Qwen are detected but raise UnsupportedArchitectureError. Added 17 tests covering all 5 ACs: AC-1 (returns RecipeBase), AC-2 (SDXL detection), AC-3 (Z-Image detection), AC-4 (no GPU/tensor copy), AC-5 (unsupported arch errors). All 107 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA47B",
+      "task_title": "Implement WIDEN Core Algorithm",
+      "task_status": "completed",
+      "note_ulid": "01KH594A",
+      "created_at": "2026-02-11T02:40:18.663Z",
+      "author": "@claude",
+      "content": "Implemented WIDEN core algorithm port from merge-router. Created 5 modules: numerical_config.py (epsilon handling), sparsity.py (sparsemax/entmax), ranking.py (importance ranking), divergence.py (direction divergence), widen.py (main algorithm). Added 32 tests covering all 9 ACs: filter_delta zeros low-importance (AC-1), merge_weights routes via softmax (AC-2), batched variants match per-key (AC-3), no ComfyUI imports (AC-4), deterministic behavior (AC-5), fp16/bf16 use fp32 (AC-6), default config values (AC-7), filter_delta_batched fallback (AC-8), merge_weights_batched fallback (AC-9). All 90 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA460",
+      "task_title": "Implement Recipe Type System",
+      "task_status": "completed",
+      "note_ulid": "01KH58K0",
+      "created_at": "2026-02-11T02:30:51.734Z",
+      "author": "@claude",
+      "content": "Completed Recipe Type System: added RecipeCompose.with_branch() for persistent tree semantics (AC-2), added RecipeNode type alias, added __all__ exports. Added 18 new tests: 4 for AC-2 (with_branch returns new instance, original unchanged), 4 for AC-3 (no GPU tensors in recipe objects), 3 for AC-4 (all classes importable/constructible), 7 for AC-5 (WIDEN wire connections between nodes). All 58 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH508VF",
+      "task_title": "Implement CI Pipeline",
+      "task_status": "completed",
+      "note_ulid": "01KH5819",
+      "created_at": "2026-02-11T02:21:10.806Z",
+      "author": "@claude",
+      "content": "Added .github/workflows/ci.yml with two jobs: lint (ruff via astral-sh/ruff-action) and test (pytest with CPU torch via uv). Triggers on push to main and all PRs."
+    },
+    {
+      "task_ref": "01KH4H1VQK",
+      "task_title": "Implement Testing Infrastructure",
+      "task_status": "completed",
+      "note_ulid": "01KH55YY",
+      "created_at": "2026-02-11T01:44:56.926Z",
+      "author": "@claude",
+      "content": "Created tests/conftest.py with: MockModelPatcher (4x4 float32 tensors, SDXL-like keys, model_state_dict/clone/add_patches/get_key_patches/patches_uuid), recipe fixtures (mock_model_patcher, recipe_base, recipe_single_lora, recipe_multi_lora, recipe_compose, recipe_chain), autouse ComfyUI API mocks (folder_paths, comfy, comfy.utils, comfy.model_management). Created 3 test files: test_packaging.py (5 smoke tests for node attributes/CATEGORY), test_recipe.py (13 tests for frozen/tuple/structure), test_mock_model_patcher.py (15 tests for mock fidelity). All 33 tests pass without ComfyUI, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA463",
+      "task_title": "Implement Entry Node",
+      "task_status": "pending_review",
+      "note_ulid": "01KH4J2T",
+      "created_at": "2026-02-10T19:57:32.482Z",
+      "author": "@claude",
+      "content": "NF-1 scope clarification: v1 detects SDXL and Z-Image as supported architectures. Flux (double_blocks) and Qwen (transformer_blocks) should be detected and produce a clear UnsupportedArchitectureError with a message like 'Detected Flux architecture but no WIDEN loader is available yet. Supported: sdxl, zimage.' This way the detection code is future-proof but the error path is explicit."
+    },
+    {
+      "task_ref": "01KH4HA463",
+      "task_title": "Implement Entry Node",
+      "task_status": "pending_review",
+      "note_ulid": "01KH4HA4",
+      "created_at": "2026-02-10T19:44:03.267Z",
+      "author": "@claude",
+      "content": "Implementation notes:\n\nStub in nodes/entry.py. Architecture detection function should live in\nlib/arch_detect.py (or inline if small) -- inspect model.model_state_dict()\nkeys for patterns: SDXL has input_blocks, middle_block, output_blocks;\nZ-Image has layers.N. plus noise_refiner; Flux has double_blocks; Qwen\nhas transformer_blocks at depth 60. Check patterns in order of specificity\n(Z-Image before generic layers). For unsupported arch error, include first\n5 state dict key prefixes in the error message for debugging. ModelPatcher\nis stored as-is in RecipeBase (reference only, no clone, no tensor ops).\nTest by constructing MockModelPatcher instances with different key patterns\nand asserting detected arch.\nFiles: nodes/entry.py, optionally lib/arch_detect.py.\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [
+    {
+      "ref": "01KH4HA467",
+      "title": "Implement LoRA Node",
+      "priority": 2,
+      "spec_ref": "@lora-node",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA46A",
+      "title": "Implement Compose Node",
+      "priority": 2,
+      "spec_ref": "@compose-node",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA46D",
+      "title": "Implement Merge Node",
+      "priority": 2,
+      "spec_ref": "@merge-node",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA473",
+      "title": "Implement Exit Patch Installation",
+      "priority": 2,
+      "spec_ref": "@exit-patch-install",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA47F",
+      "title": "Implement Batched Pipeline Executor",
+      "priority": 2,
+      "spec_ref": "@batched-executor",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA47M",
+      "title": "Implement Architecture-Specific LoRA Loaders",
+      "priority": 2,
+      "spec_ref": "@lora-loaders",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA48P",
+      "title": "Implement Block Config Type",
+      "priority": 3,
+      "spec_ref": "@block-config-type",
+      "tags": []
+    },
+    {
+      "ref": "01KH508VE1",
+      "title": "Implement ComfyUI Mocking and Fixtures",
+      "priority": 3,
+      "spec_ref": "@comfyui-mocking",
+      "tags": []
+    }
+  ],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KH4HA47B",
+      "title": "Implement WIDEN Core Algorithm",
+      "completed_at": "2026-02-11T02:43:54.707Z",
+      "closed_reason": "Merged in PR #4. Implemented WIDEN core algorithm port from merge-router with 5 modules (numerical_config.py, sparsity.py, ranking.py, divergence.py, widen.py). All 9 ACs covered with 32 tests: filter_delta zeros low-importance (AC-1), merge_weights routes via softmax (AC-2), batched variants match per-key (AC-3), no ComfyUI imports (AC-4), deterministic behavior (AC-5), fp16/bf16 use fp32 (AC-6), default config values (AC-7), filter_delta_batched fallback (AC-8), merge_weights_batched fallback (AC-9)."
+    },
+    {
+      "ref": "01KH4HA460",
+      "title": "Implement Recipe Type System",
+      "completed_at": "2026-02-11T02:32:59.881Z",
+      "closed_reason": "Merged in PR #3. Implemented recipe type system with frozen dataclasses, tuple fields, RecipeCompose.with_branch() for persistent tree semantics, RecipeNode type alias, and __all__ exports. All 5 ACs have test coverage: AC-1 (frozen), AC-2 (persistent semantics), AC-3 (no GPU tensors), AC-4 (importable/constructible), AC-5 (WIDEN wire connections)."
+    },
+    {
+      "ref": "01KH508VF",
+      "title": "Implement CI Pipeline",
+      "completed_at": "2026-02-11T02:27:43.054Z",
+      "closed_reason": "Merged in PR #2. Added GitHub Actions CI workflow with lint (ruff via astral-sh/ruff-action) and test (pytest with CPU-only PyTorch via uv) jobs. Triggers on push to main and all PRs. All ACs verified: ac-1 (pytest with CPU torch), ac-2 (ruff check), ac-3 (green checks on both jobs)."
+    },
+    {
+      "ref": "01KH4H1VQK",
+      "title": "Implement Testing Infrastructure",
+      "completed_at": "2026-02-11T02:26:48.995Z",
+      "closed_reason": "Merged in PR #1. Implemented testing infrastructure with: MockModelPatcher (4x4 float32 tensors, SDXL-like keys, model_state_dict/clone/add_patches/get_key_patches/patches_uuid), recipe fixtures (recipe_base, recipe_single_lora, recipe_multi_lora, recipe_compose, recipe_chain), autouse ComfyUI API mocks (folder_paths, comfy modules). All 37 tests pass without ComfyUI. All 4 ACs verified with test coverage."
+    },
+    {
+      "ref": "01KH4H1VQF",
+      "title": "Implement ComfyUI Packaging",
+      "completed_at": "2026-02-11T02:25:41.782Z",
+      "closed_reason": "Merged in PR #1. Implemented ComfyUI packaging infrastructure: NODE_CLASS_MAPPINGS with 5 WIDEN nodes, pyproject.toml with [tool.comfy] metadata (PublisherId=ecaj, DisplayName=ECAJ Nodes), lowercase ecaj/merge CATEGORY on all nodes, empty runtime deps with dev deps in optional-dependencies. All 4 ACs covered by tests in test_packaging.py."
+    },
+    {
+      "ref": "01KH4DWQ",
+      "title": "Port design doc into kspec specs and tasks",
+      "completed_at": "2026-02-10T21:40:56.673Z",
+      "closed_reason": null
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "746292c",
+      "full_hash": "746292c62009025a3f5333d018ac7c7a8190a9aa",
+      "date": "2026-02-11T02:46:50.000Z",
+      "message": "feat: implement WIDEN entry node with architecture detection",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "74ff35f",
+      "full_hash": "74ff35f73b18bf3525f7c7263037c0ec5cec6223",
+      "date": "2026-02-11T02:40:47.000Z",
+      "message": "feat: implement WIDEN core algorithm",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "b01d519",
+      "full_hash": "b01d51945588291afe0c5c8563e7223664ac92e4",
+      "date": "2026-02-11T02:32:52.000Z",
+      "message": "Merge pull request #3 from chapel/feat/recipe-type-system",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "d594772",
+      "full_hash": "d5947722075376272dbfc3a9cac0928128afb6ef",
+      "date": "2026-02-11T02:31:11.000Z",
+      "message": "feat: complete recipe type system with persistent semantics",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "a442dd5",
+      "full_hash": "a442dd5ace3379f79dbac2e29fc17a48f7cda2cf",
+      "date": "2026-02-11T02:23:55.000Z",
+      "message": "Merge pull request #2 from chapel/feat/ci-pipeline",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "29e14c3",
+      "full_hash": "29e14c3c6893cc3b582042d0dbd724aa6299e5a4",
+      "date": "2026-02-11T02:21:29.000Z",
+      "message": "feat: add GitHub Actions CI workflow",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "8d95a47",
+      "full_hash": "8d95a47c81a0354210ddccebdb6d4ae80b474377",
+      "date": "2026-02-11T02:17:30.000Z",
+      "message": "feat: add packaging config and testing infrastructure (#1)",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "902d7fc",
+      "full_hash": "902d7fcc689deedd83eb66e0ed372b478d4dc173",
+      "date": "2026-02-11T01:03:37.000Z",
+      "message": "feat: add ralph loop workflow hooks and guard scripts",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ceca80c",
+      "full_hash": "ceca80c50b6e67c186f9e2b6a5fb646497f7b1c1",
+      "date": "2026-02-11T00:41:24.000Z",
+      "message": "docs: add WIP readme",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "f01cdc1",
+      "full_hash": "f01cdc12c8afcbe8db70baacc1b0ddca757ef1b4",
+      "date": "2026-02-11T00:26:14.000Z",
+      "message": "feat: scaffold comfy-ecaj-nodes with WIDEN merge node stubs and recipe system",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": false,
+    "staged": [],
+    "unstaged": [],
+    "untracked": [
+      "uv.lock"
+    ]
+  },
+  "inbox_items": [],
+  "stats": {
+    "total_tasks": 25,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 8,
+    "blocked": 0,
+    "completed": 6,
+    "inbox_items": 0
+  }
+}

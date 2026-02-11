@@ -313,7 +313,7 @@
   type: task
   spec_ref: "@lora-node"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
@@ -355,6 +355,10 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T02:54:03.844Z
+  closed_reason: "Merged in PR #6. Implemented LoRA node with folder_paths dropdown, RecipeLoRA output
+    with path/strength tuples, prev chaining for LoRA sets, and zero-strength preservation. All 5
+    ACs have test coverage (12 tests total)."
 - _ulid: 01KH4HA46AAJBFFJ5JAVM9EM2H
   slugs:
     - implement-compose-node
