@@ -558,7 +558,12 @@ class TestAnalysisSetWiring:
         compose = RecipeCompose(branches=(lora_a, lora_b))
         merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=1.0)
 
-        result = analyze_recipe(merge, lora_base_path=temp_dir)
+        import os
+
+        result = analyze_recipe(
+            merge,
+            lora_path_resolver=lambda name: os.path.join(temp_dir, name),
+        )
 
         # Should have 2 sets
         assert len(result.set_affected) == 2

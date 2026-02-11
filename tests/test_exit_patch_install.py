@@ -17,6 +17,11 @@ from nodes.exit import (
 from tests.conftest import MockModelPatcher
 
 
+def _dir_resolver(base_dir: str):
+    """Create a resolver that joins LoRA names to a base directory."""
+    return lambda name: os.path.join(base_dir, name)
+
+
 class TestInstallMergedPatches:
     """Tests for install_merged_patches function."""
 
@@ -194,8 +199,8 @@ class TestComputeRecipeHash:
 
             lora = RecipeLoRA(loras=({"path": "lora_a.safetensors", "strength": 1.0},))
 
-            hash1 = _compute_recipe_hash(lora, lora_base_path=tmpdir)
-            hash2 = _compute_recipe_hash(lora, lora_base_path=tmpdir)
+            hash1 = _compute_recipe_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
+            hash2 = _compute_recipe_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
 
             assert hash1 == hash2
 
@@ -210,7 +215,7 @@ class TestComputeRecipeHash:
                 f.write(b"initial data")
 
             lora = RecipeLoRA(loras=({"path": "lora_a.safetensors", "strength": 1.0},))
-            hash1 = _compute_recipe_hash(lora, lora_base_path=tmpdir)
+            hash1 = _compute_recipe_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
 
             # Wait to ensure mtime changes (filesystem resolution)
             time.sleep(0.1)
@@ -219,7 +224,7 @@ class TestComputeRecipeHash:
             with open(lora_path, "wb") as f:
                 f.write(b"modified data with more content")
 
-            hash2 = _compute_recipe_hash(lora, lora_base_path=tmpdir)
+            hash2 = _compute_recipe_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
 
             assert hash1 != hash2
 

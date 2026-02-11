@@ -9,6 +9,7 @@ Covers all 6 acceptance criteria:
 - AC-6: FileNotFoundError for missing LoRA files
 """
 
+import os
 import tempfile
 from pathlib import Path
 
@@ -19,6 +20,11 @@ from safetensors.torch import save_file
 from lib.analysis import AnalysisResult, analyze_recipe, get_keys_to_process
 from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 from tests.conftest import MockModelPatcher
+
+
+def _dir_resolver(base_dir: str):
+    """Create a resolver that joins LoRA names to a base directory."""
+    return lambda name: os.path.join(base_dir, name)
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -91,7 +97,7 @@ class TestAC1TreeWalk:
         )
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        result = analyze_recipe(merge, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         assert result.model_patcher is mock_model_patcher
         assert result.arch == "sdxl"
@@ -113,7 +119,7 @@ class TestAC1TreeWalk:
         lora_b = RecipeLoRA(loras=({"path": Path(sdxl_lora_b).name, "strength": 0.5},))
         merge_b = RecipeMerge(base=merge_a, target=lora_b, backbone=None, t_factor=0.7)
 
-        result = analyze_recipe(merge_b, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge_b, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         assert result.model_patcher is mock_model_patcher
         assert result.arch == "sdxl"
@@ -172,7 +178,7 @@ class TestAC2SetIDAssignment:
         lora = RecipeLoRA(loras=({"path": Path(sdxl_lora_a).name, "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        result = analyze_recipe(merge, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         assert len(result.set_affected) == 1
         result.loader.cleanup()
@@ -196,7 +202,7 @@ class TestAC2SetIDAssignment:
         )
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        result = analyze_recipe(merge, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         # Should still be one set (both LoRAs in same RecipeLoRA)
         assert len(result.set_affected) == 1
@@ -218,7 +224,7 @@ class TestAC2SetIDAssignment:
         lora_b = RecipeLoRA(loras=({"path": Path(sdxl_lora_b).name, "strength": 0.5},))
         merge_b = RecipeMerge(base=merge_a, target=lora_b, backbone=None, t_factor=0.7)
 
-        result = analyze_recipe(merge_b, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge_b, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         # Two different RecipeLoRA nodes = two sets
         assert len(result.set_affected) == 2
@@ -239,7 +245,7 @@ class TestAC2SetIDAssignment:
         compose = RecipeCompose(branches=(lora_a, lora_b))
         merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=1.0)
 
-        result = analyze_recipe(merge, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         # Two branches = two sets
         assert len(result.set_affected) == 2
@@ -268,7 +274,7 @@ class TestAC3LoaderSelection:
         lora = RecipeLoRA(loras=({"path": Path(sdxl_lora_a).name, "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        result = analyze_recipe(merge, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         assert isinstance(result.loader, SDXLLoader)
         result.loader.cleanup()
@@ -292,7 +298,7 @@ class TestAC3LoaderSelection:
         lora = RecipeLoRA(loras=({"path": "zimage_lora.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        result = analyze_recipe(merge, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         assert isinstance(result.loader, ZImageLoader)
         result.loader.cleanup()
@@ -322,7 +328,7 @@ class TestAC4AffectedKeyMap:
         lora_b = RecipeLoRA(loras=({"path": Path(sdxl_lora_b).name, "strength": 0.5},))
         merge_b = RecipeMerge(base=merge_a, target=lora_b, backbone=None, t_factor=0.7)
 
-        result = analyze_recipe(merge_b, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge_b, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         # Each set should have its own affected keys
         assert len(result.set_affected) == 2
@@ -346,7 +352,7 @@ class TestAC4AffectedKeyMap:
         lora = RecipeLoRA(loras=({"path": Path(sdxl_lora_a).name, "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        result = analyze_recipe(merge, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         for set_id, keys in result.set_affected.items():
             for key in keys:
@@ -372,7 +378,7 @@ class TestAC4AffectedKeyMap:
         lora_b = RecipeLoRA(loras=({"path": Path(sdxl_lora_b).name, "strength": 0.5},))
         merge_b = RecipeMerge(base=merge_a, target=lora_b, backbone=None, t_factor=0.7)
 
-        result = analyze_recipe(merge_b, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge_b, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         # affected_keys should be union of all set keys
         expected_union = set()
@@ -445,7 +451,7 @@ class TestAC6MissingLoraError:
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         with pytest.raises(FileNotFoundError) as exc_info:
-            analyze_recipe(merge, lora_base_path=temp_lora_dir)
+            analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         # Error should name the missing file
         assert "nonexistent_lora.safetensors" in str(exc_info.value)
@@ -462,7 +468,7 @@ class TestAC6MissingLoraError:
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         with pytest.raises(FileNotFoundError) as exc_info:
-            analyze_recipe(merge, lora_base_path=temp_lora_dir)
+            analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         error_msg = str(exc_info.value)
         assert "missing.safetensors" in error_msg
@@ -486,10 +492,79 @@ class TestAC6MissingLoraError:
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         with pytest.raises(FileNotFoundError):
-            analyze_recipe(merge, lora_base_path=temp_lora_dir)
+            analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         # No cleanup assertion needed - the loader was created but error raised
         # before returning. Caller doesn't get a result to cleanup.
+
+
+# ---------------------------------------------------------------------------
+# Nested path resolution (regression test for nested LoRA directories)
+# ---------------------------------------------------------------------------
+
+
+class TestNestedLoraPathResolution:
+    """Regression: LoRA files in subdirectories must resolve correctly."""
+
+    def test_nested_subdir_resolved_by_resolver(
+        self,
+        mock_model_patcher: MockModelPatcher,
+        temp_lora_dir: str,
+    ):
+        """LoRA name with subdirectory resolves when resolver searches multiple dirs."""
+        import tempfile as _tempfile
+
+        with _tempfile.TemporaryDirectory() as dir2:
+            subdir = Path(dir2) / "z-image"
+            subdir.mkdir()
+            nested_path = subdir / "nested_lora.safetensors"
+            tensors = {
+                "lora_unet_input_blocks_0_0.lora_up.weight": torch.randn(64, 8),
+                "lora_unet_input_blocks_0_0.lora_down.weight": torch.randn(8, 32),
+            }
+            save_file(tensors, str(nested_path))
+
+            # Build a resolver that searches dir2 (NOT temp_lora_dir)
+            # This simulates ComfyUI's get_full_path searching multiple directories
+            search_dirs = [temp_lora_dir, dir2]
+
+            def multi_dir_resolver(name: str) -> str | None:
+                for d in search_dirs:
+                    candidate = os.path.join(d, name)
+                    if os.path.isfile(candidate):
+                        return candidate
+                return None
+
+            base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+            lora = RecipeLoRA(
+                loras=({"path": "z-image/nested_lora.safetensors", "strength": 1.0},)
+            )
+            merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+            # This would fail with the old lora_base_path=temp_lora_dir approach
+            # because the file lives in dir2, not temp_lora_dir
+            result = analyze_recipe(merge, lora_path_resolver=multi_dir_resolver)
+
+            assert len(result.set_affected) == 1
+            assert len(result.affected_keys) > 0
+            result.loader.cleanup()
+
+    def test_resolver_returns_none_for_missing_file(
+        self,
+        mock_model_patcher: MockModelPatcher,
+    ):
+        """When resolver returns None, FileNotFoundError is raised."""
+        def null_resolver(name: str) -> str | None:
+            return None
+
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(
+            loras=({"path": "subdir/missing.safetensors", "strength": 1.0},)
+        )
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        with pytest.raises(FileNotFoundError, match="subdir/missing.safetensors"):
+            analyze_recipe(merge, lora_path_resolver=null_resolver)
 
 
 # ---------------------------------------------------------------------------
@@ -516,7 +591,7 @@ class TestIntegration:
         compose = RecipeCompose(branches=(lora_a, lora_b))
         merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=0.9)
 
-        result = analyze_recipe(merge, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         # Verify all result fields
         assert isinstance(result, AnalysisResult)
@@ -540,7 +615,7 @@ class TestIntegration:
         lora = RecipeLoRA(loras=({"path": Path(sdxl_lora_a).name, "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        result = analyze_recipe(merge, lora_base_path=temp_lora_dir)
+        result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
 
         # Can access model state dict via model_patcher
         state_dict = result.model_patcher.model_state_dict()
