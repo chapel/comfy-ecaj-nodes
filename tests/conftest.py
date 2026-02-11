@@ -15,11 +15,22 @@ from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 # ---------------------------------------------------------------------------
 
 # Representative SDXL-like diffusion_model keys (4x4 float32 tensors)
+# AC: @comfyui-mocking ac-4
 _SDXL_KEYS = (
     "diffusion_model.input_blocks.0.0.weight",
     "diffusion_model.input_blocks.1.0.weight",
     "diffusion_model.middle_block.0.weight",
     "diffusion_model.output_blocks.0.0.weight",
+)
+
+# Representative Z-Image/S3-DiT keys with layers + noise_refiner pattern
+# AC: @comfyui-mocking ac-4
+_ZIMAGE_KEYS = (
+    "diffusion_model.layers.0.attention.qkv.weight",
+    "diffusion_model.layers.10.attention.qkv.weight",
+    "diffusion_model.layers.25.attention.qkv.weight",
+    "diffusion_model.noise_refiner.weight",
+    "diffusion_model.context_refiner.weight",
 )
 
 
@@ -154,8 +165,53 @@ def recipe_chain(recipe_base: RecipeBase, recipe_single_lora: RecipeLoRA) -> Rec
     return RecipeMerge(base=merge_a, target=lora_b, backbone=None, t_factor=0.7)
 
 
+@pytest.fixture()
+def recipe_full(recipe_base: RecipeBase, recipe_compose: RecipeCompose) -> RecipeMerge:
+    """Full pattern: compose (2 branches) merged into chain."""
+    # AC: @comfyui-mocking ac-2
+    # First merge with compose target
+    merge_a = RecipeMerge(base=recipe_base, target=recipe_compose, backbone=None, t_factor=0.8)
+    # Chain with additional LoRA
+    lora_c = RecipeLoRA(loras=({"path": "lora_c.safetensors", "strength": 0.6},))
+    return RecipeMerge(base=merge_a, target=lora_c, backbone=None, t_factor=0.5)
+
+
 # ---------------------------------------------------------------------------
-# ComfyUI API mocks (AC-4) — autouse so tests run without ComfyUI installed
+# Architecture-specific fixtures (AC-4)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture()
+def sdxl_state_dict_keys() -> tuple[str, ...]:
+    """Representative SDXL state dict key patterns.
+
+    # AC: @comfyui-mocking ac-4
+    Provides input_blocks, middle_block, and output_blocks keys.
+    """
+    return _SDXL_KEYS
+
+
+@pytest.fixture()
+def zimage_state_dict_keys() -> tuple[str, ...]:
+    """Representative Z-Image state dict key patterns.
+
+    # AC: @comfyui-mocking ac-4
+    Provides layers and noise_refiner/context_refiner keys.
+    """
+    return _ZIMAGE_KEYS
+
+
+@pytest.fixture()
+def mock_model_patcher_zimage() -> MockModelPatcher:
+    """MockModelPatcher with Z-Image architecture keys.
+
+    # AC: @comfyui-mocking ac-4
+    """
+    return MockModelPatcher(keys=_ZIMAGE_KEYS)
+
+
+# ---------------------------------------------------------------------------
+# ComfyUI API mocks (AC-3) — autouse so tests run without ComfyUI installed
 # ---------------------------------------------------------------------------
 
 
