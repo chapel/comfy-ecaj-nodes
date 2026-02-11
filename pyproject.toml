@@ -1,0 +1,15 @@
+[project]
+name = "comfy-ecaj-nodes"
+version = "0.1.0"
+description = "ComfyUI custom nodes for advanced model merging with WIDEN"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0",
+    "safetensors",
+]
+
+[tool.comfy]
+PublisherId = "ecaj"
+DisplayName = "ECAJ Nodes"
+Icon = ""
