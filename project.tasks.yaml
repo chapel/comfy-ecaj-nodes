@@ -1493,7 +1493,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -1506,6 +1506,9 @@
   started_at: 2026-02-11T06:19:26.024Z
   notes: []
   todos: []
+  completed_at: 2026-02-11T06:19:28.733Z
+  closed_reason: "Merged in PR #24. Segmented LoRA loader storage by set_id, wired set scoping through
+    analysis and executor, replaced silent fallback with RuntimeError. 13 new tests, all passing."
 - _ulid: 01KH5KGYTSTC0BK7XM3GP5N2K7
   slugs:
     - fix-batched-parity
