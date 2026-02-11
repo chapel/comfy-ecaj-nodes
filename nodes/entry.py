@@ -15,7 +15,7 @@ class WIDENEntryNode:
     RETURN_TYPES = ("WIDEN",)
     RETURN_NAMES = ("widen",)
     FUNCTION = "entry"
-    CATEGORY = "ECAJ/merge"
+    CATEGORY = "ecaj/merge"
 
     def entry(self, model):
         raise NotImplementedError("Entry node not yet implemented")

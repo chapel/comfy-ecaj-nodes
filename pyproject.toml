@@ -4,12 +4,27 @@ version = "0.1.0"
 description = "ComfyUI custom nodes for advanced model merging with WIDEN"
 license = "MIT"
 requires-python = ">=3.10"
-dependencies = [
-    "torch>=2.0",
-    "safetensors",
-]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.9", "torch>=2.0"]
+
+[tool.setuptools.packages.find]
+include = ["lib*", "nodes*"]
 
 [tool.comfy]
 PublisherId = "ecaj"
 DisplayName = "ECAJ Nodes"
 Icon = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q --import-mode=importlib"
+
+[tool.ruff]
+line-length = 99
+target-version = "py310"
+exclude = [".kspec"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

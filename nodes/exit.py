@@ -15,7 +15,7 @@ class WIDENExitNode:
     RETURN_TYPES = ("MODEL",)
     RETURN_NAMES = ("model",)
     FUNCTION = "execute"
-    CATEGORY = "ECAJ/merge"
+    CATEGORY = "ecaj/merge"
     OUTPUT_NODE = False
 
     def execute(self, widen):
