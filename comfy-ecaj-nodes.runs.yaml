@@ -518,6 +518,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-11T19:08:54.865Z
+    completed_at: 2026-02-11T19:10:03.839Z
     step_results:
       - step_index: 0
         status: completed
@@ -548,4 +549,11 @@ runs:
         notes: All captures complete. One success pattern captured (01KH71QQ). All friction items either
           already tracked or one-off. Session reflection done.
     initiated_by: "@claude"
-    completed_at: 2026-02-11T19:10:03.839Z
+  - _ulid: 01KH7F6VQK1E14CE6A9KBNCKVR
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-11T23:05:02.452Z
+    step_results: []
+    initiated_by: "@claude"
