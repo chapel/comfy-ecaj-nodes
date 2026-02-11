@@ -1,0 +1,252 @@
+{
+  "generated_at": "2026-02-11T04:44:03.681Z",
+  "branch": "feat/lora-per-block-strength",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-11T04:44:03.681Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KH4HA49",
+      "title": "Implement LoRA Per-Block Strength",
+      "started_at": "2026-02-11T04:39:41.971Z",
+      "priority": 3,
+      "spec_ref": "@lora-block-config",
+      "note_count": 3,
+      "last_note_at": "2026-02-11T04:42:28.634Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KH4HA49",
+      "task_title": "Implement LoRA Per-Block Strength",
+      "task_status": "pending_review",
+      "note_ulid": "01KH5G40",
+      "created_at": "2026-02-11T04:42:28.634Z",
+      "author": "@claude",
+      "content": "Implemented per-block strength scaling for LoRA deltas. Created _apply_per_block_lora_strength helper in lib/executor.py that computes delta = lora_applied - base, scales each key's delta by its BlockConfig override, and returns base + scaled_delta. Modified _apply_lora_set in evaluate_recipe to call this helper when RecipeLoRA.block_config is present and arch is known. AC-1: BLOCK_CONFIG with per-block strengths scales LoRA deltas (strength 0.5 halves delta, strength 2.0 doubles it, strength 0.0 removes the LoRA effect). AC-2: No block_config means global strength applies uniformly (helper not called). 14 tests in test_lora_block_strength.py covering strength scaling, different blocks, zero/amplified strengths, negative deltas, 4D conv2d shapes. 445 total tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA48W",
+      "task_title": "Implement Merge Per-Block T-Factor",
+      "task_status": "completed",
+      "note_ulid": "01KH5FKM",
+      "created_at": "2026-02-11T04:33:31.805Z",
+      "author": "@claude",
+      "content": "Implemented per-block t_factor support for merge operations. Created lib/block_classify.py with SDXL and Z-Image key classification (classify_key_sdxl, classify_key_zimage). Updated lib/executor.py with _get_block_t_factors helper that groups keys by their effective t_factor, and _apply_widen_filter_per_block/_apply_widen_merge_per_block functions that process each t_factor group with appropriate WIDEN instance. Updated nodes/exit.py to pass arch and widen_config to evaluate_recipe. AC-1: when block_config is present, per-block t_factor overrides are applied. AC-2: when block_config is None, global t_factor applies to all blocks. 35 tests in test_merge_block_config.py covering block classification and t_factor grouping. 431 total tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA48E",
+      "task_title": "Implement Per-Block Control",
+      "task_status": "completed",
+      "note_ulid": "01KH5F1X",
+      "created_at": "2026-02-11T04:23:51.522Z",
+      "author": "@claude",
+      "content": "Implemented per-block control feature with BLOCK_CONFIG custom ComfyUI type. Created WIDENBlockConfigSDXLNode (7 block group sliders: IN00-02, IN03-05, IN06-08, MID, OUT00-02, OUT03-05, OUT06-08) and WIDENBlockConfigZImageNode (8 block group sliders: L00-04 through L25-29, noise_refiner, context_refiner). Each slider is FLOAT 0.0-2.0 step 0.05. Added BLOCK_CONFIG optional input to WIDENLoRANode and WIDENMergeNode for fan-out support. AC-1: when block_config is None, behavior identical to pre-block-control. AC-2: architecture-specific nodes expose sliders. AC-3: BLOCK_CONFIG fans out correctly (same instance shared). 22 tests in test_per_block_control.py covering all 3 ACs. 396 total tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA48P",
+      "task_title": "Implement Block Config Type",
+      "task_status": "completed",
+      "note_ulid": "01KH5EPM",
+      "created_at": "2026-02-11T04:17:41.947Z",
+      "author": "@claude",
+      "content": "Implemented BlockConfig frozen dataclass with arch, block_overrides (tuple of (pattern, float) pairs), and layer_type_overrides fields. Added block_config: object = None field to RecipeLoRA and RecipeMerge for backwards compatibility. AC-1: BlockConfig is frozen, stores arch and per-block float values as tuple of pairs. AC-2: RecipeLoRA and RecipeMerge accept BlockConfig or None. Created tests/test_block_config.py with 22 tests covering all ACs. 374 total tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA486",
+      "task_title": "Implement Memory Management",
+      "task_status": "completed",
+      "note_ulid": "01KH5EBD",
+      "created_at": "2026-02-11T04:11:34.092Z",
+      "author": "@claude",
+      "content": "Implemented GPU memory management with all 5 ACs covered. Added gc.collect() and torch.cuda.empty_cache() calls per-chunk in lib/executor.py:chunked_evaluation (AC-1) and between OpSignature groups in nodes/exit.py:execute (AC-2). Verified existing loader cleanup pattern frees delta caches (AC-3). Verified install_merged_patches ensures CPU-only patches with correct dtype (AC-4). compute_batch_size already provides conservative batch sizing within VRAM bounds (AC-5). Created tests/test_memory_management.py with 20 tests covering all ACs. 352 total tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA49",
+      "task_title": "Implement LoRA Per-Block Strength",
+      "task_status": "pending_review",
+      "note_ulid": "01KH4J41",
+      "created_at": "2026-02-10T19:58:12.299Z",
+      "author": "@claude",
+      "content": "NF-8 design decision resolved: Apply per-block strength as a per-key scaling vector within the batch. After computing the LoRA delta for the full batch via torch.bmm, multiply each key's delta by its per-block strength scalar. The scaling vector is constructed during recipe analysis by classifying each key to a block group via lib/block_classify.py and looking up the BlockConfig override. This avoids splitting the batch and preserves the bmm optimization. Implementation: after _apply_lora_set_batched_gpu() returns the delta batch [B, *shape], compute a strength vector [B, 1, 1] from per-key block classifications, then multiply: delta_batch *= strength_vector."
+    },
+    {
+      "task_ref": "01KH4HA49",
+      "task_title": "Implement LoRA Per-Block Strength",
+      "task_status": "pending_review",
+      "note_ulid": "01KH4HA4",
+      "created_at": "2026-02-10T19:44:03.363Z",
+      "author": "@claude",
+      "content": "Implementation notes:\n\nLoRA node gains optional block_strength input of type BLOCK_CONFIG in\nINPUT_TYPES. When present, stored in RecipeLoRA.block_config. At Exit time\nduring batched LoRA apply phase (_apply_lora_set_batched_gpu), for each\nparameter key in batch: (1) classify key into block group, (2) look up\noverride strength in BlockConfig, (3) multiply LoRA delta by per-block\nstrength instead of global strength. This scales LoRA contribution before\nWIDEN sees it. During DeltaSpec processing, scale each spec effective\nstrength by per-block override. Since batching groups keys by OpSignature\n(same shape + affecting sets), and per-block strength varies by key, need\nto apply scaling per-key within batch -- either as diagonal scaling matrix\nor by splitting batch by block group.\nFiles: nodes/lora.py (add input), lib/executor.py (per-block scaling\nin LoRA apply).\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [
+    {
+      "ref": "01KH508VE1",
+      "title": "Implement ComfyUI Mocking and Fixtures",
+      "priority": 3,
+      "spec_ref": "@comfyui-mocking",
+      "tags": []
+    }
+  ],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KH4HA48W",
+      "title": "Implement Merge Per-Block T-Factor",
+      "completed_at": "2026-02-11T04:38:33.183Z",
+      "closed_reason": "Merged in PR #20. Implemented per-block t_factor support for merge operations with SDXL and Z-Image block classification. AC-1: BLOCK_CONFIG connected to Merge applies per-block t_factor overrides. AC-2: No BLOCK_CONFIG means global t_factor (backwards compatible). 35 tests in test_merge_block_config.py cover block classification and t_factor grouping."
+    },
+    {
+      "ref": "01KH4HA48E",
+      "title": "Implement Per-Block Control",
+      "completed_at": "2026-02-11T04:26:48.695Z",
+      "closed_reason": "Merged in PR #19. Implemented per-block control with BLOCK_CONFIG custom ComfyUI type. Created WIDENBlockConfigSDXLNode (7 block group sliders: IN00-02, IN03-05, IN06-08, MID, OUT00-02, OUT03-05, OUT06-08) and WIDENBlockConfigZImageNode (8 block group sliders: L00-04 through L25-29, noise_refiner, context_refiner). Each slider is FLOAT 0.0-2.0 with step 0.05. Added optional BLOCK_CONFIG input to WIDENLoRANode and WIDENMergeNode for fan-out support. All 3 ACs verified: AC-1 (no block_config = pre-block-control behavior), AC-2 (architecture-specific sliders 0.0-2.0), AC-3 (fan-out to multiple consumers). 22 tests pass."
+    },
+    {
+      "ref": "01KH4HA48P",
+      "title": "Implement Block Config Type",
+      "completed_at": "2026-02-11T04:19:36.726Z",
+      "closed_reason": "Merged in PR #18. Implemented BlockConfig frozen dataclass with arch, block_overrides (tuple of (pattern, float) pairs), and layer_type_overrides fields. Added block_config: object = None field to RecipeLoRA and RecipeMerge for backwards compatibility. AC-1 and AC-2 verified with 22 tests covering all acceptance criteria."
+    },
+    {
+      "ref": "01KH4HA486",
+      "title": "Implement Memory Management",
+      "completed_at": "2026-02-11T04:15:06.700Z",
+      "closed_reason": "Merged in PR #17. Implemented GPU memory management with gc.collect() and torch.cuda.empty_cache() calls per-chunk and between OpSignature groups. Loader cleanup in finally block frees delta caches. All 5 ACs covered with 20 tests in test_memory_management.py."
+    },
+    {
+      "ref": "01KH4HA47Z",
+      "title": "Implement Z-Image LoRA Loader",
+      "completed_at": "2026-02-11T04:07:39.216Z",
+      "closed_reason": "Merged in PR #16. Implemented Z-Image LoRA Loader with QKV fusing - separate to_q/to_k/to_v keys fuse to attention.qkv.weight (AC-1), Diffusers key names map to S3-DiT parameters including LyCORIS format (AC-2), QKV DeltaSpecs have offset indexing q=(0,3840), k=(3840,3840), v=(7680,3840) (AC-3). 20 tests covering all 3 ACs."
+    },
+    {
+      "ref": "01KH4HA47S",
+      "title": "Implement SDXL LoRA Loader",
+      "completed_at": "2026-02-11T03:59:43.634Z",
+      "closed_reason": "Merged in PR #15. Implemented SDXL LoRA Loader with greedy token matching for compound identifiers (input_blocks, proj_in, to_q, etc.). Added 21 tests covering all 3 ACs: block type mapping, DeltaSpec contents, and attention key mapping."
+    },
+    {
+      "ref": "01KH4HA46H",
+      "title": "Implement Exit Node",
+      "completed_at": "2026-02-11T03:52:01.713Z",
+      "closed_reason": "Merged in PR #14. Implemented WIDENExitNode.execute() orchestrating the complete recipe tree evaluation with _validate_recipe_tree() for tree structure validation. All 8 ACs covered: returns MODEL with set patches (AC-1), validates tree with position-aware errors (AC-2), compose targets call merge_weights (AC-3), single LoRA targets call filter_delta (AC-4), chained merges evaluate inner first (AC-5), single-branch compose uses filter_delta (AC-6), downstream LoRA patches apply additively (AC-7), patch tensors match base model dtype (AC-8). 22 tests added in test_exit_node.py, 291 total tests passing."
+    },
+    {
+      "ref": "01KH4HA46X",
+      "title": "Implement Exit Batched Evaluation",
+      "completed_at": "2026-02-11T03:42:23.167Z",
+      "closed_reason": "Merged in PR #13. Implemented evaluate_recipe() tree walker in lib/executor.py with full AC coverage: RecipeCompose→merge_weights_batched (AC-1), RecipeLoRA→filter_delta_batched (AC-2), chained RecipeMerge→recursive evaluation (AC-3), results stay on GPU (AC-4), backbone override passed to WIDEN (AC-5). 13 tests added covering all 5 ACs."
+    },
+    {
+      "ref": "01KH4HA46P",
+      "title": "Implement Exit Recipe Analysis",
+      "completed_at": "2026-02-11T03:35:17.741Z",
+      "closed_reason": "Merged in PR #12. Implemented exit recipe analysis in lib/analysis.py with all 6 ACs covered: tree walk to RecipeBase (AC-1), object identity-based set ID assignment (AC-2), architecture loader selection (AC-3), affected-key map tracking (AC-4), key filtering for processing (AC-5), and FileNotFoundError with context (AC-6). 22 tests verify all acceptance criteria."
+    },
+    {
+      "ref": "01KH4HA47M",
+      "title": "Implement Architecture-Specific LoRA Loaders",
+      "completed_at": "2026-02-11T03:26:45.215Z",
+      "closed_reason": "Merged in PR #11. Implemented architecture-specific LoRA loaders with pluggable registry design. Created LoRALoader ABC in lib/lora/base.py with load(), affected_keys, get_delta_specs(), cleanup() interface. Implemented SDXLLoader for kohya/A1111 format and ZImageLoader with QKV fusing support. All 4 ACs covered with 21 tests: AC-1 (architecture selection/key mapping), AC-2 (DeltaSpec production), AC-3 (pluggable design), AC-4 (interface contract)."
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "71e3641",
+      "full_hash": "71e36410b98461a7810beaa4857e6387c70e116f",
+      "date": "2026-02-11T04:42:49.000Z",
+      "message": "feat: implement LoRA per-block strength scaling",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "79a95ec",
+      "full_hash": "79a95ece6a713fe7369a2f543b58de7dc0e4be91",
+      "date": "2026-02-11T04:38:20.000Z",
+      "message": "Merge pull request #20 from chapel/feat/per-block-control",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "6e5412e",
+      "full_hash": "6e5412eb3e784e12d538699790d5a0ac9219abcd",
+      "date": "2026-02-11T04:37:06.000Z",
+      "message": "fix: clean up lint issues in test_merge_block_config.py",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "c4b8c90",
+      "full_hash": "c4b8c903364801521bc0b03d97e5f2927ac7f0fc",
+      "date": "2026-02-11T04:34:00.000Z",
+      "message": "feat: implement merge per-block t_factor support",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "6d5e471",
+      "full_hash": "6d5e471acec354156620c1642782bfa85445d9f0",
+      "date": "2026-02-11T04:26:40.000Z",
+      "message": "Merge pull request #19 from chapel/feat/per-block-control",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "59e068b",
+      "full_hash": "59e068b721f8b3a2033e115fb7408b62d7ced58c",
+      "date": "2026-02-11T04:24:15.000Z",
+      "message": "feat: implement per-block control with architecture-specific config nodes",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "099a6a3",
+      "full_hash": "099a6a3b5ef8ffaa5533965e58e381262d5616cd",
+      "date": "2026-02-11T04:19:28.000Z",
+      "message": "Merge pull request #18 from chapel/feat/block-config-type",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "717394d",
+      "full_hash": "717394d99f93807e84724b0005eeb35208db0036",
+      "date": "2026-02-11T04:17:49.000Z",
+      "message": "feat: implement BlockConfig type for per-block weight configuration",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "714cef4",
+      "full_hash": "714cef4231194a83117d6fcc78a5ae4858c47f67",
+      "date": "2026-02-11T04:14:57.000Z",
+      "message": "Merge pull request #17 from chapel/feat/memory-management",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "f6659a3",
+      "full_hash": "f6659a315b0af1e5b90b310550205a297e5dae6e",
+      "date": "2026-02-11T04:11:49.000Z",
+      "message": "feat: implement GPU memory management with gc.collect and empty_cache",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": false,
+    "staged": [],
+    "unstaged": [],
+    "untracked": [
+      "uv.lock"
+    ]
+  },
+  "inbox_items": [],
+  "stats": {
+    "total_tasks": 25,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 1,
+    "blocked": 0,
+    "completed": 22,
+    "inbox_items": 0
+  }
+}
