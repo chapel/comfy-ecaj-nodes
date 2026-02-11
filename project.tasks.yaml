@@ -2075,7 +2075,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -2105,3 +2105,6 @@
         from model_state_dict(). Added regression test. All 494 tests pass, ruff clean."
       supersedes: null
   todos: []
+  completed_at: 2026-02-11T20:08:52.629Z
+  closed_reason: "Merged in PR #32. Added .cpu() normalization before torch.stack in
+    chunked_evaluation to handle mixed CPU/CUDA tensors from model_state_dict()."
