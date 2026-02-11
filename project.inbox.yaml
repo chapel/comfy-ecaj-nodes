@@ -31,3 +31,11 @@ inbox:
       - testing
       - review-finding
     added_by: "@claude"
+  - _ulid: 01KH5KJHA3T7G2HNPAJBSAZY67
+    text: "Harden block_classify.py key matching: refiner checks use substring containment (line
+      122/124) - prefer anchored/structured patterns to avoid accidental matches"
+    created_at: 2026-02-11T05:42:50.435Z
+    tags:
+      - hardening
+      - review-finding
+    added_by: "@claude"
