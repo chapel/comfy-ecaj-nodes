@@ -544,6 +544,27 @@ workflows:
       exploration (docs, code, config, tests, specs), compilation by severity, interactive triage,
       execution, and summary."
     steps: []
+  - _ulid: 01KH53VRVYAGYWHA6SMMSZP251
+    id: spec-first
+    trigger: behavior-change
+    description: "Check spec coverage before implementing changes. Core principle: If changing behavior
+      and spec doesn't cover it, update the spec first."
+    steps:
+      - type: check
+        content: Does the spec cover this change?
+        on_fail: Update or create spec before proceeding
+      - type: decision
+        content: What is the spec status?
+        options:
+          - Spec exists and matches -> Derive task, proceed
+          - Spec exists but outdated -> Update spec first
+          - No spec exists -> Create spec first (behavior) or task directly (infra)
+      - type: action
+        content: Update or create spec item if needed
+      - type: action
+        content: Derive task from spec via kspec derive @spec-item
+      - type: action
+        content: Implement the change
 conventions:
   - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
     domain: commits
