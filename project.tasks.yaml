@@ -1948,9 +1948,17 @@
     - runtime
   vcs_refs: []
   created_at: 2026-02-11T18:48:14.607Z
-  notes: []
-  todos: []
   started_at: 2026-02-11T18:48:22.108Z
+  notes:
+    - _ulid: 01KH70H3S74RKEMHR14H61DSTH
+      created_at: 2026-02-11T18:48:29.736Z
+      author: "@claude"
+      content: "Bug 1 (b779ed5): Set patch tuple format was wrong — ('set', tensor) instead of ('set',
+        (tensor,)). ComfyUI calculate_weight does weight.copy_(v[0]), so with raw tensor v[0]
+        indexed the first row instead of unpacking a 1-tuple. Every output neuron got identical
+        values = full corruption. Fixed in nodes/exit.py:123, updated 5 test files."
+      supersedes: null
+  todos: []
 - _ulid: 01KH70GQ9YAPG64C3JJVAA1WZ0
   slugs: []
   title: Optimize batched GPU pipeline performance
