@@ -481,6 +481,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.281Z
+  started_at: 2026-02-11T03:43:27.316Z
   notes:
     - _ulid: 01KH4HA46HK4H347XYD1D7VY9S
       created_at: 2026-02-10T19:44:03.281Z
@@ -513,9 +514,20 @@
         lib/executor.py. This task wires the node to the executor, it does not implement the
         executor."
       supersedes: null
+    - _ulid: 01KH5D0YA4NYKD3JJKJ37R3DJG
+      created_at: 2026-02-11T03:48:22.468Z
+      author: "@claude"
+      content: "Implemented WIDENExitNode.execute() in nodes/exit.py. Added _validate_recipe_tree() for
+        AC-2 (validates tree structure, raises ValueError with position on type mismatches).
+        execute() orchestrates: (1) analyze_recipe for LoRA loading and set_affected map (AC-1), (2)
+        compile_batch_groups for OpSignature grouping, (3) chunked_evaluation with evaluate_recipe
+        as eval_fn for batched GPU evaluation (AC-3,4,5), (4) install_merged_patches for set patch
+        installation (AC-7,8). Updated lib/executor.py evaluate_recipe to handle single-branch
+        RecipeCompose as filter_delta not merge_weights (AC-6). Added 22 tests in
+        tests/test_exit_node.py covering all 8 ACs. All 291 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T03:43:27.316Z
 - _ulid: 01KH4HA46PY9P8S7PZ0D32WZDD
   slugs:
     - implement-exit-recipe-analysis
