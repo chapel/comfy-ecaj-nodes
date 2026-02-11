@@ -1,0 +1,265 @@
+{
+  "generated_at": "2026-02-11T03:03:17.904Z",
+  "branch": "feat/merge-node",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-11T03:03:17.904Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KH4HA46D",
+      "title": "Implement Merge Node",
+      "started_at": "2026-02-11T02:59:47.138Z",
+      "priority": 2,
+      "spec_ref": "@merge-node",
+      "note_count": 2,
+      "last_note_at": "2026-02-11T03:01:49.105Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KH4HA46D",
+      "task_title": "Implement Merge Node",
+      "task_status": "pending_review",
+      "note_ulid": "01KH5ABP",
+      "created_at": "2026-02-11T03:01:49.105Z",
+      "author": "@claude",
+      "content": "Implemented Merge node with base/target type validation. merge() validates base is RecipeBase or RecipeMerge (rejects RecipeLoRA/RecipeCompose with helpful error), accepts RecipeLoRA/RecipeCompose/RecipeMerge as target. All 6 ACs covered by 23 tests: AC-1 (returns RecipeMerge with fields), AC-2 (no backbone defaults None), AC-3 (backbone stored when provided), AC-4 (merge chaining via base), AC-5 (RecipeLoRA/RecipeCompose rejected as base), AC-6 (t_factor -1.0 preserved). All 159 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA46A",
+      "task_title": "Implement Compose Node",
+      "task_status": "completed",
+      "note_ulid": "01KH5A2D",
+      "created_at": "2026-02-11T02:56:45.530Z",
+      "author": "@claude",
+      "content": "Implemented Compose node with branch validation and chaining. compose() uses RecipeCompose.with_branch() for persistent semantics. Added 17 tests covering all 4 ACs: AC-1 (single branch returns single-element tuple), AC-2 (appends to existing compose), AC-3 (three chained nodes in order), AC-4 (RecipeBase rejected with helpful error). Also validates compose input is RecipeCompose. All 136 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA467",
+      "task_title": "Implement LoRA Node",
+      "task_status": "completed",
+      "note_ulid": "01KH59SQ",
+      "created_at": "2026-02-11T02:52:00.050Z",
+      "author": "@claude",
+      "content": "Implemented LoRA node with folder_paths dropdown (deferred import for testability). add_lora() returns RecipeLoRA with proper prev chaining for LoRA sets. Added 12 tests covering all 5 ACs: AC-1 (returns RecipeLoRA with path/strength), AC-2 (chaining via prev), AC-3 (folder_paths dropdown), AC-4 (no prev = single-element), AC-5 (zero strength preserved). Updated conftest.py mock for folder_paths.get_filename_list. All 119 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA463",
+      "task_title": "Implement Entry Node",
+      "task_status": "completed",
+      "note_ulid": "01KH59FM",
+      "created_at": "2026-02-11T02:46:29.393Z",
+      "author": "@claude",
+      "content": "Implemented Entry Node with architecture detection. Created detect_architecture() function with pattern matching for SDXL (input_blocks/middle_block/output_blocks), Z-Image (layers + noise_refiner), Flux (double_blocks), and Qwen (60+ transformer_blocks). Flux/Qwen are detected but raise UnsupportedArchitectureError. Added 17 tests covering all 5 ACs: AC-1 (returns RecipeBase), AC-2 (SDXL detection), AC-3 (Z-Image detection), AC-4 (no GPU/tensor copy), AC-5 (unsupported arch errors). All 107 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA47B",
+      "task_title": "Implement WIDEN Core Algorithm",
+      "task_status": "completed",
+      "note_ulid": "01KH594A",
+      "created_at": "2026-02-11T02:40:18.663Z",
+      "author": "@claude",
+      "content": "Implemented WIDEN core algorithm port from merge-router. Created 5 modules: numerical_config.py (epsilon handling), sparsity.py (sparsemax/entmax), ranking.py (importance ranking), divergence.py (direction divergence), widen.py (main algorithm). Added 32 tests covering all 9 ACs: filter_delta zeros low-importance (AC-1), merge_weights routes via softmax (AC-2), batched variants match per-key (AC-3), no ComfyUI imports (AC-4), deterministic behavior (AC-5), fp16/bf16 use fp32 (AC-6), default config values (AC-7), filter_delta_batched fallback (AC-8), merge_weights_batched fallback (AC-9). All 90 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH4HA46D",
+      "task_title": "Implement Merge Node",
+      "task_status": "pending_review",
+      "note_ulid": "01KH4HA4",
+      "created_at": "2026-02-10T19:44:03.277Z",
+      "author": "@claude",
+      "content": "Implementation notes:\n\nStub in nodes/merge.py. Implementation: validate base is RecipeBase or\nRecipeMerge (raise ValueError with specific message if not). Validate\ntarget is RecipeLoRA, RecipeCompose, or RecipeMerge (not RecipeBase).\nThen construct RecipeMerge(base=base, target=target, backbone=backbone,\nt_factor=t_factor). The t_factor slider range is -1.0 to 5.0, step 0.05\n(already correct in stub). -1.0 means passthrough -- interpreted by Exit\nnode, not Merge node. Backbone defaults to None when not connected\n(optional input). For the task: add isinstance validation checks at top\nof merge(), construct and return RecipeMerge.\nFiles: nodes/merge.py.\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [
+    {
+      "ref": "01KH4HA473",
+      "title": "Implement Exit Patch Installation",
+      "priority": 2,
+      "spec_ref": "@exit-patch-install",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA47F",
+      "title": "Implement Batched Pipeline Executor",
+      "priority": 2,
+      "spec_ref": "@batched-executor",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA47M",
+      "title": "Implement Architecture-Specific LoRA Loaders",
+      "priority": 2,
+      "spec_ref": "@lora-loaders",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA48P",
+      "title": "Implement Block Config Type",
+      "priority": 3,
+      "spec_ref": "@block-config-type",
+      "tags": []
+    },
+    {
+      "ref": "01KH508VE1",
+      "title": "Implement ComfyUI Mocking and Fixtures",
+      "priority": 3,
+      "spec_ref": "@comfyui-mocking",
+      "tags": []
+    }
+  ],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KH4HA46A",
+      "title": "Implement Compose Node",
+      "completed_at": "2026-02-11T02:58:53.235Z",
+      "closed_reason": "Merged in PR #7. Implemented Compose node that accumulates branches for WIDEN merging. Uses RecipeCompose.with_branch() for persistent semantics. Validates branch types (accepts RecipeLoRA, RecipeCompose, RecipeMerge; rejects raw RecipeBase with helpful error). All 4 ACs covered by 17 tests."
+    },
+    {
+      "ref": "01KH4HA467",
+      "title": "Implement LoRA Node",
+      "completed_at": "2026-02-11T02:54:03.844Z",
+      "closed_reason": "Merged in PR #6. Implemented LoRA node with folder_paths dropdown, RecipeLoRA output with path/strength tuples, prev chaining for LoRA sets, and zero-strength preservation. All 5 ACs have test coverage (12 tests total)."
+    },
+    {
+      "ref": "01KH4HA463",
+      "title": "Implement Entry Node",
+      "completed_at": "2026-02-11T02:49:00.440Z",
+      "closed_reason": "Merged in PR #5. Implemented WIDEN Entry Node with architecture detection (SDXL, Z-Image supported; Flux/Qwen detected but unsupported). All 5 ACs covered by 17 tests. No GPU memory allocation or tensor copying."
+    },
+    {
+      "ref": "01KH4HA47B",
+      "title": "Implement WIDEN Core Algorithm",
+      "completed_at": "2026-02-11T02:43:54.707Z",
+      "closed_reason": "Merged in PR #4. Implemented WIDEN core algorithm port from merge-router with 5 modules (numerical_config.py, sparsity.py, ranking.py, divergence.py, widen.py). All 9 ACs covered with 32 tests: filter_delta zeros low-importance (AC-1), merge_weights routes via softmax (AC-2), batched variants match per-key (AC-3), no ComfyUI imports (AC-4), deterministic behavior (AC-5), fp16/bf16 use fp32 (AC-6), default config values (AC-7), filter_delta_batched fallback (AC-8), merge_weights_batched fallback (AC-9)."
+    },
+    {
+      "ref": "01KH4HA460",
+      "title": "Implement Recipe Type System",
+      "completed_at": "2026-02-11T02:32:59.881Z",
+      "closed_reason": "Merged in PR #3. Implemented recipe type system with frozen dataclasses, tuple fields, RecipeCompose.with_branch() for persistent tree semantics, RecipeNode type alias, and __all__ exports. All 5 ACs have test coverage: AC-1 (frozen), AC-2 (persistent semantics), AC-3 (no GPU tensors), AC-4 (importable/constructible), AC-5 (WIDEN wire connections)."
+    },
+    {
+      "ref": "01KH508VF",
+      "title": "Implement CI Pipeline",
+      "completed_at": "2026-02-11T02:27:43.054Z",
+      "closed_reason": "Merged in PR #2. Added GitHub Actions CI workflow with lint (ruff via astral-sh/ruff-action) and test (pytest with CPU-only PyTorch via uv) jobs. Triggers on push to main and all PRs. All ACs verified: ac-1 (pytest with CPU torch), ac-2 (ruff check), ac-3 (green checks on both jobs)."
+    },
+    {
+      "ref": "01KH4H1VQK",
+      "title": "Implement Testing Infrastructure",
+      "completed_at": "2026-02-11T02:26:48.995Z",
+      "closed_reason": "Merged in PR #1. Implemented testing infrastructure with: MockModelPatcher (4x4 float32 tensors, SDXL-like keys, model_state_dict/clone/add_patches/get_key_patches/patches_uuid), recipe fixtures (recipe_base, recipe_single_lora, recipe_multi_lora, recipe_compose, recipe_chain), autouse ComfyUI API mocks (folder_paths, comfy modules). All 37 tests pass without ComfyUI. All 4 ACs verified with test coverage."
+    },
+    {
+      "ref": "01KH4H1VQF",
+      "title": "Implement ComfyUI Packaging",
+      "completed_at": "2026-02-11T02:25:41.782Z",
+      "closed_reason": "Merged in PR #1. Implemented ComfyUI packaging infrastructure: NODE_CLASS_MAPPINGS with 5 WIDEN nodes, pyproject.toml with [tool.comfy] metadata (PublisherId=ecaj, DisplayName=ECAJ Nodes), lowercase ecaj/merge CATEGORY on all nodes, empty runtime deps with dev deps in optional-dependencies. All 4 ACs covered by tests in test_packaging.py."
+    },
+    {
+      "ref": "01KH4DWQ",
+      "title": "Port design doc into kspec specs and tasks",
+      "completed_at": "2026-02-10T21:40:56.673Z",
+      "closed_reason": null
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "3f779ba",
+      "full_hash": "3f779ba8cb99cb74571334e45557df4c354680d6",
+      "date": "2026-02-11T03:02:04.000Z",
+      "message": "feat: implement WIDEN Merge node with type validation",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "54ed110",
+      "full_hash": "54ed110e30743106f5c115b7bcd013333b833e41",
+      "date": "2026-02-11T02:58:44.000Z",
+      "message": "Merge pull request #7 from chapel/feat/compose-node",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "c05c280",
+      "full_hash": "c05c28050ac38b67fb2c4c020dc3726d41716e73",
+      "date": "2026-02-11T02:56:57.000Z",
+      "message": "feat: implement WIDEN Compose node with branch accumulation",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "6ff50c7",
+      "full_hash": "6ff50c77da3e1e1f4ff38eb6fd398badb51651dc",
+      "date": "2026-02-11T02:53:57.000Z",
+      "message": "Merge pull request #6 from chapel/feat/lora-node",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "cecccbe",
+      "full_hash": "cecccbee56790cd874947dc8c585a7a1476c1acb",
+      "date": "2026-02-11T02:52:11.000Z",
+      "message": "feat: implement WIDEN LoRA node with folder_paths dropdown",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "85598ca",
+      "full_hash": "85598cadb1e1faceb84cd273ffaf639bbfaaa000",
+      "date": "2026-02-11T02:48:53.000Z",
+      "message": "Merge pull request #5 from chapel/feat/entry-node",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "746292c",
+      "full_hash": "746292c62009025a3f5333d018ac7c7a8190a9aa",
+      "date": "2026-02-11T02:46:50.000Z",
+      "message": "feat: implement WIDEN entry node with architecture detection",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "0eed187",
+      "full_hash": "0eed187b35d48b48efea49ec596d62059607afc9",
+      "date": "2026-02-11T02:43:40.000Z",
+      "message": "Merge pull request #4 from chapel/feat/widen-core-algorithm",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "74ff35f",
+      "full_hash": "74ff35f73b18bf3525f7c7263037c0ec5cec6223",
+      "date": "2026-02-11T02:40:47.000Z",
+      "message": "feat: implement WIDEN core algorithm",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "b01d519",
+      "full_hash": "b01d51945588291afe0c5c8563e7223664ac92e4",
+      "date": "2026-02-11T02:32:52.000Z",
+      "message": "Merge pull request #3 from chapel/feat/recipe-type-system",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": false,
+    "staged": [],
+    "unstaged": [],
+    "untracked": [
+      "uv.lock"
+    ]
+  },
+  "inbox_items": [],
+  "stats": {
+    "total_tasks": 25,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 5,
+    "blocked": 0,
+    "completed": 9,
+    "inbox_items": 0
+  }
+}
