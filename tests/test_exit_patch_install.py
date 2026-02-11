@@ -12,6 +12,7 @@ from nodes.exit import (
     WIDENExitNode,
     _collect_lora_paths,
     _compute_recipe_hash,
+    _unpatch_loaded_clones,
     install_merged_patches,
 )
 from tests.conftest import MockModelPatcher
@@ -31,7 +32,7 @@ class TestInstallMergedPatches:
         original_uuid = mock_model_patcher.patches_uuid
 
         merged_state = {"diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4)}
-        result = install_merged_patches(mock_model_patcher, merged_state)
+        result = install_merged_patches(mock_model_patcher, merged_state, torch.float32)
 
         # Result is different object
         assert result is not mock_model_patcher
@@ -44,7 +45,7 @@ class TestInstallMergedPatches:
         """Merged weights are added as set patches."""
         key = "diffusion_model.input_blocks.0.0.weight"
         merged_state = {key: torch.randn(4, 4)}
-        result = install_merged_patches(mock_model_patcher, merged_state)
+        result = install_merged_patches(mock_model_patcher, merged_state, torch.float32)
 
         # Check patch was added
         assert key in result.patches
@@ -60,7 +61,7 @@ class TestInstallMergedPatches:
             "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
             "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
         }
-        result = install_merged_patches(mock_model_patcher, merged_state)
+        result = install_merged_patches(mock_model_patcher, merged_state, torch.float32)
 
         # Both keys should be present as-is
         assert "diffusion_model.input_blocks.0.0.weight" in result.patches
@@ -71,7 +72,7 @@ class TestInstallMergedPatches:
         """All patch tensors are on CPU."""
         key = "diffusion_model.input_blocks.0.0.weight"
         merged_state = {key: torch.randn(4, 4)}
-        result = install_merged_patches(mock_model_patcher, merged_state)
+        result = install_merged_patches(mock_model_patcher, merged_state, torch.float32)
 
         # Get the patch tensor
         patch_entry = result.patches[key][0]
@@ -83,7 +84,7 @@ class TestInstallMergedPatches:
         """Patch tensors match base model dtype (float32 case)."""
         key = "diffusion_model.input_blocks.0.0.weight"
         merged_state = {key: torch.randn(4, 4, dtype=torch.float16)}
-        result = install_merged_patches(mock_model_patcher, merged_state)
+        result = install_merged_patches(mock_model_patcher, merged_state, torch.float32)
 
         patch_entry = result.patches[key][0]
         patch_tensor = patch_entry[1][1][0]
@@ -100,7 +101,7 @@ class TestInstallMergedPatches:
 
         key = "diffusion_model.input_blocks.0.0.weight"
         merged_state = {key: torch.randn(4, 4, dtype=torch.float32)}
-        result = install_merged_patches(patcher, merged_state)
+        result = install_merged_patches(patcher, merged_state, torch.bfloat16)
 
         patch_entry = result.patches[key][0]
         patch_tensor = patch_entry[1][1][0]
@@ -114,10 +115,40 @@ class TestInstallMergedPatches:
             "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
             "diffusion_model.output_blocks.0.0.weight": torch.randn(4, 4),
         }
-        result = install_merged_patches(mock_model_patcher, merged_state)
+        result = install_merged_patches(mock_model_patcher, merged_state, torch.float32)
 
         # All keys should be patched
         assert len(result.patches) == 4
+
+
+class TestUnpatchLoadedClones:
+    """Tests for _unpatch_loaded_clones that prevents double-application.
+
+    Regression: ComfyUI keeps models patched in-place between prompts.
+    model_state_dict() returns patched values on subsequent runs, causing
+    LoRA deltas to be applied on top of already-merged weights.
+    _unpatch_loaded_clones forces any loaded clone to fully unload,
+    restoring clean base weights before we read model_state_dict().
+    """
+
+    def test_noop_without_comfy(self, mock_model_patcher: MockModelPatcher):
+        """Does not crash when comfy.model_management is not available."""
+        # In test env, comfy is mocked/stubbed — should not raise
+        _unpatch_loaded_clones(mock_model_patcher)
+
+    def test_noop_with_no_loaded_clones(self, mock_model_patcher: MockModelPatcher):
+        """Safe when current_loaded_models is empty or has no clones."""
+        import sys
+
+        # Ensure comfy.model_management is available (from conftest stubs)
+        mm = sys.modules.get("comfy.model_management")
+        if mm is not None and hasattr(mm, "current_loaded_models"):
+            original = mm.current_loaded_models
+            mm.current_loaded_models = []
+            try:
+                _unpatch_loaded_clones(mock_model_patcher)
+            finally:
+                mm.current_loaded_models = original
 
 
 class TestCollectLoraPaths:

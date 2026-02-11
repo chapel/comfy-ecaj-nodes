@@ -319,7 +319,7 @@ class TestCpuOnlyPatches:
             "layer.weight": torch.randn(4, 4, dtype=torch.float32),
         }
 
-        install_merged_patches(mock_patcher, merged_state)
+        install_merged_patches(mock_patcher, merged_state, torch.float16)
 
         # Verify patches are CPU tensors
         for key, (patch_type, (tensor,)) in patches_received.items():
@@ -373,7 +373,7 @@ class TestCpuOnlyPatches:
             "layer.weight": torch.randn(4, 4, dtype=torch.float32),
         }
 
-        install_merged_patches(mock_patcher, merged_state)
+        install_merged_patches(mock_patcher, merged_state, torch.bfloat16)
 
         for key, (patch_type, (tensor,)) in patches_received.items():
             assert tensor.dtype == torch.bfloat16

@@ -517,7 +517,7 @@ class TestDownstreamLoraCompatibility:
         merged_state = {
             "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
         }
-        result = install_merged_patches(mock_model_patcher, merged_state)
+        result = install_merged_patches(mock_model_patcher, merged_state, torch.float32)
 
         # Simulate downstream LoRA patch
         downstream_patch = {
@@ -538,7 +538,7 @@ class TestDownstreamLoraCompatibility:
 
         key = "diffusion_model.input_blocks.0.0.weight"
         merged_state = {key: torch.randn(4, 4)}
-        result = install_merged_patches(mock_model_patcher, merged_state)
+        result = install_merged_patches(mock_model_patcher, merged_state, torch.float32)
 
         # Check patch format
         patch_entry = result.patches[key][0]
@@ -577,7 +577,7 @@ class TestBf16DtypeMatching:
         # Merged state in fp32 (computation dtype), prefixed keys
         key = "diffusion_model.input_blocks.0.0.weight"
         merged_state = {key: torch.randn(4, 4, dtype=torch.float32)}
-        result = install_merged_patches(patcher, merged_state)
+        result = install_merged_patches(patcher, merged_state, torch.bfloat16)
 
         # Patch should be bf16
         patch_tensor = result.patches[key][0][1][1][0]
@@ -596,7 +596,7 @@ class TestBf16DtypeMatching:
 
         key = "diffusion_model.input_blocks.0.0.weight"
         merged_state = {key: torch.randn(4, 4, dtype=torch.float32)}
-        result = install_merged_patches(patcher, merged_state)
+        result = install_merged_patches(patcher, merged_state, torch.float16)
         patch_tensor = result.patches[key][0][1][1][0]
         assert patch_tensor.dtype == torch.float16
 

@@ -88,9 +88,36 @@ def _validate_recipe_tree(node: RecipeNode, path: str = "root") -> None:
         )
 
 
+def _unpatch_loaded_clones(model_patcher: object) -> None:
+    """Force-unpatch any loaded clone sharing our model's weights.
+
+    ComfyUI keeps models patched in-place between prompts for performance.
+    When a clone with "set" patches is loaded, the shared model's weights
+    are overwritten. model_state_dict() returns these patched values.
+
+    This finds any loaded clone sharing the same underlying model and fully
+    unloads it, which restores the original weights from its backup.
+
+    Args:
+        model_patcher: ComfyUI ModelPatcher (from Entry node)
+    """
+    try:
+        from comfy.model_management import current_loaded_models  # noqa: E402
+    except (ImportError, AttributeError):
+        return  # Testing without ComfyUI
+
+    loaded_models = current_loaded_models
+    for i in range(len(loaded_models) - 1, -1, -1):
+        loaded = loaded_models[i]
+        if loaded.model is not None and loaded.model.is_clone(model_patcher):
+            loaded.model_unload()
+            loaded_models.pop(i)
+
+
 def install_merged_patches(
     model_patcher: object,
     merged_state: dict[str, torch.Tensor],
+    storage_dtype: torch.dtype,
 ) -> object:
     """Install merged tensors as set patches on a cloned ModelPatcher.
 
@@ -103,14 +130,11 @@ def install_merged_patches(
         model_patcher: Original ComfyUI ModelPatcher
         merged_state: Dict of {key: merged_tensor} from batched evaluation
             Keys already have diffusion_model. prefix (from LoRA loaders)
+        storage_dtype: Base model storage dtype for casting output tensors
 
     Returns:
         Cloned ModelPatcher with merged weights installed as set patches
     """
-    # Get base model dtype from first value in state dict
-    base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
-    base_dtype = next(iter(base_state.values())).dtype
-
     # Clone model (AC-1)
     cloned = model_patcher.clone()  # type: ignore[attr-defined]
 
@@ -118,7 +142,7 @@ def install_merged_patches(
     # Keys already have diffusion_model. prefix (AC-2)
     patches = {}
     for key, tensor in merged_state.items():
-        cpu_tensor = tensor.cpu().to(base_dtype)
+        cpu_tensor = tensor.cpu().to(storage_dtype)
         # "set" patch format: replaces the weight entirely
         # ComfyUI expects value wrapped in a tuple: ("set", (tensor,))
         patches[key] = ("set", (cpu_tensor,))
@@ -301,13 +325,18 @@ class WIDENExitNode:
             affected_keys = analysis.affected_keys
             arch = analysis.arch
 
+            # Force-unpatch any loaded clone from a previous run so that
+            # model_state_dict() returns clean (unpatched) base weights.
+            # Without this, "set" patches from the prior clone remain applied
+            # in-place on the shared model, causing LoRA double-application.
+            _unpatch_loaded_clones(model_patcher)
+
             # Get base model state dict (prefixed keys: diffusion_model.X.weight)
             # Must match the key format produced by LoRA loaders
             base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
 
             # Determine storage dtype from base model
-            first_tensor = next(iter(base_state.values()))
-            storage_dtype = first_tensor.dtype
+            storage_dtype = next(iter(base_state.values())).dtype
 
             # Computation dtype is fp32 for numerical stability
             compute_dtype = torch.float32
@@ -412,6 +441,6 @@ class WIDENExitNode:
         # AC-1: Returns MODEL (ModelPatcher clone) with set patches
         # AC-7: Set patches work with downstream LoRA patches additively
         # AC-8: Patch tensors match base model dtype (handled by install_merged_patches)
-        result = install_merged_patches(model_patcher, merged_state)
+        result = install_merged_patches(model_patcher, merged_state, storage_dtype)
 
         return (result,)
