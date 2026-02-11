@@ -1096,7 +1096,7 @@
   type: task
   spec_ref: "@per-block-control"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-block-config-type"
@@ -1128,6 +1128,7 @@
         lib/recipe.py (BlockConfig dataclass).
   todos: []
   automation: eligible
+  started_at: 2026-02-11T04:20:29.468Z
 - _ulid: 01KH4HA48PV4PF188MY0H239GA
   slugs:
     - implement-block-config-type
@@ -1137,6 +1138,10 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #18. Implemented BlockConfig frozen dataclass with arch,
+    block_overrides (tuple of (pattern, float) pairs), and layer_type_overrides fields. Added
+    block_config: object = None field to RecipeLoRA and RecipeMerge for backwards compatibility.
+    AC-1 and AC-2 verified with 22 tests covering all acceptance criteria."
   depends_on:
     - "@implement-recipe-type-system"
   context: []
@@ -1145,6 +1150,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.350Z
   started_at: 2026-02-11T04:15:55.148Z
+  completed_at: 2026-02-11T04:19:36.726Z
   notes:
     - _ulid: 01KH4HA48PDVTJC03SWE79A21X
       created_at: 2026-02-10T19:44:03.350Z
@@ -1174,11 +1180,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T04:19:36.726Z
-  closed_reason: "Merged in PR #18. Implemented BlockConfig frozen dataclass with arch,
-    block_overrides (tuple of (pattern, float) pairs), and layer_type_overrides fields. Added
-    block_config: object = None field to RecipeLoRA and RecipeMerge for backwards compatibility.
-    AC-1 and AC-2 verified with 22 tests covering all acceptance criteria."
 - _ulid: 01KH4HA48WYR6H4E0QV888VSD2
   slugs:
     - implement-merge-per-block-t-factor
