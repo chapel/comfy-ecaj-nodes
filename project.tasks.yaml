@@ -366,7 +366,7 @@
   type: task
   spec_ref: "@compose-node"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
@@ -404,6 +404,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T02:58:53.235Z
+  closed_reason: "Merged in PR #7. Implemented Compose node that accumulates branches for WIDEN
+    merging. Uses RecipeCompose.with_branch() for persistent semantics. Validates branch types
+    (accepts RecipeLoRA, RecipeCompose, RecipeMerge; rejects raw RecipeBase with helpful error). All
+    4 ACs covered by 17 tests."
 - _ulid: 01KH4HA46DNS18CPRTTECH915J
   slugs:
     - implement-merge-node
