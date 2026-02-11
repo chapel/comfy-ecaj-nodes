@@ -1347,6 +1347,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-11T00:05:30.177Z
+  started_at: 2026-02-11T04:46:59.375Z
   notes:
     - _ulid: 01KH508VE1T9JEBJV2R50E10ZD
       created_at: 2026-02-11T00:05:30.177Z
@@ -1360,9 +1361,21 @@
         on lib/recipe.py dataclasses. Arch fixtures provide representative state
         dict key sets for detection testing.
         Files: tests/conftest.py, tests/mocks/__init__.py, tests/mocks/mock_comfy.py
+    - _ulid: 01KH5GFVRKF1TEASV99QCVHN05
+      created_at: 2026-02-11T04:48:57.107Z
+      author: "@claude"
+      content: "Completed ComfyUI mocking and fixtures implementation. AC-1: MockModelPatcher fixture
+        already fully implemented with model_state_dict, clone, add_patches, get_key_patches,
+        patches_uuid. AC-2: Added recipe_full fixture for compose+chain pattern, single-LoRA,
+        multi-LoRA, compose (2 branches), chain (2 sequential merges) already present. AC-3: ComfyUI
+        sys.modules mocking already implemented with autouse fixture. AC-4: Added _ZIMAGE_KEYS
+        constant with layers/noise_refiner/context_refiner keys, sdxl_state_dict_keys fixture,
+        zimage_state_dict_keys fixture, and mock_model_patcher_zimage fixture. Created
+        test_conftest_fixtures.py with 22 tests covering all 4 ACs. 467 total tests pass, ruff
+        clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T04:46:59.375Z
 - _ulid: 01KH508VEVHA4ZME2CDZ275XKS
   slugs:
     - implement-node-graph-testing
