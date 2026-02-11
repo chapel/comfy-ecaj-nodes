@@ -1545,7 +1545,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -1558,6 +1558,9 @@
   started_at: 2026-02-11T06:16:19.722Z
   notes: []
   todos: []
+  completed_at: 2026-02-11T06:16:28.992Z
+  closed_reason: "Merged in PR #23. Fixed filter_delta_batched per-sample flat mask, empty
+    weights_list validation, sparsity_method validation. 10 new tests, 477 total passing."
 - _ulid: 01KH5KHTVK03VYJGAPV28SYJB0
   slugs:
     - fix-test-quality
