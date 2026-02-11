@@ -1628,7 +1628,11 @@
   created_at: 2026-02-11T05:42:12.878Z
   notes: []
   todos: []
-- title: Unify scalar/batched codepaths in widen.py and divergence.py
+- _ulid: 01KH5KHMQ7ZRPX9T9HVX8K2P0S
+  slugs:
+    - unify-scalar-batched
+  title: Unify scalar/batched codepaths in widen.py and divergence.py
+  type: task
   description: >-
     STRUCTURAL: ~200 lines of duplicated scalar/batched code in widen.py plus duplicated dimension
     dispatch in both widen.py and divergence.py. This duplication already produced the flat/non-flat
@@ -1675,22 +1679,80 @@
 
     VERIFICATION: All scalar tests pass unchanged, add parity tests scalar(x)==batched([x])[0], ruff
     clean
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
+  tags:
+    - refactor
+    - review-finding
+  vcs_refs: []
+  created_at: 2026-02-11T05:42:21.158Z
+  notes: []
+  todos: []
+- title: "Fix test quality: placeholder tests, mock fidelity, and weak assertions"
+  description: >-
+    TEST QUALITY issues creating false confidence in AC coverage.
+
+
+    1. PLACEHOLDER PASS TESTS (3 tests verify nothing):
+
+    - tests/test_exit_node.py:240 - TestComposeCallsMergeWeights (AC: @exit-node ac-3)
+
+    - tests/test_exit_node.py:261 - TestLoRACallsFilterDelta (AC: @exit-node ac-4)
+
+    - tests/test_exit_node.py:282 - TestChainedMergeOrder (AC: @exit-node ac-5)
+
+    Replace with real implementations.
+
+
+    2. MOCK FIDELITY BUG:
+
+    MockModelPatcher.clone() sets new UUID (tests/conftest.py:90-97), but real ComfyUI copies
+    patches_uuid from source. Tests enforce wrong behavior (test_mock_model_patcher.py:56-59). Fix
+    mock to match real ComfyUI.
+
+
+    3. WEAK ASSERTIONS:
+
+    - test_executor.py:912-943 chained merge order: only asserts call count, not actual order
+
+    - test_executor.py:1054-1085 backbone override: only checks backbone is not None
+
+    - test_exit_recipe_analysis.py:471-493 cleanup: only asserts exception, not cleanup side-effects
+
+    - test_lora_block_strength.py:309-325 backwards-compat: only checks block_config is None
+
+
+    4. TEST ANTI-PATTERNS:
+
+    - test_lora_loaders.py:249-267 substring check for module independence (fragile)
+
+    - Duplicate _DIFFUSION_PREFIX in nodes/exit.py:23 and tests/conftest.py:37
+
+
+    VERIFICATION: No pass-only test bodies, mock matches real ComfyUI, all assertions verify
+    behavioral outcomes
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
   priority: 2
   slugs:
-    - unify-scalar-batched
+    - fix-test-quality
   tags:
-    - refactor
+    - testing
     - review-finding
   depends_on: []
-  _ulid: 01KH5KHMQ7ZRPX9T9HVX8K2P0S
+  _ulid: 01KH5KHTVK03VYJGAPV28SYJB0
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-11T05:42:21.158Z
+  created_at: 2026-02-11T05:42:27.443Z
   notes: []
   todos: []
