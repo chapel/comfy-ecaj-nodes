@@ -2007,4 +2007,12 @@
         side-by-side comparison of lib/gpu_ops.py, lib/batch_groups.py, nodes/exit.py vs
         merge-router/scripts/lora_chain_merge.py.
       supersedes: null
+    - _ulid: 01KH70KA4Y712WCV83YB4PFKF5
+      created_at: 2026-02-11T18:49:41.790Z
+      author: "@claude"
+      content: "Bottleneck 1 (highest impact ~30-40%): Excessive gc.collect()+empty_cache() — called after
+        every chunk (gpu_ops.py:292-294) AND every OpSig group (exit.py:400-404). Each call triggers
+        GPU sync blocking kernel queuing. Reference only cleans between stages. Fix: remove
+        per-chunk cleanup, keep only per-group."
+      supersedes: null
   todos: []
