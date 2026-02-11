@@ -287,6 +287,7 @@ class WIDENExitNode:
             loader = analysis.loader
             set_affected = analysis.set_affected
             affected_keys = analysis.affected_keys
+            arch = analysis.arch
 
             # Get base model state dict (unprefixed keys)
             base_state = model_patcher.model.diffusion_model.state_dict()  # type: ignore[attr-defined]
@@ -346,7 +347,9 @@ class WIDENExitNode:
                 )
 
                 # Build evaluation function that calls evaluate_recipe
-                def make_eval_fn(recipe, ldr, wdn, sid_map, dev, dtype):
+                # AC: @merge-block-config ac-1, ac-2
+                # Pass arch and widen_config for per-block t_factor support
+                def make_eval_fn(recipe, ldr, wdn, sid_map, dev, dtype, architecture, wcfg):
                     def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
                         return evaluate_recipe(
                             keys=keys,
@@ -357,11 +360,14 @@ class WIDENExitNode:
                             set_id_map=sid_map,
                             device=dev,
                             dtype=dtype,
+                            arch=architecture,
+                            widen_config=wcfg,
                         )
                     return eval_fn
 
                 eval_fn = make_eval_fn(
-                    widen, loader, widen_merger, set_id_map, device, compute_dtype
+                    widen, loader, widen_merger, set_id_map, device, compute_dtype,
+                    arch, widen_config
                 )
 
                 # Run chunked evaluation with OOM backoff
