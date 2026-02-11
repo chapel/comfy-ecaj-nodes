@@ -84,7 +84,7 @@
   type: task
   spec_ref: "@comfyui-packaging"
   plan_ref: "@plan-foundation-project-infrastructure"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -124,6 +124,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T02:25:41.782Z
+  closed_reason: "Merged in PR #1. Implemented ComfyUI packaging infrastructure: NODE_CLASS_MAPPINGS
+    with 5 WIDEN nodes, pyproject.toml with [tool.comfy] metadata (PublisherId=ecaj,
+    DisplayName=ECAJ Nodes), lowercase ecaj/merge CATEGORY on all nodes, empty runtime deps with dev
+    deps in optional-dependencies. All 4 ACs covered by tests in test_packaging.py."
 - _ulid: 01KH4H1VQK0HMMA7NP2BTSFZEA
   slugs:
     - implement-testing-infrastructure
