@@ -84,7 +84,7 @@
   type: task
   spec_ref: "@comfyui-packaging"
   plan_ref: "@plan-foundation-project-infrastructure"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -113,6 +113,7 @@
         nodes/lora.py, nodes/compose.py, nodes/merge.py, nodes/exit.py.
   todos: []
   automation: eligible
+  started_at: 2026-02-11T01:44:24.977Z
 - _ulid: 01KH4H1VQK0HMMA7NP2BTSFZEA
   slugs:
     - implement-testing-infrastructure
