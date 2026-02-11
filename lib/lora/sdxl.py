@@ -20,8 +20,8 @@ from collections.abc import Sequence
 import torch
 from safetensors import safe_open
 
-from lib.executor import DeltaSpec
-from lib.lora.base import LoRALoader
+from ..executor import DeltaSpec
+from .base import LoRALoader
 
 __all__ = ["SDXLLoader"]
 

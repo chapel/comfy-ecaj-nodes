@@ -20,9 +20,9 @@ Usage:
         loader.load(...)
 """
 
-from lib.lora.base import LoRALoader
-from lib.lora.sdxl import SDXLLoader
-from lib.lora.zimage import ZImageLoader
+from .base import LoRALoader
+from .sdxl import SDXLLoader
+from .zimage import ZImageLoader
 
 __all__ = [
     "LoRALoader",

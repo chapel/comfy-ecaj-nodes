@@ -16,8 +16,8 @@ import os
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from lib.lora import LoRALoader, get_loader
-from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
+from .lora import LoRALoader, get_loader
+from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
 
 if TYPE_CHECKING:
     pass

@@ -1,6 +1,6 @@
 """WIDEN Block Config SDXL Node — Architecture-specific block weight configuration."""
 
-from lib.recipe import BlockConfig
+from ..lib.recipe import BlockConfig
 
 
 class WIDENBlockConfigSDXLNode:

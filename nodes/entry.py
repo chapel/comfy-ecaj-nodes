@@ -1,6 +1,6 @@
 """WIDEN Entry Node — Boundary from ComfyUI MODEL to WIDEN recipe world."""
 
-from lib.recipe import RecipeBase
+from ..lib.recipe import RecipeBase
 
 
 class UnsupportedArchitectureError(ValueError):

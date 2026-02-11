@@ -1,6 +1,6 @@
 """WIDEN LoRA Node — Declares a LoRA spec in the recipe tree."""
 
-from lib.recipe import BlockConfig, RecipeLoRA
+from ..lib.recipe import BlockConfig, RecipeLoRA
 
 
 class WIDENLoRANode:
