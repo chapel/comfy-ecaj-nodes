@@ -1680,6 +1680,8 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #28. 10 validation/hardening fixes across nodes, lib, and sparsity. 491
+    tests passing."
   depends_on: []
   context: []
   priority: 3
@@ -1689,11 +1691,9 @@
   vcs_refs: []
   created_at: 2026-02-11T05:42:34.804Z
   started_at: 2026-02-11T07:41:30.424Z
+  completed_at: 2026-02-11T07:41:42.683Z
   notes: []
   todos: []
-  completed_at: 2026-02-11T07:41:42.683Z
-  closed_reason: "Merged in PR #28. 10 validation/hardening fixes across nodes, lib, and sparsity. 491
-    tests passing."
 - _ulid: 01KH5KNGFJNFN8ZFD5FTA6NZG8
   slugs:
     - split-executor
@@ -1761,5 +1761,25 @@
   created_at: 2026-02-11T05:44:30.882Z
   started_at: 2026-02-11T07:29:50.494Z
   completed_at: 2026-02-11T07:29:53.129Z
+  notes: []
+  todos: []
+- title: "Per-block performance: cache classify_key and use indexed assignment"
+  type: task
+  priority: 4
+  spec_ref: null
+  tags:
+    - performance
+    - review-finding
+  description: "Bundle two perf items: (1) Cache classify_key results per (arch, key) within a batch
+    to avoid repeated classification loops in per_block.py. (2) Replace per-index writeback loops in
+    per-block merge/filter with indexed assignment (result[indices] = sub_result)."
+  _ulid: 01KH5XMHBMKSNB3YJ64XSM5H8R
+  slugs: []
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-11T08:38:41.780Z
   notes: []
   todos: []

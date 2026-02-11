@@ -7,14 +7,6 @@ inbox:
       - refactor
       - review-finding
     added_by: "@claude"
-  - _ulid: 01KH5KJB9W1C8KAH0T7K93P2MV
-    text: Cache classify_key results per (arch, key) within a batch to avoid repeated classification
-      loops in per-block functions in executor.py
-    created_at: 2026-02-11T05:42:44.284Z
-    tags:
-      - performance
-      - review-finding
-    added_by: "@claude"
   - _ulid: 01KH5KJD5GJMGTECJ4ATTD18YT
     text: Replace per-index writeback loops in per-block merge/filter with indexed assignment
       (result[indices] = sub_result) where feasible
