@@ -46,3 +46,90 @@ class TestNodeAttributes:
     def test_return_types_is_tuple(self):
         for cls in ALL_NODE_CLASSES:
             assert isinstance(cls.RETURN_TYPES, tuple), f"{cls.__name__}.RETURN_TYPES not a tuple"
+
+
+class TestWIDENTypeConnections:
+    """WIDEN wire connections are valid between nodes in the graph editor.
+    # AC: @recipe-system ac-5
+    """
+
+    # Nodes that output WIDEN type
+    WIDEN_OUTPUTS = [
+        WIDENEntryNode,  # MODEL -> WIDEN
+        WIDENLoRANode,   # file + strength -> WIDEN
+        WIDENComposeNode,  # branch accumulation -> WIDEN
+        WIDENMergeNode,  # merge step -> WIDEN
+    ]
+
+    # Nodes that accept WIDEN input
+    WIDEN_INPUTS = [
+        WIDENLoRANode,   # prev: WIDEN (optional)
+        WIDENComposeNode,  # branch: WIDEN, compose: WIDEN (optional)
+        WIDENMergeNode,  # base: WIDEN, target: WIDEN, backbone: WIDEN (optional)
+        WIDENExitNode,   # widen: WIDEN
+    ]
+
+    def test_output_nodes_return_widen(self):
+        """All WIDEN-outputting nodes declare RETURN_TYPES with 'WIDEN'."""
+        for cls in self.WIDEN_OUTPUTS:
+            assert "WIDEN" in cls.RETURN_TYPES, (
+                f"{cls.__name__} should output WIDEN type"
+            )
+
+    def test_input_nodes_accept_widen(self):
+        """All WIDEN-accepting nodes declare 'WIDEN' in INPUT_TYPES."""
+        for cls in self.WIDEN_INPUTS:
+            input_types = cls.INPUT_TYPES()
+            all_inputs = {}
+            all_inputs.update(input_types.get("required", {}))
+            all_inputs.update(input_types.get("optional", {}))
+
+            widen_inputs = [k for k, v in all_inputs.items() if v[0] == "WIDEN"]
+            assert len(widen_inputs) > 0, (
+                f"{cls.__name__} should accept at least one WIDEN input"
+            )
+
+    def test_entry_outputs_widen_only(self):
+        """Entry node is the only source, outputs WIDEN from MODEL."""
+        input_types = WIDENEntryNode.INPUT_TYPES()
+        required = input_types.get("required", {})
+        assert "model" in required, "Entry should require MODEL input"
+        assert required["model"][0] == "MODEL", "Entry input should be MODEL type"
+        assert WIDENEntryNode.RETURN_TYPES == ("WIDEN",), "Entry should output WIDEN"
+
+    def test_exit_accepts_widen_returns_model(self):
+        """Exit node takes WIDEN, returns MODEL (boundary out)."""
+        input_types = WIDENExitNode.INPUT_TYPES()
+        required = input_types.get("required", {})
+        assert "widen" in required, "Exit should require widen input"
+        assert required["widen"][0] == "WIDEN", "Exit input should be WIDEN type"
+        assert WIDENExitNode.RETURN_TYPES == ("MODEL",), "Exit should output MODEL"
+
+    def test_merge_connections(self):
+        """Merge node accepts WIDEN base/target/backbone, outputs WIDEN."""
+        input_types = WIDENMergeNode.INPUT_TYPES()
+        required = input_types.get("required", {})
+        optional = input_types.get("optional", {})
+
+        assert required["base"][0] == "WIDEN", "Merge base should be WIDEN"
+        assert required["target"][0] == "WIDEN", "Merge target should be WIDEN"
+        assert optional.get("backbone", (None,))[0] == "WIDEN", "Merge backbone should be WIDEN"
+        assert WIDENMergeNode.RETURN_TYPES == ("WIDEN",), "Merge should output WIDEN"
+
+    def test_compose_connections(self):
+        """Compose node accepts WIDEN branch/compose, outputs WIDEN."""
+        input_types = WIDENComposeNode.INPUT_TYPES()
+        required = input_types.get("required", {})
+        optional = input_types.get("optional", {})
+
+        assert required["branch"][0] == "WIDEN", "Compose branch should be WIDEN"
+        assert optional.get("compose", (None,))[0] == "WIDEN", "Compose compose should be WIDEN"
+        assert WIDENComposeNode.RETURN_TYPES == ("WIDEN",), "Compose should output WIDEN"
+
+    def test_lora_connections(self):
+        """LoRA node optionally accepts WIDEN prev, outputs WIDEN."""
+        input_types = WIDENLoRANode.INPUT_TYPES()
+        optional = input_types.get("optional", {})
+
+        assert optional.get("prev", (None,))[0] == "WIDEN", "LoRA prev should be WIDEN"
+        assert WIDENLoRANode.RETURN_TYPES == ("WIDEN",), "LoRA should output WIDEN"
