@@ -2077,6 +2077,8 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #32. Added .cpu() normalization before torch.stack in
+    chunked_evaluation to handle mixed CPU/CUDA tensors from model_state_dict()."
   depends_on: []
   context: []
   priority: 1
@@ -2086,6 +2088,7 @@
   vcs_refs: []
   created_at: 2026-02-11T19:32:25.782Z
   started_at: 2026-02-11T19:33:55.036Z
+  completed_at: 2026-02-11T20:08:52.629Z
   notes:
     - _ulid: 01KH731V18HTSHWJZQ7GT3KYVC
       created_at: 2026-02-11T19:32:34.984Z
@@ -2105,6 +2108,27 @@
         from model_state_dict(). Added regression test. All 494 tests pass, ruff clean."
       supersedes: null
   todos: []
-  completed_at: 2026-02-11T20:08:52.629Z
-  closed_reason: "Merged in PR #32. Added .cpu() normalization before torch.stack in
-    chunked_evaluation to handle mixed CPU/CUDA tensors from model_state_dict()."
+- title: Fix LoRA double-application on subsequent generations
+  description: "First generation with WIDEN Exit node works correctly. Subsequent generations (after
+    changing a value like LoRA strength) look wrong — LoRA appears double-applied. Suspected root
+    cause: model_state_dict() on the original model_patcher returns patched-in-place weights left by
+    the previous run's clone. Need to verify against real ComfyUI ModelPatcher source and implement
+    fix."
+  type: bug
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 1
+  slugs: []
+  tags:
+    - runtime
+    - correctness
+  depends_on: []
+  _ulid: 01KH7550XP2PN0929WXXFFXPYD
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-11T20:09:16.470Z
+  notes: []
+  todos: []
