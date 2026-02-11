@@ -89,7 +89,7 @@ runs:
   - _ulid: 01KH50QDZKY91JSHEXR5BGW4V2
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 4
+    current_step: 5
     total_steps: 6
     started_at: 2026-02-11T00:13:27.923Z
     step_results:
@@ -121,5 +121,11 @@ runs:
       - step_index: 4
         status: completed
         started_at: 2026-02-11T00:14:14.589Z
-        completed_at: 2026-02-11T00:14:14.589Z
+        completed_at: 2026-02-11T00:20:15.412Z
+        notes: "User decisions: (1) Add general principle to memory about verifying refs before using them,
+          not a slug list. (2) Capture kspec issues in kspec project, not here."
+      - step_index: 5
+        status: completed
+        started_at: 2026-02-11T00:20:15.412Z
+        completed_at: 2026-02-11T00:20:15.412Z
     initiated_by: "@claude"
