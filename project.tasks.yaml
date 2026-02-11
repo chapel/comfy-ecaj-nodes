@@ -1098,6 +1098,13 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #19. Implemented per-block control with BLOCK_CONFIG custom ComfyUI
+    type. Created WIDENBlockConfigSDXLNode (7 block group sliders: IN00-02, IN03-05, IN06-08, MID,
+    OUT00-02, OUT03-05, OUT06-08) and WIDENBlockConfigZImageNode (8 block group sliders: L00-04
+    through L25-29, noise_refiner, context_refiner). Each slider is FLOAT 0.0-2.0 with step 0.05.
+    Added optional BLOCK_CONFIG input to WIDENLoRANode and WIDENMergeNode for fan-out support. All 3
+    ACs verified: AC-1 (no block_config = pre-block-control behavior), AC-2 (architecture-specific
+    sliders 0.0-2.0), AC-3 (fan-out to multiple consumers). 22 tests pass."
   depends_on:
     - "@implement-block-config-type"
     - "@implement-comfyui-packaging"
@@ -1108,6 +1115,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.342Z
   started_at: 2026-02-11T04:20:29.468Z
+  completed_at: 2026-02-11T04:26:48.695Z
   notes:
     - _ulid: 01KH4HA48EJA9E7AFC4E38BA13
       created_at: 2026-02-10T19:44:03.342Z
@@ -1142,14 +1150,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T04:26:48.695Z
-  closed_reason: "Merged in PR #19. Implemented per-block control with BLOCK_CONFIG custom ComfyUI
-    type. Created WIDENBlockConfigSDXLNode (7 block group sliders: IN00-02, IN03-05, IN06-08, MID,
-    OUT00-02, OUT03-05, OUT06-08) and WIDENBlockConfigZImageNode (8 block group sliders: L00-04
-    through L25-29, noise_refiner, context_refiner). Each slider is FLOAT 0.0-2.0 with step 0.05.
-    Added optional BLOCK_CONFIG input to WIDENLoRANode and WIDENMergeNode for fan-out support. All 3
-    ACs verified: AC-1 (no block_config = pre-block-control behavior), AC-2 (architecture-specific
-    sliders 0.0-2.0), AC-3 (fan-out to multiple consumers). 22 tests pass."
 - _ulid: 01KH4HA48PV4PF188MY0H239GA
   slugs:
     - implement-block-config-type
@@ -1208,7 +1208,7 @@
   type: task
   spec_ref: "@merge-block-config"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-per-block-control"
@@ -1239,6 +1239,7 @@
         during eval), lib/block_classify.py (key-to-block mapping).
   todos: []
   automation: eligible
+  started_at: 2026-02-11T04:27:40.314Z
 - _ulid: 01KH4HA493AA51NFWN2NGQA6GA
   slugs:
     - implement-lora-per-block-strength
