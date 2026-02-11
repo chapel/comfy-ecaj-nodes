@@ -136,8 +136,22 @@ runs:
   - _ulid: 01KH59H5TH8FPPZEM8VW6W4W5M
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-11T02:47:20.145Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-11T02:47:20.145Z
+        completed_at: 2026-02-11T02:47:28.517Z
+        notes: "Session: Implemented Entry Node (task 01KH4HA463). What worked well: (1) MockModelPatcher
+          fixture with configurable keys parameter made testing different architectures trivial -
+          just pass different key tuples. (2) Pattern-based architecture detection with ordered
+          specificity (Z-Image before generic layers) was clean approach. (3) Task/spec structure
+          gave clear ACs to implement against. Friction: None significant - straightforward
+          implementation task."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-11T02:47:28.517Z
+        completed_at: 2026-02-11T02:47:28.517Z
     initiated_by: "@claude"
