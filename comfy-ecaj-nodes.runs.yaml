@@ -458,7 +458,7 @@ runs:
   - _ulid: 01KH6XZN55CA7GCFSXZ3V46Z11
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-11T18:04:00.549Z
     step_results:
@@ -473,5 +473,15 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-11T18:04:14.705Z
-        completed_at: 2026-02-11T18:04:14.705Z
+        completed_at: 2026-02-11T18:04:23.313Z
+        notes: "Friction: (1) MockModelPatcher designed with same prefix inconsistency as production code -
+          model_state_dict() returns prefixed keys but model.diffusion_model.state_dict() strips
+          them. Tests verified the wrong behavior. Need integration-level tests or mock audit. (2)
+          No runtime/ComfyUI smoke test exists - all tests are unit-level with mocks, so entire
+          execution pipeline was untested with real data. (3) Codex review of pre-fix code was
+          useful but would have been more useful reviewing the PR diff specifically."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-11T18:04:23.313Z
+        completed_at: 2026-02-11T18:04:23.313Z
     initiated_by: "@claude"
