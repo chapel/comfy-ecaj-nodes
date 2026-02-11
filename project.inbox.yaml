@@ -15,3 +15,11 @@ inbox:
       - performance
       - review-finding
     added_by: "@claude"
+  - _ulid: 01KH5KJD5GJMGTECJ4ATTD18YT
+    text: Replace per-index writeback loops in per-block merge/filter with indexed assignment
+      (result[indices] = sub_result) where feasible
+    created_at: 2026-02-11T05:42:46.192Z
+    tags:
+      - performance
+      - review-finding
+    added_by: "@claude"
