@@ -2108,27 +2108,28 @@
         from model_state_dict(). Added regression test. All 494 tests pass, ruff clean."
       supersedes: null
   todos: []
-- title: Fix LoRA double-application on subsequent generations
+- _ulid: 01KH7550XP2PN0929WXXFFXPYD
+  slugs: []
+  title: Fix LoRA double-application on subsequent generations
+  type: bug
   description: "First generation with WIDEN Exit node works correctly. Subsequent generations (after
     changing a value like LoRA strength) look wrong — LoRA appears double-applied. Suspected root
     cause: model_state_dict() on the original model_patcher returns patched-in-place weights left by
     the previous run's clone. Need to verify against real ComfyUI ModelPatcher source and implement
     fix."
-  type: bug
   spec_ref: null
   meta_ref: null
   plan_ref: null
+  status: in_progress
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 1
-  slugs: []
   tags:
     - runtime
     - correctness
-  depends_on: []
-  _ulid: 01KH7550XP2PN0929WXXFFXPYD
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-11T20:09:16.470Z
   notes: []
   todos: []
+  started_at: 2026-02-11T20:12:05.190Z
