@@ -1999,5 +1999,12 @@
     - gpu
   vcs_refs: []
   created_at: 2026-02-11T18:48:16.958Z
-  notes: []
+  notes:
+    - _ulid: 01KH70K6RM8SX3M6YT3Y8ECDPG
+      created_at: 2026-02-11T18:49:38.324Z
+      author: "@claude"
+      content: Batched GPU pipeline is ~2-3x slower than merge-router reference. Root cause analysis from
+        side-by-side comparison of lib/gpu_ops.py, lib/batch_groups.py, nodes/exit.py vs
+        merge-router/scripts/lora_chain_merge.py.
+      supersedes: null
   todos: []
