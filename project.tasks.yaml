@@ -2023,4 +2023,11 @@
         pre-groups by model block first then by OpSig within each block, producing ~50 groups with
         better batch utilization. Fix: add _group_keys_by_block() pre-pass."
       supersedes: null
+    - _ulid: 01KH70KM49RKYVNX0ANBKH07T2
+      created_at: 2026-02-11T18:49:52.009Z
+      author: "@claude"
+      content: "Bottleneck 3: Linear O(N) search per key in apply_lora_batch_gpu (gpu_ops.py:205,224) —
+        'next(s for s in group if s.key_index == key_index)' to find matching spec after delta
+        computation. Fix: pre-build index dict from key_index → spec."
+      supersedes: null
   todos: []
