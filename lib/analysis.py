@@ -149,9 +149,13 @@ def _resolve_lora_path(
         resolved = lora_path_resolver(lora_name)
         if resolved is not None:
             return resolved
-        # Resolver returned None — fall through to return lora_name as-is
-        # (the caller will check os.path.exists and raise FileNotFoundError)
-        return lora_name
+        # Resolver was provided but couldn't find the file — fail immediately
+        # rather than falling back to the raw name (which could accidentally
+        # match a file in CWD)
+        raise FileNotFoundError(
+            f"LoRA file not found: {lora_name} "
+            f"(resolver could not locate file in any registered directory)"
+        )
 
     # No resolver — assume lora_name is already a full path
     return lora_name
