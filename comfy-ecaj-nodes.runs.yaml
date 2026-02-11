@@ -212,6 +212,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-11T03:24:36.632Z
+    completed_at: 2026-02-11T03:25:19.842Z
     step_results:
       - step_index: 0
         status: completed
@@ -238,4 +239,11 @@ runs:
         completed_at: 2026-02-11T03:25:19.841Z
         notes: No items to capture. Reflection complete with no new observations needed.
     initiated_by: "@claude"
-    completed_at: 2026-02-11T03:25:19.842Z
+  - _ulid: 01KH5C5FPDXW05CK16KV4WC5M0
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-11T03:33:22.765Z
+    step_results: []
+    initiated_by: "@claude"
