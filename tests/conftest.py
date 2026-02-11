@@ -9,7 +9,8 @@ import pytest
 import torch
 
 from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
-from nodes.exit import _DIFFUSION_PREFIX
+
+_DIFFUSION_PREFIX = "diffusion_model."
 
 # ---------------------------------------------------------------------------
 # MockModelPatcher — faithful stand-in for comfy.model_patcher.ModelPatcher

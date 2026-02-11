@@ -23,9 +23,6 @@ from ..lib.widen import WIDEN, WIDENConfig
 if TYPE_CHECKING:
     pass
 
-# Namespace prefix for diffusion model keys in ComfyUI ModelPatcher
-_DIFFUSION_PREFIX = "diffusion_model."
-
 
 def _validate_recipe_tree(node: RecipeNode, path: str = "root") -> None:
     """Recursively validate the recipe tree structure.
@@ -98,14 +95,14 @@ def install_merged_patches(
     """Install merged tensors as set patches on a cloned ModelPatcher.
 
     AC: @exit-patch-install ac-1 — clone model, add as set patches
-    AC: @exit-patch-install ac-2 — prefix keys with diffusion_model.
+    AC: @exit-patch-install ac-2 — keys use diffusion_model. prefix
     AC: @exit-patch-install ac-3 — tensors transferred to CPU
     AC: @exit-patch-install ac-4 — tensors match base model storage dtype
 
     Args:
         model_patcher: Original ComfyUI ModelPatcher
         merged_state: Dict of {key: merged_tensor} from batched evaluation
-            Keys should NOT have diffusion_model. prefix
+            Keys already have diffusion_model. prefix (from LoRA loaders)
 
     Returns:
         Cloned ModelPatcher with merged weights installed as set patches
@@ -118,13 +115,12 @@ def install_merged_patches(
     cloned = model_patcher.clone()  # type: ignore[attr-defined]
 
     # Build set patches: transfer to CPU (AC-3), cast to base dtype (AC-4)
-    # Prefix with diffusion_model. (AC-2)
+    # Keys already have diffusion_model. prefix (AC-2)
     patches = {}
     for key, tensor in merged_state.items():
         cpu_tensor = tensor.cpu().to(base_dtype)
-        prefixed_key = f"{_DIFFUSION_PREFIX}{key}"
         # "set" patch format: replaces the weight entirely
-        patches[prefixed_key] = ("set", cpu_tensor)
+        patches[key] = ("set", cpu_tensor)
 
     # Install patches (AC-1)
     cloned.add_patches(patches, strength_patch=1.0)  # type: ignore[attr-defined]
@@ -299,7 +295,9 @@ class WIDENExitNode:
 
         print("[WIDEN Exit] analyzing recipe...")
         analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
-        print(f"[WIDEN Exit] analysis done: {len(analysis.set_affected)} sets, {len(analysis.affected_keys)} keys")
+        n_sets = len(analysis.set_affected)
+        n_keys = len(analysis.affected_keys)
+        print(f"[WIDEN Exit] analysis done: {n_sets} sets, {n_keys} keys")
 
         try:
             model_patcher = analysis.model_patcher
@@ -308,8 +306,9 @@ class WIDENExitNode:
             affected_keys = analysis.affected_keys
             arch = analysis.arch
 
-            # Get base model state dict (unprefixed keys)
-            base_state = model_patcher.model.diffusion_model.state_dict()  # type: ignore[attr-defined]
+            # Get base model state dict (prefixed keys: diffusion_model.X.weight)
+            # Must match the key format produced by LoRA loaders
+            base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
 
             # Determine storage dtype from base model
             first_tensor = next(iter(base_state.values()))

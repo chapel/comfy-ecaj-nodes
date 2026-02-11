@@ -30,7 +30,7 @@ class TestInstallMergedPatches:
         """Clones the original ModelPatcher instead of mutating it."""
         original_uuid = mock_model_patcher.patches_uuid
 
-        merged_state = {"input_blocks.0.0.weight": torch.randn(4, 4)}
+        merged_state = {"diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4)}
         result = install_merged_patches(mock_model_patcher, merged_state)
 
         # Result is different object
@@ -42,53 +42,50 @@ class TestInstallMergedPatches:
     # AC: @exit-patch-install ac-1
     def test_adds_set_patches(self, mock_model_patcher: MockModelPatcher):
         """Merged weights are added as set patches."""
-        merged_state = {"input_blocks.0.0.weight": torch.randn(4, 4)}
+        key = "diffusion_model.input_blocks.0.0.weight"
+        merged_state = {key: torch.randn(4, 4)}
         result = install_merged_patches(mock_model_patcher, merged_state)
 
         # Check patch was added
-        prefixed_key = "diffusion_model.input_blocks.0.0.weight"
-        assert prefixed_key in result.patches
+        assert key in result.patches
         # Patch entry format: [(strength, value, strength_model, None, None)]
-        patch_entry = result.patches[prefixed_key][0]
+        patch_entry = result.patches[key][0]
         assert patch_entry[0] == 1.0  # strength_patch
         assert patch_entry[1][0] == "set"  # patch type
 
     # AC: @exit-patch-install ac-2
-    def test_prefixes_keys_with_diffusion_model(self, mock_model_patcher: MockModelPatcher):
-        """Keys are prefixed with 'diffusion_model.' for ModelPatcher namespace."""
+    def test_keys_use_diffusion_model_prefix(self, mock_model_patcher: MockModelPatcher):
+        """Keys with diffusion_model. prefix are passed through to ModelPatcher."""
         merged_state = {
-            "input_blocks.0.0.weight": torch.randn(4, 4),
-            "middle_block.0.weight": torch.randn(4, 4),
+            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
+            "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
         }
         result = install_merged_patches(mock_model_patcher, merged_state)
 
-        # Both keys should be prefixed
+        # Both keys should be present as-is
         assert "diffusion_model.input_blocks.0.0.weight" in result.patches
         assert "diffusion_model.middle_block.0.weight" in result.patches
-        # Unprefixed keys should not exist
-        assert "input_blocks.0.0.weight" not in result.patches
-        assert "middle_block.0.weight" not in result.patches
 
     # AC: @exit-patch-install ac-3
     def test_transfers_tensors_to_cpu(self, mock_model_patcher: MockModelPatcher):
         """All patch tensors are on CPU."""
-        # Create tensor that could be on GPU (but in tests, stays CPU)
-        merged_state = {"input_blocks.0.0.weight": torch.randn(4, 4)}
+        key = "diffusion_model.input_blocks.0.0.weight"
+        merged_state = {key: torch.randn(4, 4)}
         result = install_merged_patches(mock_model_patcher, merged_state)
 
         # Get the patch tensor
-        patch_entry = result.patches["diffusion_model.input_blocks.0.0.weight"][0]
+        patch_entry = result.patches[key][0]
         patch_tensor = patch_entry[1][1]  # ("set", tensor)
         assert patch_tensor.device.type == "cpu"
 
     # AC: @exit-patch-install ac-4
     def test_matches_base_model_dtype_float32(self, mock_model_patcher: MockModelPatcher):
         """Patch tensors match base model dtype (float32 case)."""
-        # MockModelPatcher uses float32
-        merged_state = {"input_blocks.0.0.weight": torch.randn(4, 4, dtype=torch.float16)}
+        key = "diffusion_model.input_blocks.0.0.weight"
+        merged_state = {key: torch.randn(4, 4, dtype=torch.float16)}
         result = install_merged_patches(mock_model_patcher, merged_state)
 
-        patch_entry = result.patches["diffusion_model.input_blocks.0.0.weight"][0]
+        patch_entry = result.patches[key][0]
         patch_tensor = patch_entry[1][1]
         assert patch_tensor.dtype == torch.float32
 
@@ -101,20 +98,21 @@ class TestInstallMergedPatches:
         for k in patcher._state_dict:
             patcher._state_dict[k] = patcher._state_dict[k].to(torch.bfloat16)
 
-        merged_state = {"input_blocks.0.0.weight": torch.randn(4, 4, dtype=torch.float32)}
+        key = "diffusion_model.input_blocks.0.0.weight"
+        merged_state = {key: torch.randn(4, 4, dtype=torch.float32)}
         result = install_merged_patches(patcher, merged_state)
 
-        patch_entry = result.patches["diffusion_model.input_blocks.0.0.weight"][0]
+        patch_entry = result.patches[key][0]
         patch_tensor = patch_entry[1][1]
         assert patch_tensor.dtype == torch.bfloat16
 
     def test_handles_multiple_keys(self, mock_model_patcher: MockModelPatcher):
         """Multiple merged tensors are all installed."""
         merged_state = {
-            "input_blocks.0.0.weight": torch.randn(4, 4),
-            "input_blocks.1.0.weight": torch.randn(4, 4),
-            "middle_block.0.weight": torch.randn(4, 4),
-            "output_blocks.0.0.weight": torch.randn(4, 4),
+            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
+            "diffusion_model.input_blocks.1.0.weight": torch.randn(4, 4),
+            "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
+            "diffusion_model.output_blocks.0.0.weight": torch.randn(4, 4),
         }
         result = install_merged_patches(mock_model_patcher, merged_state)
 
