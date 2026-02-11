@@ -919,7 +919,7 @@
   type: task
   spec_ref: "@sdxl-loader"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
@@ -960,6 +960,10 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T03:59:43.634Z
+  closed_reason: "Merged in PR #15. Implemented SDXL LoRA Loader with greedy token matching for
+    compound identifiers (input_blocks, proj_in, to_q, etc.). Added 21 tests covering all 3 ACs:
+    block type mapping, DeltaSpec contents, and attention key mapping."
 - _ulid: 01KH4HA47Z3DSGDJ07S2V7DNRD
   slugs:
     - implement-z-image-lora-loader
