@@ -1928,25 +1928,51 @@
         but produces corrupted output - filed inbox item 01KH6X7H for follow-up."
       supersedes: null
   todos: []
-- title: Fix corrupted model output from WIDEN Exit node
+- _ulid: 01KH70GN0FT5GQ30E36REMRST3
+  slugs: []
+  title: Fix corrupted model output from WIDEN Exit node
   type: bug
-  priority: 3
-  spec_ref: null
-  tags:
-    - correctness
-    - runtime
   description: "WIDEN Exit node produces corrupted model output when executing the GPU merge pipeline.
     Nodes now execute (key prefix mismatch fixed) but the merged weights are wrong. Need to debug:
     evaluate_recipe data flow, WIDEN filter/merge math with real z-image tensors,
     install_merged_patches correctness, and possible dtype/device mismatches. Test with actual
     ComfyUI runtime."
-  _ulid: 01KH70GN0FT5GQ30E36REMRST3
+  spec_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags:
+    - correctness
+    - runtime
+  vcs_refs: []
+  created_at: 2026-02-11T18:48:14.607Z
+  notes: []
+  todos: []
+- title: Optimize batched GPU pipeline performance
+  type: task
+  priority: 3
+  spec_ref: null
+  tags:
+    - performance
+    - gpu
+  description: "Performance: batched GPU pipeline is ~2-3x slower than merge-router reference. Key
+    bottlenecks: (1) Excessive gc.collect()+empty_cache() after every chunk AND every OpSig group —
+    reference only cleans between stages (~60 vs ~30 cleanups). Files: gpu_ops.py:292-294,
+    exit.py:400-404. (2) No block-level pre-grouping — we compile OpSig groups across ALL keys
+    creating ~200+ tiny groups vs reference's ~50 via block pre-grouping. Files: exit.py:343-348,
+    batch_groups.py:33-66. (3) Linear O(N) search in apply_lora_batch_gpu to find matching spec
+    after delta computation. Files: gpu_ops.py:205,224. (4) No pin_memory for async CPU→GPU
+    transfers. Priority order: remove per-chunk cleanup (30-40% win), pre-group by block (4x fewer
+    groups), pre-build index dict, add pin_memory."
+  _ulid: 01KH70GQ9YAPG64C3JJVAA1WZ0
   slugs: []
   status: pending
   blocked_by: []
   depends_on: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-11T18:48:14.607Z
+  created_at: 2026-02-11T18:48:16.958Z
   notes: []
   todos: []
