@@ -586,7 +586,7 @@ features:
         created: 2026-02-10T19:44:03.205Z
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
       - _ulid: 01KH4HA44C16BTA406DSC3V4HZ
         slugs:
           - zimage-loader
