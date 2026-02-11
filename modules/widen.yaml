@@ -56,7 +56,7 @@ features:
     created: 2026-02-10T19:44:03.152Z
     status:
       maturity: draft
-      implementation: in_progress
+      implementation: implemented
   - _ulid: 01KH4HA42KCZR0ME6AH4G0WXHY
     slugs:
       - entry-node
