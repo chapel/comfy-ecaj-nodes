@@ -522,7 +522,7 @@
   type: task
   spec_ref: "@exit-recipe-analysis"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
@@ -552,6 +552,7 @@
         Files: lib/executor.py, references lib/lora/base.py interface.
   todos: []
   automation: eligible
+  started_at: 2026-02-11T03:27:52.930Z
 - _ulid: 01KH4HA46X4V9RHXW26VP36FD9
   slugs:
     - implement-exit-batched-evaluation
@@ -812,6 +813,12 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #11. Implemented architecture-specific LoRA loaders with pluggable
+    registry design. Created LoRALoader ABC in lib/lora/base.py with load(), affected_keys,
+    get_delta_specs(), cleanup() interface. Implemented SDXLLoader for kohya/A1111 format and
+    ZImageLoader with QKV fusing support. All 4 ACs covered with 21 tests: AC-1 (architecture
+    selection/key mapping), AC-2 (DeltaSpec production), AC-3 (pluggable design), AC-4 (interface
+    contract)."
   depends_on:
     - "@implement-testing-infrastructure"
   context: []
@@ -820,6 +827,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.316Z
   started_at: 2026-02-11T03:18:49.921Z
+  completed_at: 2026-02-11T03:26:45.215Z
   notes:
     - _ulid: 01KH4HA47M869P70TBAPP53GVA
       created_at: 2026-02-10T19:44:03.316Z
@@ -850,13 +858,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T03:26:45.215Z
-  closed_reason: "Merged in PR #11. Implemented architecture-specific LoRA loaders with pluggable
-    registry design. Created LoRALoader ABC in lib/lora/base.py with load(), affected_keys,
-    get_delta_specs(), cleanup() interface. Implemented SDXLLoader for kohya/A1111 format and
-    ZImageLoader with QKV fusing support. All 4 ACs covered with 21 tests: AC-1 (architecture
-    selection/key mapping), AC-2 (DeltaSpec production), AC-3 (pluggable design), AC-4 (interface
-    contract)."
 - _ulid: 01KH4HA47ST02A5Y0G5ZABFP2D
   slugs:
     - implement-sdxl-lora-loader
