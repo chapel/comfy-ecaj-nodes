@@ -1144,6 +1144,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.350Z
+  started_at: 2026-02-11T04:15:55.148Z
   notes:
     - _ulid: 01KH4HA48PDVTJC03SWE79A21X
       created_at: 2026-02-10T19:44:03.350Z
@@ -1161,9 +1162,18 @@
         with the additional field. Field defaults to None for backwards compat. The
         arch field must match RecipeBase.arch -- validated at Exit time.
         Files: lib/recipe.py.
+    - _ulid: 01KH5EPMHV8C2DPANP9VNS60ND
+      created_at: 2026-02-11T04:17:41.947Z
+      author: "@claude"
+      content: "Implemented BlockConfig frozen dataclass with arch, block_overrides (tuple of (pattern,
+        float) pairs), and layer_type_overrides fields. Added block_config: object = None field to
+        RecipeLoRA and RecipeMerge for backwards compatibility. AC-1: BlockConfig is frozen, stores
+        arch and per-block float values as tuple of pairs. AC-2: RecipeLoRA and RecipeMerge accept
+        BlockConfig or None. Created tests/test_block_config.py with 22 tests covering all ACs. 374
+        total tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T04:15:55.148Z
 - _ulid: 01KH4HA48WYR6H4E0QV888VSD2
   slugs:
     - implement-merge-per-block-t-factor
