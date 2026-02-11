@@ -423,7 +423,7 @@ runs:
   - _ulid: 01KH6TZD6XQ04T47G2JSZRW79X
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-11T17:11:26.685Z
     step_results:
@@ -444,5 +444,11 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-11T17:12:07.966Z
-        completed_at: 2026-02-11T17:12:07.966Z
+        completed_at: 2026-02-11T17:12:38.205Z
+        notes: Resolved friction 01KH5HAK (pytest vs ComfyUI). Captured success 01KH6V1D (detailed handoff
+          docs). Skipped one-off Python import friction (not systemic).
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-11T17:12:38.205Z
+        completed_at: 2026-02-11T17:12:38.205Z
     initiated_by: "@claude"
