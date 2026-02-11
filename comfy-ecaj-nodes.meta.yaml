@@ -537,6 +537,13 @@ workflows:
         on_fail: Commit changes with descriptive message
       - type: action
         content: Review if task unblocked other work
+  - _ulid: 01KH53VPSMRZ2H3B3A4F2YXWD0
+    id: codebase-audit
+    trigger: pre-release
+    description: "Comprehensive codebase audit for release readiness. Five-phase workflow: parallel
+      exploration (docs, code, config, tests, specs), compilation by severity, interactive triage,
+      execution, and summary."
+    steps: []
 conventions:
   - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
     domain: commits
