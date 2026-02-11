@@ -613,6 +613,10 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #9. Implemented install_merged_patches() helper with ModelPatcher
+    cloning, diffusion_model. key prefixing, CPU transfer, and base dtype matching. Added IS_CHANGED
+    classmethod using SHA-256 hash of LoRA file (path, mtime, size) tuples for cache invalidation.
+    All 6 acceptance criteria covered by 26 tests."
   depends_on:
     - "@implement-testing-infrastructure"
   context: []
@@ -621,6 +625,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.299Z
   started_at: 2026-02-11T03:05:39.107Z
+  completed_at: 2026-02-11T03:10:24.420Z
   notes:
     - _ulid: 01KH4HA473ZK9FSNE9X2012HTK
       created_at: 2026-02-10T19:44:03.299Z
@@ -655,11 +660,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T03:10:24.420Z
-  closed_reason: "Merged in PR #9. Implemented install_merged_patches() helper with ModelPatcher
-    cloning, diffusion_model. key prefixing, CPU transfer, and base dtype matching. Added IS_CHANGED
-    classmethod using SHA-256 hash of LoRA file (path, mtime, size) tuples for cache invalidation.
-    All 6 acceptance criteria covered by 26 tests."
 - _ulid: 01KH4HA47BN0SVNJWSRGXBNJ2W
   slugs:
     - implement-widen-core-algorithm
@@ -738,7 +738,7 @@
   type: task
   spec_ref: "@batched-executor"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-widen-core-algorithm"
@@ -784,6 +784,7 @@
       supersedes: null
   todos: []
   automation: eligible
+  started_at: 2026-02-11T03:11:31.166Z
 - _ulid: 01KH4HA47M05Q979790FR6MC9J
   slugs:
     - implement-architecture-specific-lora-loaders
