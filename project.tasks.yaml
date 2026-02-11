@@ -531,6 +531,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.286Z
+  started_at: 2026-02-11T03:27:52.930Z
   notes:
     - _ulid: 01KH4HA46PWH5STPRD10BPGH8X
       created_at: 2026-02-10T19:44:03.286Z
@@ -550,9 +551,19 @@
         The tree walk and set ID assignment is the most critical piece -- get the
         identity semantics right.
         Files: lib/executor.py, references lib/lora/base.py interface.
+    - _ulid: 01KH5C3XXW78DMHNTE0VFWZ7TC
+      created_at: 2026-02-11T03:32:31.805Z
+      author: "@claude"
+      content: Implemented exit recipe analysis in lib/analysis.py with pure torch/stdlib (no ComfyUI
+        imports). Created AnalysisResult dataclass with model_patcher, arch, set_affected map,
+        loader, and affected_keys. Implemented _walk_to_base() for AC-1, _collect_lora_sets() with
+        object identity-based set IDs for AC-2, architecture loader selection via get_loader() for
+        AC-3, affected-key map tracking during load for AC-4, get_keys_to_process() for AC-5, and
+        FileNotFoundError with context for AC-6. Added 22 tests covering all 6 ACs. All 258 tests
+        pass, ruff clean.
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T03:27:52.930Z
 - _ulid: 01KH4HA46X4V9RHXW26VP36FD9
   slugs:
     - implement-exit-batched-evaluation
