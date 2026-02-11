@@ -31,6 +31,75 @@ _LORA_TO_MODEL_PREFIX = {
     "lora_unet_": "diffusion_model.",
 }
 
+# Compound token patterns in SDXL UNet LoRA keys.
+# These are ordered longest-first for greedy matching.
+# Pattern: underscore-separated → dot-separated compound name
+_COMPOUND_TOKENS = [
+    # Block structure
+    ("input_blocks", "input_blocks"),
+    ("output_blocks", "output_blocks"),
+    ("middle_block", "middle_block"),
+    ("transformer_blocks", "transformer_blocks"),
+    # Attention components (AC-3: @sdxl-loader)
+    ("proj_in", "proj_in"),
+    ("proj_out", "proj_out"),
+    ("to_out", "to_out"),
+    ("to_q", "to_q"),
+    ("to_k", "to_k"),
+    ("to_v", "to_v"),
+    # Attention blocks
+    ("attn1", "attn1"),
+    ("attn2", "attn2"),
+    # Feed-forward
+    ("ff_net", "ff_net"),
+    ("time_embed", "time_embed"),
+    ("label_emb", "label_emb"),
+    ("out_layers", "out_layers"),
+    ("in_layers", "in_layers"),
+    ("skip_connection", "skip_connection"),
+    ("emb_layers", "emb_layers"),
+]
+
+
+def _tokenize_lora_path(path: str) -> list[str]:
+    """Tokenize a LoRA path, preserving compound identifiers.
+
+    Splits on underscores but keeps known compound tokens together.
+
+    Args:
+        path: Layer path like 'input_blocks_0_0_proj_in'
+
+    Returns:
+        List of tokens like ['input_blocks', '0', '0', 'proj_in']
+    """
+    tokens: list[str] = []
+    remaining = path
+
+    while remaining:
+        # Try to match a compound token at the current position
+        matched = False
+        for pattern, _ in _COMPOUND_TOKENS:
+            if remaining.startswith(pattern):
+                # Check it's followed by underscore, end of string, or digit boundary
+                rest = remaining[len(pattern) :]
+                if rest == "" or rest.startswith("_"):
+                    tokens.append(pattern)
+                    remaining = rest[1:] if rest.startswith("_") else ""
+                    matched = True
+                    break
+
+        if not matched:
+            # Take characters up to the next underscore as a single token
+            if "_" in remaining:
+                idx = remaining.index("_")
+                tokens.append(remaining[:idx])
+                remaining = remaining[idx + 1 :]
+            else:
+                tokens.append(remaining)
+                remaining = ""
+
+    return tokens
+
 
 def _parse_lora_key(lora_key: str) -> tuple[str | None, str, str]:
     """Parse a LoRA key into (model_key, component, direction).
@@ -44,7 +113,11 @@ def _parse_lora_key(lora_key: str) -> tuple[str | None, str, str]:
         - component: 'up' or 'down'
         - direction: Full component name for matching
 
-    # AC: @lora-loaders ac-1
+    # AC: @sdxl-loader ac-1
+    Maps LoRA keys to diffusion_model input_blocks, middle_block, output_blocks.
+
+    # AC: @sdxl-loader ac-3
+    Handles attention keys (proj_in, proj_out, to_q/to_k/to_v).
     """
     # Skip non-unet keys (text encoders handled separately if needed)
     if not lora_key.startswith("lora_unet_"):
@@ -65,38 +138,23 @@ def _parse_lora_key(lora_key: str) -> tuple[str | None, str, str]:
     # Remove .lora_{up|down}.weight suffix
     layer_path = layer_path.rsplit(".lora_", 1)[0]
 
-    # Convert underscores to dots for nested keys
-    # input_blocks_0_0_proj_in → input_blocks.0.0.proj_in
-    # This handles the kohya naming convention
-    parts = layer_path.split("_")
-    converted_parts = []
-    i = 0
-    while i < len(parts):
-        part = parts[i]
-        # Check if this is a numeric index that should stay attached
-        if part.isdigit():
-            converted_parts.append(part)
-        else:
-            converted_parts.append(part)
-        i += 1
+    # Tokenize preserving compound identifiers
+    tokens = _tokenize_lora_path(layer_path)
 
-    # Reconstruct with proper dot separation
-    # Need to handle block indices specially
+    # Build model key with proper dot separation
+    # Numeric tokens get attached to preceding segment: input_blocks.0.0
     model_key = "diffusion_model."
-    segment = []
-    for part in converted_parts:
-        if part.isdigit() and segment:
-            # This is an index, append to previous segment
-            segment.append(part)
-        else:
-            if segment:
-                model_key += ".".join(segment) + "."
-            segment = [part]
-    if segment:
-        model_key += ".".join(segment)
+    parts: list[str] = []
 
-    # Ensure we have .weight suffix
-    model_key += ".weight"
+    for token in tokens:
+        if token.isdigit():
+            # Numeric index - append with dot
+            parts.append(token)
+        else:
+            # Named segment
+            parts.append(token)
+
+    model_key += ".".join(parts) + ".weight"
 
     return model_key, direction, lora_key
 
