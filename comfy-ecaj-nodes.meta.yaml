@@ -854,4 +854,15 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KH7F8SGESVV3N6CK38EPRRFV
+    type: friction
+    content: "Ported grouping criteria not verified against downstream consumers: OpSignature included
+      affecting_sets (from merge-router port) but the evaluation pipeline never consumed it — the
+      loader already filters by set_id. This caused 200+ tiny groups instead of ~10. Pattern: when
+      porting algorithms, trace each grouping/filtering criterion through the full pipeline to
+      verify it is actually used, not just structurally mirrored from the source."
+    created_at: 2026-02-11T23:06:05.710Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
