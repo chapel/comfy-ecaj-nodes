@@ -173,7 +173,7 @@ runs:
     initiated_by: "@claude"
   - _ulid: 01KH5AD4B7MSMT0VFW7Y9BTE17
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
-    status: active
+    status: completed
     current_step: 3
     total_steps: 4
     started_at: 2026-02-11T03:02:36.135Z
@@ -202,5 +202,7 @@ runs:
       - step_index: 3
         status: completed
         started_at: 2026-02-11T03:03:06.532Z
-        completed_at: 2026-02-11T03:03:06.532Z
+        completed_at: 2026-02-11T03:03:10.515Z
+        notes: No items to capture - session was friction-free. Workflow complete.
     initiated_by: "@claude"
+    completed_at: 2026-02-11T03:03:10.515Z
