@@ -6,6 +6,14 @@ with ComfyUI's caching and graph fan-out. Fields use tuples, not lists.
 
 from dataclasses import dataclass
 
+__all__ = [
+    "RecipeBase",
+    "RecipeLoRA",
+    "RecipeCompose",
+    "RecipeMerge",
+    "RecipeNode",
+]
+
 
 @dataclass(frozen=True)
 class RecipeBase:
@@ -28,6 +36,13 @@ class RecipeCompose:
 
     branches: tuple  # (WIDEN, WIDEN, ...) — each is a recipe node
 
+    def with_branch(self, branch: "RecipeNode") -> "RecipeCompose":
+        """Return a new RecipeCompose with the branch appended.
+
+        Implements persistent tree semantics — the original is unchanged.
+        """
+        return RecipeCompose(branches=self.branches + (branch,))
+
 
 @dataclass(frozen=True)
 class RecipeMerge:
@@ -37,3 +52,7 @@ class RecipeMerge:
     target: object  # WIDEN (RecipeLoRA, RecipeCompose, or RecipeMerge)
     backbone: object  # WIDEN or None — explicit backbone override
     t_factor: float
+
+
+# Type alias for any recipe node
+RecipeNode = RecipeBase | RecipeLoRA | RecipeCompose | RecipeMerge
