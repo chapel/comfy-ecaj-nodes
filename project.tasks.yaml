@@ -740,6 +740,11 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #10. Implemented batched pipeline executor primitives: OpSignature
+    (parameter grouping), DeltaSpec (LoRA delta specs), compile_batch_groups (shape/affecting_sets
+    grouping), compute_batch_size (70% VRAM targeting), apply_lora_batch_gpu (torch.bmm for standard
+    LoRA, torch.kron for LoKr), and chunked_evaluation (OOM backoff wrapper). All 7 ACs covered by
+    30 tests."
   depends_on:
     - "@implement-widen-core-algorithm"
     - "@implement-testing-infrastructure"
@@ -749,6 +754,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.311Z
   started_at: 2026-02-11T03:11:31.166Z
+  completed_at: 2026-02-11T03:18:03.688Z
   notes:
     - _ulid: 01KH4HA47F0N4G7WDBRY8CRMCT
       created_at: 2026-02-10T19:44:03.311Z
@@ -797,12 +803,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T03:18:03.688Z
-  closed_reason: "Merged in PR #10. Implemented batched pipeline executor primitives: OpSignature
-    (parameter grouping), DeltaSpec (LoRA delta specs), compile_batch_groups (shape/affecting_sets
-    grouping), compute_batch_size (70% VRAM targeting), apply_lora_batch_gpu (torch.bmm for standard
-    LoRA, torch.kron for LoKr), and chunked_evaluation (OOM backoff wrapper). All 7 ACs covered by
-    30 tests."
 - _ulid: 01KH4HA47M05Q979790FR6MC9J
   slugs:
     - implement-architecture-specific-lora-loaders
@@ -810,7 +810,7 @@
   type: task
   spec_ref: "@lora-loaders"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
@@ -838,6 +838,7 @@
         Files: lib/lora/base.py, lib/lora/__init__.py (registry).
   todos: []
   automation: eligible
+  started_at: 2026-02-11T03:18:49.921Z
 - _ulid: 01KH4HA47ST02A5Y0G5ZABFP2D
   slugs:
     - implement-sdxl-lora-loader
