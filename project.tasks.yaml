@@ -1276,6 +1276,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.363Z
+  started_at: 2026-02-11T04:39:41.971Z
   notes:
     - _ulid: 01KH4HA49389ZJ52761QNKPQ3X
       created_at: 2026-02-10T19:44:03.363Z
@@ -1308,9 +1309,22 @@
         [B, *shape], compute a strength vector [B, 1, 1] from per-key block classifications, then
         multiply: delta_batch *= strength_vector."
       supersedes: null
+    - _ulid: 01KH5G40CSQ73M9YT2NH470Z17
+      created_at: 2026-02-11T04:42:28.634Z
+      author: "@claude"
+      content: "Implemented per-block strength scaling for LoRA deltas. Created
+        _apply_per_block_lora_strength helper in lib/executor.py that computes delta = lora_applied
+        - base, scales each key's delta by its BlockConfig override, and returns base +
+        scaled_delta. Modified _apply_lora_set in evaluate_recipe to call this helper when
+        RecipeLoRA.block_config is present and arch is known. AC-1: BLOCK_CONFIG with per-block
+        strengths scales LoRA deltas (strength 0.5 halves delta, strength 2.0 doubles it, strength
+        0.0 removes the LoRA effect). AC-2: No block_config means global strength applies uniformly
+        (helper not called). 14 tests in test_lora_block_strength.py covering strength scaling,
+        different blocks, zero/amplified strengths, negative deltas, 4D conv2d shapes. 445 total
+        tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T04:39:41.971Z
 - _ulid: 01KH508VE1GEDSBP3VENYEF2R0
   slugs:
     - implement-comfyui-mocking-and-fixtures
