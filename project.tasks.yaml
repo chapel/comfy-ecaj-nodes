@@ -921,6 +921,9 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #15. Implemented SDXL LoRA Loader with greedy token matching for
+    compound identifiers (input_blocks, proj_in, to_q, etc.). Added 21 tests covering all 3 ACs:
+    block type mapping, DeltaSpec contents, and attention key mapping."
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
   context: []
@@ -929,6 +932,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.321Z
   started_at: 2026-02-11T03:53:19.587Z
+  completed_at: 2026-02-11T03:59:43.634Z
   notes:
     - _ulid: 01KH4HA47S0BBEWY8JBW0KCWSB
       created_at: 2026-02-10T19:44:03.321Z
@@ -960,10 +964,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T03:59:43.634Z
-  closed_reason: "Merged in PR #15. Implemented SDXL LoRA Loader with greedy token matching for
-    compound identifiers (input_blocks, proj_in, to_q, etc.). Added 21 tests covering all 3 ACs:
-    block type mapping, DeltaSpec contents, and attention key mapping."
 - _ulid: 01KH4HA47Z3DSGDJ07S2V7DNRD
   slugs:
     - implement-z-image-lora-loader
@@ -971,7 +971,7 @@
   type: task
   spec_ref: "@zimage-loader"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
@@ -1004,6 +1004,7 @@
         Files: lib/lora/zimage.py.
   todos: []
   automation: eligible
+  started_at: 2026-02-11T04:01:28.519Z
 - _ulid: 01KH4HA4865JG16KMN5YXENCYH
   slugs:
     - implement-memory-management
