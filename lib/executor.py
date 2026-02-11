@@ -18,38 +18,21 @@ from __future__ import annotations
 # Re-export gc so tests that patch "lib.executor.gc.collect" still work.
 import gc  # noqa: F401
 
-try:
-    from .batch_groups import OpSignature, compile_batch_groups
-    from .gpu_ops import (
-        DeltaSpec,
-        apply_lora_batch_gpu,
-        chunked,
-        chunked_evaluation,
-        compute_batch_size,
-    )
-    from .per_block import (
-        _apply_per_block_lora_strength,
-        _apply_widen_filter_per_block,
-        _apply_widen_merge_per_block,
-        _get_block_t_factors,
-    )
-    from .recipe_eval import evaluate_recipe
-except ImportError:
-    from lib.batch_groups import OpSignature, compile_batch_groups
-    from lib.gpu_ops import (
-        DeltaSpec,
-        apply_lora_batch_gpu,
-        chunked,
-        chunked_evaluation,
-        compute_batch_size,
-    )
-    from lib.per_block import (
-        _apply_per_block_lora_strength,
-        _apply_widen_filter_per_block,
-        _apply_widen_merge_per_block,
-        _get_block_t_factors,
-    )
-    from lib.recipe_eval import evaluate_recipe
+from .batch_groups import OpSignature, compile_batch_groups
+from .gpu_ops import (
+    DeltaSpec,
+    apply_lora_batch_gpu,
+    chunked,
+    chunked_evaluation,
+    compute_batch_size,
+)
+from .per_block import (
+    _apply_per_block_lora_strength,
+    _apply_widen_filter_per_block,
+    _apply_widen_merge_per_block,
+    _get_block_t_factors,
+)
+from .recipe_eval import evaluate_recipe
 
 __all__ = [
     "OpSignature",

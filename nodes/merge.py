@@ -1,9 +1,6 @@
 """WIDEN Merge Node — Defines a merge step in the recipe tree."""
 
-try:
-    from ..lib.recipe import BlockConfig, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
-except ImportError:
-    from lib.recipe import BlockConfig, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+from ..lib.recipe import BlockConfig, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
 
 def _find_base_arch(node) -> str | None:

@@ -19,10 +19,7 @@ from typing import TYPE_CHECKING
 import torch
 
 if TYPE_CHECKING:
-    try:
-        from .recipe import BlockConfig
-    except ImportError:
-        from lib.recipe import BlockConfig
+    from .recipe import BlockConfig
 
 
 def _apply_per_block_lora_strength(
@@ -54,10 +51,7 @@ def _apply_per_block_lora_strength(
     Returns:
         [B, *shape] weights with per-block scaled LoRA deltas
     """
-    try:
-        from .block_classify import classify_key
-    except ImportError:
-        from lib.block_classify import classify_key
+    from .block_classify import classify_key
 
     # Build lookup dict from block_overrides
     block_overrides = dict(block_config.block_overrides)
@@ -124,10 +118,7 @@ def _get_block_t_factors(
         Dict mapping t_factor -> list of key indices with that t_factor
     """
     # Import here to avoid circular import at module level
-    try:
-        from .block_classify import classify_key
-    except ImportError:
-        from lib.block_classify import classify_key
+    from .block_classify import classify_key
 
     # If no block_config or no arch, all keys use the default t_factor
     if block_config is None or arch is None:
@@ -179,10 +170,7 @@ def _apply_widen_filter_per_block(
     Returns:
         [B, *shape] filtered weights
     """
-    try:
-        from .widen import WIDEN, WIDENConfig
-    except ImportError:
-        from lib.widen import WIDEN, WIDENConfig
+    from .widen import WIDEN, WIDENConfig
 
     # Get per-block t_factor groupings
     t_factor_groups = _get_block_t_factors(keys, block_config, arch, default_t_factor)
@@ -254,10 +242,7 @@ def _apply_widen_merge_per_block(
     Returns:
         [B, *shape] merged weights
     """
-    try:
-        from .widen import WIDEN, WIDENConfig
-    except ImportError:
-        from lib.widen import WIDEN, WIDENConfig
+    from .widen import WIDEN, WIDENConfig
 
     # Get per-block t_factor groupings
     t_factor_groups = _get_block_t_factors(keys, block_config, arch, default_t_factor)
