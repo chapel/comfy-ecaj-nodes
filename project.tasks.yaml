@@ -471,6 +471,13 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #14. Implemented WIDENExitNode.execute() orchestrating the complete
+    recipe tree evaluation with _validate_recipe_tree() for tree structure validation. All 8 ACs
+    covered: returns MODEL with set patches (AC-1), validates tree with position-aware errors
+    (AC-2), compose targets call merge_weights (AC-3), single LoRA targets call filter_delta (AC-4),
+    chained merges evaluate inner first (AC-5), single-branch compose uses filter_delta (AC-6),
+    downstream LoRA patches apply additively (AC-7), patch tensors match base model dtype (AC-8). 22
+    tests added in test_exit_node.py, 291 total tests passing."
   depends_on:
     - "@implement-exit-recipe-analysis"
     - "@implement-exit-batched-evaluation"
@@ -482,6 +489,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.281Z
   started_at: 2026-02-11T03:43:27.316Z
+  completed_at: 2026-02-11T03:52:01.713Z
   notes:
     - _ulid: 01KH4HA46HK4H347XYD1D7VY9S
       created_at: 2026-02-10T19:44:03.281Z
@@ -528,14 +536,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T03:52:01.713Z
-  closed_reason: "Merged in PR #14. Implemented WIDENExitNode.execute() orchestrating the complete
-    recipe tree evaluation with _validate_recipe_tree() for tree structure validation. All 8 ACs
-    covered: returns MODEL with set patches (AC-1), validates tree with position-aware errors
-    (AC-2), compose targets call merge_weights (AC-3), single LoRA targets call filter_delta (AC-4),
-    chained merges evaluate inner first (AC-5), single-branch compose uses filter_delta (AC-6),
-    downstream LoRA patches apply additively (AC-7), patch tensors match base model dtype (AC-8). 22
-    tests added in test_exit_node.py, 291 total tests passing."
 - _ulid: 01KH4HA46PY9P8S7PZ0D32WZDD
   slugs:
     - implement-exit-recipe-analysis
@@ -919,7 +919,7 @@
   type: task
   spec_ref: "@sdxl-loader"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
@@ -948,6 +948,7 @@
         Files: lib/lora/sdxl.py.
   todos: []
   automation: eligible
+  started_at: 2026-02-11T03:53:19.587Z
 - _ulid: 01KH4HA47Z3DSGDJ07S2V7DNRD
   slugs:
     - implement-z-image-lora-loader
