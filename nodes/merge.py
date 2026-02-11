@@ -20,7 +20,7 @@ class WIDENMergeNode:
     RETURN_TYPES = ("WIDEN",)
     RETURN_NAMES = ("widen",)
     FUNCTION = "merge"
-    CATEGORY = "ECAJ/merge"
+    CATEGORY = "ecaj/merge"
 
     def merge(self, base, target, t_factor, backbone=None):
         raise NotImplementedError("Merge node not yet implemented")

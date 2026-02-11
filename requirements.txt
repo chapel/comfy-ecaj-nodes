@@ -1,3 +1,2 @@
-# Core dependencies (torch and safetensors provided by ComfyUI)
-torch>=2.0
-safetensors
+# Runtime dependencies provided by ComfyUI host environment.
+# For development: uv pip install -e ".[dev]"

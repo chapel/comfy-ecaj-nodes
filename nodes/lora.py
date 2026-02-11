@@ -19,7 +19,7 @@ class WIDENLoRANode:
     RETURN_TYPES = ("WIDEN",)
     RETURN_NAMES = ("widen",)
     FUNCTION = "add_lora"
-    CATEGORY = "ECAJ/merge"
+    CATEGORY = "ecaj/merge"
 
     def add_lora(self, lora_name, strength, prev=None):
         raise NotImplementedError("LoRA node not yet implemented")

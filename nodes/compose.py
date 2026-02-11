@@ -18,7 +18,7 @@ class WIDENComposeNode:
     RETURN_TYPES = ("WIDEN",)
     RETURN_NAMES = ("widen",)
     FUNCTION = "compose"
-    CATEGORY = "ECAJ/merge"
+    CATEGORY = "ecaj/merge"
 
     def compose(self, branch, compose=None):
         raise NotImplementedError("Compose node not yet implemented")
