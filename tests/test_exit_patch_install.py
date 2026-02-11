@@ -1,8 +1,10 @@
 """Tests for Exit Patch Installation — AC coverage for @exit-patch-install."""
 
 import os
+import sys
 import tempfile
 import time
+from unittest.mock import MagicMock
 
 import pytest
 import torch
@@ -131,24 +133,75 @@ class TestUnpatchLoadedClones:
     restoring clean base weights before we read model_state_dict().
     """
 
+    @pytest.fixture()
+    def _patch_loaded_models(self, monkeypatch):
+        """Wire current_loaded_models onto the comfy.model_management stub."""
+        mm = sys.modules["comfy.model_management"]
+        loaded: list = []
+        monkeypatch.setattr(mm, "current_loaded_models", loaded, raising=False)
+        return loaded
+
     def test_noop_without_comfy(self, mock_model_patcher: MockModelPatcher):
-        """Does not crash when comfy.model_management is not available."""
-        # In test env, comfy is mocked/stubbed — should not raise
+        """Does not crash when comfy.model_management has no current_loaded_models."""
         _unpatch_loaded_clones(mock_model_patcher)
 
-    def test_noop_with_no_loaded_clones(self, mock_model_patcher: MockModelPatcher):
-        """Safe when current_loaded_models is empty or has no clones."""
-        import sys
+    def test_noop_with_empty_loaded_models(
+        self, mock_model_patcher: MockModelPatcher, _patch_loaded_models
+    ):
+        """Safe when current_loaded_models is empty."""
+        _unpatch_loaded_clones(mock_model_patcher)
+        assert _patch_loaded_models == []
 
-        # Ensure comfy.model_management is available (from conftest stubs)
-        mm = sys.modules.get("comfy.model_management")
-        if mm is not None and hasattr(mm, "current_loaded_models"):
-            original = mm.current_loaded_models
-            mm.current_loaded_models = []
-            try:
-                _unpatch_loaded_clones(mock_model_patcher)
-            finally:
-                mm.current_loaded_models = original
+    def test_unloads_matching_clone(
+        self, mock_model_patcher: MockModelPatcher, _patch_loaded_models
+    ):
+        """Matching loaded clone is unloaded and removed from the list."""
+        clone = mock_model_patcher.clone()
+        loaded_entry = MagicMock()
+        loaded_entry.model = clone
+        _patch_loaded_models.append(loaded_entry)
+
+        _unpatch_loaded_clones(mock_model_patcher)
+
+        loaded_entry.model_unload.assert_called_once()
+        assert len(_patch_loaded_models) == 0
+
+    def test_preserves_non_matching_entries(
+        self, _patch_loaded_models
+    ):
+        """Non-matching entries are not touched."""
+        other_patcher = MockModelPatcher()
+        target_patcher = MockModelPatcher()
+
+        non_matching = MagicMock()
+        non_matching.model = other_patcher
+        _patch_loaded_models.append(non_matching)
+
+        _unpatch_loaded_clones(target_patcher)
+
+        non_matching.model_unload.assert_not_called()
+        assert len(_patch_loaded_models) == 1
+
+    def test_unloads_only_matching_among_mixed(
+        self, mock_model_patcher: MockModelPatcher, _patch_loaded_models
+    ):
+        """Only matching clones are removed; others stay."""
+        clone = mock_model_patcher.clone()
+
+        matching = MagicMock()
+        matching.model = clone
+
+        non_matching = MagicMock()
+        non_matching.model = MockModelPatcher()
+
+        _patch_loaded_models.extend([non_matching, matching])
+
+        _unpatch_loaded_clones(mock_model_patcher)
+
+        matching.model_unload.assert_called_once()
+        non_matching.model_unload.assert_not_called()
+        assert len(_patch_loaded_models) == 1
+        assert _patch_loaded_models[0] is non_matching
 
 
 class TestCollectLoraPaths:
