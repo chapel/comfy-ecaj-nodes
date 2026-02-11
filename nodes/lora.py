@@ -1,6 +1,6 @@
 """WIDEN LoRA Node — Declares a LoRA spec in the recipe tree."""
 
-from lib.recipe import RecipeLoRA
+from lib.recipe import BlockConfig, RecipeLoRA
 
 
 class WIDENLoRANode:
@@ -18,6 +18,7 @@ class WIDENLoRANode:
             },
             "optional": {
                 "prev": ("WIDEN",),
+                "block_config": ("BLOCK_CONFIG",),
             },
         }
 
@@ -26,18 +27,30 @@ class WIDENLoRANode:
     FUNCTION = "add_lora"
     CATEGORY = "ecaj/merge"
 
-    def add_lora(self, lora_name: str, strength: float, prev: RecipeLoRA | None = None) -> tuple:
+    def add_lora(
+        self,
+        lora_name: str,
+        strength: float,
+        prev: RecipeLoRA | None = None,
+        block_config: BlockConfig | None = None,
+    ) -> tuple:
         """Build RecipeLoRA, chaining with prev if provided.
 
         Returns a single-element tuple as required by ComfyUI node protocol.
+
+        AC: @per-block-control ac-1 — when block_config is None, behavior is identical
+        AC: @per-block-control ac-3 — BLOCK_CONFIG fans out correctly to each consumer
         """
         new_lora = {"path": lora_name, "strength": strength}
 
         if prev is not None and isinstance(prev, RecipeLoRA):
             # Chain: append new LoRA to existing set
             loras = prev.loras + (new_lora,)
+            # Preserve block_config from prev if new one not provided
+            if block_config is None:
+                block_config = prev.block_config
         else:
             # First in chain: single-element tuple
             loras = (new_lora,)
 
-        return (RecipeLoRA(loras=loras),)
+        return (RecipeLoRA(loras=loras, block_config=block_config),)

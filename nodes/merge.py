@@ -1,6 +1,6 @@
 """WIDEN Merge Node — Defines a merge step in the recipe tree."""
 
-from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+from lib.recipe import BlockConfig, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
 
 class WIDENMergeNode:
@@ -16,6 +16,7 @@ class WIDENMergeNode:
             },
             "optional": {
                 "backbone": ("WIDEN",),
+                "block_config": ("BLOCK_CONFIG",),
             },
         }
 
@@ -24,7 +25,14 @@ class WIDENMergeNode:
     FUNCTION = "merge"
     CATEGORY = "ecaj/merge"
 
-    def merge(self, base, target, t_factor, backbone=None):
+    def merge(
+        self,
+        base,
+        target,
+        t_factor,
+        backbone=None,
+        block_config: BlockConfig | None = None,
+    ):
         """Build a RecipeMerge from base and target recipes.
 
         Args:
@@ -32,12 +40,16 @@ class WIDENMergeNode:
             target: The target WIDEN recipe to merge (RecipeLoRA, RecipeCompose, or RecipeMerge).
             t_factor: Merge strength factor. -1.0 means passthrough (no WIDEN).
             backbone: Optional explicit backbone reference for WIDEN importance.
+            block_config: Optional block configuration for per-block weight control.
 
         Returns:
             Tuple containing RecipeMerge with the merge configuration.
 
         Raises:
             ValueError: If base is RecipeLoRA or RecipeCompose (must be base model or merge chain).
+
+        AC: @per-block-control ac-1 — when block_config is None, behavior is identical
+        AC: @per-block-control ac-3 — BLOCK_CONFIG fans out correctly to each consumer
         """
         # AC-5: base must be RecipeBase or RecipeMerge, not RecipeLoRA/RecipeCompose
         if isinstance(base, (RecipeLoRA, RecipeCompose)):
@@ -62,4 +74,12 @@ class WIDENMergeNode:
         # AC-1, AC-2, AC-3, AC-6: Build RecipeMerge with all fields
         # backbone is None when not connected (AC-2), stored when connected (AC-3)
         # t_factor of -1.0 is preserved as-is (AC-6) — Exit node interprets it
-        return (RecipeMerge(base=base, target=target, backbone=backbone, t_factor=t_factor),)
+        return (
+            RecipeMerge(
+                base=base,
+                target=target,
+                backbone=backbone,
+                t_factor=t_factor,
+                block_config=block_config,
+            ),
+        )

@@ -1,6 +1,8 @@
 """ComfyUI ECAJ Nodes — Advanced model merging with WIDEN."""
 
 try:
+    from .nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
+    from .nodes.block_config_zimage import WIDENBlockConfigZImageNode
     from .nodes.compose import WIDENComposeNode
     from .nodes.entry import WIDENEntryNode
     from .nodes.exit import WIDENExitNode
@@ -17,6 +19,8 @@ else:
         "WIDENCompose": WIDENComposeNode,
         "WIDENMerge": WIDENMergeNode,
         "WIDENExit": WIDENExitNode,
+        "WIDENBlockConfigSDXL": WIDENBlockConfigSDXLNode,
+        "WIDENBlockConfigZImage": WIDENBlockConfigZImageNode,
     }
 
     NODE_DISPLAY_NAME_MAPPINGS = {
@@ -25,6 +29,8 @@ else:
         "WIDENCompose": "WIDEN Compose",
         "WIDENMerge": "WIDEN Merge",
         "WIDENExit": "WIDEN Exit",
+        "WIDENBlockConfigSDXL": "WIDEN Block Config (SDXL)",
+        "WIDENBlockConfigZImage": "WIDEN Block Config (Z-Image)",
     }
 
     WEB_DIRECTORY = None
