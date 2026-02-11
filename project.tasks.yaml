@@ -138,6 +138,12 @@
   plan_ref: "@plan-foundation-project-infrastructure"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #1. Implemented testing infrastructure with: MockModelPatcher (4x4
+    float32 tensors, SDXL-like keys,
+    model_state_dict/clone/add_patches/get_key_patches/patches_uuid), recipe fixtures (recipe_base,
+    recipe_single_lora, recipe_multi_lora, recipe_compose, recipe_chain), autouse ComfyUI API mocks
+    (folder_paths, comfy modules). All 37 tests pass without ComfyUI. All 4 ACs verified with test
+    coverage."
   depends_on: []
   context: []
   priority: 1
@@ -145,6 +151,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:39:32.467Z
   started_at: 2026-02-11T01:44:45.085Z
+  completed_at: 2026-02-11T02:26:48.995Z
   notes:
     - _ulid: 01KH4H1VQK71QYFPXSF52PYAVJ
       created_at: 2026-02-10T19:39:32.467Z
@@ -186,13 +193,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T02:26:48.995Z
-  closed_reason: "Merged in PR #1. Implemented testing infrastructure with: MockModelPatcher (4x4
-    float32 tensors, SDXL-like keys,
-    model_state_dict/clone/add_patches/get_key_patches/patches_uuid), recipe fixtures (recipe_base,
-    recipe_single_lora, recipe_multi_lora, recipe_compose, recipe_chain), autouse ComfyUI API mocks
-    (folder_paths, comfy modules). All 37 tests pass without ComfyUI. All 4 ACs verified with test
-    coverage."
 - _ulid: 01KH4HA460E5KKNBG2WJJK17GX
   slugs:
     - implement-recipe-type-system
@@ -1071,7 +1071,7 @@
   type: task
   spec_ref: "@ci-pipeline"
   plan_ref: "@plan-testing-strategy"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
@@ -1101,3 +1101,8 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T02:27:43.054Z
+  closed_reason: "Merged in PR #2. Added GitHub Actions CI workflow with lint (ruff via
+    astral-sh/ruff-action) and test (pytest with CPU-only PyTorch via uv) jobs. Triggers on push to
+    main and all PRs. All ACs verified: ac-1 (pytest with CPU torch), ac-2 (ruff check), ac-3 (green
+    checks on both jobs)."
