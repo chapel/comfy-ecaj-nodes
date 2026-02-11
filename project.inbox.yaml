@@ -47,3 +47,11 @@ inbox:
       - docs
       - review-finding
     added_by: "@claude"
+  - _ulid: 01KH5KJNP37YK25Z0S2T6P0GFJ
+    text: Consider strict mode for batched catch-all fallbacks in widen.py (lines 556, 640) - non-OOM
+      catch-all hides shape bugs and API misuse
+    created_at: 2026-02-11T05:42:54.915Z
+    tags:
+      - hardening
+      - review-finding
+    added_by: "@claude"
