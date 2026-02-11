@@ -1337,7 +1337,7 @@
   type: task
   spec_ref: "@comfyui-mocking"
   plan_ref: "@plan-testing-strategy"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
@@ -1376,6 +1376,8 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T23:48:37.399Z
+  closed_reason: null
 - _ulid: 01KH508VEVHA4ZME2CDZ275XKS
   slugs:
     - implement-node-graph-testing
@@ -2175,26 +2177,26 @@
         OOM kill due to cloning all affected keys to CPU RAM."
       supersedes: null
   todos: []
-- title: "E2E test: multi-set recipe evaluation with shape-only grouping"
+- _ulid: 01KH7EZFK49AMP1VRJT0ZTY4MM
+  slugs: []
+  title: "E2E test: multi-set recipe evaluation with shape-only grouping"
+  type: task
   description: "Add integration/E2E test that exercises multi-set recipe evaluation where same-shape
     keys are affected by different LoRA sets and processed in one OpSignature group. Verifies no
     cross-set leakage when grouping by shape only (without affecting_sets). Should use
     MockLoRALoader with per-set filtering and assert final merged tensors match expected per-set
     behavior. Guards against regressions from the OpSignature simplification in PR #34."
-  type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 2
-  slugs: []
   tags:
     - testing
     - performance
-  depends_on: []
-  _ulid: 01KH7EZFK49AMP1VRJT0ZTY4MM
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-11T23:01:00.641Z
   notes: []
