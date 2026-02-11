@@ -515,7 +515,7 @@ runs:
   - _ulid: 01KH71PG6HTG4P4KD9FTTZ30RE
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-11T19:08:54.865Z
     step_results:
@@ -537,5 +537,12 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-11T19:09:50.423Z
-        completed_at: 2026-02-11T19:09:50.423Z
+        completed_at: 2026-02-11T19:09:57.761Z
+        notes: "All items evaluated. Mock divergence: SKIP (existing 01KH6Y5J + 01KH6Y61). Inbox/task
+          confusion: SKIP (one-off). Speculation: SKIP (one-off). Reference comparison success:
+          ALREADY CAPTURED (01KH71QQ). No remaining items to capture."
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-11T19:09:57.761Z
+        completed_at: 2026-02-11T19:09:57.761Z
     initiated_by: "@claude"
