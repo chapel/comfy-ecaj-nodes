@@ -928,6 +928,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.321Z
+  started_at: 2026-02-11T03:53:19.587Z
   notes:
     - _ulid: 01KH4HA47S0BBEWY8JBW0KCWSB
       created_at: 2026-02-10T19:44:03.321Z
@@ -946,9 +947,19 @@
         LoRA: kind=standard, up=lora_up.weight, down=lora_down.weight, alpha from lora
         key or default to rank.
         Files: lib/lora/sdxl.py.
+    - _ulid: 01KH5DHA80WYE26JZWQN4B3HVT
+      created_at: 2026-02-11T03:57:18.976Z
+      author: "@claude"
+      content: "Fixed SDXL key parsing algorithm. The original implementation naively split all
+        underscores into dots, breaking compound identifiers like input_blocks, transformer_blocks,
+        proj_in, proj_out, to_q, to_k, to_v. Implemented _tokenize_lora_path() with greedy matching
+        for 16 known compound tokens. Added 21 tests in test_sdxl_loader.py covering all 3 ACs: AC-1
+        (block type mapping for input_blocks/middle_block/output_blocks), AC-2 (DeltaSpec contents:
+        kind, up/down factors, rank, scale), AC-3 (attention key mapping: proj_in, proj_out,
+        to_q/to_k/to_v/to_out). All 312 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T03:53:19.587Z
 - _ulid: 01KH4HA47Z3DSGDJ07S2V7DNRD
   slugs:
     - implement-z-image-lora-loader
