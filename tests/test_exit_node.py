@@ -317,7 +317,7 @@ class TestSingleBranchCompose:
 
         # Mock loader and widen
         class MockLoader:
-            def get_delta_specs(self, keys, key_indices):
+            def get_delta_specs(self, keys, key_indices, set_id=None):
                 return []
 
         class MockWIDEN:

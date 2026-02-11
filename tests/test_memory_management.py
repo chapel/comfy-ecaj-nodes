@@ -210,16 +210,18 @@ class TestLoaderCleanup:
         from lib.lora.sdxl import SDXLLoader
 
         loader = SDXLLoader()
-        # Simulate loaded data
-        loader._lora_data["test_key"] = [(torch.randn(4, 4), torch.randn(4, 4), 1.0)]
+        # Simulate loaded data (using per-set storage)
+        loader._lora_data_by_set["__default__"]["test_key"] = [
+            (torch.randn(4, 4), torch.randn(4, 4), 1.0)
+        ]
         loader._affected.add("test_key")
 
-        assert len(loader._lora_data) > 0
+        assert len(loader._lora_data_by_set) > 0
         assert len(loader._affected) > 0
 
         loader.cleanup()
 
-        assert len(loader._lora_data) == 0
+        assert len(loader._lora_data_by_set) == 0
         assert len(loader._affected) == 0
 
     def test_zimage_loader_cleanup_clears_data(self):
@@ -228,22 +230,24 @@ class TestLoaderCleanup:
         from lib.lora.zimage import ZImageLoader
 
         loader = ZImageLoader()
-        # Simulate loaded data
-        loader._lora_data["test_key"] = [(torch.randn(4, 4), torch.randn(4, 4), 1.0)]
-        loader._qkv_data["qkv_key"] = [
+        # Simulate loaded data (using per-set storage)
+        loader._lora_data_by_set["__default__"]["test_key"] = [
+            (torch.randn(4, 4), torch.randn(4, 4), 1.0)
+        ]
+        loader._qkv_data_by_set["__default__"]["qkv_key"] = [
             (torch.randn(4, 4), torch.randn(4, 4), 1.0, "q")
         ]
         loader._affected.add("test_key")
         loader._affected.add("qkv_key")
 
-        assert len(loader._lora_data) > 0
-        assert len(loader._qkv_data) > 0
+        assert len(loader._lora_data_by_set) > 0
+        assert len(loader._qkv_data_by_set) > 0
         assert len(loader._affected) > 0
 
         loader.cleanup()
 
-        assert len(loader._lora_data) == 0
-        assert len(loader._qkv_data) == 0
+        assert len(loader._lora_data_by_set) == 0
+        assert len(loader._qkv_data_by_set) == 0
         assert len(loader._affected) == 0
 
     def test_loader_context_manager_calls_cleanup(self):
@@ -260,7 +264,7 @@ class TestLoaderCleanup:
 
         with patch.object(SDXLLoader, "cleanup", mock_cleanup):
             with SDXLLoader() as loader:
-                loader._lora_data["test"] = []
+                loader._lora_data_by_set["__default__"]["test"] = []
 
         assert len(cleanup_called) == 1
 

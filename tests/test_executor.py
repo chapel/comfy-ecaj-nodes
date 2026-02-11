@@ -706,11 +706,12 @@ class MockLoRALoader:
         """
         self._delta_map = delta_map or {}
 
-    def get_delta_specs(self, keys, key_indices):
+    def get_delta_specs(self, keys, key_indices, set_id=None):
         """Return mock delta specs.
 
         Creates proper up/down factorizations that when multiplied
         produce the desired delta. For simplicity, uses rank=1 decomposition.
+        The set_id parameter is accepted for API compatibility.
         """
         specs = []
         for key in keys:
@@ -816,7 +817,7 @@ class TestEvaluateRecipeComposeTarget:
 
         loader = MockLoRALoader()
         widen = MockWIDEN()
-        set_id_map = {}
+        set_id_map = {id(lora1): "set1", id(lora2): "set2", id(lora3): "set3"}
 
         evaluate_recipe(
             keys=["k0"],
@@ -924,7 +925,7 @@ class TestEvaluateRecipeChainedMerge:
 
         loader = MockLoRALoader()
         widen = MockWIDEN()
-        set_id_map = {}
+        set_id_map = {id(inner_lora): "set_inner", id(outer_lora): "set_outer"}
 
         evaluate_recipe(
             keys=["k0"],
@@ -959,7 +960,7 @@ class TestEvaluateRecipeChainedMerge:
 
         loader = MockLoRALoader()
         widen = MockWIDEN()
-        set_id_map = {}
+        set_id_map = {id(lora1): "set1", id(lora2): "set2", id(lora3): "set3"}
 
         evaluate_recipe(
             keys=["k0"],
@@ -1024,7 +1025,7 @@ class TestEvaluateRecipeGPUResults:
 
         loader = MockLoRALoader()
         widen = MockWIDEN()
-        set_id_map = {}
+        set_id_map = {id(lora): "set1"}
 
         result = evaluate_recipe(
             keys=["k0"],
@@ -1095,7 +1096,7 @@ class TestEvaluateRecipeBackboneOverride:
 
         loader = MockLoRALoader()
         widen = MockWIDEN()
-        set_id_map = {}
+        set_id_map = {id(lora): "set1"}
 
         evaluate_recipe(
             keys=["k0"],
@@ -1127,7 +1128,7 @@ class TestEvaluateRecipeBackboneOverride:
 
         loader = MockLoRALoader()
         widen = MockWIDEN()
-        set_id_map = {}
+        set_id_map = {id(lora1): "set1", id(lora2): "set2"}
 
         evaluate_recipe(
             keys=["k0"],
