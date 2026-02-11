@@ -383,8 +383,20 @@ runs:
   - _ulid: 01KH5H8TC16JAX5FENDQ4MY7C9
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-11T05:02:34.882Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-11T05:02:34.882Z
+        completed_at: 2026-02-11T05:03:02.355Z
+        notes: "Reviewed session. Worked well: parallel reads, kspec lifecycle, subagent PR review caught AC
+          gap. Friction: (1) pytest vs ComfyUI __init__.py took 6 attempts - non-obvious fix
+          pattern, (2) torch missing from dev deps in plan, (3) no venv existed. Searched
+          specs/tasks/inbox - none tracked."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-11T05:03:02.355Z
+        completed_at: 2026-02-11T05:03:02.355Z
     initiated_by: "@claude"
