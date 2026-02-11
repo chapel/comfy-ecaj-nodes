@@ -87,16 +87,23 @@ class MockModelPatcher:
         return {k: v for k, v in self._state_dict.items() if k.startswith(filter_prefix)}
 
     def clone(self) -> "MockModelPatcher":
-        """Shallow clone — independent patches, shared underlying tensors.
+        """Shallow clone — independent patches, shared underlying model.
 
         Copies patches_uuid from source, matching real ComfyUI ModelPatcher behavior.
+        Shares the same .model object so is_clone() returns True.
         """
         c = MockModelPatcher.__new__(MockModelPatcher)
         c._state_dict = self._state_dict  # shared, like real clone()
-        c.model = _MockBaseModel(c._state_dict)
+        c.model = self.model  # shared, like real clone()
         c.patches = deepcopy(self.patches)
         c.patches_uuid = self.patches_uuid  # copy from source, not uuid.uuid4()
         return c
+
+    def is_clone(self, other: "MockModelPatcher") -> bool:
+        """Check if this patcher shares the same underlying model as other."""
+        if hasattr(other, "model") and self.model is other.model:
+            return True
+        return False
 
     def add_patches(
         self,
