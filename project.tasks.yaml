@@ -973,6 +973,10 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #16. Implemented Z-Image LoRA Loader with QKV fusing - separate
+    to_q/to_k/to_v keys fuse to attention.qkv.weight (AC-1), Diffusers key names map to S3-DiT
+    parameters including LyCORIS format (AC-2), QKV DeltaSpecs have offset indexing q=(0,3840),
+    k=(3840,3840), v=(7680,3840) (AC-3). 20 tests covering all 3 ACs."
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
   context: []
@@ -981,6 +985,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.327Z
   started_at: 2026-02-11T04:01:28.519Z
+  completed_at: 2026-02-11T04:07:39.216Z
   notes:
     - _ulid: 01KH4HA47ZYK7SM6X6WGWT9GZ8
       created_at: 2026-02-10T19:44:03.327Z
@@ -1017,11 +1022,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T04:07:39.216Z
-  closed_reason: "Merged in PR #16. Implemented Z-Image LoRA Loader with QKV fusing - separate
-    to_q/to_k/to_v keys fuse to attention.qkv.weight (AC-1), Diffusers key names map to S3-DiT
-    parameters including LyCORIS format (AC-2), QKV DeltaSpecs have offset indexing q=(0,3840),
-    k=(3840,3840), v=(7680,3840) (AC-3). 20 tests covering all 3 ACs."
 - _ulid: 01KH4HA4865JG16KMN5YXENCYH
   slugs:
     - implement-memory-management
@@ -1029,7 +1029,7 @@
   type: task
   spec_ref: "@memory-management"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-exit-node"
@@ -1073,6 +1073,7 @@
       supersedes: null
   todos: []
   automation: eligible
+  started_at: 2026-02-11T04:08:31.101Z
 - _ulid: 01KH4HA48ERX1APFPSJS5E1Y7F
   slugs:
     - implement-per-block-control
