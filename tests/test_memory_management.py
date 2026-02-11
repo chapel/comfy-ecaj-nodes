@@ -172,13 +172,8 @@ class TestBetweenGroupCleanup:
             "layer1.weight": torch.randn(4, 4),
             "layer2.weight": torch.randn(8, 8),  # Different shape = different group
         }
-        set_affected = {
-            "set_a": {"layer1.weight", "layer2.weight"},
-        }
 
-        groups = compile_batch_groups(
-            list(base_state.keys()), base_state, set_affected
-        )
+        groups = compile_batch_groups(list(base_state.keys()), base_state)
 
         # Should have 2 groups due to different shapes
         assert len(groups) == 2

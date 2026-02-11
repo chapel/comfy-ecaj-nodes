@@ -373,7 +373,7 @@ class WIDENExitNode:
             batch_groups = compile_batch_groups(
                 list(keys_to_process),
                 base_state,
-                set_affected,
+                arch=arch,
             )
 
             # Phase 2: Batched GPU evaluation per group
