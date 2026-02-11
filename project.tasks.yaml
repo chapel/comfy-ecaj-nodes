@@ -1615,7 +1615,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -1627,6 +1627,7 @@
   created_at: 2026-02-11T05:42:27.443Z
   notes: []
   todos: []
+  started_at: 2026-02-11T07:29:44.549Z
 - _ulid: 01KH5KJ21MWX1JS1QCN873N9KZ
   slugs:
     - harden-validation
@@ -1706,6 +1707,11 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #25. Split executor.py into batch_groups.py, gpu_ops.py, per_block.py,
+    recipe_eval.py with facade. Deduplicated matmul (4 paths to 2 via _compute_deltas), fixed QKV
+    offset to use DeltaSpec.offset, decomposed evaluate_recipe from 230-line closure into 6
+    module-level functions with EvalContext, guarded all torch.cuda.empty_cache() calls. 490 tests
+    passing, ruff clean, CI green."
   depends_on: []
   context: []
   priority: 2
@@ -1715,14 +1721,9 @@
   vcs_refs: []
   created_at: 2026-02-11T05:44:27.890Z
   started_at: 2026-02-11T06:32:44.737Z
+  completed_at: 2026-02-11T06:32:54.264Z
   notes: []
   todos: []
-  completed_at: 2026-02-11T06:32:54.264Z
-  closed_reason: "Merged in PR #25. Split executor.py into batch_groups.py, gpu_ops.py, per_block.py,
-    recipe_eval.py with facade. Deduplicated matmul (4 paths to 2 via _compute_deltas), fixed QKV
-    offset to use DeltaSpec.offset, decomposed evaluate_recipe from 230-line closure into 6
-    module-level functions with EvalContext, guarded all torch.cuda.empty_cache() calls. 490 tests
-    passing, ruff clean, CI green."
 - _ulid: 01KH5KNKD2PFVCBKPN04G1PCXD
   slugs:
     - unify-scalar-batched
