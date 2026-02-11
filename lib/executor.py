@@ -10,13 +10,18 @@ This module provides the core primitives for batched GPU evaluation:
 This module is pure torch and stdlib - no ComfyUI imports.
 """
 
+from __future__ import annotations
+
 import gc
 from collections import defaultdict
 from collections.abc import Callable
-from dataclasses import dataclass
-from typing import TypeVar
+from dataclasses import dataclass, replace
+from typing import TYPE_CHECKING, TypeVar
 
 import torch
+
+if TYPE_CHECKING:
+    from lib.recipe import BlockConfig
 
 T = TypeVar("T")
 
@@ -368,6 +373,197 @@ def chunked_evaluation(
     return results
 
 
+def _get_block_t_factors(
+    keys: list[str],
+    block_config: BlockConfig | None,
+    arch: str | None,
+    default_t_factor: float,
+) -> dict[float, list[int]]:
+    """Group key indices by their effective t_factor based on block classification.
+
+    # AC: @merge-block-config ac-1
+    Per-block t_factor overrides are applied based on block classification.
+
+    # AC: @merge-block-config ac-2
+    Keys not matching any block pattern use the default (global) t_factor.
+
+    Args:
+        keys: List of parameter keys
+        block_config: BlockConfig with block_overrides, or None
+        arch: Architecture name for block classification
+        default_t_factor: Global t_factor to use when no override applies
+
+    Returns:
+        Dict mapping t_factor -> list of key indices with that t_factor
+    """
+    # Import here to avoid circular import at module level
+    from lib.block_classify import classify_key
+
+    # If no block_config or no arch, all keys use the default t_factor
+    if block_config is None or arch is None:
+        return {default_t_factor: list(range(len(keys)))}
+
+    # Build lookup dict from block_overrides
+    block_overrides = dict(block_config.block_overrides)
+
+    # Group keys by their effective t_factor
+    t_factor_groups: dict[float, list[int]] = defaultdict(list)
+
+    for idx, key in enumerate(keys):
+        block_group = classify_key(key, arch)
+        if block_group is not None and block_group in block_overrides:
+            t_factor = block_overrides[block_group]
+        else:
+            t_factor = default_t_factor
+        t_factor_groups[t_factor].append(idx)
+
+    return dict(t_factor_groups)
+
+
+def _apply_widen_filter_per_block(
+    keys: list[str],
+    lora_applied: torch.Tensor,
+    backbone: torch.Tensor,
+    block_config: BlockConfig | None,
+    arch: str | None,
+    default_t_factor: float,
+    widen_config: object,
+) -> torch.Tensor:
+    """Apply WIDEN filter_delta with per-block t_factor overrides.
+
+    # AC: @merge-block-config ac-1
+    Per-block t_factor overrides are applied instead of global t_factor.
+
+    # AC: @merge-block-config ac-2
+    When no block_config, global t_factor applies to all blocks.
+
+    Args:
+        keys: List of parameter keys
+        lora_applied: [B, *shape] LoRA-applied weights
+        backbone: [B, *shape] backbone weights for importance analysis
+        block_config: BlockConfig with per-block overrides, or None
+        arch: Architecture name for block classification
+        default_t_factor: Global t_factor when no override applies
+        widen_config: WIDENConfig template for creating per-block instances
+
+    Returns:
+        [B, *shape] filtered weights
+    """
+    from lib.widen import WIDEN, WIDENConfig
+
+    # Get per-block t_factor groupings
+    t_factor_groups = _get_block_t_factors(keys, block_config, arch, default_t_factor)
+
+    # If all keys have the same t_factor, use simple path
+    if len(t_factor_groups) == 1:
+        t_factor = next(iter(t_factor_groups.keys()))
+        if widen_config:
+            cfg = replace(widen_config, t_factor=t_factor)
+        else:
+            cfg = WIDENConfig(t_factor=t_factor)
+        widen_instance = WIDEN(cfg)
+        return widen_instance.filter_delta_batched(lora_applied, backbone)
+
+    # Multiple t_factors: process each group separately
+    result = lora_applied.clone()
+
+    for t_factor, indices in t_factor_groups.items():
+        if not indices:
+            continue
+
+        # Create WIDEN instance for this t_factor
+        if widen_config:
+            cfg = replace(widen_config, t_factor=t_factor)
+        else:
+            cfg = WIDENConfig(t_factor=t_factor)
+        widen_instance = WIDEN(cfg)
+
+        # Extract batch slices for this group
+        sub_lora = lora_applied[indices]
+        sub_backbone = backbone[indices]
+
+        # Apply filter
+        sub_result = widen_instance.filter_delta_batched(sub_lora, sub_backbone)
+
+        # Write back to result
+        for i, idx in enumerate(indices):
+            result[idx] = sub_result[i]
+
+    return result
+
+
+def _apply_widen_merge_per_block(
+    keys: list[str],
+    branch_results: list[torch.Tensor],
+    backbone: torch.Tensor,
+    block_config: BlockConfig | None,
+    arch: str | None,
+    default_t_factor: float,
+    widen_config: object,
+) -> torch.Tensor:
+    """Apply WIDEN merge_weights with per-block t_factor overrides.
+
+    # AC: @merge-block-config ac-1
+    Per-block t_factor overrides are applied instead of global t_factor.
+
+    # AC: @merge-block-config ac-2
+    When no block_config, global t_factor applies to all blocks.
+
+    Args:
+        keys: List of parameter keys
+        branch_results: List of N tensors, each [B, *shape]
+        backbone: [B, *shape] backbone weights for importance analysis
+        block_config: BlockConfig with per-block overrides, or None
+        arch: Architecture name for block classification
+        default_t_factor: Global t_factor when no override applies
+        widen_config: WIDENConfig template for creating per-block instances
+
+    Returns:
+        [B, *shape] merged weights
+    """
+    from lib.widen import WIDEN, WIDENConfig
+
+    # Get per-block t_factor groupings
+    t_factor_groups = _get_block_t_factors(keys, block_config, arch, default_t_factor)
+
+    # If all keys have the same t_factor, use simple path
+    if len(t_factor_groups) == 1:
+        t_factor = next(iter(t_factor_groups.keys()))
+        if widen_config:
+            cfg = replace(widen_config, t_factor=t_factor)
+        else:
+            cfg = WIDENConfig(t_factor=t_factor)
+        widen_instance = WIDEN(cfg)
+        return widen_instance.merge_weights_batched(branch_results, backbone)
+
+    # Multiple t_factors: process each group separately
+    result = backbone.clone()
+
+    for t_factor, indices in t_factor_groups.items():
+        if not indices:
+            continue
+
+        # Create WIDEN instance for this t_factor
+        if widen_config:
+            cfg = replace(widen_config, t_factor=t_factor)
+        else:
+            cfg = WIDENConfig(t_factor=t_factor)
+        widen_instance = WIDEN(cfg)
+
+        # Extract batch slices for this group
+        sub_branches = [b[indices] for b in branch_results]
+        sub_backbone = backbone[indices]
+
+        # Apply merge
+        sub_result = widen_instance.merge_weights_batched(sub_branches, sub_backbone)
+
+        # Write back to result
+        for i, idx in enumerate(indices):
+            result[idx] = sub_result[i]
+
+    return result
+
+
 def evaluate_recipe(
     keys: list[str],
     base_batch: torch.Tensor,
@@ -377,6 +573,8 @@ def evaluate_recipe(
     set_id_map: dict[int, str],
     device: str,
     dtype: torch.dtype,
+    arch: str | None = None,
+    widen_config: object | None = None,
 ) -> torch.Tensor:
     """Evaluate a recipe tree on a batch of parameters.
 
@@ -401,6 +599,12 @@ def evaluate_recipe(
     # AC: @exit-batched-eval ac-5
     RecipeMerge.backbone overrides the importance reference for WIDEN analysis.
 
+    # AC: @merge-block-config ac-1
+    When RecipeMerge has block_config, per-block t_factor overrides are applied.
+
+    # AC: @merge-block-config ac-2
+    When no block_config is connected, global t_factor applies to all blocks.
+
     Args:
         keys: List of B parameter keys being evaluated
         base_batch: [B, *shape] base model weights on GPU
@@ -410,6 +614,8 @@ def evaluate_recipe(
         set_id_map: Map of object id(RecipeLoRA) → set_id string
         device: GPU device string
         dtype: Computation dtype
+        arch: Architecture name for block classification (optional)
+        widen_config: WIDENConfig to create per-block WIDEN instances (optional)
 
     Returns:
         [B, *shape] merged weights on GPU
@@ -505,6 +711,11 @@ def evaluate_recipe(
             # Evaluate target
             target_result = _eval_node(current_base, node.target)
 
+            # AC: @merge-block-config ac-1, ac-2
+            # Check if this merge has block_config for per-block t_factor
+            merge_block_config = getattr(node, "block_config", None)
+            use_per_block = merge_block_config is not None and arch is not None
+
             # Dispatch based on target type
             if isinstance(node.target, RecipeCompose):
                 # target_result is a list of branch results
@@ -514,12 +725,24 @@ def evaluate_recipe(
                 # Single-branch compose uses filter_delta (passthrough), not merge_weights
                 if len(branch_results) == 1:
                     lora_applied = branch_results[0]
-                    filtered = widen.filter_delta_batched(lora_applied, backbone_weights)
+                    if use_per_block:
+                        filtered = _apply_widen_filter_per_block(
+                            keys, lora_applied, backbone_weights,
+                            merge_block_config, arch, node.t_factor, widen_config
+                        )
+                    else:
+                        filtered = widen.filter_delta_batched(lora_applied, backbone_weights)
                     return filtered
 
                 # AC: @exit-batched-eval ac-1
                 # Multi-branch compose: Call merge_weights_batched with all branches
-                merged = widen.merge_weights_batched(branch_results, backbone_weights)
+                if use_per_block:
+                    merged = _apply_widen_merge_per_block(
+                        keys, branch_results, backbone_weights,
+                        merge_block_config, arch, node.t_factor, widen_config
+                    )
+                else:
+                    merged = widen.merge_weights_batched(branch_results, backbone_weights)
                 return merged
 
             elif isinstance(node.target, RecipeLoRA):
@@ -527,7 +750,13 @@ def evaluate_recipe(
                 # target_result is the LoRA-applied weights
                 lora_applied = target_result
                 # Call filter_delta_batched
-                filtered = widen.filter_delta_batched(lora_applied, backbone_weights)
+                if use_per_block:
+                    filtered = _apply_widen_filter_per_block(
+                        keys, lora_applied, backbone_weights,
+                        merge_block_config, arch, node.t_factor, widen_config
+                    )
+                else:
+                    filtered = widen.filter_delta_batched(lora_applied, backbone_weights)
                 return filtered
 
             elif isinstance(node.target, RecipeMerge):
@@ -535,7 +764,13 @@ def evaluate_recipe(
                 # Target is another merge - already evaluated recursively
                 # Apply filter_delta_batched to treat inner merge result as "delta"
                 inner_result = target_result
-                filtered = widen.filter_delta_batched(inner_result, backbone_weights)
+                if use_per_block:
+                    filtered = _apply_widen_filter_per_block(
+                        keys, inner_result, backbone_weights,
+                        merge_block_config, arch, node.t_factor, widen_config
+                    )
+                else:
+                    filtered = widen.filter_delta_batched(inner_result, backbone_weights)
                 return filtered
 
             else:
