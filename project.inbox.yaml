@@ -39,14 +39,6 @@ inbox:
       - hardening
       - review-finding
     added_by: "@claude"
-  - _ulid: 01KH5KJKADZ9MM2W1KWPD366CJ
-    text: "Clarify compute_batch_size doc vs behavior: 70% vram budget only guaranteed in auto-detect
-      path, not explicit vram_budget_gb path"
-    created_at: 2026-02-11T05:42:52.493Z
-    tags:
-      - docs
-      - review-finding
-    added_by: "@claude"
   - _ulid: 01KH5KJNP37YK25Z0S2T6P0GFJ
     text: Consider strict mode for batched catch-all fallbacks in widen.py (lines 556, 640) - non-OOM
       catch-all hides shape bugs and API misuse
