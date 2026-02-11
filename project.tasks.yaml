@@ -1896,6 +1896,10 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #30. Fixed 3 bugs: (1) lora_path_resolver callable replaces single-dir
+    lora_base_path for multi-directory search, (2) fail-fast imports in __init__.py, (3) key prefix
+    mismatch between loaders and exit node. Also hardened resolver-returns-None to fail immediately.
+    Runtime corruption tracked separately."
   depends_on: []
   context: []
   priority: 2
@@ -1905,6 +1909,7 @@
   vcs_refs: []
   created_at: 2026-02-11T09:25:46.933Z
   started_at: 2026-02-11T17:17:00.323Z
+  completed_at: 2026-02-11T18:02:42.369Z
   notes:
     - _ulid: 01KH6VHP8AAVKHPDJ5A3BCSQM3
       created_at: 2026-02-11T17:21:25.771Z
@@ -1923,8 +1928,25 @@
         but produces corrupted output - filed inbox item 01KH6X7H for follow-up."
       supersedes: null
   todos: []
-  completed_at: 2026-02-11T18:02:42.369Z
-  closed_reason: "Merged in PR #30. Fixed 3 bugs: (1) lora_path_resolver callable replaces single-dir
-    lora_base_path for multi-directory search, (2) fail-fast imports in __init__.py, (3) key prefix
-    mismatch between loaders and exit node. Also hardened resolver-returns-None to fail immediately.
-    Runtime corruption tracked separately."
+- title: Fix corrupted model output from WIDEN Exit node
+  type: bug
+  priority: 3
+  spec_ref: null
+  tags:
+    - correctness
+    - runtime
+  description: "WIDEN Exit node produces corrupted model output when executing the GPU merge pipeline.
+    Nodes now execute (key prefix mismatch fixed) but the merged weights are wrong. Need to debug:
+    evaluate_recipe data flow, WIDEN filter/merge math with real z-image tensors,
+    install_merged_patches correctness, and possible dtype/device mismatches. Test with actual
+    ComfyUI runtime."
+  _ulid: 01KH70GN0FT5GQ30E36REMRST3
+  slugs: []
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-11T18:48:14.607Z
+  notes: []
+  todos: []
