@@ -418,6 +418,11 @@
   plan_ref: "@plan-widen-merge-feature-specs"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #8. Implemented Merge node with base/target type validation. merge()
+    validates base is RecipeBase or RecipeMerge (rejects RecipeLoRA/RecipeCompose with helpful error
+    message suggesting Entry node or Merge output). All 6 ACs covered by 23 tests: AC-1 (RecipeMerge
+    with fields), AC-2 (no backbone defaults None), AC-3 (backbone stored), AC-4 (merge chaining),
+    AC-5 (invalid base rejection), AC-6 (t_factor -1.0 preserved). All tests pass, ruff clean."
   depends_on:
     - "@implement-testing-infrastructure"
     - "@implement-comfyui-packaging"
@@ -427,6 +432,7 @@
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.277Z
   started_at: 2026-02-11T02:59:47.138Z
+  completed_at: 2026-02-11T03:04:40.091Z
   notes:
     - _ulid: 01KH4HA46D87PGPQBEVJMMND53
       created_at: 2026-02-10T19:44:03.277Z
@@ -456,12 +462,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-11T03:04:40.091Z
-  closed_reason: "Merged in PR #8. Implemented Merge node with base/target type validation. merge()
-    validates base is RecipeBase or RecipeMerge (rejects RecipeLoRA/RecipeCompose with helpful error
-    message suggesting Entry node or Merge output). All 6 ACs covered by 23 tests: AC-1 (RecipeMerge
-    with fields), AC-2 (no backbone defaults None), AC-3 (backbone stored), AC-4 (merge chaining),
-    AC-5 (invalid base rejection), AC-6 (t_factor -1.0 preserved). All tests pass, ruff clean."
 - _ulid: 01KH4HA46HJ6V0VC67XRPWSGB5
   slugs:
     - implement-exit-node
@@ -611,7 +611,7 @@
   type: task
   spec_ref: "@exit-patch-install"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
@@ -643,6 +643,7 @@
         Files: nodes/exit.py.
   todos: []
   automation: eligible
+  started_at: 2026-02-11T03:05:39.107Z
 - _ulid: 01KH4HA47BN0SVNJWSRGXBNJ2W
   slugs:
     - implement-widen-core-algorithm
