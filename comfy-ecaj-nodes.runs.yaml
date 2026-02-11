@@ -383,7 +383,7 @@ runs:
   - _ulid: 01KH5H8TC16JAX5FENDQ4MY7C9
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-11T05:02:34.882Z
     step_results:
@@ -398,5 +398,15 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-11T05:03:02.355Z
-        completed_at: 2026-02-11T05:03:02.355Z
+        completed_at: 2026-02-11T05:03:18.092Z
+        notes: "High-confidence items: (1) SUCCESS: Subagent PR review caught real AC gap
+          (model.diffusion_model access path missing). This is a repeatable pattern - always use
+          pr-review subagent before merge. (2) FRICTION: pytest + ComfyUI root __init__.py conflict
+          required try/except + collect_ignore + importlib mode. This is systemic - every ComfyUI
+          node pack with relative imports in __init__.py will hit this. Worth capturing the solution
+          pattern in memory. Low-confidence (skip): torch/venv issues were plan gaps, not systemic."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-11T05:03:18.092Z
+        completed_at: 2026-02-11T05:03:18.092Z
     initiated_by: "@claude"
