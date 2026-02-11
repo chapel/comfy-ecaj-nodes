@@ -2075,7 +2075,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -2098,3 +2098,4 @@
         before stacking, e.g. base_tensors[k].cpu(), or move uniformly to device before stack."
       supersedes: null
   todos: []
+  started_at: 2026-02-11T19:33:55.036Z
