@@ -1265,7 +1265,7 @@
   type: task
   spec_ref: "@lora-block-config"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-per-block-control"
@@ -1325,6 +1325,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T04:45:26.430Z
+  closed_reason: "Merged in PR #21. Implemented LoRA per-block strength scaling:
+    _apply_per_block_lora_strength helper in lib/executor.py scales LoRA deltas by BlockConfig
+    overrides. AC-1: BLOCK_CONFIG with per-block strengths scales LoRA deltas per-key. AC-2: No
+    block_config means global strength applies uniformly. 14 tests in test_lora_block_strength.py."
 - _ulid: 01KH508VE1GEDSBP3VENYEF2R0
   slugs:
     - implement-comfyui-mocking-and-fixtures
