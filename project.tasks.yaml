@@ -1743,7 +1743,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -1756,3 +1756,6 @@
   started_at: 2026-02-11T07:29:50.494Z
   notes: []
   todos: []
+  completed_at: 2026-02-11T07:29:53.129Z
+  closed_reason: "Merged in PR #27. Unified scalar/batched codepaths (-180 lines), generic dimension
+    dispatch, removed n_models, fixed exact_rank stable sort, normalized soft_rank."
