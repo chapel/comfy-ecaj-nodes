@@ -1454,3 +1454,54 @@
       supersedes: null
   todos: []
   automation: eligible
+- title: Fix LoRA set scoping bug in executor and loader API
+  description: >-
+    CORRECTNESS BUG: LoRA set IDs are looked up in evaluate_recipe (lib/executor.py:717) but never
+    passed to the loader API. loader.get_delta_specs(keys, key_indices) has no set_id parameter, and
+    analyze_recipe loads all LoRA sets cumulatively into one loader (lib/analysis.py:190-222). Each
+    RecipeLoRA evaluation can apply deltas from ALL loaded sets affecting a key, not just that LoRA
+    node's set. Compose branches with overlapping keys produce incorrect merged output.
+
+
+    SCOPE:
+
+    - lib/lora/base.py: Add set_id parameter to get_delta_specs() interface
+
+    - lib/lora/sdxl.py: Segment _lora_data/_qkv_data by set, or maintain per-set loaders
+
+    - lib/lora/zimage.py: Same segmentation
+
+    - lib/analysis.py: Wire set scoping through analysis pipeline
+
+    - lib/executor.py: Pass set_id through _apply_lora_set to loader calls
+
+    - Also fix silent fallback: when set_id is None in _apply_lora_set (executor.py:717-720), raise
+    RuntimeError instead of silently returning current weights
+
+
+    VERIFICATION:
+
+    - Test: two LoRA sets affecting same key produce distinct branch results
+
+    - Test: missing set_id raises explicit error, not silent no-op
+
+    - All 467 existing tests must pass
+  type: bug
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 1
+  slugs:
+    - fix-lora-set-scoping
+  tags:
+    - correctness
+    - review-finding
+  depends_on: []
+  _ulid: 01KH5KGMYRRPD5W18RMR3WBHFB
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-11T05:41:48.628Z
+  notes: []
+  todos: []
