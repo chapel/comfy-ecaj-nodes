@@ -350,8 +350,18 @@ runs:
   - _ulid: 01KH5F3GNYCK56TJBSJ1SC79CN
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-11T04:24:43.967Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-11T04:24:43.967Z
+        completed_at: 2026-02-11T04:25:02.887Z
+        notes: Session reviewed. Per-block control implementation was straightforward - clear spec, existing
+          patterns to follow, BlockConfig type already implemented. No friction points identified.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-11T04:25:02.887Z
+        completed_at: 2026-02-11T04:25:02.887Z
     initiated_by: "@claude"
