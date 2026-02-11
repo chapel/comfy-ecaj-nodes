@@ -333,9 +333,10 @@ class TestWIDENExitNodeBasic:
         """Function name is execute."""
         assert WIDENExitNode.FUNCTION == "execute"
 
-    def test_execute_not_implemented(self):
-        """Execute raises NotImplementedError (batched evaluation not yet done)."""
+    def test_execute_rejects_lora_at_root(self):
+        """Execute raises ValueError for LoRA at root (must use Merge)."""
         node = WIDENExitNode()
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(ValueError) as exc_info:
             node.execute(lora)
+        assert "RecipeLoRA" in str(exc_info.value)

@@ -484,10 +484,18 @@ def evaluate_recipe(
 
             # Dispatch based on target type
             if isinstance(node.target, RecipeCompose):
-                # AC: @exit-batched-eval ac-1
                 # target_result is a list of branch results
                 branch_results = target_result
-                # Call merge_weights_batched with all branches
+
+                # AC: @exit-node ac-6
+                # Single-branch compose uses filter_delta (passthrough), not merge_weights
+                if len(branch_results) == 1:
+                    lora_applied = branch_results[0]
+                    filtered = widen.filter_delta_batched(lora_applied, backbone_weights)
+                    return filtered
+
+                # AC: @exit-batched-eval ac-1
+                # Multi-branch compose: Call merge_weights_batched with all branches
                 merged = widen.merge_weights_batched(branch_results, backbone_weights)
                 return merged
 
