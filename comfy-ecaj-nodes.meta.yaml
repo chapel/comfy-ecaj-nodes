@@ -525,5 +525,14 @@ conventions:
       - Include context for decisions made
       - Reference related commits, PRs, or issues
     examples: []
+  - _ulid: 01KH509WYHJKSQ1XXE7FYDATA1
+    domain: testing
+    rules:
+      - Every implementation task must include tests covering its spec ACs
+      - "Tests must be annotated with # AC: @spec-ref ac-N comments linking to the spec AC they
+        cover"
+      - The local-review workflow checks for AC annotation coverage before PR
+      - Tests must not require a running ComfyUI instance or GPU
+    examples: []
 observations: []
 includes: []
