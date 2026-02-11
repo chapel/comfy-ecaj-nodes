@@ -2122,6 +2122,9 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: Fix confirmed working in real ComfyUI. _unpatch_loaded_clones() forces any loaded
+    clone to fully unload via model_unload() before reading model_state_dict(), restoring clean base
+    weights. Zero memory overhead. 497 tests pass.
   depends_on: []
   context: []
   priority: 1
@@ -2131,6 +2134,7 @@
   vcs_refs: []
   created_at: 2026-02-11T20:09:16.470Z
   started_at: 2026-02-11T20:12:05.190Z
+  completed_at: 2026-02-11T20:35:39.491Z
   notes:
     - _ulid: 01KH75H5N9WHDQ37Z3CJ3XMRP5
       created_at: 2026-02-11T20:15:54.537Z
@@ -2171,7 +2175,27 @@
         OOM kill due to cloning all affected keys to CPU RAM."
       supersedes: null
   todos: []
-  completed_at: 2026-02-11T20:35:39.491Z
-  closed_reason: Fix confirmed working in real ComfyUI. _unpatch_loaded_clones() forces any loaded
-    clone to fully unload via model_unload() before reading model_state_dict(), restoring clean base
-    weights. Zero memory overhead. 497 tests pass.
+- title: "E2E test: multi-set recipe evaluation with shape-only grouping"
+  description: "Add integration/E2E test that exercises multi-set recipe evaluation where same-shape
+    keys are affected by different LoRA sets and processed in one OpSignature group. Verifies no
+    cross-set leakage when grouping by shape only (without affecting_sets). Should use
+    MockLoRALoader with per-set filtering and assert final merged tensors match expected per-set
+    behavior. Guards against regressions from the OpSignature simplification in PR #34."
+  type: task
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 2
+  slugs: []
+  tags:
+    - testing
+    - performance
+  depends_on: []
+  _ulid: 01KH7EZFK49AMP1VRJT0ZTY4MM
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-11T23:01:00.641Z
+  notes: []
+  todos: []
