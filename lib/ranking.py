@@ -46,7 +46,7 @@ class RankingMechanism:
             Ranks in [0, 1] with uniform distribution
         """
         flat = divergences.flatten()
-        sorted_indices = torch.argsort(flat)
+        sorted_indices = torch.argsort(flat, stable=True)
 
         # VECTORIZED ranking - much faster than loop
         ranks = torch.empty_like(flat).scatter_(
@@ -76,12 +76,16 @@ class RankingMechanism:
     def soft_rank(self, divergences: torch.Tensor) -> torch.Tensor:
         """Differentiable ranking for gradient tests only.
 
+        Returns values normalized to [0, 1] to match other strategies.
         Falls back to exact rank if torch_sort not available.
         """
         try:
             from torch_sort import soft_rank as torch_soft_rank
 
-            return torch_soft_rank(divergences, regularization=1.0)
+            ranks = torch_soft_rank(divergences, regularization=1.0)
+            # Normalize from [1, N] to [1/N, 1] to match exact_rank contract
+            n = divergences.numel()
+            return ranks / n
         except ImportError:
             logger.debug("torch_sort not available, using exact rank")
             return self.exact_rank(divergences)
@@ -119,7 +123,7 @@ class RankingMechanism:
         """Apply ranking strategy independently per batch element.
 
         Args:
-            divergences: [B, ...] — batched divergence tensor
+            divergences: [B, ...] -- batched divergence tensor
             strategy: Override ranking strategy
 
         Returns:
@@ -142,7 +146,7 @@ class RankingMechanism:
         """Batched exact j/k ranking. Each batch element ranked independently.
 
         Args:
-            divergences: [B, ...] — batched divergence values
+            divergences: [B, ...] -- batched divergence values
 
         Returns:
             Ranks [B, ...] in [0, 1] with uniform distribution per element

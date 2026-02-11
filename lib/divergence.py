@@ -31,6 +31,8 @@ class DivergenceCalculator:
     def compute_direction_divergence(self, D1: torch.Tensor, D2: torch.Tensor) -> torch.Tensor:
         """Compute per-column direction divergence.
 
+        Thin wrapper: unsqueeze -> batched -> squeeze.
+
         Returns divergence with same shape as m (including leading singleton).
 
         Args:
@@ -40,73 +42,45 @@ class DivergenceCalculator:
         Returns:
             Direction divergence as 1 - cosine_similarity
         """
-        if D1.dim() == 2:
-            # Per-column cosine similarity (Linear)
-            cos_sim = F.cosine_similarity(D1, D2, dim=0)  # (in_features,)
-            return (1 - cos_sim).unsqueeze(0)  # (1, in_features)
-
-        elif D1.dim() == 4:  # Conv2D
-            D1_flat = D1.view(D1.shape[0], -1)
-            D2_flat = D2.view(D2.shape[0], -1)
-            cos_sim = F.cosine_similarity(D1_flat, D2_flat, dim=0)  # (in*h*w,)
-            div = 1 - cos_sim
-            # Reshape with leading singleton
-            return div.view(1, D1.shape[1], D1.shape[2], D1.shape[3])
-
-        elif D1.dim() == 3:  # Conv1D
-            D1_flat = D1.view(D1.shape[0], -1)
-            D2_flat = D2.view(D2.shape[0], -1)
-            cos_sim = F.cosine_similarity(D1_flat, D2_flat, dim=0)
-            div = 1 - cos_sim
-            return div.view(1, D1.shape[1], D1.shape[2])
-
-        elif D1.dim() == 1:  # 1D weights
-            # No direction for 1D
-            return torch.zeros(1, device=D1.device, dtype=D1.dtype)
-
-        else:
-            raise ValueError(f"Unsupported tensor dimension: {D1.dim()}")
+        result = self.compute_direction_divergence_batched(D1.unsqueeze(0), D2.unsqueeze(0))
+        return result.squeeze(0)
 
     def compute_direction_divergence_batched(
         self, D1: torch.Tensor, D2: torch.Tensor
     ) -> torch.Tensor:
         """Batched per-column direction divergence.
 
+        Generic implementation that handles all tensor dimensions by flattening
+        non-output axes and computing cosine similarity along the output dimension.
+
         Args:
-            D1, D2: [B, out, in, ...] — batched direction tensors
+            D1, D2: [B, out, in, ...] -- batched direction tensors
 
         Returns:
             Divergence with shape matching batched m: [B, 1, in, ...]
         """
         logical_ndim = D1.ndim - 1  # subtract batch dim
 
-        if logical_ndim == 2:
-            # Linear: [B, out, in] — cosine along out (dim=1)
-            cos_sim = F.cosine_similarity(D1, D2, dim=1)  # [B, in]
-            return (1 - cos_sim).unsqueeze(1)  # [B, 1, in]
-
-        elif logical_ndim == 4:
-            # Conv2D: [B, out, in, h, w]
-            B, out_c, in_c, h, w = D1.shape
-            D1_flat = D1.view(B, out_c, -1)
-            D2_flat = D2.view(B, out_c, -1)
-            cos_sim = F.cosine_similarity(D1_flat, D2_flat, dim=1)  # [B, in*h*w]
-            div = 1 - cos_sim
-            return div.view(B, 1, in_c, h, w)
-
-        elif logical_ndim == 3:
-            # Conv1D: [B, out, in, k]
-            B, out_c, in_c, k = D1.shape
-            D1_flat = D1.view(B, out_c, -1)
-            D2_flat = D2.view(B, out_c, -1)
-            cos_sim = F.cosine_similarity(D1_flat, D2_flat, dim=1)
-            div = 1 - cos_sim
-            return div.view(B, 1, in_c, k)
-
-        elif logical_ndim == 1:
-            # 1D weights — no direction divergence
+        if logical_ndim == 1:
+            # 1D weights -- no direction divergence
             B = D1.shape[0]
             return torch.zeros(B, 1, device=D1.device, dtype=D1.dtype)
 
-        else:
+        if logical_ndim < 1:
             raise ValueError(f"Unsupported batched tensor ndim: {D1.ndim}")
+
+        # Generic path for logical_ndim >= 2 (Linear, Conv1D, Conv2D, etc.)
+        B = D1.shape[0]
+        out_dim = D1.shape[1]
+        spatial_shape = D1.shape[2:]  # everything after [B, out, ...]
+
+        # Flatten spatial dims: [B, out, *spatial] -> [B, out, flat]
+        D1_flat = D1.reshape(B, out_dim, -1)
+        D2_flat = D2.reshape(B, out_dim, -1)
+
+        # Cosine similarity along output dim (dim=1)
+        cos_sim = F.cosine_similarity(D1_flat, D2_flat, dim=1)  # [B, flat]
+        div = 1 - cos_sim
+
+        # Reshape to [B, 1, *spatial]
+        return div.reshape(B, 1, *spatial_shape)
