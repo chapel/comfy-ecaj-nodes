@@ -131,7 +131,7 @@
   type: task
   spec_ref: "@testing-infrastructure"
   plan_ref: "@plan-foundation-project-infrastructure"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -168,6 +168,7 @@
       supersedes: null
   todos: []
   automation: eligible
+  started_at: 2026-02-11T01:44:45.085Z
 - _ulid: 01KH4HA460E5KKNBG2WJJK17GX
   slugs:
     - implement-recipe-type-system
