@@ -1913,4 +1913,13 @@
         wraps folder_paths.get_full_path to search all registered LoRA directories. 2 new regression
         tests, 493 total passing."
       supersedes: null
+    - _ulid: 01KH6X93F2H2Y1HTFGNZ8D4EC0
+      created_at: 2026-02-11T17:51:41.538Z
+      author: "@claude"
+      content: "Found and fixed 3 bugs: (1) lora_path_resolver replaces single-dir lora_base_path, (2)
+        __init__.py fail-fast instead of silent except ImportError, (3) key prefix mismatch - exit
+        node used model.diffusion_model.state_dict() (unprefixed) but loaders produce prefixed keys,
+        so intersection was always empty. Runtime testing revealed the merge pipeline now executes
+        but produces corrupted output - filed inbox item 01KH6X7H for follow-up."
+      supersedes: null
   todos: []
