@@ -1881,28 +1881,29 @@
   created_at: 2026-02-11T08:39:02.176Z
   notes: []
   todos: []
-- title: Fix LoRA file path resolution for nested paths
+- _ulid: 01KH60AR9NMW9K4DYQB51TTYQV
+  slugs:
+    - fix-lora-path-resolution
+  title: Fix LoRA file path resolution for nested paths
+  type: bug
   description: When ComfyUI passes a LoRA name like 'z-image/Mystic-XXX-ZIT-V5.safetensors' (nested
     subdirectory), analyze_recipe fails with FileNotFoundError. The lora_base_path resolution in
     lib/analysis.py likely doesn't handle ComfyUI's folder_paths.get_full_path() correctly for
     nested LoRA directories. Need to use ComfyUI's folder_paths to resolve the actual file location
     rather than simple path joining.
-  type: bug
   spec_ref: null
   meta_ref: null
   plan_ref: null
+  status: in_progress
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 2
-  slugs:
-    - fix-lora-path-resolution
   tags:
     - correctness
     - runtime
-  depends_on: []
-  _ulid: 01KH60AR9NMW9K4DYQB51TTYQV
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-11T09:25:46.933Z
   notes: []
   todos: []
+  started_at: 2026-02-11T17:17:00.323Z
