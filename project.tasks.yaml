@@ -971,7 +971,7 @@
   type: task
   spec_ref: "@zimage-loader"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
@@ -1017,6 +1017,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T04:07:39.216Z
+  closed_reason: "Merged in PR #16. Implemented Z-Image LoRA Loader with QKV fusing - separate
+    to_q/to_k/to_v keys fuse to attention.qkv.weight (AC-1), Diffusers key names map to S3-DiT
+    parameters including LyCORIS format (AC-2), QKV DeltaSpecs have offset indexing q=(0,3840),
+    k=(3840,3840), v=(7680,3840) (AC-3). 20 tests covering all 3 ACs."
 - _ulid: 01KH4HA4865JG16KMN5YXENCYH
   slugs:
     - implement-memory-management
