@@ -1,12 +1,4 @@
 inbox:
-  - _ulid: 01KH5KJNP37YK25Z0S2T6P0GFJ
-    text: Consider strict mode for batched catch-all fallbacks in widen.py (lines 556, 640) - non-OOM
-      catch-all hides shape bugs and API misuse
-    created_at: 2026-02-11T05:42:54.915Z
-    tags:
-      - hardening
-      - review-finding
-    added_by: "@claude"
   - _ulid: 01KH5PYZNJ5RJH45ZKT73KJXMH
     text: "gpu_ops.py: _compute_deltas strips spec identity - resolve metadata via next(s for s in group
       if s.key_index == key_index) is O(n^2) and couples to key_index uniqueness. Consider returning

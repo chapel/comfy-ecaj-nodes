@@ -1822,22 +1822,42 @@
   created_at: 2026-02-11T08:38:55.017Z
   notes: []
   todos: []
-- title: Harden block_classify.py key matching with anchored patterns
+- _ulid: 01KH5XN0ZP4N73QZ2YPVX0RJ2D
+  slugs: []
+  title: Harden block_classify.py key matching with anchored patterns
   type: task
+  description: Refiner checks in block_classify.py (lines 122/124) use substring containment which can
+    accidentally match unrelated keys. Prefer anchored/structured patterns.
+  spec_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 4
+  tags:
+    - hardening
+    - review-finding
+  vcs_refs: []
+  created_at: 2026-02-11T08:38:57.782Z
+  notes: []
+  todos: []
+- title: Add strict mode for batched catch-all fallbacks in widen.py
+  type: task
+  priority: 5
   spec_ref: null
   tags:
     - hardening
     - review-finding
-  description: Refiner checks in block_classify.py (lines 122/124) use substring containment which can
-    accidentally match unrelated keys. Prefer anchored/structured patterns.
-  _ulid: 01KH5XN0ZP4N73QZ2YPVX0RJ2D
+  description: Non-OOM catch-all fallbacks in widen.py (around lines 556, 640) hide shape bugs and API
+    misuse. Add optional strict mode that raises instead of falling back. Defer until integration
+    testing surfaces real issues.
+  _ulid: 01KH5XN34KRHPV070J3H177FTC
   slugs: []
   status: pending
   blocked_by: []
   depends_on: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-11T08:38:57.782Z
+  created_at: 2026-02-11T08:38:59.987Z
   notes: []
   todos: []
