@@ -1,0 +1,9 @@
+inbox:
+  - _ulid: 01KH5KJ94T4WX59YNDB0GVENMG
+    text: "DRY improvement: block_config_sdxl.py and block_config_zimage.py repeat slider schema and
+      packing logic - extract shared helper/factory"
+    created_at: 2026-02-11T05:42:42.075Z
+    tags:
+      - refactor
+      - review-finding
+    added_by: "@claude"
