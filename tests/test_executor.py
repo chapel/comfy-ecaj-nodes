@@ -30,29 +30,23 @@ class TestOpSignatureGrouping:
     Then: keys with identical shape and affecting sets are in the same group
     """
 
-    def test_same_shape_same_sets_grouped(self):
-        """Keys with identical shape and affecting sets should be grouped together."""
+    def test_same_shape_grouped(self):
+        """Keys with identical shape should be grouped together."""
         # AC: @batched-executor ac-1
         base_state = {
             "layer1.weight": torch.randn(4, 4),
             "layer2.weight": torch.randn(4, 4),
             "layer3.weight": torch.randn(4, 4),
         }
-        set_affected = {
-            "set_a": {"layer1.weight", "layer2.weight", "layer3.weight"},
-        }
 
-        groups = compile_batch_groups(
-            list(base_state.keys()), base_state, set_affected
-        )
+        groups = compile_batch_groups(list(base_state.keys()), base_state)
 
-        # All 3 keys have same shape (4,4) and same affecting sets {set_a}
+        # All 3 keys have same shape (4,4)
         assert len(groups) == 1
         sig = list(groups.keys())[0]
         assert len(groups[sig]) == 3
         assert sig.shape == (4, 4)
         assert sig.ndim == 2
-        assert sig.affecting_sets == frozenset(["set_a"])
 
     def test_different_shapes_separate_groups(self):
         """Keys with different shapes should be in separate groups."""
@@ -62,45 +56,37 @@ class TestOpSignatureGrouping:
             "layer2.weight": torch.randn(8, 8),
             "layer3.bias": torch.randn(16),
         }
-        set_affected = {
-            "set_a": {"layer1.weight", "layer2.weight", "layer3.bias"},
-        }
 
-        groups = compile_batch_groups(
-            list(base_state.keys()), base_state, set_affected
-        )
+        groups = compile_batch_groups(list(base_state.keys()), base_state)
 
         # 3 different shapes = 3 groups
         assert len(groups) == 3
         shapes = {sig.shape for sig in groups.keys()}
         assert shapes == {(4, 4), (8, 8), (16,)}
 
-    def test_different_affecting_sets_separate_groups(self):
-        """Keys with different affecting sets should be in separate groups."""
+    def test_same_shape_different_sets_same_group(self):
+        """Keys with same shape but different affecting sets are now in the same group.
+
+        Per-set filtering is handled by the loader during evaluation, not
+        at the grouping stage.
+        """
         # AC: @batched-executor ac-1
         base_state = {
             "layer1.weight": torch.randn(4, 4),
             "layer2.weight": torch.randn(4, 4),
         }
-        # layer1 affected by set_a only, layer2 affected by both
-        set_affected = {
-            "set_a": {"layer1.weight", "layer2.weight"},
-            "set_b": {"layer2.weight"},
-        }
 
-        groups = compile_batch_groups(
-            list(base_state.keys()), base_state, set_affected
-        )
+        groups = compile_batch_groups(list(base_state.keys()), base_state)
 
-        # Same shape but different affecting sets = 2 groups
-        assert len(groups) == 2
+        # Same shape = same group (per-set filtering is loader's job)
+        assert len(groups) == 1
 
     def test_opsignature_is_hashable(self):
         """OpSignature should be usable as dict key."""
         # AC: @batched-executor ac-1
-        sig1 = OpSignature(frozenset(["a", "b"]), (4, 4), 2)
-        sig2 = OpSignature(frozenset(["a", "b"]), (4, 4), 2)
-        sig3 = OpSignature(frozenset(["a"]), (4, 4), 2)
+        sig1 = OpSignature((4, 4), 2)
+        sig2 = OpSignature((4, 4), 2)
+        sig3 = OpSignature((8, 8), 2)
 
         d = {sig1: "value1"}
         d[sig2] = "value2"
@@ -116,12 +102,9 @@ class TestOpSignatureGrouping:
         base_state = {
             "layer1.weight": torch.randn(4, 4),
         }
-        set_affected = {
-            "set_a": {"layer1.weight", "missing_key"},
-        }
 
         groups = compile_batch_groups(
-            ["layer1.weight", "missing_key"], base_state, set_affected
+            ["layer1.weight", "missing_key"], base_state
         )
 
         # Only layer1.weight should be in groups

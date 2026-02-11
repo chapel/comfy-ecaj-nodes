@@ -27,8 +27,13 @@ class TestPerChunkCleanup:
     Then: all GPU tensors for that chunk are deleted and freed
     """
 
-    def test_gc_collect_called_after_chunk(self):
-        """gc.collect() should be called after each chunk completes."""
+    def test_no_gc_collect_per_chunk_in_normal_path(self):
+        """gc.collect() should NOT be called per-chunk in normal (non-OOM) path.
+
+        GPU tensors are freed via explicit del statements. gc.collect runs
+        between OpSignature groups (in exit.py), not per-chunk, to avoid
+        GPU sync overhead that blocks kernel queuing.
+        """
         # AC: @memory-management ac-1
         keys = ["k0", "k1", "k2", "k3"]
         base = {k: torch.randn(4, 4) for k in keys}
@@ -54,11 +59,11 @@ class TestPerChunkCleanup:
                 storage_dtype=torch.float32,
             )
 
-        # Should have at least 2 gc.collect calls (one per chunk)
-        assert len(gc_calls) >= 2
+        # No gc.collect calls in normal path (cleanup is per-group in exit.py)
+        assert len(gc_calls) == 0
 
-    def test_empty_cache_called_after_chunk(self):
-        """torch.cuda.empty_cache() should be called after chunk when CUDA available."""
+    def test_no_empty_cache_per_chunk_in_normal_path(self):
+        """torch.cuda.empty_cache() should NOT be called per-chunk in normal path."""
         # AC: @memory-management ac-1
         keys = ["k0", "k1"]
         base = {k: torch.randn(4, 4) for k in keys}
@@ -83,8 +88,8 @@ class TestPerChunkCleanup:
                     storage_dtype=torch.float32,
                 )
 
-        # Should have at least 1 empty_cache call
-        assert len(empty_cache_calls) >= 1
+        # No empty_cache calls in normal path
+        assert len(empty_cache_calls) == 0
 
     def test_results_on_cpu_after_cleanup(self):
         """All result tensors should be on CPU after cleanup."""
@@ -167,13 +172,8 @@ class TestBetweenGroupCleanup:
             "layer1.weight": torch.randn(4, 4),
             "layer2.weight": torch.randn(8, 8),  # Different shape = different group
         }
-        set_affected = {
-            "set_a": {"layer1.weight", "layer2.weight"},
-        }
 
-        groups = compile_batch_groups(
-            list(base_state.keys()), base_state, set_affected
-        )
+        groups = compile_batch_groups(list(base_state.keys()), base_state)
 
         # Should have 2 groups due to different shapes
         assert len(groups) == 2
@@ -481,7 +481,7 @@ class TestMemoryManagementIntegration:
     """Integration tests for memory management across the pipeline."""
 
     def test_full_pipeline_cleanup_pattern(self):
-        """Verify the full cleanup pattern through chunked evaluation."""
+        """Verify cleanup pattern: no gc per chunk, results on CPU."""
         # Integration test covering AC-1, AC-4
         keys = ["k0", "k1", "k2", "k3", "k4", "k5"]
         base = {k: torch.randn(8, 8) for k in keys}
@@ -507,8 +507,9 @@ class TestMemoryManagementIntegration:
                 storage_dtype=torch.float32,
             )
 
-        # Should have cleanup after each chunk
-        assert len(gc_calls) >= 3  # At least one per chunk
+        # No gc.collect in normal chunked_evaluation path
+        # (gc.collect runs per-group in exit.py, not per-chunk)
+        assert len(gc_calls) == 0
 
         # All results on CPU
         for tensor in results.values():
