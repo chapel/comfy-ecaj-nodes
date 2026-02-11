@@ -1208,7 +1208,7 @@
   type: task
   spec_ref: "@merge-block-config"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-per-block-control"
@@ -1253,6 +1253,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T04:38:33.183Z
+  closed_reason: "Merged in PR #20. Implemented per-block t_factor support for merge operations with
+    SDXL and Z-Image block classification. AC-1: BLOCK_CONFIG connected to Merge applies per-block
+    t_factor overrides. AC-2: No BLOCK_CONFIG means global t_factor (backwards compatible). 35 tests
+    in test_merge_block_config.py cover block classification and t_factor grouping."
 - _ulid: 01KH4HA493AA51NFWN2NGQA6GA
   slugs:
     - implement-lora-per-block-strength
