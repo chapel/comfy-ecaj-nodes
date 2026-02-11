@@ -139,6 +139,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-11T02:47:20.145Z
+    completed_at: 2026-02-11T02:47:53.320Z
     step_results:
       - step_index: 0
         status: completed
@@ -170,4 +171,11 @@ runs:
         completed_at: 2026-02-11T02:47:53.319Z
         notes: No items to capture - nothing passed the high-confidence threshold. Reflection complete.
     initiated_by: "@claude"
-    completed_at: 2026-02-11T02:47:53.320Z
+  - _ulid: 01KH5AD4B7MSMT0VFW7Y9BTE17
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-11T03:02:36.135Z
+    step_results: []
+    initiated_by: "@claude"
