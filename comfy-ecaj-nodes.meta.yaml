@@ -523,6 +523,20 @@ workflows:
         content: Review ready tasks and inbox items
       - type: action
         content: Start work on chosen task via kspec task start
+  - _ulid: 01KH53VMGSZYW2QG2PQW7PWN99
+    id: task-lifecycle
+    trigger: task-complete
+    description: Complete a task properly with notes and cleanup.
+    steps:
+      - type: action
+        content: Add completion note describing what was done
+      - type: action
+        content: Run kspec task complete @task --reason "summary"
+      - type: check
+        content: Are there uncommitted changes?
+        on_fail: Commit changes with descriptive message
+      - type: action
+        content: Review if task unblocked other work
 conventions:
   - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
     domain: commits
