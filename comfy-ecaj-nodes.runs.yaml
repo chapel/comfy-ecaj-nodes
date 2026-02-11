@@ -6,6 +6,7 @@ runs:
     current_step: 4
     total_steps: 5
     started_at: 2026-02-10T22:52:33.690Z
+    completed_at: 2026-02-11T00:04:51.381Z
     step_results:
       - step_index: 0
         status: completed
@@ -33,4 +34,11 @@ runs:
         notes: Import path chosen - 3 new specs (comfyui-mocking, node-graph-testing, ci-pipeline) plus
           restructured parent
     initiated_by: "@claude"
-    completed_at: 2026-02-11T00:04:51.381Z
+  - _ulid: 01KH507SWV0N6P4XDYGWX6JE1X
+    workflow_ref: "@01KH4W2EVRR14Z55XSGY646P3C"
+    status: active
+    current_step: 0
+    total_steps: 8
+    started_at: 2026-02-11T00:04:55.835Z
+    step_results: []
+    initiated_by: "@claude"
