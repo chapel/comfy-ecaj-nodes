@@ -461,6 +461,7 @@ runs:
     current_step: 5
     total_steps: 6
     started_at: 2026-02-11T18:04:00.549Z
+    completed_at: 2026-02-11T18:07:36.071Z
     step_results:
       - step_index: 0
         status: completed
@@ -511,4 +512,11 @@ runs:
         notes: "Captured: inbox 01KH6Y5J (mock audit), success observation 01KH6Y5Y (parallel review),
           friction observation 01KH6Y61 (mock-validated bugs). Reflection complete."
     initiated_by: "@claude"
-    completed_at: 2026-02-11T18:07:36.071Z
+  - _ulid: 01KH71PG6HTG4P4KD9FTTZ30RE
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-11T19:08:54.865Z
+    step_results: []
+    initiated_by: "@claude"
