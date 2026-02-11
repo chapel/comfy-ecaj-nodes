@@ -60,6 +60,10 @@ class DeltaSpec:
     w2: torch.Tensor | None = None
     # For conv2d reshape:
     target_shape: tuple | None = None  # original 4D shape if applicable
+    # For QKV slicing (AC: @zimage-loader ac-3):
+    # offset=(start, length) for the slice into fused weight
+    # e.g. q=(0, 3840), k=(3840, 3840), v=(7680, 3840)
+    offset: tuple[int, int] | None = None
 
 
 def compile_batch_groups(
