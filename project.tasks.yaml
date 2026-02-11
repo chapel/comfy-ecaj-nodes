@@ -2130,6 +2130,35 @@
     - correctness
   vcs_refs: []
   created_at: 2026-02-11T20:09:16.470Z
-  notes: []
-  todos: []
   started_at: 2026-02-11T20:12:05.190Z
+  notes:
+    - _ulid: 01KH75H5N9WHDQ37Z3CJ3XMRP5
+      created_at: 2026-02-11T20:15:54.537Z
+      author: "@claude"
+      content: >-
+        Root cause confirmed from ComfyUI source (../ComfyUI/comfy/model_patcher.py):
+
+        1. model_state_dict() (line 604) just returns self.model.state_dict() — no backup check.
+        use_ejected() only handles module injections, not weight patches.
+
+        2. load_models_gpu() (line 672-676) detaches old clones with unpatch_all=False — model stays
+        patched in-place.
+
+        3. patch_weight_to_device() (line 621) backs up the CURRENT weight (potentially already
+        patched), not the original.
+
+
+        Fix: added _get_clean_base_state() lazy cache in nodes/exit.py. Caches clean base weights
+        per-key on first access (when model is guaranteed unpatched). Subsequent runs use cached
+        values. Only caches affected keys (not full model) — ~5-10% CPU RAM overhead for typical
+        merges, not double.
+
+
+        Also fixed install_merged_patches() to accept storage_dtype param instead of calling
+        model_state_dict() again.
+
+
+        500 tests pass, ruff clean. 6 regression tests added for the cache. Still needs real ComfyUI
+        testing to confirm the fix works end-to-end.
+      supersedes: null
+  todos: []
