@@ -971,7 +971,7 @@
   type: task
   spec_ref: "@zimage-loader"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@implement-architecture-specific-lora-loaders"
