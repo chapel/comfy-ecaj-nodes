@@ -1,18 +1,17 @@
 """ComfyUI ECAJ Nodes — Advanced model merging with WIDEN."""
 
-try:
-    from .nodes.block_config_sdxl import WIDENBlockConfigSDXLNode  # noqa: F401
-    from .nodes.block_config_zimage import WIDENBlockConfigZImageNode  # noqa: F401
-    from .nodes.compose import WIDENComposeNode  # noqa: F401
-    from .nodes.entry import WIDENEntryNode  # noqa: F401
-    from .nodes.exit import WIDENExitNode  # noqa: F401
-    from .nodes.lora import WIDENLoRANode  # noqa: F401
-    from .nodes.merge import WIDENMergeNode  # noqa: F401
-except ImportError:
-    # Running outside ComfyUI (e.g., pytest) — tests import nodes directly
-    # via absolute imports with --import-mode=importlib.
-    pass
-else:
+# Guard on __package__: relative imports require a package context.
+# In ComfyUI, this is always set (errors propagate immediately).
+# In pytest, __init__.py is loaded standalone — skip registration.
+if __package__:
+    from .nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
+    from .nodes.block_config_zimage import WIDENBlockConfigZImageNode
+    from .nodes.compose import WIDENComposeNode
+    from .nodes.entry import WIDENEntryNode
+    from .nodes.exit import WIDENExitNode
+    from .nodes.lora import WIDENLoRANode
+    from .nodes.merge import WIDENMergeNode
+
     NODE_CLASS_MAPPINGS = {
         "WIDENEntry": WIDENEntryNode,
         "WIDENLoRA": WIDENLoRANode,

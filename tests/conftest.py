@@ -9,7 +9,8 @@ import pytest
 import torch
 
 from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
-from nodes.exit import _DIFFUSION_PREFIX
+
+_DIFFUSION_PREFIX = "diffusion_model."
 
 # ---------------------------------------------------------------------------
 # MockModelPatcher — faithful stand-in for comfy.model_patcher.ModelPatcher
@@ -229,6 +230,10 @@ def _mock_comfyui_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     folder_paths_mod = _make_stub_module("folder_paths")
     # Mock get_filename_list for LoRA node dropdown (AC-3 @lora-node)
     folder_paths_mod.get_filename_list = lambda folder: ["test_lora.safetensors"]
+    # Mock get_full_path — returns None (no real directories in test env)
+    folder_paths_mod.get_full_path = lambda folder, filename: None
+    # Mock get_folder_paths — returns empty list
+    folder_paths_mod.get_folder_paths = lambda folder: []
 
     stubs = {
         "folder_paths": folder_paths_mod,

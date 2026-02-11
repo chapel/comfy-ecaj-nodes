@@ -13,6 +13,7 @@ AC: @exit-recipe-analysis ac-1 through ac-6
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -126,33 +127,43 @@ def _collect_lora_sets(node: RecipeNode) -> dict[int, RecipeLoRA]:
     return lora_sets
 
 
-def _resolve_lora_path(lora_name: str, lora_base_path: str | None = None) -> str:
+def _resolve_lora_path(
+    lora_name: str,
+    lora_path_resolver: Callable[[str], str | None] | None = None,
+) -> str:
     """Resolve a LoRA name to its full path.
 
     Args:
-        lora_name: LoRA filename (from RecipeLoRA)
-        lora_base_path: Base directory for LoRA files (for tests, or runtime)
+        lora_name: LoRA filename (from RecipeLoRA), may include subdirectories
+            (e.g. "z-image/Mystic.safetensors")
+        lora_path_resolver: Callable that takes a LoRA name and returns the
+            full path, or None if not found. In production, this wraps
+            folder_paths.get_full_path("loras", name), which searches all
+            registered LoRA directories. This keeps the lib module pure
+            (no ComfyUI imports).
 
     Returns:
         Full path to LoRA file
-
-    Note:
-        In production, the caller (Exit node) should pass a lora_base_path
-        obtained from folder_paths.get_folder_paths("loras")[0]. This keeps
-        the lib module pure (no ComfyUI imports).
     """
-    if lora_base_path:
-        full_path = os.path.join(lora_base_path, lora_name)
-    else:
-        # No base path - assume lora_name is already a full path
-        full_path = lora_name
+    if lora_path_resolver is not None:
+        resolved = lora_path_resolver(lora_name)
+        if resolved is not None:
+            return resolved
+        # Resolver was provided but couldn't find the file — fail immediately
+        # rather than falling back to the raw name (which could accidentally
+        # match a file in CWD)
+        raise FileNotFoundError(
+            f"LoRA file not found: {lora_name} "
+            f"(resolver could not locate file in any registered directory)"
+        )
 
-    return full_path
+    # No resolver — assume lora_name is already a full path
+    return lora_name
 
 
 def analyze_recipe(
     node: RecipeNode,
-    lora_base_path: str | None = None,
+    lora_path_resolver: Callable[[str], str | None] | None = None,
 ) -> AnalysisResult:
     """Analyze a recipe tree and load all LoRA files.
 
@@ -166,7 +177,10 @@ def analyze_recipe(
 
     Args:
         node: Root recipe node (typically RecipeMerge)
-        lora_base_path: Base path for LoRA files (for testing)
+        lora_path_resolver: Callable that resolves a LoRA name to its full
+            filesystem path, or None if not found. In production, wraps
+            folder_paths.get_full_path("loras", name). For testing, use
+            lambda name: os.path.join(test_dir, name).
 
     Returns:
         AnalysisResult with all analysis data
@@ -198,7 +212,7 @@ def analyze_recipe(
             strength = lora_spec["strength"]
 
             # Resolve path (AC-6: raises FileNotFoundError if missing)
-            full_path = _resolve_lora_path(lora_name, lora_base_path)
+            full_path = _resolve_lora_path(lora_name, lora_path_resolver)
             if not os.path.exists(full_path):
                 raise FileNotFoundError(
                     f"LoRA file not found: {lora_name} "

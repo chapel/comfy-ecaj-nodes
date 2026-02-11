@@ -513,9 +513,9 @@ class TestDownstreamLoraCompatibility:
         # AC: @exit-node ac-7
         from nodes.exit import install_merged_patches
 
-        # Install some merged patches
+        # Install some merged patches (keys already have diffusion_model. prefix)
         merged_state = {
-            "input_blocks.0.0.weight": torch.randn(4, 4),
+            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
         }
         result = install_merged_patches(mock_model_patcher, merged_state)
 
@@ -536,11 +536,11 @@ class TestDownstreamLoraCompatibility:
         # AC: @exit-node ac-7
         from nodes.exit import install_merged_patches
 
-        merged_state = {"input_blocks.0.0.weight": torch.randn(4, 4)}
+        key = "diffusion_model.input_blocks.0.0.weight"
+        merged_state = {key: torch.randn(4, 4)}
         result = install_merged_patches(mock_model_patcher, merged_state)
 
         # Check patch format
-        key = "diffusion_model.input_blocks.0.0.weight"
         patch_entry = result.patches[key][0]
 
         # Format: (strength_patch, (patch_type, tensor), strength_model, None, None)
@@ -573,12 +573,12 @@ class TestBf16DtypeMatching:
         for k in patcher._state_dict:
             patcher._state_dict[k] = patcher._state_dict[k].to(torch.bfloat16)
 
-        # Merged state in fp32 (computation dtype)
-        merged_state = {"input_blocks.0.0.weight": torch.randn(4, 4, dtype=torch.float32)}
+        # Merged state in fp32 (computation dtype), prefixed keys
+        key = "diffusion_model.input_blocks.0.0.weight"
+        merged_state = {key: torch.randn(4, 4, dtype=torch.float32)}
         result = install_merged_patches(patcher, merged_state)
 
         # Patch should be bf16
-        key = "diffusion_model.input_blocks.0.0.weight"
         patch_tensor = result.patches[key][0][1][1]
         assert patch_tensor.dtype == torch.bfloat16
 
@@ -593,10 +593,9 @@ class TestBf16DtypeMatching:
         for k in patcher._state_dict:
             patcher._state_dict[k] = patcher._state_dict[k].to(torch.float16)
 
-        merged_state = {"input_blocks.0.0.weight": torch.randn(4, 4, dtype=torch.float32)}
-        result = install_merged_patches(patcher, merged_state)
-
         key = "diffusion_model.input_blocks.0.0.weight"
+        merged_state = {key: torch.randn(4, 4, dtype=torch.float32)}
+        result = install_merged_patches(patcher, merged_state)
         patch_tensor = result.patches[key][0][1][1]
         assert patch_tensor.dtype == torch.float16
 

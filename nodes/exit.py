@@ -5,6 +5,7 @@ from __future__ import annotations
 import gc
 import hashlib
 import os
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 import torch
@@ -21,9 +22,6 @@ from ..lib.widen import WIDEN, WIDENConfig
 
 if TYPE_CHECKING:
     pass
-
-# Namespace prefix for diffusion model keys in ComfyUI ModelPatcher
-_DIFFUSION_PREFIX = "diffusion_model."
 
 
 def _validate_recipe_tree(node: RecipeNode, path: str = "root") -> None:
@@ -97,14 +95,14 @@ def install_merged_patches(
     """Install merged tensors as set patches on a cloned ModelPatcher.
 
     AC: @exit-patch-install ac-1 — clone model, add as set patches
-    AC: @exit-patch-install ac-2 — prefix keys with diffusion_model.
+    AC: @exit-patch-install ac-2 — keys use diffusion_model. prefix
     AC: @exit-patch-install ac-3 — tensors transferred to CPU
     AC: @exit-patch-install ac-4 — tensors match base model storage dtype
 
     Args:
         model_patcher: Original ComfyUI ModelPatcher
         merged_state: Dict of {key: merged_tensor} from batched evaluation
-            Keys should NOT have diffusion_model. prefix
+            Keys already have diffusion_model. prefix (from LoRA loaders)
 
     Returns:
         Cloned ModelPatcher with merged weights installed as set patches
@@ -117,13 +115,12 @@ def install_merged_patches(
     cloned = model_patcher.clone()  # type: ignore[attr-defined]
 
     # Build set patches: transfer to CPU (AC-3), cast to base dtype (AC-4)
-    # Prefix with diffusion_model. (AC-2)
+    # Keys already have diffusion_model. prefix (AC-2)
     patches = {}
     for key, tensor in merged_state.items():
         cpu_tensor = tensor.cpu().to(base_dtype)
-        prefixed_key = f"{_DIFFUSION_PREFIX}{key}"
         # "set" patch format: replaces the weight entirely
-        patches[prefixed_key] = ("set", cpu_tensor)
+        patches[key] = ("set", cpu_tensor)
 
     # Install patches (AC-1)
     cloned.add_patches(patches, strength_patch=1.0)  # type: ignore[attr-defined]
@@ -163,7 +160,10 @@ def _collect_lora_paths(node: RecipeNode) -> list[str]:
     return paths
 
 
-def _compute_recipe_hash(widen: RecipeNode, lora_base_path: str | None = None) -> str:
+def _compute_recipe_hash(
+    widen: RecipeNode,
+    lora_path_resolver: Callable[[str], str | None] | None = None,
+) -> str:
     """Compute a hash of the recipe based on LoRA file paths and mtimes.
 
     AC: @exit-patch-install ac-5 — identical hash when no LoRA changes
@@ -171,7 +171,9 @@ def _compute_recipe_hash(widen: RecipeNode, lora_base_path: str | None = None) -
 
     Args:
         widen: Recipe tree root
-        lora_base_path: Base path for LoRA files (for tests, optional)
+        lora_path_resolver: Callable that resolves a LoRA name to its full
+            filesystem path, or None if not found. Same resolver as
+            used by analyze_recipe.
 
     Returns:
         Hex digest of SHA-256 hash
@@ -185,11 +187,12 @@ def _compute_recipe_hash(widen: RecipeNode, lora_base_path: str | None = None) -
     hasher = hashlib.sha256()
 
     for path in paths:
-        # Resolve full path if base path provided
-        if lora_base_path:
-            full_path = os.path.join(lora_base_path, path)
-        else:
-            full_path = path
+        # Resolve full path using resolver if available
+        full_path = path
+        if lora_path_resolver is not None:
+            resolved = lora_path_resolver(path)
+            if resolved is not None:
+                full_path = resolved
 
         try:
             stat = os.stat(full_path)
@@ -204,6 +207,21 @@ def _compute_recipe_hash(widen: RecipeNode, lora_base_path: str | None = None) -
         hasher.update(f"{path}|{mtime}|{size}\n".encode())
 
     return hasher.hexdigest()
+
+
+def _build_lora_resolver() -> Callable[[str], str | None]:
+    """Build a LoRA path resolver using ComfyUI's folder_paths.
+
+    Returns a callable that resolves LoRA names (including nested paths like
+    "z-image/Mystic.safetensors") to their full filesystem path by searching
+    all registered LoRA directories.
+    """
+    import folder_paths
+
+    def resolver(lora_name: str) -> str | None:
+        return folder_paths.get_full_path("loras", lora_name)
+
+    return resolver
 
 
 class WIDENExitNode:
@@ -233,7 +251,7 @@ class WIDENExitNode:
         Returns:
             Hash string for ComfyUI caching
         """
-        return _compute_recipe_hash(widen)
+        return _compute_recipe_hash(widen, lora_path_resolver=_build_lora_resolver())
 
     def execute(self, widen: RecipeNode) -> tuple[object]:
         """Execute the recipe tree and return merged MODEL.
@@ -261,7 +279,6 @@ class WIDENExitNode:
 
         # Quick check: must end in RecipeMerge for actual merging
         if isinstance(widen, RecipeBase):
-            # No LoRAs to apply - return clone of base model
             return (widen.model_patcher.clone(),)  # type: ignore[attr-defined]
 
         if not isinstance(widen, RecipeMerge):
@@ -271,16 +288,10 @@ class WIDENExitNode:
             )
 
         # Phase 1: Analyze recipe tree (loads LoRAs, builds set map)
-        # Get LoRA base path from folder_paths if available
-        try:
-            import folder_paths
+        # Build resolver that searches all ComfyUI LoRA directories
+        lora_path_resolver = _build_lora_resolver()
 
-            lora_paths = folder_paths.get_folder_paths("loras")
-            lora_base_path = lora_paths[0] if lora_paths else None
-        except (ImportError, AttributeError, IndexError):
-            lora_base_path = None
-
-        analysis = analyze_recipe(widen, lora_base_path=lora_base_path)
+        analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
 
         try:
             model_patcher = analysis.model_patcher
@@ -289,8 +300,9 @@ class WIDENExitNode:
             affected_keys = analysis.affected_keys
             arch = analysis.arch
 
-            # Get base model state dict (unprefixed keys)
-            base_state = model_patcher.model.diffusion_model.state_dict()  # type: ignore[attr-defined]
+            # Get base model state dict (prefixed keys: diffusion_model.X.weight)
+            # Must match the key format produced by LoRA loaders
+            base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
 
             # Determine storage dtype from base model
             first_tensor = next(iter(base_state.values()))
