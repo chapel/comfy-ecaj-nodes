@@ -47,14 +47,6 @@ inbox:
       - hardening
       - review-finding
     added_by: "@claude"
-  - _ulid: 01KH5KJR8RA2V8708PX87QF0CG
-    text: WIDEN ranking_strategy and ranker.strategy can drift if mutated after init - scalar passes
-      self.ranking_strategy while batched uses ranker defaults. Use one source of truth.
-    created_at: 2026-02-11T05:42:57.561Z
-    tags:
-      - correctness
-      - review-finding
-    added_by: "@claude"
   - _ulid: 01KH5PYZNJ5RJH45ZKT73KJXMH
     text: "gpu_ops.py: _compute_deltas strips spec identity - resolve metadata via next(s for s in group
       if s.key_index == key_index) is O(n^2) and couples to key_index uniqueness. Consider returning
