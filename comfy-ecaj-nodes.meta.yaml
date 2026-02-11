@@ -844,4 +844,14 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KH71QQWF7YPS5BVN3MNKB401
+    type: success
+    content: "Reference implementation comparison is highly effective for debugging correctness issues.
+      When output is wrong, diff the code path against the known-good reference (merge-router) step
+      by step — traces through real framework code (ComfyUI calculate_weight) rather than mocks.
+      Found two bugs in one session this way: tuple format and alpha reading."
+    created_at: 2026-02-11T19:09:35.503Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
