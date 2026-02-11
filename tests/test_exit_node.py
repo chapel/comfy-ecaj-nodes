@@ -543,10 +543,11 @@ class TestDownstreamLoraCompatibility:
         # Check patch format
         patch_entry = result.patches[key][0]
 
-        # Format: (strength_patch, (patch_type, tensor), strength_model, None, None)
+        # Format: (strength_patch, ("set", (tensor,)), strength_model, None, None)
         assert patch_entry[0] == 1.0  # strength_patch
         assert patch_entry[1][0] == "set"  # patch type
-        assert isinstance(patch_entry[1][1], torch.Tensor)  # tensor
+        assert isinstance(patch_entry[1][1], tuple)  # value wrapped in tuple
+        assert isinstance(patch_entry[1][1][0], torch.Tensor)  # actual tensor
 
 
 # =============================================================================
@@ -579,7 +580,7 @@ class TestBf16DtypeMatching:
         result = install_merged_patches(patcher, merged_state)
 
         # Patch should be bf16
-        patch_tensor = result.patches[key][0][1][1]
+        patch_tensor = result.patches[key][0][1][1][0]
         assert patch_tensor.dtype == torch.bfloat16
 
     def test_fp16_base_produces_fp16_patches(self):
@@ -596,7 +597,7 @@ class TestBf16DtypeMatching:
         key = "diffusion_model.input_blocks.0.0.weight"
         merged_state = {key: torch.randn(4, 4, dtype=torch.float32)}
         result = install_merged_patches(patcher, merged_state)
-        patch_tensor = result.patches[key][0][1][1]
+        patch_tensor = result.patches[key][0][1][1][0]
         assert patch_tensor.dtype == torch.float16
 
 

@@ -196,15 +196,32 @@ class SDXLLoader(LoRALoader):
 
         # Collect up/down pairs keyed by layer path
         layer_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
+        # Collect alpha values keyed by LoRA base path
+        alpha_values: dict[str, float] = {}
+        # Map from model_key to LoRA base path (for alpha lookup)
+        lora_base_paths: dict[str, str] = {}
 
         with safe_open(path, framework="pt", device="cpu") as f:
             for lora_key in f.keys():
+                # Check for alpha keys (e.g. "lora_unet_input_blocks_0_0.alpha")
+                if lora_key.endswith(".alpha"):
+                    alpha_tensor = f.get_tensor(lora_key)
+                    if alpha_tensor.numel() == 1:
+                        alpha_values[lora_key[: -len(".alpha")]] = alpha_tensor.item()
+                    continue
+
                 model_key, direction, _ = _parse_lora_key(lora_key)
                 if model_key is None:
                     continue
 
                 tensor = f.get_tensor(lora_key)
                 layer_tensors[model_key][direction] = tensor
+
+                # Extract LoRA base path for alpha lookup
+                # e.g. "lora_unet_input_blocks_0_0.lora_up.weight"
+                #    → "lora_unet_input_blocks_0_0"
+                lora_base = lora_key.rsplit(".lora_", 1)[0]
+                lora_base_paths[model_key] = lora_base
 
         # Build delta specs for complete up/down pairs
         for model_key, tensors in layer_tensors.items():
@@ -215,9 +232,12 @@ class SDXLLoader(LoRALoader):
             down = tensors["down"]
 
             # Compute scale: strength * alpha / rank
-            # Alpha defaults to rank if not specified in the file
+            # Alpha is read from the file if available, otherwise defaults to rank
             rank = down.shape[0]
-            alpha = rank  # Default; could read from file metadata if present
+            alpha = float(rank)
+            lora_base = lora_base_paths.get(model_key)
+            if lora_base is not None and lora_base in alpha_values:
+                alpha = alpha_values[lora_base]
             scale = strength * alpha / rank
 
             self._lora_data_by_set[effective_set_id][model_key].append((up, down, scale))

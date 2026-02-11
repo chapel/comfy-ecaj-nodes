@@ -255,23 +255,46 @@ class ZImageLoader(LoRALoader):
         layer_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
         # Track which keys have QKV components
         qkv_info: dict[str, str | None] = {}
+        # Collect alpha values keyed by LoRA base path (before .lora_A/.lora_B)
+        alpha_values: dict[str, float] = {}
+        # Map from our layer_key to the LoRA base path (for alpha lookup)
+        lora_base_paths: dict[str, str] = {}
 
         with safe_open(path, framework="pt", device="cpu") as f:
             for lora_key in f.keys():
+                # Check for alpha keys (e.g. "transformer.layers.0.attention.to_q.alpha")
+                if lora_key.endswith(".alpha"):
+                    alpha_tensor = f.get_tensor(lora_key)
+                    if alpha_tensor.numel() == 1:
+                        alpha_values[lora_key[: -len(".alpha")]] = alpha_tensor.item()
+                    continue
+
                 model_key, direction, qkv_comp = _parse_zimage_lora_key(lora_key)
                 if model_key is None:
                     continue
 
                 tensor = f.get_tensor(lora_key)
 
+                # Extract LoRA base path for alpha lookup
+                # e.g. "transformer.layers.0.attention.to_q.lora_A.weight"
+                #    → "transformer.layers.0.attention.to_q"
+                lora_base = lora_key
+                for suffix in (".lora_A.weight", ".lora_B.weight",
+                               ".lora_down.weight", ".lora_up.weight"):
+                    if lora_base.endswith(suffix):
+                        lora_base = lora_base[: -len(suffix)]
+                        break
+
                 # For QKV, we need to track each component separately
                 if qkv_comp is not None:
                     qkv_layer_key = f"{model_key}:{qkv_comp}"
                     layer_tensors[qkv_layer_key][direction] = tensor
                     qkv_info[qkv_layer_key] = qkv_comp
+                    lora_base_paths[qkv_layer_key] = lora_base
                 else:
                     layer_tensors[model_key][direction] = tensor
                     qkv_info[model_key] = None
+                    lora_base_paths[model_key] = lora_base
 
         # Build delta data for complete up/down pairs
         for layer_key, tensors in layer_tensors.items():
@@ -282,8 +305,12 @@ class ZImageLoader(LoRALoader):
             down = tensors["down"]
 
             # Compute scale: strength * alpha / rank
+            # Alpha is read from the file if available, otherwise defaults to rank
             rank = down.shape[0]
-            alpha = rank  # Default
+            alpha = float(rank)
+            lora_base = lora_base_paths.get(layer_key)
+            if lora_base is not None and lora_base in alpha_values:
+                alpha = alpha_values[lora_base]
             scale = strength * alpha / rank
 
             qkv_comp = qkv_info.get(layer_key)

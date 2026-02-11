@@ -120,7 +120,8 @@ def install_merged_patches(
     for key, tensor in merged_state.items():
         cpu_tensor = tensor.cpu().to(base_dtype)
         # "set" patch format: replaces the weight entirely
-        patches[key] = ("set", cpu_tensor)
+        # ComfyUI expects value wrapped in a tuple: ("set", (tensor,))
+        patches[key] = ("set", (cpu_tensor,))
 
     # Install patches (AC-1)
     cloned.add_patches(patches, strength_patch=1.0)  # type: ignore[attr-defined]
