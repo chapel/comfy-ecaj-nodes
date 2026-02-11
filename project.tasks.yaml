@@ -819,6 +819,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.316Z
+  started_at: 2026-02-11T03:18:49.921Z
   notes:
     - _ulid: 01KH4HA47M869P70TBAPP53GVA
       created_at: 2026-02-10T19:44:03.316Z
@@ -836,9 +837,19 @@
         like {"sdxl": SDXLLoader, "zimage": ZImageLoader}. For AC-3 pluggable design:
         use registry pattern or just the dict -- adding new arch means adding one entry.
         Files: lib/lora/base.py, lib/lora/__init__.py (registry).
+    - _ulid: 01KH5BKS82R40BARJP5B62RVM4
+      created_at: 2026-02-11T03:23:42.722Z
+      author: "@claude"
+      content: "Implemented architecture-specific LoRA loaders with pluggable registry design. Created
+        LoRALoader ABC in lib/lora/base.py with load(), affected_keys, get_delta_specs(), cleanup()
+        interface. Implemented SDXLLoader for kohya/A1111 LoRA format with key mapping. Implemented
+        ZImageLoader with QKV fusing support (to_q/to_k/to_v → fused qkv.weight). Created
+        LOADER_REGISTRY in lib/lora/__init__.py for pluggable architecture selection. All 4 ACs
+        covered by 21 tests: AC-1 (architecture selection/key mapping), AC-2 (DeltaSpec production),
+        AC-3 (pluggable design), AC-4 (interface contract). All 236 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T03:18:49.921Z
 - _ulid: 01KH4HA47ST02A5Y0G5ZABFP2D
   slugs:
     - implement-sdxl-lora-loader
