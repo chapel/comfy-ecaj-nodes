@@ -262,6 +262,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-10T19:44:03.267Z
+  started_at: 2026-02-11T02:44:49.090Z
   notes:
     - _ulid: 01KH4HA463N9QDME4T6H5MEV84
       created_at: 2026-02-10T19:44:03.267Z
@@ -289,9 +290,18 @@
         loader is available yet. Supported: sdxl, zimage.' This way the detection code is
         future-proof but the error path is explicit."
       supersedes: null
+    - _ulid: 01KH59FM8G8R54CKHG8BKP0BYQ
+      created_at: 2026-02-11T02:46:29.393Z
+      author: "@claude"
+      content: "Implemented Entry Node with architecture detection. Created detect_architecture() function
+        with pattern matching for SDXL (input_blocks/middle_block/output_blocks), Z-Image (layers +
+        noise_refiner), Flux (double_blocks), and Qwen (60+ transformer_blocks). Flux/Qwen are
+        detected but raise UnsupportedArchitectureError. Added 17 tests covering all 5 ACs: AC-1
+        (returns RecipeBase), AC-2 (SDXL detection), AC-3 (Z-Image detection), AC-4 (no GPU/tensor
+        copy), AC-5 (unsupported arch errors). All 107 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-11T02:44:49.090Z
 - _ulid: 01KH4HA46729EXG3GT8QCW2F44
   slugs:
     - implement-lora-node
