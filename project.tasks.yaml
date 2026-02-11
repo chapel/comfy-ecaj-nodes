@@ -1557,78 +1557,6 @@
   created_at: 2026-02-11T05:41:58.745Z
   notes: []
   todos: []
-- _ulid: 01KH5KHCMFBHMXAWCYDATFDXX7
-  slugs:
-    - split-executor
-  title: Split executor.py into focused modules
-  type: task
-  description: >-
-    STRUCTURAL: lib/executor.py is 883 lines mixing 4 distinct concerns with high cyclomatic
-    complexity. evaluate_recipe alone is ~230 lines with nested closures. Codex confirmed the
-    coupling is hiding correctness bugs.
-
-
-    SPLIT INTO:
-
-    1. lib/batch_groups.py - OpSignature, compile_batch_groups
-
-    2. lib/gpu_ops.py - DeltaSpec, apply_lora_batch_gpu, chunked_evaluation, compute_batch_size,
-    chunked
-
-    3. lib/per_block.py - _apply_per_block_lora_strength, _get_block_t_factors,
-    _apply_widen_filter_per_block, _apply_widen_merge_per_block
-
-    4. lib/recipe_eval.py - evaluate_recipe decomposed with EvalContext dataclass and explicit
-    helpers (_eval_base_for_merge, _resolve_backbone, _eval_target, _apply_merge_result,
-    _apply_filter, _apply_merge)
-
-    5. lib/executor.py - keep as compatibility facade/re-export
-
-
-    MIGRATION ORDER (incremental, safe):
-
-    1. Move data types first (DeltaSpec, OpSignature), re-export from executor.py
-
-    2. Move pure helpers (compile_batch_groups, compute_batch_size, chunked)
-
-    3. Move apply_lora_batch_gpu + tests
-
-    4. Move per-block functions
-
-    5. Move evaluate_recipe last with EvalContext decomposition
-
-
-    ADDITIONAL FIXES DURING SPLIT:
-
-    - Deduplicate apply_lora_batch_gpu single-vs-batched matmul (4 paths -> 2)
-
-    - Fix QKV: use DeltaSpec.offset for slice placement instead of hardcoded hidden//3
-
-    - Fix type contract: _eval_node returns Tensor | list[Tensor], make explicit
-
-    - Guard all torch.cuda.empty_cache() with torch.cuda.is_available()
-
-    - Fix backbone override: evaluate node.backbone subtree or fail loudly
-
-
-    VERIFICATION: All 467 tests pass after each step, ruff clean, new tests for QKV offset and
-    backbone
-  spec_ref: null
-  meta_ref: null
-  plan_ref: null
-  status: pending
-  blocked_by: []
-  depends_on:
-    - 01KH5KGM
-  context: []
-  priority: 2
-  tags:
-    - refactor
-    - review-finding
-  vcs_refs: []
-  created_at: 2026-02-11T05:42:12.878Z
-  notes: []
-  todos: []
 - _ulid: 01KH5KHTVK03VYJGAPV28SYJB0
   slugs:
     - fix-test-quality
@@ -1748,5 +1676,77 @@
     - review-finding
   vcs_refs: []
   created_at: 2026-02-11T05:42:34.804Z
+  notes: []
+  todos: []
+- title: Split executor.py into focused modules
+  description: >-
+    STRUCTURAL: lib/executor.py is 883 lines mixing 4 distinct concerns with high cyclomatic
+    complexity. evaluate_recipe alone is ~230 lines with nested closures. Codex confirmed the
+    coupling is hiding correctness bugs.
+
+
+    SPLIT INTO:
+
+    1. lib/batch_groups.py - OpSignature, compile_batch_groups
+
+    2. lib/gpu_ops.py - DeltaSpec, apply_lora_batch_gpu, chunked_evaluation, compute_batch_size,
+    chunked
+
+    3. lib/per_block.py - _apply_per_block_lora_strength, _get_block_t_factors,
+    _apply_widen_filter_per_block, _apply_widen_merge_per_block
+
+    4. lib/recipe_eval.py - evaluate_recipe decomposed with EvalContext dataclass and explicit
+    helpers (_eval_base_for_merge, _resolve_backbone, _eval_target, _apply_merge_result,
+    _apply_filter, _apply_merge)
+
+    5. lib/executor.py - keep as compatibility facade/re-export
+
+
+    MIGRATION ORDER (incremental, safe):
+
+    1. Move data types first (DeltaSpec, OpSignature), re-export from executor.py
+
+    2. Move pure helpers (compile_batch_groups, compute_batch_size, chunked)
+
+    3. Move apply_lora_batch_gpu + tests
+
+    4. Move per-block functions
+
+    5. Move evaluate_recipe last with EvalContext decomposition
+
+
+    ADDITIONAL FIXES DURING SPLIT:
+
+    - Deduplicate apply_lora_batch_gpu single-vs-batched matmul (4 paths -> 2)
+
+    - Fix QKV: use DeltaSpec.offset for slice placement instead of hardcoded hidden//3
+
+    - Fix type contract: _eval_node returns Tensor | list[Tensor], make explicit
+
+    - Guard all torch.cuda.empty_cache() with torch.cuda.is_available()
+
+    - Fix backbone override: evaluate node.backbone subtree or fail loudly
+
+
+    VERIFICATION: All 467 tests pass after each step, ruff clean, new tests for QKV offset and
+    backbone
+  type: task
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 2
+  slugs:
+    - split-executor
+  tags:
+    - refactor
+    - review-finding
+  depends_on:
+    - 01KH5KGM
+  _ulid: 01KH5KMG04RARQCWASARVXM7SN
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-11T05:43:54.628Z
   notes: []
   todos: []
