@@ -561,3 +561,222 @@ class TestEdgeCases:
 
             assert result.shape == backbone.shape, f"{method} should preserve shape"
             assert not result.isnan().any(), f"{method} should not produce NaN"
+
+
+# ---------------------------------------------------------------------------
+# Batched parity fix tests (@fix-batched-parity)
+# ---------------------------------------------------------------------------
+
+
+class TestBatchedParityFix:
+    """Tests for per-sample flat mask fix in filter_delta_batched.
+
+    AC: @fix-batched-parity ac-1
+    """
+
+    def test_mixed_flat_nonflat_1d_batch_flat_item_passthrough(self):
+        """Flat item in mixed batch must match scalar passthrough (unchanged).
+
+        Reproduction case: batch item 0 is constant nonzero delta (flat variance),
+        batch item 1 has non-flat delta. Batched output for item 0 should match
+        scalar filter_delta on item 0 (passthrough unchanged).
+
+        # AC: @fix-batched-parity ac-1
+        """
+        widen = WIDEN(WIDENConfig(t_factor=1.0))
+
+        # Item 0: constant nonzero delta (flat variance -> should passthrough)
+        backbone_0 = torch.zeros(32)
+        delta_0 = torch.ones(32) * 0.5  # Flat: all elements equal
+        lora_0 = backbone_0 + delta_0
+
+        # Item 1: non-flat delta (varied importance, unique values to avoid
+        # tie-breaking differences between scalar/batched argsort)
+        backbone_1 = torch.zeros(32)
+        delta_1 = torch.linspace(0.01, 1.0, 32)  # All unique values
+        lora_1 = backbone_1 + delta_1
+
+        # Scalar calls (ground truth)
+        scalar_0 = widen.filter_delta(lora_0, backbone_0)
+        scalar_1 = widen.filter_delta(lora_1, backbone_1)
+
+        # Batched call
+        backbone_batch = torch.stack([backbone_0, backbone_1])
+        lora_batch = torch.stack([lora_0, lora_1])
+        batched_result = widen.filter_delta_batched(lora_batch, backbone_batch)
+
+        # Item 0 (flat) should match scalar exactly: passthrough
+        assert torch.allclose(batched_result[0], scalar_0, atol=1e-6), (
+            f"Flat batch item should match scalar passthrough.\n"
+            f"Batched: {batched_result[0][:8]}\n"
+            f"Scalar:  {scalar_0[:8]}"
+        )
+
+        # Item 1 (non-flat) should match scalar
+        assert torch.allclose(batched_result[1], scalar_1, atol=1e-6), (
+            f"Non-flat batch item should match scalar.\n"
+            f"Batched: {batched_result[1][:8]}\n"
+            f"Scalar:  {scalar_1[:8]}"
+        )
+
+    def test_mixed_flat_nonflat_1d_flat_item_not_attenuated(self):
+        """Flat item in mixed batch must NOT be attenuated by ranking.
+
+        This is the core bug reproduction: without the fix, a flat item in a
+        mixed batch would go through ranking/masking and get attenuated, while
+        scalar filter_delta would passthrough unchanged.
+
+        # AC: @fix-batched-parity ac-1
+        """
+        widen = WIDEN(WIDENConfig(t_factor=1.0))
+
+        # Item 0: constant nonzero delta (flat variance -> should passthrough)
+        backbone_0 = torch.zeros(32)
+        delta_0 = torch.ones(32) * 0.5
+        lora_0 = backbone_0 + delta_0
+
+        # Item 1: non-flat delta
+        backbone_1 = torch.zeros(32)
+        delta_1 = torch.zeros(32)
+        delta_1[:4] = 1.0
+        delta_1[4:] = 0.01
+        lora_1 = backbone_1 + delta_1
+
+        # Batched call
+        backbone_batch = torch.stack([backbone_0, backbone_1])
+        lora_batch = torch.stack([lora_0, lora_1])
+        batched_result = widen.filter_delta_batched(lora_batch, backbone_batch)
+
+        # Item 0 (flat) should be returned unchanged — identical to lora_0
+        assert torch.allclose(batched_result[0], lora_0, atol=1e-7), (
+            f"Flat item should pass through unchanged in mixed batch.\n"
+            f"Expected: {lora_0[:8]}\n"
+            f"Got:      {batched_result[0][:8]}"
+        )
+
+    def test_mixed_flat_nonflat_2d_batch_matches_scalar(self):
+        """Mixed flat/non-flat 2D batch must match per-item scalar calls.
+
+        # AC: @fix-batched-parity ac-1
+        """
+        torch.manual_seed(42)
+        widen = WIDEN(WIDENConfig(t_factor=1.0))
+
+        # Item 0: constant nonzero delta (flat variance -> should passthrough)
+        backbone_0 = torch.randn(8, 8)
+        delta_0 = torch.ones(8, 8) * 0.3  # Flat: all elements equal
+        lora_0 = backbone_0 + delta_0
+
+        # Item 1: non-flat delta with unique values (avoid tie-breaking issues)
+        backbone_1 = torch.randn(8, 8)
+        delta_1 = torch.randn(8, 8).abs() * 0.5 + 0.01  # All unique positive values
+        lora_1 = backbone_1 + delta_1
+
+        # Scalar calls (ground truth)
+        scalar_0 = widen.filter_delta(lora_0, backbone_0)
+        scalar_1 = widen.filter_delta(lora_1, backbone_1)
+
+        # Batched call
+        backbone_batch = torch.stack([backbone_0, backbone_1])
+        lora_batch = torch.stack([lora_0, lora_1])
+        batched_result = widen.filter_delta_batched(lora_batch, backbone_batch)
+
+        # Item 0 (flat) should match scalar exactly: passthrough
+        assert torch.allclose(batched_result[0], scalar_0, atol=1e-5), (
+            "Flat 2D batch item should match scalar passthrough"
+        )
+
+        # Item 1 (non-flat) should match scalar
+        assert torch.allclose(batched_result[1], scalar_1, atol=1e-5), (
+            "Non-flat 2D batch item should match scalar"
+        )
+
+    def test_all_flat_batch_still_early_exits(self):
+        """If ALL batch items are flat, early exit should still work.
+
+        # AC: @fix-batched-parity ac-1
+        """
+        widen = WIDEN(WIDENConfig(t_factor=1.0))
+
+        backbone = torch.randn(3, 16)
+        # All items have constant delta (flat variance)
+        delta = torch.ones(3, 16) * 0.5
+        lora = backbone + delta
+
+        result = widen.filter_delta_batched(lora, backbone)
+
+        # Should passthrough unchanged
+        assert torch.allclose(result, lora, atol=1e-7), (
+            "All-flat batch should passthrough unchanged"
+        )
+
+
+class TestEmptyWeightsListConsistency:
+    """Tests for empty weights_list consistency between scalar and batched.
+
+    AC: @fix-batched-parity ac-2
+    """
+
+    def test_merge_weights_empty_raises_valueerror(self):
+        """merge_weights with empty weights_list should raise ValueError.
+
+        # AC: @fix-batched-parity ac-2
+        """
+        widen = WIDEN(WIDENConfig(t_factor=1.0))
+        backbone = torch.randn(8, 8)
+
+        with pytest.raises(ValueError, match="weights_list must not be empty"):
+            widen.merge_weights([], backbone)
+
+    def test_merge_weights_batched_empty_raises_valueerror(self):
+        """merge_weights_batched with empty weights_list should raise ValueError.
+
+        # AC: @fix-batched-parity ac-2
+        """
+        widen = WIDEN(WIDENConfig(t_factor=1.0))
+        backbone = torch.randn(4, 8, 8)
+
+        with pytest.raises(ValueError, match="weights_list must not be empty"):
+            widen.merge_weights_batched([], backbone)
+
+    def test_merge_weights_empty_no_backbone_raises_valueerror(self):
+        """merge_weights with empty weights_list and no backbone should raise ValueError.
+
+        # AC: @fix-batched-parity ac-2
+        """
+        widen = WIDEN(WIDENConfig(t_factor=1.0))
+
+        with pytest.raises(ValueError, match="weights_list must not be empty"):
+            widen.merge_weights([])
+
+
+class TestSparsityMethodValidation:
+    """Tests for sparsity_method input validation.
+
+    AC: @fix-batched-parity ac-3
+    """
+
+    def test_invalid_sparsity_method_raises_valueerror(self):
+        """Unknown sparsity_method should raise ValueError, not silently fall back.
+
+        # AC: @fix-batched-parity ac-3
+        """
+        with pytest.raises(ValueError, match="Unknown sparsity_method"):
+            WIDEN(WIDENConfig(sparsity_method="invalid_method"))
+
+    def test_invalid_sparsity_method_error_message_lists_valid_options(self):
+        """Error message should list the valid options.
+
+        # AC: @fix-batched-parity ac-3
+        """
+        with pytest.raises(ValueError, match="softmax.*sparsemax.*entmax"):
+            WIDEN(WIDENConfig(sparsity_method="bogus"))
+
+    def test_valid_sparsity_methods_still_work(self):
+        """Valid sparsity methods should still initialize correctly.
+
+        # AC: @fix-batched-parity ac-3
+        """
+        for method in ["softmax", "sparsemax", "entmax"]:
+            widen = WIDEN(WIDENConfig(sparsity_method=method))
+            assert widen.sparsity_fn is not None, f"{method} should initialize"

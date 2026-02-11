@@ -281,7 +281,10 @@ class WIDEN:
             self._entmax = Entmax(alpha=1.5, dim=0)
             self.sparsity_fn = lambda x, dim: self._entmax(x)
         else:
-            self.sparsity_fn = torch.softmax
+            raise ValueError(
+                f"Unknown sparsity_method: {config.sparsity_method!r}. "
+                f"Valid options: 'softmax', 'sparsemax', 'entmax'"
+            )
 
         # Parameters
         self.t_factor = config.t_factor
@@ -398,6 +401,9 @@ class WIDEN:
         Returns:
             Merged weight tensor
         """
+        if not weights_list:
+            raise ValueError("weights_list must not be empty")
+
         # CRITICAL FIX: Fast-path for t<0 (exact averaging)
         if self.t_factor < 0:
             if backbone is not None:
@@ -499,10 +505,12 @@ class WIDEN:
                 if lora_applied.ndim == 2:
                     mag_delta = torch.abs(delta)
 
-                    # Per-element variance check
-                    var = mag_delta.var(dim=1, keepdim=True)
-                    all_flat = (var < eps).all()
-                    if all_flat:
+                    # Per-sample variance check — flat samples pass through
+                    var = mag_delta.var(dim=1, keepdim=True)  # [B, 1]
+                    flat_mask = var < eps  # [B, 1] bool
+
+                    # Early exit only if ALL samples are flat
+                    if flat_mask.all():
                         return backbone + delta
 
                     importance = self.ranker.rank_weights_batched(mag_delta)
@@ -516,6 +524,10 @@ class WIDEN:
                         importance / threshold,
                     )
                     mask = torch.nan_to_num(mask, nan=1.0, posinf=1.0, neginf=0.0)
+
+                    # Blend: flat samples get ones mask (passthrough), others get filtered
+                    mask = torch.where(flat_mask, torch.ones_like(mask), mask)
+
                     return backbone + mask * delta
 
                 # 2D+ path
@@ -525,12 +537,14 @@ class WIDEN:
                 delta_m = torch.abs(m_lora - m_base)
                 delta_D = self.divergence_calc.compute_direction_divergence_batched(D_lora, D_base)
 
-                # Variance check
+                # Per-sample variance check
                 combined_raw = delta_m + delta_D
                 spatial_dims = tuple(range(1, combined_raw.ndim))
-                var = combined_raw.var(dim=spatial_dims, keepdim=True)
-                all_flat = (var < eps).all()
-                if all_flat:
+                var = combined_raw.var(dim=spatial_dims, keepdim=True)  # [B, 1, ...]
+                flat_mask = var < eps  # [B, 1, ...] bool
+
+                # Early exit only if ALL samples are flat
+                if flat_mask.all():
                     return backbone + delta
 
                 ranked_m = self.ranker.rank_weights_batched(delta_m)
@@ -548,6 +562,10 @@ class WIDEN:
                     importance / threshold,
                 )
                 mask = torch.nan_to_num(mask, nan=1.0, posinf=1.0, neginf=0.0)
+
+                # Blend: flat samples get ones mask (passthrough), others get filtered
+                # flat_mask shape [B,1,...] broadcasts to match mask shape
+                mask = torch.where(flat_mask, torch.ones_like(mask), mask)
 
                 return backbone + mask * delta
 
@@ -578,6 +596,9 @@ class WIDEN:
         Returns:
             Merged tensor [B, *param_shape]
         """
+        if not weights_list:
+            raise ValueError("weights_list must not be empty")
+
         try:
             N = len(weights_list)
 
