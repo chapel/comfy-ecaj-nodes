@@ -458,7 +458,7 @@ runs:
   - _ulid: 01KH6XZN55CA7GCFSXZ3V46Z11
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 3
+    current_step: 4
     total_steps: 6
     started_at: 2026-02-11T18:04:00.549Z
     step_results:
@@ -493,5 +493,14 @@ runs:
       - step_index: 3
         status: completed
         started_at: 2026-02-11T18:04:40.477Z
-        completed_at: 2026-02-11T18:04:40.477Z
+        completed_at: 2026-02-11T18:04:47.860Z
+        notes: "Proposals: (1) Audit MockModelPatcher key consistency - verify that model_state_dict() and
+          model.diffusion_model.state_dict() use consistent key formats relative to what production
+          code expects. Small scope - one-time review of conftest.py mock. (2) The runtime
+          corruption issue (01KH6X7H) will inherently drive the need for better end-to-end
+          validation, so no separate item needed for that."
+      - step_index: 4
+        status: completed
+        started_at: 2026-02-11T18:04:47.860Z
+        completed_at: 2026-02-11T18:04:47.860Z
     initiated_by: "@claude"
