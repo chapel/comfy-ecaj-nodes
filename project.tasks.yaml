@@ -588,7 +588,7 @@
   type: task
   spec_ref: "@widen-core"
   plan_ref: "@plan-widen-merge-feature-specs"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -645,6 +645,13 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-11T02:43:54.707Z
+  closed_reason: "Merged in PR #4. Implemented WIDEN core algorithm port from merge-router with 5
+    modules (numerical_config.py, sparsity.py, ranking.py, divergence.py, widen.py). All 9 ACs
+    covered with 32 tests: filter_delta zeros low-importance (AC-1), merge_weights routes via
+    softmax (AC-2), batched variants match per-key (AC-3), no ComfyUI imports (AC-4), deterministic
+    behavior (AC-5), fp16/bf16 use fp32 (AC-6), default config values (AC-7), filter_delta_batched
+    fallback (AC-8), merge_weights_batched fallback (AC-9)."
 - _ulid: 01KH4HA47F493S53EWKW4EA9SF
   slugs:
     - implement-batched-pipeline-executor

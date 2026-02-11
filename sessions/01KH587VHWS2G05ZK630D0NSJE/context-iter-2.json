@@ -1,0 +1,235 @@
+{
+  "generated_at": "2026-02-11T02:32:15.513Z",
+  "branch": "feat/recipe-type-system",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-11T02:32:15.513Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KH4HA460",
+      "title": "Implement Recipe Type System",
+      "started_at": "2026-02-11T02:28:43.363Z",
+      "priority": 1,
+      "spec_ref": "@recipe-system",
+      "note_count": 2,
+      "last_note_at": "2026-02-11T02:30:51.734Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KH4HA460",
+      "task_title": "Implement Recipe Type System",
+      "task_status": "pending_review",
+      "note_ulid": "01KH58K0",
+      "created_at": "2026-02-11T02:30:51.734Z",
+      "author": "@claude",
+      "content": "Completed Recipe Type System: added RecipeCompose.with_branch() for persistent tree semantics (AC-2), added RecipeNode type alias, added __all__ exports. Added 18 new tests: 4 for AC-2 (with_branch returns new instance, original unchanged), 4 for AC-3 (no GPU tensors in recipe objects), 3 for AC-4 (all classes importable/constructible), 7 for AC-5 (WIDEN wire connections between nodes). All 58 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KH508VF",
+      "task_title": "Implement CI Pipeline",
+      "task_status": "completed",
+      "note_ulid": "01KH5819",
+      "created_at": "2026-02-11T02:21:10.806Z",
+      "author": "@claude",
+      "content": "Added .github/workflows/ci.yml with two jobs: lint (ruff via astral-sh/ruff-action) and test (pytest with CPU torch via uv). Triggers on push to main and all PRs."
+    },
+    {
+      "task_ref": "01KH4H1VQK",
+      "task_title": "Implement Testing Infrastructure",
+      "task_status": "completed",
+      "note_ulid": "01KH55YY",
+      "created_at": "2026-02-11T01:44:56.926Z",
+      "author": "@claude",
+      "content": "Created tests/conftest.py with: MockModelPatcher (4x4 float32 tensors, SDXL-like keys, model_state_dict/clone/add_patches/get_key_patches/patches_uuid), recipe fixtures (mock_model_patcher, recipe_base, recipe_single_lora, recipe_multi_lora, recipe_compose, recipe_chain), autouse ComfyUI API mocks (folder_paths, comfy, comfy.utils, comfy.model_management). Created 3 test files: test_packaging.py (5 smoke tests for node attributes/CATEGORY), test_recipe.py (13 tests for frozen/tuple/structure), test_mock_model_patcher.py (15 tests for mock fidelity). All 33 tests pass without ComfyUI, ruff clean."
+    },
+    {
+      "task_ref": "01KH4H1VQF",
+      "task_title": "Implement ComfyUI Packaging",
+      "task_status": "completed",
+      "note_ulid": "01KH55Y8",
+      "created_at": "2026-02-11T01:44:34.803Z",
+      "author": "@claude",
+      "content": "Fixed CATEGORY casing ECAJ/merge -> ecaj/merge in all 5 node stubs. Updated pyproject.toml: empty runtime deps, dev deps (pytest/ruff/torch), pytest config with importlib mode, ruff config (line-length=99, py310, isort+pyflakes+pyupgrade). Made requirements.txt comment-only. Added setuptools package discovery for flat layout. Made __init__.py safe to import outside ComfyUI (try/except for relative imports). Added root conftest.py with collect_ignore."
+    },
+    {
+      "task_ref": "01KH4H1VQK",
+      "task_title": "Implement Testing Infrastructure",
+      "task_status": "completed",
+      "note_ulid": "01KH54VW",
+      "created_at": "2026-02-11T01:25:48.545Z",
+      "author": "@claude",
+      "content": "Dependencies cleared (was: @implement-comfyui-mocking-and-fixtures, @implement-node-graph-testing, @implement-ci-pipeline)"
+    },
+    {
+      "task_ref": "01KH4HA460",
+      "task_title": "Implement Recipe Type System",
+      "task_status": "pending_review",
+      "note_ulid": "01KH4HA4",
+      "created_at": "2026-02-10T19:44:03.264Z",
+      "author": "@claude",
+      "content": "Implementation notes:\n\nPartially implemented in lib/recipe.py -- has all 4 dataclasses but\nmissing BlockConfig (added later in per-block-control). The WIDEN custom\ntype is registered implicitly by ComfyUI when a node declares\nRETURN_TYPES = (\"WIDEN\",) -- no explicit registration needed, but verify\nthis works by checking that ComfyUI type system allows connections between\nnodes sharing the custom type name. AC-5 can be tested by constructing a\nmock workflow JSON with WIDEN connections and validating against ComfyUI\ngraph validation, or by testing in a running ComfyUI instance. For the\ntask: verify existing dataclasses match design doc section 6.6, ensure all\nfields use tuples (not lists), verify frozen=True on all, add __all__\nexport list. Consider adding RecipeNode = Union[RecipeBase, RecipeLoRA,\nRecipeCompose, RecipeMerge] type alias for type checking.\nFiles: lib/recipe.py.\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [
+    {
+      "ref": "01KH4HA47B",
+      "title": "Implement WIDEN Core Algorithm",
+      "priority": 1,
+      "spec_ref": "@widen-core",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA463",
+      "title": "Implement Entry Node",
+      "priority": 2,
+      "spec_ref": "@entry-node",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA467",
+      "title": "Implement LoRA Node",
+      "priority": 2,
+      "spec_ref": "@lora-node",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA46A",
+      "title": "Implement Compose Node",
+      "priority": 2,
+      "spec_ref": "@compose-node",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA46D",
+      "title": "Implement Merge Node",
+      "priority": 2,
+      "spec_ref": "@merge-node",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA473",
+      "title": "Implement Exit Patch Installation",
+      "priority": 2,
+      "spec_ref": "@exit-patch-install",
+      "tags": []
+    },
+    {
+      "ref": "01KH4HA47M",
+      "title": "Implement Architecture-Specific LoRA Loaders",
+      "priority": 2,
+      "spec_ref": "@lora-loaders",
+      "tags": []
+    }
+  ],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KH508VF",
+      "title": "Implement CI Pipeline",
+      "completed_at": "2026-02-11T02:27:43.054Z",
+      "closed_reason": "Merged in PR #2. Added GitHub Actions CI workflow with lint (ruff via astral-sh/ruff-action) and test (pytest with CPU-only PyTorch via uv) jobs. Triggers on push to main and all PRs. All ACs verified: ac-1 (pytest with CPU torch), ac-2 (ruff check), ac-3 (green checks on both jobs)."
+    },
+    {
+      "ref": "01KH4H1VQK",
+      "title": "Implement Testing Infrastructure",
+      "completed_at": "2026-02-11T02:26:48.995Z",
+      "closed_reason": "Merged in PR #1. Implemented testing infrastructure with: MockModelPatcher (4x4 float32 tensors, SDXL-like keys, model_state_dict/clone/add_patches/get_key_patches/patches_uuid), recipe fixtures (recipe_base, recipe_single_lora, recipe_multi_lora, recipe_compose, recipe_chain), autouse ComfyUI API mocks (folder_paths, comfy modules). All 37 tests pass without ComfyUI. All 4 ACs verified with test coverage."
+    },
+    {
+      "ref": "01KH4H1VQF",
+      "title": "Implement ComfyUI Packaging",
+      "completed_at": "2026-02-11T02:25:41.782Z",
+      "closed_reason": "Merged in PR #1. Implemented ComfyUI packaging infrastructure: NODE_CLASS_MAPPINGS with 5 WIDEN nodes, pyproject.toml with [tool.comfy] metadata (PublisherId=ecaj, DisplayName=ECAJ Nodes), lowercase ecaj/merge CATEGORY on all nodes, empty runtime deps with dev deps in optional-dependencies. All 4 ACs covered by tests in test_packaging.py."
+    },
+    {
+      "ref": "01KH4DWQ",
+      "title": "Port design doc into kspec specs and tasks",
+      "completed_at": "2026-02-10T21:40:56.673Z",
+      "closed_reason": null
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "d594772",
+      "full_hash": "d5947722075376272dbfc3a9cac0928128afb6ef",
+      "date": "2026-02-11T02:31:11.000Z",
+      "message": "feat: complete recipe type system with persistent semantics",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "a442dd5",
+      "full_hash": "a442dd5ace3379f79dbac2e29fc17a48f7cda2cf",
+      "date": "2026-02-11T02:23:55.000Z",
+      "message": "Merge pull request #2 from chapel/feat/ci-pipeline",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "29e14c3",
+      "full_hash": "29e14c3c6893cc3b582042d0dbd724aa6299e5a4",
+      "date": "2026-02-11T02:21:29.000Z",
+      "message": "feat: add GitHub Actions CI workflow",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "8d95a47",
+      "full_hash": "8d95a47c81a0354210ddccebdb6d4ae80b474377",
+      "date": "2026-02-11T02:17:30.000Z",
+      "message": "feat: add packaging config and testing infrastructure (#1)",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "902d7fc",
+      "full_hash": "902d7fcc689deedd83eb66e0ed372b478d4dc173",
+      "date": "2026-02-11T01:03:37.000Z",
+      "message": "feat: add ralph loop workflow hooks and guard scripts",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ceca80c",
+      "full_hash": "ceca80c50b6e67c186f9e2b6a5fb646497f7b1c1",
+      "date": "2026-02-11T00:41:24.000Z",
+      "message": "docs: add WIP readme",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "f01cdc1",
+      "full_hash": "f01cdc12c8afcbe8db70baacc1b0ddca757ef1b4",
+      "date": "2026-02-11T00:26:14.000Z",
+      "message": "feat: scaffold comfy-ecaj-nodes with WIDEN merge node stubs and recipe system",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "c94385c",
+      "full_hash": "c94385c5606761f05a41b9acff32bddf01e74dec",
+      "date": "2026-02-10T10:21:10.000Z",
+      "message": "chore: add .kspec/ to .gitignore for shadow branch",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": false,
+    "staged": [],
+    "unstaged": [],
+    "untracked": [
+      "uv.lock"
+    ]
+  },
+  "inbox_items": [],
+  "stats": {
+    "total_tasks": 25,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 7,
+    "blocked": 0,
+    "completed": 4,
+    "inbox_items": 0
+  }
+}
