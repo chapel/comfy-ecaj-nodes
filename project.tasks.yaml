@@ -1841,23 +1841,43 @@
   created_at: 2026-02-11T08:38:57.782Z
   notes: []
   todos: []
-- title: Add strict mode for batched catch-all fallbacks in widen.py
+- _ulid: 01KH5XN34KRHPV070J3H177FTC
+  slugs: []
+  title: Add strict mode for batched catch-all fallbacks in widen.py
   type: task
-  priority: 5
-  spec_ref: null
-  tags:
-    - hardening
-    - review-finding
   description: Non-OOM catch-all fallbacks in widen.py (around lines 556, 640) hide shape bugs and API
     misuse. Add optional strict mode that raises instead of falling back. Defer until integration
     testing surfaces real issues.
-  _ulid: 01KH5XN34KRHPV070J3H177FTC
+  spec_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 5
+  tags:
+    - hardening
+    - review-finding
+  vcs_refs: []
+  created_at: 2026-02-11T08:38:59.987Z
+  notes: []
+  todos: []
+- title: Fix _compute_deltas to preserve spec-to-delta mapping
+  type: task
+  priority: 4
+  spec_ref: null
+  tags:
+    - performance
+    - review-finding
+  description: gpu_ops.py _compute_deltas strips spec identity. Metadata resolved via next(s for s in
+    group if s.key_index == key_index) is O(n^2) and couples to key_index uniqueness. Return (spec,
+    delta) pairs instead.
+  _ulid: 01KH5XN590K4EMDTCP1FJWFHM0
   slugs: []
   status: pending
   blocked_by: []
   depends_on: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-11T08:38:59.987Z
+  created_at: 2026-02-11T08:39:02.176Z
   notes: []
   todos: []
