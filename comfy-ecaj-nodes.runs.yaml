@@ -37,7 +37,7 @@ runs:
   - _ulid: 01KH507SWV0N6P4XDYGWX6JE1X
     workflow_ref: "@01KH4W2EVRR14Z55XSGY646P3C"
     status: active
-    current_step: 5
+    current_step: 6
     total_steps: 8
     started_at: 2026-02-11T00:04:55.835Z
     step_results:
@@ -68,7 +68,13 @@ runs:
         completed_at: 2026-02-11T00:06:08.897Z
         notes: Imported with --update. 3 specs created, parent updated, 3 tasks derived.
       - step_index: 5
-        status: completed
+        status: skipped
         started_at: 2026-02-11T00:06:08.897Z
-        completed_at: 2026-02-11T00:06:08.897Z
+        completed_at: 2026-02-11T00:06:14.590Z
+        notes: No traits applicable - project has no trait definitions (CLI traits dont apply to ComfyUI
+          node pack)
+      - step_index: 6
+        status: completed
+        started_at: 2026-02-11T00:06:14.590Z
+        completed_at: 2026-02-11T00:06:14.590Z
     initiated_by: "@claude"
