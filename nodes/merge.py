@@ -3,6 +3,15 @@
 from lib.recipe import BlockConfig, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
 
+def _find_base_arch(node) -> str | None:
+    """Walk the base chain to find RecipeBase and return its arch."""
+    if isinstance(node, RecipeBase):
+        return node.arch
+    elif isinstance(node, RecipeMerge):
+        return _find_base_arch(node.base)
+    return None
+
+
 class WIDENMergeNode:
     """Builds RecipeMerge. Compose target -> merge_weights, single -> filter_delta."""
 
@@ -70,6 +79,16 @@ class WIDENMergeNode:
                 f"target must be RecipeLoRA, RecipeCompose, or RecipeMerge, "
                 f"got {type(target).__name__}"
             )
+
+        # Validate block_config architecture matches the recipe's base architecture
+        if block_config is not None:
+            base_arch = _find_base_arch(base)
+            if base_arch is not None and block_config.arch != base_arch:
+                raise ValueError(
+                    f"Block config architecture '{block_config.arch}' does not match "
+                    f"base model architecture '{base_arch}'. "
+                    f"Use a Block Config node matching the base model's architecture."
+                )
 
         # AC-1, AC-2, AC-3, AC-6: Build RecipeMerge with all fields
         # backbone is None when not connected (AC-2), stored when connected (AC-3)
