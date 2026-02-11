@@ -1059,7 +1059,7 @@
   type: task
   spec_ref: "@ci-pipeline"
   plan_ref: "@plan-testing-strategy"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@implement-testing-infrastructure"
