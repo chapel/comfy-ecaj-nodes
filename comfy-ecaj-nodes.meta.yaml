@@ -655,6 +655,110 @@ workflows:
 
           Only capture items that passed the evaluation in step 3.
           Be selective - lower volume, higher quality.
+  - _ulid: 01KH53X8R9V2QX5FKMZYMA5ABV
+    id: task-work-loop
+    trigger: manual
+    description: "Loop variant of task-work-session for autonomous agents. Auto-filters to
+      automation-eligible tasks, auto-resolves decisions. Task selection: in_progress > unblocking >
+      priority. Still verifies work needed. PR review handled externally by ralph."
+    steps:
+      - type: action
+        content: |-
+          Filter to automation-eligible tasks only.
+          Use: kspec tasks ready --eligible
+          This ensures only tasks marked automation: eligible are considered.
+        execution:
+          mode: silent
+      - type: decision
+        content: |-
+          Select task by priority order.
+          First, run kspec tasks ready --eligible — its output is authoritative.
+          Check in order:
+          1. in_progress tasks (continue existing work)
+          2. Ready tasks that unblock others (high impact)
+          3. Highest priority ready task (lowest number = higher priority)
+
+          Note: pending_review tasks are handled externally by ralph spawning PR review subagents.
+        options:
+          - in_progress task exists -> continue that task
+          - Ready task unblocks others -> select that task
+          - Only isolated ready tasks -> select highest priority (lowest number)
+          - kspec tasks ready --eligible returned empty -> stop responding (ralph exits
+            automatically)
+          - kspec tasks ready --eligible shows all blocked -> stop responding (ralph exits
+            automatically)
+        execution:
+          mode: silent
+      - type: check
+        content: |-
+          Verify work is needed - but VALIDATE, do not trust notes.
+
+          Notes are context, not proof. If a task is in the queue, there is a reason.
+
+          To mark Already implemented you MUST:
+          1. RUN the tests - they must PASS, not skip
+          2. VERIFY AC coverage - each AC has a corresponding test
+          3. CHECK implementation matches spec requirements
+
+          DO NOT mark complete just because:
+          - Notes say already done (verify yourself)
+          - Tests exist but skip in CI (that is a gap to fix)
+          - Someone said it was implemented (run the tests)
+        on_fail: |-
+          Only if tests PASS and ACs are COVERED:
+          Mark task complete with Already implemented reason and EXIT
+        execution:
+          mode: silent
+      - type: action
+        content: |-
+          Start selected task (if not already in_progress).
+          Use: kspec task start @task
+        execution:
+          mode: silent
+      - type: action
+        content: |-
+          Work on the task, adding notes as you go.
+          Use: kspec task note @task "What you are doing..."
+          Add notes during work, not just at end.
+
+          SCOPE EXPANSION: If you discover missing implementation while testing,
+          implementing it IS in scope. The goal is verified behavior, not just test files.
+          Add tests for X means ensure X is verified - if X does not exist, implement it.
+      - type: check
+        content: |-
+          Verify Definition of Done before committing.
+
+          Read task notes for any DoD criteria. Common constraints:
+          - No test.skip() calls - verify no skipped tests in changes
+          - All ACs covered - verify each AC has corresponding test
+          - No TODO/FIXME - no placeholder comments
+
+          If DoD criteria exist and are not met, fix the gaps first.
+        on_fail: |-
+          Do not proceed with DoD violations.
+          Either fix the gaps or escalate to user if scope is unclear.
+        execution:
+          mode: silent
+      - type: action
+        content: |-
+          Commit changes with Task: @task trailer.
+          All changes must be committed before submitting.
+        execution:
+          mode: silent
+      - type: action
+        content: |-
+          Submit task for review.
+          Use: kspec task submit @task
+          This marks the task pending_review.
+        execution:
+          mode: silent
+      - type: action
+        content: |-
+          Create PR.
+          Use: /pr skill
+          After PR created, EXIT - ralph handles PR review via separate subagent.
+        execution:
+          mode: silent
 conventions:
   - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
     domain: commits
