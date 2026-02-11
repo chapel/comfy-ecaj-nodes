@@ -119,6 +119,8 @@ def _collect_lora_sets(node: RecipeNode) -> dict[int, RecipeLoRA]:
             _walk(n.target)
             if n.backbone is not None:
                 _walk(n.backbone)
+        else:
+            raise ValueError(f"Unknown recipe node type: {type(n).__name__}")
 
     _walk(node)
     return lora_sets
@@ -196,19 +198,12 @@ def analyze_recipe(
             strength = lora_spec["strength"]
 
             # Resolve path (AC-6: raises FileNotFoundError if missing)
-            try:
-                full_path = _resolve_lora_path(lora_name, lora_base_path)
-                if not os.path.exists(full_path):
-                    raise FileNotFoundError(
-                        f"LoRA file not found: {lora_name} "
-                        f"(referenced by LoRA node with strength {strength})"
-                    )
-            except FileNotFoundError:
-                # Re-raise with context about which LoRA node
+            full_path = _resolve_lora_path(lora_name, lora_base_path)
+            if not os.path.exists(full_path):
                 raise FileNotFoundError(
                     f"LoRA file not found: {lora_name} "
                     f"(referenced by LoRA node with strength {strength})"
-                ) from None
+                )
 
             # Load the LoRA file into the specific set
             loader.load(full_path, strength, set_id=set_key)

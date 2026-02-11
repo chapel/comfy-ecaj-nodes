@@ -151,6 +151,8 @@ class NumericalConfig:
             return (scale * norm_scaled).to(tensor.dtype)
         else:
             # Per-dimension norm
+            # Internal computation always uses keepdim=True for consistent shapes;
+            # squeeze at the end if keepdim=False was requested.
             scale = tensor.abs().amax(dim=dim, keepdim=True)
 
             # Handle zero columns/rows
@@ -165,15 +167,18 @@ class NumericalConfig:
                     scale_d = scale.double()
                     # Safe division where scale > 0
                     safe_scaled = torch.where(nonzero, tensor_scaled / scale_d, 0.0)
-                    norm_scaled = torch.norm(safe_scaled, p=2, dim=dim, keepdim=keepdim)
+                    norm_scaled = torch.norm(safe_scaled, p=2, dim=dim, keepdim=True)
                     result = torch.where(nonzero, scale_d * norm_scaled, 0.0).to(tensor.dtype)
                 else:
                     # fp32 computation
                     tensor_scaled = tensor.float()
                     scale_f = scale.float()
                     safe_scaled = torch.where(nonzero, tensor_scaled / scale_f, 0.0)
-                    norm_scaled = torch.norm(safe_scaled, p=2, dim=dim, keepdim=keepdim)
+                    norm_scaled = torch.norm(safe_scaled, p=2, dim=dim, keepdim=True)
                     result = torch.where(nonzero, scale_f * norm_scaled, 0.0).to(tensor.dtype)
+
+            if not keepdim:
+                result = result.squeeze(dim=dim)
 
             return result
 

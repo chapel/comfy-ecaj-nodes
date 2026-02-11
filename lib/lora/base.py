@@ -14,6 +14,7 @@ and cleanup().
 
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from collections.abc import Set as AbstractSet
 
 from lib.executor import DeltaSpec
 
@@ -58,12 +59,13 @@ class LoRALoader(ABC):
 
     @property
     @abstractmethod
-    def affected_keys(self) -> set[str]:
+    def affected_keys(self) -> AbstractSet[str]:
         """Return set of base model keys that loaded LoRAs modify (all sets).
 
         Keys should be in base model format (e.g. 'diffusion_model.X').
         Used by the executor to determine which parameters need LoRA
-        deltas applied during batched evaluation.
+        deltas applied during batched evaluation. Returns a frozen view
+        to prevent external mutation.
 
         # AC: @lora-loaders ac-4
         """

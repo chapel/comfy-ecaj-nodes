@@ -44,35 +44,41 @@ _QKV_OFFSETS = {
 }
 
 # Compound names that should not have underscores converted to dots
-# during LyCORIS key normalization
-_COMPOUND_NAMES = [
-    # LoKr components (must preserve underscore!)
-    "lokr_w1",
-    "lokr_w2",
-    "lokr_w1_a",
-    "lokr_w1_b",
-    "lokr_w2_a",
-    "lokr_w2_b",
-    # LoRA components
-    "lora_down",
-    "lora_up",
-    "lora_A",
-    "lora_B",
-    # Attention components
-    "to_out",
-    "to_q",
-    "to_k",
-    "to_v",
-    # Z-Image specific
-    "adaLN_modulation",
-    "feed_forward",
-    "noise_refiner",
-    "context_refiner",
-    "t_embedder",
-    "cap_embedder",
-    "x_pad_token",
-    "cap_pad_token",
-]
+# during LyCORIS key normalization.
+# Sorted by length descending so longer variants (e.g. lokr_w1_a) are
+# matched before shorter prefixes (e.g. lokr_w1) to avoid partial replacement.
+_COMPOUND_NAMES = sorted(
+    [
+        # LoKr components (must preserve underscore!)
+        "lokr_w1",
+        "lokr_w2",
+        "lokr_w1_a",
+        "lokr_w1_b",
+        "lokr_w2_a",
+        "lokr_w2_b",
+        # LoRA components
+        "lora_down",
+        "lora_up",
+        "lora_A",
+        "lora_B",
+        # Attention components
+        "to_out",
+        "to_q",
+        "to_k",
+        "to_v",
+        # Z-Image specific
+        "adaLN_modulation",
+        "feed_forward",
+        "noise_refiner",
+        "context_refiner",
+        "t_embedder",
+        "cap_embedder",
+        "x_pad_token",
+        "cap_pad_token",
+    ],
+    key=len,
+    reverse=True,
+)
 
 
 def _normalize_lycoris_key(key: str) -> str:
@@ -299,12 +305,14 @@ class ZImageLoader(LoRALoader):
                 self._affected.add(layer_key)
 
     @property
-    def affected_keys(self) -> set[str]:
+    def affected_keys(self) -> frozenset[str]:
         """Return keys that loaded LoRAs modify (all sets).
+
+        Returns a frozenset to prevent external mutation of internal state.
 
         # AC: @lora-loaders ac-4
         """
-        return self._affected
+        return frozenset(self._affected)
 
     def affected_keys_for_set(self, set_id: str) -> set[str]:
         """Return keys modified by a specific LoRA set.

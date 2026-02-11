@@ -225,12 +225,14 @@ class SDXLLoader(LoRALoader):
             self._affected.add(model_key)
 
     @property
-    def affected_keys(self) -> set[str]:
+    def affected_keys(self) -> frozenset[str]:
         """Return keys that loaded LoRAs modify (all sets).
+
+        Returns a frozenset to prevent external mutation of internal state.
 
         # AC: @lora-loaders ac-4
         """
-        return self._affected
+        return frozenset(self._affected)
 
     def affected_keys_for_set(self, set_id: str) -> set[str]:
         """Return keys modified by a specific LoRA set.

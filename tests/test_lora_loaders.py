@@ -320,11 +320,11 @@ class TestAC4LoaderInterface:
         assert callable(getattr(loader, "load", None))
 
     def test_loader_has_affected_keys_property(self):
-        """Loaders have affected_keys property returning set."""
+        """Loaders have affected_keys property returning set-like type."""
         # AC: @lora-loaders ac-4
         loader = SDXLLoader()
         assert hasattr(loader, "affected_keys")
-        assert isinstance(loader.affected_keys, set)
+        assert isinstance(loader.affected_keys, (set, frozenset))
 
     def test_loader_has_get_delta_specs_method(self):
         """Loaders have get_delta_specs(keys, key_indices) method."""

@@ -5,6 +5,7 @@ with ComfyUI's caching and graph fan-out. Fields use tuples, not lists.
 """
 
 from dataclasses import dataclass
+from types import MappingProxyType
 
 __all__ = [
     "BlockConfig",
@@ -39,10 +40,21 @@ class RecipeBase:
 
 @dataclass(frozen=True)
 class RecipeLoRA:
-    """LoRA node output — one or more LoRAs to apply as a group (a 'set')."""
+    """LoRA node output — one or more LoRAs to apply as a group (a 'set').
 
-    loras: tuple  # ({"path": str, "strength": float}, ...)
+    Each entry in loras is a MappingProxyType wrapping {"path": str, "strength": float}
+    to prevent external mutation of recipe contents post-construction.
+    """
+
+    loras: tuple  # (MappingProxyType({"path": str, "strength": float}), ...)
     block_config: object = None  # BlockConfig or None
+
+    def __post_init__(self) -> None:
+        """Freeze mutable dicts in loras to prevent post-construction mutation."""
+        frozen = tuple(
+            MappingProxyType(d) if isinstance(d, dict) else d for d in self.loras
+        )
+        object.__setattr__(self, "loras", frozen)
 
 
 @dataclass(frozen=True)

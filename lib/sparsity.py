@@ -114,6 +114,13 @@ class EntmaxFunction(Function):
     """Entmax activation function with alpha parameter.
 
     Generalizes softmax (alpha=1) and sparsemax (alpha=2).
+
+    Note: The alpha==1.0 (softmax) and alpha==2.0 (sparsemax) fast paths
+    delegate to F.softmax and SparsemaxFunction respectively without saving
+    context for backward. This is safe because entmax is used only in
+    inference (within torch.no_grad() blocks) in the WIDEN pipeline.
+    If gradient support is needed for alpha==1/2, dedicated backward
+    paths must be implemented.
     """
 
     @staticmethod
@@ -132,12 +139,14 @@ class EntmaxFunction(Function):
         Returns:
             Entmax output
         """
+        ctx._entmax_alpha = alpha
+
         if alpha == 1.0:
-            # Special case: softmax
+            # Special case: softmax (no ctx saved — inference only)
             return F.softmax(input, dim=dim)
 
         if alpha == 2.0:
-            # Special case: sparsemax
+            # Special case: sparsemax (no ctx saved — delegates to SparsemaxFunction)
             return SparsemaxFunction.apply(input, dim)
 
         # General case: use bisection algorithm
@@ -187,7 +196,19 @@ class EntmaxFunction(Function):
 
         Returns:
             Gradients w.r.t. input (and None for other args)
+
+        Raises:
+            RuntimeError: If called for alpha==1.0 or alpha==2.0, which use
+                fast paths that do not save context for backward.
         """
+        alpha = getattr(ctx, "_entmax_alpha", None)
+        if alpha is not None and alpha in (1.0, 2.0):
+            raise RuntimeError(
+                f"EntmaxFunction backward is not supported for alpha={alpha}. "
+                f"The alpha=={alpha} fast path does not save context for backward. "
+                f"Use torch.no_grad() at the call site or use alpha != {alpha}."
+            )
+
         output, _ = ctx.saved_tensors
         alpha = ctx.alpha
         dim = ctx.dim
@@ -211,7 +232,11 @@ class EntmaxFunction(Function):
 
 
 class Entmax(nn.Module):
-    """Entmax activation module."""
+    """Entmax activation module.
+
+    Used in inference only (within torch.no_grad() blocks) for WIDEN routing.
+    The alpha==1.0 and alpha==2.0 fast paths do not support gradients.
+    """
 
     def __init__(self, alpha: float = 1.5, dim: int = -1, n_iter: int = 50):
         super().__init__()
@@ -219,6 +244,7 @@ class Entmax(nn.Module):
         self.dim = dim
         self.n_iter = n_iter
 
+    @torch.no_grad()
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         return EntmaxFunction.apply(input, self.alpha, self.dim, self.n_iter)
 
@@ -236,10 +262,14 @@ def sparsemax(input: torch.Tensor, dim: int = -1) -> torch.Tensor:
     return SparsemaxFunction.apply(input, dim)
 
 
+@torch.no_grad()
 def entmax(
     input: torch.Tensor, alpha: float = 1.5, dim: int = -1, n_iter: int = 50
 ) -> torch.Tensor:
     """Functional entmax.
+
+    Used in inference only. The alpha==1.0 and alpha==2.0 fast paths
+    do not support gradients.
 
     Args:
         input: Input tensor

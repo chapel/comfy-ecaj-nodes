@@ -41,14 +41,25 @@ class WIDENLoRANode:
         AC: @per-block-control ac-1 — when block_config is None, behavior is identical
         AC: @per-block-control ac-3 — BLOCK_CONFIG fans out correctly to each consumer
         """
+        if prev is not None and not isinstance(prev, RecipeLoRA):
+            raise TypeError(f"Expected RecipeLoRA for prev input, got {type(prev).__name__}")
+
         new_lora = {"path": lora_name, "strength": strength}
 
-        if prev is not None and isinstance(prev, RecipeLoRA):
+        if prev is not None:
             # Chain: append new LoRA to existing set
             loras = prev.loras + (new_lora,)
             # Preserve block_config from prev if new one not provided
             if block_config is None:
                 block_config = prev.block_config
+            elif prev.block_config is not None:
+                # Both prev and new block_config provided — architectures must match
+                if block_config.arch != prev.block_config.arch:
+                    raise ValueError(
+                        f"Block config architecture mismatch: prev has '{prev.block_config.arch}' "
+                        f"but new block_config has '{block_config.arch}'. "
+                        f"All LoRAs in a chain must use the same architecture."
+                    )
         else:
             # First in chain: single-element tuple
             loras = (new_lora,)
