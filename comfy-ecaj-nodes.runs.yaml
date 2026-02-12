@@ -837,7 +837,7 @@ runs:
   - _ulid: 01KH9Y9V7ZJQTN96W73KJRGPF8
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-12T22:07:17.759Z
     step_results:
@@ -857,5 +857,11 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-12T22:08:02.732Z
-        completed_at: 2026-02-12T22:08:02.732Z
+        completed_at: 2026-02-12T22:08:08.186Z
+        notes: One item captured (success observation 01KH9YAW). All other potential items either already
+          tracked or below confidence threshold.
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-12T22:08:08.186Z
+        completed_at: 2026-02-12T22:08:08.186Z
     initiated_by: "@claude"
