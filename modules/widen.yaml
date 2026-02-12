@@ -273,6 +273,11 @@ features:
         given: the base ModelPatcher uses bf16 weights
         when: set patches are installed
         then: patch tensors match the base model storage dtype
+      - id: ac-9
+        given: the exit node processes multiple batch groups
+        when: each batch group completes
+        then: progress is reported via ComfyUI ProgressBar with value incrementing and max equal to total
+          groups
     depends_on: []
     implements: []
     relates_to: []
