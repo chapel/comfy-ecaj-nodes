@@ -20,7 +20,7 @@ from nodes.exit import _validate_recipe_tree
 from nodes.lora import WIDENLoRANode
 from nodes.merge import WIDENMergeNode
 
-from .conftest import MockModelPatcher
+from .conftest import _ZIMAGE_KEYS, MockModelPatcher
 
 # ---------------------------------------------------------------------------
 # Mock executor — lightweight tree walker recording operation plan
@@ -129,14 +129,10 @@ def plan_operations(node: object, *, depth: int = 0) -> list[OpRecord]:
 
 def _make_entry(arch: str = "sdxl") -> tuple[RecipeBase, MockModelPatcher]:
     """Create a RecipeBase through the Entry node."""
-    if arch == "sdxl":
-        patcher = MockModelPatcher()
-    elif arch == "zimage":
-        from tests.conftest import _ZIMAGE_KEYS
-
-        patcher = MockModelPatcher(keys=_ZIMAGE_KEYS)
-    else:
+    keys = {"sdxl": None, "zimage": _ZIMAGE_KEYS}.get(arch)
+    if arch not in ("sdxl", "zimage"):
         raise ValueError(f"Unknown arch for test: {arch}")
+    patcher = MockModelPatcher(keys=keys) if keys else MockModelPatcher()
 
     entry = WIDENEntryNode()
     (recipe,) = entry.entry(patcher)
@@ -152,7 +148,10 @@ def _make_lora(
     return recipe
 
 
-def _make_compose(*branches: object, compose: RecipeCompose | None = None) -> RecipeCompose:
+RecipeNode = RecipeBase | RecipeLoRA | RecipeCompose | RecipeMerge
+
+
+def _make_compose(*branches: RecipeNode, compose: RecipeCompose | None = None) -> RecipeCompose:
     """Create a RecipeCompose through the Compose node, accumulating branches."""
     compose_node = WIDENComposeNode()
     result = compose
@@ -162,10 +161,10 @@ def _make_compose(*branches: object, compose: RecipeCompose | None = None) -> Re
 
 
 def _make_merge(
-    base: object,
-    target: object,
+    base: RecipeBase | RecipeMerge,
+    target: RecipeLoRA | RecipeCompose | RecipeMerge,
     t_factor: float = 1.0,
-    backbone: object = None,
+    backbone: RecipeNode | None = None,
 ) -> RecipeMerge:
     """Create a RecipeMerge through the Merge node."""
     merge_node = WIDENMergeNode()
