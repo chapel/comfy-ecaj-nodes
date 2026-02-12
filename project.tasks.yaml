@@ -1385,7 +1385,7 @@
   type: task
   spec_ref: "@node-graph-testing"
   plan_ref: "@plan-testing-strategy"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@implement-comfyui-mocking-and-fixtures"
