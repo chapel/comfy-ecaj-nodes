@@ -1792,6 +1792,7 @@
     - review-finding
   vcs_refs: []
   created_at: 2026-02-11T08:38:41.780Z
+  started_at: 2026-02-12T00:21:36.566Z
   notes:
     - _ulid: 01KH7JMSP6Y234TMCPBBTW7QRZ
       created_at: 2026-02-12T00:05:04.838Z
@@ -1802,7 +1803,6 @@
         indexed tensor assignment instead of Python loops."
       supersedes: null
   todos: []
-  started_at: 2026-02-12T00:21:36.566Z
 - _ulid: 01KH5XMW1P2P2PKWR4NFHT7W1H
   slugs: []
   title: "DRY block config nodes: extract shared slider schema and packing helper"
@@ -1849,7 +1849,7 @@
   description: Refiner checks in block_classify.py (lines 122/124) use substring containment which can
     accidentally match unrelated keys. Prefer anchored/structured patterns.
   spec_ref: null
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on: []
   context: []
