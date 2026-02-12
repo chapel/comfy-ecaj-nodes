@@ -555,6 +555,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-11T23:05:02.452Z
+    completed_at: 2026-02-11T23:06:16.935Z
     step_results:
       - step_index: 0
         status: completed
@@ -652,4 +653,11 @@ runs:
         notes: All captures complete. 1 friction observation captured (01KH7F8S). 3 items skipped (already
           tracked or one-off). Session reflection complete.
     initiated_by: "@claude"
-    completed_at: 2026-02-11T23:06:16.935Z
+  - _ulid: 01KH88JYJ0Y8EEVWNE53KA96G9
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-12T06:28:32.960Z
+    step_results: []
+    initiated_by: "@claude"
