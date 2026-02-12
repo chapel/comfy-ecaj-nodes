@@ -2527,23 +2527,24 @@
         structures and refactoring the eval dispatch."
       supersedes: null
   todos: []
-- title: Add ProgressBar tracking to exit node
+- _ulid: 01KH9ZHMFJKDDMVAS91FZRKBSW
+  slugs:
+    - exit-progress
+  title: Add ProgressBar tracking to exit node
+  type: task
   description: Import comfy.utils.ProgressBar (with try/except guard for tests), create pbar after
     compile_batch_groups(), update per group iteration. Covers AC ac-9.
-  type: task
   spec_ref: "@exit-node"
   meta_ref: null
   plan_ref: null
-  priority: 3
-  slugs:
-    - exit-progress
-  tags: []
-  depends_on: []
-  _ulid: 01KH9ZHMFJKDDMVAS91FZRKBSW
-  status: pending
+  status: in_progress
   blocked_by: []
+  depends_on: []
   context: []
+  priority: 3
+  tags: []
   vcs_refs: []
   created_at: 2026-02-12T22:29:01.554Z
   notes: []
   todos: []
+  started_at: 2026-02-12T22:39:49.974Z
