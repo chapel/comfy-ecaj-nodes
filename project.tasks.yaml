@@ -2346,6 +2346,7 @@
     - perf
   vcs_refs: []
   created_at: 2026-02-12T17:45:50.577Z
+  started_at: 2026-02-12T19:14:30.573Z
   notes:
     - _ulid: 01KH9FBPZ10B4DSBGG1ZZAE8DM
       created_at: 2026-02-12T17:46:10.273Z
@@ -2357,8 +2358,16 @@
         stronger guarantees. Autograd graph tracking adds CPU overhead and memory pressure for ops
         that never need gradients."
       supersedes: null
+    - _ulid: 01KH9MGEEWQM6JQJVCXREWQ5S4
+      created_at: 2026-02-12T19:16:08.284Z
+      author: "@claude"
+      content: "Done: (1) Added @torch.inference_mode() to evaluate_recipe() — covers all downstream calls
+        including filter/merge/lora_apply. (2) Removed redundant torch.no_grad() from
+        filter_delta_batched (inference_mode is a superset). (3) Removed no_grad block in
+        merge_weights_batched — backbone disentanglement was outside it, now covered by caller's
+        inference_mode. 525 tests pass, ruff clean."
+      supersedes: null
   todos: []
-  started_at: 2026-02-12T19:14:30.573Z
 - _ulid: 01KH9HB0QNXSS23B5BN1KS3XKW
   slugs: []
   title: Reduce unnecessary .clone() calls in WIDEN hot paths
