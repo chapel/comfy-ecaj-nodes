@@ -398,7 +398,14 @@ features:
         relates_to: []
         tests: []
         traits: []
-        notes: []
+        notes:
+          - _ulid: 01KH7QYW4E5MNYR0Y9GTK6H583
+            created_at: 2026-02-12T01:37:57.902Z
+            author: "@claude"
+            content: "Implementation note: install_merged_patches uses (\"set\", (tensor,)) tuple format to
+              match ComfyUI convention for add_patches. ac-1 'added as set patches' is realized via
+              this specific tuple structure."
+            supersedes: null
         created: 2026-02-10T19:44:03.182Z
         status:
           maturity: draft
