@@ -189,7 +189,7 @@ features:
         created: 2026-02-11T00:05:30.150Z
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
       - _ulid: 01KH508VDJJNRN312NV7Y260HZ
         slugs:
           - ci-pipeline
