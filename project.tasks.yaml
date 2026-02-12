@@ -1385,7 +1385,7 @@
   type: task
   spec_ref: "@node-graph-testing"
   plan_ref: "@plan-testing-strategy"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-comfyui-mocking-and-fixtures"
@@ -1431,6 +1431,8 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-12T07:52:35.520Z
+  closed_reason: "PR #38 merged. 17 integration tests covering all 6 ACs for node graph testing."
 - _ulid: 01KH508VFBCS29YV4HX4J1QTST
   slugs:
     - implement-ci-pipeline
