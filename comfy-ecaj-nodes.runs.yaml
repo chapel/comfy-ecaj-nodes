@@ -656,7 +656,7 @@ runs:
   - _ulid: 01KH88JYJ0Y8EEVWNE53KA96G9
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-12T06:28:32.960Z
     step_results:
@@ -681,5 +681,22 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-12T06:28:42.490Z
-        completed_at: 2026-02-12T06:28:42.490Z
+        completed_at: 2026-02-12T06:28:52.350Z
+        notes: >-
+          Step 2 - Friction Points:
+
+          1. Task lifecycle for audit/research tasks — 01KH7QY3 (mock audit) had no code changes but
+          required submit→complete flow designed for PRs. Had to do submit+complete back-to-back
+          which felt like ceremony for a research task.
+
+          2. kspec task set API inconsistency — tried --description and --tags (plural) which don't
+          exist; had to check --help to find --tag (singular) and that description must go through
+          notes. Minor but slowed down task setup.
+
+          3. Branch management after PR merge — was on refactor branch after merge, had to checkout
+          main before committing the next task's changes. Easy to forget.
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-12T06:28:52.350Z
+        completed_at: 2026-02-12T06:28:52.350Z
     initiated_by: "@claude"
