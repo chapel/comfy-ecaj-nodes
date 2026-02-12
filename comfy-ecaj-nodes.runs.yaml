@@ -738,6 +738,7 @@ runs:
     current_step: 5
     total_steps: 6
     started_at: 2026-02-12T07:35:39.357Z
+    completed_at: 2026-02-12T07:36:35.659Z
     step_results:
       - step_index: 0
         status: completed
@@ -779,4 +780,11 @@ runs:
         notes: "Captured one success observation (01KH8CFD): Explore subagent for multi-module context. No
           friction items to capture. Clean session."
     initiated_by: "@claude"
-    completed_at: 2026-02-12T07:36:35.659Z
+  - _ulid: 01KH9NKY44QW5Q1YBJ0FNBX5VY
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-12T19:35:31.205Z
+    step_results: []
+    initiated_by: "@claude"
