@@ -2745,3 +2745,32 @@
         Nodes with publisher ecaj.'"
       supersedes: null
   todos: []
+- title: Spec and plan layer-type filtering for WIDEN
+  description: "Design doc section 6.10 describes layer-type filtering: cross-cutting control
+    orthogonal to per-block overrides. Users could apply different t_factor/LoRA strength per layer
+    type (attention, feed_forward, norm, embedder, refiner, final) within the same block.
+    BlockConfig.layer_type_overrides field already exists on the dataclass (defaults to empty tuple)
+    and block_classify.py already classifies keys by layer type. Need to: (1) spec the feature with
+    ACs, (2) plan the implementation — how layer_type_overrides flows through per_block.py into
+    recipe evaluation, (3) decide on UI: extend existing block config nodes with layer-type
+    toggles/sliders, or separate node, (4) consider interaction with per-block overrides (per-block
+    × per-layer-type matrix)."
+  type: spike
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 3
+  slugs:
+    - layer-type-filtering
+  tags:
+    - spec
+    - planning
+  depends_on: []
+  _ulid: 01KHA4HK38352V0271WSEPXC99
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-12T23:56:23.016Z
+  notes: []
+  todos: []
