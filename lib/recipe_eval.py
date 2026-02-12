@@ -15,6 +15,7 @@ lib.gpu_ops) - no ComfyUI imports.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import torch
 
@@ -24,6 +25,16 @@ from .per_block import (
     _apply_widen_filter_per_block,
     _apply_widen_merge_per_block,
 )
+
+if TYPE_CHECKING:
+    from .recipe import (
+        BlockConfig,
+        RecipeCompose,
+        RecipeLoRA,
+        RecipeMerge,
+        RecipeNode,
+    )
+
 
 # ---------------------------------------------------------------------------
 # Operation dataclasses (frozen, emitted by compile_plan)
@@ -35,7 +46,7 @@ class OpApplyLoRA:
     """Apply a LoRA set to the tensor in input_reg, write to out_reg."""
 
     set_id: str
-    block_config: object  # BlockConfig or None
+    block_config: BlockConfig | None
     input_reg: int
     out_reg: int
 
@@ -47,7 +58,7 @@ class OpFilterDelta:
     input_reg: int
     backbone_reg: int
     t_factor: float
-    block_config: object  # BlockConfig or None
+    block_config: BlockConfig | None
     use_per_block: bool
     out_reg: int
 
@@ -59,9 +70,12 @@ class OpMergeWeights:
     branch_regs: tuple[int, ...]
     backbone_reg: int
     t_factor: float
-    block_config: object  # BlockConfig or None
+    block_config: BlockConfig | None
     use_per_block: bool
     out_reg: int
+
+
+_Op = OpApplyLoRA | OpFilterDelta | OpMergeWeights
 
 
 @dataclass(frozen=True)
@@ -70,10 +84,64 @@ class EvalPlan:
 
     ops:        Tuple of operations to execute in order.
     result_reg: Register holding the final output tensor.
+    dead_after: Per-op tuple of register ids safe to free after that op.
+                Enables eager release of intermediate GPU tensors.
     """
 
-    ops: tuple[OpApplyLoRA | OpFilterDelta | OpMergeWeights, ...]
+    ops: tuple[_Op, ...]
     result_reg: int
+    dead_after: tuple[tuple[int, ...], ...]
+
+
+# ---------------------------------------------------------------------------
+# Register liveness analysis
+# ---------------------------------------------------------------------------
+
+
+def _input_regs(op: _Op) -> tuple[int, ...]:
+    """Return all registers read by an operation."""
+    op_type = type(op)
+    if op_type is OpApplyLoRA:
+        return (op.input_reg,)
+    if op_type is OpFilterDelta:
+        return (op.input_reg, op.backbone_reg)
+    if op_type is OpMergeWeights:
+        return (*op.branch_regs, op.backbone_reg)
+    raise ValueError(f"Unknown op type: {op_type}")
+
+
+def _compute_liveness(
+    ops: tuple[_Op, ...],
+    result_reg: int,
+) -> tuple[tuple[int, ...], ...]:
+    """Compute which registers can be freed after each op.
+
+    For each register, finds the last op that reads it. After that op
+    executes, the register is dead and its tensor can be released.
+
+    Register 0 (base_batch) and result_reg are never freed — reg 0 is
+    caller-owned, and result_reg is returned to the caller.
+    """
+    n = len(ops)
+    if n == 0:
+        return ()
+
+    # last_use[reg] = index of last op that reads this register
+    last_use: dict[int, int] = {}
+    for i, op in enumerate(ops):
+        for reg in _input_regs(op):
+            last_use[reg] = i
+
+    # Never free register 0 (caller-owned base_batch) or the result register
+    last_use.pop(0, None)
+    last_use.pop(result_reg, None)
+
+    # Build dead_after: for each op index, which registers die
+    dead_lists: list[list[int]] = [[] for _ in range(n)]
+    for reg, last_idx in last_use.items():
+        dead_lists[last_idx].append(reg)
+
+    return tuple(tuple(d) for d in dead_lists)
 
 
 # ---------------------------------------------------------------------------
@@ -95,7 +163,7 @@ class _PlanCompiler:
     ) -> None:
         self._set_id_map = set_id_map
         self._arch = arch
-        self._ops: list[OpApplyLoRA | OpFilterDelta | OpMergeWeights] = []
+        self._ops: list[_Op] = []
         self._next_reg = 1  # 0 is reserved for base_batch
 
     def _alloc_reg(self) -> int:
@@ -107,7 +175,7 @@ class _PlanCompiler:
 
     def compile_node(
         self,
-        node: object,
+        node: RecipeNode,
         current_base_reg: int,
     ) -> int | list[int]:
         """Compile a recipe node, returning a register (or list for Compose)."""
@@ -127,7 +195,7 @@ class _PlanCompiler:
 
         raise ValueError(f"Unknown recipe node type: {type(node)}")
 
-    def _compile_lora(self, node: object, current_base_reg: int) -> int:
+    def _compile_lora(self, node: RecipeLoRA, current_base_reg: int) -> int:
         set_id = self._set_id_map.get(id(node))
         if set_id is None:
             raise RuntimeError(
@@ -136,36 +204,38 @@ class _PlanCompiler:
                 f"set_id_map before evaluation. RecipeLoRA loras: {node.loras!r}"
             )
         out = self._alloc_reg()
-        block_config = getattr(node, "block_config", None)
         self._ops.append(
             OpApplyLoRA(
                 set_id=set_id,
-                block_config=block_config,
+                block_config=node.block_config,
                 input_reg=current_base_reg,
                 out_reg=out,
             )
         )
         return out
 
-    def _compile_compose(self, node: object, current_base_reg: int) -> list[int]:
+    def _compile_compose(
+        self, node: RecipeCompose, current_base_reg: int
+    ) -> list[int]:
         branch_regs: list[int] = []
         for branch in node.branches:
             r = self.compile_node(branch, current_base_reg)
             branch_regs.append(r)
         return branch_regs
 
-    def _compile_merge(self, node: object, current_base_reg: int) -> int:
+    def _compile_merge(self, node: RecipeMerge, current_base_reg: int) -> int:
         from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
         # Evaluate base (may be chained merge or RecipeBase)
         if isinstance(node.base, RecipeMerge):
-            current_base_reg = self.compile_node(current_base_reg=current_base_reg, node=node.base)
+            current_base_reg = self.compile_node(node.base, current_base_reg)
         elif isinstance(node.base, RecipeBase):
             pass  # current_base_reg stays
         else:
             raise ValueError(f"Invalid base type in RecipeMerge: {type(node.base)}")
 
         # Resolve backbone
+        # AC: @exit-batched-eval ac-5
         if node.backbone is not None:
             backbone_reg = 0  # original base_batch
         else:
@@ -174,14 +244,15 @@ class _PlanCompiler:
         # Compile target
         target_result = self.compile_node(node.target, current_base_reg)
 
-        merge_block_config = getattr(node, "block_config", None)
+        merge_block_config = node.block_config
         use_per_block = merge_block_config is not None and self._arch is not None
 
         if isinstance(node.target, RecipeCompose):
             branch_regs = target_result  # list[int]
 
+            # AC: @exit-node ac-6
+            # Single-branch compose uses filter_delta (passthrough), not merge_weights
             if len(branch_regs) == 1:
-                # Single-branch compose → filter_delta
                 out = self._alloc_reg()
                 self._ops.append(
                     OpFilterDelta(
@@ -226,12 +297,9 @@ class _PlanCompiler:
         else:
             raise ValueError(f"Invalid target type in RecipeMerge: {type(node.target)}")
 
-    def build(self) -> EvalPlan:
-        raise RuntimeError("Call compile_plan() instead")
-
 
 def compile_plan(
-    recipe_node: object,
+    recipe_node: RecipeNode,
     set_id_map: dict[int, str],
     arch: str | None,
 ) -> EvalPlan:
@@ -239,6 +307,8 @@ def compile_plan(
 
     Walks the tree once and emits a sequence of operations that can be
     replayed for every batch chunk without redundant isinstance checks.
+    Also computes register liveness so execute_plan() can eagerly free
+    intermediate tensors.
 
     Args:
         recipe_node: Recipe tree root (typically RecipeMerge)
@@ -246,7 +316,7 @@ def compile_plan(
         arch: Architecture name for block classification (optional)
 
     Returns:
-        EvalPlan with ops tuple and result_reg
+        EvalPlan with ops tuple, result_reg, and dead_after liveness info
     """
     compiler = _PlanCompiler(set_id_map, arch)
     result = compiler.compile_node(recipe_node, current_base_reg=0)
@@ -259,7 +329,9 @@ def compile_plan(
             "Expected RecipeMerge or RecipeBase at root."
         )
 
-    return EvalPlan(ops=tuple(compiler._ops), result_reg=result)
+    ops = tuple(compiler._ops)
+    dead_after = _compute_liveness(ops, result)
+    return EvalPlan(ops=ops, result_reg=result, dead_after=dead_after)
 
 
 # ---------------------------------------------------------------------------
@@ -304,7 +376,7 @@ def execute_plan(
     # Build key_indices once (used by every OpApplyLoRA)
     key_indices = {k: i for i, k in enumerate(keys)}
 
-    for op in plan.ops:
+    for i, op in enumerate(plan.ops):
         # Use type(op) is X for pointer comparison (faster than isinstance)
         op_type = type(op)
 
@@ -348,6 +420,10 @@ def execute_plan(
         else:
             raise ValueError(f"Unknown op type: {op_type}")
 
+        # Release dead registers to free intermediate GPU tensors
+        for dead_reg in plan.dead_after[i]:
+            del regs[dead_reg]
+
     return regs[plan.result_reg]
 
 
@@ -360,7 +436,7 @@ def execute_plan(
 def evaluate_recipe(
     keys: list[str],
     base_batch: torch.Tensor,
-    recipe_node: object,
+    recipe_node: RecipeNode,
     loader: object,
     widen: object,
     set_id_map: dict[int, str],

@@ -29,9 +29,14 @@ def _base() -> RecipeBase:
 
 
 class TestSimpleLoRAThenFilter:
-    """Simple RecipeMerge + RecipeLoRA -> [OpApplyLoRA, OpFilterDelta]."""
+    """Simple RecipeMerge + RecipeLoRA -> [OpApplyLoRA, OpFilterDelta].
+
+    # AC: @exit-batched-eval ac-2
+    Single LoRA targets call filter_delta_batched with applied delta and backbone.
+    """
 
     def test_op_sequence(self):
+        """# AC: @exit-batched-eval ac-2"""
         base = _base()
         lora = _lora()
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -44,6 +49,7 @@ class TestSimpleLoRAThenFilter:
         assert type(plan.ops[1]) is OpFilterDelta
 
     def test_register_wiring(self):
+        """# AC: @exit-batched-eval ac-2"""
         base = _base()
         lora = _lora()
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -64,6 +70,7 @@ class TestSimpleLoRAThenFilter:
         assert plan.result_reg == op_filter.out_reg
 
     def test_t_factor_preserved(self):
+        """# AC: @merge-block-config ac-2"""
         base = _base()
         lora = _lora()
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=0.75)
@@ -76,9 +83,14 @@ class TestSimpleLoRAThenFilter:
 
 
 class TestComposeWithTwoBranches:
-    """RecipeCompose with 2 branches -> [OpApplyLoRA, OpApplyLoRA, OpMergeWeights]."""
+    """RecipeCompose with 2 branches -> [OpApplyLoRA, OpApplyLoRA, OpMergeWeights].
+
+    # AC: @exit-batched-eval ac-1
+    Compose targets call merge_weights_batched with all branch results and backbone.
+    """
 
     def test_op_sequence(self):
+        """# AC: @exit-batched-eval ac-1"""
         base = _base()
         lora1 = _lora("a.safetensors")
         lora2 = _lora("b.safetensors")
@@ -94,6 +106,7 @@ class TestComposeWithTwoBranches:
         assert type(plan.ops[2]) is OpMergeWeights
 
     def test_branch_regs(self):
+        """# AC: @exit-batched-eval ac-1"""
         base = _base()
         lora1 = _lora("a.safetensors")
         lora2 = _lora("b.safetensors")
@@ -111,9 +124,14 @@ class TestComposeWithTwoBranches:
 
 
 class TestChainedMerge:
-    """Chained RecipeMerge -> inner merge ops before outer."""
+    """Chained RecipeMerge -> inner merge ops before outer.
+
+    # AC: @exit-batched-eval ac-3
+    Chained RecipeMerge nodes evaluate inner merges first.
+    """
 
     def test_inner_before_outer(self):
+        """# AC: @exit-batched-eval ac-3"""
         base = _base()
         inner_lora = _lora("inner.safetensors")
         inner_merge = RecipeMerge(base=base, target=inner_lora, backbone=None, t_factor=1.0)
@@ -143,6 +161,7 @@ class TestChainedMerge:
         assert outer_filter.backbone_reg == inner_filter.out_reg
 
     def test_triple_chain(self):
+        """# AC: @exit-batched-eval ac-3"""
         base = _base()
         l1 = _lora("l1.safetensors")
         m1 = RecipeMerge(base=base, target=l1, backbone=None, t_factor=1.0)
@@ -163,9 +182,14 @@ class TestChainedMerge:
 
 
 class TestBackboneOverride:
-    """backbone override -> backbone_reg=0 (original base_batch)."""
+    """backbone override -> backbone_reg=0 (original base_batch).
+
+    # AC: @exit-batched-eval ac-5
+    RecipeMerge.backbone overrides the importance reference for WIDEN analysis.
+    """
 
     def test_backbone_uses_reg_zero(self):
+        """# AC: @exit-batched-eval ac-5"""
         base = _base()
         backbone_ref = _base()
         lora = _lora()
@@ -178,6 +202,7 @@ class TestBackboneOverride:
         assert op_filter.backbone_reg == 0
 
     def test_no_backbone_uses_current_base(self):
+        """# AC: @exit-batched-eval ac-5"""
         base = _base()
         lora = _lora()
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -190,7 +215,10 @@ class TestBackboneOverride:
         assert op_filter.backbone_reg == 0
 
     def test_chained_backbone_override_still_reg_zero(self):
-        """Even in a chained merge, backbone override points to reg 0."""
+        """Even in a chained merge, backbone override points to reg 0.
+
+        # AC: @exit-batched-eval ac-5
+        """
         base = _base()
         l1 = _lora("l1.safetensors")
         m1 = RecipeMerge(base=base, target=l1, backbone=None, t_factor=1.0)
@@ -212,9 +240,14 @@ class TestBackboneOverride:
 
 
 class TestSingleBranchCompose:
-    """Single-branch compose -> OpFilterDelta, not OpMergeWeights."""
+    """Single-branch compose -> OpFilterDelta, not OpMergeWeights.
+
+    # AC: @exit-node ac-6
+    Single-branch compose uses filter_delta (passthrough), not merge_weights.
+    """
 
     def test_single_branch_uses_filter(self):
+        """# AC: @exit-node ac-6"""
         base = _base()
         lora = _lora()
         compose = RecipeCompose(branches=(lora,))
@@ -229,9 +262,17 @@ class TestSingleBranchCompose:
 
 
 class TestPerBlockFlags:
-    """use_per_block pre-computation based on block_config and arch."""
+    """use_per_block pre-computation based on block_config and arch.
+
+    # AC: @merge-block-config ac-1
+    When RecipeMerge has block_config, per-block t_factor overrides are applied.
+
+    # AC: @merge-block-config ac-2
+    When no block_config is connected, global t_factor applies to all blocks.
+    """
 
     def test_no_block_config_no_per_block(self):
+        """# AC: @merge-block-config ac-2"""
         base = _base()
         lora = _lora()
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -243,6 +284,7 @@ class TestPerBlockFlags:
         assert op_filter.use_per_block is False
 
     def test_block_config_with_arch_enables_per_block(self):
+        """# AC: @merge-block-config ac-1"""
         from lib.recipe import BlockConfig
 
         base = _base()
@@ -260,6 +302,7 @@ class TestPerBlockFlags:
         assert op_filter.block_config is bc
 
     def test_block_config_without_arch_no_per_block(self):
+        """# AC: @merge-block-config ac-1"""
         from lib.recipe import BlockConfig
 
         base = _base()
@@ -308,6 +351,7 @@ class TestRecipeBaseAtRoot:
 
         assert len(plan.ops) == 0
         assert plan.result_reg == 0
+        assert plan.dead_after == ()
 
 
 class TestEvalPlanIsFrozen:
@@ -322,6 +366,7 @@ class TestEvalPlanIsFrozen:
         plan = compile_plan(merge, set_id_map, arch=None)
 
         assert isinstance(plan.ops, tuple)
+        assert isinstance(plan.dead_after, tuple)
 
     def test_frozen(self):
         base = _base()
@@ -332,9 +377,13 @@ class TestEvalPlanIsFrozen:
 
 
 class TestMergeAsTarget:
-    """RecipeMerge as target of outer merge produces OpFilterDelta."""
+    """RecipeMerge as target of outer merge produces OpFilterDelta.
+
+    # AC: @exit-batched-eval ac-3
+    """
 
     def test_merge_target_uses_filter(self):
+        """# AC: @exit-batched-eval ac-3"""
         base = _base()
         inner_lora = _lora("inner.safetensors")
         inner_merge = RecipeMerge(
@@ -354,3 +403,107 @@ class TestMergeAsTarget:
         assert type(plan.ops[2]) is OpFilterDelta  # outer filter (t=0.9)
         assert plan.ops[1].t_factor == 0.8
         assert plan.ops[2].t_factor == 0.9
+
+
+# ---------------------------------------------------------------------------
+# Register liveness / dead_after tests
+# ---------------------------------------------------------------------------
+
+
+class TestRegisterLiveness:
+    """Verify dead_after correctly identifies registers to free."""
+
+    def test_simple_merge_frees_lora_reg(self):
+        """After OpFilterDelta reads the LoRA reg, it should be freed."""
+        base = _base()
+        lora = _lora()
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+        set_id_map = {id(lora): "set1"}
+
+        plan = compile_plan(merge, set_id_map, arch=None)
+
+        # ops: [OpApplyLoRA(in=0, out=1), OpFilterDelta(in=1, bb=0, out=2)]
+        # reg 1 is last read at op[1], so dead_after[1] should contain reg 1
+        # reg 0 is never freed (caller-owned), reg 2 is result_reg (never freed)
+        assert plan.dead_after[0] == ()  # reg 1 still needed by op[1]
+        assert 1 in plan.dead_after[1]
+
+    def test_chained_merge_frees_inner_lora_reg(self):
+        """Inner LoRA reg is freed after inner filter reads it."""
+        base = _base()
+        l1 = _lora("l1.safetensors")
+        m1 = RecipeMerge(base=base, target=l1, backbone=None, t_factor=1.0)
+        l2 = _lora("l2.safetensors")
+        m2 = RecipeMerge(base=m1, target=l2, backbone=None, t_factor=1.0)
+        set_id_map = {id(l1): "s1", id(l2): "s2"}
+
+        plan = compile_plan(m2, set_id_map, arch=None)
+
+        # ops: [ApplyLoRA(in=0,out=1), Filter(in=1,bb=0,out=2),
+        #        ApplyLoRA(in=2,out=3), Filter(in=3,bb=2,out=4)]
+        # reg 1: last read at op[1] -> dead_after[1]
+        # reg 2: last read at op[3] -> dead_after[3]
+        # reg 3: last read at op[3] -> dead_after[3]
+        # reg 0: never freed, reg 4: result_reg never freed
+        assert 1 in plan.dead_after[1]
+        assert 2 in plan.dead_after[3] or 3 in plan.dead_after[3]
+
+    def test_compose_frees_branch_regs(self):
+        """Branch regs are freed after OpMergeWeights reads them."""
+        base = _base()
+        lora1 = _lora("a.safetensors")
+        lora2 = _lora("b.safetensors")
+        compose = RecipeCompose(branches=(lora1, lora2))
+        merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=1.0)
+        set_id_map = {id(lora1): "set1", id(lora2): "set2"}
+
+        plan = compile_plan(merge, set_id_map, arch=None)
+
+        # ops: [ApplyLoRA(in=0,out=1), ApplyLoRA(in=0,out=2),
+        #        MergeWeights(branches=(1,2),bb=0,out=3)]
+        # reg 1: last read at op[2] -> dead_after[2]
+        # reg 2: last read at op[2] -> dead_after[2]
+        dead_at_merge = set(plan.dead_after[2])
+        assert 1 in dead_at_merge
+        assert 2 in dead_at_merge
+
+    def test_result_reg_never_freed(self):
+        """The result register is never included in dead_after."""
+        base = _base()
+        lora = _lora()
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+        set_id_map = {id(lora): "set1"}
+
+        plan = compile_plan(merge, set_id_map, arch=None)
+
+        all_dead = set()
+        for d in plan.dead_after:
+            all_dead.update(d)
+        assert plan.result_reg not in all_dead
+
+    def test_reg_zero_never_freed(self):
+        """Register 0 (base_batch) is never included in dead_after."""
+        base = _base()
+        lora = _lora()
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+        set_id_map = {id(lora): "set1"}
+
+        plan = compile_plan(merge, set_id_map, arch=None)
+
+        all_dead = set()
+        for d in plan.dead_after:
+            all_dead.update(d)
+        assert 0 not in all_dead
+
+    def test_dead_after_length_matches_ops(self):
+        """dead_after should have one entry per op."""
+        base = _base()
+        l1 = _lora("l1.safetensors")
+        m1 = RecipeMerge(base=base, target=l1, backbone=None, t_factor=1.0)
+        l2 = _lora("l2.safetensors")
+        m2 = RecipeMerge(base=m1, target=l2, backbone=None, t_factor=1.0)
+        set_id_map = {id(l1): "s1", id(l2): "s2"}
+
+        plan = compile_plan(m2, set_id_map, arch=None)
+
+        assert len(plan.dead_after) == len(plan.ops)
