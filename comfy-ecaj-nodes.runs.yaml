@@ -871,8 +871,20 @@ runs:
   - _ulid: 01KH9Z9FWKJ53AWQP103WS0MBH
     workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 5
     started_at: 2026-02-12T22:24:34.707Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-12T22:24:34.707Z
+        completed_at: 2026-02-12T22:24:50.114Z
+        inputs:
+          feature_description: Add progress tracking to the WIDEN exit node using comfy.utils.ProgressBar.
+            Report per-batch-group progress during GPU evaluation, with potential for finer
+            per-chunk granularity.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-12T22:24:50.114Z
+        completed_at: 2026-02-12T22:24:50.114Z
     initiated_by: "@claude"
