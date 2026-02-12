@@ -2597,7 +2597,17 @@
     - cleanup
   vcs_refs: []
   created_at: 2026-02-12T23:53:43.861Z
-  notes: []
+  notes:
+    - _ulid: 01KHA4DCFB9KXEPMY6CGH2B1EN
+      created_at: 2026-02-12T23:54:05.163Z
+      author: "@claude"
+      content: "Outdated areas: OpSignature dropped affecting_sets field, executor.py split into 4 modules
+        (batch_groups/gpu_ops/per_block/recipe_eval + facade), recursive eval replaced by
+        compile-then-execute, project tree missing
+        analysis.py/block_classify.py/sparsity.py/block_config nodes, input naming changed from
+        block_strength/block_t_factor to generic block_config, set patch format uses tuple wrapping.
+        Specs capture the actual system accurately."
+      supersedes: null
   todos: []
 - _ulid: 01KHA4CVGHS4HG8J2CAMQR22NK
   slugs:
@@ -2670,25 +2680,25 @@
   created_at: 2026-02-12T23:53:54.192Z
   notes: []
   todos: []
-- title: Add test for comfyui-packaging ac-3 registry metadata
+- _ulid: 01KHA4D4KZQ3MBABRZ033Q4DGZ
+  slugs:
+    - test-comfy-registry
+  title: Add test for comfyui-packaging ac-3 registry metadata
+  type: task
   description: "@comfyui-packaging ac-3 says: pyproject.toml [tool.comfy] metadata displays as ECAJ
     Nodes with publisher ecaj. No test validates this. Add a test that reads pyproject.toml and
     asserts PublisherId=ecaj and DisplayName=ECAJ Nodes. Simple toml parsing assertion — prevents
     accidental metadata breakage before registry publishing."
-  type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  priority: 3
-  slugs:
-    - test-comfy-registry
-  tags:
-    - testing
-  depends_on: []
-  _ulid: 01KHA4D4KZQ3MBABRZ033Q4DGZ
   status: pending
   blocked_by: []
+  depends_on: []
   context: []
+  priority: 3
+  tags:
+    - testing
   vcs_refs: []
   created_at: 2026-02-12T23:53:57.119Z
   notes: []
