@@ -735,8 +735,21 @@ runs:
   - _ulid: 01KH8CDTJX4M0SAN024QCCZW9M
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 6
     started_at: 2026-02-12T07:35:39.357Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-12T07:35:39.357Z
+        completed_at: 2026-02-12T07:35:56.714Z
+        notes: "What worked: (1) Explore subagent for parallel codebase context gathering — got
+          comprehensive report on OpSignature, MockLoRALoader, recipe_eval, batch_groups in one
+          shot. (2) Test design correct on first attempt — identified need for
+          SetAwareMockLoRALoader + rank-1 deltas for exact factorization. (3) Clean linear workflow:
+          task start → implement → test → PR → review → merge → complete with no blockers."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-12T07:35:56.714Z
+        completed_at: 2026-02-12T07:35:56.714Z
     initiated_by: "@claude"
