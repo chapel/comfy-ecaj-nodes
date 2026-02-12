@@ -945,7 +945,7 @@ runs:
   - _ulid: 01KHA10X66V1GYFGCN7TC91MAT
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 6
     started_at: 2026-02-12T22:54:50.567Z
     step_results:
@@ -974,5 +974,11 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-12T22:55:07.753Z
-        completed_at: 2026-02-12T22:55:07.753Z
+        completed_at: 2026-02-12T22:55:17.241Z
+        notes: Searched all three friction points against specs, tasks, and inbox. None are currently
+          tracked. All three are untracked candidates.
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-12T22:55:17.241Z
+        completed_at: 2026-02-12T22:55:17.241Z
     initiated_by: "@claude"
