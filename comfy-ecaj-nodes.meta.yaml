@@ -865,4 +865,12 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KH7MPS72Z8R7PBZJZ1DECGJ9
+    type: friction
+    content: Tasks can get stuck in pending_review between sessions when PR merges but task complete is
+      never called. Session start should check for pending_review tasks and prompt completion.
+    created_at: 2026-02-12T00:41:07.042Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
