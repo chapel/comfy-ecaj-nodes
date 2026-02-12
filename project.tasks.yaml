@@ -2233,23 +2233,23 @@
   created_at: 2026-02-11T23:01:00.641Z
   notes: []
   todos: []
-- title: Audit MockModelPatcher API surfaces against real ComfyUI ModelPatcher
+- _ulid: 01KH7QY3F9CXXZP8N274J9F5AE
+  slugs: []
+  title: Audit MockModelPatcher API surfaces against real ComfyUI ModelPatcher
   type: task
-  priority: 3
-  spec_ref: null
-  tags:
-    - testing
-    - review-finding
   description: Audit MockModelPatcher for mock/production divergences. The key prefix mismatch bug
     (model_state_dict prefixed vs model.diffusion_model.state_dict unprefixed) was invisible to
     tests because the mock faithfully reproduced the same inconsistency. Review all MockModelPatcher
     API surfaces against real ComfyUI ModelPatcher behavior to catch similar hidden mismatches.
-  _ulid: 01KH7QY3F9CXXZP8N274J9F5AE
-  slugs: []
+  spec_ref: "@comfyui-mocking"
   status: pending
   blocked_by: []
   depends_on: []
   context: []
+  priority: 3
+  tags:
+    - testing
+    - review-finding
   vcs_refs: []
   created_at: 2026-02-12T01:37:32.649Z
   notes: []
