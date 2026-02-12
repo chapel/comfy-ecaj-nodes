@@ -783,7 +783,7 @@ runs:
   - _ulid: 01KH9NKY44QW5Q1YBJ0FNBX5VY
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 4
+    current_step: 5
     total_steps: 6
     started_at: 2026-02-12T19:35:31.205Z
     step_results:
@@ -821,5 +821,11 @@ runs:
       - step_index: 4
         status: completed
         started_at: 2026-02-12T19:36:22.682Z
-        completed_at: 2026-02-12T19:36:22.682Z
+        completed_at: 2026-02-12T19:40:28.338Z
+        notes: "User approved: (1) MEMORY.md principle about subagent quantitative claims. (2) MEMORY.md
+          note about action-to-command mapping. User skipped: (3) submit+complete friction."
+      - step_index: 5
+        status: completed
+        started_at: 2026-02-12T19:40:28.338Z
+        completed_at: 2026-02-12T19:40:28.338Z
     initiated_by: "@claude"
