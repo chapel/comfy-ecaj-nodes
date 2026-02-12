@@ -206,9 +206,8 @@ def _apply_widen_filter_per_block(
         # Apply filter
         sub_result = widen_instance.filter_delta_batched(sub_lora, sub_backbone)
 
-        # Write back to result
-        for i, idx in enumerate(indices):
-            result[idx] = sub_result[i]
+        # Write back to result using indexed assignment
+        result[indices] = sub_result
 
     return result
 
@@ -278,8 +277,7 @@ def _apply_widen_merge_per_block(
         # Apply merge
         sub_result = widen_instance.merge_weights_batched(sub_branches, sub_backbone)
 
-        # Write back to result
-        for i, idx in enumerate(indices):
-            result[idx] = sub_result[i]
+        # Write back to result using indexed assignment
+        result[indices] = sub_result
 
     return result

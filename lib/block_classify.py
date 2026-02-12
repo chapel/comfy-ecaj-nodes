@@ -121,10 +121,10 @@ def classify_key_zimage(key: str) -> str | None:
             return "L25-29"
         return None
 
-    # Match refiners
-    if "noise_refiner" in key:
+    # Match refiners (anchored prefix match to avoid substring false positives)
+    if key.startswith("noise_refiner"):
         return "noise_refiner"
-    if "context_refiner" in key:
+    if key.startswith("context_refiner"):
         return "context_refiner"
 
     # No block match
@@ -150,10 +150,12 @@ def get_block_classifier(arch: str) -> Callable[[str], str | None] | None:
     return _CLASSIFIERS.get(arch)
 
 
+@functools.lru_cache(maxsize=4096)
 def classify_key(key: str, arch: str) -> str | None:
     """Classify a parameter key into a block group for the given architecture.
 
     Convenience function that looks up and applies the appropriate classifier.
+    Cached to avoid repeated dict lookups when called in per-key loops.
 
     Args:
         key: Parameter key

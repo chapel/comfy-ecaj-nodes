@@ -344,6 +344,69 @@ class TestAC3OffsetIndexing:
 
         loader.cleanup()
 
+    def test_scale_with_explicit_alpha(self):
+        """DeltaSpec scale uses alpha from .alpha tensor when present."""
+        # AC: @zimage-loader ac-3
+        # Rank=8, alpha=4 → scale = strength * 4 / 8 = strength * 0.5
+        with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+            tensors = {
+                "transformer.layers.0.attention.to_q.lora_A.weight": torch.randn(8, 64),
+                "transformer.layers.0.attention.to_q.lora_B.weight": torch.randn(32, 8),
+                "transformer.layers.0.attention.to_q.alpha": torch.tensor(4.0),
+                "transformer.layers.0.attention.to_k.lora_A.weight": torch.randn(8, 64),
+                "transformer.layers.0.attention.to_k.lora_B.weight": torch.randn(32, 8),
+                "transformer.layers.0.attention.to_k.alpha": torch.tensor(4.0),
+                "transformer.layers.0.attention.to_v.lora_A.weight": torch.randn(8, 64),
+                "transformer.layers.0.attention.to_v.lora_B.weight": torch.randn(32, 8),
+                "transformer.layers.0.attention.to_v.alpha": torch.tensor(4.0),
+            }
+            save_file(tensors, f.name)
+            path = f.name
+
+        try:
+            loader = ZImageLoader()
+            loader.load(path, strength=1.0)
+
+            keys = list(loader.affected_keys)
+            key_indices = {k: i for i, k in enumerate(keys)}
+            specs = loader.get_delta_specs(keys, key_indices)
+
+            # scale = 1.0 * 4 / 8 = 0.5
+            assert len(specs) == 3
+            for spec in specs:
+                assert abs(spec.scale - 0.5) < 1e-6, f"Expected scale=0.5, got {spec.scale}"
+
+            loader.cleanup()
+        finally:
+            Path(path).unlink(missing_ok=True)
+
+    def test_scale_default_alpha_equals_rank(self):
+        """Without .alpha tensor, alpha defaults to rank (scale = strength)."""
+        # AC: @zimage-loader ac-3
+        with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+            tensors = {
+                "transformer.layers.0.attention.to_q.lora_A.weight": torch.randn(8, 64),
+                "transformer.layers.0.attention.to_q.lora_B.weight": torch.randn(32, 8),
+            }
+            save_file(tensors, f.name)
+            path = f.name
+
+        try:
+            loader = ZImageLoader()
+            loader.load(path, strength=0.7)
+
+            keys = list(loader.affected_keys)
+            key_indices = {k: i for i, k in enumerate(keys)}
+            specs = loader.get_delta_specs(keys, key_indices)
+
+            # Default alpha = rank, so scale = strength = 0.7
+            assert len(specs) == 1
+            assert abs(specs[0].scale - 0.7) < 1e-6, f"Expected scale=0.7, got {specs[0].scale}"
+
+            loader.cleanup()
+        finally:
+            Path(path).unlink(missing_ok=True)
+
     def test_standard_specs_have_no_offset(self, qkv_lora_file: str):
         """Standard (non-QKV) DeltaSpecs have offset=None."""
         # AC: @zimage-loader ac-3

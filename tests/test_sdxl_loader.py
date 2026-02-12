@@ -71,12 +71,25 @@ def sdxl_lora_with_attention_keys() -> str:
 
 @pytest.fixture
 def sdxl_lora_with_alpha() -> str:
-    """Create a LoRA file with alpha metadata."""
+    """Create a LoRA file without explicit alpha (defaults to rank)."""
     with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
-        # Rank 8, alpha would typically be stored as metadata
         tensors = {
             "lora_unet_input_blocks_0_0_proj.lora_up.weight": torch.randn(64, 8),
             "lora_unet_input_blocks_0_0_proj.lora_down.weight": torch.randn(8, 32),
+        }
+        save_file(tensors, f.name)
+        return f.name
+
+
+@pytest.fixture
+def sdxl_lora_with_explicit_alpha() -> str:
+    """Create a LoRA file with .alpha tensor keys where alpha != rank."""
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        # Rank 8, alpha 16 → scale = strength * 16 / 8 = strength * 2.0
+        tensors = {
+            "lora_unet_input_blocks_0_0_proj.lora_up.weight": torch.randn(64, 8),
+            "lora_unet_input_blocks_0_0_proj.lora_down.weight": torch.randn(8, 32),
+            "lora_unet_input_blocks_0_0_proj.alpha": torch.tensor(16.0),
         }
         save_file(tensors, f.name)
         return f.name
@@ -228,6 +241,23 @@ class TestAC2DeltaSpecContents:
 
         loader.cleanup()
         Path(sdxl_lora_with_alpha).unlink(missing_ok=True)
+
+    def test_deltaspec_scale_with_explicit_alpha(self, sdxl_lora_with_explicit_alpha: str):
+        """DeltaSpec scale uses alpha from .alpha tensor when present."""
+        # AC: @sdxl-loader ac-2
+        # Fixture: rank=8, alpha=16, strength=0.5 → scale = 0.5 * 16 / 8 = 1.0
+        loader = SDXLLoader()
+        loader.load(sdxl_lora_with_explicit_alpha, strength=0.5)
+
+        keys = list(loader.affected_keys)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs = loader.get_delta_specs(keys, key_indices)
+
+        assert len(specs) == 1
+        assert abs(specs[0].scale - 1.0) < 1e-6, f"Expected scale=1.0, got {specs[0].scale}"
+
+        loader.cleanup()
+        Path(sdxl_lora_with_explicit_alpha).unlink(missing_ok=True)
 
 
 # ---------------------------------------------------------------------------
