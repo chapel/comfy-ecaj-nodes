@@ -2443,6 +2443,7 @@
     - perf
   vcs_refs: []
   created_at: 2026-02-12T18:45:44.165Z
+  started_at: 2026-02-12T19:16:19.723Z
   notes:
     - _ulid: 01KH9JS0HPS7E2PT0XMRKMFTJ1
       created_at: 2026-02-12T18:45:51.798Z
@@ -2454,8 +2455,15 @@
         on low-VRAM GPUs. The OOM backoff in gpu_ops.py should handle pressure anyway, so aggressive
         pre-emptive cleanup may be unnecessary. Test on 8GB GPU to validate."
       supersedes: null
+    - _ulid: 01KH9MMCS9HAHMN12GZ7Z0Y0MR
+      created_at: 2026-02-12T19:18:17.642Z
+      author: "@claude"
+      content: "Done: Moved gc.collect() + empty_cache() out of the per-group loop to after all groups
+        complete. Updated @memory-management ac-2 spec to match. Updated test docstrings/names. OOM
+        backoff in chunked_evaluation already handles per-group memory pressure. 525 tests pass,
+        ruff clean."
+      supersedes: null
   todos: []
-  started_at: 2026-02-12T19:16:19.723Z
 - _ulid: 01KH9KHQGTXPJFYNAVNVWF7PD0
   slugs: []
   title: Pre-compile recipe tree into flat evaluation plan to avoid per-chunk traversal
