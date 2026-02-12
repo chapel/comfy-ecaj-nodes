@@ -927,4 +927,12 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHA138MCR7XFAA3329WXREQ8
+    type: success
+    content: spec-plan manual path is efficient for single-AC additions — avoids import document
+      overhead while still going through design workflow
+    created_at: 2026-02-12T22:56:07.820Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
