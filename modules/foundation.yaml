@@ -140,7 +140,7 @@ features:
         created: 2026-02-11T00:05:30.140Z
         status:
           maturity: draft
-          implementation: implemented
+          implementation: in_progress
       - _ulid: 01KH508VD63383F1GR9V1X9F9K
         slugs:
           - node-graph-testing
