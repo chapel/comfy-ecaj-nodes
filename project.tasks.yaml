@@ -2252,5 +2252,13 @@
     - review-finding
   vcs_refs: []
   created_at: 2026-02-12T01:37:32.649Z
-  notes: []
+  notes:
+    - _ulid: 01KH7QYN6FPFNY625PY4N9AG5X
+      created_at: 2026-02-12T01:37:50.799Z
+      author: "@claude"
+      content: The key prefix mismatch bug was invisible because the mock faithfully reproduced
+        production's inconsistency. Audit all MockModelPatcher API surfaces against real ComfyUI
+        ModelPatcher to catch similar hidden mismatches. Goes beyond @fix-test-quality (clone UUID,
+        placeholder tests) to cover the full mock surface area.
+      supersedes: null
   todos: []
