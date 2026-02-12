@@ -2251,7 +2251,7 @@
     tests because the mock faithfully reproduced the same inconsistency. Review all MockModelPatcher
     API surfaces against real ComfyUI ModelPatcher behavior to catch similar hidden mismatches.
   spec_ref: "@comfyui-mocking"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on: []
   context: []
