@@ -2251,7 +2251,7 @@
     tests because the mock faithfully reproduced the same inconsistency. Review all MockModelPatcher
     API surfaces against real ComfyUI ModelPatcher behavior to catch similar hidden mismatches.
   spec_ref: "@comfyui-mocking"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -2282,3 +2282,6 @@
         fix-test-quality already addressed."
       supersedes: null
   todos: []
+  completed_at: 2026-02-12T05:22:53.036Z
+  closed_reason: Audit found no actionable divergences. All 7 mock API surfaces match real ComfyUI.
+    Missing methods (patch_weight_to_device, unpatch_model) are intentionally out of scope.
