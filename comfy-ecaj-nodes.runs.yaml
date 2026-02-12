@@ -945,7 +945,7 @@ runs:
   - _ulid: 01KHA10X66V1GYFGCN7TC91MAT
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 3
+    current_step: 4
     total_steps: 6
     started_at: 2026-02-12T22:54:50.567Z
     step_results:
@@ -980,5 +980,15 @@ runs:
       - step_index: 3
         status: completed
         started_at: 2026-02-12T22:55:17.241Z
-        completed_at: 2026-02-12T22:55:17.241Z
+        completed_at: 2026-02-12T22:55:24.932Z
+        notes: "Proposals: 1. PR self-approval workaround — The pr-review skill should detect single-account
+          repos and skip --approve, going straight to --comment. Scope: small (one conditional in
+          the skill). 2. pytest not in PATH — Not worth tracking; it's an environment setup detail,
+          not a systemic issue. Using .venv/bin/pytest is fine. 3. Workflow input discovery — This
+          is a kspec UX issue. Could be improved by showing required inputs in the step description.
+          Scope: medium (kspec CLI change). Not in our scope to fix here."
+      - step_index: 4
+        status: completed
+        started_at: 2026-02-12T22:55:24.932Z
+        completed_at: 2026-02-12T22:55:24.932Z
     initiated_by: "@claude"
