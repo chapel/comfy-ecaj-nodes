@@ -945,7 +945,7 @@ runs:
   - _ulid: 01KHA10X66V1GYFGCN7TC91MAT
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-12T22:54:50.567Z
     step_results:
@@ -963,5 +963,16 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-12T22:54:59.652Z
-        completed_at: 2026-02-12T22:54:59.652Z
+        completed_at: 2026-02-12T22:55:07.753Z
+        notes: 1. Self-approval blocked on PR review — the pr-review agent tried gh pr review --approve but
+          GitHub blocks self-approval. Had to fall back to --comment. This happens every time we use
+          a single GitHub account for both authoring and reviewing. 2. Workflow step inputs were
+          trial-and-error — e.g. kspec workflow next required --input key=value but the required key
+          names aren't obvious until the error message shows them. Minor friction but repeated
+          across steps. 3. No pytest in PATH — had to use .venv/bin/pytest instead of python -m
+          pytest. Small but recurrent.
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-12T22:55:07.753Z
+        completed_at: 2026-02-12T22:55:07.753Z
     initiated_by: "@claude"
