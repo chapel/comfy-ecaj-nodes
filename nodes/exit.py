@@ -426,11 +426,11 @@ class WIDENExitNode:
 
                 merged_state.update(group_results)
 
-                # AC: @memory-management ac-2
-                # Cleanup between groups: gc.collect() and empty_cache()
-                gc.collect()
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
+            # AC: @memory-management ac-2
+            # Cleanup after all groups complete (OOM backoff handles per-group pressure)
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
 
         finally:
             # AC: @memory-management ac-3

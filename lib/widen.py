@@ -347,68 +347,27 @@ class WIDEN:
             [B, *param_shape] -- backbone + filtered delta
         """
         try:
-            with torch.no_grad():
-                delta = lora_applied - backbone
+            delta = lora_applied - backbone
 
-                if self.t_factor < 0:
-                    return backbone + delta
+            if self.t_factor < 0:
+                return backbone + delta
 
-                eps = self.numerical_config.get_adaptive_epsilon(delta)
+            eps = self.numerical_config.get_adaptive_epsilon(delta)
 
-                # 1D path (biases, norms) -- ndim=2 means [B, features]
-                if lora_applied.ndim == 2:
-                    mag_delta = torch.abs(delta)
+            # 1D path (biases, norms) -- ndim=2 means [B, features]
+            if lora_applied.ndim == 2:
+                mag_delta = torch.abs(delta)
 
-                    # Per-sample variance check -- flat samples pass through
-                    var = mag_delta.var(dim=1, keepdim=True)  # [B, 1]
-                    flat_mask = var < eps  # [B, 1] bool
-
-                    # Early exit only if ALL samples are flat
-                    if flat_mask.all():
-                        return backbone + delta
-
-                    importance = self.ranker.rank_weights_batched(mag_delta)
-                    mean_importance = importance.mean(dim=1, keepdim=True)
-                    threshold = self.t_factor * mean_importance
-                    threshold = torch.clamp(threshold, min=eps)
-
-                    mask = torch.where(
-                        importance >= threshold,
-                        torch.ones_like(importance),
-                        importance / threshold,
-                    )
-                    mask = torch.nan_to_num(mask, nan=1.0, posinf=1.0, neginf=0.0)
-
-                    # Blend: flat samples get ones mask (passthrough), others get filtered
-                    mask = torch.where(flat_mask, torch.ones_like(mask), mask)
-
-                    return backbone + mask * delta
-
-                # 2D+ path
-                m_lora, D_lora = self._disentangle_batched(lora_applied)
-                m_base, D_base = self._disentangle_batched(backbone)
-
-                delta_m = torch.abs(m_lora - m_base)
-                delta_D = self.divergence_calc.compute_direction_divergence_batched(
-                    D_lora, D_base
-                )
-
-                # Per-sample variance check
-                combined_raw = delta_m + delta_D
-                spatial_dims = tuple(range(1, combined_raw.ndim))
-                var = combined_raw.var(dim=spatial_dims, keepdim=True)  # [B, 1, ...]
-                flat_mask = var < eps  # [B, 1, ...] bool
+                # Per-sample variance check -- flat samples pass through
+                var = mag_delta.var(dim=1, keepdim=True)  # [B, 1]
+                flat_mask = var < eps  # [B, 1] bool
 
                 # Early exit only if ALL samples are flat
                 if flat_mask.all():
                     return backbone + delta
 
-                ranked_m = self.ranker.rank_weights_batched(delta_m)
-                ranked_D = self.ranker.rank_weights_batched(delta_D)
-                importance = (ranked_m + ranked_D) / 2
-
-                spatial_dims = tuple(range(1, importance.ndim))
-                mean_importance = importance.mean(dim=spatial_dims, keepdim=True)
+                importance = self.ranker.rank_weights_batched(mag_delta)
+                mean_importance = importance.mean(dim=1, keepdim=True)
                 threshold = self.t_factor * mean_importance
                 threshold = torch.clamp(threshold, min=eps)
 
@@ -420,10 +379,50 @@ class WIDEN:
                 mask = torch.nan_to_num(mask, nan=1.0, posinf=1.0, neginf=0.0)
 
                 # Blend: flat samples get ones mask (passthrough), others get filtered
-                # flat_mask shape [B,1,...] broadcasts to match mask shape
                 mask = torch.where(flat_mask, torch.ones_like(mask), mask)
 
                 return backbone + mask * delta
+
+            # 2D+ path
+            m_lora, D_lora = self._disentangle_batched(lora_applied)
+            m_base, D_base = self._disentangle_batched(backbone)
+
+            delta_m = torch.abs(m_lora - m_base)
+            delta_D = self.divergence_calc.compute_direction_divergence_batched(
+                D_lora, D_base
+            )
+
+            # Per-sample variance check
+            combined_raw = delta_m + delta_D
+            spatial_dims = tuple(range(1, combined_raw.ndim))
+            var = combined_raw.var(dim=spatial_dims, keepdim=True)  # [B, 1, ...]
+            flat_mask = var < eps  # [B, 1, ...] bool
+
+            # Early exit only if ALL samples are flat
+            if flat_mask.all():
+                return backbone + delta
+
+            ranked_m = self.ranker.rank_weights_batched(delta_m)
+            ranked_D = self.ranker.rank_weights_batched(delta_D)
+            importance = (ranked_m + ranked_D) / 2
+
+            spatial_dims = tuple(range(1, importance.ndim))
+            mean_importance = importance.mean(dim=spatial_dims, keepdim=True)
+            threshold = self.t_factor * mean_importance
+            threshold = torch.clamp(threshold, min=eps)
+
+            mask = torch.where(
+                importance >= threshold,
+                torch.ones_like(importance),
+                importance / threshold,
+            )
+            mask = torch.nan_to_num(mask, nan=1.0, posinf=1.0, neginf=0.0)
+
+            # Blend: flat samples get ones mask (passthrough), others get filtered
+            # flat_mask shape [B,1,...] broadcasts to match mask shape
+            mask = torch.where(flat_mask, torch.ones_like(mask), mask)
+
+            return backbone + mask * delta
 
         except torch.cuda.OutOfMemoryError:
             raise  # Let OOM propagate
@@ -473,12 +472,11 @@ class WIDEN:
             m_backbone, D_backbone = self._disentangle_batched(backbone)
             m_list, D_list, delta_W_list = [], [], []
 
-            with torch.no_grad():
-                for W in weights_list:
-                    m, D = self._disentangle_batched(W)
-                    m_list.append(m)
-                    D_list.append(D)
-                    delta_W_list.append(W - backbone)
+            for W in weights_list:
+                m, D = self._disentangle_batched(W)
+                m_list.append(m)
+                D_list.append(D)
+                delta_W_list.append(W - backbone)
 
             # Step 2: Compute divergences
             delta_m_list = [torch.abs(m - m_backbone) for m in m_list]
