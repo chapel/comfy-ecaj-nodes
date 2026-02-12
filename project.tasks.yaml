@@ -2358,21 +2358,32 @@
         that never need gradients."
       supersedes: null
   todos: []
-- title: Reduce unnecessary .clone() calls in WIDEN hot paths
+- _ulid: 01KH9HB0QNXSS23B5BN1KS3XKW
+  slugs: []
+  title: Reduce unnecessary .clone() calls in WIDEN hot paths
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  priority: 2
-  slugs: []
-  tags:
-    - perf
-  depends_on: []
-  _ulid: 01KH9HB0QNXSS23B5BN1KS3XKW
   status: pending
   blocked_by: []
+  depends_on: []
   context: []
+  priority: 2
+  tags:
+    - perf
   vcs_refs: []
   created_at: 2026-02-12T18:20:44.661Z
-  notes: []
+  notes:
+    - _ulid: 01KH9HB84SEANGFYKETG6QSDZV
+      created_at: 2026-02-12T18:20:52.249Z
+      author: "@claude"
+      content: "Implementation notes: Clones identified at: (1) widen.py:172 filter_delta_batched — clones
+        base_batch before computation. (2) widen.py:463 merge_weights_batched — clones backbone. (3)
+        per_block.py:189 filter_per_block — clones lora_applied. (4) per_block.py:260
+        merge_per_block — clones backbone. Need to verify which clones are needed for correctness
+        (input tensor reuse downstream) vs purely redundant. Consider using in-place ops or
+        zeros_like + selective addition instead. Research needed on whether callers depend on the
+        input tensors being unmodified."
+      supersedes: null
   todos: []
