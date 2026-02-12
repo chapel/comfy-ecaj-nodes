@@ -871,7 +871,7 @@ runs:
   - _ulid: 01KH9Z9FWKJ53AWQP103WS0MBH
     workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 5
     started_at: 2026-02-12T22:24:34.707Z
     step_results:
@@ -886,5 +886,9 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-12T22:24:50.114Z
-        completed_at: 2026-02-12T22:24:50.114Z
+        completed_at: 2026-02-12T22:28:11.626Z
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-12T22:28:11.626Z
+        completed_at: 2026-02-12T22:28:11.626Z
     initiated_by: "@claude"
