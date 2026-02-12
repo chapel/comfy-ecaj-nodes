@@ -881,4 +881,13 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KH89KAN9WEDS2WSA6R37NS9M
+    type: success
+    content: "Parallel 3-agent research pattern for audit tasks: launch mock-impl, real-API, and
+      usage-pattern agents simultaneously. One round produced comprehensive audit with no follow-up
+      needed. Good for any comparison/divergence analysis."
+    created_at: 2026-02-12T06:46:13.929Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
