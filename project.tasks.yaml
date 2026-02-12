@@ -1851,9 +1851,16 @@
     - review-finding
   vcs_refs: []
   created_at: 2026-02-11T08:38:55.017Z
-  notes: []
-  todos: []
   started_at: 2026-02-12T06:03:03.146Z
+  notes:
+    - _ulid: 01KH875GJCM6GSTW6S8TWN5BW2
+      created_at: 2026-02-12T06:03:44.077Z
+      author: "@claude"
+      content: "Pivoted from CI lint to process enforcement per user preference. Added guidance to
+        AGENTS.md (rule #7), local-review (expanded fluff test criteria with examples), and
+        pr-review (AC coverage rejects placeholders). Committed directly to main."
+      supersedes: null
+  todos: []
 - _ulid: 01KH5XN0ZP4N73QZ2YPVX0RJ2D
   slugs: []
   title: Harden block_classify.py key matching with anchored patterns
