@@ -1993,7 +1993,7 @@
     transfers. Priority order: remove per-chunk cleanup (30-40% win), pre-group by block (4x fewer
     groups), pre-build index dict, add pin_memory."
   spec_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -2042,6 +2042,8 @@
         for async transfers on large batches. Fix: add pin_memory option in gpu_ops.py:273-274."
       supersedes: null
   todos: []
+  completed_at: 2026-02-12T00:04:54.319Z
+  closed_reason: null
 - _ulid: 01KH70WT78G1NNBJCNC9PH7JDC
   slugs: []
   title: Add unit tests for LoRA alpha reading from safetensors
