@@ -1,9 +1,1 @@
-inbox:
-  - _ulid: 01KH9F9ZQ0BGSWKQHK48D7JBXC
-    text: Wrap evaluate_recipe and merge_weights_batched in torch.inference_mode() — autograd graphs
-      currently built for pure inference ops, adding CPU overhead and memory pressure. Low effort,
-      high impact perf fix. Affects recipe_eval.py:evaluate_recipe and
-      widen.py:merge_weights_batched (backbone disentanglement outside no_grad block).
-    created_at: 2026-02-12T17:45:13.696Z
-    tags: []
-    added_by: "@claude"
+inbox: []
