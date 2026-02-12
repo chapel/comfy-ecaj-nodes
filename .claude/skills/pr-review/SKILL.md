@@ -76,6 +76,7 @@ it('should error when no PR exists', () => { ... });
 - Read spec ACs from `kspec task get @task-ref`
 - Search test files for `// AC: @spec-ref ac-N` annotations
 - Flag any ACs without test coverage
+- **Reject placeholder tests** — AC-annotated tests with `pass`-only bodies, `assert True`, or no assertions are not coverage. They must validate observable behavior.
 
 ### 2. Spec Alignment
 

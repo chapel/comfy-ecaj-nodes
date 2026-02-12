@@ -70,6 +70,7 @@ ln -s $(pwd) /path/to/ComfyUI/custom_nodes/comfy-ecaj-nodes
 4. **Check dependencies** — Tasks have `depends_on` relationships; complete prerequisites first.
 5. **Always confirm** — Ask before creating or modifying spec items.
 6. **Batch mutations** — Use `kspec batch` for 2+ sequential write operations (one atomic commit).
+7. **No placeholder tests** — Every `test_` function must assert observable behavior. Never commit `pass`-only bodies, `assert True`, or tests with no assertions. If you can't write the real test yet, don't write the function.
 
 ## Project Structure
 

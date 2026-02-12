@@ -70,8 +70,22 @@ All tests must properly validate their intended purpose.
 - Tests that always pass regardless of implementation
 - Tests that only verify implementation details
 - Tests that mock everything and verify nothing
+- **Placeholder tests** — `pass`-only bodies, `assert True`, or missing assertions
 
-**Litmus test:** Would this test fail if the feature breaks?
+**Placeholder examples (MUST reject):**
+```python
+def test_feature():
+    pass
+
+def test_feature():
+    result = run_feature()
+    # no assertion — proves nothing
+
+def test_feature():
+    assert True
+```
+
+**Litmus test:** Would this test fail if the feature breaks? If the test body has no assertion against observable behavior, it's a placeholder.
 
 ### 3. Test Strategy (Advisory)
 
