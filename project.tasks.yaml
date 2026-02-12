@@ -2443,21 +2443,33 @@
         pre-emptive cleanup may be unnecessary. Test on 8GB GPU to validate."
       supersedes: null
   todos: []
-- title: Pre-compile recipe tree into flat evaluation plan to avoid per-chunk traversal
+- _ulid: 01KH9KHQGTXPJFYNAVNVWF7PD0
+  slugs: []
+  title: Pre-compile recipe tree into flat evaluation plan to avoid per-chunk traversal
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  priority: 2
-  slugs: []
-  tags:
-    - perf
-  depends_on: []
-  _ulid: 01KH9KHQGTXPJFYNAVNVWF7PD0
   status: pending
   blocked_by: []
+  depends_on: []
   context: []
+  priority: 2
+  tags:
+    - perf
   vcs_refs: []
   created_at: 2026-02-12T18:59:21.749Z
-  notes: []
+  notes:
+    - _ulid: 01KH9KJ13R6X9WXNY18JN5R9E6
+      created_at: 2026-02-12T18:59:31.576Z
+      author: "@claude"
+      content: "Implementation notes: recipe_eval.py:evaluate_recipe() recursively traverses the recipe
+        tree (via _eval_node) for every batch chunk. The tree structure is identical across chunks —
+        only the tensor data changes. With batch_size=8 and 1000 params → ~125 redundant tree walks.
+        Approach: compile recipe tree into a flat list of operations (e.g. [ApplyLoraSet(set_id,
+        strength), Filter(t_factor), Compose(method), Merge(method)]) during analysis phase. Then
+        execute the plan per-chunk without recursion. This also opens the door to plan-level
+        optimizations (e.g. fusing consecutive filter+merge). Medium effort — requires new data
+        structures and refactoring the eval dispatch."
+      supersedes: null
   todos: []
