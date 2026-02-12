@@ -1782,7 +1782,7 @@
     to avoid repeated classification loops in per_block.py. (2) Replace per-index writeback loops in
     per-block merge/filter with indexed assignment (result[indices] = sub_result)."
   spec_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -1803,6 +1803,8 @@
         indexed tensor assignment instead of Python loops."
       supersedes: null
   todos: []
+  completed_at: 2026-02-12T00:28:59.239Z
+  closed_reason: null
 - _ulid: 01KH5XMW1P2P2PKWR4NFHT7W1H
   slugs: []
   title: "DRY block config nodes: extract shared slider schema and packing helper"
@@ -2077,6 +2079,7 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: null
   depends_on: []
   context: []
   priority: 2
@@ -2086,6 +2089,7 @@
   vcs_refs: []
   created_at: 2026-02-11T18:54:53.160Z
   started_at: 2026-02-12T00:21:35.114Z
+  completed_at: 2026-02-12T00:28:57.810Z
   notes:
     - _ulid: 01KH70X1M1S20E8QECK2ARVN6N
       created_at: 2026-02-11T18:55:00.737Z
@@ -2098,8 +2102,6 @@
         tests/test_sdxl_loader.py, tests/test_zimage_loader.py."
       supersedes: null
   todos: []
-  completed_at: 2026-02-12T00:28:57.810Z
-  closed_reason: null
 - _ulid: 01KH731J1SG2XVAKCSJNK0QTPA
   slugs: []
   title: Fix device mismatch in chunked_evaluation torch.stack
