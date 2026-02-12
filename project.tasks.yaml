@@ -2424,7 +2424,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -2454,6 +2454,8 @@
         squaring, making fp64 redundant. All 525 tests pass.
       supersedes: null
   todos: []
+  completed_at: 2026-02-12T19:56:32.311Z
+  closed_reason: "safe_norm default flipped to use_fp64=False, merged in PR #40"
 - _ulid: 01KH9JRS35WA50NMTNPY8KSWXG
   slugs: []
   title: Reduce gc.collect/cuda.empty_cache frequency in exit node evaluation loop
