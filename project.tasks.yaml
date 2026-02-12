@@ -1815,6 +1815,7 @@
   spec_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "Factory extracted, AC annotations and __name__ added, PR #36 merged"
   depends_on: []
   context: []
   priority: 4
@@ -1824,6 +1825,7 @@
   vcs_refs: []
   created_at: 2026-02-11T08:38:52.726Z
   started_at: 2026-02-12T03:03:45.825Z
+  completed_at: 2026-02-12T05:08:26.479Z
   notes:
     - _ulid: 01KH7WXQDFP70HYGF1V9HBBG2H
       created_at: 2026-02-12T03:04:43.183Z
@@ -1832,8 +1834,6 @@
         Z-Image (66→30 lines) are now pure data + factory call. 503 tests pass, ruff clean.
       supersedes: null
   todos: []
-  completed_at: 2026-02-12T05:08:26.479Z
-  closed_reason: "Factory extracted, AC annotations and __name__ added, PR #36 merged"
 - _ulid: 01KH5XMY99SGNHVS97NFG78M6G
   slugs: []
   title: Add CI guard for empty/placeholder test bodies
@@ -2251,7 +2251,7 @@
     tests because the mock faithfully reproduced the same inconsistency. Review all MockModelPatcher
     API surfaces against real ComfyUI ModelPatcher behavior to catch similar hidden mismatches.
   spec_ref: "@comfyui-mocking"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -2271,3 +2271,4 @@
         placeholder tests) to cover the full mock surface area.
       supersedes: null
   todos: []
+  started_at: 2026-02-12T05:20:21.240Z
