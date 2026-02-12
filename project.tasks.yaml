@@ -2745,7 +2745,11 @@
         Nodes with publisher ecaj.'"
       supersedes: null
   todos: []
-- title: Spec and plan layer-type filtering for WIDEN
+- _ulid: 01KHA4HK38352V0271WSEPXC99
+  slugs:
+    - layer-type-filtering
+  title: Spec and plan layer-type filtering for WIDEN
+  type: spike
   description: "Design doc section 6.10 describes layer-type filtering: cross-cutting control
     orthogonal to per-block overrides. Users could apply different t_factor/LoRA strength per layer
     type (attention, feed_forward, norm, embedder, refiner, final) within the same block.
@@ -2755,22 +2759,42 @@
     recipe evaluation, (3) decide on UI: extend existing block config nodes with layer-type
     toggles/sliders, or separate node, (4) consider interaction with per-block overrides (per-block
     × per-layer-type matrix)."
-  type: spike
   spec_ref: null
   meta_ref: null
   plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 3
-  slugs:
-    - layer-type-filtering
   tags:
     - spec
     - planning
-  depends_on: []
-  _ulid: 01KHA4HK38352V0271WSEPXC99
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-12T23:56:23.016Z
-  notes: []
+  notes:
+    - _ulid: 01KHA4HX2Z2T58F3KVJTD9AD4D
+      created_at: 2026-02-12T23:56:33.248Z
+      author: "@claude"
+      content: >-
+        Existing infrastructure that supports this:
+
+        - BlockConfig.layer_type_overrides: tuple field on recipe.py:30, already frozen/tested,
+        defaults to ()
+
+        - block_classify.py: classify_key() returns (block_group, layer_type) — layer_type is one
+        of: attention, feed_forward, norm, embedder, refiner, final
+
+        - per_block.py: get_per_block_value() looks up block_overrides by block pattern — would need
+        parallel get_per_layer_type_value() or combined lookup
+
+        - Design doc suggested two approaches: (a) per-block × per-layer-type matrix on block
+        config, (b) simpler global toggle on Merge node
+
+        - Key design question: does this multiply the UI complexity (6 layer types × N blocks = many
+        sliders) or stay simple (global per-layer-type only, no per-block cross-product)?
+
+        - compile_plan/execute_plan would need to carry layer_type info so the plan can apply
+        different t_factors per layer type within a chunk
+      supersedes: null
   todos: []
