@@ -909,4 +909,14 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KH9NXZRX3PEXBXCRE60K11V7
+    type: friction
+    content: Subagent research quality unreliable for quantitative claims - ranking agent said <0.5% of
+      merge time, background benchmark said 48.7%, correct benchmark with realistic shapes showed
+      1.9% on GPU. Three different numbers, only the manual benchmark was right. Need to validate
+      perf claims with real measurements.
+    created_at: 2026-02-12T19:41:00.573Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
