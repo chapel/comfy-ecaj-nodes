@@ -783,7 +783,7 @@ runs:
   - _ulid: 01KH9NKY44QW5Q1YBJ0FNBX5VY
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-12T19:35:31.205Z
     step_results:
@@ -798,5 +798,13 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-12T19:35:47.189Z
-        completed_at: 2026-02-12T19:35:47.189Z
+        completed_at: 2026-02-12T19:35:59.129Z
+        notes: "Friction: (1) Subagent research conclusions unreliable - ranking agent said <0.5% but real
+          answer was 1.9% GPU / 48.7% CPU with wrong shapes. Confident wrong conclusions. (2) Used
+          inbox add when user wanted task add - had to be corrected. (3) kspec task complete
+          requires submit first - two-step ceremony for one action."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-12T19:35:59.129Z
+        completed_at: 2026-02-12T19:35:59.129Z
     initiated_by: "@claude"
