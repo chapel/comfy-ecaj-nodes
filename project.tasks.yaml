@@ -1398,6 +1398,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-11T00:05:30.203Z
+  started_at: 2026-02-12T07:39:43.759Z
   notes:
     - _ulid: 01KH508VEVQ633FW8E9Y3NX9TP
       created_at: 2026-02-11T00:05:30.203Z
@@ -1421,9 +1422,15 @@
         workflow pattern built through nodes) are the main gaps. AC-5 (invalid graph errors) is well
         covered already."
       supersedes: null
+    - _ulid: 01KH8CT296VAMFEVMYQF26M54E
+      created_at: 2026-02-12T07:42:20.455Z
+      author: "@claude"
+      content: "Implemented tests/test_graph.py with 17 tests covering all 6 ACs. Mock executor
+        (plan_operations) walks recipe tree recording OpRecords. Helper functions build graphs
+        through node FUNCTION methods. Full suite: 525 passed, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-12T07:39:43.759Z
 - _ulid: 01KH508VFBCS29YV4HX4J1QTST
   slugs:
     - implement-ci-pipeline
