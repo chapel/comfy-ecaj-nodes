@@ -1782,7 +1782,7 @@
     to avoid repeated classification loops in per_block.py. (2) Replace per-index writeback loops in
     per-block merge/filter with indexed assignment (result[indices] = sub_result)."
   spec_ref: null
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on: []
   context: []
