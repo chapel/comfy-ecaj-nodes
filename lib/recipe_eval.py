@@ -313,6 +313,7 @@ def _eval_merge(
     return _eval_target(ctx, ctx.keys, target_result, backbone_weights, node)
 
 
+@torch.inference_mode()
 def evaluate_recipe(
     keys: list[str],
     base_batch: torch.Tensor,

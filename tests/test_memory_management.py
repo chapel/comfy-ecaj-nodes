@@ -160,12 +160,13 @@ class TestBetweenGroupCleanup:
     """AC: @memory-management ac-2
 
     Given: an OpSignature group completes all chunks
-    When: transitioning to the next group
-    Then: gc.collect() and torch.cuda.empty_cache() are called
+    When: all groups complete
+    Then: gc.collect() and torch.cuda.empty_cache() are called once after all
+          groups complete (OOM backoff handles per-group memory pressure)
     """
 
-    def test_multiple_groups_each_get_cleanup(self):
-        """Each OpSignature group should trigger cleanup after completion."""
+    def test_multiple_groups_produce_distinct_signatures(self):
+        """Different shapes produce distinct OpSignature groups."""
         # AC: @memory-management ac-2
         # Create parameters with different shapes to get multiple groups
         base_state = {
@@ -178,13 +179,11 @@ class TestBetweenGroupCleanup:
         # Should have 2 groups due to different shapes
         assert len(groups) == 2
 
-    def test_exit_node_calls_gc_between_groups(self):
-        """Exit node should call gc.collect between OpSignature groups."""
+    def test_exit_node_calls_gc_after_groups(self):
+        """Exit node should call gc.collect after all OpSignature groups complete."""
         # AC: @memory-management ac-2
-        # This is tested indirectly via integration - the gc.collect call
-        # in nodes/exit.py is placed after each group's chunked_evaluation
-        # Verifying the code structure is sufficient since we test gc.collect
-        # behavior in isolation above.
+        # gc.collect runs once after the evaluation loop, not per-group.
+        # OOM backoff in chunked_evaluation handles per-group memory pressure.
         import nodes.exit
 
         # Verify gc is imported
