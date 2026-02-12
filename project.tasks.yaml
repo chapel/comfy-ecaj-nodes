@@ -2387,21 +2387,31 @@
         input tensors being unmodified."
       supersedes: null
   todos: []
-- title: Change safe_norm default to use_fp64=False
+- _ulid: 01KH9HBTSDC3J7HR367E82YVPW
+  slugs: []
+  title: Change safe_norm default to use_fp64=False
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  priority: 2
-  slugs: []
-  tags:
-    - perf
-  depends_on: []
-  _ulid: 01KH9HBTSDC3J7HR367E82YVPW
   status: pending
   blocked_by: []
+  depends_on: []
   context: []
+  priority: 2
+  tags:
+    - perf
   vcs_refs: []
   created_at: 2026-02-12T18:21:11.341Z
-  notes: []
+  notes:
+    - _ulid: 01KH9HC1XP2NWM78EYFAKE48F8
+      created_at: 2026-02-12T18:21:18.646Z
+      author: "@claude"
+      content: "Implementation notes: numerical_config.py:156 — safe_norm() converts to .double() by
+        default. Called hundreds of times per batch (once per param per model per disentanglement).
+        merge-router uses fp64=False by default and only upgrades when necessary. Change: flip
+        default in NumericalConfig, use dtype-appropriate epsilon. May need test updates if tests
+        assert on fp64 precision. Consider adding a fast-path that skips scaled norm for tensors
+        with well-behaved magnitudes."
+      supersedes: null
   todos: []
