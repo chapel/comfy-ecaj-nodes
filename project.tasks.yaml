@@ -2377,7 +2377,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -2417,6 +2417,8 @@
         All 525 tests pass, ruff clean.
       supersedes: null
   todos: []
+  completed_at: 2026-02-12T19:56:33.726Z
+  closed_reason: "6 redundant .clone() calls eliminated, merged in PR #40"
 - _ulid: 01KH9HBTSDC3J7HR367E82YVPW
   slugs: []
   title: Change safe_norm default to use_fp64=False
@@ -2426,6 +2428,7 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "safe_norm default flipped to use_fp64=False, merged in PR #40"
   depends_on: []
   context: []
   priority: 2
@@ -2434,6 +2437,7 @@
   vcs_refs: []
   created_at: 2026-02-12T18:21:11.341Z
   started_at: 2026-02-12T19:42:35.969Z
+  completed_at: 2026-02-12T19:56:32.311Z
   notes:
     - _ulid: 01KH9HC1XP2NWM78EYFAKE48F8
       created_at: 2026-02-12T18:21:18.646Z
@@ -2454,8 +2458,6 @@
         squaring, making fp64 redundant. All 525 tests pass.
       supersedes: null
   todos: []
-  completed_at: 2026-02-12T19:56:32.311Z
-  closed_reason: "safe_norm default flipped to use_fp64=False, merged in PR #40"
 - _ulid: 01KH9JRS35WA50NMTNPY8KSWXG
   slugs: []
   title: Reduce gc.collect/cuda.empty_cache frequency in exit node evaluation loop
