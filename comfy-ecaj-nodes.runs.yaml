@@ -659,6 +659,7 @@ runs:
     current_step: 5
     total_steps: 6
     started_at: 2026-02-12T06:28:32.960Z
+    completed_at: 2026-02-12T06:46:18.823Z
     step_results:
       - step_index: 0
         status: completed
@@ -731,4 +732,11 @@ runs:
         notes: Step 6 - Captured one success observation (parallel agent audit pattern). No friction or
           inbox items to capture per user decision.
     initiated_by: "@claude"
-    completed_at: 2026-02-12T06:46:18.823Z
+  - _ulid: 01KH8CDTJX4M0SAN024QCCZW9M
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-12T07:35:39.357Z
+    step_results: []
+    initiated_by: "@claude"
