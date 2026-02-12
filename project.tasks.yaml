@@ -1841,7 +1841,7 @@
   description: Add a lint check or CI step that fails if a test_ method body is only pass or if
     AC-tagged tests contain no behavioral assertion. Prevents future regressions.
   spec_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -1853,6 +1853,7 @@
   created_at: 2026-02-11T08:38:55.017Z
   notes: []
   todos: []
+  started_at: 2026-02-12T06:03:03.146Z
 - _ulid: 01KH5XN0ZP4N73QZ2YPVX0RJ2D
   slugs: []
   title: Harden block_classify.py key matching with anchored patterns
@@ -2253,6 +2254,8 @@
   spec_ref: "@comfyui-mocking"
   status: completed
   blocked_by: []
+  closed_reason: Audit found no actionable divergences. All 7 mock API surfaces match real ComfyUI.
+    Missing methods (patch_weight_to_device, unpatch_model) are intentionally out of scope.
   depends_on: []
   context: []
   priority: 3
@@ -2262,6 +2265,7 @@
   vcs_refs: []
   created_at: 2026-02-12T01:37:32.649Z
   started_at: 2026-02-12T05:20:21.240Z
+  completed_at: 2026-02-12T05:22:53.036Z
   notes:
     - _ulid: 01KH7QYN6FPFNY625PY4N9AG5X
       created_at: 2026-02-12T01:37:50.799Z
@@ -2282,6 +2286,3 @@
         fix-test-quality already addressed."
       supersedes: null
   todos: []
-  completed_at: 2026-02-12T05:22:53.036Z
-  closed_reason: Audit found no actionable divergences. All 7 mock API surfaces match real ComfyUI.
-    Missing methods (patch_weight_to_device, unpatch_model) are intentionally out of scope.
