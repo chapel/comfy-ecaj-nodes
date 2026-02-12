@@ -2631,7 +2631,17 @@
     - annotations
   vcs_refs: []
   created_at: 2026-02-12T23:53:47.793Z
-  notes: []
+  notes:
+    - _ulid: 01KHA4DGAD29S9WNK8PRBK8E1E
+      created_at: 2026-02-12T23:54:09.101Z
+      author: "@claude"
+      content: "Audit found 234/551 tests (42.5%) have no AC annotation. Most are supplementary edge-case
+        tests alongside annotated primaries — those are fine without annotations. The actionable
+        gaps are: (1) test_lora_block_strength.py — 16 tests, zero annotations, all directly test
+        @lora-block-config behavior. (2) test_recipe.py:TestRecipeFrozen — tests frozen mutation
+        (recipe-system ac-1) but annotated as testing-infrastructure ac-3. (3) Consider
+        standardizing on '# AC: @slug ac-N' comment style (some files use docstring style instead)."
+      supersedes: null
   todos: []
 - _ulid: 01KHA4CY23BXDVEDX2AV5VP4WT
   slugs:
