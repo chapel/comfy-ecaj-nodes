@@ -31,11 +31,16 @@ def make_block_config_node(arch, block_groups, docstring):
         CATEGORY = "ecaj/merge"
 
         def create_config(self, **kwargs) -> tuple[BlockConfig]:
+            """Create BlockConfig with architecture-specific block overrides.
+
+            AC: @per-block-control ac-2 — block group sliders with float range 0.0 to 2.0
+            """
             block_overrides = tuple(
                 (override_key, kwargs[param]) for param, override_key in block_groups
             )
             return (BlockConfig(arch=arch, block_overrides=block_overrides),)
 
+    BlockConfigNode.__name__ = f"WIDENBlockConfig{arch.capitalize()}Node"
+    BlockConfigNode.__qualname__ = f"WIDENBlockConfig{arch.capitalize()}Node"
     BlockConfigNode.__doc__ = docstring
-    BlockConfigNode.__qualname__ = f"WIDEN BlockConfig {arch}"
     return BlockConfigNode
