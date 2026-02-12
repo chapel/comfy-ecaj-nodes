@@ -2377,7 +2377,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -2399,6 +2399,7 @@
         input tensors being unmodified."
       supersedes: null
   todos: []
+  started_at: 2026-02-12T19:43:59.976Z
 - _ulid: 01KH9HBTSDC3J7HR367E82YVPW
   slugs: []
   title: Change safe_norm default to use_fp64=False
