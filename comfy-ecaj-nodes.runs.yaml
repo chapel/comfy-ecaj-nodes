@@ -786,6 +786,7 @@ runs:
     current_step: 5
     total_steps: 6
     started_at: 2026-02-12T19:35:31.205Z
+    completed_at: 2026-02-12T19:41:06.699Z
     step_results:
       - step_index: 0
         status: completed
@@ -833,4 +834,11 @@ runs:
           deep-dive + interactive triage. (4) Friction observation about subagent quantitative
           reliability."
     initiated_by: "@claude"
-    completed_at: 2026-02-12T19:41:06.699Z
+  - _ulid: 01KH9Y9V7ZJQTN96W73KJRGPF8
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-12T22:07:17.759Z
+    step_results: []
+    initiated_by: "@claude"
