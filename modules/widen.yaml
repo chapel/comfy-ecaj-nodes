@@ -648,7 +648,8 @@ features:
       - id: ac-2
         given: an OpSignature group completes all chunks
         when: transitioning to the next group
-        then: gc.collect() and torch.cuda.empty_cache() are called
+        then: gc.collect() and torch.cuda.empty_cache() are called once after all groups complete, not
+          between individual groups (OOM backoff handles per-group memory pressure)
       - id: ac-3
         given: all LoRA files have been loaded and evaluation is complete
         when: cleanup runs
