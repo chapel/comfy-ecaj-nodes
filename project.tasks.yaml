@@ -2646,27 +2646,50 @@
   created_at: 2026-02-12T23:53:50.403Z
   notes: []
   todos: []
-- title: Add spec coverage for _unpatch_loaded_clones
+- _ulid: 01KHA4D1RGKTD7FVSW5G92R8F1
+  slugs:
+    - spec-unpatch-clones
+  title: Add spec coverage for _unpatch_loaded_clones
+  type: task
   description: "_unpatch_loaded_clones() in nodes/exit.py (lines 97-121) is correctness-critical — it
     forces unpatching of loaded clones to get clean base weights, preventing LoRA double-application
     on subsequent generations. This was added to fix a real bug (task 01KH7550) but has no spec AC.
     Should be an AC under @exit-node or @exit-patch-install covering the invariant: exit node must
     produce clean base weights regardless of prior patch state."
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags:
+    - spec
+  vcs_refs: []
+  created_at: 2026-02-12T23:53:54.192Z
+  notes: []
+  todos: []
+- title: Add test for comfyui-packaging ac-3 registry metadata
+  description: "@comfyui-packaging ac-3 says: pyproject.toml [tool.comfy] metadata displays as ECAJ
+    Nodes with publisher ecaj. No test validates this. Add a test that reads pyproject.toml and
+    asserts PublisherId=ecaj and DisplayName=ECAJ Nodes. Simple toml parsing assertion — prevents
+    accidental metadata breakage before registry publishing."
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
   priority: 3
   slugs:
-    - spec-unpatch-clones
+    - test-comfy-registry
   tags:
-    - spec
+    - testing
   depends_on: []
-  _ulid: 01KHA4D1RGKTD7FVSW5G92R8F1
+  _ulid: 01KHA4D4KZQ3MBABRZ033Q4DGZ
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-12T23:53:54.192Z
+  created_at: 2026-02-12T23:53:57.119Z
   notes: []
   todos: []
