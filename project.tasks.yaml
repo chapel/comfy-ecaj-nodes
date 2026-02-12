@@ -2415,21 +2415,31 @@
         with well-behaved magnitudes."
       supersedes: null
   todos: []
-- title: Reduce gc.collect/cuda.empty_cache frequency in exit node evaluation loop
+- _ulid: 01KH9JRS35WA50NMTNPY8KSWXG
+  slugs: []
+  title: Reduce gc.collect/cuda.empty_cache frequency in exit node evaluation loop
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  priority: 2
-  slugs: []
-  tags:
-    - perf
-  depends_on: []
-  _ulid: 01KH9JRS35WA50NMTNPY8KSWXG
   status: pending
   blocked_by: []
+  depends_on: []
   context: []
+  priority: 2
+  tags:
+    - perf
   vcs_refs: []
   created_at: 2026-02-12T18:45:44.165Z
-  notes: []
+  notes:
+    - _ulid: 01KH9JS0HPS7E2PT0XMRKMFTJ1
+      created_at: 2026-02-12T18:45:51.798Z
+      author: "@claude"
+      content: "Implementation notes: exit.py:431-433 runs gc.collect() + torch.cuda.empty_cache() after
+        every OpSignature group. SDXL has 50+ groups = 50+ GC passes + GPU sync barriers. Options:
+        (1) Move to end-of-evaluation only. (2) Run every N groups (e.g. every 10). (3) Only run
+        when free VRAM drops below threshold. Must be careful — this cleanup exists to prevent OOM
+        on low-VRAM GPUs. The OOM backoff in gpu_ops.py should handle pressure anyway, so aggressive
+        pre-emptive cleanup may be unnecessary. Test on 8GB GPU to validate."
+      supersedes: null
   todos: []
