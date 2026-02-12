@@ -2599,27 +2599,50 @@
   created_at: 2026-02-12T23:53:43.861Z
   notes: []
   todos: []
-- title: Fill missing AC annotations in tests
+- _ulid: 01KHA4CVGHS4HG8J2CAMQR22NK
+  slugs:
+    - fill-ac-annotations
+  title: Fill missing AC annotations in tests
+  type: task
   description: "Two issues: (1) All 16 tests in test_lora_block_strength.py cover @lora-block-config
     ac-1 and ac-2 behavior but have zero AC annotations. (2) TestRecipeFrozen in test_recipe.py
     tests @recipe-system ac-1 (frozen dataclass mutation raises error) but is misattributed to
     @testing-infrastructure ac-3. Also: two annotation styles exist (# AC: @slug ac-N comments vs
     docstring style) — standardize on comment style."
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags:
+    - annotations
+  vcs_refs: []
+  created_at: 2026-02-12T23:53:47.793Z
+  notes: []
+  todos: []
+- title: Create example ComfyUI workflow JSONs
+  description: "The project structure planned an examples/ directory but it was never created. Add
+    example workflow JSON files that users can import into ComfyUI. Candidates: basic 2-model WIDEN
+    merge, multi-LoRA compose with chaining, per-block control with block config nodes. These serve
+    as both documentation and quick-start templates."
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  priority: 3
+  priority: 4
   slugs:
-    - fill-ac-annotations
+    - create-examples
   tags:
-    - annotations
+    - docs
   depends_on: []
-  _ulid: 01KHA4CVGHS4HG8J2CAMQR22NK
+  _ulid: 01KHA4CY23BXDVEDX2AV5VP4WT
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-12T23:53:47.793Z
+  created_at: 2026-02-12T23:53:50.403Z
   notes: []
   todos: []
