@@ -156,6 +156,12 @@ class TestBlockClassifyZImage:
         assert classify_key_zimage("blocks.0.attn.qkv.weight") == "L00-04"
         assert classify_key_zimage("blocks.25.mlp.fc1.weight") == "L25-29"
 
+    def test_refiner_substring_not_matched(self):
+        """Keys containing refiner as substring but not prefix are rejected."""
+        # Anchored patterns should only match keys starting with the refiner name
+        assert classify_key_zimage("some_noise_refiner.weight") is None
+        assert classify_key_zimage("prefix_context_refiner.weight") is None
+
     def test_unmatched_returns_none(self):
         """Keys not matching any block return None."""
         # AC: @merge-block-config ac-2
