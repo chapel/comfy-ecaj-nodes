@@ -132,7 +132,7 @@ class WeightDisentangler:
             D: [B, out_features, in_features]
         """
         # Column norms along out_features (dim=1)
-        m = self.numerical_config.safe_norm(W, p=2, dim=1, keepdim=True, use_fp64=True)
+        m = self.numerical_config.safe_norm(W, p=2, dim=1, keepdim=True)
 
         finfo = torch.finfo(W.dtype)
         degenerate_threshold = 64 * finfo.tiny
@@ -153,7 +153,7 @@ class WeightDisentangler:
         B, out_c, in_c, h, w = W.shape
         W_flat = W.reshape(B, out_c, -1)  # (B, out_c, in_c*h*w)
 
-        m = self.numerical_config.safe_norm(W_flat, p=2, dim=1, keepdim=True, use_fp64=True)
+        m = self.numerical_config.safe_norm(W_flat, p=2, dim=1, keepdim=True)
 
         finfo = torch.finfo(W.dtype)
         degenerate_threshold = 64 * finfo.tiny
@@ -177,7 +177,7 @@ class WeightDisentangler:
         B, out_c, in_c, k = W.shape
         W_flat = W.reshape(B, out_c, -1)
 
-        m = self.numerical_config.safe_norm(W_flat, p=2, dim=1, keepdim=True, use_fp64=True)
+        m = self.numerical_config.safe_norm(W_flat, p=2, dim=1, keepdim=True)
 
         finfo = torch.finfo(W.dtype)
         degenerate_threshold = 64 * finfo.tiny
@@ -459,10 +459,7 @@ class WIDEN:
 
             # Fast-path for t<0 (exact averaging)
             if self.t_factor < 0:
-                W_merged = backbone.clone()
-                for W in weights_list:
-                    W_merged += (1.0 / N) * (W - backbone)
-                return W_merged
+                return torch.stack(weights_list).mean(dim=0)
 
             # Route 1D params (batch dim + 1 feature dim = ndim 2)
             if weights_list[0].ndim == 2:
@@ -502,11 +499,13 @@ class WIDEN:
                 M = self._calibrate(M, important_mask_m)
                 D_scores = self._calibrate(D_scores, important_mask_d)
 
-            # Step 6: Delta merge
-            W_merged = backbone.clone()
-            for n in range(N):
+            # Step 6: Delta merge (accumulate weighted deltas, add backbone at end)
+            S_0 = (M[0] + D_scores[0]) / 2
+            W_merged = S_0 * delta_W_list[0]
+            for n in range(1, N):
                 S_n = (M[n] + D_scores[n]) / 2
                 W_merged += S_n * delta_W_list[n]
+            W_merged += backbone
 
             return W_merged
 
@@ -515,11 +514,7 @@ class WIDEN:
         except Exception as e:
             # AC: @widen-core ac-9
             logger.warning(f"merge_weights_batched error, using averaging fallback: {e}")
-            W_merged = backbone.clone()
-            N = len(weights_list)
-            for W in weights_list:
-                W_merged += (1.0 / N) * (W - backbone)
-            return W_merged
+            return torch.stack(weights_list).mean(dim=0)
 
     def _disentangle_by_type(self, weight: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Disentangle weight based on its type/shape."""
@@ -573,9 +568,10 @@ class WIDEN:
         ranked = [self.ranker.rank_weights_batched(m) for m in magnitudes]
         scores = self.sparsity_fn(torch.stack(ranked), dim=0)
 
-        merged = backbone.clone()
-        for i, delta_i in enumerate(deltas):
-            merged += scores[i] * delta_i
+        merged = scores[0] * deltas[0]
+        for i in range(1, len(deltas)):
+            merged += scores[i] * deltas[i]
+        merged += backbone
         return merged
 
     def _build_importance_masks(

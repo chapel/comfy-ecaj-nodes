@@ -186,7 +186,8 @@ def _apply_widen_filter_per_block(
         return widen_instance.filter_delta_batched(lora_applied, backbone)
 
     # Multiple t_factors: process each group separately
-    result = lora_applied.clone()
+    # All indices are covered by groups, so every element gets overwritten
+    result = torch.empty_like(lora_applied)
 
     for t_factor, indices in t_factor_groups.items():
         if not indices:
@@ -257,7 +258,8 @@ def _apply_widen_merge_per_block(
         return widen_instance.merge_weights_batched(branch_results, backbone)
 
     # Multiple t_factors: process each group separately
-    result = backbone.clone()
+    # All indices are covered by groups, so every element gets overwritten
+    result = torch.empty_like(backbone)
 
     for t_factor, indices in t_factor_groups.items():
         if not indices:

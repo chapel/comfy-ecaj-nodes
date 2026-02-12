@@ -107,7 +107,7 @@ class NumericalConfig:
         p: float = 2.0,
         dim: int | tuple | None = None,
         keepdim: bool = True,
-        use_fp64: bool = True,
+        use_fp64: bool = False,
     ) -> torch.Tensor:
         """Compute norm with numerical stability using scaled computation.
 
