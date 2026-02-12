@@ -2358,3 +2358,21 @@
         that never need gradients."
       supersedes: null
   todos: []
+- title: Reduce unnecessary .clone() calls in WIDEN hot paths
+  type: task
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 2
+  slugs: []
+  tags:
+    - perf
+  depends_on: []
+  _ulid: 01KH9HB0QNXSS23B5BN1KS3XKW
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-12T18:20:44.661Z
+  notes: []
+  todos: []
