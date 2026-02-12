@@ -783,7 +783,7 @@ runs:
   - _ulid: 01KH9NKY44QW5Q1YBJ0FNBX5VY
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 6
     started_at: 2026-02-12T19:35:31.205Z
     step_results:
@@ -806,5 +806,12 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-12T19:35:59.129Z
-        completed_at: 2026-02-12T19:35:59.129Z
+        completed_at: 2026-02-12T19:36:11.242Z
+        notes: "Searched: (1) 'subagent' - 5 hits, all about successful parallel use, none about
+          quality/reliability of conclusions. (2) 'research quality' - no hits. (3) 'submit
+          complete' - no hits. (4) 'inbox task' - no hits. All three friction points are untracked."
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-12T19:36:11.242Z
+        completed_at: 2026-02-12T19:36:11.242Z
     initiated_by: "@claude"
