@@ -31,8 +31,8 @@ class TestPerChunkCleanup:
         """gc.collect() should NOT be called per-chunk in normal (non-OOM) path.
 
         GPU tensors are freed via explicit del statements. gc.collect runs
-        between OpSignature groups (in exit.py), not per-chunk, to avoid
-        GPU sync overhead that blocks kernel queuing.
+        after all OpSignature groups complete (in exit.py), not per-chunk,
+        to avoid GPU sync overhead that blocks kernel queuing.
         """
         # AC: @memory-management ac-1
         keys = ["k0", "k1", "k2", "k3"]
@@ -59,7 +59,7 @@ class TestPerChunkCleanup:
                 storage_dtype=torch.float32,
             )
 
-        # No gc.collect calls in normal path (cleanup is per-group in exit.py)
+        # No gc.collect calls in normal path (cleanup is after all groups in exit.py)
         assert len(gc_calls) == 0
 
     def test_no_empty_cache_per_chunk_in_normal_path(self):
@@ -507,7 +507,7 @@ class TestMemoryManagementIntegration:
             )
 
         # No gc.collect in normal chunked_evaluation path
-        # (gc.collect runs per-group in exit.py, not per-chunk)
+        # (gc.collect runs after all groups in exit.py, not per-chunk)
         assert len(gc_calls) == 0
 
         # All results on CPU
