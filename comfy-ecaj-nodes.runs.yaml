@@ -837,7 +837,7 @@ runs:
   - _ulid: 01KH9Y9V7ZJQTN96W73KJRGPF8
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-12T22:07:17.759Z
     step_results:
@@ -850,5 +850,12 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-12T22:07:56.777Z
-        completed_at: 2026-02-12T22:07:56.777Z
+        completed_at: 2026-02-12T22:08:02.732Z
+        notes: Already searched and captured one success (parallel reviewers, observation 01KH9YAW). No
+          systemic friction to capture — EvalPlan field addition was one-off, TYPE_CHECKING pattern
+          is already documented in MEMORY.md.
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-12T22:08:02.732Z
+        completed_at: 2026-02-12T22:08:02.732Z
     initiated_by: "@claude"
