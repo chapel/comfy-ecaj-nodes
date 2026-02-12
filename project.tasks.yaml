@@ -2387,3 +2387,21 @@
         input tensors being unmodified."
       supersedes: null
   todos: []
+- title: Change safe_norm default to use_fp64=False
+  type: task
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 2
+  slugs: []
+  tags:
+    - perf
+  depends_on: []
+  _ulid: 01KH9HBTSDC3J7HR367E82YVPW
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-12T18:21:11.341Z
+  notes: []
+  todos: []
