@@ -1851,6 +1851,7 @@
   spec_ref: null
   status: completed
   blocked_by: []
+  closed_reason: null
   depends_on: []
   context: []
   priority: 4
@@ -1860,10 +1861,9 @@
   vcs_refs: []
   created_at: 2026-02-11T08:38:57.782Z
   started_at: 2026-02-12T00:21:33.676Z
+  completed_at: 2026-02-12T00:28:56.428Z
   notes: []
   todos: []
-  completed_at: 2026-02-12T00:28:56.428Z
-  closed_reason: null
 - _ulid: 01KH5XN34KRHPV070J3H177FTC
   slugs: []
   title: Add strict mode for batched catch-all fallbacks in widen.py
@@ -2075,7 +2075,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -2098,6 +2098,8 @@
         tests/test_sdxl_loader.py, tests/test_zimage_loader.py."
       supersedes: null
   todos: []
+  completed_at: 2026-02-12T00:28:57.810Z
+  closed_reason: null
 - _ulid: 01KH731J1SG2XVAKCSJNK0QTPA
   slugs: []
   title: Fix device mismatch in chunked_evaluation torch.stack
