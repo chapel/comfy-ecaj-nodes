@@ -2415,3 +2415,21 @@
         with well-behaved magnitudes."
       supersedes: null
   todos: []
+- title: Reduce gc.collect/cuda.empty_cache frequency in exit node evaluation loop
+  type: task
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 2
+  slugs: []
+  tags:
+    - perf
+  depends_on: []
+  _ulid: 01KH9JRS35WA50NMTNPY8KSWXG
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-12T18:45:44.165Z
+  notes: []
+  todos: []
