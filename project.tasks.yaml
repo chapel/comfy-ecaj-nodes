@@ -2251,9 +2251,30 @@
     - performance
   vcs_refs: []
   created_at: 2026-02-11T23:01:00.641Z
-  notes: []
-  todos: []
   started_at: 2026-02-12T07:18:03.551Z
+  notes:
+    - _ulid: 01KH8BJFY1PBFAFFH3VRSX0KFH
+      created_at: 2026-02-12T07:20:43.714Z
+      author: "@claude"
+      content: >-
+        Added 5 E2E tests in TestMultiSetShapeOnlyGrouping class:
+
+        1. test_same_shape_keys_produce_single_group - verifies shape-only grouping
+
+        2. test_no_cross_set_leakage_in_branch_results - inspects branch tensors directly
+
+        3. test_merged_result_matches_expected_per_set_values - verifies final merged output
+
+        4. test_interleaved_keys_no_leakage - interleaved set keys catch positional bugs
+
+        5. test_full_pipeline_grouping_through_evaluation - E2E: compile_batch_groups →
+        chunked_evaluation → evaluate_recipe
+
+
+        Created SetAwareMockLoRALoader that filters deltas by set_id (unlike MockLoRALoader which
+        ignores it). Uses rank-1 deltas for exact factorization. 508 tests pass, ruff clean.
+      supersedes: null
+  todos: []
 - _ulid: 01KH7QY3F9CXXZP8N274J9F5AE
   slugs: []
   title: Audit MockModelPatcher API surfaces against real ComfyUI ModelPatcher
