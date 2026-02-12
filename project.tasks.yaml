@@ -2261,6 +2261,7 @@
     - review-finding
   vcs_refs: []
   created_at: 2026-02-12T01:37:32.649Z
+  started_at: 2026-02-12T05:20:21.240Z
   notes:
     - _ulid: 01KH7QYN6FPFNY625PY4N9AG5X
       created_at: 2026-02-12T01:37:50.799Z
@@ -2270,5 +2271,14 @@
         ModelPatcher to catch similar hidden mismatches. Goes beyond @fix-test-quality (clone UUID,
         placeholder tests) to cover the full mock surface area.
       supersedes: null
+    - _ulid: 01KH84T7Q8WKKWF9NAK8YP7R5G
+      created_at: 2026-02-12T05:22:37.420Z
+      author: "@claude"
+      content: "Audit complete. Three parallel agents examined: (1) MockModelPatcher implementation, (2)
+        real ComfyUI ModelPatcher API from design.md and lib/ code, (3) all 60+ test methods using
+        the mock across 10 files. All 7 implemented API surfaces match real ComfyUI behavior. Two
+        methods (patch_weight_to_device, unpatch_model) are intentionally missing — called by
+        ComfyUI internals, not our code. No actionable divergences found beyond what
+        fix-test-quality already addressed."
+      supersedes: null
   todos: []
-  started_at: 2026-02-12T05:20:21.240Z
