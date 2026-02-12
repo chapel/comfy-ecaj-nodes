@@ -1871,7 +1871,7 @@
     group if s.key_index == key_index) is O(n^2) and couples to key_index uniqueness. Return (spec,
     delta) pairs instead.
   spec_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -1884,6 +1884,8 @@
   started_at: 2026-02-12T00:04:55.710Z
   notes: []
   todos: []
+  completed_at: 2026-02-12T00:04:58.380Z
+  closed_reason: null
 - _ulid: 01KH60AR9NMW9K4DYQB51TTYQV
   slugs:
     - fix-lora-path-resolution
