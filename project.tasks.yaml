@@ -2330,21 +2330,31 @@
         fix-test-quality already addressed."
       supersedes: null
   todos: []
-- title: Wrap evaluate_recipe and merge_weights_batched in torch.inference_mode()
+- _ulid: 01KH9FB3QJHEZX2ERZZBN26S3S
+  slugs: []
+  title: Wrap evaluate_recipe and merge_weights_batched in torch.inference_mode()
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  priority: 2
-  slugs: []
-  tags:
-    - perf
-  depends_on: []
-  _ulid: 01KH9FB3QJHEZX2ERZZBN26S3S
   status: pending
   blocked_by: []
+  depends_on: []
   context: []
+  priority: 2
+  tags:
+    - perf
   vcs_refs: []
   created_at: 2026-02-12T17:45:50.577Z
-  notes: []
+  notes:
+    - _ulid: 01KH9FBPZ10B4DSBGG1ZZAE8DM
+      created_at: 2026-02-12T17:46:10.273Z
+      author: "@claude"
+      content: "Implementation notes: (1) Add @torch.inference_mode() decorator to evaluate_recipe() in
+        recipe_eval.py. (2) In widen.py merge_weights_batched(), move backbone disentanglement (line
+        ~473) inside the existing torch.no_grad() block, or better yet wrap the entire function. (3)
+        Also check filter_delta_batched — already has no_grad but could use inference_mode for
+        stronger guarantees. Autograd graph tracking adds CPU overhead and memory pressure for ops
+        that never need gradients."
+      supersedes: null
   todos: []
