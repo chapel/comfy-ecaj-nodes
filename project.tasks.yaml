@@ -1849,7 +1849,7 @@
   description: Refiner checks in block_classify.py (lines 122/124) use substring containment which can
     accidentally match unrelated keys. Prefer anchored/structured patterns.
   spec_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -1862,6 +1862,8 @@
   started_at: 2026-02-12T00:21:33.676Z
   notes: []
   todos: []
+  completed_at: 2026-02-12T00:28:56.428Z
+  closed_reason: null
 - _ulid: 01KH5XN34KRHPV070J3H177FTC
   slugs: []
   title: Add strict mode for batched catch-all fallbacks in widen.py
