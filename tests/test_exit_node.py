@@ -602,6 +602,99 @@ class TestBf16DtypeMatching:
 
 
 # =============================================================================
+# AC-9: Progress reported via ProgressBar per batch group
+# =============================================================================
+
+
+class TestProgressBarPerBatchGroup:
+    """AC: @exit-node ac-9
+
+    Given: the exit node processes multiple batch groups
+    When: each batch group completes
+    Then: progress is reported via ComfyUI ProgressBar
+    """
+
+    def test_progress_bar_created_with_group_count(self, mock_model_patcher):
+        """ProgressBar should be created with total = number of batch groups."""
+        # AC: @exit-node ac-9
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        node = WIDENExitNode()
+
+        mock_pbar = MagicMock()
+        mock_pbar_cls = MagicMock(return_value=mock_pbar)
+
+        with (
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", mock_pbar_cls),
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+
+            # Two affected keys with different shapes → 2 batch groups
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {"diffusion_model.k1", "diffusion_model.k2"}},
+                affected_keys={"diffusion_model.k1", "diffusion_model.k2"},
+            )
+
+            # Override state dict to include keys with different shapes
+            mock_model_patcher._state_dict["diffusion_model.k1"] = torch.randn(4, 4)
+            mock_model_patcher._state_dict["diffusion_model.k2"] = torch.randn(8, 8)
+
+            with patch("nodes.exit.chunked_evaluation") as mock_chunked:
+                mock_chunked.return_value = {}
+
+                (result,) = node.execute(merge)
+
+            # ProgressBar created with number of batch groups
+            mock_pbar_cls.assert_called_once()
+            n_groups = mock_pbar_cls.call_args[0][0]
+            assert n_groups >= 1  # At least one group
+
+            # update(1) called once per batch group
+            assert mock_pbar.update.call_count == n_groups
+            for call in mock_pbar.update.call_args_list:
+                assert call[0] == (1,)
+
+    def test_progress_works_when_progressbar_unavailable(self, mock_model_patcher):
+        """Execution should work fine when ProgressBar is None (no ComfyUI)."""
+        # AC: @exit-node ac-9
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {"diffusion_model.k1"}},
+                affected_keys={"diffusion_model.k1"},
+            )
+            mock_model_patcher._state_dict["diffusion_model.k1"] = torch.randn(4, 4)
+
+            with patch("nodes.exit.chunked_evaluation", return_value={}):
+                # Should not raise even with ProgressBar=None
+                (result,) = node.execute(merge)
+
+            assert result is not None
+
+
+# =============================================================================
 # Additional integration tests
 # =============================================================================
 

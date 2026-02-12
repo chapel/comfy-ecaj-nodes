@@ -21,6 +21,11 @@ from ..lib.executor import (
 from ..lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
 from ..lib.widen import WIDEN, WIDENConfig
 
+try:
+    from comfy.utils import ProgressBar
+except ImportError:  # testing without ComfyUI
+    ProgressBar = None  # type: ignore[assignment,misc]
+
 if TYPE_CHECKING:
     pass
 
@@ -380,6 +385,9 @@ class WIDENExitNode:
             # Phase 2: Batched GPU evaluation per group
             merged_state: dict[str, torch.Tensor] = {}
 
+            # AC-9: Report progress per batch group via ComfyUI ProgressBar
+            pbar = ProgressBar(len(batch_groups)) if ProgressBar is not None else None
+
             # Pre-compile recipe tree into flat evaluation plan (once)
             plan = compile_plan(widen, set_id_map, arch)
 
@@ -428,6 +436,10 @@ class WIDENExitNode:
                 )
 
                 merged_state.update(group_results)
+
+                # AC-9: Update progress after each batch group
+                if pbar is not None:
+                    pbar.update(1)
 
             # AC: @memory-management ac-2
             # Cleanup after all groups complete (OOM backoff handles per-group pressure)
