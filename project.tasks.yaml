@@ -2443,3 +2443,21 @@
         pre-emptive cleanup may be unnecessary. Test on 8GB GPU to validate."
       supersedes: null
   todos: []
+- title: Pre-compile recipe tree into flat evaluation plan to avoid per-chunk traversal
+  type: task
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 2
+  slugs: []
+  tags:
+    - perf
+  depends_on: []
+  _ulid: 01KH9KHQGTXPJFYNAVNVWF7PD0
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-12T18:59:21.749Z
+  notes: []
+  todos: []
