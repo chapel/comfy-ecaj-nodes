@@ -2664,7 +2664,17 @@
     - docs
   vcs_refs: []
   created_at: 2026-02-12T23:53:50.403Z
-  notes: []
+  notes:
+    - _ulid: 01KHA4DMNJTGYNCCDMPR8FG8QR
+      created_at: 2026-02-12T23:54:13.555Z
+      author: "@claude"
+      content: "Design doc section 7 planned examples/ directory. Workflow JSONs are exported from ComfyUI
+        — save a workflow in the UI, export as JSON/API format. Good candidates: (1)
+        basic-widen-merge: Entry→LoRA→LoRA→Compose→Merge→Exit with 2 models, (2) multi-lora-compose:
+        chaining multiple LoRA nodes with different strengths, (3) per-block-control: block config
+        SDXL node wired into Merge for per-block t_factor. These double as smoke tests for the node
+        graph."
+      supersedes: null
   todos: []
 - _ulid: 01KHA4D1RGKTD7FVSW5G92R8F1
   slugs:
