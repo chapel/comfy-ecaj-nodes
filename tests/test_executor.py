@@ -1,6 +1,7 @@
 """Tests for batched pipeline executor primitives.
 
-Covers all 7 acceptance criteria for @batched-executor spec.
+Covers all 7 acceptance criteria for @batched-executor spec,
+plus E2E multi-set recipe evaluation regression tests.
 """
 
 import torch
@@ -1175,3 +1176,292 @@ class TestEvaluateRecipeBackboneOverride:
         assert len(widen.merge_calls) == 1
         call = widen.merge_calls[0]
         assert call["backbone"] is not None
+
+
+# =============================================================================
+# E2E: Multi-set recipe evaluation with shape-only grouping
+# =============================================================================
+
+
+class SetAwareMockLoRALoader:
+    """Mock LoRA loader that filters deltas by set_id.
+
+    Unlike MockLoRALoader which ignores set_id, this mock correctly
+    returns only deltas belonging to the requested set. This is critical
+    for testing cross-set isolation with shape-only OpSignature grouping.
+    """
+
+    def __init__(self, set_deltas: dict[str, dict[str, torch.Tensor]]):
+        """Initialize with per-set delta maps.
+
+        Args:
+            set_deltas: {set_id: {key: delta_tensor (2D)}}
+        """
+        self._set_deltas = set_deltas
+
+    def get_delta_specs(self, keys, key_indices, set_id=None):
+        """Return delta specs filtered to the requested set_id."""
+        delta_map = self._set_deltas.get(set_id, {}) if set_id else {}
+        specs = []
+        for key in keys:
+            if key in delta_map:
+                idx = key_indices[key]
+                delta = delta_map[key]
+                out_dim, in_dim = delta.shape
+                # Rank-1 factorization: up @ down = delta (exact for rank-1 inputs)
+                up = delta[:, 0:1]  # (out_dim, 1)
+                down = torch.ones(1, in_dim)  # (1, in_dim)
+                specs.append(
+                    DeltaSpec(
+                        kind="standard",
+                        key_index=idx,
+                        up=up,
+                        down=down,
+                        scale=1.0,
+                    )
+                )
+        return specs
+
+
+class TestMultiSetShapeOnlyGrouping:
+    """E2E: Multi-set recipe evaluation with shape-only OpSignature grouping.
+
+    Guards against regressions from the OpSignature simplification (PR #34)
+    where affecting_sets was removed from grouping. With shape-only grouping,
+    keys affected by different LoRA sets but with the same shape land in one
+    OpSignature group. Per-set filtering must prevent cross-set leakage.
+    """
+
+    @staticmethod
+    def _rank1_delta(column: list[float], width: int) -> torch.Tensor:
+        """Build a rank-1 (out, width) delta from a column vector.
+
+        Rank-1 ensures MockLoRALoader's up/down factorization is exact.
+        """
+        col = torch.tensor(column).unsqueeze(1)  # (out, 1)
+        return col @ torch.ones(1, width)  # (out, width)
+
+    def test_same_shape_keys_produce_single_group(self):
+        """Keys with identical shape should land in one OpSignature group
+        regardless of which LoRA sets affect them."""
+        keys = ["k0", "k1", "k2", "k3"]
+        base_state = {k: torch.zeros(4, 4) for k in keys}
+
+        groups = compile_batch_groups(keys, base_state)
+
+        assert len(groups) == 1
+        sig = next(iter(groups))
+        assert sig.shape == (4, 4)
+        assert set(groups[sig]) == set(keys)
+
+    def test_no_cross_set_leakage_in_branch_results(self):
+        """Each compose branch should contain only its own set's deltas.
+
+        Set A affects k0, k1; Set B affects k2, k3. All keys have the same
+        shape so they share one OpSignature group. Verify that branch A has
+        delta_a applied only to k0/k1 (k2/k3 remain base), and branch B
+        has delta_b applied only to k2/k3 (k0/k1 remain base).
+        """
+        keys = ["k0", "k1", "k2", "k3"]
+        base = torch.zeros(4, 4, 4)  # (batch=4, 4, 4)
+
+        delta_a = self._rank1_delta([1.0, 2.0, 3.0, 4.0], 4)
+        delta_b = self._rank1_delta([5.0, 6.0, 7.0, 8.0], 4)
+
+        loader = SetAwareMockLoRALoader({
+            "set_a": {"k0": delta_a, "k1": delta_a},
+            "set_b": {"k2": delta_b, "k3": delta_b},
+        })
+
+        base_node = RecipeBase(model_patcher=None, arch="sdxl")
+        lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        lora_b = RecipeLoRA(loras=({"path": "b.safetensors", "strength": 1.0},))
+        compose = RecipeCompose(branches=(lora_a, lora_b))
+        merge = RecipeMerge(base=base_node, target=compose, backbone=None, t_factor=1.0)
+
+        widen = MockWIDEN()
+        set_id_map = {id(lora_a): "set_a", id(lora_b): "set_b"}
+
+        evaluate_recipe(
+            keys=keys,
+            base_batch=base,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        assert len(widen.merge_calls) == 1
+        branch_a, branch_b = widen.merge_calls[0]["weights_list"]
+
+        # Branch A: k0, k1 have delta_a; k2, k3 are untouched (zeros)
+        assert torch.allclose(branch_a[0], delta_a)
+        assert torch.allclose(branch_a[1], delta_a)
+        assert torch.allclose(branch_a[2], torch.zeros(4, 4))
+        assert torch.allclose(branch_a[3], torch.zeros(4, 4))
+
+        # Branch B: k2, k3 have delta_b; k0, k1 are untouched (zeros)
+        assert torch.allclose(branch_b[0], torch.zeros(4, 4))
+        assert torch.allclose(branch_b[1], torch.zeros(4, 4))
+        assert torch.allclose(branch_b[2], delta_b)
+        assert torch.allclose(branch_b[3], delta_b)
+
+    def test_merged_result_matches_expected_per_set_values(self):
+        """Final merged tensor should equal the mean of per-set branches.
+
+        With MockWIDEN averaging branches, the expected result for each key is:
+        - Keys in set A: delta_a / 2  (one branch has delta, the other has base)
+        - Keys in set B: delta_b / 2
+        """
+        keys = ["k0", "k1", "k2", "k3"]
+        base = torch.zeros(4, 4, 4)
+
+        delta_a = self._rank1_delta([1.0, 2.0, 3.0, 4.0], 4)
+        delta_b = self._rank1_delta([5.0, 6.0, 7.0, 8.0], 4)
+
+        loader = SetAwareMockLoRALoader({
+            "set_a": {"k0": delta_a, "k1": delta_a},
+            "set_b": {"k2": delta_b, "k3": delta_b},
+        })
+
+        base_node = RecipeBase(model_patcher=None, arch="sdxl")
+        lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        lora_b = RecipeLoRA(loras=({"path": "b.safetensors", "strength": 1.0},))
+        compose = RecipeCompose(branches=(lora_a, lora_b))
+        merge = RecipeMerge(base=base_node, target=compose, backbone=None, t_factor=1.0)
+
+        set_id_map = {id(lora_a): "set_a", id(lora_b): "set_b"}
+
+        result = evaluate_recipe(
+            keys=keys,
+            base_batch=base,
+            recipe_node=merge,
+            loader=loader,
+            widen=MockWIDEN(),
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        # MockWIDEN averages branches: mean([base+delta, base]) = delta/2
+        assert torch.allclose(result[0], delta_a / 2)
+        assert torch.allclose(result[1], delta_a / 2)
+        assert torch.allclose(result[2], delta_b / 2)
+        assert torch.allclose(result[3], delta_b / 2)
+
+    def test_interleaved_keys_no_leakage(self):
+        """Cross-set isolation holds when set keys are interleaved in the batch.
+
+        Keys are ordered [set_a, set_b, set_a, set_b] to catch any positional
+        assumptions in the batching pipeline.
+        """
+        keys = ["k_a0", "k_b0", "k_a1", "k_b1"]
+        base = torch.zeros(4, 4, 4)
+
+        delta_a = self._rank1_delta([1.0, 0.0, 0.0, 0.0], 4)
+        delta_b = self._rank1_delta([0.0, 0.0, 0.0, 9.0], 4)
+
+        loader = SetAwareMockLoRALoader({
+            "set_a": {"k_a0": delta_a, "k_a1": delta_a},
+            "set_b": {"k_b0": delta_b, "k_b1": delta_b},
+        })
+
+        base_node = RecipeBase(model_patcher=None, arch="sdxl")
+        lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        lora_b = RecipeLoRA(loras=({"path": "b.safetensors", "strength": 1.0},))
+        compose = RecipeCompose(branches=(lora_a, lora_b))
+        merge = RecipeMerge(base=base_node, target=compose, backbone=None, t_factor=1.0)
+
+        widen = MockWIDEN()
+        set_id_map = {id(lora_a): "set_a", id(lora_b): "set_b"}
+
+        evaluate_recipe(
+            keys=keys,
+            base_batch=base,
+            recipe_node=merge,
+            loader=loader,
+            widen=widen,
+            set_id_map=set_id_map,
+            device="cpu",
+            dtype=torch.float32,
+        )
+
+        branch_a, branch_b = widen.merge_calls[0]["weights_list"]
+
+        # Branch A: only k_a0 (idx 0) and k_a1 (idx 2) have deltas
+        assert torch.allclose(branch_a[0], delta_a)  # k_a0
+        assert torch.allclose(branch_a[1], torch.zeros(4, 4))  # k_b0 untouched
+        assert torch.allclose(branch_a[2], delta_a)  # k_a1
+        assert torch.allclose(branch_a[3], torch.zeros(4, 4))  # k_b1 untouched
+
+        # Branch B: only k_b0 (idx 1) and k_b1 (idx 3) have deltas
+        assert torch.allclose(branch_b[0], torch.zeros(4, 4))  # k_a0 untouched
+        assert torch.allclose(branch_b[1], delta_b)  # k_b0
+        assert torch.allclose(branch_b[2], torch.zeros(4, 4))  # k_a1 untouched
+        assert torch.allclose(branch_b[3], delta_b)  # k_b1
+
+    def test_full_pipeline_grouping_through_evaluation(self):
+        """E2E: compile_batch_groups → chunked_evaluation → evaluate_recipe.
+
+        Exercises the full pipeline that the exit node uses: group by shape,
+        then evaluate each group via chunked_evaluation with evaluate_recipe
+        as the eval_fn.
+        """
+        keys = ["k0", "k1", "k2", "k3"]
+        base_state = {k: torch.zeros(4, 4) for k in keys}
+
+        delta_a = self._rank1_delta([2.0, 2.0, 2.0, 2.0], 4)
+        delta_b = self._rank1_delta([4.0, 4.0, 4.0, 4.0], 4)
+
+        loader = SetAwareMockLoRALoader({
+            "set_a": {"k0": delta_a, "k1": delta_a},
+            "set_b": {"k2": delta_b, "k3": delta_b},
+        })
+
+        base_node = RecipeBase(model_patcher=None, arch="sdxl")
+        lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        lora_b = RecipeLoRA(loras=({"path": "b.safetensors", "strength": 1.0},))
+        compose = RecipeCompose(branches=(lora_a, lora_b))
+        merge = RecipeMerge(base=base_node, target=compose, backbone=None, t_factor=1.0)
+
+        widen = MockWIDEN()
+        set_id_map = {id(lora_a): "set_a", id(lora_b): "set_b"}
+
+        # Step 1: Group by shape
+        groups = compile_batch_groups(keys, base_state)
+        assert len(groups) == 1
+
+        # Step 2: chunked_evaluation with evaluate_recipe as eval_fn
+        def eval_fn(chunk_keys, base_batch_gpu):
+            return evaluate_recipe(
+                keys=chunk_keys,
+                base_batch=base_batch_gpu,
+                recipe_node=merge,
+                loader=loader,
+                widen=widen,
+                set_id_map=set_id_map,
+                device="cpu",
+                dtype=torch.float32,
+            )
+
+        for _sig, group_keys in groups.items():
+            results = chunked_evaluation(
+                keys=group_keys,
+                base_tensors={k: base_state[k] for k in group_keys},
+                eval_fn=eval_fn,
+                batch_size=len(group_keys),
+                device="cpu",
+                dtype=torch.float32,
+                storage_dtype=torch.float32,
+            )
+
+        # Verify all keys processed
+        assert set(results.keys()) == set(keys)
+
+        # Verify per-set values (MockWIDEN averages: delta/2)
+        assert torch.allclose(results["k0"], delta_a / 2)
+        assert torch.allclose(results["k1"], delta_a / 2)
+        assert torch.allclose(results["k2"], delta_b / 2)
+        assert torch.allclose(results["k3"], delta_b / 2)
