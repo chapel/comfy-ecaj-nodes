@@ -783,8 +783,20 @@ runs:
   - _ulid: 01KH9NKY44QW5Q1YBJ0FNBX5VY
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 6
     started_at: 2026-02-12T19:35:31.205Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-12T19:35:31.205Z
+        completed_at: 2026-02-12T19:35:47.189Z
+        notes: "What worked: (1) Parallel 4-agent deep dive for perf analysis - comprehensive in 90s. (2)
+          Interactive AskUserQuestion triage per item kept alignment, let user redirect. (3)
+          Research-before-acting prevented 3 wasted tasks. (4) Benchmark with realistic shapes
+          corrected misleading initial numbers."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-12T19:35:47.189Z
+        completed_at: 2026-02-12T19:35:47.189Z
     initiated_by: "@claude"
