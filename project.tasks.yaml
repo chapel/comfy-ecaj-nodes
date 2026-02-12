@@ -2733,5 +2733,15 @@
     - testing
   vcs_refs: []
   created_at: 2026-02-12T23:53:57.119Z
-  notes: []
+  notes:
+    - _ulid: 01KHA4DWH3X4FZK3G8TB4534QH
+      created_at: 2026-02-12T23:54:21.603Z
+      author: "@claude"
+      content: "pyproject.toml already has [tool.comfy] with PublisherId = \"ecaj\", DisplayName = \"ECAJ
+        Nodes\", Icon = \"\". Test should use tomllib (Python 3.11+) or tomli to parse
+        pyproject.toml and assert the metadata fields. This prevents accidental breakage before
+        publishing to the ComfyUI registry. The AC text: 'Given pyproject.toml defines [tool.comfy]
+        metadata, When the package is published to the ComfyUI registry, Then it displays as ECAJ
+        Nodes with publisher ecaj.'"
+      supersedes: null
   todos: []
