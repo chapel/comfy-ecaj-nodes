@@ -656,8 +656,30 @@ runs:
   - _ulid: 01KH88JYJ0Y8EEVWNE53KA96G9
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 6
     started_at: 2026-02-12T06:28:32.960Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-12T06:28:32.960Z
+        completed_at: 2026-02-12T06:28:42.490Z
+        notes: >-
+          Step 1 - What Worked Well:
+
+          1. Parallel agent research for MockModelPatcher audit — three agents (mock impl, real API,
+          usage patterns) returned comprehensive results in one round, no follow-up needed
+
+          2. Task pivoting — CI guard task pivoted from tooling to process enforcement (AGENTS.md +
+          review skills) based on user preference, completed cleanly
+
+          3. Factory pattern for DRY block config — data-driven factory was right abstraction, tests
+          passed unchanged proving behavioral equivalence
+
+          4. Subagent PR review with --no-merge flag — clean separation of review and merge
+          decisions
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-12T06:28:42.490Z
+        completed_at: 2026-02-12T06:28:42.490Z
     initiated_by: "@claude"
