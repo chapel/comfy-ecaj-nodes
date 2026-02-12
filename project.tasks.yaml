@@ -2577,25 +2577,49 @@
         counts, and graceful degradation when ProgressBar is None."
       supersedes: null
   todos: []
-- title: Delete docs/design.md
+- _ulid: 01KHA4CQNSQMM3FQRYZ54E8HQQ
+  slugs:
+    - delete-design-doc
+  title: Delete docs/design.md
+  type: task
   description: Design doc is 1077 lines and outdated in several areas (OpSignature fields, executor
     structure, project tree, recipe evaluation algorithm). Specs are now the source of truth. Remove
     docs/design.md and the docs/ directory if empty.
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags:
+    - cleanup
+  vcs_refs: []
+  created_at: 2026-02-12T23:53:43.861Z
+  notes: []
+  todos: []
+- title: Fill missing AC annotations in tests
+  description: "Two issues: (1) All 16 tests in test_lora_block_strength.py cover @lora-block-config
+    ac-1 and ac-2 behavior but have zero AC annotations. (2) TestRecipeFrozen in test_recipe.py
+    tests @recipe-system ac-1 (frozen dataclass mutation raises error) but is misattributed to
+    @testing-infrastructure ac-3. Also: two annotation styles exist (# AC: @slug ac-N comments vs
+    docstring style) — standardize on comment style."
   type: task
   spec_ref: null
   meta_ref: null
   plan_ref: null
   priority: 3
   slugs:
-    - delete-design-doc
+    - fill-ac-annotations
   tags:
-    - cleanup
+    - annotations
   depends_on: []
-  _ulid: 01KHA4CQNSQMM3FQRYZ54E8HQQ
+  _ulid: 01KHA4CVGHS4HG8J2CAMQR22NK
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-12T23:53:43.861Z
+  created_at: 2026-02-12T23:53:47.793Z
   notes: []
   todos: []
