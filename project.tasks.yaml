@@ -2526,6 +2526,12 @@
         optimizations (e.g. fusing consecutive filter+merge). Medium effort — requires new data
         structures and refactoring the eval dispatch."
       supersedes: null
+    - _ulid: 01KHA1SA9DMYVMP3VX5E6NP5YX
+      created_at: 2026-02-12T23:08:10.414Z
+      author: "@claude"
+      content: "Already merged in PR #41 (commit a41df47). compile_plan()/execute_plan() with
+        register-based dispatch, 356-line test suite."
+      supersedes: null
   todos: []
 - _ulid: 01KH9ZHMFJKDDMVAS91FZRKBSW
   slugs:
@@ -2539,6 +2545,7 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "PR #42 merged. ProgressBar tracking added to exit node with 2 tests covering ac-9."
   depends_on: []
   context: []
   priority: 3
@@ -2546,6 +2553,7 @@
   vcs_refs: []
   created_at: 2026-02-12T22:29:01.554Z
   started_at: 2026-02-12T22:39:49.974Z
+  completed_at: 2026-02-12T22:49:39.396Z
   notes:
     - _ulid: 01KHA07TC1FGQPS642R0JX4QGJ
       created_at: 2026-02-12T22:41:08.482Z
@@ -2555,5 +2563,3 @@
         counts, and graceful degradation when ProgressBar is None."
       supersedes: null
   todos: []
-  completed_at: 2026-02-12T22:49:39.396Z
-  closed_reason: "PR #42 merged. ProgressBar tracking added to exit node with 2 tests covering ac-9."
