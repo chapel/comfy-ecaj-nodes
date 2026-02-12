@@ -14,8 +14,9 @@ from ..lib.analysis import analyze_recipe, get_keys_to_process
 from ..lib.executor import (
     chunked_evaluation,
     compile_batch_groups,
+    compile_plan,
     compute_batch_size,
-    evaluate_recipe,
+    execute_plan,
 )
 from ..lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
 from ..lib.widen import WIDEN, WIDENConfig
@@ -379,6 +380,9 @@ class WIDENExitNode:
             # Phase 2: Batched GPU evaluation per group
             merged_state: dict[str, torch.Tensor] = {}
 
+            # Pre-compile recipe tree into flat evaluation plan (once)
+            plan = compile_plan(widen, set_id_map, arch)
+
             for sig, group_keys in batch_groups.items():
                 # Estimate batch size based on shape and VRAM
                 n_models = len(set_affected)  # Number of LoRA sets
@@ -388,18 +392,17 @@ class WIDENExitNode:
                     compute_dtype,
                 )
 
-                # Build evaluation function that calls evaluate_recipe
+                # Build evaluation function using pre-compiled plan
                 # AC: @merge-block-config ac-1, ac-2
                 # Pass arch and widen_config for per-block t_factor support
-                def make_eval_fn(recipe, ldr, wdn, sid_map, dev, dtype, architecture, wcfg):
+                def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg):
                     def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
-                        return evaluate_recipe(
+                        return execute_plan(
+                            plan=p,
                             keys=keys,
                             base_batch=base_batch,
-                            recipe_node=recipe,
                             loader=ldr,
                             widen=wdn,
-                            set_id_map=sid_map,
                             device=dev,
                             dtype=dtype,
                             arch=architecture,
@@ -408,7 +411,7 @@ class WIDENExitNode:
                     return eval_fn
 
                 eval_fn = make_eval_fn(
-                    widen, loader, widen_merger, set_id_map, device, compute_dtype,
+                    plan, loader, widen_merger, device, compute_dtype,
                     arch, widen_config
                 )
 

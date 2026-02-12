@@ -1,7 +1,12 @@
 """Recipe tree evaluation engine.
 
-Provides evaluate_recipe() which walks a recipe tree and dispatches
-to WIDEN filter/merge operations on batched GPU tensors.
+Provides compile_plan() / execute_plan() for pre-compiled recipe evaluation,
+plus evaluate_recipe() which combines both for one-shot use.
+
+The compilation phase walks the frozen recipe tree once and emits a flat
+list of operations (OpApplyLoRA, OpFilterDelta, OpMergeWeights).  The
+execution phase replays that list per chunk using a register-based model,
+avoiding repeated isinstance checks and attribute lookups.
 
 This module is pure torch and stdlib (plus lib.recipe, lib.per_block,
 lib.gpu_ops) - no ComfyUI imports.
@@ -20,297 +25,335 @@ from .per_block import (
     _apply_widen_merge_per_block,
 )
 
+# ---------------------------------------------------------------------------
+# Operation dataclasses (frozen, emitted by compile_plan)
+# ---------------------------------------------------------------------------
 
-@dataclass
-class EvalContext:
-    """Shared state for recipe tree evaluation.
 
-    Replaces closure-captured variables with an explicit typed container.
+@dataclass(frozen=True)
+class OpApplyLoRA:
+    """Apply a LoRA set to the tensor in input_reg, write to out_reg."""
+
+    set_id: str
+    block_config: object  # BlockConfig or None
+    input_reg: int
+    out_reg: int
+
+
+@dataclass(frozen=True)
+class OpFilterDelta:
+    """Run WIDEN filter_delta_batched (single-branch path)."""
+
+    input_reg: int
+    backbone_reg: int
+    t_factor: float
+    block_config: object  # BlockConfig or None
+    use_per_block: bool
+    out_reg: int
+
+
+@dataclass(frozen=True)
+class OpMergeWeights:
+    """Run WIDEN merge_weights_batched (multi-branch path)."""
+
+    branch_regs: tuple[int, ...]
+    backbone_reg: int
+    t_factor: float
+    block_config: object  # BlockConfig or None
+    use_per_block: bool
+    out_reg: int
+
+
+@dataclass(frozen=True)
+class EvalPlan:
+    """Pre-compiled flat evaluation plan for a recipe tree.
+
+    ops:        Tuple of operations to execute in order.
+    result_reg: Register holding the final output tensor.
     """
 
-    keys: list[str]
-    base_batch: torch.Tensor
-    loader: object
-    widen: object
-    set_id_map: dict[int, str]
-    device: str
-    dtype: torch.dtype
-    arch: str | None
-    widen_config: object | None
+    ops: tuple[OpApplyLoRA | OpFilterDelta | OpMergeWeights, ...]
+    result_reg: int
 
 
-def _apply_lora_set(
-    ctx: EvalContext,
-    current: torch.Tensor,
-    recipe_lora: object,
-) -> torch.Tensor:
-    """Apply a LoRA set to current weights with per-block strength scaling.
+# ---------------------------------------------------------------------------
+# Plan compiler
+# ---------------------------------------------------------------------------
 
-    # AC: @lora-block-config ac-1
-    When block_config is present, per-block strength scaling is applied.
 
-    # AC: @lora-block-config ac-2
-    When no block_config, global strength applies uniformly.
+class _PlanCompiler:
+    """Walks a recipe tree once and emits a flat list of operations.
 
-    Args:
-        ctx: Evaluation context with shared state
-        current: [B, *shape] current weights on GPU
-        recipe_lora: RecipeLoRA node with LoRA specs
-
-    Returns:
-        [B, *shape] weights with LoRA applied
-
-    Raises:
-        RuntimeError: If the RecipeLoRA has no set_id mapping (indicates
-            a bug in recipe analysis -- every RecipeLoRA must be registered).
+    Register 0 is always the base_batch (set by the executor before replay).
+    Registers 1..N are allocated monotonically during compilation.
     """
-    set_id = ctx.set_id_map.get(id(recipe_lora))
-    if set_id is None:
-        raise RuntimeError(
-            "RecipeLoRA has no set_id mapping. This indicates a bug in "
-            "recipe analysis -- every RecipeLoRA must be registered in "
-            "set_id_map before evaluation. "
-            f"RecipeLoRA loras: {recipe_lora.loras!r}"
-        )
 
-    # Build key_indices for DeltaSpec
-    key_indices = {k: i for i, k in enumerate(ctx.keys)}
+    def __init__(
+        self,
+        set_id_map: dict[int, str],
+        arch: str | None,
+    ) -> None:
+        self._set_id_map = set_id_map
+        self._arch = arch
+        self._ops: list[OpApplyLoRA | OpFilterDelta | OpMergeWeights] = []
+        self._next_reg = 1  # 0 is reserved for base_batch
 
-    # Get delta specs from loader scoped to this set
-    delta_specs = ctx.loader.get_delta_specs(ctx.keys, key_indices, set_id=set_id)
+    def _alloc_reg(self) -> int:
+        r = self._next_reg
+        self._next_reg += 1
+        return r
 
-    # Apply deltas using batched GPU application
-    result = apply_lora_batch_gpu(ctx.keys, current, delta_specs, ctx.device, ctx.dtype)
+    # -- recursive compile dispatch --
 
-    # AC: @lora-block-config ac-1, ac-2
-    # Apply per-block strength scaling if block_config is present
-    lora_block_config = getattr(recipe_lora, "block_config", None)
-    if lora_block_config is not None and ctx.arch is not None:
-        result = _apply_per_block_lora_strength(
-            ctx.keys, current, result, lora_block_config, ctx.arch, ctx.device, ctx.dtype
-        )
+    def compile_node(
+        self,
+        node: object,
+        current_base_reg: int,
+    ) -> int | list[int]:
+        """Compile a recipe node, returning a register (or list for Compose)."""
+        from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
-    return result
+        if isinstance(node, RecipeBase):
+            return current_base_reg
 
+        if isinstance(node, RecipeLoRA):
+            return self._compile_lora(node, current_base_reg)
 
-def _eval_node(
-    ctx: EvalContext,
-    current_base: torch.Tensor,
-    node: object,
-) -> torch.Tensor | list[torch.Tensor]:
-    """Recursively evaluate a recipe node.
+        if isinstance(node, RecipeCompose):
+            return self._compile_compose(node, current_base_reg)
 
-    Args:
-        ctx: Evaluation context with shared state
-        current_base: [B, *shape] current base weights
-        node: Recipe node to evaluate
+        if isinstance(node, RecipeMerge):
+            return self._compile_merge(node, current_base_reg)
 
-    Returns:
-        [B, *shape] evaluated weights on GPU, or list of tensors for RecipeCompose
-    """
-    # Import here to avoid circular import
-    from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
-
-    if isinstance(node, RecipeBase):
-        # Base node - return current base unchanged
-        # AC: @exit-batched-eval ac-3 - base case for recursion
-        return current_base
-
-    elif isinstance(node, RecipeLoRA):
-        # Apply LoRA set to current base
-        # AC: @exit-batched-eval ac-2
-        return _apply_lora_set(ctx, current_base, node)
-
-    elif isinstance(node, RecipeCompose):
-        # Evaluate all branches
-        # AC: @exit-batched-eval ac-1
-        branch_results = []
-        for branch in node.branches:
-            result = _eval_node(ctx, current_base, branch)
-            branch_results.append(result)
-        return branch_results
-
-    elif isinstance(node, RecipeMerge):
-        return _eval_merge(ctx, current_base, node)
-
-    else:
         raise ValueError(f"Unknown recipe node type: {type(node)}")
 
+    def _compile_lora(self, node: object, current_base_reg: int) -> int:
+        set_id = self._set_id_map.get(id(node))
+        if set_id is None:
+            raise RuntimeError(
+                "RecipeLoRA has no set_id mapping. This indicates a bug in "
+                "recipe analysis -- every RecipeLoRA must be registered in "
+                f"set_id_map before evaluation. RecipeLoRA loras: {node.loras!r}"
+            )
+        out = self._alloc_reg()
+        block_config = getattr(node, "block_config", None)
+        self._ops.append(
+            OpApplyLoRA(
+                set_id=set_id,
+                block_config=block_config,
+                input_reg=current_base_reg,
+                out_reg=out,
+            )
+        )
+        return out
 
-def _resolve_backbone(
-    ctx: EvalContext,
-    current_base: torch.Tensor,
-    node: object,
-) -> torch.Tensor:
-    """Determine backbone weights for WIDEN analysis.
+    def _compile_compose(self, node: object, current_base_reg: int) -> list[int]:
+        branch_regs: list[int] = []
+        for branch in node.branches:
+            r = self.compile_node(branch, current_base_reg)
+            branch_regs.append(r)
+        return branch_regs
 
-    # AC: @exit-batched-eval ac-5
-    RecipeMerge.backbone overrides the importance reference for WIDEN analysis.
+    def _compile_merge(self, node: object, current_base_reg: int) -> int:
+        from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+
+        # Evaluate base (may be chained merge or RecipeBase)
+        if isinstance(node.base, RecipeMerge):
+            current_base_reg = self.compile_node(current_base_reg=current_base_reg, node=node.base)
+        elif isinstance(node.base, RecipeBase):
+            pass  # current_base_reg stays
+        else:
+            raise ValueError(f"Invalid base type in RecipeMerge: {type(node.base)}")
+
+        # Resolve backbone
+        if node.backbone is not None:
+            backbone_reg = 0  # original base_batch
+        else:
+            backbone_reg = current_base_reg
+
+        # Compile target
+        target_result = self.compile_node(node.target, current_base_reg)
+
+        merge_block_config = getattr(node, "block_config", None)
+        use_per_block = merge_block_config is not None and self._arch is not None
+
+        if isinstance(node.target, RecipeCompose):
+            branch_regs = target_result  # list[int]
+
+            if len(branch_regs) == 1:
+                # Single-branch compose → filter_delta
+                out = self._alloc_reg()
+                self._ops.append(
+                    OpFilterDelta(
+                        input_reg=branch_regs[0],
+                        backbone_reg=backbone_reg,
+                        t_factor=node.t_factor,
+                        block_config=merge_block_config,
+                        use_per_block=use_per_block,
+                        out_reg=out,
+                    )
+                )
+                return out
+
+            # Multi-branch compose → merge_weights
+            out = self._alloc_reg()
+            self._ops.append(
+                OpMergeWeights(
+                    branch_regs=tuple(branch_regs),
+                    backbone_reg=backbone_reg,
+                    t_factor=node.t_factor,
+                    block_config=merge_block_config,
+                    use_per_block=use_per_block,
+                    out_reg=out,
+                )
+            )
+            return out
+
+        elif isinstance(node.target, (RecipeLoRA, RecipeMerge)):
+            out = self._alloc_reg()
+            self._ops.append(
+                OpFilterDelta(
+                    input_reg=target_result,
+                    backbone_reg=backbone_reg,
+                    t_factor=node.t_factor,
+                    block_config=merge_block_config,
+                    use_per_block=use_per_block,
+                    out_reg=out,
+                )
+            )
+            return out
+
+        else:
+            raise ValueError(f"Invalid target type in RecipeMerge: {type(node.target)}")
+
+    def build(self) -> EvalPlan:
+        raise RuntimeError("Call compile_plan() instead")
+
+
+def compile_plan(
+    recipe_node: object,
+    set_id_map: dict[int, str],
+    arch: str | None,
+) -> EvalPlan:
+    """Pre-compile a recipe tree into a flat evaluation plan.
+
+    Walks the tree once and emits a sequence of operations that can be
+    replayed for every batch chunk without redundant isinstance checks.
 
     Args:
-        ctx: Evaluation context
-        current_base: Current base weights
-        node: RecipeMerge node
+        recipe_node: Recipe tree root (typically RecipeMerge)
+        set_id_map: Map of id(RecipeLoRA) -> set_id string
+        arch: Architecture name for block classification (optional)
 
     Returns:
-        Backbone tensor for WIDEN analysis
+        EvalPlan with ops tuple and result_reg
     """
-    if node.backbone is not None:
-        # Explicit backbone override
-        # Use original base as default (backbone evaluation not yet implemented)
-        return ctx.base_batch
-    else:
-        # Use current base as backbone
-        return current_base
+    compiler = _PlanCompiler(set_id_map, arch)
+    result = compiler.compile_node(recipe_node, current_base_reg=0)
+
+    # compile_node returns int for single result, list[int] for compose at root
+    # (which shouldn't happen for a well-formed tree that ends in RecipeMerge)
+    if isinstance(result, list):
+        raise ValueError(
+            "Recipe tree root produced a list of registers (RecipeCompose at root). "
+            "Expected RecipeMerge or RecipeBase at root."
+        )
+
+    return EvalPlan(ops=tuple(compiler._ops), result_reg=result)
 
 
-def _eval_base_for_merge(
-    ctx: EvalContext,
-    current_base: torch.Tensor,
-    node: object,
-) -> torch.Tensor:
-    """Evaluate the base of a RecipeMerge node.
-
-    # AC: @exit-batched-eval ac-3
-    Chained RecipeMerge nodes evaluate inner merges first.
-
-    Args:
-        ctx: Evaluation context
-        current_base: Current base weights
-        node: RecipeMerge node
-
-    Returns:
-        Evaluated base weights
-
-    Raises:
-        ValueError: If base type is invalid
-    """
-    from .recipe import RecipeBase, RecipeMerge
-
-    if isinstance(node.base, RecipeMerge):
-        # Recursive merge - evaluate inner merge first
-        return _eval_node(ctx, current_base, node.base)
-    elif isinstance(node.base, RecipeBase):
-        # At the root - use provided base_batch
-        return current_base
-    else:
-        raise ValueError(f"Invalid base type in RecipeMerge: {type(node.base)}")
+# ---------------------------------------------------------------------------
+# Plan executor
+# ---------------------------------------------------------------------------
 
 
-def _eval_target(
-    ctx: EvalContext,
+@torch.inference_mode()
+def execute_plan(
+    plan: EvalPlan,
     keys: list[str],
-    target_result: torch.Tensor | list[torch.Tensor],
-    backbone_weights: torch.Tensor,
-    node: object,
+    base_batch: torch.Tensor,
+    loader: object,
+    widen: object,
+    device: str,
+    dtype: torch.dtype,
+    arch: str | None = None,
+    widen_config: object | None = None,
 ) -> torch.Tensor:
-    """Dispatch WIDEN operations based on target type.
+    """Execute a pre-compiled plan on a batch of parameters.
+
+    # AC: @exit-batched-eval ac-4
+    Results remain on GPU (CPU transfer happens in patch installation phase).
 
     Args:
-        ctx: Evaluation context
-        keys: Parameter keys
-        target_result: Evaluated target (tensor or list of tensors)
-        backbone_weights: Backbone for WIDEN analysis
-        node: RecipeMerge node
+        plan: Pre-compiled EvalPlan from compile_plan()
+        keys: List of B parameter keys being evaluated
+        base_batch: [B, *shape] base model weights on GPU
+        loader: LoRALoader with loaded LoRA data
+        widen: WIDEN instance for filter/merge operations
+        device: GPU device string
+        dtype: Computation dtype
+        arch: Architecture name for block classification (optional)
+        widen_config: WIDENConfig for per-block WIDEN instances (optional)
 
     Returns:
-        Merged/filtered weights tensor
+        [B, *shape] merged weights on GPU
     """
-    from .recipe import RecipeCompose, RecipeLoRA, RecipeMerge
+    # Register file: maps register id -> tensor
+    regs: dict[int, torch.Tensor] = {0: base_batch}
 
-    merge_block_config = getattr(node, "block_config", None)
-    use_per_block = merge_block_config is not None and ctx.arch is not None
+    # Build key_indices once (used by every OpApplyLoRA)
+    key_indices = {k: i for i, k in enumerate(keys)}
 
-    if isinstance(node.target, RecipeCompose):
-        # target_result is a list of branch results
-        branch_results = target_result
+    for op in plan.ops:
+        # Use type(op) is X for pointer comparison (faster than isinstance)
+        op_type = type(op)
 
-        # AC: @exit-node ac-6
-        # Single-branch compose uses filter_delta (passthrough), not merge_weights
-        if len(branch_results) == 1:
-            lora_applied = branch_results[0]
-            if use_per_block:
-                return _apply_widen_filter_per_block(
-                    keys, lora_applied, backbone_weights,
-                    merge_block_config, ctx.arch, node.t_factor, ctx.widen_config
+        if op_type is OpApplyLoRA:
+            current = regs[op.input_reg]
+            delta_specs = loader.get_delta_specs(keys, key_indices, set_id=op.set_id)
+            result = apply_lora_batch_gpu(keys, current, delta_specs, device, dtype)
+
+            # AC: @lora-block-config ac-1, ac-2
+            if op.block_config is not None and arch is not None:
+                result = _apply_per_block_lora_strength(
+                    keys, current, result, op.block_config, arch, device, dtype
+                )
+
+            regs[op.out_reg] = result
+
+        elif op_type is OpFilterDelta:
+            lora_applied = regs[op.input_reg]
+            backbone = regs[op.backbone_reg]
+
+            if op.use_per_block:
+                regs[op.out_reg] = _apply_widen_filter_per_block(
+                    keys, lora_applied, backbone,
+                    op.block_config, arch, op.t_factor, widen_config,
                 )
             else:
-                return ctx.widen.filter_delta_batched(lora_applied, backbone_weights)
+                regs[op.out_reg] = widen.filter_delta_batched(lora_applied, backbone)
 
-        # AC: @exit-batched-eval ac-1
-        # Multi-branch compose: Call merge_weights_batched with all branches
-        if use_per_block:
-            return _apply_widen_merge_per_block(
-                keys, branch_results, backbone_weights,
-                merge_block_config, ctx.arch, node.t_factor, ctx.widen_config
-            )
+        elif op_type is OpMergeWeights:
+            branch_tensors = [regs[r] for r in op.branch_regs]
+            backbone = regs[op.backbone_reg]
+
+            if op.use_per_block:
+                regs[op.out_reg] = _apply_widen_merge_per_block(
+                    keys, branch_tensors, backbone,
+                    op.block_config, arch, op.t_factor, widen_config,
+                )
+            else:
+                regs[op.out_reg] = widen.merge_weights_batched(branch_tensors, backbone)
+
         else:
-            return ctx.widen.merge_weights_batched(branch_results, backbone_weights)
+            raise ValueError(f"Unknown op type: {op_type}")
 
-    elif isinstance(node.target, RecipeLoRA):
-        # AC: @exit-batched-eval ac-2
-        lora_applied = target_result
-        if use_per_block:
-            return _apply_widen_filter_per_block(
-                keys, lora_applied, backbone_weights,
-                merge_block_config, ctx.arch, node.t_factor, ctx.widen_config
-            )
-        else:
-            return ctx.widen.filter_delta_batched(lora_applied, backbone_weights)
-
-    elif isinstance(node.target, RecipeMerge):
-        # AC: @exit-batched-eval ac-3
-        inner_result = target_result
-        if use_per_block:
-            return _apply_widen_filter_per_block(
-                keys, inner_result, backbone_weights,
-                merge_block_config, ctx.arch, node.t_factor, ctx.widen_config
-            )
-        else:
-            return ctx.widen.filter_delta_batched(inner_result, backbone_weights)
-
-    else:
-        raise ValueError(f"Invalid target type in RecipeMerge: {type(node.target)}")
+    return regs[plan.result_reg]
 
 
-def _eval_merge(
-    ctx: EvalContext,
-    current_base: torch.Tensor,
-    node: object,
-) -> torch.Tensor:
-    """Evaluate a RecipeMerge node.
-
-    # AC: @exit-batched-eval ac-3
-    Chained RecipeMerge nodes evaluate inner merges first.
-
-    # AC: @exit-batched-eval ac-5
-    RecipeMerge.backbone overrides the importance reference.
-
-    # AC: @merge-block-config ac-1
-    When RecipeMerge has block_config, per-block t_factor overrides are applied.
-
-    # AC: @merge-block-config ac-2
-    When no block_config is connected, global t_factor applies to all blocks.
-
-    Args:
-        ctx: Evaluation context
-        current_base: Current base weights
-        node: RecipeMerge node
-
-    Returns:
-        Merged weights tensor
-    """
-    # Evaluate the base (could be another RecipeMerge or RecipeBase)
-    current_base = _eval_base_for_merge(ctx, current_base, node)
-
-    # Determine backbone for WIDEN analysis
-    backbone_weights = _resolve_backbone(ctx, current_base, node)
-
-    # Evaluate target
-    target_result = _eval_node(ctx, current_base, node.target)
-
-    # Dispatch based on target type
-    return _eval_target(ctx, ctx.keys, target_result, backbone_weights, node)
+# ---------------------------------------------------------------------------
+# Public API (backwards-compatible wrapper)
+# ---------------------------------------------------------------------------
 
 
 @torch.inference_mode()
@@ -370,18 +413,10 @@ def evaluate_recipe(
     Returns:
         [B, *shape] merged weights on GPU
     """
-    ctx = EvalContext(
-        keys=keys,
-        base_batch=base_batch,
-        loader=loader,
-        widen=widen,
-        set_id_map=set_id_map,
-        device=device,
-        dtype=dtype,
-        arch=arch,
-        widen_config=widen_config,
-    )
-
+    plan = compile_plan(recipe_node, set_id_map, arch)
     # AC: @exit-batched-eval ac-4
     # Evaluate and return - result stays on GPU
-    return _eval_node(ctx, base_batch, recipe_node)
+    return execute_plan(
+        plan, keys, base_batch, loader, widen,
+        device, dtype, arch, widen_config,
+    )

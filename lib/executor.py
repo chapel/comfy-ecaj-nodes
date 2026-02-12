@@ -10,7 +10,7 @@ Actual implementations live in:
                       apply_lora_batch_gpu, chunked_evaluation
 - lib.per_block     — _apply_per_block_lora_strength, _get_block_t_factors,
                       _apply_widen_filter_per_block, _apply_widen_merge_per_block
-- lib.recipe_eval   — evaluate_recipe (+ EvalContext, helpers)
+- lib.recipe_eval   — compile_plan, execute_plan, evaluate_recipe, EvalPlan
 """
 
 from __future__ import annotations
@@ -32,17 +32,20 @@ from .per_block import (
     _apply_widen_merge_per_block,
     _get_block_t_factors,
 )
-from .recipe_eval import evaluate_recipe
+from .recipe_eval import EvalPlan, compile_plan, evaluate_recipe, execute_plan
 
 __all__ = [
     "OpSignature",
     "DeltaSpec",
+    "EvalPlan",
     "compile_batch_groups",
+    "compile_plan",
     "compute_batch_size",
     "chunked",
     "apply_lora_batch_gpu",
     "chunked_evaluation",
     "evaluate_recipe",
+    "execute_plan",
     "_apply_per_block_lora_strength",
     "_get_block_t_factors",
     "_apply_widen_filter_per_block",
