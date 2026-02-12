@@ -1823,9 +1823,15 @@
     - review-finding
   vcs_refs: []
   created_at: 2026-02-11T08:38:52.726Z
-  notes: []
-  todos: []
   started_at: 2026-02-12T03:03:45.825Z
+  notes:
+    - _ulid: 01KH7WXQDFP70HYGF1V9HBBG2H
+      created_at: 2026-02-12T03:04:43.183Z
+      author: "@claude"
+      content: Created nodes/block_config.py with make_block_config_node factory. SDXL (63→29 lines) and
+        Z-Image (66→30 lines) are now pure data + factory call. 503 tests pass, ruff clean.
+      supersedes: null
+  todos: []
 - _ulid: 01KH5XMY99SGNHVS97NFG78M6G
   slugs: []
   title: Add CI guard for empty/placeholder test bodies
