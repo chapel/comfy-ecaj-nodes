@@ -840,6 +840,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-12T22:07:17.759Z
+    completed_at: 2026-02-12T22:08:13.314Z
     step_results:
       - step_index: 0
         status: completed
@@ -867,4 +868,11 @@ runs:
         notes: All items already captured. Success observation 01KH9YAW is the only output. Session
           complete.
     initiated_by: "@claude"
-    completed_at: 2026-02-12T22:08:13.314Z
+  - _ulid: 01KH9Z9FWKJ53AWQP103WS0MBH
+    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
+    status: active
+    current_step: 0
+    total_steps: 5
+    started_at: 2026-02-12T22:24:34.707Z
+    step_results: []
+    initiated_by: "@claude"
