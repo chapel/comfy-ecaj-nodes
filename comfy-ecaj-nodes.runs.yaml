@@ -656,7 +656,7 @@ runs:
   - _ulid: 01KH88JYJ0Y8EEVWNE53KA96G9
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 3
+    current_step: 4
     total_steps: 6
     started_at: 2026-02-12T06:28:32.960Z
     step_results:
@@ -712,5 +712,15 @@ runs:
       - step_index: 3
         status: completed
         started_at: 2026-02-12T06:29:08.144Z
-        completed_at: 2026-02-12T06:29:08.144Z
+        completed_at: 2026-02-12T06:29:14.261Z
+        notes: >-
+          Step 4 - Proposed Improvements:
+
+          1. task complete --force should bypass submit requirement for non-code tasks (audits,
+          research, docs-only). Scope: small (kspec CLI change). Already tried --force and it didn't
+          work. Would eliminate the submit→complete ceremony for tasks that have no PR.
+      - step_index: 4
+        status: completed
+        started_at: 2026-02-12T06:29:14.261Z
+        completed_at: 2026-02-12T06:29:14.261Z
     initiated_by: "@claude"
