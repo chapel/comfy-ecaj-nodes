@@ -890,4 +890,13 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KH8CFD570MKM3SG96WSX33W1
+    type: success
+    content: Explore subagent (very thorough) for multi-module context gathering — one round-trip to
+      build comprehensive mental model spanning batch_groups, recipe_eval, gpu_ops, and test
+      patterns. Saved many sequential reads on the E2E multi-set task.
+    created_at: 2026-02-12T07:36:31.143Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
