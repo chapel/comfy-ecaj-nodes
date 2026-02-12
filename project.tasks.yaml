@@ -1904,7 +1904,7 @@
     misuse. Add optional strict mode that raises instead of falling back. Defer until integration
     testing surfaces real issues.
   spec_ref: null
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on: []
   context: []
@@ -1914,6 +1914,7 @@
     - review-finding
   vcs_refs: []
   created_at: 2026-02-11T08:38:59.987Z
+  started_at: 2026-02-12T23:15:16.955Z
   notes:
     - _ulid: 01KHA269D8GD9GBV6BXG2QKYMM
       created_at: 2026-02-12T23:15:15.497Z
@@ -1924,7 +1925,6 @@
         2-line change.
       supersedes: null
   todos: []
-  started_at: 2026-02-12T23:15:16.955Z
 - _ulid: 01KH5XN590K4EMDTCP1FJWFHM0
   slugs: []
   title: Fix _compute_deltas to preserve spec-to-delta mapping
