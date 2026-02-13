@@ -1156,7 +1156,7 @@ runs:
   - _ulid: 01KHAKSTM667M65DRWPC4F9SD1
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 4
+    current_step: 5
     total_steps: 6
     started_at: 2026-02-13T04:23:01.510Z
     step_results:
@@ -1227,5 +1227,11 @@ runs:
       - step_index: 4
         status: completed
         started_at: 2026-02-13T04:23:42.304Z
-        completed_at: 2026-02-13T04:23:42.304Z
+        completed_at: 2026-02-13T04:25:14.407Z
+        notes: "User approved both: (1) Add branch-first principle to MEMORY.md, (2) Standardize AC
+          placement to before-def + fix the 5 tests."
+      - step_index: 5
+        status: completed
+        started_at: 2026-02-13T04:25:14.407Z
+        completed_at: 2026-02-13T04:25:14.407Z
     initiated_by: "@claude"
