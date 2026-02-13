@@ -1156,8 +1156,26 @@ runs:
   - _ulid: 01KHAKSTM667M65DRWPC4F9SD1
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 6
     started_at: 2026-02-13T04:23:01.510Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-13T04:23:01.510Z
+        completed_at: 2026-02-13T04:23:09.447Z
+        notes: >-
+          1. Fast task completion - spec-unpatch-clones was straightforward: existing tests just
+          needed AC annotation + new AC on the spec. Identified this quickly by reading the code and
+          tests before starting.
+
+          2. Parallel PR review via subagent - launched pr-review in background while staying
+          available. Review came back clean with a useful style consistency observation.
+
+          3. Memory note about pr-review no-merge paid off - correctly instructed subagent to review
+          only, avoided accidental merge.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-13T04:23:09.447Z
+        completed_at: 2026-02-13T04:23:09.447Z
     initiated_by: "@claude"
