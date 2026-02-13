@@ -1005,7 +1005,7 @@ runs:
   - _ulid: 01KHA7HDS5AJK7YASWFZ58PM79
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-13T00:48:43.301Z
     step_results:
@@ -1053,5 +1053,37 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-13T00:49:05.288Z
-        completed_at: 2026-02-13T00:49:05.288Z
+        completed_at: 2026-02-13T00:49:37.512Z
+        notes: >-
+          ## High-Confidence Items
+
+
+          ### Friction: kspec batch lacks forward references (SYSTEMIC)
+
+          - **Pattern**: Tasks created in a batch can't be referenced by later commands in the same
+          batch. This forced splitting into 2 batches: create entities first, then annotate.
+
+          - **Encountered**: 2 times this session (task notes referencing sibling tasks, depends-on
+          referencing sibling task)
+
+          - **Will recur**: Every time tasks with notes or cross-dependencies are created via batch
+
+          - **Search result**: NOT tracked. Existing observation 01KH5142 covers batch success
+          pattern but doesn't mention this limitation.
+
+          - **Confidence**: HIGH — concrete, systemic, reproducible
+
+
+          ### Not capturing (low confidence / one-off):
+
+          - Global slug namespace collision: encountered once, learned the pattern, won't recur now
+          that I know
+
+          - Batch JSON format discovery: one-off learning curve, now in memory
+
+          - Spike vs task type confusion: one-off
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-13T00:49:37.512Z
+        completed_at: 2026-02-13T00:49:37.512Z
     initiated_by: "@claude"
