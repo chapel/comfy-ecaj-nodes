@@ -940,7 +940,8 @@ features:
         given: an optional BLOCK_CONFIG input
         when: connected
         then: the BlockConfig is stored in RecipeModel.block_config
-    depends_on: []
+    depends_on:
+      - "@full-model-recipe"
     implements: []
     relates_to: []
     tests: []
