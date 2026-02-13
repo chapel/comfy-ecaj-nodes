@@ -1008,6 +1008,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-13T00:48:43.301Z
+    completed_at: 2026-02-13T00:49:55.178Z
     step_results:
       - step_index: 0
         status: completed
@@ -1108,4 +1109,11 @@ runs:
         notes: "Captured 1 friction observation (01KHA7KF): kspec batch forward reference limitation. All
           other items skipped per low-confidence criteria."
     initiated_by: "@claude"
-    completed_at: 2026-02-13T00:49:55.178Z
+  - _ulid: 01KHA98V7DZD5JR4J3XWCY3PZ8
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-13T01:18:59.310Z
+    step_results: []
+    initiated_by: "@claude"
