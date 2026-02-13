@@ -987,4 +987,17 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHCJHDS03M89PT92DP1WV1PR
+    type: success
+    content: "Subagent plan review for standalone-ness catches real blockers: After writing a spec plan,
+      launching a Plan agent to review the document against actual codebase files found 5
+      implementation blockers (wrong file locations, missing isinstance dispatch points across 6+
+      files, unspecified function signature changes, performance implications of all-key processing,
+      architecture detection on un-normalized keys). Pattern: give the reviewer read access to the
+      plan AND the actual code it references, ask it to verify file paths, function names, and
+      interface assumptions."
+    created_at: 2026-02-13T22:39:26.497Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
