@@ -1005,7 +1005,7 @@ runs:
   - _ulid: 01KHA7HDS5AJK7YASWFZ58PM79
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-13T00:48:43.301Z
     step_results:
@@ -1085,5 +1085,24 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-13T00:49:37.512Z
-        completed_at: 2026-02-13T00:49:37.512Z
+        completed_at: 2026-02-13T00:49:43.994Z
+        notes: >-
+          ## Evaluation
+
+
+          ### kspec batch forward reference limitation
+
+          - Searched: 'batch forward reference', 'batch slug', 'batch schema', and broad 'batch' —
+          no existing tracking
+
+          - Existing observation 01KH5142 covers batch success but NOT this limitation
+
+          - **Decision: CAPTURE** as friction observation
+
+
+          ### All other items: SKIP (low confidence / one-off as noted in step 2)
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-13T00:49:43.994Z
+        completed_at: 2026-02-13T00:49:43.994Z
     initiated_by: "@claude"
