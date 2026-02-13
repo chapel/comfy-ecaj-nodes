@@ -2588,7 +2588,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -2609,6 +2609,7 @@
         Specs capture the actual system accurately."
       supersedes: null
   todos: []
+  started_at: 2026-02-13T00:57:51.449Z
 - _ulid: 01KHA4CVGHS4HG8J2CAMQR22NK
   slugs:
     - fill-ac-annotations
