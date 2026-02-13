@@ -15,3 +15,17 @@ inbox:
     tags:
       - annotations
     added_by: "@claude"
+  - _ulid: 01KHA9Y4380G85N3R3H8APGQJA
+    text: "Exit node: add toggle + text input to save merged model to disk. Two purposes: (1) persist
+      finished merge for easy reuse as a regular model, (2) cache — if saved file exists and config
+      matches, load directly instead of recomputing. Cache invalidation must account for: recipe
+      tree identity (ops/weights/modes), LoRA file changes on disk (hash or mtime), base model
+      identity, per-block strength configs. Design questions: hash strategy (recipe+file stats vs
+      structured metadata), save location (models dir vs cache dir vs user path), format
+      (safetensors with metadata keys for validation), force-recompute override."
+    created_at: 2026-02-13T01:30:36.520Z
+    tags:
+      - feature
+      - exit-node
+      - cache
+    added_by: "@claude"
