@@ -970,4 +970,13 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHAKZEH6RG6FP8V2MSZDP64Y
+    type: friction
+    content: AC annotation placement inconsistency between test classes (before-def vs
+      after-def/before-docstring). Standardized to before-def in MEMORY.md and fixed the 5 tests
+      from this session.
+    created_at: 2026-02-13T04:26:05.735Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
