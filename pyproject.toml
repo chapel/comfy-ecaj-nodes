@@ -14,7 +14,7 @@ include = ["lib*", "nodes*"]
 
 [tool.comfy]
 PublisherId = "ecaj"
-DisplayName = "ECAJ Nodes"
+DisplayName = "ecaj nodes"
 Icon = ""
 
 [tool.pytest.ini_options]
