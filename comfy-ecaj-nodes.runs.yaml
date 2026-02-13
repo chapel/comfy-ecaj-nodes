@@ -1242,7 +1242,7 @@ runs:
   - _ulid: 01KHCJE8CBEV5HGGPZFNKDNZPQ
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-13T22:37:42.668Z
     step_results:
@@ -1258,5 +1258,38 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-13T22:38:05.205Z
-        completed_at: 2026-02-13T22:38:05.205Z
+        completed_at: 2026-02-13T22:39:09.097Z
+        notes: >-
+          High-confidence items after search:
+
+
+          FRICTION (not tracked):
+
+          1. Plan import doesn't create structural depends_on/blocked_by from implementation notes
+          dependency chain. Had to manually add 5 dependency links after import. Repeatable every
+          time a plan with deps is imported. Existing coverage: spec-plan-import workflow mentions
+          preview+import but not dependency setup.
+
+
+          SUCCESS (not tracked):
+
+          2. Subagent plan review for standalone-ness: Having a Plan agent review the plan doc
+          against actual codebase caught 5 real blockers (wrong file paths, missing isinstance
+          dispatch points, unspecified function signatures, performance implications, arch detection
+          gap). This prevented a plan that would have stalled implementation. Pattern: review plan
+          with subagent that reads actual code, not just the plan text.
+
+
+          ALREADY TRACKED / SKIP:
+
+          - Task lifecycle ceremony (start→submit→complete for spikes): Related to 01KH7MPS but
+          different angle. However, discovered --skip-review flag exists on complete. The real
+          friction was not knowing the CLI well enough — one-off learning, not systemic.
+
+          - kspec CLI arg discovery (--title vs positional): One-off learning, captured in MEMORY.md
+          already.
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-13T22:39:09.097Z
+        completed_at: 2026-02-13T22:39:09.097Z
     initiated_by: "@claude"
