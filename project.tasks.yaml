@@ -3159,11 +3159,34 @@
         pytest -v && ruff check
       supersedes: null
   todos: []
-- title: Add Qwen and Flux 2 Klein architecture support
+- _ulid: 01KHC3H6MZJMGDCM7VNB74K1Y4
+  slugs: []
+  title: Add Qwen and Flux 2 Klein architecture support
+  type: spike
   description: "Extend node support beyond SDXL + Z-Image to include Qwen and Flux 2 Klein
     architectures. Currently these are detected but error with a helpful message. Requires
     design/spec work: define architecture detection, key mapping, block structure differences, and
     per-architecture validation. Write specs with AC before implementation."
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags:
+    - design
+    - spec
+  vcs_refs: []
+  created_at: 2026-02-13T18:17:10.558Z
+  notes: []
+  todos: []
+- title: Add full model merging support
+  description: "The architecture should technically be capable of full model merging (not just
+    LoRA-based WIDEN), but this needs explicit specs, acceptance criteria, and validation. Requires
+    design/spec work: define merge strategies for full models, spec out the merge pipeline, write
+    AC-annotated tests, and validate against known merge results."
   type: spike
   spec_ref: null
   meta_ref: null
@@ -3174,11 +3197,11 @@
     - design
     - spec
   depends_on: []
-  _ulid: 01KHC3H6MZJMGDCM7VNB74K1Y4
+  _ulid: 01KHC3H8DFA4RN9DA0K5DW8ZDW
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-13T18:17:10.558Z
+  created_at: 2026-02-13T18:17:12.357Z
   notes: []
   todos: []
