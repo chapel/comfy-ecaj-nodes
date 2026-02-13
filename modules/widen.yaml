@@ -398,6 +398,11 @@ features:
             given: IS_CHANGED is called and a LoRA file has been modified
             when: the hash is computed
             then: it differs from the previous call triggering a cache miss
+          - id: ac-7
+            given: an exit node executing after a previous generation left set patches on a loaded clone
+            when: patch installation begins
+            then: loaded clones sharing the base model are fully unloaded first so model_state_dict() returns
+              original unpatched weights
         depends_on: []
         implements: []
         relates_to: []
