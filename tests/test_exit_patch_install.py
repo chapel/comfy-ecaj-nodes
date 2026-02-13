@@ -141,23 +141,23 @@ class TestUnpatchLoadedClones:
         monkeypatch.setattr(mm, "current_loaded_models", loaded, raising=False)
         return loaded
 
+    # AC: @exit-patch-install ac-7
     def test_noop_without_comfy(self, mock_model_patcher: MockModelPatcher):
-        # AC: @exit-patch-install ac-7
         """Does not crash when comfy.model_management has no current_loaded_models."""
         _unpatch_loaded_clones(mock_model_patcher)
 
+    # AC: @exit-patch-install ac-7
     def test_noop_with_empty_loaded_models(
         self, mock_model_patcher: MockModelPatcher, _patch_loaded_models
     ):
-        # AC: @exit-patch-install ac-7
         """Safe when current_loaded_models is empty."""
         _unpatch_loaded_clones(mock_model_patcher)
         assert _patch_loaded_models == []
 
+    # AC: @exit-patch-install ac-7
     def test_unloads_matching_clone(
         self, mock_model_patcher: MockModelPatcher, _patch_loaded_models
     ):
-        # AC: @exit-patch-install ac-7
         """Matching loaded clone is unloaded and removed from the list."""
         clone = mock_model_patcher.clone()
         loaded_entry = MagicMock()
@@ -169,10 +169,10 @@ class TestUnpatchLoadedClones:
         loaded_entry.model_unload.assert_called_once()
         assert len(_patch_loaded_models) == 0
 
+    # AC: @exit-patch-install ac-7
     def test_preserves_non_matching_entries(
         self, _patch_loaded_models
     ):
-        # AC: @exit-patch-install ac-7
         """Non-matching entries are not touched."""
         other_patcher = MockModelPatcher()
         target_patcher = MockModelPatcher()
@@ -186,10 +186,10 @@ class TestUnpatchLoadedClones:
         non_matching.model_unload.assert_not_called()
         assert len(_patch_loaded_models) == 1
 
+    # AC: @exit-patch-install ac-7
     def test_unloads_only_matching_among_mixed(
         self, mock_model_patcher: MockModelPatcher, _patch_loaded_models
     ):
-        # AC: @exit-patch-install ac-7
         """Only matching clones are removed; others stay."""
         clone = mock_model_patcher.clone()
 
