@@ -700,6 +700,15 @@ features:
         given: a single BLOCK_CONFIG output
         when: connected to multiple consuming nodes
         then: it fans out correctly to each consumer
+      - id: ac-4
+        given: SDXL architecture
+        when: block config node is used
+        then: each of the 19 individual blocks (IN00-IN08, MID, OUT00-OUT08) has its own slider
+      - id: ac-5
+        given: Z-Image architecture
+        when: block config node is used
+        then: each of the 34 individual blocks (L00-L29, NOISE_REF0, NOISE_REF1, CTX_REF0, CTX_REF1) has its
+          own slider
     depends_on: []
     implements: []
     relates_to: []
@@ -741,9 +750,10 @@ features:
         tags: []
         acceptance_criteria:
           - id: ac-1
-            given: a BLOCK_CONFIG connected to Merge block_t_factor input
-            when: Exit evaluates the merge step
-            then: per-block t_factor overrides are applied instead of global t_factor
+            given: BLOCK_CONFIG connected to Merge node
+            when: per-block t_factor overrides are applied
+            then: block classification returns individual block names (e.g. IN00, IN01, L05, NOISE_REF0), not
+              grouped ranges
           - id: ac-2
             given: no BLOCK_CONFIG connected to Merge
             when: Exit evaluates
@@ -766,9 +776,10 @@ features:
         tags: []
         acceptance_criteria:
           - id: ac-1
-            given: a BLOCK_CONFIG connected to LoRA node block_strength input
-            when: Exit applies LoRA deltas
-            then: per-block strength scaling is applied to LoRA deltas
+            given: BLOCK_CONFIG connected to LoRA node
+            when: per-block strength scaling is applied to LoRA deltas
+            then: block classification returns individual block names (e.g. IN00, IN01, L05, NOISE_REF0), not
+              grouped ranges
           - id: ac-2
             given: no BLOCK_CONFIG connected to LoRA node
             when: Exit applies LoRA deltas
@@ -783,6 +794,59 @@ features:
         status:
           maturity: draft
           implementation: implemented
+      - _ulid: 01KHA77MCVSX367KN2Y8WMHXXK
+        slugs:
+          - layer-type-filter
+        title: Layer-Type Filtering
+        type: requirement
+        tags: []
+        description: Classify parameter keys by layer type (attention, feed_forward, norm) and apply
+          multiplicative strength/t_factor overrides per layer type. Wires up the existing
+          BlockConfig.layer_type_overrides field.
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-13T00:43:22.395Z
+        acceptance_criteria:
+          - id: ac-1
+            given: a parameter key from SDXL or Z-Image
+            when: classify_layer_type is called
+            then: "it returns one of: attention, feed_forward, norm, or None"
+          - id: ac-2
+            given: a block config with layer_type_overrides
+            when: LoRA strength is applied per-block
+            then: the effective strength is block_strength * layer_type_strength (multiplicative)
+          - id: ac-3
+            given: a block config with layer_type_overrides
+            when: WIDEN t_factor is applied per-block
+            then: the effective t_factor is block_t_factor * layer_type_multiplier (multiplicative)
+          - id: ac-4
+            given: a block config with empty layer_type_overrides (default)
+            when: per-block processing runs
+            then: behavior is identical to before (backwards compatible)
+          - id: ac-5
+            given: a block config node for SDXL or Z-Image
+            when: rendered in ComfyUI
+            then: it includes attention, feed_forward, and norm sliders (FLOAT 0.0-2.0, default 1.0) after the
+              block sliders
+          - id: ac-6
+            given: a parameter key that matches no layer type pattern (e.g., time_embed, label_emb,
+              adaLN_modulation, embedders)
+            when: classify_layer_type is called
+            then: it returns None, and effective strength/t_factor uses block-only value with no layer-type
+              modification
+          - id: ac-7
+            given: a parameter key that could match multiple layer type patterns (e.g., q_norm matches both
+              attention and norm)
+            when: classify_layer_type is called
+            then: "the first-match-wins rule applies with precedence order: attention > feed_forward > norm"
+          - id: ac-8
+            given: arch=None or an unsupported architecture
+            when: classify_layer_type is called
+            then: it returns None (no error)
     status:
       maturity: draft
       implementation: implemented
