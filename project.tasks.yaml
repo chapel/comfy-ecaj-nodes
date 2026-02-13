@@ -2745,6 +2745,7 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "Added 3 tests for [tool.comfy] metadata in test_packaging.py. PR #46."
   depends_on: []
   context: []
   priority: 3
@@ -2753,6 +2754,7 @@
   vcs_refs: []
   created_at: 2026-02-12T23:53:57.119Z
   started_at: 2026-02-13T05:08:06.570Z
+  completed_at: 2026-02-13T05:09:17.859Z
   notes:
     - _ulid: 01KHA4DWH3X4FZK3G8TB4534QH
       created_at: 2026-02-12T23:54:21.603Z
@@ -2765,8 +2767,6 @@
         Nodes with publisher ecaj.'"
       supersedes: null
   todos: []
-  completed_at: 2026-02-13T05:09:17.859Z
-  closed_reason: "Added 3 tests for [tool.comfy] metadata in test_packaging.py. PR #46."
 - _ulid: 01KHA4HK38352V0271WSEPXC99
   slugs:
     - layer-type-filtering
@@ -3158,4 +3158,27 @@
 
         pytest -v && ruff check
       supersedes: null
+  todos: []
+- title: Add Qwen and Flux 2 Klein architecture support
+  description: "Extend node support beyond SDXL + Z-Image to include Qwen and Flux 2 Klein
+    architectures. Currently these are detected but error with a helpful message. Requires
+    design/spec work: define architecture detection, key mapping, block structure differences, and
+    per-architecture validation. Write specs with AC before implementation."
+  type: spike
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 3
+  slugs: []
+  tags:
+    - design
+    - spec
+  depends_on: []
+  _ulid: 01KHC3H6MZJMGDCM7VNB74K1Y4
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-13T18:17:10.558Z
+  notes: []
   todos: []
