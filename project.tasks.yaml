@@ -2743,7 +2743,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -2765,6 +2765,8 @@
         Nodes with publisher ecaj.'"
       supersedes: null
   todos: []
+  completed_at: 2026-02-13T05:09:17.859Z
+  closed_reason: "Added 3 tests for [tool.comfy] metadata in test_packaging.py. PR #46."
 - _ulid: 01KHA4HK38352V0271WSEPXC99
   slugs:
     - layer-type-filtering
