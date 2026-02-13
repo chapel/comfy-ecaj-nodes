@@ -6,7 +6,7 @@
 
 The node pack uses a **deferred execution architecture**: recipe-building nodes (Entry, LoRA, Compose, Merge) construct a lightweight recipe tree with zero GPU work. The Exit node receives the complete recipe and runs the full batched GPU pipeline in one shot, preserving optimal `OpSignature` batching and `torch.bmm` LoRA application.
 
-The core algorithm is ported from the **merge-router** project (`~/Projects/merge-router`). The design document lives at `docs/design.md`.
+The core algorithm is ported from the **merge-router** project (`~/Projects/merge-router`).
 
 It uses **kspec** (Kynetic Spec) for specification and task management. Spec files in `.kspec/` define what to build; tasks track the work.
 
@@ -28,7 +28,6 @@ AGENTS.md provides **project architecture, gotchas, and decision frameworks**. F
 | Comprehensive audit | `/audit` skill |
 | Creating workflows | `/create-workflow` skill |
 | WIDEN algorithm (source) | `~/Projects/merge-router/src/core/widen.py` |
-| Design document | `docs/design.md` |
 
 Skills inject their full documentation when invoked — you don't need to memorize their contents.
 

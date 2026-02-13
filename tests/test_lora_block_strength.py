@@ -20,6 +20,7 @@ from lib.recipe import BlockConfig, RecipeBase, RecipeLoRA, RecipeMerge
 class TestApplyPerBlockLoraStrength:
     """Direct tests for the per-block LoRA strength helper function."""
 
+    # AC: @lora-block-config ac-2
     def test_no_overrides_returns_lora_applied(self):
         """When all overrides are 1.0, returns lora_applied unchanged.
 
@@ -45,6 +46,7 @@ class TestApplyPerBlockLoraStrength:
         # Should be unchanged since all overrides are 1.0
         assert torch.allclose(result, lora_applied)
 
+    # AC: @lora-block-config ac-1
     def test_scales_delta_by_block_strength(self):
         """Per-block strength scales the LoRA delta (lora_applied - base).
 
@@ -71,6 +73,7 @@ class TestApplyPerBlockLoraStrength:
         expected = torch.full((2, 4, 4), 1.0)
         assert torch.allclose(result, expected)
 
+    # AC: @lora-block-config ac-1
     def test_different_strengths_per_block(self):
         """Different blocks can have different strength multipliers.
 
@@ -105,6 +108,7 @@ class TestApplyPerBlockLoraStrength:
         # OUT03-05: delta 4.0 * 1.0 (default) = 4.0
         assert torch.allclose(result[2], torch.full((4, 4), 4.0))
 
+    # AC: @lora-block-config ac-1
     def test_zero_strength_removes_lora_effect(self):
         """Strength of 0.0 completely removes the LoRA delta.
 
@@ -126,6 +130,7 @@ class TestApplyPerBlockLoraStrength:
         # Delta 10.0 * 0.0 = 0.0, so result = base
         assert torch.allclose(result, base)
 
+    # AC: @lora-block-config ac-1
     def test_strength_above_one_amplifies(self):
         """Strength > 1.0 amplifies the LoRA effect.
 
@@ -148,6 +153,7 @@ class TestApplyPerBlockLoraStrength:
         expected = torch.full((1, 4, 4), 4.5)
         assert torch.allclose(result, expected)
 
+    # AC: @lora-block-config ac-2
     def test_unmatched_keys_use_default_strength(self):
         """Keys not matching any block pattern use 1.0 (unchanged).
 
@@ -169,6 +175,7 @@ class TestApplyPerBlockLoraStrength:
         # Keys don't match any block, so delta is unchanged
         assert torch.allclose(result, lora_applied)
 
+    # AC: @lora-block-config ac-1
     def test_zimage_block_strength(self):
         """Z-Image architecture uses its own block classification.
 
@@ -201,6 +208,7 @@ class TestApplyPerBlockLoraStrength:
         # noise_refiner: delta 8.0 * 0.75 = 6.0
         assert torch.allclose(result[2], torch.full((4, 4), 6.0))
 
+    # AC: @lora-block-config ac-1
     def test_conv2d_shapes(self):
         """Works with 4D conv2d weight tensors.
 
@@ -223,6 +231,7 @@ class TestApplyPerBlockLoraStrength:
         expected = torch.full((1, 64, 64, 3, 3), 2.0)
         assert torch.allclose(result, expected)
 
+    # AC: @lora-block-config ac-1
     def test_preserves_negative_deltas(self):
         """Correctly handles negative LoRA deltas.
 
@@ -254,6 +263,7 @@ class TestApplyPerBlockLoraStrength:
 class TestRecipeLoRABlockConfig:
     """Tests for RecipeLoRA.block_config field behavior."""
 
+    # AC: @lora-block-config ac-1
     def test_recipe_lora_stores_block_config(self):
         """RecipeLoRA correctly stores block_config.
 
@@ -271,6 +281,7 @@ class TestRecipeLoRABlockConfig:
         assert lora.block_config is config
         assert lora.block_config.block_overrides == (("IN00-02", 0.5),)
 
+    # AC: @lora-block-config ac-2
     def test_recipe_lora_none_block_config(self):
         """RecipeLoRA with None block_config for backwards compatibility.
 
@@ -283,6 +294,7 @@ class TestRecipeLoRABlockConfig:
 
         assert lora.block_config is None
 
+    # AC: @lora-block-config ac-2
     def test_recipe_lora_default_block_config(self):
         """RecipeLoRA block_config defaults to None.
 
@@ -306,6 +318,7 @@ class TestBackwardsCompatibility:
     AC: @lora-block-config ac-2
     """
 
+    # AC: @lora-block-config ac-2
     def test_no_block_config_no_scaling(self):
         """Without block_config, LoRA deltas are applied without scaling.
 
@@ -366,6 +379,7 @@ class TestBackwardsCompatibility:
         # With no deltas from loader, lora_applied equals base_batch
         assert torch.equal(widen.filter_calls[0]["lora_applied"], base_batch)
 
+    # AC: @lora-block-config ac-1
     def test_recipe_merge_chain_preserves_lora_block_config(self):
         """RecipeMerge correctly preserves LoRA block_config in tree.
 

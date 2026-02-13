@@ -14,7 +14,7 @@ from lib.recipe import (
 
 class TestRecipeFrozen:
     """All recipe dataclasses must be frozen (immutable).
-    # AC: @testing-infrastructure ac-3
+    # AC: @recipe-system ac-1
     """
 
     def test_recipe_base_frozen(self, recipe_base):
@@ -36,7 +36,7 @@ class TestRecipeFrozen:
 
 class TestRecipeTupleTypes:
     """Collection fields must use tuples, not lists.
-    # AC: @testing-infrastructure ac-3
+    # AC: @recipe-system ac-1
     """
 
     def test_lora_loras_is_tuple(self, recipe_single_lora):
@@ -52,7 +52,7 @@ class TestRecipeTupleTypes:
 
 class TestRecipeStructure:
     """Verify recipe tree composition and field values.
-    # AC: @testing-infrastructure ac-3
+    # AC: @recipe-system ac-4
     """
 
     def test_recipe_base_arch(self, recipe_base):
