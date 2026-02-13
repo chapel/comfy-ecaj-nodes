@@ -1156,7 +1156,7 @@ runs:
   - _ulid: 01KHAKSTM667M65DRWPC4F9SD1
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-13T04:23:01.510Z
     step_results:
@@ -1177,5 +1177,22 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-13T04:23:09.447Z
-        completed_at: 2026-02-13T04:23:09.447Z
+        completed_at: 2026-02-13T04:23:18.268Z
+        notes: >-
+          1. Committed to main accidentally before creating feature branch - had to create branch
+          after, soft-reset, recommit, force-push, then reset main back. This is a recurring
+          pattern: should always create the branch BEFORE committing. Wasted ~5 tool calls cleaning
+          up.
+
+          2. AC annotation placement inconsistency - pr-review flagged that TestInstallMergedPatches
+          puts # AC: before def, while I put it after def/before docstring. No standard documented
+          anywhere. Minor but worth standardizing.
+
+          3. kspec command discovery friction - had to try `kspec status` (doesn't exist), then
+          `kspec tasks` (needs subcommand), then `kspec tasks next`. Also `kspec ac add` vs `kspec
+          item ac add`. Multiple failed attempts to find the right command shape.
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-13T04:23:18.268Z
+        completed_at: 2026-02-13T04:23:18.268Z
     initiated_by: "@claude"
