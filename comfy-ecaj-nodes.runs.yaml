@@ -948,6 +948,7 @@ runs:
     current_step: 5
     total_steps: 6
     started_at: 2026-02-12T22:54:50.567Z
+    completed_at: 2026-02-12T22:56:18.079Z
     step_results:
       - step_index: 0
         status: completed
@@ -1001,4 +1002,11 @@ runs:
         notes: "All items captured in step 5. Inbox: 01KHA133 (pr-review self-approval). Observation:
           01KHA138 (manual path efficiency)."
     initiated_by: "@claude"
-    completed_at: 2026-02-12T22:56:18.079Z
+  - _ulid: 01KHA7HDS5AJK7YASWFZ58PM79
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-13T00:48:43.301Z
+    step_results: []
+    initiated_by: "@claude"
