@@ -37,7 +37,7 @@ features:
       - id: ac-3
         given: pyproject.toml defines [tool.comfy] metadata
         when: the package is published to the ComfyUI registry
-        then: it displays as ECAJ Nodes with publisher ecaj
+        then: it displays as ecaj nodes with publisher ecaj
       - id: ac-4
         given: the CATEGORY namespace uses ecaj/merge for WIDEN nodes
         when: future non-merge nodes are added
