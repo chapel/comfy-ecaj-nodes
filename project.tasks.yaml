@@ -2590,6 +2590,7 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: Deleted docs/design.md, removed references from AGENTS.md, removed empty docs/ directory
   depends_on: []
   context: []
   priority: 3
@@ -2598,6 +2599,7 @@
   vcs_refs: []
   created_at: 2026-02-12T23:53:43.861Z
   started_at: 2026-02-13T00:57:51.449Z
+  completed_at: 2026-02-13T00:58:35.578Z
   notes:
     - _ulid: 01KHA4DCFB9KXEPMY6CGH2B1EN
       created_at: 2026-02-12T23:54:05.163Z
@@ -2610,8 +2612,6 @@
         Specs capture the actual system accurately."
       supersedes: null
   todos: []
-  completed_at: 2026-02-13T00:58:35.578Z
-  closed_reason: Deleted docs/design.md, removed references from AGENTS.md, removed empty docs/ directory
 - _ulid: 01KHA4CVGHS4HG8J2CAMQR22NK
   slugs:
     - fill-ac-annotations
@@ -2625,7 +2625,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -2646,6 +2646,7 @@
         standardizing on '# AC: @slug ac-N' comment style (some files use docstring style instead)."
       supersedes: null
   todos: []
+  started_at: 2026-02-13T00:58:54.141Z
 - _ulid: 01KHA4CY23BXDVEDX2AV5VP4WT
   slugs:
     - create-examples
