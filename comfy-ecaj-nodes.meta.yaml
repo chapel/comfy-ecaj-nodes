@@ -961,4 +961,13 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHAKZCM2XNSM29G1V1VTA3V5
+    type: friction
+    content: Committed to main before creating feature branch — required soft-reset, recommit,
+      force-push, and main reset to fix. Now documented in MEMORY.md as 'branch before commit'
+      principle.
+    created_at: 2026-02-13T04:26:03.778Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
