@@ -1114,6 +1114,7 @@ features:
     depends_on:
       - "@full-model-recipe"
       - "@model-input-node"
+      - "@full-model-loader"
     implements: []
     relates_to: []
     tests: []
