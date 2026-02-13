@@ -2821,28 +2821,319 @@
     - blocks
   vcs_refs: []
   created_at: 2026-02-13T00:43:25.166Z
-  notes: []
+  notes:
+    - _ulid: 01KHA7ANS0RW3QBZ4TAKK3W5QP
+      created_at: 2026-02-13T00:45:02.112Z
+      author: "@claude"
+      content: >-
+        ## Implementation Details
+
+
+        ### lib/block_classify.py — Change classifier return values
+
+
+        `classify_key_sdxl` (lines 26-78):
+
+        - Replace range grouping with individual names
+
+        - `input_blocks.N` → `f"IN{N:02d}"` for N=0..8 (was: "IN00-02", "IN03-05", "IN06-08")
+
+        - `middle_block` → "MID" (unchanged — already single block)
+
+        - `output_blocks.N` → `f"OUT{N:02d}"` for N=0..8 (was: "OUT00-02", "OUT03-05", "OUT06-08")
+
+        - The if/elif range checks simplify to one range check + f-string
+
+
+        `classify_key_zimage` (lines 82-131):
+
+        - `layers.N` or `blocks.N` → `f"L{N:02d}"` for N=0..29 (was: "L00-04" through "L25-29")
+
+        - Change `noise_refiner` from prefix match to regex: `re.match(r"noise_refiner\.(\d+)\.",
+        key)` → `f"NOISE_REF{N}"`. Refiners are nn.ModuleList so state dict keys have numbered
+        sub-modules. Confirmed by LyCORIS normalizer in lib/lora/zimage.py:92. No fallback for
+        unmatchable refiner keys — return None.
+
+        - Same pattern for `context_refiner` → `f"CTX_REF{N}"`
+
+
+        ### nodes/block_config_sdxl.py — Replace _SDXL_BLOCKS (7 → 19)
+
+        ```python
+
+        _SDXL_BLOCKS = (
+            *((f"IN{i:02d}", f"IN{i:02d}") for i in range(9)),
+            ("MID", "MID"),
+            *((f"OUT{i:02d}", f"OUT{i:02d}") for i in range(9)),
+        )
+
+        ```
+
+
+        ### nodes/block_config_zimage.py — Replace _ZIMAGE_BLOCKS (8 → 34)
+
+        ```python
+
+        _ZIMAGE_BLOCKS = tuple(
+            [(f"L{i:02d}", f"L{i:02d}") for i in range(30)]
+            + [("NOISE_REF0", "NOISE_REF0"), ("NOISE_REF1", "NOISE_REF1"),
+               ("CTX_REF0", "CTX_REF0"), ("CTX_REF1", "CTX_REF1")]
+        )
+
+        ```
+
+
+        ### No changes needed to
+
+        lib/per_block.py, lib/recipe.py, lib/recipe_eval.py, nodes/block_config.py,
+        lib/batch_groups.py — all generic, keyed by string names.
+
+
+        ### Also update (cosmetic)
+
+        - lib/recipe.py line 29: docstring example "(('IN00-02', 0.5), ...)" → "(('IN00', 0.5),
+        ...)"
+
+        - tests/conftest.py lines 30-36: _ZIMAGE_KEYS needs refiner keys with sub-block numbers
+        (diffusion_model.noise_refiner.0.weight not diffusion_model.noise_refiner.weight)
+
+
+        ### Test updates
+
+        - tests/test_merge_block_config.py: classifier assertions, t_factor grouping keys, refiner
+        sub-block numbers
+
+        - tests/test_per_block_control.py: expected block names (7→19 SDXL, 8→34 Z-Image), slider
+        counts, config overrides. Lines: 43, 48-51, 102, 105, 120-121, 130, 134-145, 198-202
+
+        - tests/test_lora_block_strength.py: BlockConfig override keys in all fixtures, Z-Image test
+        keys
+
+        - tests/test_block_config.py: cosmetic override key examples
+
+        - Files confirmed clean: test_exit_recipe_analysis.py, test_exit_node.py, test_executor.py,
+        test_compile_plan.py
+
+
+        ### File-touch checklist
+
+        - [ ] lib/block_classify.py
+
+        - [ ] lib/recipe.py (docstring)
+
+        - [ ] nodes/block_config_sdxl.py
+
+        - [ ] nodes/block_config_zimage.py
+
+        - [ ] tests/conftest.py
+
+        - [ ] tests/test_merge_block_config.py
+
+        - [ ] tests/test_per_block_control.py
+
+        - [ ] tests/test_lora_block_strength.py
+
+        - [ ] tests/test_block_config.py
+
+        - [ ] tests/test_entry.py (if needed)
+
+
+        ### Verification
+
+        pytest -v && ruff check
+      supersedes: null
   todos: []
-- title: Add layer-type filtering to block config
+- _ulid: 01KHA77QE33PJTTXZCP29H88DS
+  slugs:
+    - layer-type-filter-impl
+  title: Add layer-type filtering to block config
+  type: task
   description: Add classify_layer_type function and wire up BlockConfig.layer_type_overrides. Adds
     attention/feed_forward/norm sliders to block config nodes. Effective strength = block_strength *
     layer_type_strength (multiplicative). See task notes for full implementation details.
-  type: task
   spec_ref: "@layer-type-filter"
   meta_ref: null
   plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@individual-block-control"
+  context: []
   priority: 3
-  slugs:
-    - layer-type-filter-impl
   tags:
     - feature
     - blocks
-  depends_on: []
-  _ulid: 01KHA77QE33PJTTXZCP29H88DS
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-13T00:43:25.507Z
-  notes: []
+  notes:
+    - _ulid: 01KHA7AP8GK10K6PZS4K3SBZ8Z
+      created_at: 2026-02-13T00:45:02.608Z
+      author: "@claude"
+      content: >-
+        ## Implementation Details
+
+
+        ### lib/block_classify.py — Add classify_layer_type
+
+        ```python
+
+        @functools.lru_cache(maxsize=4096)
+
+        def classify_layer_type(key: str, arch: str) -> str | None:
+
+        ```
+
+        - Strip prefixes (diffusion_model., transformer.)
+
+        - Pattern matching on key segments (order matters — more specific first):
+          - SDXL attention: attn1, attn2, to_q, to_k, to_v, proj_in, proj_out (within blocks)
+          - Z-Image attention: attn.qkv, attn.out, q_norm, k_norm
+          - Feed-forward: ff., mlp., fc1, fc2, .w1., .w2., .w3., feed_forward
+          - Norm: norm, ln, rms
+          - adaLN_modulation → None (conditioning projection, NOT norm)
+          - Return None for: time_embed, label_emb, final_layer, embedders, unclassifiable
+        - Add to __all__
+
+        - Precedence: attention > feed_forward > norm
+
+
+        ### nodes/block_config.py — Extend make_block_config_node
+
+        ```python
+
+        def make_block_config_node(arch, block_groups, docstring, layer_types=None):
+
+        ```
+
+        - When layer_types provided, add FLOAT inputs in INPUT_TYPES (same SLIDER_CONFIG)
+
+        - create_config partitions kwargs into block vs layer-type by checking membership
+
+        - Returns BlockConfig(arch=arch, block_overrides=..., layer_type_overrides=...)
+
+
+        ### nodes/block_config_sdxl.py + block_config_zimage.py
+
+        ```python
+
+        _LAYER_TYPES = (("attention", "attention"), ("feed_forward", "feed_forward"), ("norm",
+        "norm"))
+
+        ```
+
+        Pass as layer_types=_LAYER_TYPES to make_block_config_node.
+
+
+        ### lib/per_block.py — Consume layer_type_overrides multiplicatively
+
+
+        _apply_per_block_lora_strength (lines 25-94):
+
+        - Import classify_layer_type
+
+        - Build layer_type_overrides dict alongside block_overrides
+
+        - Per-key: effective = block_s * layer_s
+
+        - Update early-exit has_overrides check
+
+
+        _get_block_t_factors (lines 97-141):
+
+        - Same pattern: effective_t = block_t * layer_t
+
+        - block overrides are absolute t_factor values; layer_type overrides are multipliers
+
+        - layer_type at 1.0 = no change, 0.5 = halve, 2.0 = double
+
+
+        ### No changes needed to
+
+        lib/recipe.py (field exists), lib/recipe_eval.py, lib/gpu_ops.py, lib/batch_groups.py
+
+
+        ### New tests — tests/test_layer_type_classify.py
+
+        - SDXL: input_blocks.3.1.transformer_blocks.0.attn1.to_q.weight → "attention"
+
+        - SDXL: input_blocks.4.1.transformer_blocks.0.ff.net.0.proj.weight → "feed_forward"
+
+        - SDXL: input_blocks.4.0.in_layers.0.weight → "norm" (if contains norm)
+
+        - Z-Image: layers.5.attn.qkv.weight → "attention"
+
+        - Z-Image: layers.5.feed_forward.w1.weight → "feed_forward"
+
+        - Z-Image: layers.5.adaLN_modulation.1.weight → None
+
+        - Unmatched → None; with/without prefixes
+
+
+        ### Extend test_per_block_control.py
+
+        - 3 layer_type sliders (attention, feed_forward, norm)
+
+        - create_config stores layer_type_overrides
+
+        - Total inputs = block_sliders + 3
+
+
+        ### Extend test_lora_block_strength.py
+
+        - block=0.5, attention=0.7 → effective 0.35
+
+        - attention=0.5 only → 0.5 for attention keys, 1.0 for others
+
+        - Both at 1.0 → no effect
+
+        - layer_type=0.0 → disable that type
+
+
+        ### Extend test_merge_block_config.py
+
+        - t_factor with layer_type_overrides grouping
+
+        - block t=0.8, attention=0.5 → effective 0.4
+
+
+        ### Key decisions
+
+        - adaLN_modulation → None (SiLU + Linear conditioning projection)
+
+        - q_norm/k_norm → "attention" (precedence: attention > feed_forward > norm)
+
+        - proj_in/proj_out in blocks → "attention"
+
+        - Unsupported arch or arch=None → None (no error)
+
+        - Negative sliders allowed (ComfyUI permits). No clamping.
+
+        - Zero slider: 0.0 * anything = 0.0 (valid: disable LoRA or passthrough t_factor)
+
+
+        ### File-touch checklist
+
+        - [ ] lib/block_classify.py — add classify_layer_type, update __all__
+
+        - [ ] lib/per_block.py — modify both functions
+
+        - [ ] nodes/block_config.py — extend factory
+
+        - [ ] nodes/block_config_sdxl.py — pass _LAYER_TYPES
+
+        - [ ] nodes/block_config_zimage.py — pass _LAYER_TYPES
+
+        - [ ] tests/test_layer_type_classify.py (new)
+
+        - [ ] tests/test_per_block_control.py
+
+        - [ ] tests/test_lora_block_strength.py
+
+        - [ ] tests/test_merge_block_config.py
+
+
+        ### Verification
+
+        pytest -v && ruff check
+      supersedes: null
   todos: []
