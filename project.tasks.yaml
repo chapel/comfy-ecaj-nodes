@@ -3348,7 +3348,10 @@
   plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
   status: pending
   blocked_by: []
-  depends_on: []
+  depends_on:
+    - "@implement-full-model-recipe-type"
+    - "@implement-model-input-node"
+    - "@implement-full-model-loader"
   context: []
   priority: 3
   tags: []
