@@ -1,6 +1,10 @@
 """Smoke tests for ComfyUI node packaging — CATEGORY, INPUT_TYPES, etc."""
 
-from nodes.compose import WIDENComposeNode
+from pathlib import Path
+
+import tomllib
+
+from nodes.compose import WIDENComposeNode  # noqa: I001 — stdlib/local split
 from nodes.entry import WIDENEntryNode
 from nodes.exit import WIDENExitNode
 from nodes.lora import WIDENLoRANode
@@ -46,6 +50,32 @@ class TestNodeAttributes:
     def test_return_types_is_tuple(self):
         for cls in ALL_NODE_CLASSES:
             assert isinstance(cls.RETURN_TYPES, tuple), f"{cls.__name__}.RETURN_TYPES not a tuple"
+
+
+PYPROJECT = Path(__file__).resolve().parent.parent / "pyproject.toml"
+
+
+class TestComfyRegistryMetadata:
+    """Registry metadata in pyproject.toml [tool.comfy]."""
+
+    def _load_comfy_metadata(self):
+        with open(PYPROJECT, "rb") as f:
+            return tomllib.load(f)["tool"]["comfy"]
+
+    # AC: @comfyui-packaging ac-3
+    def test_publisher_id(self):
+        meta = self._load_comfy_metadata()
+        assert meta["PublisherId"] == "ecaj"
+
+    # AC: @comfyui-packaging ac-3
+    def test_display_name(self):
+        meta = self._load_comfy_metadata()
+        assert meta["DisplayName"] == "ECAJ Nodes"
+
+    # AC: @comfyui-packaging ac-3
+    def test_icon_defined(self):
+        meta = self._load_comfy_metadata()
+        assert "Icon" in meta
 
 
 class TestWIDENTypeConnections:
