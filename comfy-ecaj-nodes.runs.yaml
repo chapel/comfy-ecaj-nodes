@@ -1005,8 +1005,53 @@ runs:
   - _ulid: 01KHA7HDS5AJK7YASWFZ58PM79
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-13T00:48:43.301Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-13T00:48:43.301Z
+        completed_at: 2026-02-13T00:49:05.288Z
+        notes: >-
+          ## Session Review
+
+
+          ### What Worked Well
+
+          1. **Comprehensive plan before execution** — The plan from plan mode had exact spec refs,
+          AC text, task descriptions, and implementation notes. This made the kspec batch
+          construction mechanical rather than creative.
+
+          2. **Dry-run before execute** — Using `kspec batch --dry-run` caught the slug collision
+          before committing, preventing partial state.
+
+          3. **Atomic batch mode** — When commands failed mid-batch, atomic rollback prevented
+          orphaned partial state. This was critical — 3 separate batch attempts rolled back cleanly
+          before the 4th succeeded.
+
+
+          ### Friction Points
+
+          1. **kspec batch doesn't support forward references** — Tasks created in a batch can't be
+          referenced by later commands in the same batch (e.g., task notes referencing a task
+          created 2 commands earlier). Required splitting into 2 batches: create-then-annotate. This
+          is a systemic issue that will recur whenever tasks need notes or dependencies on sibling
+          tasks.
+
+          2. **Global slug namespace** — Spec items and tasks share the same slug space. Creating
+          spec `layer-type-filter` blocked creating task with same slug. Required using
+          `layer-type-filter-impl` for the task. Not intuitive — expected namespacing by item type.
+
+          3. **Batch JSON format discovery** — Had to trial-and-error 5 different JSON formats
+          before finding `{"command": "...", "args": {"key": "value"}}`. The help output says 'JSON'
+          but doesn't show the schema. Took 4 failed attempts.
+
+          4. **Spike vs task confusion** — `kspec item get @layer-type-filtering` returned the
+          spike, but `kspec item delete` said 'this is a task, use task cancel'. The item/task
+          boundary is not clear from the get output.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-13T00:49:05.288Z
+        completed_at: 2026-02-13T00:49:05.288Z
     initiated_by: "@claude"
