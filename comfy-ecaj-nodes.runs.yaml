@@ -1159,6 +1159,7 @@ runs:
     current_step: 5
     total_steps: 6
     started_at: 2026-02-13T04:23:01.510Z
+    completed_at: 2026-02-13T04:26:13.617Z
     step_results:
       - step_index: 0
         status: completed
@@ -1238,4 +1239,11 @@ runs:
           convention, (2) Fixed 5 tests to use before-def placement, (3) Recorded 2 friction
           observations and 1 success observation."
     initiated_by: "@claude"
-    completed_at: 2026-02-13T04:26:13.617Z
+  - _ulid: 01KHCJE8CBEV5HGGPZFNKDNZPQ
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-13T22:37:42.668Z
+    step_results: []
+    initiated_by: "@claude"
