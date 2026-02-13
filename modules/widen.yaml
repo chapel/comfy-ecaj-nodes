@@ -855,3 +855,265 @@ features:
     status:
       maturity: draft
       implementation: implemented
+  - _ulid: 01KHCJ41CGXX0V1FTCF9J0H3YK
+    slugs:
+      - full-model-recipe
+    title: Full Model Recipe Type
+    type: feature
+    tags: []
+    description: |
+      Frozen recipe dataclass representing a full model checkpoint to merge.
+      Stores a file path and strength (like RecipeLoRA stores LoRA paths),
+      not a ComfyUI MODEL reference. This enables deferred disk-based loading
+      at Exit time via safetensors streaming. Follows all recipe conventions:
+      frozen, tuples not lists, no GPU tensors.
+    acceptance_criteria:
+      - id: ac-1
+        given: a RecipeModel instance
+        when: a field is assigned after construction
+        then: a FrozenInstanceError is raised
+      - id: ac-2
+        given: a RecipeModel
+        when: inspecting its fields
+        then: |
+          it has path (str), strength (float, default 1.0), and
+          block_config (BlockConfig or None, default None)
+      - id: ac-3
+        given: a RecipeModel instance
+        when: passed to RecipeCompose.with_branch()
+        then: a new RecipeCompose is returned containing it as a branch
+      - id: ac-4
+        given: a RecipeMerge constructed with target=RecipeModel
+        when: the tree is inspected
+        then: construction succeeds and target is the RecipeModel
+      - id: ac-5
+        given: the RecipeNode type alias
+        when: inspected
+        then: RecipeModel is included in the union
+      - id: ac-6
+        given: a RecipeModel
+        when: inspected for GPU tensors
+        then: no torch.Tensor objects are found (path and strength only)
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-13T22:32:07.824Z
+  - _ulid: 01KHCJ41D55KYE8VE38DEBQD3K
+    slugs:
+      - model-input-node
+    title: Model Input Node
+    type: feature
+    tags: []
+    description: |
+      ComfyUI node that produces a RecipeModel from a checkpoint file picker.
+      Loads from disk out-of-band from ComfyUI -- the model is NOT loaded at
+      node execution time. Like the LoRA node, this is pure recipe building
+      with zero GPU work and zero file I/O. The file path is stored in the
+      recipe and resolved at Exit time for deferred streaming access.
+    acceptance_criteria:
+      - id: ac-1
+        given: the node's INPUT_TYPES
+        when: inspected
+        then: |
+          it has model_name (checkpoint file combo via folder_paths) and
+          strength (FLOAT, default 1.0, range 0.0-2.0)
+      - id: ac-2
+        given: the node executes with a valid checkpoint name
+        when: output is inspected
+        then: it returns a RecipeModel with the filename and strength stored
+      - id: ac-3
+        given: the node executes
+        when: checking GPU memory and disk I/O
+        then: no GPU memory is allocated and no file is opened (deferred to Exit)
+      - id: ac-4
+        given: the node class
+        when: inspecting CATEGORY
+        then: it is ecaj/merge
+      - id: ac-5
+        given: the node's RETURN_TYPES
+        when: inspected
+        then: it returns WIDEN type (compatible with Compose and Merge inputs)
+      - id: ac-6
+        given: an optional BLOCK_CONFIG input
+        when: connected
+        then: the BlockConfig is stored in RecipeModel.block_config
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-13T22:32:07.845Z
+  - _ulid: 01KHCJ41DMYNDJH45JQQ0FAQ3K
+    slugs:
+      - full-model-loader
+    title: Full Model Loader
+    type: feature
+    tags: []
+    description: |
+      Streaming model loader using safetensors.safe_open() for memory-efficient
+      per-batch access to full checkpoint weights. Matches the LoRALoader
+      interface pattern but provides full weight tensors instead of low-rank
+      factors. Handles key normalization between checkpoint file format and
+      base model state dict format. Architecture-specific key mapping for
+      SDXL and Z-Image. Only supports safetensors format (non-safetensors
+      checkpoints raise a clear error).
+    acceptance_criteria:
+      - id: ac-1
+        given: a safetensors checkpoint path
+        when: the loader opens it
+        then: |
+          it uses safe_open() for memory-mapped access without loading the
+          full file into memory
+      - id: ac-2
+        given: a list of base model parameter keys
+        when: get_weights(keys) is called
+        then: |
+          it returns the corresponding weight tensors from the checkpoint
+          file, correctly mapped from file key format to base model key format
+      - id: ac-3
+        given: an SDXL checkpoint file with model.diffusion_model prefix
+        when: key mapping runs
+        then: |
+          file keys are normalized to match base model state dict keys
+          (e.g., model.diffusion_model.input_blocks.0 maps to input_blocks.0)
+      - id: ac-4
+        given: a Z-Image checkpoint file
+        when: key mapping runs
+        then: |
+          file keys are normalized to match base model state dict keys,
+          handling the diffusion_model or transformer prefix variants
+      - id: ac-5
+        given: the loader
+        when: affected_keys is accessed
+        then: |
+          it returns the set of base model keys that have corresponding
+          diffusion model weights in the checkpoint file, excluding
+          VAE and text encoder keys
+      - id: ac-6
+        given: the loader is no longer needed
+        when: cleanup() is called
+        then: the safe_open file handle is closed and resources freed
+      - id: ac-7
+        given: a checkpoint file with keys that don't match the base model
+        when: the mismatch is detected
+        then: a clear error is raised listing unmatched keys
+      - id: ac-8
+        given: the loader
+        when: detecting architecture from file keys
+        then: |
+          it can determine architecture without loading any tensor data
+          by inspecting normalized keys against architecture patterns
+      - id: ac-9
+        given: a non-safetensors checkpoint file (e.g., .ckpt, .pt)
+        when: the loader attempts to open it
+        then: |
+          a clear error is raised explaining that only safetensors
+          format is supported for model merging
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-13T22:32:07.860Z
+  - _ulid: 01KHCJ41E230H6BM4NNWYW0MJ5
+    slugs:
+      - full-model-execution
+    title: Full Model Execution
+    type: feature
+    tags: []
+    description: |
+      Exit node extension for executing WIDEN merge on full model checkpoints.
+      Adds OpApplyModel operation to the recipe evaluation engine. During
+      recipe analysis, detects RecipeModel nodes and opens streaming loaders.
+      During batched evaluation, OpApplyModel loads model weights per-batch
+      into registers, then existing OpFilterDelta/OpMergeWeights apply WIDEN
+      importance routing unchanged. Validates architecture consistency between
+      base model and merge models. Adding RecipeModel as a 5th recipe type
+      requires updating all isinstance dispatch points across the codebase.
+    acceptance_criteria:
+      - id: ac-1
+        given: a recipe tree containing RecipeModel nodes
+        when: recipe analysis runs (lib/analysis.py)
+        then: |
+          it detects RecipeModel nodes, opens FullModelLoader instances for
+          each unique path, and builds affected-key maps per model
+      - id: ac-2
+        given: a RecipeModel in a recipe tree
+        when: compile_plan processes it
+        then: an OpApplyModel op is emitted referencing the model's loader ID
+      - id: ac-3
+        given: execute_plan encounters OpApplyModel
+        when: executing a batch of keys
+        then: |
+          it loads the model weight tensors for those keys from the streaming
+          loader into a register (the raw weights, no arithmetic)
+      - id: ac-4
+        given: OpApplyModel result is in a register
+        when: OpFilterDelta or OpMergeWeights uses it with a backbone register
+        then: |
+          WIDEN computes delta (model_weights - backbone) internally and
+          routes by importance -- existing algorithm, unchanged
+      - id: ac-5
+        given: a recipe that mixes RecipeModel and RecipeLoRA nodes
+        when: the exit node processes it
+        then: |
+          both paths execute correctly -- LoRA via existing DeltaSpec path,
+          models via OpApplyModel streaming path
+      - id: ac-6
+        given: a checkpoint file whose detected architecture
+        when: it differs from the base model architecture
+        then: a clear error is raised naming both architectures and both file paths
+      - id: ac-7
+        given: full model weights loaded per-batch via streaming
+        when: GPU evaluation completes for a batch
+        then: |
+          loaded weights are freed after use, not held resident
+          (streaming loader re-reads from disk as needed)
+      - id: ac-8
+        given: GPU runs out of memory during full model evaluation
+        when: OOM is caught
+        then: |
+          existing chunked_evaluation backoff retries at batch_size=1
+          (compatible with streaming loader -- just re-reads fewer keys)
+      - id: ac-9
+        given: a RecipeModel with block_config
+        when: per-block control is applied during execution
+        then: |
+          block-level strength scaling is applied to full model deltas
+          the same way it applies to LoRA deltas
+      - id: ac-10
+        given: the checkpoint file does not exist or is not a valid safetensors file
+        when: the exit node attempts to open it
+        then: |
+          a clear error is raised naming the missing file and which
+          Model Input node referenced it
+      - id: ac-11
+        given: IS_CHANGED is called
+        when: the recipe tree contains RecipeModel nodes
+        then: |
+          checkpoint file (mtime, size) is included in the hash alongside
+          any LoRA file hashes
+      - id: ac-12
+        given: a recipe with only RecipeModel targets (no LoRAs)
+        when: affected keys are computed
+        then: |
+          all diffusion model keys present in both base and merge model
+          are processed (not just LoRA-affected subset)
+      - id: ac-13
+        given: a recipe composing 3 full models for merge
+        when: execution runs
+        then: |
+          only one batch of model weights per loader is on GPU at a time
+          (streaming loaders are read sequentially, not all at once)
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    notes: []
+    created: 2026-02-13T22:32:07.874Z

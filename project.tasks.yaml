@@ -3182,26 +3182,261 @@
   created_at: 2026-02-13T18:17:10.558Z
   notes: []
   todos: []
-- title: Add full model merging support
+- _ulid: 01KHC3H8DFA4RN9DA0K5DW8ZDW
+  slugs: []
+  title: Add full model merging support
+  type: spike
   description: "The architecture should technically be capable of full model merging (not just
     LoRA-based WIDEN), but this needs explicit specs, acceptance criteria, and validation. Requires
     design/spec work: define merge strategies for full models, spec out the merge pipeline, write
     AC-annotated tests, and validate against known merge results."
-  type: spike
   spec_ref: null
   meta_ref: null
   plan_ref: null
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 3
-  slugs: []
   tags:
     - design
     - spec
+  vcs_refs: []
+  created_at: 2026-02-13T18:17:12.357Z
+  notes: []
+  todos: []
+- _ulid: 01KHCJ41F34PDP4V447CFDK4M7
+  slugs:
+    - implement-full-model-recipe-type
+  title: Implement Full Model Recipe Type
+  type: task
+  spec_ref: "@full-model-recipe"
+  plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
+  status: pending
+  blocked_by: []
   depends_on: []
-  _ulid: 01KHC3H8DFA4RN9DA0K5DW8ZDW
+  context: []
+  priority: 3
+  tags: []
+  vcs_refs: []
+  created_at: 2026-02-13T22:32:07.907Z
+  notes:
+    - _ulid: 01KHCJ41F39ZSQPM36KT3FY13F
+      created_at: 2026-02-13T22:32:07.907Z
+      author: "@claude"
+      content: |
+        Implementation notes:
+
+        Add to lib/recipe.py alongside existing dataclasses. Pattern follows
+        RecipeLoRA but simpler -- single path+strength instead of tuple of
+        LoRA dicts. No MappingProxyType needed (only scalar fields). Update
+        __all__ and RecipeNode type alias to include RecipeModel.
+
+        The path field stores the checkpoint filename (resolved to full path
+        at Exit time via folder_paths, same as LoRA path resolution).
+        block_config enables per-block strength control, reusing existing
+        BlockConfig type.
+
+        Files: lib/recipe.py.
+  todos: []
+- _ulid: 01KHCJ41G45JMGBJN3S459HJ52
+  slugs:
+    - implement-model-input-node
+  title: Implement Model Input Node
+  type: task
+  spec_ref: "@model-input-node"
+  plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags: []
+  vcs_refs: []
+  created_at: 2026-02-13T22:32:07.940Z
+  notes:
+    - _ulid: 01KHCJ41G4WJBH40F9NG3HZ17Q
+      created_at: 2026-02-13T22:32:07.940Z
+      author: "@claude"
+      content: |
+        Implementation notes:
+
+        New file nodes/model_input.py. Pattern follows nodes/lora.py closely:
+        checkpoint file combo via folder_paths.get_filename_list("checkpoints"),
+        strength slider, optional BLOCK_CONFIG input. No chaining (unlike LoRA
+        node) -- each RecipeModel represents one model. To merge multiple models,
+        use Compose node.
+
+        Register in __init__.py NODE_CLASS_MAPPINGS as
+        "WIDENModelInput": WIDENModelInputNode with display name
+        "WIDEN Model Input". The file path is stored as-is (the filename,
+        not full path) -- Exit resolves via
+        folder_paths.get_full_path("checkpoints", name) at execution time.
+
+        Files: nodes/model_input.py, __init__.py.
+  todos: []
+- _ulid: 01KHCJ41HRS122HRGWERT8R5V2
+  slugs:
+    - implement-full-model-loader
+  title: Implement Full Model Loader
+  type: task
+  spec_ref: "@full-model-loader"
+  plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 3
+  tags: []
+  vcs_refs: []
+  created_at: 2026-02-13T22:32:07.992Z
+  notes:
+    - _ulid: 01KHCJ41HR7FBHA9CWXYDCFKNF
+      created_at: 2026-02-13T22:32:07.992Z
+      author: "@claude"
+      content: |
+        Implementation notes:
+
+        New file lib/model_loader.py. Uses safetensors.safe_open(path,
+        framework="pt", device="cpu") context manager.
+
+        Key normalization pipeline (runs once at open time):
+        1. Read all keys from safe_open metadata (no tensor loading).
+        2. Normalize: strip architecture-specific prefixes to canonical form.
+           - SDXL files: strip "model.diffusion_model." prefix.
+           - Z-Image files: strip "model.diffusion_model." or similar prefix.
+           - Reference merge-router src/models/ for format-specific patterns.
+        3. Filter: keep only diffusion model keys (drop VAE "first_stage_model."
+           and text encoder "conditioner." / "cond_stage_model." keys).
+        4. Build forward map: file_key -> base_model_key (normalized).
+        5. Build reverse map: base_model_key -> file_key (for lookups).
+
+        Architecture detection: run architecture patterns on NORMALIZED keys
+        (post prefix-stripping), so the same _ARCH_PATTERNS from nodes/entry.py
+        work. Detection must happen AFTER normalization, not before, since
+        patterns expect state_dict-format keys (e.g., "diffusion_model.input_blocks"
+        not "model.diffusion_model.input_blocks").
+
+        get_weights(keys) calls f.get_tensor(reverse_map[key]) per key, returns
+        list of tensors. Streaming means per-batch disk I/O but avoids full model
+        in memory. The safe_open handle is kept open for the duration of execution
+        (closed in cleanup()).
+
+        Note: safetensors safe_open uses memory-mapping on supported platforms,
+        but actual behavior may vary. The key guarantee is that tensors are not
+        allocated in Python memory until get_tensor() is called.
+
+        Files: lib/model_loader.py, reference lib/lora/base.py for interface
+        pattern, reference merge-router src/models/ for key normalization.
+  todos: []
+- title: Implement Full Model Execution
+  type: task
+  spec_ref: "@full-model-execution"
+  plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
+  priority: 3
+  slugs:
+    - implement-full-model-execution
+  tags: []
+  depends_on: []
+  notes:
+    - _ulid: 01KHCJ41JV61GEG140NXPX6FWA
+      created_at: 2026-02-13T22:32:08.027Z
+      author: "@claude"
+      content: |
+        Implementation notes:
+
+        This is the largest spec -- it touches every isinstance dispatch
+        point that currently hardcodes the 4 recipe types. All changes needed:
+
+        RECIPE TYPE SYSTEM (lib/recipe.py):
+        - Add RecipeModel to RecipeNode type alias (line 86).
+        - Add RecipeModel to __all__ exports.
+
+        VALIDATION (nodes/exit.py _validate_recipe_tree):
+        - Add RecipeModel as valid Compose branch type (line 62).
+        - Add RecipeModel as valid Merge target type (line 81).
+        - Add RecipeModel leaf case (no children to validate).
+
+        RECIPE ANALYSIS (lib/analysis.py):
+        - _walk_to_base(): RecipeModel cannot be tree root -- add case
+          that raises ValueError like RecipeLoRA (line 71-75).
+        - _collect_lora_sets(): Add RecipeModel case that skips (no LoRAs
+          to collect) instead of raising ValueError (line 124).
+        - New function _collect_model_refs(): Walk tree, collect unique
+          RecipeModel nodes with synthetic model IDs (parallel to
+          _collect_lora_sets pattern).
+        - Extend analyze_recipe() or create analyze_recipe_models() to
+          open FullModelLoader per unique path, validate arch match,
+          build model affected-key maps. Return extended AnalysisResult
+          with model_loaders and model_affected fields.
+        - Extend get_keys_to_process(): Union of LoRA affected keys AND
+          model affected keys determines which keys need processing.
+
+        EXIT NODE (nodes/exit.py):
+        - _collect_lora_paths(): Add RecipeModel skip case so tree walk
+          doesn't raise on model nodes.
+        - New _collect_model_paths(): Parallel function that collects
+          checkpoint file paths from RecipeModel nodes.
+        - _compute_recipe_hash(): Include model file (mtime, size) in hash.
+        - execute(): Call model analysis, pass model_loaders to executor.
+        - Cleanup: Close model loaders after execution completes.
+
+        PLAN COMPILER (lib/recipe_eval.py):
+        - New OpApplyModel frozen dataclass: model_id (str), block_config,
+          input_reg (int), out_reg (int).
+        - Add OpApplyModel to _Op type alias (line 78).
+        - _input_regs(): Add OpApplyModel case returning (input_reg,).
+        - _PlanCompiler.compile_node(): Add RecipeModel dispatch that
+          emits OpApplyModel (parallel to _compile_lora pattern).
+        - _PlanCompiler._compile_merge(): Add RecipeModel to valid
+          target isinstance check (line 283).
+
+        PLAN EXECUTOR (lib/recipe_eval.py):
+        - execute_plan() gains new parameter:
+          model_loaders: dict[str, FullModelLoader] | None = None
+          This keeps backward compatibility (None = no models).
+        - OpApplyModel handler: look up loader by model_id, call
+          loader.get_weights(keys), stack into [B, *shape] tensor,
+          move to device/dtype, store in register.
+        - evaluate_recipe() wrapper passes model_loaders through.
+
+        COMPOSE NODE (nodes/compose.py):
+        - Add RecipeModel to valid branch types (line 48).
+
+        MERGE NODE (nodes/merge.py):
+        - Add RecipeModel to valid target types (line 77-81).
+
+        KEY INSIGHT: OpApplyModel just loads weights into a register.
+        It does NOT compute deltas. OpFilterDelta internally computes
+        delta = input_reg - backbone_reg via WIDEN's filter_delta_batched.
+        So full model merge reuses 100% of the WIDEN algorithm unchanged.
+
+        MIXED RECIPES: compile_plan handles both node types independently.
+        A chained merge like Merge(base=Merge(base=Entry, target=LoRA),
+        target=Model) evaluates inner merge (LoRA path) first, then outer
+        merge (model path) with inner result as base. The only naming
+        confusion: execute_plan's variable "lora_applied" (line 397) is
+        actually "the weights in input_reg" which may be raw model weights
+        when from OpApplyModel. Consider renaming to "applied" for clarity.
+
+        PERFORMANCE NOTE: For recipes with only RecipeModel targets (no
+        LoRAs), affected_keys is the full diffusion model key set. This
+        means ALL keys are processed, not a small LoRA subset. Batch sizing
+        via compute_batch_size() handles this, but total processing time is
+        proportionally higher. For SDXL: ~1500 keys vs ~200-400 for typical
+        LoRA merges.
+
+        MEMORY: Streaming loaders mean only 1 batch of model weights on GPU
+        at a time. For SDXL with batch_size=64, this is ~100-500MB GPU per
+        batch vs 4.2GB for full model. With 3 models in a Compose, each
+        batch loads 3 × batch_size weights sequentially.
+
+        Files: lib/recipe.py, lib/recipe_eval.py, lib/analysis.py,
+        nodes/exit.py, nodes/merge.py, nodes/compose.py.
+  _ulid: 01KHCJ41JV9XBWBJ8VSVB748W8
   status: pending
   blocked_by: []
   context: []
   vcs_refs: []
-  created_at: 2026-02-13T18:17:12.357Z
-  notes: []
+  created_at: 2026-02-13T22:32:08.027Z
   todos: []
