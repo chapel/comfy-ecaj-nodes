@@ -2706,6 +2706,7 @@
     - spec
   vcs_refs: []
   created_at: 2026-02-12T23:53:54.192Z
+  started_at: 2026-02-13T04:12:19.511Z
   notes:
     - _ulid: 01KHA4DS7A72P7ZRSJHHSB99EM
       created_at: 2026-02-12T23:54:18.218Z
@@ -2719,8 +2720,15 @@
         generation, When base weights are extracted, Then they reflect the original unpatched model
         state regardless of prior set patches.'"
       supersedes: null
+    - _ulid: 01KHAK8CK7MTTBD2G5RSD0N6BG
+      created_at: 2026-02-13T04:13:30.087Z
+      author: "@claude"
+      content: "Added ac-7 to @exit-patch-install: 'Given previous generation left set patches on a loaded
+        clone, When patch installation begins, Then loaded clones sharing the base model are fully
+        unloaded first so model_state_dict() returns original unpatched weights.' Annotated all 5
+        TestUnpatchLoadedClones tests. All pass, lint clean."
+      supersedes: null
   todos: []
-  started_at: 2026-02-13T04:12:19.511Z
 - _ulid: 01KHA4D4KZQ3MBABRZ033Q4DGZ
   slugs:
     - test-comfy-registry
