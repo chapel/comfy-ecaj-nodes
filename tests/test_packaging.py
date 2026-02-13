@@ -70,7 +70,7 @@ class TestComfyRegistryMetadata:
     # AC: @comfyui-packaging ac-3
     def test_display_name(self):
         meta = self._load_comfy_metadata()
-        assert meta["DisplayName"] == "ECAJ Nodes"
+        assert meta["DisplayName"] == "ecaj nodes"
 
     # AC: @comfyui-packaging ac-3
     def test_icon_defined(self):
