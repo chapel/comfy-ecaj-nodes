@@ -1115,6 +1115,7 @@ runs:
     current_step: 5
     total_steps: 6
     started_at: 2026-02-13T01:18:59.310Z
+    completed_at: 2026-02-13T01:19:55.076Z
     step_results:
       - step_index: 0
         status: completed
@@ -1152,4 +1153,11 @@ runs:
         notes: Captured 2 success observations (batching cleanup tasks, subagent review catching misses). No
           friction to capture. test_graph.py follow-up already inboxed as 01KHA976.
     initiated_by: "@claude"
-    completed_at: 2026-02-13T01:19:55.076Z
+  - _ulid: 01KHAKSTM667M65DRWPC4F9SD1
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-13T04:23:01.510Z
+    step_results: []
+    initiated_by: "@claude"
