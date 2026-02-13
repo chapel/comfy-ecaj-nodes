@@ -2625,7 +2625,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on: []
   context: []
@@ -2634,6 +2634,7 @@
     - annotations
   vcs_refs: []
   created_at: 2026-02-12T23:53:47.793Z
+  started_at: 2026-02-13T00:58:54.141Z
   notes:
     - _ulid: 01KHA4DGAD29S9WNK8PRBK8E1E
       created_at: 2026-02-12T23:54:09.101Z
@@ -2646,7 +2647,6 @@
         standardizing on '# AC: @slug ac-N' comment style (some files use docstring style instead)."
       supersedes: null
   todos: []
-  started_at: 2026-02-13T00:58:54.141Z
 - _ulid: 01KHA4CY23BXDVEDX2AV5VP4WT
   slugs:
     - create-examples
