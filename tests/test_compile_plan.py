@@ -214,11 +214,9 @@ class TestBackboneOverride:
         op_filter = plan.ops[1]
         assert op_filter.backbone_reg == 0
 
+    # AC: @exit-batched-eval ac-5
     def test_chained_backbone_override_still_reg_zero(self):
-        """Even in a chained merge, backbone override points to reg 0.
-
-        # AC: @exit-batched-eval ac-5
-        """
+        """Even in a chained merge, backbone override points to reg 0."""
         base = _base()
         l1 = _lora("l1.safetensors")
         m1 = RecipeMerge(base=base, target=l1, backbone=None, t_factor=1.0)
