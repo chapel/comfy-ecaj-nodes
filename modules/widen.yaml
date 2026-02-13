@@ -1113,6 +1113,7 @@ features:
           (streaming loaders are read sequentially, not all at once)
     depends_on:
       - "@full-model-recipe"
+      - "@model-input-node"
     implements: []
     relates_to: []
     tests: []
