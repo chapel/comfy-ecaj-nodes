@@ -29,13 +29,3 @@ inbox:
       - exit-node
       - cache
     added_by: "@claude"
-  - _ulid: 01KHCJHAZQ5ZSX6JX055GKYQ7V
-    text: "kspec plan import: auto-generate depends_on/blocked_by from implementation notes dependency
-      chain. Currently plan import creates specs and tasks but dependency relationships must be
-      added manually. Could parse 'depends on: X' patterns from implementation_notes or add a
-      dependencies field to the plan YAML spec format."
-    created_at: 2026-02-13T22:39:23.639Z
-    tags:
-      - reflection
-      - kspec
-    added_by: "@claude"
