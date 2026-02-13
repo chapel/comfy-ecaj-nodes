@@ -1242,7 +1242,7 @@ runs:
   - _ulid: 01KHCJE8CBEV5HGGPZFNKDNZPQ
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-13T22:37:42.668Z
     step_results:
@@ -1291,5 +1291,19 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-13T22:39:09.097Z
-        completed_at: 2026-02-13T22:39:09.097Z
+        completed_at: 2026-02-13T22:39:15.789Z
+        notes: >-
+          Decision for each item:
+
+
+          1. FRICTION: Plan import missing structural deps → CAPTURE as inbox item (actionable kspec
+          improvement, repeatable pattern, not tracked anywhere).
+
+
+          2. SUCCESS: Subagent plan review for standalone-ness → CAPTURE as success observation
+          (concrete pattern with measurable value — 5 blockers caught).
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-13T22:39:15.789Z
+        completed_at: 2026-02-13T22:39:15.789Z
     initiated_by: "@claude"
