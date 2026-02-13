@@ -3195,6 +3195,7 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: null
   depends_on: []
   context: []
   priority: 3
@@ -3204,10 +3205,15 @@
   vcs_refs: []
   created_at: 2026-02-13T18:17:12.357Z
   started_at: 2026-02-13T22:32:24.232Z
-  notes: []
-  todos: []
   completed_at: 2026-02-13T22:32:26.896Z
-  closed_reason: null
+  notes:
+    - _ulid: 01KHCJ4NBXTQ56N69D2TVCYE9Q
+      created_at: 2026-02-13T22:32:28.285Z
+      author: "@claude"
+      content: Spike complete — plan imported as @plan-full-model-merging-widen-on-full-checkpoints with 4
+        specs and 4 derived tasks
+      supersedes: null
+  todos: []
 - _ulid: 01KHCJ41F34PDP4V447CFDK4M7
   slugs:
     - implement-full-model-recipe-type
