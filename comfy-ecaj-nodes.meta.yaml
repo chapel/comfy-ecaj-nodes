@@ -935,4 +935,14 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHA7KF2BVABEKJ348XBHSCTE
+    type: friction
+    content: "kspec batch doesn't support forward references between commands. Tasks created in a batch
+      can't be referenced by task notes or depends-on in the same batch. Workaround: split into 2
+      batches (create entities first, annotate second). Encountered when creating specs+tasks+notes
+      for individual-block-control and layer-type-filter-impl."
+    created_at: 2026-02-13T00:49:50.156Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
