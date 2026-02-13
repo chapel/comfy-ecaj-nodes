@@ -3193,7 +3193,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -3206,6 +3206,8 @@
   started_at: 2026-02-13T22:32:24.232Z
   notes: []
   todos: []
+  completed_at: 2026-02-13T22:32:26.896Z
+  closed_reason: null
 - _ulid: 01KHCJ41F34PDP4V447CFDK4M7
   slugs:
     - implement-full-model-recipe-type
