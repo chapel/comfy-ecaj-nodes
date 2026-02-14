@@ -939,7 +939,7 @@ features:
             then: it returns None (no error)
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
     status:
       maturity: draft
       implementation: implemented
