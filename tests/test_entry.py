@@ -171,20 +171,17 @@ class TestUnsupportedArchitectureError:
         error_msg = str(exc_info.value)
         assert "custom_model" in error_msg
 
-    def test_flux_detected_but_unsupported(self):
-        """Flux architecture is detected but raises clear 'not supported' error."""
+    def test_flux_detected_and_supported(self):
+        """Flux Klein architecture (double_blocks) is detected and supported."""
+        # AC: @flux-klein-support ac-1
         keys = (
             "double_blocks.0.weight",
             "double_blocks.1.weight",
         )
         patcher = MockModelPatcher(keys=keys)
 
-        with pytest.raises(UnsupportedArchitectureError) as exc_info:
-            detect_architecture(patcher)
-
-        error_msg = str(exc_info.value)
-        assert "flux" in error_msg.lower()
-        assert "no WIDEN loader is available yet" in error_msg
+        arch = detect_architecture(patcher)
+        assert arch == "flux"
 
     def test_qwen_detected_and_supported(self):
         """Qwen architecture (60+ transformer_blocks) is detected and supported."""

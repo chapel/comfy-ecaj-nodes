@@ -7,6 +7,7 @@ Tests for @merge-block-config acceptance criteria:
 
 from lib.block_classify import (
     classify_key,
+    classify_key_flux,
     classify_key_qwen,
     classify_key_sdxl,
     classify_key_zimage,
@@ -157,6 +158,58 @@ class TestBlockClassifyQwen:
         assert classify_key_qwen("transformer_blocks.attn.weight") is None
 
 
+class TestBlockClassifyFlux:
+    """Flux Klein block classification tests."""
+
+    # AC: @flux-klein-support ac-2
+    def test_double_blocks_classify_individually(self):
+        """Double blocks classify as DB00-DB07 with dynamic range."""
+        assert classify_key_flux("double_blocks.0.img_attn.weight") == "DB00"
+        assert classify_key_flux("double_blocks.1.txt_attn.weight") == "DB01"
+        assert classify_key_flux("double_blocks.7.img_mlp.weight") == "DB07"
+        # Dynamic range - Klein 4B has only 5 double blocks
+        assert classify_key_flux("double_blocks.4.img_attn.weight") == "DB04"
+
+    # AC: @flux-klein-support ac-2
+    def test_single_blocks_classify_individually(self):
+        """Single blocks classify as SB00-SB23 with dynamic range."""
+        assert classify_key_flux("single_blocks.0.linear1.weight") == "SB00"
+        assert classify_key_flux("single_blocks.10.linear2.weight") == "SB10"
+        assert classify_key_flux("single_blocks.23.modulation.weight") == "SB23"
+        # Dynamic range - Klein 4B has only 20 single blocks
+        assert classify_key_flux("single_blocks.19.linear1.weight") == "SB19"
+
+    # AC: @flux-klein-support ac-2
+    def test_strips_prefixes(self):
+        """Key classification strips common prefixes."""
+        key = "diffusion_model.double_blocks.0.img_attn.weight"
+        assert classify_key_flux(key) == "DB00"
+        key = "transformer.single_blocks.5.linear1.weight"
+        assert classify_key_flux(key) == "SB05"
+
+    # AC: @flux-klein-support ac-2, ac-10
+    def test_both_klein_variants(self):
+        """Both Klein 4B (5+20) and 9B (8+24) work with same classifier."""
+        # Klein 4B max indices
+        assert classify_key_flux("double_blocks.4.img_attn.weight") == "DB04"
+        assert classify_key_flux("single_blocks.19.linear1.weight") == "SB19"
+        # Klein 9B max indices
+        assert classify_key_flux("double_blocks.7.img_attn.weight") == "DB07"
+        assert classify_key_flux("single_blocks.23.linear1.weight") == "SB23"
+
+    # AC: @flux-klein-support ac-2
+    def test_unmatched_returns_none(self):
+        """Non-block keys return None."""
+        assert classify_key_flux("guidance_in.weight") is None
+        assert classify_key_flux("time_in.weight") is None
+        assert classify_key_flux("vector_in.weight") is None
+        assert classify_key_flux("img_in.weight") is None
+        assert classify_key_flux("txt_in.weight") is None
+        assert classify_key_flux("final_layer.weight") is None
+        # Missing block index
+        assert classify_key_flux("double_blocks.img_attn.weight") is None
+
+
 class TestGetBlockClassifier:
     """get_block_classifier function tests."""
 
@@ -176,10 +229,15 @@ class TestGetBlockClassifier:
         classifier = get_block_classifier("qwen")
         assert classifier is classify_key_qwen
 
+    # AC: @flux-klein-support ac-2
+    def test_returns_flux_classifier(self):
+        """Returns Flux classifier for 'flux' arch."""
+        classifier = get_block_classifier("flux")
+        assert classifier is classify_key_flux
+
     def test_returns_none_for_unknown_arch(self):
         """Returns None for unknown architectures."""
         assert get_block_classifier("unknown") is None
-        assert get_block_classifier("flux") is None
 
     def test_classify_key_convenience_function(self):
         """classify_key convenience function works correctly."""

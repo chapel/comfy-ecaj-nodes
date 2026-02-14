@@ -225,6 +225,83 @@ class TestLayerTypeClassifyQwen:
 
 
 # =============================================================================
+# Flux Layer Type Classification Tests
+# =============================================================================
+
+
+class TestLayerTypeClassifyFlux:
+    """Flux Klein layer type classification tests."""
+
+    # AC: @flux-klein-support ac-3
+    def test_attention_layers_img_attn(self):
+        """Flux img_attn keys classify as attention."""
+        assert classify_layer_type("double_blocks.0.img_attn.qkv.weight", "flux") == "attention"
+        assert classify_layer_type("double_blocks.0.img_attn.proj.weight", "flux") == "attention"
+
+    # AC: @flux-klein-support ac-3
+    def test_attention_layers_txt_attn(self):
+        """Flux txt_attn keys classify as attention."""
+        assert classify_layer_type("double_blocks.0.txt_attn.qkv.weight", "flux") == "attention"
+        assert classify_layer_type("double_blocks.0.txt_attn.proj.weight", "flux") == "attention"
+
+    # AC: @flux-klein-support ac-3
+    def test_attention_layers_qkv(self):
+        """Flux qkv keys classify as attention."""
+        assert classify_layer_type("single_blocks.0.linear1.qkv.weight", "flux") == "attention"
+
+    # AC: @flux-klein-support ac-3
+    def test_attention_layers_proj(self):
+        """Flux proj keys classify as attention."""
+        assert classify_layer_type("single_blocks.0.proj.weight", "flux") == "attention"
+
+    # AC: @flux-klein-support ac-3
+    def test_attention_layers_norm_query_key(self):
+        """Flux norm.query_norm/key_norm keys classify as attention."""
+        key = "double_blocks.0.img_attn.norm.query_norm.weight"
+        assert classify_layer_type(key, "flux") == "attention"
+        key = "double_blocks.0.img_attn.norm.key_norm.weight"
+        assert classify_layer_type(key, "flux") == "attention"
+
+    # AC: @flux-klein-support ac-3
+    def test_feed_forward_layers_img_mlp(self):
+        """Flux img_mlp keys classify as feed_forward."""
+        assert classify_layer_type("double_blocks.0.img_mlp.weight", "flux") == "feed_forward"
+
+    # AC: @flux-klein-support ac-3
+    def test_feed_forward_layers_txt_mlp(self):
+        """Flux txt_mlp keys classify as feed_forward."""
+        assert classify_layer_type("double_blocks.0.txt_mlp.weight", "flux") == "feed_forward"
+
+    # AC: @flux-klein-support ac-3
+    def test_feed_forward_layers_linear2(self):
+        """Flux linear2 keys classify as feed_forward."""
+        assert classify_layer_type("single_blocks.0.linear2.weight", "flux") == "feed_forward"
+
+    # AC: @flux-klein-support ac-3
+    def test_norm_layers_img_mod(self):
+        """Flux img_mod keys classify as norm."""
+        assert classify_layer_type("double_blocks.0.img_mod.weight", "flux") == "norm"
+
+    # AC: @flux-klein-support ac-3
+    def test_norm_layers_txt_mod(self):
+        """Flux txt_mod keys classify as norm."""
+        assert classify_layer_type("double_blocks.0.txt_mod.weight", "flux") == "norm"
+
+    # AC: @flux-klein-support ac-3
+    def test_norm_layers_modulation(self):
+        """Flux modulation keys classify as norm."""
+        assert classify_layer_type("single_blocks.0.modulation.weight", "flux") == "norm"
+
+    # AC: @flux-klein-support ac-3
+    def test_strips_prefixes(self):
+        """Layer type classification strips common prefixes."""
+        key = "diffusion_model.double_blocks.0.img_attn.weight"
+        assert classify_layer_type(key, "flux") == "attention"
+        key = "transformer.single_blocks.0.linear2.weight"
+        assert classify_layer_type(key, "flux") == "feed_forward"
+
+
+# =============================================================================
 # Architecture Edge Cases
 # =============================================================================
 
@@ -242,7 +319,6 @@ class TestLayerTypeClassifyArchEdgeCases:
     # AC: @layer-type-filter ac-8
     def test_unsupported_arch_returns_none(self):
         """Unsupported architectures return None."""
-        assert classify_layer_type("layers.5.attn.qkv.weight", "flux") is None
         assert classify_layer_type("input_blocks.0.0.weight", "unknown") is None
 
 
