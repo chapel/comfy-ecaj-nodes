@@ -473,9 +473,9 @@ features:
             when: exit node checks cache validity
             then: cache is invalidated and merge recomputes
           - id: ac-8
-            given: saved safetensors from exit node
+            given: saved safetensors from exit node containing full base model state dict
             when: loaded by ComfyUI standard model loader
-            then: functions as a complete standalone model
+            then: functions as a complete standalone model (all keys present, correct dtypes)
           - id: ac-9
             given: file with model_name already exists but lacks ecaj metadata in safetensors header
             when: exit node attempts save or cache-check
