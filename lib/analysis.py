@@ -18,14 +18,24 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from .lora import LoRALoader, get_loader
-from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
+from .model_loader import ModelLoader
+from .recipe import (
+    RecipeBase,
+    RecipeCompose,
+    RecipeLoRA,
+    RecipeMerge,
+    RecipeModel,
+    RecipeNode,
+)
 
 if TYPE_CHECKING:
     pass
 
 __all__ = [
     "AnalysisResult",
+    "ModelAnalysisResult",
     "analyze_recipe",
+    "analyze_recipe_models",
     "walk_to_base",
 ]
 
@@ -47,6 +57,23 @@ class AnalysisResult:
     set_affected: dict[str, set[str]]
     loader: LoRALoader
     affected_keys: set[str]
+
+
+@dataclass
+class ModelAnalysisResult:
+    """Result of recipe model analysis.
+
+    Contains model loaders and affected keys for full checkpoint merging:
+    - model_loaders: Map of model_id -> ModelLoader (streaming access)
+    - model_affected: Map of model_id -> set of keys affected by that model
+    - all_model_keys: Union of all keys affected by any model
+
+    AC: @full-model-execution ac-1
+    """
+
+    model_loaders: dict[str, ModelLoader]
+    model_affected: dict[str, frozenset[str]]
+    all_model_keys: frozenset[str]
 
 
 def walk_to_base(node: RecipeNode) -> RecipeBase:
@@ -73,6 +100,11 @@ def walk_to_base(node: RecipeNode) -> RecipeBase:
         raise ValueError(
             "RecipeLoRA cannot be the root of a recipe tree. "
             "Use Entry node to create RecipeBase first."
+        )
+    elif isinstance(node, RecipeModel):
+        raise ValueError(
+            "RecipeModel cannot be the root of a recipe tree. "
+            "Use Entry node to create RecipeBase first, then Merge with the model."
         )
     elif isinstance(node, RecipeCompose):
         raise ValueError(
@@ -111,6 +143,9 @@ def _collect_lora_sets(node: RecipeNode) -> dict[int, RecipeLoRA]:
             set_id = id(n)
             if set_id not in lora_sets:
                 lora_sets[set_id] = n
+        elif isinstance(n, RecipeModel):
+            # RecipeModel has no LoRAs - skip
+            pass
         elif isinstance(n, RecipeCompose):
             # Walk all branches
             for branch in n.branches:
@@ -255,3 +290,123 @@ def get_keys_to_process(
         Set of keys that need processing
     """
     return all_keys & affected_keys
+
+
+def _collect_model_refs(node: RecipeNode) -> dict[int, RecipeModel]:
+    """Collect all unique RecipeModel nodes with synthetic model IDs.
+
+    AC: @full-model-execution ac-1
+    Each unique RecipeModel gets a distinct ID for loader management.
+
+    Args:
+        node: Root recipe node to walk
+
+    Returns:
+        Dict mapping model_id (int) -> RecipeModel for each unique node
+    """
+    model_refs: dict[int, RecipeModel] = {}
+
+    def _walk(n: RecipeNode) -> None:
+        if isinstance(n, RecipeBase):
+            pass
+        elif isinstance(n, RecipeLoRA):
+            pass
+        elif isinstance(n, RecipeModel):
+            model_id = id(n)
+            if model_id not in model_refs:
+                model_refs[model_id] = n
+        elif isinstance(n, RecipeCompose):
+            for branch in n.branches:
+                _walk(branch)
+        elif isinstance(n, RecipeMerge):
+            _walk(n.base)
+            _walk(n.target)
+            if n.backbone is not None:
+                _walk(n.backbone)
+        else:
+            raise ValueError(f"Unknown recipe node type: {type(n).__name__}")
+
+    _walk(node)
+    return model_refs
+
+
+def analyze_recipe_models(
+    node: RecipeNode,
+    base_arch: str,
+    model_path_resolver: Callable[[str], str | None] | None = None,
+) -> ModelAnalysisResult:
+    """Analyze a recipe tree for full model checkpoints.
+
+    AC: @full-model-execution ac-1, ac-6, ac-10, ac-12
+
+    Opens ModelLoader instances for each unique RecipeModel path,
+    validates architecture consistency, and builds affected-key maps.
+
+    Args:
+        node: Root recipe node (typically RecipeMerge)
+        base_arch: Architecture of the base model (for validation)
+        model_path_resolver: Callable that resolves a model name to its full
+            filesystem path. In production, wraps folder_paths.get_full_path.
+
+    Returns:
+        ModelAnalysisResult with loaders and affected key sets
+
+    Raises:
+        FileNotFoundError: If any checkpoint file doesn't exist (AC-10)
+        ValueError: If checkpoint architecture doesn't match base (AC-6)
+    """
+    model_refs = _collect_model_refs(node)
+
+    model_loaders: dict[str, ModelLoader] = {}
+    model_affected: dict[str, frozenset[str]] = {}
+    all_model_keys: set[str] = set()
+    opened_loaders: list[ModelLoader] = []  # For cleanup on error
+
+    try:
+        for model_id, recipe_model in model_refs.items():
+            model_key = str(model_id)
+            model_name = recipe_model.path
+
+            # Resolve path
+            full_path = model_name
+            if model_path_resolver is not None:
+                resolved = model_path_resolver(model_name)
+                if resolved is not None:
+                    full_path = resolved
+
+            # AC-10: Check file exists before opening loader
+            if not os.path.exists(full_path):
+                raise FileNotFoundError(
+                    f"Checkpoint file not found: {model_name}\n"
+                    f"Referenced by Model Input node with strength {recipe_model.strength}"
+                )
+
+            # Open streaming loader
+            loader = ModelLoader(full_path)
+            opened_loaders.append(loader)
+
+            # AC-6: Validate architecture matches base model
+            if loader.arch is not None and loader.arch != base_arch:
+                raise ValueError(
+                    f"Architecture mismatch: checkpoint '{model_name}' has "
+                    f"architecture '{loader.arch}' but base model has '{base_arch}'\n"
+                    f"Both models must have the same architecture for merging."
+                )
+
+            model_loaders[model_key] = loader
+
+            # AC-12: All diffusion model keys in the checkpoint are affected
+            model_affected[model_key] = loader.affected_keys
+            all_model_keys.update(loader.affected_keys)
+
+    except Exception:
+        # Cleanup any opened loaders on error
+        for loader in opened_loaders:
+            loader.cleanup()
+        raise
+
+    return ModelAnalysisResult(
+        model_loaders=model_loaders,
+        model_affected=model_affected,
+        all_model_keys=frozenset(all_model_keys),
+    )

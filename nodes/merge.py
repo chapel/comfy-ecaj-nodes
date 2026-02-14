@@ -1,6 +1,13 @@
 """WIDEN Merge Node — Defines a merge step in the recipe tree."""
 
-from ..lib.recipe import BlockConfig, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+from ..lib.recipe import (
+    BlockConfig,
+    RecipeBase,
+    RecipeCompose,
+    RecipeLoRA,
+    RecipeMerge,
+    RecipeModel,
+)
 
 
 def _find_base_arch(node) -> str | None:
@@ -74,9 +81,9 @@ class WIDENMergeNode:
             )
 
         # Validate target is a valid merge target
-        if not isinstance(target, (RecipeLoRA, RecipeCompose, RecipeMerge)):
+        if not isinstance(target, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
             raise TypeError(
-                f"target must be RecipeLoRA, RecipeCompose, or RecipeMerge, "
+                f"target must be RecipeLoRA, RecipeModel, RecipeCompose, or RecipeMerge, "
                 f"got {type(target).__name__}"
             )
 

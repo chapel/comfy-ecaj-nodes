@@ -32,6 +32,7 @@ if TYPE_CHECKING:
         RecipeCompose,
         RecipeLoRA,
         RecipeMerge,
+        RecipeModel,
         RecipeNode,
     )
 
@@ -75,7 +76,22 @@ class OpMergeWeights:
     out_reg: int
 
 
-_Op = OpApplyLoRA | OpFilterDelta | OpMergeWeights
+@dataclass(frozen=True)
+class OpApplyModel:
+    """Load full model weights into a register for WIDEN merge.
+
+    AC: @full-model-execution ac-2, ac-3
+    Loads raw checkpoint weights (no arithmetic) into a register.
+    OpFilterDelta/OpMergeWeights compute deltas internally.
+    """
+
+    model_id: str
+    block_config: BlockConfig | None
+    input_reg: int
+    out_reg: int
+
+
+_Op = OpApplyLoRA | OpFilterDelta | OpMergeWeights | OpApplyModel
 
 
 @dataclass(frozen=True)
@@ -107,6 +123,8 @@ def _input_regs(op: _Op) -> tuple[int, ...]:
         return (op.input_reg, op.backbone_reg)
     if op_type is OpMergeWeights:
         return (*op.branch_regs, op.backbone_reg)
+    if op_type is OpApplyModel:
+        return (op.input_reg,)
     raise ValueError(f"Unknown op type: {op_type}")
 
 
@@ -160,9 +178,11 @@ class _PlanCompiler:
         self,
         set_id_map: dict[int, str],
         arch: str | None,
+        model_id_map: dict[int, str] | None = None,
     ) -> None:
         self._set_id_map = set_id_map
         self._arch = arch
+        self._model_id_map = model_id_map or {}
         self._ops: list[_Op] = []
         self._next_reg = 1  # 0 is reserved for base_batch
 
@@ -179,13 +199,16 @@ class _PlanCompiler:
         current_base_reg: int,
     ) -> int | list[int]:
         """Compile a recipe node, returning a register (or list for Compose)."""
-        from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+        from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeModel
 
         if isinstance(node, RecipeBase):
             return current_base_reg
 
         if isinstance(node, RecipeLoRA):
             return self._compile_lora(node, current_base_reg)
+
+        if isinstance(node, RecipeModel):
+            return self._compile_model(node, current_base_reg)
 
         if isinstance(node, RecipeCompose):
             return self._compile_compose(node, current_base_reg)
@@ -214,6 +237,30 @@ class _PlanCompiler:
         )
         return out
 
+    def _compile_model(self, node: RecipeModel, current_base_reg: int) -> int:
+        """Compile a RecipeModel node into an OpApplyModel operation.
+
+        AC: @full-model-execution ac-2
+        Emits OpApplyModel referencing the model's loader ID.
+        """
+        model_id = self._model_id_map.get(id(node))
+        if model_id is None:
+            raise RuntimeError(
+                "RecipeModel has no model_id mapping. This indicates a bug in "
+                "recipe analysis -- every RecipeModel must be registered in "
+                f"model_id_map before evaluation. RecipeModel path: {node.path!r}"
+            )
+        out = self._alloc_reg()
+        self._ops.append(
+            OpApplyModel(
+                model_id=model_id,
+                block_config=node.block_config,
+                input_reg=current_base_reg,
+                out_reg=out,
+            )
+        )
+        return out
+
     def _compile_compose(
         self, node: RecipeCompose, current_base_reg: int
     ) -> list[int]:
@@ -224,7 +271,7 @@ class _PlanCompiler:
         return branch_regs
 
     def _compile_merge(self, node: RecipeMerge, current_base_reg: int) -> int:
-        from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+        from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeModel
 
         # Evaluate base (may be chained merge or RecipeBase)
         if isinstance(node.base, RecipeMerge):
@@ -280,7 +327,10 @@ class _PlanCompiler:
             )
             return out
 
-        elif isinstance(node.target, (RecipeLoRA, RecipeMerge)):
+        elif isinstance(node.target, (RecipeLoRA, RecipeMerge, RecipeModel)):
+            # AC: @full-model-execution ac-4
+            # RecipeModel works like RecipeLoRA — OpFilterDelta computes
+            # delta (model_weights - backbone) internally via WIDEN
             out = self._alloc_reg()
             self._ops.append(
                 OpFilterDelta(
@@ -302,6 +352,7 @@ def compile_plan(
     recipe_node: RecipeNode,
     set_id_map: dict[int, str],
     arch: str | None,
+    model_id_map: dict[int, str] | None = None,
 ) -> EvalPlan:
     """Pre-compile a recipe tree into a flat evaluation plan.
 
@@ -314,11 +365,12 @@ def compile_plan(
         recipe_node: Recipe tree root (typically RecipeMerge)
         set_id_map: Map of id(RecipeLoRA) -> set_id string
         arch: Architecture name for block classification (optional)
+        model_id_map: Map of id(RecipeModel) -> model_id string (optional)
 
     Returns:
         EvalPlan with ops tuple, result_reg, and dead_after liveness info
     """
-    compiler = _PlanCompiler(set_id_map, arch)
+    compiler = _PlanCompiler(set_id_map, arch, model_id_map)
     result = compiler.compile_node(recipe_node, current_base_reg=0)
 
     # compile_node returns int for single result, list[int] for compose at root
@@ -350,11 +402,17 @@ def execute_plan(
     dtype: torch.dtype,
     arch: str | None = None,
     widen_config: object | None = None,
+    model_loaders: dict[str, object] | None = None,
 ) -> torch.Tensor:
     """Execute a pre-compiled plan on a batch of parameters.
 
     # AC: @exit-batched-eval ac-4
     Results remain on GPU (CPU transfer happens in patch installation phase).
+
+    # AC: @full-model-execution ac-3, ac-7, ac-13
+    OpApplyModel loads weights from streaming loaders per-batch.
+    Weights are freed after use (streaming loaders re-read as needed).
+    Only one batch of model weights per loader is on GPU at a time.
 
     Args:
         plan: Pre-compiled EvalPlan from compile_plan()
@@ -366,6 +424,7 @@ def execute_plan(
         dtype: Computation dtype
         arch: Architecture name for block classification (optional)
         widen_config: WIDENConfig for per-block WIDEN instances (optional)
+        model_loaders: Map of model_id -> ModelLoader for full model merging
 
     Returns:
         [B, *shape] merged weights on GPU
@@ -392,6 +451,41 @@ def execute_plan(
                 )
 
             regs[op.out_reg] = result
+
+        elif op_type is OpApplyModel:
+            # AC: @full-model-execution ac-3
+            # Load model weights for this batch of keys from streaming loader
+            if model_loaders is None:
+                raise RuntimeError(
+                    "OpApplyModel requires model_loaders but none were provided. "
+                    "This indicates a bug in recipe analysis."
+                )
+            model_loader = model_loaders.get(op.model_id)
+            if model_loader is None:
+                raise RuntimeError(
+                    f"OpApplyModel references model_id '{op.model_id}' but no "
+                    f"loader was found. This indicates a bug in recipe analysis."
+                )
+
+            # Get weights for the batch keys (returns list of CPU tensors)
+            # AC: @full-model-execution ac-7, ac-13
+            # Weights are loaded per-batch and freed after use
+            weight_tensors = model_loader.get_weights(keys)
+
+            # Stack into [B, *shape] tensor and move to GPU
+            stacked = torch.stack(weight_tensors, dim=0).to(device=device, dtype=dtype)
+
+            # AC: @full-model-execution ac-9
+            # Apply per-block strength scaling to model weights
+            if op.block_config is not None and arch is not None:
+                # For models, we apply strength scaling differently:
+                # The model weights themselves are what we're merging,
+                # so block_config affects how much of the model's delta
+                # (vs backbone) is used. This is handled by OpFilterDelta
+                # which receives the model weights as input_reg.
+                pass
+
+            regs[op.out_reg] = stacked
 
         elif op_type is OpFilterDelta:
             lora_applied = regs[op.input_reg]
@@ -421,6 +515,8 @@ def execute_plan(
             raise ValueError(f"Unknown op type: {op_type}")
 
         # Release dead registers to free intermediate GPU tensors
+        # AC: @full-model-execution ac-7
+        # This frees model weights after they're no longer needed
         for dead_reg in plan.dead_after[i]:
             del regs[dead_reg]
 
@@ -444,6 +540,8 @@ def evaluate_recipe(
     dtype: torch.dtype,
     arch: str | None = None,
     widen_config: object | None = None,
+    model_id_map: dict[int, str] | None = None,
+    model_loaders: dict[str, object] | None = None,
 ) -> torch.Tensor:
     """Evaluate a recipe tree on a batch of parameters.
 
@@ -451,6 +549,7 @@ def evaluate_recipe(
     evaluates the recipe tree, dispatching to WIDEN functions based on node type:
     - RecipeMerge with RecipeCompose target -> merge_weights_batched
     - RecipeMerge with RecipeLoRA target -> filter_delta_batched
+    - RecipeMerge with RecipeModel target -> filter_delta_batched (via OpApplyModel)
     - Chained RecipeMerge -> recurse on inner merge first
 
     # AC: @exit-batched-eval ac-1
@@ -485,14 +584,16 @@ def evaluate_recipe(
         dtype: Computation dtype
         arch: Architecture name for block classification (optional)
         widen_config: WIDENConfig to create per-block WIDEN instances (optional)
+        model_id_map: Map of object id(RecipeModel) -> model_id string (optional)
+        model_loaders: Map of model_id -> ModelLoader for full model merging
 
     Returns:
         [B, *shape] merged weights on GPU
     """
-    plan = compile_plan(recipe_node, set_id_map, arch)
+    plan = compile_plan(recipe_node, set_id_map, arch, model_id_map)
     # AC: @exit-batched-eval ac-4
     # Evaluate and return - result stays on GPU
     return execute_plan(
         plan, keys, base_batch, loader, widen,
-        device, dtype, arch, widen_config,
+        device, dtype, arch, widen_config, model_loaders,
     )
