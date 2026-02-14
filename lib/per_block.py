@@ -39,6 +39,12 @@ def _apply_per_block_lora_strength(
     # AC: @lora-block-config ac-1
     Per-block strength scaling is applied to LoRA deltas when block_config present.
 
+    # AC: @layer-type-filter ac-2
+    effective_strength = block_strength * layer_type_strength (multiplicative)
+
+    # AC: @layer-type-filter ac-4
+    Empty layer_type_overrides preserves backwards-compatible behavior.
+
     Args:
         keys: List of B parameter keys being evaluated
         base: [B, *shape] base weights before LoRA
@@ -51,19 +57,33 @@ def _apply_per_block_lora_strength(
     Returns:
         [B, *shape] weights with per-block scaled LoRA deltas
     """
-    from .block_classify import classify_key
+    from .block_classify import classify_key, classify_layer_type
 
-    # Build lookup dict from block_overrides
+    # Build lookup dicts from overrides
     block_overrides = dict(block_config.block_overrides)
+    layer_type_overrides = dict(block_config.layer_type_overrides)
 
-    # Check if any key has a non-1.0 override
+    # Check if any key has a non-1.0 effective override
     has_overrides = False
     for key in keys:
         block_group = classify_key(key, arch)
-        if block_group is not None and block_group in block_overrides:
-            if block_overrides[block_group] != 1.0:
-                has_overrides = True
-                break
+        block_strength = (
+            block_overrides[block_group]
+            if block_group is not None and block_group in block_overrides
+            else 1.0
+        )
+
+        layer_type = classify_layer_type(key, arch)
+        layer_strength = (
+            layer_type_overrides[layer_type]
+            if layer_type is not None and layer_type in layer_type_overrides
+            else 1.0
+        )
+
+        effective = block_strength * layer_strength
+        if effective != 1.0:
+            has_overrides = True
+            break
 
     if not has_overrides:
         # All keys use default strength of 1.0 - no scaling needed
@@ -76,11 +96,20 @@ def _apply_per_block_lora_strength(
     strength_multipliers = []
     for key in keys:
         block_group = classify_key(key, arch)
-        if block_group is not None and block_group in block_overrides:
-            strength_multipliers.append(block_overrides[block_group])
-        else:
-            # No override - use 1.0 (unchanged)
-            strength_multipliers.append(1.0)
+        block_strength = (
+            block_overrides[block_group]
+            if block_group is not None and block_group in block_overrides
+            else 1.0
+        )
+
+        layer_type = classify_layer_type(key, arch)
+        layer_strength = (
+            layer_type_overrides[layer_type]
+            if layer_type is not None and layer_type in layer_type_overrides
+            else 1.0
+        )
+
+        strength_multipliers.append(block_strength * layer_strength)
 
     # Create scaling tensor [B, 1, 1, ...] for broadcasting
     scales = torch.tensor(strength_multipliers, device=device, dtype=dtype)
@@ -108,6 +137,14 @@ def _get_block_t_factors(
     # AC: @merge-block-config ac-2
     Keys not matching any block pattern use the default (global) t_factor.
 
+    # AC: @layer-type-filter ac-3
+    effective_t_factor = block_t_factor * layer_type_multiplier (multiplicative).
+    block_overrides are absolute t_factor values; layer_type_overrides are multipliers.
+    layer_type at 1.0 = no change, 0.5 = halve, 2.0 = double.
+
+    # AC: @layer-type-filter ac-4
+    Empty layer_type_overrides preserves backwards-compatible behavior.
+
     Args:
         keys: List of parameter keys
         block_config: BlockConfig with block_overrides, or None
@@ -118,25 +155,36 @@ def _get_block_t_factors(
         Dict mapping t_factor -> list of key indices with that t_factor
     """
     # Import here to avoid circular import at module level
-    from .block_classify import classify_key
+    from .block_classify import classify_key, classify_layer_type
 
     # If no block_config or no arch, all keys use the default t_factor
     if block_config is None or arch is None:
         return {default_t_factor: list(range(len(keys)))}
 
-    # Build lookup dict from block_overrides
+    # Build lookup dicts from overrides
     block_overrides = dict(block_config.block_overrides)
+    layer_type_overrides = dict(block_config.layer_type_overrides)
 
     # Group keys by their effective t_factor
     t_factor_groups: dict[float, list[int]] = defaultdict(list)
 
     for idx, key in enumerate(keys):
+        # Block t_factor (absolute value)
         block_group = classify_key(key, arch)
         if block_group is not None and block_group in block_overrides:
-            t_factor = block_overrides[block_group]
+            block_t = block_overrides[block_group]
         else:
-            t_factor = default_t_factor
-        t_factor_groups[t_factor].append(idx)
+            block_t = default_t_factor
+
+        # Layer type multiplier (multiplicative on top of block)
+        layer_type = classify_layer_type(key, arch)
+        if layer_type is not None and layer_type in layer_type_overrides:
+            layer_mult = layer_type_overrides[layer_type]
+        else:
+            layer_mult = 1.0
+
+        effective_t = block_t * layer_mult
+        t_factor_groups[effective_t].append(idx)
 
     return dict(t_factor_groups)
 

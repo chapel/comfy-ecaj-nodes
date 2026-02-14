@@ -40,6 +40,7 @@ class TestBlockConfigSDXLNode:
     """WIDENBlockConfigSDXL node tests.
     # AC: @per-block-control ac-2
     # AC: @per-block-control ac-4
+    # AC: @layer-type-filter ac-5
     """
 
     # AC: @per-block-control ac-4
@@ -56,6 +57,23 @@ class TestBlockConfigSDXLNode:
         assert len(expected_blocks) == 19
         for block in expected_blocks:
             assert block in required, f"Missing individual block slider: {block}"
+
+    # AC: @layer-type-filter ac-5
+    def test_input_types_has_layer_type_sliders(self):
+        """SDXL node exposes attention, feed_forward, norm sliders."""
+        input_types = WIDENBlockConfigSDXLNode.INPUT_TYPES()
+        required = input_types["required"]
+
+        expected_layer_types = ["attention", "feed_forward", "norm"]
+        for lt in expected_layer_types:
+            assert lt in required, f"Missing layer type slider: {lt}"
+
+    # AC: @layer-type-filter ac-5
+    def test_total_input_count(self):
+        """SDXL node has 19 blocks + 3 layer types = 22 total inputs."""
+        input_types = WIDENBlockConfigSDXLNode.INPUT_TYPES()
+        required = input_types["required"]
+        assert len(required) == 22
 
     def test_input_types_slider_config(self):
         """Each slider has correct FLOAT config with range 0.0-2.0."""
@@ -78,10 +96,11 @@ class TestBlockConfigSDXLNode:
     def test_create_config_returns_block_config(self):
         """create_config returns BlockConfig with sdxl arch."""
         node = WIDENBlockConfigSDXLNode()
-        # Build kwargs for all 19 blocks
+        # Build kwargs for all 19 blocks + layer types
         kwargs = {f"IN{i:02d}": 1.0 for i in range(9)}
         kwargs["MID"] = 1.0
         kwargs.update({f"OUT{i:02d}": 1.0 for i in range(9)})
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
         kwargs["IN00"] = 0.5  # Override one to verify
 
         result = node.create_config(**kwargs)
@@ -95,10 +114,11 @@ class TestBlockConfigSDXLNode:
     def test_create_config_stores_block_overrides(self):
         """create_config stores all 19 block overrides as tuple of pairs."""
         node = WIDENBlockConfigSDXLNode()
-        # Build kwargs for all 19 blocks with distinct values
+        # Build kwargs for all 19 blocks with distinct values + layer types
         kwargs = {f"IN{i:02d}": 0.5 + i * 0.05 for i in range(9)}
         kwargs["MID"] = 1.2
         kwargs.update({f"OUT{i:02d}": 1.0 + i * 0.05 for i in range(9)})
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
 
         (config,) = node.create_config(**kwargs)
 
@@ -106,6 +126,23 @@ class TestBlockConfigSDXLNode:
         assert config.block_overrides[0] == ("IN00", 0.5)
         assert config.block_overrides[9] == ("MID", 1.2)
         assert config.block_overrides[10] == ("OUT00", 1.0)
+
+    # AC: @layer-type-filter ac-5
+    def test_create_config_stores_layer_type_overrides(self):
+        """create_config stores layer_type_overrides as tuple of pairs."""
+        node = WIDENBlockConfigSDXLNode()
+        # Build kwargs for all blocks + layer types
+        kwargs = {f"IN{i:02d}": 1.0 for i in range(9)}
+        kwargs["MID"] = 1.0
+        kwargs.update({f"OUT{i:02d}": 1.0 for i in range(9)})
+        kwargs.update({"attention": 0.5, "feed_forward": 1.2, "norm": 0.8})
+
+        (config,) = node.create_config(**kwargs)
+
+        assert len(config.layer_type_overrides) == 3
+        assert config.layer_type_overrides[0] == ("attention", 0.5)
+        assert config.layer_type_overrides[1] == ("feed_forward", 1.2)
+        assert config.layer_type_overrides[2] == ("norm", 0.8)
 
     def test_create_config_with_boundary_values(self):
         """create_config handles boundary values (0.0, 2.0)."""
@@ -116,6 +153,7 @@ class TestBlockConfigSDXLNode:
         kwargs.update({f"OUT{i:02d}": 1.0 for i in range(9)})
         kwargs["IN00"] = 0.0
         kwargs["IN01"] = 2.0
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
 
         (config,) = node.create_config(**kwargs)
 
@@ -127,6 +165,7 @@ class TestBlockConfigZImageNode:
     """WIDENBlockConfigZImage node tests.
     # AC: @per-block-control ac-2
     # AC: @per-block-control ac-5
+    # AC: @layer-type-filter ac-5
     """
 
     # AC: @per-block-control ac-5
@@ -145,6 +184,23 @@ class TestBlockConfigZImageNode:
         assert len(expected_blocks) == 34
         for block in expected_blocks:
             assert block in required, f"Missing individual block slider: {block}"
+
+    # AC: @layer-type-filter ac-5
+    def test_input_types_has_layer_type_sliders(self):
+        """Z-Image node exposes attention, feed_forward, norm sliders."""
+        input_types = WIDENBlockConfigZImageNode.INPUT_TYPES()
+        required = input_types["required"]
+
+        expected_layer_types = ["attention", "feed_forward", "norm"]
+        for lt in expected_layer_types:
+            assert lt in required, f"Missing layer type slider: {lt}"
+
+    # AC: @layer-type-filter ac-5
+    def test_total_input_count(self):
+        """Z-Image node has 34 blocks + 3 layer types = 37 total inputs."""
+        input_types = WIDENBlockConfigZImageNode.INPUT_TYPES()
+        required = input_types["required"]
+        assert len(required) == 37
 
     def test_input_types_slider_config(self):
         """Each slider has correct FLOAT config with range 0.0-2.0."""
@@ -167,14 +223,17 @@ class TestBlockConfigZImageNode:
     def test_create_config_returns_block_config(self):
         """create_config returns BlockConfig with zimage arch."""
         node = WIDENBlockConfigZImageNode()
-        # Build kwargs for all 34 blocks
+        # Build kwargs for all 34 blocks + layer types
         kwargs = {f"L{i:02d}": 1.0 for i in range(30)}
-        kwargs.update({
-            "NOISE_REF0": 1.0,
-            "NOISE_REF1": 1.0,
-            "CTX_REF0": 1.0,
-            "CTX_REF1": 1.0,
-        })
+        kwargs.update(
+            {
+                "NOISE_REF0": 1.0,
+                "NOISE_REF1": 1.0,
+                "CTX_REF0": 1.0,
+                "CTX_REF1": 1.0,
+            }
+        )
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
         kwargs["L00"] = 0.5  # Override one to verify
 
         result = node.create_config(**kwargs)
@@ -188,14 +247,17 @@ class TestBlockConfigZImageNode:
     def test_create_config_stores_block_overrides(self):
         """create_config stores all 34 block overrides as tuple of pairs."""
         node = WIDENBlockConfigZImageNode()
-        # Build kwargs for all 34 blocks with distinct values
+        # Build kwargs for all 34 blocks with distinct values + layer types
         kwargs = {f"L{i:02d}": 0.5 + i * 0.02 for i in range(30)}
-        kwargs.update({
-            "NOISE_REF0": 1.1,
-            "NOISE_REF1": 1.2,
-            "CTX_REF0": 0.9,
-            "CTX_REF1": 0.8,
-        })
+        kwargs.update(
+            {
+                "NOISE_REF0": 1.1,
+                "NOISE_REF1": 1.2,
+                "CTX_REF0": 0.9,
+                "CTX_REF1": 0.8,
+            }
+        )
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
 
         (config,) = node.create_config(**kwargs)
 
@@ -204,6 +266,29 @@ class TestBlockConfigZImageNode:
         assert config.block_overrides[25] == ("L25", 1.0)  # 0.5 + 25*0.02 = 1.0
         assert config.block_overrides[30] == ("NOISE_REF0", 1.1)
         assert config.block_overrides[33] == ("CTX_REF1", 0.8)
+
+    # AC: @layer-type-filter ac-5
+    def test_create_config_stores_layer_type_overrides(self):
+        """create_config stores layer_type_overrides as tuple of pairs."""
+        node = WIDENBlockConfigZImageNode()
+        # Build kwargs for all blocks + layer types
+        kwargs = {f"L{i:02d}": 1.0 for i in range(30)}
+        kwargs.update(
+            {
+                "NOISE_REF0": 1.0,
+                "NOISE_REF1": 1.0,
+                "CTX_REF0": 1.0,
+                "CTX_REF1": 1.0,
+            }
+        )
+        kwargs.update({"attention": 0.6, "feed_forward": 1.4, "norm": 0.9})
+
+        (config,) = node.create_config(**kwargs)
+
+        assert len(config.layer_type_overrides) == 3
+        assert config.layer_type_overrides[0] == ("attention", 0.6)
+        assert config.layer_type_overrides[1] == ("feed_forward", 1.4)
+        assert config.layer_type_overrides[2] == ("norm", 0.9)
 
 
 class TestNoBlockConfigBehavior:

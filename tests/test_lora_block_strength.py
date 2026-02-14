@@ -80,8 +80,8 @@ class TestApplyPerBlockLoraStrength:
         AC: @lora-block-config ac-1
         """
         keys = [
-            "input_blocks.0.0.weight",   # IN00 -> 0.5
-            "middle_block.0.weight",     # MID -> 2.0
+            "input_blocks.0.0.weight",  # IN00 -> 0.5
+            "middle_block.0.weight",  # MID -> 2.0
             "output_blocks.3.0.weight",  # OUT03 -> no override (1.0)
         ]
         base = torch.zeros(3, 4, 4)
@@ -182,9 +182,9 @@ class TestApplyPerBlockLoraStrength:
         AC: @lora-block-config ac-1
         """
         keys = [
-            "layers.0.attn.weight",        # L00 -> 0.25
-            "layers.10.mlp.weight",        # L10 -> 1.0 (default)
-            "noise_refiner.0.attn.weight", # NOISE_REF0 -> 0.75
+            "layers.0.attn.weight",  # L00 -> 0.25
+            "layers.10.mlp.weight",  # L10 -> 1.0 (default)
+            "noise_refiner.0.attn.weight",  # NOISE_REF0 -> 0.75
         ]
         base = torch.zeros(3, 4, 4)
         lora_applied = torch.full((3, 4, 4), 8.0)  # Delta of 8.0
@@ -402,3 +402,179 @@ class TestBackwardsCompatibility:
 
         # Access block_config through the tree
         assert merge.target.block_config is config
+
+
+# =============================================================================
+# Layer-Type Override Tests (LoRA Strength)
+# =============================================================================
+
+
+class TestLayerTypeLoraStrength:
+    """Tests for layer_type_overrides multiplicative effect on LoRA strength.
+
+    AC: @layer-type-filter ac-2
+    AC: @layer-type-filter ac-4
+    """
+
+    # AC: @layer-type-filter ac-2
+    def test_block_and_layer_type_multiplicative(self):
+        """Effective strength = block_strength * layer_type_strength.
+
+        AC: @layer-type-filter ac-2
+        Given: block=0.5, attention=0.7
+        Then: effective = 0.35
+        """
+        keys = ["input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"]  # IN01, attention
+        base = torch.zeros(1, 4, 4)
+        lora_applied = torch.full((1, 4, 4), 2.0)  # Delta of 2.0
+
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN01", 0.5),),
+            layer_type_overrides=(("attention", 0.7),),
+        )
+
+        result = _apply_per_block_lora_strength(
+            keys, base, lora_applied, config, "sdxl", "cpu", torch.float32
+        )
+
+        # Delta 2.0 * (0.5 * 0.7) = 2.0 * 0.35 = 0.7
+        expected = torch.full((1, 4, 4), 0.7)
+        assert torch.allclose(result, expected)
+
+    # AC: @layer-type-filter ac-2
+    def test_layer_type_only_applies(self):
+        """Layer type override applies when block uses default.
+
+        attention=0.5 only → 0.5 for attention keys, 1.0 for others
+        """
+        keys = [
+            # IN01, attention -> 0.5
+            "input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight",
+            # IN01, feed_forward -> 1.0
+            "input_blocks.1.1.transformer_blocks.0.ff.net.0.proj.weight",
+        ]
+        base = torch.zeros(2, 4, 4)
+        lora_applied = torch.full((2, 4, 4), 4.0)  # Delta of 4.0
+
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(),  # No block overrides
+            layer_type_overrides=(("attention", 0.5),),
+        )
+
+        result = _apply_per_block_lora_strength(
+            keys, base, lora_applied, config, "sdxl", "cpu", torch.float32
+        )
+
+        # attention: delta 4.0 * 0.5 = 2.0
+        assert torch.allclose(result[0], torch.full((4, 4), 2.0))
+        # feed_forward: delta 4.0 * 1.0 = 4.0 (no layer type override)
+        assert torch.allclose(result[1], torch.full((4, 4), 4.0))
+
+    # AC: @layer-type-filter ac-4
+    def test_empty_layer_type_overrides_backwards_compatible(self):
+        """Empty layer_type_overrides means behavior identical to before.
+
+        AC: @layer-type-filter ac-4
+        """
+        keys = ["input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"]
+        base = torch.zeros(1, 4, 4)
+        lora_applied = torch.full((1, 4, 4), 4.0)
+
+        # BlockConfig with only block overrides (layer_type_overrides empty by default)
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN01", 0.5),),
+        )
+
+        result = _apply_per_block_lora_strength(
+            keys, base, lora_applied, config, "sdxl", "cpu", torch.float32
+        )
+
+        # Only block override applies: delta 4.0 * 0.5 = 2.0
+        expected = torch.full((1, 4, 4), 2.0)
+        assert torch.allclose(result, expected)
+
+    # AC: @layer-type-filter ac-2
+    def test_layer_type_zero_disables(self):
+        """layer_type=0.0 disables that layer type entirely.
+
+        AC: @layer-type-filter ac-2
+        """
+        keys = ["input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"]  # attention
+        base = torch.full((1, 4, 4), 10.0)
+        lora_applied = torch.full((1, 4, 4), 20.0)  # Delta of 10.0
+
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(),
+            layer_type_overrides=(("attention", 0.0),),
+        )
+
+        result = _apply_per_block_lora_strength(
+            keys, base, lora_applied, config, "sdxl", "cpu", torch.float32
+        )
+
+        # Delta 10.0 * 0.0 = 0.0, so result = base
+        assert torch.allclose(result, base)
+
+    # AC: @layer-type-filter ac-2
+    def test_all_layer_types_at_one_no_effect(self):
+        """All layer types at 1.0 has no effect (identity).
+
+        AC: @layer-type-filter ac-4
+        """
+        keys = ["input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"]
+        base = torch.zeros(1, 4, 4)
+        lora_applied = torch.full((1, 4, 4), 4.0)
+
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN01", 0.5),),
+            layer_type_overrides=(
+                ("attention", 1.0),
+                ("feed_forward", 1.0),
+                ("norm", 1.0),
+            ),
+        )
+
+        result = _apply_per_block_lora_strength(
+            keys, base, lora_applied, config, "sdxl", "cpu", torch.float32
+        )
+
+        # Block only: delta 4.0 * 0.5 * 1.0 = 2.0
+        expected = torch.full((1, 4, 4), 2.0)
+        assert torch.allclose(result, expected)
+
+    # AC: @layer-type-filter ac-2
+    def test_zimage_layer_type_multiplicative(self):
+        """Z-Image layer type overrides work multiplicatively."""
+        keys = [
+            "layers.5.attn.qkv.weight",  # L05, attention
+            "layers.5.feed_forward.w1.weight",  # L05, feed_forward
+            "layers.5.norm.weight",  # L05, norm
+        ]
+        base = torch.zeros(3, 4, 4)
+        lora_applied = torch.full((3, 4, 4), 4.0)
+
+        config = BlockConfig(
+            arch="zimage",
+            block_overrides=(("L05", 0.8),),
+            layer_type_overrides=(
+                ("attention", 0.5),  # 0.8 * 0.5 = 0.4
+                ("feed_forward", 1.5),  # 0.8 * 1.5 = 1.2
+                ("norm", 0.0),  # 0.8 * 0.0 = 0.0
+            ),
+        )
+
+        result = _apply_per_block_lora_strength(
+            keys, base, lora_applied, config, "zimage", "cpu", torch.float32
+        )
+
+        # attention: 4.0 * 0.4 = 1.6
+        assert torch.allclose(result[0], torch.full((4, 4), 1.6))
+        # feed_forward: 4.0 * 1.2 = 4.8
+        assert torch.allclose(result[1], torch.full((4, 4), 4.8))
+        # norm: 4.0 * 0.0 = 0.0
+        assert torch.allclose(result[2], torch.full((4, 4), 0.0))

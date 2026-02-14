@@ -205,9 +205,9 @@ class TestGetBlockTFactors:
         Then: per-block t_factor overrides are applied
         """
         keys = [
-            "input_blocks.0.0.weight",   # IN00 -> 0.5
-            "input_blocks.1.0.weight",   # IN01 -> 0.5
-            "middle_block.0.weight",     # MID -> 1.2
+            "input_blocks.0.0.weight",  # IN00 -> 0.5
+            "input_blocks.1.0.weight",  # IN01 -> 0.5
+            "middle_block.0.weight",  # MID -> 1.2
             "output_blocks.3.0.weight",  # OUT03 -> default 1.0
         ]
         config = BlockConfig(
@@ -232,8 +232,8 @@ class TestGetBlockTFactors:
 
         # Check correct key indices in each group
         assert groups[0.5] == [0, 1]  # First two input blocks
-        assert groups[1.2] == [2]      # Middle block
-        assert groups[1.0] == [3]      # Output block (no override)
+        assert groups[1.2] == [2]  # Middle block
+        assert groups[1.0] == [3]  # Output block (no override)
 
     def test_unmatched_keys_use_default(self):
         """Keys not matching any block pattern use default t_factor.
@@ -262,10 +262,10 @@ class TestGetBlockTFactors:
         AC: @merge-block-config ac-1
         """
         keys = [
-            "layers.0.attn.weight",        # L00 -> 0.3
-            "layers.5.attn.weight",        # L05 -> default 1.0
-            "layers.25.attn.weight",       # L25 -> 1.5
-            "noise_refiner.0.attn.weight", # NOISE_REF0 -> 0.8
+            "layers.0.attn.weight",  # L00 -> 0.3
+            "layers.5.attn.weight",  # L05 -> default 1.0
+            "layers.25.attn.weight",  # L25 -> 1.5
+            "noise_refiner.0.attn.weight",  # NOISE_REF0 -> 0.8
         ]
         config = BlockConfig(
             arch="zimage",
@@ -282,10 +282,10 @@ class TestGetBlockTFactors:
         )
 
         assert len(groups) == 4
-        assert groups[0.3] == [0]   # L00
-        assert groups[1.0] == [1]   # L05 (no override)
-        assert groups[1.5] == [2]   # L25
-        assert groups[0.8] == [3]   # NOISE_REF0
+        assert groups[0.3] == [0]  # L00
+        assert groups[1.0] == [1]  # L05 (no override)
+        assert groups[1.5] == [2]  # L25
+        assert groups[0.8] == [3]  # NOISE_REF0
 
 
 # =============================================================================
@@ -393,9 +393,7 @@ class TestBlockConfigEdgeCases:
             block_overrides=(("IN00", 0.5),),
         )
 
-        groups = _get_block_t_factors(
-            keys, block_config=config, arch="sdxl", default_t_factor=1.0
-        )
+        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
 
         assert len(groups) == 1
         assert groups[0.5] == [0, 1, 2]
@@ -414,9 +412,188 @@ class TestBlockConfigEdgeCases:
         )
 
         # Classify as sdxl - IN00 would match if BlockConfig arch matched
-        groups = _get_block_t_factors(
-            keys, block_config=config, arch="sdxl", default_t_factor=1.0
-        )
+        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
 
         # Should still apply the IN00 override since we look up by block name
         assert groups[0.5] == [0]
+
+
+# =============================================================================
+# Layer-Type T-Factor Tests
+# =============================================================================
+
+
+class TestLayerTypeTFactor:
+    """Tests for layer_type_overrides multiplicative effect on t_factor.
+
+    AC: @layer-type-filter ac-3
+    AC: @layer-type-filter ac-4
+    """
+
+    # AC: @layer-type-filter ac-3
+    def test_block_and_layer_type_multiplicative(self):
+        """Effective t_factor = block_t_factor * layer_type_multiplier.
+
+        AC: @layer-type-filter ac-3
+        Given: block t=0.8, attention=0.5
+        Then: effective t=0.4
+        """
+        keys = ["input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"]  # IN01, attention
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN01", 0.8),),
+            layer_type_overrides=(("attention", 0.5),),
+        )
+
+        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
+
+        # 0.8 * 0.5 = 0.4
+        assert 0.4 in groups
+        assert groups[0.4] == [0]
+
+    # AC: @layer-type-filter ac-3
+    def test_layer_type_multiplier_doubles(self):
+        """layer_type at 2.0 doubles the block t_factor.
+
+        AC: @layer-type-filter ac-3
+        """
+        keys = ["input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"]  # attention
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN01", 0.6),),
+            layer_type_overrides=(("attention", 2.0),),
+        )
+
+        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
+
+        # 0.6 * 2.0 = 1.2
+        assert 1.2 in groups
+        assert groups[1.2] == [0]
+
+    # AC: @layer-type-filter ac-4
+    def test_empty_layer_type_overrides_backwards_compatible(self):
+        """Empty layer_type_overrides means behavior identical to before.
+
+        AC: @layer-type-filter ac-4
+        """
+        keys = ["input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"]
+        # BlockConfig with only block overrides
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN01", 0.5),),
+        )
+
+        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
+
+        # Only block override applies
+        assert 0.5 in groups
+        assert groups[0.5] == [0]
+
+    # AC: @layer-type-filter ac-3
+    def test_layer_type_zero_zeroes_t_factor(self):
+        """layer_type=0.0 gives effective t_factor of 0.0.
+
+        AC: @layer-type-filter ac-3
+        """
+        keys = ["input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"]  # attention
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN01", 0.8),),
+            layer_type_overrides=(("attention", 0.0),),
+        )
+
+        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
+
+        # 0.8 * 0.0 = 0.0
+        assert 0.0 in groups
+        assert groups[0.0] == [0]
+
+    # AC: @layer-type-filter ac-3
+    def test_different_layer_types_different_effective_t(self):
+        """Different layer types get different effective t_factors."""
+        keys = [
+            "input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight",  # IN01, attention
+            "input_blocks.1.1.transformer_blocks.0.ff.net.0.proj.weight",  # IN01, feed_forward
+            "input_blocks.1.1.transformer_blocks.0.norm1.weight",  # IN01, norm
+            "time_embed.0.weight",  # no block, no layer type
+        ]
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN01", 0.8),),
+            layer_type_overrides=(
+                ("attention", 0.5),  # 0.8 * 0.5 = 0.4
+                ("feed_forward", 1.5),  # 0.8 * 1.5 = 1.2
+                ("norm", 0.25),  # 0.8 * 0.25 = 0.2
+            ),
+        )
+
+        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
+
+        # Check 4 distinct t_factors exist
+        assert len(groups) == 4
+
+        # Verify each key is mapped to correct group
+        # Use approximate matching for floating point
+        t_factors = sorted(groups.keys())
+        assert abs(t_factors[0] - 0.2) < 1e-9  # norm: 0.8 * 0.25
+        assert abs(t_factors[1] - 0.4) < 1e-9  # attention: 0.8 * 0.5
+        assert abs(t_factors[2] - 1.0) < 1e-9  # time_embed: default
+        assert abs(t_factors[3] - 1.2) < 1e-9  # feed_forward: 0.8 * 1.5
+
+        # Verify indices
+        assert groups[t_factors[0]] == [2]  # norm
+        assert groups[t_factors[1]] == [0]  # attention
+        assert groups[t_factors[2]] == [3]  # time_embed
+        assert groups[t_factors[3]] == [1]  # feed_forward
+
+    # AC: @layer-type-filter ac-3
+    def test_layer_type_only_no_block_override(self):
+        """Layer type applies when block uses default t_factor."""
+        keys = ["input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"]  # IN01, attention
+        config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(),  # No block overrides
+            layer_type_overrides=(("attention", 0.5),),
+        )
+
+        groups = _get_block_t_factors(keys, block_config=config, arch="sdxl", default_t_factor=1.0)
+
+        # default 1.0 * 0.5 = 0.5
+        assert 0.5 in groups
+        assert groups[0.5] == [0]
+
+    # AC: @layer-type-filter ac-3
+    def test_zimage_layer_type_multiplicative(self):
+        """Z-Image layer type overrides work multiplicatively."""
+        keys = [
+            "layers.5.attn.qkv.weight",  # L05, attention
+            "layers.5.feed_forward.w1.weight",  # L05, feed_forward
+            "layers.5.norm.weight",  # L05, norm
+        ]
+        config = BlockConfig(
+            arch="zimage",
+            block_overrides=(("L05", 0.8),),
+            layer_type_overrides=(
+                ("attention", 0.5),  # 0.8 * 0.5 = 0.4
+                ("feed_forward", 1.5),  # 0.8 * 1.5 = 1.2
+                ("norm", 0.25),  # 0.8 * 0.25 = 0.2
+            ),
+        )
+
+        groups = _get_block_t_factors(
+            keys, block_config=config, arch="zimage", default_t_factor=1.0
+        )
+
+        # Check 3 distinct t_factors exist
+        assert len(groups) == 3
+
+        # Verify using sorted keys and approximate matching for floating point
+        t_factors = sorted(groups.keys())
+        assert abs(t_factors[0] - 0.2) < 1e-9  # norm
+        assert abs(t_factors[1] - 0.4) < 1e-9  # attention
+        assert abs(t_factors[2] - 1.2) < 1e-9  # feed_forward
+
+        # Verify indices
+        assert groups[t_factors[0]] == [2]  # norm
+        assert groups[t_factors[1]] == [0]  # attention
+        assert groups[t_factors[2]] == [1]  # feed_forward

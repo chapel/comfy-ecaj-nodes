@@ -16,6 +16,7 @@ from collections.abc import Callable
 
 __all__ = [
     "classify_key",
+    "classify_layer_type",
     "get_block_classifier",
     "classify_key_sdxl",
     "classify_key_zimage",
@@ -147,3 +148,103 @@ def classify_key(key: str, arch: str) -> str | None:
     if classifier is None:
         return None
     return classifier(key)
+
+
+# Layer type patterns for SDXL (order matters - first match wins)
+# Precedence: attention > feed_forward > norm (per ac-7)
+_SDXL_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
+    # Attention patterns (most specific first)
+    ("attn1", "attention"),
+    ("attn2", "attention"),
+    ("to_q", "attention"),
+    ("to_k", "attention"),
+    ("to_v", "attention"),
+    ("to_out", "attention"),
+    ("proj_in", "attention"),
+    ("proj_out", "attention"),
+    # Feed-forward patterns
+    (".ff.", "feed_forward"),
+    ("ff.net", "feed_forward"),
+    # Norm patterns (most general last - excludes q_norm/k_norm via precedence)
+    (".norm", "norm"),
+    ("_norm", "norm"),
+    ("ln_", "norm"),
+)
+
+# Layer type patterns for Z-Image/S3-DiT
+_ZIMAGE_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
+    # Attention patterns (including q_norm/k_norm per ac-7)
+    ("attn.qkv", "attention"),
+    ("attn.out", "attention"),
+    ("q_norm", "attention"),
+    ("k_norm", "attention"),
+    # Feed-forward patterns
+    ("feed_forward", "feed_forward"),
+    (".mlp.", "feed_forward"),
+    (".w1.", "feed_forward"),
+    (".w2.", "feed_forward"),
+    (".w3.", "feed_forward"),
+    (".fc1", "feed_forward"),
+    (".fc2", "feed_forward"),
+    # Norm patterns
+    (".norm", "norm"),
+    ("_norm", "norm"),
+    (".ln", "norm"),
+    (".rms", "norm"),
+)
+
+# Registry of layer type patterns by architecture
+_LAYER_TYPE_PATTERNS: dict[str, tuple[tuple[str, str], ...]] = {
+    "sdxl": _SDXL_LAYER_PATTERNS,
+    "zimage": _ZIMAGE_LAYER_PATTERNS,
+}
+
+
+@functools.lru_cache(maxsize=4096)
+def classify_layer_type(key: str, arch: str | None) -> str | None:
+    """Classify a parameter key into a layer type for the given architecture.
+
+    # AC: @layer-type-filter ac-1
+    Returns one of: attention, feed_forward, norm, or None.
+
+    # AC: @layer-type-filter ac-6
+    Keys not matching any pattern (time_embed, label_emb, adaLN_modulation,
+    embedders) return None.
+
+    # AC: @layer-type-filter ac-7
+    First-match-wins with precedence: attention > feed_forward > norm.
+
+    # AC: @layer-type-filter ac-8
+    Returns None for arch=None or unsupported architectures.
+
+    Args:
+        key: Parameter key
+        arch: Architecture name (e.g., "sdxl", "zimage") or None
+
+    Returns:
+        Layer type ("attention", "feed_forward", "norm") or None
+    """
+    if arch is None:
+        return None
+
+    patterns = _LAYER_TYPE_PATTERNS.get(arch)
+    if patterns is None:
+        return None
+
+    # Strip common prefixes for cleaner matching
+    for prefix in ("diffusion_model.", "transformer."):
+        if key.startswith(prefix):
+            key = key[len(prefix) :]
+
+    # Exclude known non-layer-type keys early (per ac-6)
+    # These are conditioning/embedding projections, not layer components
+    for excluded in ("time_embed", "label_emb", "adaLN_modulation", "embedders"):
+        if excluded in key:
+            return None
+
+    # First match wins (patterns are ordered by precedence)
+    for pattern, layer_type in patterns:
+        if pattern in key:
+            return layer_type
+
+    return None
