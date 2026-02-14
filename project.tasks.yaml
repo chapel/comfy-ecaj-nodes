@@ -4058,6 +4058,7 @@
     - lora
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.043Z
+  started_at: 2026-02-14T07:51:52.341Z
   notes:
     - _ulid: 01KHDHEGPK45VJ5WB2HH51A4JM
       created_at: 2026-02-14T07:39:37.043Z
@@ -4074,9 +4075,19 @@
         get_loader("qwen") with real loader tests. Add new tests with
         synthetic safetensors LoRA files for each format.
         Covers ac-4, ac-5, ac-6.
+    - _ulid: 01KHDJD446WM0Q3XQ2MS0244Y3
+      created_at: 2026-02-14T07:56:19.974Z
+      author: "@claude"
+      content: "Implementation complete. Created lib/lora/qwen.py with QwenLoader class supporting 3 LoRA
+        formats: diffusers (transformer.transformer_blocks.N.*.lora_A/B), A1111/kohya
+        (lora_unet_transformer_blocks_N_*.lora_up/down), and LyCORIS
+        (lycoris_transformer_blocks_N_*.lora_down/up). Key features: compound name preservation
+        (_normalize_lycoris_key, _normalize_kohya_key), no QKV fusion (separate to_q/to_k/to_v),
+        standard DeltaSpec production. Registered in LOADER_REGISTRY. Added 11 tests covering all 3
+        ACs (ac-4, ac-5, ac-6). 741 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T07:51:52.341Z
 - _ulid: 01KHDHEGRC0TP9TR9YKFD2Q9AY
   slugs:
     - qwen-model-loader
