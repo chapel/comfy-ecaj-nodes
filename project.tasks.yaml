@@ -3480,7 +3480,7 @@
   description: "test_graph.py has 5 docstring-only AC annotations (AC: @node-graph-testing ac-N
     without # prefix) that should be converted to standard # AC: comment style"
   spec_ref: "@node-graph-testing"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -3493,6 +3493,10 @@
   notes: []
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T02:09:31.349Z
+  closed_reason: "Merged in PR #48. Moved 17 AC annotations from docstring format to standard
+    before-def comment format in test_graph.py. All 6 ACs (@node-graph-testing ac-1 through ac-6)
+    have full test coverage."
 - _ulid: 01KHCRP1YM8442EBH98DBHWPPQ
   slugs:
     - task-exit-model-persistence
