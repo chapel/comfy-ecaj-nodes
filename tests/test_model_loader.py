@@ -522,3 +522,126 @@ class TestQwenKeyNormalization:
             assert len(tensors) == 3
             for t in tensors:
                 assert isinstance(t, torch.Tensor)
+
+
+# ---------------------------------------------------------------------------
+# Flux Klein Architecture Support
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def flux_checkpoint_path() -> str:
+    """Create a temporary Flux Klein-format checkpoint file.
+
+    Uses double_blocks and single_blocks structure (Klein 9B: 8 double + 24 single).
+    """
+    tensors = {}
+    # Double blocks (8 for Klein 9B)
+    for i in range(8):
+        tensors[f"diffusion_model.double_blocks.{i}.img_attn.qkv.weight"] = torch.randn(4, 4)
+        tensors[f"diffusion_model.double_blocks.{i}.txt_attn.qkv.weight"] = torch.randn(4, 4)
+        tensors[f"diffusion_model.double_blocks.{i}.img_mlp.0.weight"] = torch.randn(4, 4)
+        tensors[f"diffusion_model.double_blocks.{i}.txt_mlp.0.weight"] = torch.randn(4, 4)
+    # Single blocks (24 for Klein 9B)
+    for i in range(24):
+        tensors[f"diffusion_model.single_blocks.{i}.linear1.weight"] = torch.randn(4, 4)
+        tensors[f"diffusion_model.single_blocks.{i}.linear2.weight"] = torch.randn(4, 4)
+    # Non-block keys
+    tensors["diffusion_model.final_layer.linear.weight"] = torch.randn(4, 4)
+    tensors["diffusion_model.img_in.weight"] = torch.randn(4, 4)
+    # VAE keys (should be excluded)
+    tensors["first_stage_model.encoder.weight"] = torch.randn(4, 4)
+
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        save_file(tensors, f.name)
+        return f.name
+
+
+@pytest.fixture
+def flux_transformer_prefix_checkpoint_path() -> str:
+    """Create a Flux checkpoint with transformer prefix."""
+    tensors = {}
+    for i in range(5):
+        tensors[f"transformer.double_blocks.{i}.img_attn.qkv.weight"] = torch.randn(4, 4)
+    for i in range(20):
+        tensors[f"transformer.single_blocks.{i}.linear1.weight"] = torch.randn(4, 4)
+
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        save_file(tensors, f.name)
+        return f.name
+
+
+# AC: @flux-model-loader ac-8
+class TestFluxArchitectureDetection:
+    """Tests for Flux Klein architecture detection from checkpoint keys."""
+
+    def test_detect_flux_architecture(self, flux_checkpoint_path: str) -> None:
+        """Flux checkpoint detected from double_blocks pattern."""
+        with ModelLoader(flux_checkpoint_path) as loader:
+            assert loader.arch == "flux"
+
+    def test_detect_flux_with_transformer_prefix(
+        self, flux_transformer_prefix_checkpoint_path: str
+    ) -> None:
+        """Flux checkpoint with transformer prefix detected."""
+        with ModelLoader(flux_transformer_prefix_checkpoint_path) as loader:
+            assert loader.arch == "flux"
+
+    def test_detect_flux_architecture_without_loading_tensors(self) -> None:
+        """Flux detection uses only key inspection, no tensor loading."""
+        # Test with double_blocks keys
+        flux_keys = frozenset({
+            "diffusion_model.double_blocks.0.img_attn.qkv.weight",
+            "diffusion_model.double_blocks.1.txt_attn.qkv.weight",
+            "diffusion_model.single_blocks.0.linear1.weight",
+        })
+        assert _detect_architecture_from_keys(flux_keys) == "flux"
+
+    def test_flux_not_detected_without_double_blocks(self) -> None:
+        """Keys without double_blocks do not trigger Flux detection."""
+        # Only single_blocks should not trigger Flux
+        keys = frozenset({
+            "diffusion_model.single_blocks.0.linear1.weight",
+            "diffusion_model.single_blocks.1.linear1.weight",
+        })
+        assert _detect_architecture_from_keys(keys) != "flux"
+
+
+class TestFluxKeyNormalization:
+    """Tests for Flux Klein checkpoint key normalization."""
+
+    def test_normalize_key_handles_diffusion_model_prefix(self) -> None:
+        """diffusion_model.double_blocks.X keys are preserved."""
+        file_key = "diffusion_model.double_blocks.0.img_attn.qkv.weight"
+        normalized = _normalize_key(file_key)
+        assert normalized == "diffusion_model.double_blocks.0.img_attn.qkv.weight"
+
+    def test_normalize_key_handles_transformer_prefix(self) -> None:
+        """transformer.double_blocks.X normalizes to diffusion_model.double_blocks.X."""
+        file_key = "transformer.double_blocks.0.img_attn.qkv.weight"
+        normalized = _normalize_key(file_key)
+        assert normalized == "diffusion_model.double_blocks.0.img_attn.qkv.weight"
+
+    def test_flux_checkpoint_keys_normalized_correctly(
+        self, flux_checkpoint_path: str
+    ) -> None:
+        """Flux checkpoint keys are normalized to base model format."""
+        with ModelLoader(flux_checkpoint_path) as loader:
+            for key in loader.affected_keys:
+                assert key.startswith("diffusion_model.")
+
+    def test_flux_checkpoint_excludes_vae(self, flux_checkpoint_path: str) -> None:
+        """Flux checkpoint VAE keys are excluded."""
+        with ModelLoader(flux_checkpoint_path) as loader:
+            for key in loader.affected_keys:
+                assert "first_stage_model" not in key
+
+    def test_flux_keys_retrievable(self, flux_checkpoint_path: str) -> None:
+        """Keys can be retrieved from Flux checkpoint after normalization."""
+        with ModelLoader(flux_checkpoint_path) as loader:
+            # Get first few keys and retrieve tensors
+            keys = list(loader.affected_keys)[:3]
+            tensors = loader.get_weights(keys)
+            assert len(tensors) == 3
+            for t in tensors:
+                assert isinstance(t, torch.Tensor)
