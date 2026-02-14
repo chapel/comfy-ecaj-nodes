@@ -33,8 +33,9 @@ class KeyMismatchError(ValueError):
 # Ordered by specificity (longer prefixes first).
 _FILE_KEY_PREFIXES = (
     "model.diffusion_model.",  # SDXL checkpoint format
+    "model.transformer.",      # Qwen checkpoint format (model.transformer.X)
     "diffusion_model.",        # Some Z-Image/Diffusers formats
-    "transformer.",            # Alternate Z-Image format
+    "transformer.",            # Alternate Z-Image/Qwen format
 )
 
 # Prefixes that identify non-diffusion keys (VAE, text encoder) to exclude.
@@ -66,6 +67,12 @@ _ARCH_PATTERNS = (
         lambda keys: any("diffusion_model.input_blocks." in k for k in keys)
         and any("diffusion_model.middle_block." in k for k in keys)
         and any("diffusion_model.output_blocks." in k for k in keys),
+    ),
+    # Qwen: transformer_blocks at depth 60+ (matches nodes/entry.py pattern)
+    # AC: @qwen-model-loader ac-7
+    (
+        "qwen",
+        lambda keys: sum(1 for k in keys if "transformer_blocks" in k) >= 60,
     ),
 )
 
