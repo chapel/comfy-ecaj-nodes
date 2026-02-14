@@ -11,6 +11,7 @@ Tests for @per-block-control acceptance criteria:
 import pytest
 
 from lib.recipe import BlockConfig, RecipeBase, RecipeLoRA, RecipeMerge
+from nodes.block_config_qwen import WIDENBlockConfigQwenNode
 from nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
 from nodes.block_config_zimage import WIDENBlockConfigZImageNode
 from nodes.lora import WIDENLoRANode
@@ -432,3 +433,114 @@ class TestInputTypesIncludeBlockConfig:
         input_types = WIDENMergeNode.INPUT_TYPES()
         assert "block_config" in input_types["optional"]
         assert input_types["optional"]["block_config"] == ("BLOCK_CONFIG",)
+
+
+class TestBlockConfigQwenNode:
+    """WIDENBlockConfigQwen node tests.
+    # AC: @qwen-block-config ac-8
+    # AC: @qwen-block-config ac-9
+    """
+
+    # AC: @qwen-block-config ac-8
+    def test_input_types_has_all_individual_blocks(self):
+        """Qwen node exposes all 60 individual block sliders (TB00-TB59)."""
+        input_types = WIDENBlockConfigQwenNode.INPUT_TYPES()
+        required = input_types["required"]
+
+        expected_blocks = [f"TB{i:02d}" for i in range(60)]
+        assert len(expected_blocks) == 60
+        for block in expected_blocks:
+            assert block in required, f"Missing individual block slider: {block}"
+
+    def test_input_types_has_layer_type_sliders(self):
+        """Qwen node exposes attention, feed_forward, norm sliders."""
+        input_types = WIDENBlockConfigQwenNode.INPUT_TYPES()
+        required = input_types["required"]
+
+        expected_layer_types = ["attention", "feed_forward", "norm"]
+        for lt in expected_layer_types:
+            assert lt in required, f"Missing layer type slider: {lt}"
+
+    def test_total_input_count(self):
+        """Qwen node has 60 blocks + 3 layer types = 63 total inputs."""
+        input_types = WIDENBlockConfigQwenNode.INPUT_TYPES()
+        required = input_types["required"]
+        assert len(required) == 63
+
+    def test_input_types_slider_config(self):
+        """Each slider has correct FLOAT config with range 0.0-2.0."""
+        input_types = WIDENBlockConfigQwenNode.INPUT_TYPES()
+        required = input_types["required"]
+
+        for name, config in required.items():
+            assert config[0] == "FLOAT", f"{name} should be FLOAT type"
+            opts = config[1]
+            assert opts["default"] == 1.0, f"{name} default should be 1.0"
+            assert opts["min"] == 0.0, f"{name} min should be 0.0"
+            assert opts["max"] == 2.0, f"{name} max should be 2.0"
+            assert opts["step"] == 0.05, f"{name} step should be 0.05"
+
+    def test_return_types(self):
+        """Node returns BLOCK_CONFIG type."""
+        assert WIDENBlockConfigQwenNode.RETURN_TYPES == ("BLOCK_CONFIG",)
+        assert WIDENBlockConfigQwenNode.RETURN_NAMES == ("block_config",)
+
+    def test_create_config_returns_block_config(self):
+        """create_config returns BlockConfig with qwen arch."""
+        node = WIDENBlockConfigQwenNode()
+        # Build kwargs for all 60 blocks + layer types
+        kwargs = {f"TB{i:02d}": 1.0 for i in range(60)}
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
+        kwargs["TB00"] = 0.5  # Override one to verify
+
+        result = node.create_config(**kwargs)
+
+        assert len(result) == 1
+        config = result[0]
+        assert isinstance(config, BlockConfig)
+        assert config.arch == "qwen"
+
+    # AC: @qwen-block-config ac-8
+    def test_create_config_stores_block_overrides(self):
+        """create_config stores all 60 block overrides as tuple of pairs."""
+        node = WIDENBlockConfigQwenNode()
+        # Build kwargs for all 60 blocks with distinct values + layer types
+        kwargs = {f"TB{i:02d}": 0.5 + i * 0.02 for i in range(60)}
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
+
+        (config,) = node.create_config(**kwargs)
+
+        assert len(config.block_overrides) == 60
+        assert config.block_overrides[0] == ("TB00", 0.5)
+        assert config.block_overrides[25] == ("TB25", 1.0)  # 0.5 + 25*0.02 = 1.0
+        assert config.block_overrides[59] == ("TB59", 0.5 + 59 * 0.02)
+
+    def test_create_config_stores_layer_type_overrides(self):
+        """create_config stores layer_type_overrides as tuple of pairs."""
+        node = WIDENBlockConfigQwenNode()
+        # Build kwargs for all blocks + layer types
+        kwargs = {f"TB{i:02d}": 1.0 for i in range(60)}
+        kwargs.update({"attention": 0.7, "feed_forward": 1.3, "norm": 0.85})
+
+        (config,) = node.create_config(**kwargs)
+
+        assert len(config.layer_type_overrides) == 3
+        assert config.layer_type_overrides[0] == ("attention", 0.7)
+        assert config.layer_type_overrides[1] == ("feed_forward", 1.3)
+        assert config.layer_type_overrides[2] == ("norm", 0.85)
+
+    def test_create_config_with_boundary_values(self):
+        """create_config handles boundary values (0.0, 2.0)."""
+        node = WIDENBlockConfigQwenNode()
+        # All defaults except boundary test blocks
+        kwargs = {f"TB{i:02d}": 1.0 for i in range(60)}
+        kwargs["TB00"] = 0.0
+        kwargs["TB01"] = 2.0
+        kwargs["TB59"] = 2.0
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
+
+        (config,) = node.create_config(**kwargs)
+
+        assert config.block_overrides[0] == ("TB00", 0.0)
+        assert config.block_overrides[1] == ("TB01", 2.0)
+        assert config.block_overrides[59] == ("TB59", 2.0)
