@@ -4429,7 +4429,7 @@
   spec_ref: "@full-model-execution"
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -4441,3 +4441,7 @@
   started_at: 2026-02-14T09:41:50.277Z
   notes: []
   todos: []
+  completed_at: 2026-02-14T09:43:29.104Z
+  closed_reason: "Implemented per-block strength scaling for model weights in OpApplyModel. Added
+    _apply_per_block_lora_strength call mirroring LoRA pattern. AC-15 covered with 2 tests. PR #64
+    created, awaiting CI/merge."
