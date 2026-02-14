@@ -1530,8 +1530,18 @@ runs:
   - _ulid: 01KHDNG8W0NSA9XY3VV1VST9EG
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-14T08:50:28.865Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-14T08:50:28.865Z
+        completed_at: 2026-02-14T08:51:17.716Z
+        notes: "Reviewed session: automation triage, ralph loop, spec planning. 1 friction (plan import
+          ignores depends_on), 1 success (parallel plan review). Both captured."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-14T08:51:17.716Z
+        completed_at: 2026-02-14T08:51:17.716Z
     initiated_by: "@claude"
