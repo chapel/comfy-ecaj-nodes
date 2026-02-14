@@ -1115,6 +1115,9 @@ features:
     traits: []
     notes: []
     created: 2026-02-13T22:32:07.860Z
+    status:
+      maturity: draft
+      implementation: in_progress
   - _ulid: 01KHCJ41E230H6BM4NNWYW0MJ5
     slugs:
       - full-model-execution
