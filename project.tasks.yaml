@@ -3335,7 +3335,7 @@
   type: task
   spec_ref: "@model-input-node"
   plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-full-model-recipe-type"
@@ -3377,6 +3377,10 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T02:39:35.284Z
+  closed_reason: "Merged in PR #52. Implemented WIDENModelInputNode that produces RecipeModel from
+    checkpoint file picker. Includes: checkpoint combo via folder_paths, strength slider (0.0-2.0),
+    optional BLOCK_CONFIG input, returns WIDEN type. All 6 ACs covered by 15 tests."
 - _ulid: 01KHCJ41HRS122HRGWERT8R5V2
   slugs:
     - implement-full-model-loader
