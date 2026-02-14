@@ -1,11 +1,4 @@
 inbox:
-  - _ulid: 01KHA976BQY4QMF0BRCCY7ZVD6
-    text: "test_graph.py has 5 docstring-only AC annotations (AC: @node-graph-testing ac-N without #
-      prefix) that should be converted to standard # AC: comment style"
-    created_at: 2026-02-13T01:18:05.175Z
-    tags:
-      - annotations
-    added_by: "@claude"
   - _ulid: 01KHA9Y4380G85N3R3H8APGQJA
     text: "Exit node: add toggle + text input to save merged model to disk. Two purposes: (1) persist
       finished merge for easy reuse as a regular model, (2) cache — if saved file exists and config
