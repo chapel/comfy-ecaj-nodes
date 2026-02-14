@@ -4198,7 +4198,7 @@
   title: Implement Flux Klein detection and block classification
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -4247,6 +4247,12 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T08:16:03.308Z
+  closed_reason: "Merged in PR #59. Added Flux Klein detection (ac-1) and block classification (ac-2,
+    ac-10) with classify_key_flux() mapping double_blocks.N to DB0N and single_blocks.N to SB0N via
+    dynamic index discovery. Added layer type patterns (ac-3) for attention, feed_forward, and norm.
+    Registered in _CLASSIFIERS, _LAYER_TYPE_PATTERNS, and _SUPPORTED_ARCHITECTURES. 17 new tests
+    with AC annotations, all 777 tests passing."
 - _ulid: 01KHDHEGVX7ZCMG3A20X4XWBCA
   slugs:
     - flux-lora-loader
