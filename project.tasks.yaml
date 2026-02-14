@@ -3485,7 +3485,7 @@
   type: task
   spec_ref: "@exit-model-persistence"
   derivation: auto
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-exit-node"
@@ -3758,3 +3758,5 @@
         the cache.
       supersedes: null
   todos: []
+  completed_at: 2026-02-14T02:03:37.720Z
+  closed_reason: null
