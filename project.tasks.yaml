@@ -2840,7 +2840,7 @@
   spec_ref: "@per-block-control"
   meta_ref: null
   plan_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -2973,6 +2973,7 @@
       supersedes: null
   todos: []
   automation: eligible
+  started_at: 2026-02-14T02:09:57.814Z
 - _ulid: 01KHA77QE33PJTTXZCP29H88DS
   slugs:
     - layer-type-filter-impl
@@ -3482,6 +3483,9 @@
   spec_ref: "@node-graph-testing"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #48. Moved 17 AC annotations from docstring format to standard
+    before-def comment format in test_graph.py. All 6 ACs (@node-graph-testing ac-1 through ac-6)
+    have full test coverage."
   depends_on: []
   context: []
   priority: 3
@@ -3490,13 +3494,10 @@
   vcs_refs: []
   created_at: 2026-02-14T00:13:06.763Z
   started_at: 2026-02-14T02:06:04.625Z
+  completed_at: 2026-02-14T02:09:31.349Z
   notes: []
   todos: []
   automation: eligible
-  completed_at: 2026-02-14T02:09:31.349Z
-  closed_reason: "Merged in PR #48. Moved 17 AC annotations from docstring format to standard
-    before-def comment format in test_graph.py. All 6 ACs (@node-graph-testing ac-1 through ac-6)
-    have full test coverage."
 - _ulid: 01KHCRP1YM8442EBH98DBHWPPQ
   slugs:
     - task-exit-model-persistence
