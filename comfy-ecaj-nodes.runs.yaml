@@ -1497,6 +1497,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-14T08:29:18.215Z
+    completed_at: 2026-02-14T08:30:05.034Z
     step_results:
       - step_index: 0
         status: completed
@@ -1526,4 +1527,11 @@ runs:
         notes: No items to capture. Clean iteration with well-defined task, clear AC, and established
           patterns.
     initiated_by: "@claude"
-    completed_at: 2026-02-14T08:30:05.034Z
+  - _ulid: 01KHDNG8W0NSA9XY3VV1VST9EG
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-14T08:50:28.865Z
+    step_results: []
+    initiated_by: "@claude"
