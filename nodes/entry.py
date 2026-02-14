@@ -29,7 +29,7 @@ _ARCH_PATTERNS = (
         "flux",
         lambda keys: any("double_blocks" in k for k in keys),
     ),
-    # Qwen: transformer_blocks at depth 60+ (detected but not supported yet)
+    # Qwen: transformer_blocks at depth 60+
     (
         "qwen",
         lambda keys: sum(1 for k in keys if "transformer_blocks" in k) >= 60,
@@ -37,7 +37,7 @@ _ARCH_PATTERNS = (
 )
 
 # Architectures with implemented WIDEN loaders
-_SUPPORTED_ARCHITECTURES = frozenset({"sdxl", "zimage"})
+_SUPPORTED_ARCHITECTURES = frozenset({"sdxl", "zimage", "qwen"})
 
 
 def detect_architecture(model_patcher: object) -> str:

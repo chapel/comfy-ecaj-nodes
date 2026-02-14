@@ -7,6 +7,7 @@ Tests for @merge-block-config acceptance criteria:
 
 from lib.block_classify import (
     classify_key,
+    classify_key_qwen,
     classify_key_sdxl,
     classify_key_zimage,
     get_block_classifier,
@@ -125,6 +126,37 @@ class TestBlockClassifyZImage:
         assert classify_key_zimage("final_norm.weight") is None
 
 
+class TestBlockClassifyQwen:
+    """Qwen block classification tests."""
+
+    # AC: @qwen-detect-classify ac-2
+    def test_transformer_blocks_classify_individually(self):
+        """Transformer blocks classify as TB00-TB59+ with dynamic range."""
+        assert classify_key_qwen("transformer_blocks.0.attn.weight") == "TB00"
+        assert classify_key_qwen("transformer_blocks.1.mlp.weight") == "TB01"
+        assert classify_key_qwen("transformer_blocks.10.attn.weight") == "TB10"
+        assert classify_key_qwen("transformer_blocks.29.norm.weight") == "TB29"
+        assert classify_key_qwen("transformer_blocks.59.attn.weight") == "TB59"
+        # Dynamic range - no upper bound
+        assert classify_key_qwen("transformer_blocks.60.attn.weight") == "TB60"
+        assert classify_key_qwen("transformer_blocks.99.mlp.weight") == "TB99"
+
+    # AC: @qwen-detect-classify ac-2
+    def test_strips_prefixes(self):
+        """Key classification strips common prefixes."""
+        key = "diffusion_model.transformer_blocks.0.attn.weight"
+        assert classify_key_qwen(key) == "TB00"
+        key = "transformer.transformer_blocks.15.mlp.weight"
+        assert classify_key_qwen(key) == "TB15"
+
+    # AC: @qwen-detect-classify ac-2
+    def test_unmatched_returns_none(self):
+        """Keys not matching any block return None."""
+        assert classify_key_qwen("time_embed.0.weight") is None
+        assert classify_key_qwen("final_norm.weight") is None
+        assert classify_key_qwen("transformer_blocks.attn.weight") is None
+
+
 class TestGetBlockClassifier:
     """get_block_classifier function tests."""
 
@@ -137,6 +169,12 @@ class TestGetBlockClassifier:
         """Returns Z-Image classifier for 'zimage' arch."""
         classifier = get_block_classifier("zimage")
         assert classifier is classify_key_zimage
+
+    # AC: @qwen-detect-classify ac-2
+    def test_returns_qwen_classifier(self):
+        """Returns Qwen classifier for 'qwen' arch."""
+        classifier = get_block_classifier("qwen")
+        assert classifier is classify_key_qwen
 
     def test_returns_none_for_unknown_arch(self):
         """Returns None for unknown architectures."""

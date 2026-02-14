@@ -20,6 +20,7 @@ __all__ = [
     "get_block_classifier",
     "classify_key_sdxl",
     "classify_key_zimage",
+    "classify_key_qwen",
 ]
 
 
@@ -111,10 +112,40 @@ def classify_key_zimage(key: str) -> str | None:
     return None
 
 
+@functools.lru_cache(maxsize=4096)
+def classify_key_qwen(key: str) -> str | None:
+    """Classify a Qwen parameter key into an individual block.
+
+    Qwen block structure uses dynamic index discovery (not hardcoded to 60):
+    - transformer_blocks.N → TB00, TB01, ... (dynamic range based on model)
+
+    Args:
+        key: Parameter key (with or without diffusion_model./transformer. prefix)
+
+    Returns:
+        Individual block name (e.g., "TB00", "TB59") or None if no match
+    """
+    # Strip common prefixes
+    for prefix in ("diffusion_model.", "transformer."):
+        if key.startswith(prefix):
+            key = key[len(prefix) :]
+
+    # Match transformer_blocks.N
+    match = re.match(r"transformer_blocks\.(\d+)\.", key)
+    if match:
+        block_num = int(match.group(1))
+        # Dynamic range - no upper bound check, format with width for sorting
+        return f"TB{block_num:02d}"
+
+    # No block match
+    return None
+
+
 # Registry of architecture classifiers
 _CLASSIFIERS: dict[str, Callable[[str], str | None]] = {
     "sdxl": classify_key_sdxl,
     "zimage": classify_key_zimage,
+    "qwen": classify_key_qwen,
 }
 
 
@@ -193,10 +224,33 @@ _ZIMAGE_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
     (".rms", "norm"),
 )
 
+# Layer type patterns for Qwen
+_QWEN_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
+    # Attention patterns
+    (".attn.", "attention"),
+    ("to_q", "attention"),
+    ("to_k", "attention"),
+    ("to_v", "attention"),
+    ("to_out", "attention"),
+    (".qkv", "attention"),
+    (".proj", "attention"),
+    # Feed-forward patterns
+    (".mlp.", "feed_forward"),
+    (".ff.", "feed_forward"),
+    (".gate_proj", "feed_forward"),
+    (".up_proj", "feed_forward"),
+    (".down_proj", "feed_forward"),
+    # Norm patterns
+    (".norm", "norm"),
+    ("_norm", "norm"),
+    (".ln", "norm"),
+)
+
 # Registry of layer type patterns by architecture
 _LAYER_TYPE_PATTERNS: dict[str, tuple[tuple[str, str], ...]] = {
     "sdxl": _SDXL_LAYER_PATTERNS,
     "zimage": _ZIMAGE_LAYER_PATTERNS,
+    "qwen": _QWEN_LAYER_PATTERNS,
 }
 
 
