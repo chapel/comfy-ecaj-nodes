@@ -4324,7 +4324,7 @@
   title: Implement Flux Klein model loader support
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -4362,6 +4362,10 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T08:31:39.765Z
+  closed_reason: "Merged in PR #61. Implemented Flux Klein model loader support with architecture
+    detection from double_blocks pattern and key normalization (transformer. → diffusion_model.). 9
+    tests covering ac-8. All CI checks passed."
 - _ulid: 01KHDHEGXXH30KS31R7RXA41NC
   slugs:
     - flux-block-config
