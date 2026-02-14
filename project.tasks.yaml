@@ -2972,6 +2972,7 @@
         pytest -v && ruff check
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KHA77QE33PJTTXZCP29H88DS
   slugs:
     - layer-type-filter-impl
@@ -3166,6 +3167,7 @@
         pytest -v && ruff check
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KHC3H6MZJMGDCM7VNB74K1Y4
   slugs: []
   title: Add Qwen and Flux 2 Klein architecture support
@@ -3262,6 +3264,7 @@
 
         Files: lib/recipe.py.
   todos: []
+  automation: eligible
 - _ulid: 01KHCJ41G45JMGBJN3S459HJ52
   slugs:
     - implement-model-input-node
@@ -3299,6 +3302,7 @@
 
         Files: nodes/model_input.py, __init__.py.
   todos: []
+  automation: eligible
 - _ulid: 01KHCJ41HRS122HRGWERT8R5V2
   slugs:
     - implement-full-model-loader
@@ -3353,6 +3357,7 @@
         Files: lib/model_loader.py, reference lib/lora/base.py for interface
         pattern, reference merge-router src/models/ for key normalization.
   todos: []
+  automation: eligible
 - _ulid: 01KHCJ41JV9XBWBJ8VSVB748W8
   slugs:
     - implement-full-model-execution
@@ -3467,6 +3472,7 @@
         Files: lib/recipe.py, lib/recipe_eval.py, lib/analysis.py,
         nodes/exit.py, nodes/merge.py, nodes/compose.py.
   todos: []
+  automation: eligible
 - _ulid: 01KHCQWYAEA21JA0ZB7FB9100T
   slugs: []
   title: Fix AC annotation style in test_graph.py
