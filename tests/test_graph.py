@@ -180,11 +180,9 @@ def _make_merge(
 class TestEntryLoRAMergePipeline:
     """AC: @node-graph-testing ac-1"""
 
+    # AC: @node-graph-testing ac-1
     def test_entry_lora_merge_structure(self):
-        """Entry → LoRA → Merge produces correct RecipeMerge.
-
-        # AC: @node-graph-testing ac-1
-        """
+        """Entry → LoRA → Merge produces correct RecipeMerge."""
         base, patcher = _make_entry("sdxl")
         lora = _make_lora("test_lora.safetensors", strength=0.8)
         merge = _make_merge(base, lora, t_factor=0.7)
@@ -204,11 +202,9 @@ class TestEntryLoRAMergePipeline:
         assert merge.t_factor == 0.7
         assert merge.backbone is None
 
+    # AC: @node-graph-testing ac-1
     def test_chained_loras_accumulate(self):
-        """Chaining LoRA nodes produces single RecipeLoRA with all specs.
-
-        # AC: @node-graph-testing ac-1
-        """
+        """Chaining LoRA nodes produces single RecipeLoRA with all specs."""
         lora_a = _make_lora("lora_a.safetensors", strength=1.0)
         lora_chain = _make_lora("lora_b.safetensors", strength=0.5, prev=lora_a)
 
@@ -217,11 +213,9 @@ class TestEntryLoRAMergePipeline:
         assert lora_chain.loras[0]["path"] == "lora_a.safetensors"
         assert lora_chain.loras[1]["path"] == "lora_b.safetensors"
 
+    # AC: @node-graph-testing ac-1
     def test_entry_produces_recipe_base(self):
-        """Entry node wraps ModelPatcher in RecipeBase with detected arch.
-
-        # AC: @node-graph-testing ac-1
-        """
+        """Entry node wraps ModelPatcher in RecipeBase with detected arch."""
         base, patcher = _make_entry("sdxl")
 
         assert isinstance(base, RecipeBase)
@@ -237,11 +231,9 @@ class TestEntryLoRAMergePipeline:
 class TestComposeThreeBranches:
     """AC: @node-graph-testing ac-2"""
 
+    # AC: @node-graph-testing ac-2
     def test_compose_three_branches_uses_merge_weights(self):
-        """Three-branch compose dispatches to merge_weights.
-
-        # AC: @node-graph-testing ac-2
-        """
+        """Three-branch compose dispatches to merge_weights."""
         base, _ = _make_entry("sdxl")
         branch_a = _make_lora("lora_a.safetensors", strength=1.0)
         branch_b = _make_lora("lora_b.safetensors", strength=0.8)
@@ -256,11 +248,9 @@ class TestComposeThreeBranches:
         assert ops[0].target_type == "RecipeCompose"
         assert ops[0].n_branches == 3
 
+    # AC: @node-graph-testing ac-2
     def test_compose_structure_accumulates_branches(self):
-        """Compose node accumulates branches in order through chained calls.
-
-        # AC: @node-graph-testing ac-2
-        """
+        """Compose node accumulates branches in order through chained calls."""
         branch_a = _make_lora("lora_a.safetensors")
         branch_b = _make_lora("lora_b.safetensors")
         branch_c = _make_lora("lora_c.safetensors")
@@ -282,11 +272,9 @@ class TestComposeThreeBranches:
 class TestSingleLoRAFilterDelta:
     """AC: @node-graph-testing ac-3"""
 
+    # AC: @node-graph-testing ac-3
     def test_single_lora_uses_filter_delta(self):
-        """Single LoRA target dispatches to filter_delta.
-
-        # AC: @node-graph-testing ac-3
-        """
+        """Single LoRA target dispatches to filter_delta."""
         base, _ = _make_entry("sdxl")
         lora = _make_lora("test_lora.safetensors", strength=1.0)
         merge = _make_merge(base, lora, t_factor=1.0)
@@ -297,11 +285,9 @@ class TestSingleLoRAFilterDelta:
         assert ops[0].target_type == "RecipeLoRA"
         assert ops[0].n_branches is None
 
+    # AC: @node-graph-testing ac-3
     def test_single_branch_compose_also_filter_delta(self):
-        """Single-branch compose falls back to filter_delta.
-
-        # AC: @node-graph-testing ac-3
-        """
+        """Single-branch compose falls back to filter_delta."""
         base, _ = _make_entry("sdxl")
         lora = _make_lora("test_lora.safetensors")
         composed = _make_compose(lora)
@@ -322,11 +308,9 @@ class TestSingleLoRAFilterDelta:
 class TestChainedMergeEvaluation:
     """AC: @node-graph-testing ac-4"""
 
+    # AC: @node-graph-testing ac-4
     def test_two_merge_chain_inner_first(self):
-        """Inner merge in a chain evaluates before outer.
-
-        # AC: @node-graph-testing ac-4
-        """
+        """Inner merge in a chain evaluates before outer."""
         base, _ = _make_entry("sdxl")
         lora_inner = _make_lora("lora_inner.safetensors")
         inner_merge = _make_merge(base, lora_inner, t_factor=1.0)
@@ -341,11 +325,9 @@ class TestChainedMergeEvaluation:
         assert ops[0].op == "filter_delta"  # inner: single LoRA
         assert ops[1].op == "filter_delta"  # outer: single LoRA
 
+    # AC: @node-graph-testing ac-4
     def test_three_merge_chain_evaluation_order(self):
-        """Three-level chain evaluates innermost → middle → outermost.
-
-        # AC: @node-graph-testing ac-4
-        """
+        """Three-level chain evaluates innermost → middle → outermost."""
         base, _ = _make_entry("sdxl")
 
         lora_1 = _make_lora("lora_1.safetensors")
@@ -364,11 +346,9 @@ class TestChainedMergeEvaluation:
         assert ops[1].depth == 1  # merge_2 (middle)
         assert ops[2].depth == 0  # merge_3 (outermost)
 
+    # AC: @node-graph-testing ac-4
     def test_chained_merge_base_structure(self):
-        """Inner merge result feeds into outer merge's base.
-
-        # AC: @node-graph-testing ac-4
-        """
+        """Inner merge result feeds into outer merge's base."""
         base, _ = _make_entry("sdxl")
         lora_a = _make_lora("lora_a.safetensors")
         inner = _make_merge(base, lora_a, t_factor=1.0)
@@ -392,22 +372,18 @@ class TestChainedMergeEvaluation:
 class TestInvalidGraphValidation:
     """AC: @node-graph-testing ac-5"""
 
+    # AC: @node-graph-testing ac-5
     def test_recipe_base_as_compose_branch_rejected(self):
-        """RecipeBase wired to compose branch raises clear error.
-
-        # AC: @node-graph-testing ac-5
-        """
+        """RecipeBase wired to compose branch raises clear error."""
         base, _ = _make_entry("sdxl")
         compose_node = WIDENComposeNode()
 
         with pytest.raises(ValueError, match="Cannot compose a raw base model"):
             compose_node.compose(base)
 
+    # AC: @node-graph-testing ac-5
     def test_recipe_lora_as_merge_base_rejected(self):
-        """RecipeLoRA wired to merge base raises ValueError.
-
-        # AC: @node-graph-testing ac-5
-        """
+        """RecipeLoRA wired to merge base raises ValueError."""
         lora = _make_lora("test_lora.safetensors")
         target = _make_lora("target_lora.safetensors")
         merge_node = WIDENMergeNode()
@@ -415,11 +391,9 @@ class TestInvalidGraphValidation:
         with pytest.raises(ValueError, match="base must be RecipeBase or RecipeMerge"):
             merge_node.merge(lora, target, t_factor=1.0)
 
+    # AC: @node-graph-testing ac-5
     def test_exit_validation_names_invalid_type_and_position(self):
-        """Exit validation error includes type name and tree position.
-
-        # AC: @node-graph-testing ac-5
-        """
+        """Exit validation error includes type name and tree position."""
         base, _ = _make_entry("sdxl")
 
         # Manually craft an invalid tree: RecipeBase in compose branches
@@ -433,11 +407,9 @@ class TestInvalidGraphValidation:
         # Error should name the invalid type
         assert "RecipeBase" in str(exc_info.value)
 
+    # AC: @node-graph-testing ac-5
     def test_non_recipe_type_as_merge_target_rejected(self):
-        """Non-recipe type at merge target raises TypeError.
-
-        # AC: @node-graph-testing ac-5
-        """
+        """Non-recipe type at merge target raises TypeError."""
         base, _ = _make_entry("sdxl")
         merge_node = WIDENMergeNode()
 
@@ -461,11 +433,9 @@ class TestHyphoriaWorkflow:
       A: nicegirls→nsfw1→nsfw2   B: painting→mecha
     """
 
+    # AC: @node-graph-testing ac-6
     def test_hyphoria_recipe_structure(self):
-        """Full hyphoria graph builds correct recipe tree through node chain.
-
-        # AC: @node-graph-testing ac-6
-        """
+        """Full hyphoria graph builds correct recipe tree through node chain."""
         # Entry: base model
         base, _ = _make_entry("sdxl")
 
@@ -519,13 +489,12 @@ class TestHyphoriaWorkflow:
         assert len(inner.target.branches[1].loras) == 2
         assert inner.target.branches[1].loras[0]["path"] == "painting.safetensors"
 
+    # AC: @node-graph-testing ac-6
     def test_hyphoria_operation_plan(self):
         """Hyphoria workflow produces correct operation sequence.
 
         Expected: merge_weights (compose), filter_delta (nipples), filter_delta (Mystic)
         In evaluation order: innermost first.
-
-        # AC: @node-graph-testing ac-6
         """
         base, _ = _make_entry("sdxl")
 
@@ -564,11 +533,9 @@ class TestHyphoriaWorkflow:
         assert ops[2].target_type == "RecipeLoRA"
         assert ops[2].depth == 0
 
+    # AC: @node-graph-testing ac-6
     def test_hyphoria_passes_exit_validation(self):
-        """Full hyphoria tree passes _validate_recipe_tree without error.
-
-        # AC: @node-graph-testing ac-6
-        """
+        """Full hyphoria tree passes _validate_recipe_tree without error."""
         base, _ = _make_entry("sdxl")
 
         branch_a = _make_lora("nicegirls.safetensors", strength=0.8)
