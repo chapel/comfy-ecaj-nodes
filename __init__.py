@@ -11,6 +11,7 @@ if __package__:
     from .nodes.exit import WIDENExitNode
     from .nodes.lora import WIDENLoRANode
     from .nodes.merge import WIDENMergeNode
+    from .nodes.model_input import WIDENModelInputNode
 
     NODE_CLASS_MAPPINGS = {
         "WIDENEntry": WIDENEntryNode,
@@ -20,6 +21,7 @@ if __package__:
         "WIDENExit": WIDENExitNode,
         "WIDENBlockConfigSDXL": WIDENBlockConfigSDXLNode,
         "WIDENBlockConfigZImage": WIDENBlockConfigZImageNode,
+        "WIDENModelInput": WIDENModelInputNode,
     }
 
     NODE_DISPLAY_NAME_MAPPINGS = {
@@ -30,6 +32,7 @@ if __package__:
         "WIDENExit": "WIDEN Exit",
         "WIDENBlockConfigSDXL": "WIDEN Block Config (SDXL)",
         "WIDENBlockConfigZImage": "WIDEN Block Config (Z-Image)",
+        "WIDENModelInput": "WIDEN Model Input",
     }
 
     __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
