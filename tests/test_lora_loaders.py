@@ -17,6 +17,7 @@ from safetensors.torch import save_file
 from lib.executor import DeltaSpec
 from lib.lora import (
     LOADER_REGISTRY,
+    FluxLoader,
     LoRALoader,
     QwenLoader,
     SDXLLoader,
@@ -152,11 +153,17 @@ class TestAC1ArchitectureSelection:
         loader = get_loader("zimage")
         assert isinstance(loader, ZImageLoader)
 
+    def test_flux_loader_selected_for_flux_arch(self):
+        """Flux architecture tag returns FluxLoader."""
+        # AC: @flux-lora-loader ac-4
+        loader = get_loader("flux")
+        assert isinstance(loader, FluxLoader)
+
     def test_unsupported_arch_raises_value_error(self):
         """Unsupported architecture raises helpful ValueError."""
         # AC: @lora-loaders ac-1
-        with pytest.raises(ValueError, match="Unsupported architecture 'flux'"):
-            get_loader("flux")
+        with pytest.raises(ValueError, match="Unsupported architecture 'unknown_arch'"):
+            get_loader("unknown_arch")
 
     def test_sdxl_key_mapping(self, sdxl_lora_file: str, cleanup_lora_files):
         """SDXL loader maps LoRA keys to model keys correctly."""
@@ -693,6 +700,293 @@ class TestQwenLoader:
         # Verify specs are executor-compatible
         assert all(isinstance(s, DeltaSpec) for s in specs)
         assert all(s.kind == "standard" for s in specs)
+
+        # Cleanup
+        loader.cleanup()
+        assert len(loader.affected_keys) == 0
+
+
+# ---------------------------------------------------------------------------
+# Flux-specific fixtures
+# ---------------------------------------------------------------------------
+
+# Helper to build Flux LoRA keys
+_DB0_IMG = "transformer.double_blocks.0.img_attn"
+_DB0_TXT = "transformer.double_blocks.0.txt_attn"
+
+
+def _make_qkv_lora(prefix: str, hidden: int, rank: int) -> dict[str, torch.Tensor]:
+    """Generate QKV lora_A/lora_B weight pairs."""
+    return {
+        f"{prefix}.to_q.lora_A.weight": torch.randn(rank, hidden),
+        f"{prefix}.to_q.lora_B.weight": torch.randn(hidden, rank),
+        f"{prefix}.to_k.lora_A.weight": torch.randn(rank, hidden),
+        f"{prefix}.to_k.lora_B.weight": torch.randn(hidden, rank),
+        f"{prefix}.to_v.lora_A.weight": torch.randn(rank, hidden),
+        f"{prefix}.to_v.lora_B.weight": torch.randn(hidden, rank),
+    }
+
+
+@pytest.fixture
+def flux_double_block_lora_file() -> str:
+    """Create a Flux double_block LoRA file with img_attn and txt_attn QKV."""
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        hidden, rank = 3072, 8
+        tensors = {
+            **_make_qkv_lora(_DB0_IMG, hidden, rank),
+            **_make_qkv_lora(_DB0_TXT, hidden, rank),
+        }
+        save_file(tensors, f.name)
+        return f.name
+
+
+@pytest.fixture
+def flux_single_block_lora_file() -> str:
+    """Create a Flux single_block LoRA file with linear1 4-way fusing."""
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        hidden, rank = 3072, 8
+        # BFL/kohya format: lora_unet_single_blocks_N_linear1_*
+        pre = "lora_unet_single_blocks_0_linear1"
+        tensors = {
+            f"{pre}_to_q.lora_down.weight": torch.randn(rank, hidden),
+            f"{pre}_to_q.lora_up.weight": torch.randn(hidden, rank),
+            f"{pre}_to_k.lora_down.weight": torch.randn(rank, hidden),
+            f"{pre}_to_k.lora_up.weight": torch.randn(hidden, rank),
+            f"{pre}_to_v.lora_down.weight": torch.randn(rank, hidden),
+            f"{pre}_to_v.lora_up.weight": torch.randn(hidden, rank),
+            f"{pre}_proj_mlp.lora_down.weight": torch.randn(rank, hidden),
+            f"{pre}_proj_mlp.lora_up.weight": torch.randn(hidden, rank),
+        }
+        save_file(tensors, f.name)
+        return f.name
+
+
+@pytest.fixture
+def flux_kohya_lora_file() -> str:
+    """Create a temporary Flux BFL/kohya format LoRA file."""
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        hidden, rank = 3072, 8
+        pre = "lora_unet_double_blocks_1_img_attn"
+        tensors = {
+            f"{pre}_to_q.lora_down.weight": torch.randn(rank, hidden),
+            f"{pre}_to_q.lora_up.weight": torch.randn(hidden, rank),
+            f"{pre}_to_k.lora_down.weight": torch.randn(rank, hidden),
+            f"{pre}_to_k.lora_up.weight": torch.randn(hidden, rank),
+            f"{pre}_to_v.lora_down.weight": torch.randn(rank, hidden),
+            f"{pre}_to_v.lora_up.weight": torch.randn(hidden, rank),
+        }
+        save_file(tensors, f.name)
+        return f.name
+
+
+# ---------------------------------------------------------------------------
+# Flux-specific tests
+# ---------------------------------------------------------------------------
+
+
+class TestFluxLoader:
+    """Tests for Flux Klein architecture LoRA loader."""
+
+    def test_flux_loader_in_registry(self):
+        """FluxLoader is registered in LOADER_REGISTRY."""
+        # AC: @lora-loaders ac-3
+        assert "flux" in LOADER_REGISTRY
+        assert LOADER_REGISTRY["flux"] is FluxLoader
+
+    def test_flux_double_block_diffusers_format_loads(
+        self, flux_double_block_lora_file: str
+    ):
+        """Flux loader handles diffusers format LoRA files for double_blocks."""
+        # AC: @flux-lora-loader ac-4
+        loader = FluxLoader()
+        loader.load(flux_double_block_lora_file)
+
+        affected = loader.affected_keys
+        assert len(affected) > 0, "Should have affected keys"
+
+        # Keys should map to fused qkv format
+        for key in affected:
+            assert key.startswith("diffusion_model."), f"Key {key} missing prefix"
+            assert "double_blocks" in key, f"Key {key} missing double_blocks"
+            assert key.endswith(".weight"), f"Key {key} missing suffix"
+
+        loader.cleanup()
+
+    def test_flux_double_block_qkv_fusing(self, flux_double_block_lora_file: str):
+        """Flux loader fuses img_attn and txt_attn QKV keys to qkv weights."""
+        # AC: @flux-lora-loader ac-5
+        loader = FluxLoader()
+        loader.load(flux_double_block_lora_file)
+
+        affected = loader.affected_keys
+
+        # Should have fused qkv keys for both img and txt attn
+        img_qkv = "diffusion_model.double_blocks.0.img_attn.qkv.weight"
+        txt_qkv = "diffusion_model.double_blocks.0.txt_attn.qkv.weight"
+        assert img_qkv in affected, f"Expected {img_qkv} in {affected}"
+        assert txt_qkv in affected, f"Expected {txt_qkv} in {affected}"
+
+        loader.cleanup()
+
+    def test_flux_double_block_produces_qkv_deltaspec(
+        self, flux_double_block_lora_file: str
+    ):
+        """Flux loader produces qkv_* kind DeltaSpecs for double_block QKV layers."""
+        # AC: @flux-lora-loader ac-5
+        # AC: @flux-lora-loader ac-7
+        loader = FluxLoader()
+        loader.load(flux_double_block_lora_file)
+
+        keys = list(loader.affected_keys)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs = loader.get_delta_specs(keys, key_indices)
+
+        # Should have QKV specs for both streams
+        qkv_kinds = {s.kind for s in specs if s.kind.startswith("qkv_")}
+        assert qkv_kinds == {"qkv_q", "qkv_k", "qkv_v"}, f"Missing QKV kinds: {qkv_kinds}"
+
+        # All QKV specs should have offsets
+        for spec in specs:
+            if spec.kind.startswith("qkv_"):
+                assert spec.offset is not None, f"QKV spec missing offset: {spec}"
+
+        loader.cleanup()
+
+    def test_flux_single_block_linear1_loads(self, flux_single_block_lora_file: str):
+        """Flux loader handles single_block linear1 4-way fused keys."""
+        # AC: @flux-lora-loader ac-6
+        loader = FluxLoader()
+        loader.load(flux_single_block_lora_file)
+
+        affected = loader.affected_keys
+        assert len(affected) > 0, "Should have affected keys"
+
+        # Should map to linear1 fused weight
+        linear1_key = "diffusion_model.single_blocks.0.linear1.weight"
+        assert linear1_key in affected, f"Expected {linear1_key} in {affected}"
+
+        loader.cleanup()
+
+    def test_flux_single_block_produces_qkv_and_mlp_specs(
+        self, flux_single_block_lora_file: str
+    ):
+        """Flux loader produces qkv_* and offset_mlp specs for single_block linear1."""
+        # AC: @flux-lora-loader ac-6
+        # AC: @flux-lora-loader ac-7
+        loader = FluxLoader()
+        loader.load(flux_single_block_lora_file)
+
+        keys = list(loader.affected_keys)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs = loader.get_delta_specs(keys, key_indices)
+
+        # Should have QKV and MLP specs
+        kinds = {s.kind for s in specs}
+        assert "qkv_q" in kinds, f"Missing qkv_q in {kinds}"
+        assert "qkv_k" in kinds, f"Missing qkv_k in {kinds}"
+        assert "qkv_v" in kinds, f"Missing qkv_v in {kinds}"
+        assert "offset_mlp" in kinds, f"Missing offset_mlp in {kinds}"
+
+        # All specs should have offsets
+        for spec in specs:
+            assert spec.offset is not None, f"Spec missing offset: {spec}"
+
+        loader.cleanup()
+
+    def test_flux_single_block_offset_values(self, flux_single_block_lora_file: str):
+        """Flux single_block linear1 specs have correct 4-way offset values."""
+        # AC: @flux-lora-loader ac-6
+        loader = FluxLoader()
+        loader.load(flux_single_block_lora_file)
+
+        keys = list(loader.affected_keys)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs = loader.get_delta_specs(keys, key_indices)
+
+        # Hidden dim is 3072 based on fixture
+        hidden_dim = 3072
+
+        # Find specs by kind and check offsets
+        offsets_by_kind = {s.kind: s.offset for s in specs}
+        h = hidden_dim  # alias for shorter lines
+
+        assert offsets_by_kind["qkv_q"] == (0, h)
+        assert offsets_by_kind["qkv_k"] == (h, h)
+        assert offsets_by_kind["qkv_v"] == (2 * h, h)
+        assert offsets_by_kind["offset_mlp"] == (3 * h, h)
+
+        loader.cleanup()
+
+    def test_flux_kohya_format_loads(self, flux_kohya_lora_file: str):
+        """Flux loader handles BFL/kohya format LoRA files."""
+        # AC: @flux-lora-loader ac-4
+        loader = FluxLoader()
+        loader.load(flux_kohya_lora_file)
+
+        affected = loader.affected_keys
+        assert len(affected) > 0, "Should have affected keys"
+
+        # Verify key mapping: lora_unet_double_blocks_1 -> double_blocks.1
+        assert any("double_blocks.1" in k for k in affected), (
+            f"Expected double_blocks.1 in keys: {affected}"
+        )
+
+        loader.cleanup()
+
+    def test_flux_strength_affects_scale(self, flux_double_block_lora_file: str):
+        """LoRA strength multiplier affects DeltaSpec scale."""
+        # AC: @flux-lora-loader ac-7
+        loader1 = FluxLoader()
+        loader1.load(flux_double_block_lora_file, strength=1.0)
+        keys = list(loader1.affected_keys)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs1 = loader1.get_delta_specs(keys, key_indices)
+        loader1.cleanup()
+
+        loader2 = FluxLoader()
+        loader2.load(flux_double_block_lora_file, strength=0.5)
+        specs2 = loader2.get_delta_specs(keys, key_indices)
+        loader2.cleanup()
+
+        # Same key should have half the scale
+        assert len(specs1) == len(specs2)
+        for s1, s2 in zip(specs1, specs2, strict=True):
+            assert abs(s1.scale - 2 * s2.scale) < 1e-6, (
+                f"Scale mismatch: {s1.scale} vs {s2.scale}"
+            )
+
+    def test_flux_cleanup_clears_state(self, flux_double_block_lora_file: str):
+        """cleanup() releases loaded tensors."""
+        # AC: @lora-loaders ac-4
+        loader = FluxLoader()
+        loader.load(flux_double_block_lora_file)
+        assert len(loader.affected_keys) > 0, "Should have affected keys"
+
+        loader.cleanup()
+        assert len(loader.affected_keys) == 0, "cleanup should clear affected keys"
+
+    def test_flux_full_workflow(self, flux_double_block_lora_file: str):
+        """Full workflow: get loader, load, get specs, cleanup."""
+        # Get architecture-appropriate loader
+        loader = get_loader("flux")
+
+        # Load LoRA file
+        loader.load(flux_double_block_lora_file, strength=0.75)
+
+        # Check affected keys
+        affected = loader.affected_keys
+        assert len(affected) > 0
+
+        # Get delta specs for batched execution
+        keys = list(affected)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs = loader.get_delta_specs(keys, key_indices)
+
+        # Verify specs are executor-compatible
+        assert all(isinstance(s, DeltaSpec) for s in specs)
+        # Flux uses QKV specs
+        kinds = {s.kind for s in specs}
+        assert kinds.issubset({"qkv_q", "qkv_k", "qkv_v", "offset_mlp", "standard"})
 
         # Cleanup
         loader.cleanup()
