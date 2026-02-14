@@ -3485,7 +3485,7 @@
   type: task
   spec_ref: "@exit-model-persistence"
   derivation: auto
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@implement-exit-node"
@@ -3494,6 +3494,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-14T00:26:49.684Z
+  started_at: 2026-02-14T02:03:34.988Z
   notes:
     - _ulid: 01KHCRP1YMEMWB6TAH6W9W1YAD
       created_at: 2026-02-14T00:26:49.684Z
@@ -3757,4 +3758,3 @@
         the cache.
       supersedes: null
   todos: []
-  started_at: 2026-02-14T02:03:34.988Z
