@@ -427,11 +427,13 @@ features:
         type: requirement
         tags: []
         description: "Opt-in save/cache for merged model output. When enabled, the exit node saves the
-          fully-merged model as safetensors adjacent to the base model directory. On subsequent
-          runs, if the cached file metadata matches the current recipe configuration, the node loads
-          directly from disk instead of recomputing the GPU merge pipeline. The saved file is a
-          complete standalone model loadable by ComfyUI standard model loader. New inputs:
-          save_model (boolean toggle, default off) and model_name (string filename)."
+          fully-merged model as safetensors in the base model directory. On subsequent runs, if the
+          cached file metadata matches the current recipe configuration, the node loads directly
+          from disk instead of recomputing the GPU merge pipeline. The saved file is a complete
+          standalone model (all keys) loadable by ComfyUI standard model loader. New inputs:
+          save_model (boolean toggle, default off) and model_name (string filename). Requires
+          threading the base model checkpoint path from Entry node through RecipeBase so the exit
+          node can resolve the save directory and base model identity for hashing."
         depends_on: []
         implements: []
         relates_to: []
