@@ -4385,6 +4385,7 @@
     - node
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.277Z
+  started_at: 2026-02-14T08:32:50.534Z
   notes:
     - _ulid: 01KHDHEGXXP8J47WJCR68S2KNG
       created_at: 2026-02-14T07:39:37.277Z
@@ -4399,6 +4400,18 @@
 
         Tests in: tests/test_per_block_control.py (new Flux node tests).
         Covers ac-9, ac-10, ac-11.
+    - _ulid: 01KHDMP414AB2XK6W6V1BJXVQ1
+      created_at: 2026-02-14T08:36:11.940Z
+      author: "@claude"
+      content: "Implementation complete. Created nodes/block_config_flux.py with 32 block sliders
+        (DB00-DB07 + SB00-SB23) plus 3 layer-type sliders (attention, feed_forward, norm).
+        Registered WIDENBlockConfigFlux in NODE_CLASS_MAPPINGS and NODE_DISPLAY_NAME_MAPPINGS in
+        __init__.py. Added 18 tests: TestBlockConfigFluxNode (12 tests covering ac-9) for
+        double/single block sliders, layer types, input counts, slider config, return types,
+        BlockConfig creation, block/layer-type override storage, Klein 4B unused blocks defaulting
+        to 1.0 (ac-10), and boundary values. TestFluxKleinRegistryWiring (6 tests covering ac-11)
+        verifying all registries wired: _SUPPORTED_ARCHITECTURES, _CLASSIFIERS,
+        _LAYER_TYPE_PATTERNS, LOADER_REGISTRY, _ARCH_PATTERNS. All 815 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T08:32:50.534Z
