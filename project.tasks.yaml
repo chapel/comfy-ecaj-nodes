@@ -4200,6 +4200,11 @@
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #59. Added Flux Klein detection (ac-1) and block classification (ac-2,
+    ac-10) with classify_key_flux() mapping double_blocks.N to DB0N and single_blocks.N to SB0N via
+    dynamic index discovery. Added layer type patterns (ac-3) for attention, feed_forward, and norm.
+    Registered in _CLASSIFIERS, _LAYER_TYPE_PATTERNS, and _SUPPORTED_ARCHITECTURES. 17 new tests
+    with AC annotations, all 777 tests passing."
   depends_on: []
   context: []
   priority: 2
@@ -4209,6 +4214,7 @@
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.178Z
   started_at: 2026-02-14T08:10:27.852Z
+  completed_at: 2026-02-14T08:16:03.308Z
   notes:
     - _ulid: 01KHDHEGTTV23EK1E4EGA7G4P8
       created_at: 2026-02-14T07:39:37.178Z
@@ -4247,19 +4253,13 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-14T08:16:03.308Z
-  closed_reason: "Merged in PR #59. Added Flux Klein detection (ac-1) and block classification (ac-2,
-    ac-10) with classify_key_flux() mapping double_blocks.N to DB0N and single_blocks.N to SB0N via
-    dynamic index discovery. Added layer type patterns (ac-3) for attention, feed_forward, and norm.
-    Registered in _CLASSIFIERS, _LAYER_TYPE_PATTERNS, and _SUPPORTED_ARCHITECTURES. 17 new tests
-    with AC annotations, all 777 tests passing."
 - _ulid: 01KHDHEGVX7ZCMG3A20X4XWBCA
   slugs:
     - flux-lora-loader
   title: Implement Flux Klein LoRA loader
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@flux-detect-classify"
@@ -4297,6 +4297,7 @@
         Covers ac-4, ac-5, ac-6, ac-7.
   todos: []
   automation: eligible
+  started_at: 2026-02-14T08:16:55.723Z
 - _ulid: 01KHDHEGWYT9Y2847GMYDB85NZ
   slugs:
     - flux-model-loader
