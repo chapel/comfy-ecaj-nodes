@@ -3461,7 +3461,7 @@
   type: task
   spec_ref: "@full-model-execution"
   plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-full-model-recipe-type"
@@ -3663,6 +3663,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T02:57:50.644Z
+  closed_reason: "Merged in PR #54. Implemented full model execution for WIDEN checkpoint merging.
+    Added RecipeModel support across the codebase: analyze_recipe_models() in lib/analysis.py,
+    OpApplyModel in lib/recipe_eval.py, model path collection in nodes/exit.py, and RecipeModel as
+    valid type in compose/merge nodes. All 13 ACs verified with 20 tests."
 - _ulid: 01KHCQWYAEA21JA0ZB7FB9100T
   slugs: []
   title: Fix AC annotation style in test_graph.py
