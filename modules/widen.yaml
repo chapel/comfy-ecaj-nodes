@@ -504,7 +504,7 @@ features:
             then: no workflow JSON is included in safetensors metadata
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
     status:
       maturity: draft
       implementation: implemented
