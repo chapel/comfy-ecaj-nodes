@@ -24,22 +24,18 @@ __all__ = [
 
 @functools.lru_cache(maxsize=4096)
 def classify_key_sdxl(key: str) -> str | None:
-    """Classify an SDXL parameter key into a block group.
+    """Classify an SDXL parameter key into an individual block.
 
     SDXL block structure matches WIDENBlockConfigSDXLNode sliders:
-    - input_blocks.0-2 → IN00-02
-    - input_blocks.3-5 → IN03-05
-    - input_blocks.6-8 → IN06-08
-    - middle_block → MID
-    - output_blocks.0-2 → OUT00-02
-    - output_blocks.3-5 → OUT03-05
-    - output_blocks.6-8 → OUT06-08
+    - input_blocks.0-8 → IN00-IN08 (9 individual blocks)
+    - middle_block → MID (single block)
+    - output_blocks.0-8 → OUT00-OUT08 (9 individual blocks)
 
     Args:
         key: Parameter key (with or without diffusion_model. prefix)
 
     Returns:
-        Block group name (e.g., "IN00-02", "MID") or None if no match
+        Individual block name (e.g., "IN00", "MID", "OUT05") or None if no match
     """
     # Strip common prefixes
     if key.startswith("diffusion_model."):
@@ -49,12 +45,8 @@ def classify_key_sdxl(key: str) -> str | None:
     match = re.match(r"input_blocks\.(\d+)\.", key)
     if match:
         block_num = int(match.group(1))
-        if 0 <= block_num <= 2:
-            return "IN00-02"
-        elif 3 <= block_num <= 5:
-            return "IN03-05"
-        elif 6 <= block_num <= 8:
-            return "IN06-08"
+        if 0 <= block_num <= 8:
+            return f"IN{block_num:02d}"
         # Block numbers 9-11 exist in some SDXL variants
         return None
 
@@ -66,12 +58,8 @@ def classify_key_sdxl(key: str) -> str | None:
     match = re.match(r"output_blocks\.(\d+)\.", key)
     if match:
         block_num = int(match.group(1))
-        if 0 <= block_num <= 2:
-            return "OUT00-02"
-        elif 3 <= block_num <= 5:
-            return "OUT03-05"
-        elif 6 <= block_num <= 8:
-            return "OUT06-08"
+        if 0 <= block_num <= 8:
+            return f"OUT{block_num:02d}"
         return None
 
     # No block match (e.g., time_embed, label_emb at top level)
@@ -80,23 +68,18 @@ def classify_key_sdxl(key: str) -> str | None:
 
 @functools.lru_cache(maxsize=4096)
 def classify_key_zimage(key: str) -> str | None:
-    """Classify a Z-Image/S3-DiT parameter key into a block group.
+    """Classify a Z-Image/S3-DiT parameter key into an individual block.
 
     Z-Image block structure matches WIDENBlockConfigZImageNode sliders:
-    - layers.0-4 → L00-04
-    - layers.5-9 → L05-09
-    - layers.10-14 → L10-14
-    - layers.15-19 → L15-19
-    - layers.20-24 → L20-24
-    - layers.25-29 → L25-29
-    - noise_refiner → noise_refiner
-    - context_refiner → context_refiner
+    - layers.0-29 → L00-L29 (30 individual blocks)
+    - noise_refiner.0-1 → NOISE_REF0, NOISE_REF1 (2 blocks)
+    - context_refiner.0-1 → CTX_REF0, CTX_REF1 (2 blocks)
 
     Args:
         key: Parameter key (with or without transformer./diffusion_model. prefix)
 
     Returns:
-        Block group name (e.g., "L00-04", "noise_refiner") or None if no match
+        Individual block name (e.g., "L00", "NOISE_REF0") or None if no match
     """
     # Strip common prefixes
     for prefix in ("diffusion_model.", "transformer."):
@@ -107,25 +90,21 @@ def classify_key_zimage(key: str) -> str | None:
     match = re.match(r"(?:layers|blocks)\.(\d+)\.", key)
     if match:
         layer_num = int(match.group(1))
-        if 0 <= layer_num <= 4:
-            return "L00-04"
-        elif 5 <= layer_num <= 9:
-            return "L05-09"
-        elif 10 <= layer_num <= 14:
-            return "L10-14"
-        elif 15 <= layer_num <= 19:
-            return "L15-19"
-        elif 20 <= layer_num <= 24:
-            return "L20-24"
-        elif 25 <= layer_num <= 29:
-            return "L25-29"
+        if 0 <= layer_num <= 29:
+            return f"L{layer_num:02d}"
         return None
 
-    # Match refiners (anchored prefix match to avoid substring false positives)
-    if key.startswith("noise_refiner"):
-        return "noise_refiner"
-    if key.startswith("context_refiner"):
-        return "context_refiner"
+    # Match noise_refiner.N (nn.ModuleList sub-modules)
+    match = re.match(r"noise_refiner\.(\d+)\.", key)
+    if match:
+        refiner_num = int(match.group(1))
+        return f"NOISE_REF{refiner_num}"
+
+    # Match context_refiner.N (nn.ModuleList sub-modules)
+    match = re.match(r"context_refiner\.(\d+)\.", key)
+    if match:
+        refiner_num = int(match.group(1))
+        return f"CTX_REF{refiner_num}"
 
     # No block match
     return None

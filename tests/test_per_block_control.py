@@ -2,8 +2,10 @@
 
 Tests for @per-block-control acceptance criteria:
 - AC-1: No BLOCK_CONFIG inputs → behavior identical to pre-block-control
-- AC-2: Architecture-specific nodes expose block group sliders with float range 0.0-2.0
+- AC-2: Architecture-specific nodes expose block sliders with float range 0.0-2.0
 - AC-3: Single BLOCK_CONFIG output fans out correctly to multiple consumers
+- AC-4: SDXL node has 19 individual blocks (IN00-IN08, MID, OUT00-OUT08)
+- AC-5: Z-Image node has 34 individual blocks (L00-L29, NOISE_REF0-1, CTX_REF0-1)
 """
 
 import pytest
@@ -37,18 +39,23 @@ def mock_folder_paths(monkeypatch):
 class TestBlockConfigSDXLNode:
     """WIDENBlockConfigSDXL node tests.
     # AC: @per-block-control ac-2
+    # AC: @per-block-control ac-4
     """
 
-    def test_input_types_has_all_block_groups(self):
-        """SDXL node exposes all 7 block group sliders."""
+    # AC: @per-block-control ac-4
+    def test_input_types_has_all_individual_blocks(self):
+        """SDXL node exposes all 19 individual block sliders."""
         input_types = WIDENBlockConfigSDXLNode.INPUT_TYPES()
         required = input_types["required"]
 
         expected_blocks = [
-            "IN00_02", "IN03_05", "IN06_08", "MID", "OUT00_02", "OUT03_05", "OUT06_08"
+            *[f"IN{i:02d}" for i in range(9)],
+            "MID",
+            *[f"OUT{i:02d}" for i in range(9)],
         ]
+        assert len(expected_blocks) == 19
         for block in expected_blocks:
-            assert block in required, f"Missing block group slider: {block}"
+            assert block in required, f"Missing individual block slider: {block}"
 
     def test_input_types_slider_config(self):
         """Each slider has correct FLOAT config with range 0.0-2.0."""
@@ -71,78 +78,73 @@ class TestBlockConfigSDXLNode:
     def test_create_config_returns_block_config(self):
         """create_config returns BlockConfig with sdxl arch."""
         node = WIDENBlockConfigSDXLNode()
-        result = node.create_config(
-            IN00_02=0.5,
-            IN03_05=0.8,
-            IN06_08=1.0,
-            MID=1.2,
-            OUT00_02=1.5,
-            OUT03_05=0.9,
-            OUT06_08=1.1,
-        )
+        # Build kwargs for all 19 blocks
+        kwargs = {f"IN{i:02d}": 1.0 for i in range(9)}
+        kwargs["MID"] = 1.0
+        kwargs.update({f"OUT{i:02d}": 1.0 for i in range(9)})
+        kwargs["IN00"] = 0.5  # Override one to verify
+
+        result = node.create_config(**kwargs)
 
         assert len(result) == 1
         config = result[0]
         assert isinstance(config, BlockConfig)
         assert config.arch == "sdxl"
 
+    # AC: @per-block-control ac-4
     def test_create_config_stores_block_overrides(self):
-        """create_config stores all block overrides as tuple of pairs."""
+        """create_config stores all 19 block overrides as tuple of pairs."""
         node = WIDENBlockConfigSDXLNode()
-        (config,) = node.create_config(
-            IN00_02=0.5,
-            IN03_05=0.8,
-            IN06_08=1.0,
-            MID=1.2,
-            OUT00_02=1.5,
-            OUT03_05=0.9,
-            OUT06_08=1.1,
-        )
+        # Build kwargs for all 19 blocks with distinct values
+        kwargs = {f"IN{i:02d}": 0.5 + i * 0.05 for i in range(9)}
+        kwargs["MID"] = 1.2
+        kwargs.update({f"OUT{i:02d}": 1.0 + i * 0.05 for i in range(9)})
 
-        assert len(config.block_overrides) == 7
-        assert config.block_overrides[0] == ("IN00-02", 0.5)
-        assert config.block_overrides[3] == ("MID", 1.2)
-        assert config.block_overrides[6] == ("OUT06-08", 1.1)
+        (config,) = node.create_config(**kwargs)
+
+        assert len(config.block_overrides) == 19
+        assert config.block_overrides[0] == ("IN00", 0.5)
+        assert config.block_overrides[9] == ("MID", 1.2)
+        assert config.block_overrides[10] == ("OUT00", 1.0)
 
     def test_create_config_with_boundary_values(self):
         """create_config handles boundary values (0.0, 2.0)."""
         node = WIDENBlockConfigSDXLNode()
-        (config,) = node.create_config(
-            IN00_02=0.0,
-            IN03_05=2.0,
-            IN06_08=0.0,
-            MID=2.0,
-            OUT00_02=0.0,
-            OUT03_05=2.0,
-            OUT06_08=0.0,
-        )
+        # All defaults except boundary test blocks
+        kwargs = {f"IN{i:02d}": 1.0 for i in range(9)}
+        kwargs["MID"] = 2.0
+        kwargs.update({f"OUT{i:02d}": 1.0 for i in range(9)})
+        kwargs["IN00"] = 0.0
+        kwargs["IN01"] = 2.0
 
-        assert config.block_overrides[0] == ("IN00-02", 0.0)
-        assert config.block_overrides[1] == ("IN03-05", 2.0)
+        (config,) = node.create_config(**kwargs)
+
+        assert config.block_overrides[0] == ("IN00", 0.0)
+        assert config.block_overrides[1] == ("IN01", 2.0)
 
 
 class TestBlockConfigZImageNode:
     """WIDENBlockConfigZImage node tests.
     # AC: @per-block-control ac-2
+    # AC: @per-block-control ac-5
     """
 
-    def test_input_types_has_all_block_groups(self):
-        """Z-Image node exposes all 8 block group sliders."""
+    # AC: @per-block-control ac-5
+    def test_input_types_has_all_individual_blocks(self):
+        """Z-Image node exposes all 34 individual block sliders."""
         input_types = WIDENBlockConfigZImageNode.INPUT_TYPES()
         required = input_types["required"]
 
         expected_blocks = [
-            "L00_04",
-            "L05_09",
-            "L10_14",
-            "L15_19",
-            "L20_24",
-            "L25_29",
-            "noise_refiner",
-            "context_refiner",
+            *[f"L{i:02d}" for i in range(30)],
+            "NOISE_REF0",
+            "NOISE_REF1",
+            "CTX_REF0",
+            "CTX_REF1",
         ]
+        assert len(expected_blocks) == 34
         for block in expected_blocks:
-            assert block in required, f"Missing block group slider: {block}"
+            assert block in required, f"Missing individual block slider: {block}"
 
     def test_input_types_slider_config(self):
         """Each slider has correct FLOAT config with range 0.0-2.0."""
@@ -165,41 +167,43 @@ class TestBlockConfigZImageNode:
     def test_create_config_returns_block_config(self):
         """create_config returns BlockConfig with zimage arch."""
         node = WIDENBlockConfigZImageNode()
-        result = node.create_config(
-            L00_04=0.5,
-            L05_09=0.8,
-            L10_14=1.0,
-            L15_19=1.2,
-            L20_24=1.5,
-            L25_29=0.9,
-            noise_refiner=1.1,
-            context_refiner=0.7,
-        )
+        # Build kwargs for all 34 blocks
+        kwargs = {f"L{i:02d}": 1.0 for i in range(30)}
+        kwargs.update({
+            "NOISE_REF0": 1.0,
+            "NOISE_REF1": 1.0,
+            "CTX_REF0": 1.0,
+            "CTX_REF1": 1.0,
+        })
+        kwargs["L00"] = 0.5  # Override one to verify
+
+        result = node.create_config(**kwargs)
 
         assert len(result) == 1
         config = result[0]
         assert isinstance(config, BlockConfig)
         assert config.arch == "zimage"
 
+    # AC: @per-block-control ac-5
     def test_create_config_stores_block_overrides(self):
-        """create_config stores all block overrides as tuple of pairs."""
+        """create_config stores all 34 block overrides as tuple of pairs."""
         node = WIDENBlockConfigZImageNode()
-        (config,) = node.create_config(
-            L00_04=0.5,
-            L05_09=0.8,
-            L10_14=1.0,
-            L15_19=1.2,
-            L20_24=1.5,
-            L25_29=0.9,
-            noise_refiner=1.1,
-            context_refiner=0.7,
-        )
+        # Build kwargs for all 34 blocks with distinct values
+        kwargs = {f"L{i:02d}": 0.5 + i * 0.02 for i in range(30)}
+        kwargs.update({
+            "NOISE_REF0": 1.1,
+            "NOISE_REF1": 1.2,
+            "CTX_REF0": 0.9,
+            "CTX_REF1": 0.8,
+        })
 
-        assert len(config.block_overrides) == 8
-        assert config.block_overrides[0] == ("L00-04", 0.5)
-        assert config.block_overrides[5] == ("L25-29", 0.9)
-        assert config.block_overrides[6] == ("noise_refiner", 1.1)
-        assert config.block_overrides[7] == ("context_refiner", 0.7)
+        (config,) = node.create_config(**kwargs)
+
+        assert len(config.block_overrides) == 34
+        assert config.block_overrides[0] == ("L00", 0.5)
+        assert config.block_overrides[25] == ("L25", 1.0)  # 0.5 + 25*0.02 = 1.0
+        assert config.block_overrides[30] == ("NOISE_REF0", 1.1)
+        assert config.block_overrides[33] == ("CTX_REF1", 0.8)
 
 
 class TestNoBlockConfigBehavior:
@@ -253,7 +257,7 @@ class TestBlockConfigFanOut:
         """Same BlockConfig can be used by multiple LoRA nodes."""
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5), ("MID", 1.0)),
+            block_overrides=(("IN00", 0.5), ("MID", 1.0)),
         )
 
         node = WIDENLoRANode()
@@ -269,7 +273,7 @@ class TestBlockConfigFanOut:
         """Same BlockConfig can be used by multiple Merge nodes."""
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("OUT00-02", 0.8),),
+            block_overrides=(("OUT00", 0.8),),
         )
         base = RecipeBase(model_patcher=object(), arch="sdxl")
         lora_a = RecipeLoRA(loras=({"path": "lora_a.safetensors", "strength": 1.0},))
@@ -287,7 +291,7 @@ class TestBlockConfigFanOut:
         """Same BlockConfig can be used by both LoRA and Merge nodes."""
         config = BlockConfig(
             arch="zimage",
-            block_overrides=(("L00-04", 0.5), ("noise_refiner", 1.2)),
+            block_overrides=(("L00", 0.5), ("NOISE_REF0", 1.2)),
         )
         base = RecipeBase(model_patcher=object(), arch="zimage")
 

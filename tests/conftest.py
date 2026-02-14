@@ -25,14 +25,14 @@ _SDXL_KEYS = (
     "diffusion_model.output_blocks.0.0.weight",
 )
 
-# Representative Z-Image/S3-DiT keys with layers + noise_refiner pattern
+# Representative Z-Image/S3-DiT keys with layers + noise_refiner.N pattern
 # AC: @comfyui-mocking ac-4
 _ZIMAGE_KEYS = (
     "diffusion_model.layers.0.attention.qkv.weight",
     "diffusion_model.layers.10.attention.qkv.weight",
     "diffusion_model.layers.25.attention.qkv.weight",
-    "diffusion_model.noise_refiner.weight",
-    "diffusion_model.context_refiner.weight",
+    "diffusion_model.noise_refiner.0.attn.weight",
+    "diffusion_model.context_refiner.0.attn.weight",
 )
 
 

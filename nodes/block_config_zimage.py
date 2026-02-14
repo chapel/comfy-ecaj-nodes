@@ -3,26 +3,23 @@
 from .block_config import make_block_config_node
 
 _ZIMAGE_BLOCKS = (
-    ("L00_04", "L00-04"),
-    ("L05_09", "L05-09"),
-    ("L10_14", "L10-14"),
-    ("L15_19", "L15-19"),
-    ("L20_24", "L20-24"),
-    ("L25_29", "L25-29"),
-    ("noise_refiner", "noise_refiner"),
-    ("context_refiner", "context_refiner"),
+    *((f"L{i:02d}", f"L{i:02d}") for i in range(30)),
+    ("NOISE_REF0", "NOISE_REF0"),
+    ("NOISE_REF1", "NOISE_REF1"),
+    ("CTX_REF0", "CTX_REF0"),
+    ("CTX_REF1", "CTX_REF1"),
 )
 
 WIDENBlockConfigZImageNode = make_block_config_node(
     arch="zimage",
     block_groups=_ZIMAGE_BLOCKS,
     docstring="""\
-Produces BlockConfig for Z-Image/S3-DiT architecture with grouped block sliders.
+Produces BlockConfig for Z-Image/S3-DiT architecture with individual block sliders.
 
 Z-Image block structure:
-- layers: L00-04, L05-09, L10-14, L15-19, L20-24, L25-29 (6 groups of 5 layers)
-- noise_refiner: single refiner block
-- context_refiner: single refiner block
+- layers: L00-L29 (30 individual blocks)
+- noise_refiner: NOISE_REF0, NOISE_REF1 (2 blocks)
+- context_refiner: CTX_REF0, CTX_REF1 (2 blocks)
 
 Each slider is FLOAT range 0.0-2.0 with step 0.05.
 ComfyUI allows typing values outside slider range so -1.0 is accessible.
