@@ -1232,7 +1232,7 @@ features:
     created: 2026-02-13T22:32:07.874Z
     status:
       maturity: draft
-      implementation: in_progress
+      implementation: implemented
   - _ulid: 01KHDHEGJPYDSTP9WV3RTMZCH7
     slugs:
       - qwen-support
