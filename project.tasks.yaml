@@ -3013,6 +3013,10 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #51. Added layer-type filtering with classify_layer_type function
+    supporting SDXL and Z-Image architectures. Layer types (attention, feed_forward, norm) apply
+    multiplicatively with block overrides for both LoRA strength and WIDEN t_factor. UI sliders
+    added to block config nodes. All 8 ACs covered with 897 lines of implementation and tests."
   depends_on:
     - "@individual-block-control"
   context: []
@@ -3023,6 +3027,7 @@
   vcs_refs: []
   created_at: 2026-02-13T00:43:25.507Z
   started_at: 2026-02-14T02:24:23.423Z
+  completed_at: 2026-02-14T02:35:14.566Z
   notes:
     - _ulid: 01KHA7AP8GK10K6PZS4K3SBZ8Z
       created_at: 2026-02-13T00:45:02.608Z
@@ -3211,11 +3216,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-14T02:35:14.566Z
-  closed_reason: "Merged in PR #51. Added layer-type filtering with classify_layer_type function
-    supporting SDXL and Z-Image architectures. Layer types (attention, feed_forward, norm) apply
-    multiplicatively with block overrides for both LoRA strength and WIDEN t_factor. UI sliders
-    added to block config nodes. All 8 ACs covered with 897 lines of implementation and tests."
 - _ulid: 01KHC3H6MZJMGDCM7VNB74K1Y4
   slugs: []
   title: Add Qwen and Flux 2 Klein architecture support
@@ -3335,7 +3335,7 @@
   type: task
   spec_ref: "@model-input-node"
   plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-full-model-recipe-type"
@@ -3366,6 +3366,7 @@
         Files: nodes/model_input.py, __init__.py.
   todos: []
   automation: eligible
+  started_at: 2026-02-14T02:35:52.210Z
 - _ulid: 01KHCJ41HRS122HRGWERT8R5V2
   slugs:
     - implement-full-model-loader
