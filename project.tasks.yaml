@@ -4049,6 +4049,10 @@
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #56. Implemented QwenLoader supporting 3 LoRA formats (diffusers,
+    A1111/kohya, LyCORIS). Features: compound name preservation, no QKV fusion (separate
+    to_q/to_k/to_v), standard DeltaSpec production. Registered in LOADER_REGISTRY. 11 tests covering
+    ac-4, ac-5, ac-6."
   depends_on:
     - "@qwen-detect-classify"
   context: []
@@ -4059,6 +4063,7 @@
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.043Z
   started_at: 2026-02-14T07:51:52.341Z
+  completed_at: 2026-02-14T07:59:18.823Z
   notes:
     - _ulid: 01KHDHEGPK45VJ5WB2HH51A4JM
       created_at: 2026-02-14T07:39:37.043Z
@@ -4088,18 +4093,13 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-14T07:59:18.823Z
-  closed_reason: "Merged in PR #56. Implemented QwenLoader supporting 3 LoRA formats (diffusers,
-    A1111/kohya, LyCORIS). Features: compound name preservation, no QKV fusion (separate
-    to_q/to_k/to_v), standard DeltaSpec production. Registered in LOADER_REGISTRY. 11 tests covering
-    ac-4, ac-5, ac-6."
 - _ulid: 01KHDHEGRC0TP9TR9YKFD2Q9AY
   slugs:
     - qwen-model-loader
   title: Implement Qwen model loader support
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -4125,6 +4125,7 @@
         Covers ac-7.
   todos: []
   automation: eligible
+  started_at: 2026-02-14T07:59:48.141Z
 - _ulid: 01KHDHEGSHFQVSWEK3F2A93R9Y
   slugs:
     - qwen-block-config
