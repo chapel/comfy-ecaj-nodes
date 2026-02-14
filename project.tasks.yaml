@@ -2683,7 +2683,14 @@
         SDXL node wired into Merge for per-block t_factor. These double as smoke tests for the node
         graph."
       supersedes: null
+    - _ulid: 01KHCY7F8CZRFMB14ESNKRAGDG
+      created_at: 2026-02-14T02:03:43.244Z
+      author: "@claude"
+      content: "Automation status set to manual_only: Workflow JSONs must be built in ComfyUI UI and
+        exported — inherently manual"
+      supersedes: null
   todos: []
+  automation: manual_only
 - _ulid: 01KHA4D1RGKTD7FVSW5G92R8F1
   slugs:
     - spec-unpatch-clones
@@ -3487,6 +3494,7 @@
   derivation: auto
   status: completed
   blocked_by: []
+  closed_reason: null
   depends_on:
     - "@implement-exit-node"
   context: []
@@ -3495,6 +3503,7 @@
   vcs_refs: []
   created_at: 2026-02-14T00:26:49.684Z
   started_at: 2026-02-14T02:03:34.988Z
+  completed_at: 2026-02-14T02:03:37.720Z
   notes:
     - _ulid: 01KHCRP1YMEMWB6TAH6W9W1YAD
       created_at: 2026-02-14T00:26:49.684Z
@@ -3758,5 +3767,3 @@
         the cache.
       supersedes: null
   todos: []
-  completed_at: 2026-02-14T02:03:37.720Z
-  closed_reason: null
