@@ -3180,8 +3180,15 @@
     - spec
   vcs_refs: []
   created_at: 2026-02-13T18:17:10.558Z
-  notes: []
+  notes:
+    - _ulid: 01KHCY2FB3GH2FS53CRAJSJZ4P
+      created_at: 2026-02-14T02:00:59.491Z
+      author: "@claude"
+      content: "Automation status set to manual_only: Spike - output is architecture research, not
+        automatable code"
+      supersedes: null
   todos: []
+  automation: manual_only
 - _ulid: 01KHC3H8DFA4RN9DA0K5DW8ZDW
   slugs: []
   title: Add full model merging support
