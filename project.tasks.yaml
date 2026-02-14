@@ -4372,7 +4372,7 @@
   title: Implement Flux Klein block config node and registration
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@flux-detect-classify"
