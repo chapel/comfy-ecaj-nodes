@@ -4270,6 +4270,7 @@
     - lora
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.213Z
+  started_at: 2026-02-14T08:16:55.723Z
   notes:
     - _ulid: 01KHDHEGVX65KJJGA1XQC642CV
       created_at: 2026-02-14T07:39:37.213Z
@@ -4295,9 +4296,21 @@
         get_loader("flux") with real loader tests. Add synthetic safetensors
         LoRA files testing both double_block QKV and single_block linear1.
         Covers ac-4, ac-5, ac-6, ac-7.
+    - _ulid: 01KHDKXE5F6G26YCTW583CGP7W
+      created_at: 2026-02-14T08:22:43.119Z
+      author: "@claude"
+      content: "Implementation complete. Created lib/lora/flux.py with FluxLoader class supporting
+        BFL/kohya and diffusers LoRA formats. Double block img_attn/txt_attn QKV fusing uses
+        qkv_q/qkv_k/qkv_v DeltaSpec kinds with offset=(start, length). Single block linear1 4-way
+        fusing (to_q/to_k/to_v/proj_mlp) uses qkv_* for Q/K/V and new offset_mlp kind for MLP
+        projection. Added offset_mlp to gpu_ops.py offset-aware kinds tuple at line 200. Registered
+        FluxLoader in LOADER_REGISTRY. Updated tests: changed
+        test_unsupported_arch_raises_value_error to use 'unknown_arch', added
+        test_flux_loader_selected_for_flux_arch, added TestFluxLoader class with 12 tests covering
+        ac-4, ac-5, ac-6, ac-7. 789 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T08:16:55.723Z
 - _ulid: 01KHDHEGWYT9Y2847GMYDB85NZ
   slugs:
     - flux-model-loader
