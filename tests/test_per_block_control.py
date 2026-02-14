@@ -11,6 +11,7 @@ Tests for @per-block-control acceptance criteria:
 import pytest
 
 from lib.recipe import BlockConfig, RecipeBase, RecipeLoRA, RecipeMerge
+from nodes.block_config_flux import WIDENBlockConfigFluxNode
 from nodes.block_config_qwen import WIDENBlockConfigQwenNode
 from nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
 from nodes.block_config_zimage import WIDENBlockConfigZImageNode
@@ -544,3 +545,216 @@ class TestBlockConfigQwenNode:
         assert config.block_overrides[0] == ("TB00", 0.0)
         assert config.block_overrides[1] == ("TB01", 2.0)
         assert config.block_overrides[59] == ("TB59", 2.0)
+
+
+class TestBlockConfigFluxNode:
+    """WIDENBlockConfigFlux node tests.
+    # AC: @flux-klein-support ac-9
+    # AC: @flux-klein-support ac-10
+    # AC: @flux-klein-support ac-11
+    """
+
+    # AC: @flux-klein-support ac-9
+    def test_input_types_has_all_double_blocks(self):
+        """Flux node exposes 8 double block sliders (DB00-DB07)."""
+        input_types = WIDENBlockConfigFluxNode.INPUT_TYPES()
+        required = input_types["required"]
+
+        expected_double_blocks = [f"DB{i:02d}" for i in range(8)]
+        for block in expected_double_blocks:
+            assert block in required, f"Missing double block slider: {block}"
+
+    # AC: @flux-klein-support ac-9
+    def test_input_types_has_all_single_blocks(self):
+        """Flux node exposes 24 single block sliders (SB00-SB23)."""
+        input_types = WIDENBlockConfigFluxNode.INPUT_TYPES()
+        required = input_types["required"]
+
+        expected_single_blocks = [f"SB{i:02d}" for i in range(24)]
+        for block in expected_single_blocks:
+            assert block in required, f"Missing single block slider: {block}"
+
+    def test_input_types_has_layer_type_sliders(self):
+        """Flux node exposes attention, feed_forward, norm sliders."""
+        input_types = WIDENBlockConfigFluxNode.INPUT_TYPES()
+        required = input_types["required"]
+
+        expected_layer_types = ["attention", "feed_forward", "norm"]
+        for lt in expected_layer_types:
+            assert lt in required, f"Missing layer type slider: {lt}"
+
+    # AC: @flux-klein-support ac-9
+    def test_total_input_count(self):
+        """Flux node has 8 double + 24 single + 3 layer types = 35 total inputs."""
+        input_types = WIDENBlockConfigFluxNode.INPUT_TYPES()
+        required = input_types["required"]
+        assert len(required) == 35
+
+    def test_input_types_slider_config(self):
+        """Each slider has correct FLOAT config with range 0.0-2.0."""
+        input_types = WIDENBlockConfigFluxNode.INPUT_TYPES()
+        required = input_types["required"]
+
+        for name, config in required.items():
+            assert config[0] == "FLOAT", f"{name} should be FLOAT type"
+            opts = config[1]
+            assert opts["default"] == 1.0, f"{name} default should be 1.0"
+            assert opts["min"] == 0.0, f"{name} min should be 0.0"
+            assert opts["max"] == 2.0, f"{name} max should be 2.0"
+            assert opts["step"] == 0.05, f"{name} step should be 0.05"
+
+    def test_return_types(self):
+        """Node returns BLOCK_CONFIG type."""
+        assert WIDENBlockConfigFluxNode.RETURN_TYPES == ("BLOCK_CONFIG",)
+        assert WIDENBlockConfigFluxNode.RETURN_NAMES == ("block_config",)
+
+    def test_create_config_returns_block_config(self):
+        """create_config returns BlockConfig with flux arch."""
+        node = WIDENBlockConfigFluxNode()
+        # Build kwargs for all 32 blocks + layer types
+        kwargs = {f"DB{i:02d}": 1.0 for i in range(8)}
+        kwargs.update({f"SB{i:02d}": 1.0 for i in range(24)})
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
+        kwargs["DB00"] = 0.5  # Override one to verify
+
+        result = node.create_config(**kwargs)
+
+        assert len(result) == 1
+        config = result[0]
+        assert isinstance(config, BlockConfig)
+        assert config.arch == "flux"
+
+    # AC: @flux-klein-support ac-9
+    def test_create_config_stores_block_overrides(self):
+        """create_config stores all 32 block overrides as tuple of pairs."""
+        node = WIDENBlockConfigFluxNode()
+        # Build kwargs for all blocks with distinct values + layer types
+        kwargs = {f"DB{i:02d}": 0.5 + i * 0.1 for i in range(8)}
+        kwargs.update({f"SB{i:02d}": 0.7 + i * 0.05 for i in range(24)})
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
+
+        (config,) = node.create_config(**kwargs)
+
+        assert len(config.block_overrides) == 32
+        # Double blocks come first
+        assert config.block_overrides[0] == ("DB00", 0.5)
+        assert config.block_overrides[7] == ("DB07", 0.5 + 7 * 0.1)
+        # Single blocks after double blocks
+        assert config.block_overrides[8] == ("SB00", 0.7)
+        assert config.block_overrides[31] == ("SB23", 0.7 + 23 * 0.05)
+
+    def test_create_config_stores_layer_type_overrides(self):
+        """create_config stores layer_type_overrides as tuple of pairs."""
+        node = WIDENBlockConfigFluxNode()
+        # Build kwargs for all blocks + layer types
+        kwargs = {f"DB{i:02d}": 1.0 for i in range(8)}
+        kwargs.update({f"SB{i:02d}": 1.0 for i in range(24)})
+        kwargs.update({"attention": 0.7, "feed_forward": 1.3, "norm": 0.85})
+
+        (config,) = node.create_config(**kwargs)
+
+        assert len(config.layer_type_overrides) == 3
+        assert config.layer_type_overrides[0] == ("attention", 0.7)
+        assert config.layer_type_overrides[1] == ("feed_forward", 1.3)
+        assert config.layer_type_overrides[2] == ("norm", 0.85)
+
+    # AC: @flux-klein-support ac-10 — Klein 4B and 9B variants handled with same arch tag
+    def test_klein_4b_unused_blocks_default_to_one(self):
+        """Klein 4B has 5 double + 20 single blocks; unused remain at 1.0 default."""
+        node = WIDENBlockConfigFluxNode()
+        # Simulate 4B model: only use DB00-DB04, SB00-SB19
+        kwargs = {f"DB{i:02d}": 1.0 for i in range(8)}
+        kwargs.update({f"SB{i:02d}": 1.0 for i in range(24)})
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
+
+        # Set used blocks for 4B variant
+        for i in range(5):  # DB00-DB04
+            kwargs[f"DB{i:02d}"] = 0.8
+        for i in range(20):  # SB00-SB19
+            kwargs[f"SB{i:02d}"] = 0.8
+
+        (config,) = node.create_config(**kwargs)
+
+        # Used blocks
+        for i in range(5):
+            assert config.block_overrides[i][1] == 0.8
+        for i in range(20):
+            assert config.block_overrides[8 + i][1] == 0.8
+
+        # Unused blocks (DB05-DB07, SB20-SB23) stay at default 1.0
+        assert config.block_overrides[5] == ("DB05", 1.0)
+        assert config.block_overrides[6] == ("DB06", 1.0)
+        assert config.block_overrides[7] == ("DB07", 1.0)
+        assert config.block_overrides[28] == ("SB20", 1.0)
+        assert config.block_overrides[29] == ("SB21", 1.0)
+        assert config.block_overrides[30] == ("SB22", 1.0)
+        assert config.block_overrides[31] == ("SB23", 1.0)
+
+    def test_create_config_with_boundary_values(self):
+        """create_config handles boundary values (0.0, 2.0)."""
+        node = WIDENBlockConfigFluxNode()
+        # All defaults except boundary test blocks
+        kwargs = {f"DB{i:02d}": 1.0 for i in range(8)}
+        kwargs.update({f"SB{i:02d}": 1.0 for i in range(24)})
+        kwargs["DB00"] = 0.0
+        kwargs["DB07"] = 2.0
+        kwargs["SB00"] = 0.0
+        kwargs["SB23"] = 2.0
+        kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
+
+        (config,) = node.create_config(**kwargs)
+
+        assert config.block_overrides[0] == ("DB00", 0.0)
+        assert config.block_overrides[7] == ("DB07", 2.0)
+        assert config.block_overrides[8] == ("SB00", 0.0)
+        assert config.block_overrides[31] == ("SB23", 2.0)
+
+
+class TestFluxKleinRegistryWiring:
+    """Flux Klein registry wiring tests.
+    # AC: @flux-klein-support ac-11
+    """
+
+    # AC: @flux-klein-support ac-11
+    def test_flux_block_config_node_exists(self):
+        """WIDENBlockConfigFlux node class exists and has expected interface."""
+        # In test context, direct import works (not in ComfyUI runtime)
+        assert WIDENBlockConfigFluxNode is not None
+        assert hasattr(WIDENBlockConfigFluxNode, "INPUT_TYPES")
+        assert hasattr(WIDENBlockConfigFluxNode, "create_config")
+
+    # AC: @flux-klein-support ac-11
+    def test_flux_in_supported_architectures(self):
+        """'flux' is in _SUPPORTED_ARCHITECTURES."""
+        from nodes.entry import _SUPPORTED_ARCHITECTURES
+
+        assert "flux" in _SUPPORTED_ARCHITECTURES
+
+    # AC: @flux-klein-support ac-11
+    def test_flux_in_classifiers(self):
+        """'flux' has a block classifier registered."""
+        from lib.block_classify import _CLASSIFIERS
+
+        assert "flux" in _CLASSIFIERS
+
+    # AC: @flux-klein-support ac-11
+    def test_flux_in_layer_type_patterns(self):
+        """'flux' has layer type patterns registered."""
+        from lib.block_classify import _LAYER_TYPE_PATTERNS
+
+        assert "flux" in _LAYER_TYPE_PATTERNS
+
+    # AC: @flux-klein-support ac-11
+    def test_flux_in_loader_registry(self):
+        """'flux' has a LoRA loader registered."""
+        from lib.lora import LOADER_REGISTRY
+
+        assert "flux" in LOADER_REGISTRY
+
+    # AC: @flux-klein-support ac-11
+    def test_flux_in_arch_patterns(self):
+        """'flux' has an architecture detection pattern."""
+        from lib.model_loader import _ARCH_PATTERNS
+
+        arch_names = [arch_name for arch_name, _ in _ARCH_PATTERNS]
+        assert "flux" in arch_names
