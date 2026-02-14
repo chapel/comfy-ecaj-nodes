@@ -1533,6 +1533,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-14T08:50:28.865Z
+    completed_at: 2026-02-14T08:51:33.539Z
     step_results:
       - step_index: 0
         status: completed
@@ -1561,4 +1562,11 @@ runs:
         notes: All items already captured during step 2 (captured early for efficiency). inbox:01KHDNHH and
           observation:01KHDNHK. Reflection complete.
     initiated_by: "@claude"
-    completed_at: 2026-02-14T08:51:33.539Z
+  - _ulid: 01KHF0VSVJWBGFEQ47AADMEKSN
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-14T21:28:15.474Z
+    step_results: []
+    initiated_by: "@claude"
