@@ -1,0 +1,270 @@
+{
+  "generated_at": "2026-02-14T02:17:55.665Z",
+  "branch": "refactor/individual-block-control",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-14T02:17:55.665Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KHA77Q3",
+      "title": "Refactor block config from grouped to individual blocks",
+      "started_at": "2026-02-14T02:09:57.814Z",
+      "priority": 3,
+      "spec_ref": "@per-block-control",
+      "note_count": 2,
+      "last_note_at": "2026-02-14T02:16:40.021Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KHA77Q3",
+      "task_title": "Refactor block config from grouped to individual blocks",
+      "task_status": "pending_review",
+      "note_ulid": "01KHCYZ5",
+      "created_at": "2026-02-14T02:16:40.021Z",
+      "author": "@claude",
+      "content": "Implementation complete. Refactored from grouped blocks to individual blocks:\n\nSDXL: 7 grouped sliders → 19 individual sliders (IN00-IN08, MID, OUT00-OUT08)\nZ-Image: 8 grouped sliders → 34 individual sliders (L00-L29, NOISE_REF0-1, CTX_REF0-1)\n\nFiles modified:\n- lib/block_classify.py: Updated both classifiers\n- lib/recipe.py: Updated docstring example\n- nodes/block_config_sdxl.py: Updated _SDXL_BLOCKS tuple\n- nodes/block_config_zimage.py: Updated _ZIMAGE_BLOCKS tuple\n- tests/conftest.py: Updated _ZIMAGE_KEYS with numbered refiner submodules\n- tests/test_per_block_control.py: Updated expected block names and counts\n- tests/test_merge_block_config.py: Updated all block name references\n- tests/test_lora_block_strength.py: Updated block config overrides\n- tests/test_block_config.py: Updated example block names\n\nAll 600 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHCRP1",
+      "task_title": "Implement: Exit Model Persistence",
+      "task_status": "completed",
+      "note_ulid": "01KHCSMX",
+      "created_at": "2026-02-14T00:43:40.978Z",
+      "author": "@claude",
+      "content": "## Workflow Embedding\n\nNew input: save_workflow (BOOLEAN, default True). When enabled, embed the ComfyUI workflow JSON in safetensors metadata.\n\nAccess the workflow via HIDDEN inputs in INPUT_TYPES:\n  'hidden': {'prompt': 'PROMPT', 'extra_pnginfo': 'EXTRA_PNGINFO'}\n\nEXTRA_PNGINFO contains the workflow dict. Serialize with json.dumps() into metadata key __ecaj_workflow__. This mirrors how ComfyUI embeds workflow in PNG images via the SaveImage node.\n\nNote: workflow is NOT included in the recipe hash — it's purely informational metadata for reproducibility. Changing the workflow JSON (e.g. rearranging nodes) should not invalidate the cache."
+    },
+    {
+      "task_ref": "01KHCRP1",
+      "task_title": "Implement: Exit Model Persistence",
+      "task_status": "completed",
+      "note_ulid": "01KHCSEZ",
+      "created_at": "2026-02-14T00:40:26.534Z",
+      "author": "@claude",
+      "content": "## Updated: Recipe-in-Metadata Approach\n\nEmbed the full serialized recipe tree in safetensors metadata rather than storing individual fields. The hash is derived FROM the serialized recipe, not computed separately.\n\n### Safetensors Metadata Keys (revised)\n\n- __ecaj_version__: '1'\n- __ecaj_recipe__: JSON-serialized frozen recipe tree (model_patcher replaced with model_path string, all other fields preserved — strengths, t_factors, block_config, tree structure)\n- __ecaj_recipe_hash__: sha256(__ecaj_recipe__) — fast comparison key\n\n### Cache Validation Flow (revised)\n\n1. Read header metadata (fast, no tensor load)\n2. Compare __ecaj_recipe_hash__ against hash of current serialized recipe (fast path)\n3. On hash match → cache hit, load tensors\n4. On mismatch → recompute\n\nThe recipe serialization is deterministic because the tree is frozen dataclasses with tuples. Replace model_patcher with model_path, serialize with json.dumps(sort_keys=True) or deterministic repr().\n\nBenefits: single source of truth, no separate fields to sync, full recipe is inspectable in metadata for debugging, and LoRA file stats (mtime/size) are naturally included since they're part of the recipe tree walk during serialization.\n\nPrevious note about individual __ecaj_lora_stats__, __ecaj_base_model__, __ecaj_block_config__, __ecaj_t_factors__ fields is SUPERSEDED — these are replaced by the single __ecaj_recipe__ field."
+    },
+    {
+      "task_ref": "01KHCRP1",
+      "task_title": "Implement: Exit Model Persistence",
+      "task_status": "completed",
+      "note_ulid": "01KHCS6Z",
+      "created_at": "2026-02-14T00:36:03.889Z",
+      "author": "@claude",
+      "content": "## Implementation Notes\n\n### Files to Modify\n\n1. **lib/recipe.py** — Add model_path: str | None field to RecipeBase (frozen dataclass). This threads the checkpoint filename from Entry node for save directory resolution and base model identity hashing.\n\n2. **nodes/entry.py** — Set model_path on RecipeBase when creating the recipe tree. ComfyUI provides the checkpoint name as a node input string; pass it through.\n\n3. **nodes/exit.py** — Primary changes:\n   - Add save_model (BOOLEAN, default False) and model_name (STRING) to INPUT_TYPES\n   - Add cache-check at start of execute() (before GPU work)\n   - Add save step after merged_state is computed (before install_merged_patches)\n   - Use folder_paths.get_folder_paths('checkpoints') to resolve base model directory from model_path\n\n4. **lib/persistence.py** (new) — Separation of concerns:\n   - compute_persistence_hash(recipe_tree) -> str (full config identity)\n   - save_merged_model(path, state_dict, metadata) -> None (atomic write)\n   - load_cached_model(path, expected_hash) -> dict | None\n   - validate_model_name(name) -> str (sanitization)\n\n### Recipe Identity Hash\n\nThe existing _compute_recipe_hash in nodes/exit.py only covers LoRA file paths+stats for IS_CHANGED. The persistence hash must be a SEPARATE, more comprehensive function covering:\n- LoRA paths + mtime + size (existing)\n- LoRA strengths per entry\n- t_factor values at each merge level\n- block_config overrides (serialized)\n- Recipe tree topology (structural identity)\n- Base model identity (checkpoint filename or content hash)\n\nApproach: Serialize the frozen recipe tree deterministically, replacing model_patcher refs with model_path string, then SHA-256 the repr. Frozen dataclasses make this natural.\n\n### Safetensors Metadata Keys\n\nAll keys prefixed with __ecaj_ to avoid collision:\n- __ecaj_version__: '1'\n- __ecaj_recipe_hash__: '<sha256 hex>'\n- __ecaj_lora_stats__: JSON array of [path, mtime, size]\n- __ecaj_base_model__: checkpoint filename string\n- __ecaj_block_config__: JSON serialized config (or 'null')\n- __ecaj_t_factors__: JSON array of t_factor values\n\nNote: safetensors metadata values must be strings. Use json.dumps().\nThe hash alone is used for cache validation (fast path). Individual fields are for introspection/debugging.\n\n### Save/Load Flow in execute()\n\nSAVE PATH (after GPU merge, before install_merged_patches):\n1. Validate model_name: non-empty, no path separators, no '..' (AC-5, AC-11)\n2. Append .safetensors if missing (AC-12)\n3. Resolve save_path via folder_paths from model_path directory\n4. Build full state_dict: start from base model state_dict, overlay merged keys\n5. Compute metadata with persistence hash\n6. Atomic write: write to save_path.tmp, then os.rename() (AC-10)\n\nCACHE CHECK (at start of execute(), after validation):\n1. Resolve expected path from model_name + base model directory\n2. If file doesn't exist -> proceed to GPU merge\n3. If file exists -> read safetensors header metadata only (fast, no tensor load)\n4. If no __ecaj_version__ key -> raise error (AC-9, not our file)\n5. If __ecaj_recipe_hash__ matches -> load tensors, skip GPU pipeline (AC-3)\n6. If hash mismatch -> proceed to GPU merge, will overwrite (AC-4)\n\n### Gotchas\n\n1. Cache hit still needs install_merged_patches() — the cache replaces GPU merge (phases 1-2), NOT patch installation (phase 3). Loaded state_dict feeds into install_merged_patches like normal.\n\n2. _unpatch_loaded_clones() MUST still run even on cache hit — base model state could be corrupted from prior run patches.\n\n3. storage_dtype must match between cached file and base model. Save in storage_dtype, verify on load.\n\n4. The existing finally block calls loader.cleanup(). On cache-hit path, loader may not be initialized. Restructure try/finally or guard with hasattr/None check.\n\n5. ProgressBar on cache hit: show single step 'loaded from cache' instead of batch group progress.\n\n6. Full state dict for AC-8: must save ALL base model keys (2-7GB for SDXL), not just WIDEN-affected keys. Read full base state_dict, overlay merged keys, write complete model. Memory implication: need full state_dict in RAM during save."
+    },
+    {
+      "task_ref": "01KHCRP1",
+      "task_title": "Implement: Exit Model Persistence",
+      "task_status": "completed",
+      "note_ulid": "01KHCRP1",
+      "created_at": "2026-02-14T00:26:49.684Z",
+      "author": "@claude",
+      "content": "Implementation notes (auto-generated from spec):\n\nOpt-in save/cache for merged model output. When enabled, the exit node saves the fully-merged model as safetensors adjacent to the base model directory. On subsequent runs, if the cached file metadata matches the current recipe configuration, the node loads directly from disk instead of recomputing the GPU merge pipeline. The saved file is a complete standalone model loadable by ComfyUI standard model loader. New inputs: save_model (boolean toggle, default off) and model_name (string filename).\n\n\nAcceptance Criteria:\n- ac-1: Given save_model toggle is disabled (default), when exit node executes, then behavior is unchanged from baseline — no file I/O\n- ac-2: Given save_model enabled and model_name provided, when exit node completes GPU merge, then fully-merged state dict saved as safetensors adjacent to base model using model_name\n- ac-3: Given cached safetensors exists at expected path, when exit node executes with save_model enabled and metadata matches current config, then model loaded from disk and GPU merge pipeline skipped entirely\n- ac-4: Given cached file exists but metadata does not match, when exit node executes with save_model enabled, then GPU merge pipeline runs and cached file is overwritten with new results\n- ac-5: Given save_model enabled and model_name is empty or not provided, when exit node validates inputs, then raises clear error requesting a model name\n- ac-6: Given a saved safetensors file, when examined for metadata, then header contains recipe identity hash, LoRA file stats (paths + mtime + size), base model identity, and per-block config\n- ac-7: Given LoRA files on disk have changed (different mtime or size), when exit node checks cache validity, then cache is invalidated and merge recomputes\n- ac-8: Given saved safetensors from exit node, when loaded by ComfyUI standard model loader, then functions as a complete standalone model\n- ac-9: Given file with model_name already exists but lacks ecaj metadata in safetensors header, when exit node attempts save or cache-check, then raises error indicating file was not created by this node and suggests a different model_name"
+    },
+    {
+      "task_ref": "01KHA77Q3",
+      "task_title": "Refactor block config from grouped to individual blocks",
+      "task_status": "pending_review",
+      "note_ulid": "01KHA7AN",
+      "created_at": "2026-02-13T00:45:02.112Z",
+      "author": "@claude",
+      "content": "## Implementation Details\n\n### lib/block_classify.py — Change classifier return values\n\n`classify_key_sdxl` (lines 26-78):\n- Replace range grouping with individual names\n- `input_blocks.N` → `f\"IN{N:02d}\"` for N=0..8 (was: \"IN00-02\", \"IN03-05\", \"IN06-08\")\n- `middle_block` → \"MID\" (unchanged — already single block)\n- `output_blocks.N` → `f\"OUT{N:02d}\"` for N=0..8 (was: \"OUT00-02\", \"OUT03-05\", \"OUT06-08\")\n- The if/elif range checks simplify to one range check + f-string\n\n`classify_key_zimage` (lines 82-131):\n- `layers.N` or `blocks.N` → `f\"L{N:02d}\"` for N=0..29 (was: \"L00-04\" through \"L25-29\")\n- Change `noise_refiner` from prefix match to regex: `re.match(r\"noise_refiner\\.(\\d+)\\.\", key)` → `f\"NOISE_REF{N}\"`. Refiners are nn.ModuleList so state dict keys have numbered sub-modules. Confirmed by LyCORIS normalizer in lib/lora/zimage.py:92. No fallback for unmatchable refiner keys — return None.\n- Same pattern for `context_refiner` → `f\"CTX_REF{N}\"`\n\n### nodes/block_config_sdxl.py — Replace _SDXL_BLOCKS (7 → 19)\n```python\n_SDXL_BLOCKS = (\n    *((f\"IN{i:02d}\", f\"IN{i:02d}\") for i in range(9)),\n    (\"MID\", \"MID\"),\n    *((f\"OUT{i:02d}\", f\"OUT{i:02d}\") for i in range(9)),\n)\n```\n\n### nodes/block_config_zimage.py — Replace _ZIMAGE_BLOCKS (8 → 34)\n```python\n_ZIMAGE_BLOCKS = tuple(\n    [(f\"L{i:02d}\", f\"L{i:02d}\") for i in range(30)]\n    + [(\"NOISE_REF0\", \"NOISE_REF0\"), (\"NOISE_REF1\", \"NOISE_REF1\"),\n       (\"CTX_REF0\", \"CTX_REF0\"), (\"CTX_REF1\", \"CTX_REF1\")]\n)\n```\n\n### No changes needed to\nlib/per_block.py, lib/recipe.py, lib/recipe_eval.py, nodes/block_config.py, lib/batch_groups.py — all generic, keyed by string names.\n\n### Also update (cosmetic)\n- lib/recipe.py line 29: docstring example \"(('IN00-02', 0.5), ...)\" → \"(('IN00', 0.5), ...)\"\n- tests/conftest.py lines 30-36: _ZIMAGE_KEYS needs refiner keys with sub-block numbers (diffusion_model.noise_refiner.0.weight not diffusion_model.noise_refiner.weight)\n\n### Test updates\n- tests/test_merge_block_config.py: classifier assertions, t_factor grouping keys, refiner sub-block numbers\n- tests/test_per_block_control.py: expected block names (7→19 SDXL, 8→34 Z-Image), slider counts, config overrides. Lines: 43, 48-51, 102, 105, 120-121, 130, 134-145, 198-202\n- tests/test_lora_block_strength.py: BlockConfig override keys in all fixtures, Z-Image test keys\n- tests/test_block_config.py: cosmetic override key examples\n- Files confirmed clean: test_exit_recipe_analysis.py, test_exit_node.py, test_executor.py, test_compile_plan.py\n\n### File-touch checklist\n- [ ] lib/block_classify.py\n- [ ] lib/recipe.py (docstring)\n- [ ] nodes/block_config_sdxl.py\n- [ ] nodes/block_config_zimage.py\n- [ ] tests/conftest.py\n- [ ] tests/test_merge_block_config.py\n- [ ] tests/test_per_block_control.py\n- [ ] tests/test_lora_block_strength.py\n- [ ] tests/test_block_config.py\n- [ ] tests/test_entry.py (if needed)\n\n### Verification\npytest -v && ruff check"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [
+    {
+      "ref": "01KHCJ41F",
+      "title": "Implement Full Model Recipe Type",
+      "priority": 3,
+      "spec_ref": "@full-model-recipe",
+      "tags": []
+    },
+    {
+      "ref": "01KHCJ41H",
+      "title": "Implement Full Model Loader",
+      "priority": 3,
+      "spec_ref": "@full-model-loader",
+      "tags": []
+    }
+  ],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KHCQWY",
+      "title": "Fix AC annotation style in test_graph.py",
+      "completed_at": "2026-02-14T02:09:31.349Z",
+      "closed_reason": "Merged in PR #48. Moved 17 AC annotations from docstring format to standard before-def comment format in test_graph.py. All 6 ACs (@node-graph-testing ac-1 through ac-6) have full test coverage."
+    },
+    {
+      "ref": "01KHCRP1",
+      "title": "Implement: Exit Model Persistence",
+      "completed_at": "2026-02-14T02:03:37.720Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KHC3H8",
+      "title": "Add full model merging support",
+      "completed_at": "2026-02-13T22:32:26.896Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KHA4D4",
+      "title": "Add test for comfyui-packaging ac-3 registry metadata",
+      "completed_at": "2026-02-13T05:09:17.859Z",
+      "closed_reason": "Added 3 tests for [tool.comfy] metadata in test_packaging.py. PR #46."
+    },
+    {
+      "ref": "01KHA4D1",
+      "title": "Add spec coverage for _unpatch_loaded_clones",
+      "completed_at": "2026-02-13T04:22:10.603Z",
+      "closed_reason": "PR #44 merged. Added ac-7 to @exit-patch-install and annotated 5 tests."
+    },
+    {
+      "ref": "01KHA4CV",
+      "title": "Fill missing AC annotations in tests",
+      "completed_at": "2026-02-13T01:01:47.213Z",
+      "closed_reason": "Fixed AC annotations in 3 files: added # AC comments to test_lora_block_strength.py (14 tests), corrected wrong refs in test_recipe.py (3 classes), converted hybrid docstring format in test_compile_plan.py (13 tests). 67 tests pass, ruff clean."
+    },
+    {
+      "ref": "01KHA4CQ",
+      "title": "Delete docs/design.md",
+      "completed_at": "2026-02-13T00:58:35.578Z",
+      "closed_reason": "Deleted docs/design.md, removed references from AGENTS.md, removed empty docs/ directory"
+    },
+    {
+      "ref": "01KH5XN3",
+      "title": "Add strict mode for batched catch-all fallbacks in widen.py",
+      "completed_at": "2026-02-12T23:15:19.865Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KH9KHQ",
+      "title": "Pre-compile recipe tree into flat evaluation plan to avoid per-chunk traversal",
+      "completed_at": "2026-02-12T23:08:17.734Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KH9ZHM",
+      "title": "Add ProgressBar tracking to exit node",
+      "completed_at": "2026-02-12T22:49:39.396Z",
+      "closed_reason": "PR #42 merged. ProgressBar tracking added to exit node with 2 tests covering ac-9."
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "265f767",
+      "full_hash": "265f7673cb9fb619c23ed63cce50872d3380d21c",
+      "date": "2026-02-14T02:17:00.000Z",
+      "message": "refactor: change block config from grouped to individual blocks",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "01ea19a",
+      "full_hash": "01ea19a7edf97595347cdf8ae7a952f107582d46",
+      "date": "2026-02-14T02:09:24.000Z",
+      "message": "Merge pull request #48 from chapel/style/ac-annotation-test-graph",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "7e9dbfb",
+      "full_hash": "7e9dbfbcd6658fe783266addf038f90c6e93268b",
+      "date": "2026-02-14T02:07:35.000Z",
+      "message": "style: move AC annotations to before-def placement in test_graph.py",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ec98f47",
+      "full_hash": "ec98f4704ea1bf4f78b000f8909c8f11d38d28d1",
+      "date": "2026-02-14T01:56:53.000Z",
+      "message": "Merge pull request #47 from chapel/feat/exit-model-persistence",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "93b985f",
+      "full_hash": "93b985f417b76a5294895f44bb225c2d61dbe394",
+      "date": "2026-02-14T01:46:42.000Z",
+      "message": "fix: address PR review feedback",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "9f7c4e6",
+      "full_hash": "9f7c4e64caa1af177203a713bc1590dd88dfafee",
+      "date": "2026-02-14T01:29:32.000Z",
+      "message": "feat: add exit node model persistence (save/cache merged models)",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "b6ec170",
+      "full_hash": "b6ec170d610a3ae1b43402ffea6edd2fc3e81ebf",
+      "date": "2026-02-13T05:11:41.000Z",
+      "message": "Merge pull request #46 from chapel/test/comfy-registry",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "930b0e8",
+      "full_hash": "930b0e887ca8487ba4597ac6efb9eb7457aa824f",
+      "date": "2026-02-13T05:10:28.000Z",
+      "message": "style: lowercase DisplayName to \"ecaj nodes\"",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ebc830e",
+      "full_hash": "ebc830ea7538e805d868e399a2938b63c0e8a139",
+      "date": "2026-02-13T05:08:57.000Z",
+      "message": "test: add registry metadata tests for comfyui-packaging ac-3",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "f61aadd",
+      "full_hash": "f61aadd04679a6137d012d664e72ae6aeabcacb1",
+      "date": "2026-02-13T04:28:28.000Z",
+      "message": "Merge pull request #45 from chapel/style/ac-annotation-placement",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": true,
+    "staged": [],
+    "unstaged": [],
+    "untracked": []
+  },
+  "inbox_items": [
+    {
+      "ref": "01KHCXS4",
+      "text": "Recipe serialization as a trait/protocol — serialize_recipe currently uses isinstance checks for each recipe type. Should be a protocol method on RecipeNode so new recipe types implement their own serialization. Prevents silent skips and keeps persistence.py decoupled from recipe type enumeration.",
+      "created_at": "2026-02-14T01:55:53.531Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS7",
+      "text": "compute_lora_stats._walk() silently ignores unknown recipe node types — should raise ValueError like serialize_recipe does. Related to serialization-as-trait refactor.",
+      "created_at": "2026-02-14T01:55:56.494Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS9",
+      "text": "load_affected_keys should wrap safetensors errors with helpful message pointing to cached file corruption — tells users to delete and re-run.",
+      "created_at": "2026-02-14T01:55:58.446Z",
+      "tags": [],
+      "added_by": "@claude"
+    }
+  ],
+  "stats": {
+    "total_tasks": 67,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 4,
+    "blocked": 0,
+    "completed": 58,
+    "inbox_items": 3
+  }
+}
