@@ -244,6 +244,8 @@ _QWEN_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
     (".norm", "norm"),
     ("_norm", "norm"),
     (".ln", "norm"),
+    ("img_mod", "norm"),
+    ("txt_mod", "norm"),
 )
 
 # Registry of layer type patterns by architecture

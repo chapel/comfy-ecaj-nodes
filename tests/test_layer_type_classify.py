@@ -210,6 +210,12 @@ class TestLayerTypeClassifyQwen:
         assert classify_layer_type("transformer_blocks.5.layer_norm.weight", "qwen") == "norm"
 
     # AC: @qwen-detect-classify ac-3
+    def test_mod_layers(self):
+        """Qwen img_mod/txt_mod keys classify as norm."""
+        assert classify_layer_type("transformer_blocks.5.img_mod.weight", "qwen") == "norm"
+        assert classify_layer_type("transformer_blocks.5.txt_mod.weight", "qwen") == "norm"
+
+    # AC: @qwen-detect-classify ac-3
     def test_strips_prefixes(self):
         """Layer type classification strips common prefixes."""
         key = "diffusion_model.transformer_blocks.5.attn.weight"
