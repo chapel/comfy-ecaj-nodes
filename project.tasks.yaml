@@ -4147,7 +4147,7 @@
   title: Implement Qwen block config node and registration
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@qwen-detect-classify"
@@ -4187,6 +4187,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T08:09:56.960Z
+  closed_reason: "Merged in PR #58. Implemented WIDENBlockConfigQwen node with 60 transformer block
+    sliders (TB00-TB59) and 3 layer-type sliders (attention, feed_forward, norm). Registered in
+    NODE_CLASS_MAPPINGS and NODE_DISPLAY_NAME_MAPPINGS. 9 tests covering AC-8 (60 individual blocks
+    + layer type sliders) and AC-9 (registry wiring). All CI passed."
 - _ulid: 01KHDHEGTTYESTY0BGZ64NV8EZ
   slugs:
     - flux-detect-classify
