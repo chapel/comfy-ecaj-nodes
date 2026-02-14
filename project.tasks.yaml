@@ -2840,7 +2840,7 @@
   spec_ref: "@per-block-control"
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -2996,6 +2996,10 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T02:19:17.185Z
+  closed_reason: "Merged in PR #49. Refactored block config from grouped to individual blocks: SDXL
+    7→19 sliders (IN00-IN08, MID, OUT00-OUT08), Z-Image 8→34 sliders (L00-L29, NOISE_REF0-1,
+    CTX_REF0-1). All 5 ACs covered with tests, CI passing."
 - _ulid: 01KHA77QE33PJTTXZCP29H88DS
   slugs:
     - layer-type-filter-impl
