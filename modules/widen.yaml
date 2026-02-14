@@ -502,6 +502,9 @@ features:
             given: save_model enabled and save_workflow toggle is disabled
             when: saving merged model to disk
             then: no workflow JSON is included in safetensors metadata
+        status:
+          maturity: draft
+          implementation: in_progress
     status:
       maturity: draft
       implementation: implemented
