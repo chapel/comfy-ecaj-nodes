@@ -439,6 +439,44 @@ features:
         traits: []
         notes: []
         created: 2026-02-14T00:26:32.026Z
+        acceptance_criteria:
+          - id: ac-1
+            given: save_model toggle is disabled (default)
+            when: exit node executes
+            then: behavior is unchanged from baseline — no file I/O
+          - id: ac-2
+            given: save_model enabled and model_name provided
+            when: exit node completes GPU merge
+            then: fully-merged state dict saved as safetensors adjacent to base model using model_name
+          - id: ac-3
+            given: cached safetensors exists at expected path
+            when: exit node executes with save_model enabled and metadata matches current config
+            then: model loaded from disk and GPU merge pipeline skipped entirely
+          - id: ac-4
+            given: cached file exists but metadata does not match
+            when: exit node executes with save_model enabled
+            then: GPU merge pipeline runs and cached file is overwritten with new results
+          - id: ac-5
+            given: save_model enabled and model_name is empty or not provided
+            when: exit node validates inputs
+            then: raises clear error requesting a model name
+          - id: ac-6
+            given: a saved safetensors file
+            when: examined for metadata
+            then: header contains recipe identity hash, LoRA file stats (paths + mtime + size), base model
+              identity, and per-block config
+          - id: ac-7
+            given: LoRA files on disk have changed (different mtime or size)
+            when: exit node checks cache validity
+            then: cache is invalidated and merge recomputes
+          - id: ac-8
+            given: saved safetensors from exit node
+            when: loaded by ComfyUI standard model loader
+            then: functions as a complete standalone model
+          - id: ac-9
+            given: file with model_name already exists but lacks ecaj metadata in safetensors header
+            when: exit node attempts save or cache-check
+            then: raises error indicating file was not created by this node and suggests a different model_name
     status:
       maturity: draft
       implementation: implemented
