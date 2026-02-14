@@ -1,0 +1,266 @@
+{
+  "generated_at": "2026-02-14T08:14:41.279Z",
+  "branch": "feat/flux-detect-classify",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-14T08:14:41.279Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KHDHEGT",
+      "title": "Implement Flux Klein detection and block classification",
+      "started_at": "2026-02-14T08:10:27.852Z",
+      "priority": 2,
+      "spec_ref": null,
+      "note_count": 2,
+      "last_note_at": "2026-02-14T08:13:32.370Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KHDHEGT",
+      "task_title": "Implement Flux Klein detection and block classification",
+      "task_status": "pending_review",
+      "note_ulid": "01KHDKCM",
+      "created_at": "2026-02-14T08:13:32.370Z",
+      "author": "@claude",
+      "content": "Implementation complete. Added classify_key_flux() to lib/block_classify.py mapping double_blocks.N to DB0N and single_blocks.N to SB0N with dynamic index discovery (no upper bound). Added Flux layer type patterns (_FLUX_LAYER_PATTERNS) for attention (img_attn, txt_attn, qkv, proj, query_norm, key_norm), feed_forward (img_mlp, txt_mlp, linear2), and norm (img_mod, txt_mod, modulation). Registered in _CLASSIFIERS and _LAYER_TYPE_PATTERNS. Added 'flux' to _SUPPORTED_ARCHITECTURES in nodes/entry.py. Updated tests: test_flux_detected_but_unsupported → test_flux_detected_and_supported, added TestBlockClassifyFlux (5 tests) and TestLayerTypeClassifyFlux (12 tests), updated test_returns_flux_classifier. 777 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGS",
+      "task_title": "Implement Qwen block config node and registration",
+      "task_status": "completed",
+      "note_ulid": "01KHDK0B",
+      "created_at": "2026-02-14T08:06:50.226Z",
+      "author": "@claude",
+      "content": "Implementation complete. Created nodes/block_config_qwen.py with 60 transformer blocks (TB00-TB59) and 3 layer-type sliders (attention, feed_forward, norm). Registered WIDENBlockConfigQwen in __init__.py mappings. Added 10 tests covering: 60 individual block sliders, layer type sliders, total input count (63), slider config, return types, create_config behavior, block overrides storage, layer type overrides storage, and boundary values. 759 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGR",
+      "task_title": "Implement Qwen model loader support",
+      "task_status": "completed",
+      "note_ulid": "01KHDJPW",
+      "created_at": "2026-02-14T08:01:39.870Z",
+      "author": "@claude",
+      "content": "Implementation complete. Added Qwen architecture detection to lib/model_loader.py: model.transformer. prefix in _FILE_KEY_PREFIXES, Qwen pattern in _ARCH_PATTERNS (≥60 transformer_blocks keys). Added 9 tests covering Qwen detection (qwen_checkpoint_path, qwen_model_prefix_checkpoint_path fixtures), key normalization (transformer. and model.transformer. prefixes), VAE exclusion, and tensor retrieval. 750 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGP",
+      "task_title": "Implement Qwen LoRA loader",
+      "task_status": "completed",
+      "note_ulid": "01KHDJD4",
+      "created_at": "2026-02-14T07:56:19.974Z",
+      "author": "@claude",
+      "content": "Implementation complete. Created lib/lora/qwen.py with QwenLoader class supporting 3 LoRA formats: diffusers (transformer.transformer_blocks.N.*.lora_A/B), A1111/kohya (lora_unet_transformer_blocks_N_*.lora_up/down), and LyCORIS (lycoris_transformer_blocks_N_*.lora_down/up). Key features: compound name preservation (_normalize_lycoris_key, _normalize_kohya_key), no QKV fusion (separate to_q/to_k/to_v), standard DeltaSpec production. Registered in LOADER_REGISTRY. Added 11 tests covering all 3 ACs (ac-4, ac-5, ac-6). 741 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGN",
+      "task_title": "Implement Qwen detection and block classification",
+      "task_status": "completed",
+      "note_ulid": "01KHDHS7",
+      "created_at": "2026-02-14T07:45:27.611Z",
+      "author": "@claude",
+      "content": "Implementation complete. Added classify_key_qwen() to lib/block_classify.py mapping transformer_blocks.N to TB00+ with dynamic index discovery (regex, no upper bound). Added Qwen layer type patterns (_QWEN_LAYER_PATTERNS) for attention/feed_forward/norm classification. Registered in _CLASSIFIERS and _LAYER_TYPE_PATTERNS. Updated __all__. Added 'qwen' to _SUPPORTED_ARCHITECTURES in nodes/entry.py. Updated tests: test_qwen_detected_but_unsupported → test_qwen_detected_and_supported, removed qwen from unsupported arch test. Added TestBlockClassifyQwen (3 tests), test_returns_qwen_classifier, TestLayerTypeClassifyQwen (10 tests). All 729 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGT",
+      "task_title": "Implement Flux Klein detection and block classification",
+      "task_status": "pending_review",
+      "note_ulid": "01KHDHEG",
+      "created_at": "2026-02-14T07:39:37.178Z",
+      "author": "@claude",
+      "content": "Enable Flux detection in nodes/entry.py (add \"flux\" to\n_SUPPORTED_ARCHITECTURES). Add classify_key_flux() in\nlib/block_classify.py mapping double_blocks.N to DB0N and\nsingle_blocks.N to SB0N with dynamic index discovery.\nAdd Flux layer type patterns. Register in _CLASSIFIERS and\n_LAYER_TYPE_PATTERNS. Update __all__ exports.\n\nBREAKING TESTS to update:\n- tests/test_entry.py: test_flux_detected_but_unsupported (line 174)\n  must become test_flux_detected_and_supported.\n- tests/test_layer_type_classify.py: assertions that flux returns\n  None must become positive classification tests.\n- tests/test_merge_block_config.py: assertion that\n  get_block_classifier(\"flux\") is None must test real classifier.\n\nNew tests in: tests/test_entry.py, tests/test_layer_type_classify.py,\ntests/test_merge_block_config.py.\nCovers ac-1, ac-2, ac-3.\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [
+    {
+      "ref": "01KHDHEGW",
+      "title": "Implement Flux Klein model loader support",
+      "priority": 2,
+      "spec_ref": null,
+      "tags": [
+        "flux",
+        "model-loader"
+      ]
+    }
+  ],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KHDHEGS",
+      "title": "Implement Qwen block config node and registration",
+      "completed_at": "2026-02-14T08:09:56.960Z",
+      "closed_reason": "Merged in PR #58. Implemented WIDENBlockConfigQwen node with 60 transformer block sliders (TB00-TB59) and 3 layer-type sliders (attention, feed_forward, norm). Registered in NODE_CLASS_MAPPINGS and NODE_DISPLAY_NAME_MAPPINGS. 9 tests covering AC-8 (60 individual blocks + layer type sliders) and AC-9 (registry wiring). All CI passed."
+    },
+    {
+      "ref": "01KHDHEGR",
+      "title": "Implement Qwen model loader support",
+      "completed_at": "2026-02-14T08:04:09.940Z",
+      "closed_reason": "Merged in PR #57. Added Qwen architecture detection to model_loader.py: model.transformer. prefix in _FILE_KEY_PREFIXES, Qwen pattern in _ARCH_PATTERNS (≥60 transformer_blocks keys). Added 9 tests covering Qwen detection, key normalization (transformer. and model.transformer. prefixes), VAE exclusion, and tensor retrieval. AC-7 fully covered."
+    },
+    {
+      "ref": "01KHDHEGP",
+      "title": "Implement Qwen LoRA loader",
+      "completed_at": "2026-02-14T07:59:18.823Z",
+      "closed_reason": "Merged in PR #56. Implemented QwenLoader supporting 3 LoRA formats (diffusers, A1111/kohya, LyCORIS). Features: compound name preservation, no QKV fusion (separate to_q/to_k/to_v), standard DeltaSpec production. Registered in LOADER_REGISTRY. 11 tests covering ac-4, ac-5, ac-6."
+    },
+    {
+      "ref": "01KHDHEGN",
+      "title": "Implement Qwen detection and block classification",
+      "completed_at": "2026-02-14T07:51:19.582Z",
+      "closed_reason": "Merged in PR #55. Implemented Qwen architecture detection and block/layer-type classification. Added classify_key_qwen() mapping transformer_blocks.N to TB00+ with dynamic index discovery, Qwen layer type patterns for attention/feed_forward/norm classification (including img_mod/txt_mod), and registered in _CLASSIFIERS/_LAYER_TYPE_PATTERNS. Added 'qwen' to _SUPPORTED_ARCHITECTURES. All AC coverage verified: ac-1 (detection), ac-2 (block classification), ac-3 (layer type classification). 730 tests pass."
+    },
+    {
+      "ref": "01KHC3H6",
+      "title": "Add Qwen and Flux 2 Klein architecture support",
+      "completed_at": "2026-02-14T07:39:50.714Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KHCJ41J",
+      "title": "Implement Full Model Execution",
+      "completed_at": "2026-02-14T02:57:50.644Z",
+      "closed_reason": "Merged in PR #54. Implemented full model execution for WIDEN checkpoint merging. Added RecipeModel support across the codebase: analyze_recipe_models() in lib/analysis.py, OpApplyModel in lib/recipe_eval.py, model path collection in nodes/exit.py, and RecipeModel as valid type in compose/merge nodes. All 13 ACs verified with 20 tests."
+    },
+    {
+      "ref": "01KHCJ41H",
+      "title": "Implement Full Model Loader",
+      "completed_at": "2026-02-14T02:44:52.539Z",
+      "closed_reason": "Merged in PR #53. Implemented ModelLoader class in lib/model_loader.py using safetensors safe_open() for memory-mapped checkpoint access. Key features: key normalization (strips model.diffusion_model. and transformer. prefixes), excludes VAE/text encoder keys, architecture detection from normalized keys, get_weights() for batch tensor retrieval, cleanup() for resource release, UnsupportedFormatError for non-safetensors files. All 9 ACs covered by 27 tests."
+    },
+    {
+      "ref": "01KHCJ41G",
+      "title": "Implement Model Input Node",
+      "completed_at": "2026-02-14T02:39:35.284Z",
+      "closed_reason": "Merged in PR #52. Implemented WIDENModelInputNode that produces RecipeModel from checkpoint file picker. Includes: checkpoint combo via folder_paths, strength slider (0.0-2.0), optional BLOCK_CONFIG input, returns WIDEN type. All 6 ACs covered by 15 tests."
+    },
+    {
+      "ref": "01KHA77QE",
+      "title": "Add layer-type filtering to block config",
+      "completed_at": "2026-02-14T02:35:14.566Z",
+      "closed_reason": "Merged in PR #51. Added layer-type filtering with classify_layer_type function supporting SDXL and Z-Image architectures. Layer types (attention, feed_forward, norm) apply multiplicatively with block overrides for both LoRA strength and WIDEN t_factor. UI sliders added to block config nodes. All 8 ACs covered with 897 lines of implementation and tests."
+    },
+    {
+      "ref": "01KHCJ41F",
+      "title": "Implement Full Model Recipe Type",
+      "completed_at": "2026-02-14T02:23:52.069Z",
+      "closed_reason": "Merged in PR #50. Added RecipeModel frozen dataclass to lib/recipe.py with path (str), strength (float, default 1.0), and block_config (BlockConfig | None) fields. Updated RecipeNode type alias. All 6 ACs covered by 17 tests."
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "9629531",
+      "full_hash": "962953150bb0a5b5cf4d46fb62dd0d3972165715",
+      "date": "2026-02-14T08:13:51.000Z",
+      "message": "feat: add Flux Klein detection and block classification",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "cb0de8e",
+      "full_hash": "cb0de8e1098d205b41e6efb7a0b559fa50a745c6",
+      "date": "2026-02-14T08:09:48.000Z",
+      "message": "Merge pull request #58 from chapel/feat/qwen-block-config",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "7c9fa75",
+      "full_hash": "7c9fa75fdcbc3caa48cf3243081230436a7b0db7",
+      "date": "2026-02-14T08:07:11.000Z",
+      "message": "feat: add Qwen block config node with 60 TB sliders",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "83f8226",
+      "full_hash": "83f8226f836fcdc24828a43f1ed00cd9cf4a3e69",
+      "date": "2026-02-14T08:03:56.000Z",
+      "message": "Merge pull request #57 from chapel/feat/qwen-model-loader",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ab453e5",
+      "full_hash": "ab453e596c4a11a355e4ceb9b555ec7b2e8d972f",
+      "date": "2026-02-14T08:01:31.000Z",
+      "message": "feat: add Qwen model loader support",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "a16a649",
+      "full_hash": "a16a64932eee2f6296a577d36545aa2df12a415d",
+      "date": "2026-02-14T07:59:09.000Z",
+      "message": "Merge pull request #56 from chapel/feat/qwen-lora-loader",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ee9e28c",
+      "full_hash": "ee9e28c93a2791d453e35d9d305cc054c4d560f2",
+      "date": "2026-02-14T07:56:36.000Z",
+      "message": "feat: add Qwen LoRA loader for 3 formats",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "00c3525",
+      "full_hash": "00c352568ca16675360e870b796365defbf273f2",
+      "date": "2026-02-14T07:51:07.000Z",
+      "message": "Merge pull request #55 from chapel/feat/qwen-detect-classify",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "06b9e55",
+      "full_hash": "06b9e554beb8d15da1f1cf11f9676f7129686f02",
+      "date": "2026-02-14T07:49:20.000Z",
+      "message": "fix: add img_mod/txt_mod norm patterns to Qwen layer classification",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "228c7c3",
+      "full_hash": "228c7c3265bf721def9586a60c58b70e93687fbb",
+      "date": "2026-02-14T07:45:37.000Z",
+      "message": "feat: add Qwen detection and block classification",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": true,
+    "staged": [],
+    "unstaged": [],
+    "untracked": []
+  },
+  "inbox_items": [
+    {
+      "ref": "01KHCXS4",
+      "text": "Recipe serialization as a trait/protocol — serialize_recipe currently uses isinstance checks for each recipe type. Should be a protocol method on RecipeNode so new recipe types implement their own serialization. Prevents silent skips and keeps persistence.py decoupled from recipe type enumeration.",
+      "created_at": "2026-02-14T01:55:53.531Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS7",
+      "text": "compute_lora_stats._walk() silently ignores unknown recipe node types — should raise ValueError like serialize_recipe does. Related to serialization-as-trait refactor.",
+      "created_at": "2026-02-14T01:55:56.494Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS9",
+      "text": "load_affected_keys should wrap safetensors errors with helpful message pointing to cached file corruption — tells users to delete and re-run.",
+      "created_at": "2026-02-14T01:55:58.446Z",
+      "tags": [],
+      "added_by": "@claude"
+    }
+  ],
+  "stats": {
+    "total_tasks": 75,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 2,
+    "blocked": 0,
+    "completed": 69,
+    "inbox_items": 3
+  }
+}
