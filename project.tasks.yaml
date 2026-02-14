@@ -3396,6 +3396,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-13T22:32:07.992Z
+  started_at: 2026-02-14T02:40:11.944Z
   notes:
     - _ulid: 01KHCJ41HR7FBHA9CWXYDCFKNF
       created_at: 2026-02-13T22:32:07.992Z
@@ -3434,9 +3435,18 @@
 
         Files: lib/model_loader.py, reference lib/lora/base.py for interface
         pattern, reference merge-router src/models/ for key normalization.
+    - _ulid: 01KHD0EW24HXWXCA3QXH21PNN1
+      created_at: 2026-02-14T02:42:42.884Z
+      author: "@claude"
+      content: "Implementation complete. Created lib/model_loader.py with ModelLoader class using
+        safe_open() for memory-mapped access. Key features: key normalization (strips
+        model.diffusion_model. and transformer. prefixes), excludes VAE/text encoder keys,
+        architecture detection from normalized keys, get_weights() for batch tensor retrieval,
+        cleanup() for resource release, UnsupportedFormatError for non-safetensors files. 27 tests
+        covering all 9 ACs. Full suite passes, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T02:40:11.944Z
 - _ulid: 01KHCJ41JV9XBWBJ8VSVB748W8
   slugs:
     - implement-full-model-execution
