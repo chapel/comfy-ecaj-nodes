@@ -4,19 +4,31 @@ from __future__ import annotations
 
 import gc
 import hashlib
+import json
 import os
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 import torch
 
-from ..lib.analysis import analyze_recipe, get_keys_to_process
+from ..lib.analysis import analyze_recipe, get_keys_to_process, walk_to_base
 from ..lib.executor import (
     chunked_evaluation,
     compile_batch_groups,
     compile_plan,
     compute_batch_size,
     execute_plan,
+)
+from ..lib.persistence import (
+    atomic_save,
+    build_metadata,
+    check_cache,
+    compute_base_identity,
+    compute_lora_stats,
+    compute_recipe_hash,
+    load_affected_keys,
+    serialize_recipe,
+    validate_model_name,
 )
 from ..lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
 from ..lib.widen import WIDEN, WIDENConfig
@@ -255,6 +267,26 @@ def _build_lora_resolver() -> Callable[[str], str | None]:
     return resolver
 
 
+def _resolve_checkpoints_path(model_name: str) -> str:
+    """Resolve a model name to a full path in the first checkpoints directory.
+
+    Args:
+        model_name: Validated model filename
+
+    Returns:
+        Full path to the model file
+
+    Raises:
+        ValueError: If no checkpoints directory is configured
+    """
+    import folder_paths
+
+    dirs = folder_paths.get_folder_paths("checkpoints")
+    if not dirs:
+        raise ValueError("No checkpoints directory configured in ComfyUI")
+    return os.path.join(dirs[0], model_name)
+
+
 class WIDENExitNode:
     """The only node that computes. Runs full batched GPU pipeline."""
 
@@ -263,6 +295,15 @@ class WIDENExitNode:
         return {
             "required": {
                 "widen": ("WIDEN",),
+            },
+            "optional": {
+                "save_model": ("BOOLEAN", {"default": False}),
+                "model_name": ("STRING", {"default": ""}),
+                "save_workflow": ("BOOLEAN", {"default": True}),
+            },
+            "hidden": {
+                "prompt": "PROMPT",
+                "extra_pnginfo": "EXTRA_PNGINFO",
             },
         }
 
@@ -273,7 +314,15 @@ class WIDENExitNode:
     OUTPUT_NODE = False
 
     @classmethod
-    def IS_CHANGED(cls, widen: RecipeNode) -> str:
+    def IS_CHANGED(
+        cls,
+        widen: RecipeNode,
+        save_model: bool = False,
+        model_name: str = "",
+        save_workflow: bool = True,
+        prompt: object = None,
+        extra_pnginfo: object = None,
+    ) -> str:
         """Compute cache key based on LoRA file modification times.
 
         AC: @exit-patch-install ac-5 — identical hash on no LoRA changes
@@ -282,9 +331,32 @@ class WIDENExitNode:
         Returns:
             Hash string for ComfyUI caching
         """
-        return _compute_recipe_hash(widen, lora_path_resolver=_build_lora_resolver())
+        base_hash = _compute_recipe_hash(widen, lora_path_resolver=_build_lora_resolver())
 
-    def execute(self, widen: RecipeNode) -> tuple[object]:
+        if not save_model:
+            return base_hash
+
+        # Include save parameters and cached file state
+        hasher = hashlib.sha256(base_hash.encode())
+        hasher.update(f"|save={save_model}|name={model_name}|wf={save_workflow}".encode())
+        try:
+            validated = validate_model_name(model_name)
+            path = _resolve_checkpoints_path(validated)
+            stat = os.stat(path)
+            hasher.update(f"|mtime={stat.st_mtime}|size={stat.st_size}".encode())
+        except (ValueError, OSError):
+            hasher.update(b"|no_cache")
+        return hasher.hexdigest()
+
+    def execute(
+        self,
+        widen: RecipeNode,
+        save_model: bool = False,
+        model_name: str = "",
+        save_workflow: bool = True,
+        prompt: object = None,
+        extra_pnginfo: object = None,
+    ) -> tuple[object]:
         """Execute the recipe tree and return merged MODEL.
 
         AC: @exit-node ac-1 — returns ComfyUI MODEL with set patches
@@ -295,9 +367,15 @@ class WIDENExitNode:
         AC: @exit-node ac-6 — single-branch compose uses filter_delta
         AC: @exit-node ac-7 — downstream LoRA patches apply additively
         AC: @exit-node ac-8 — patch tensors match base model dtype
+        AC: @exit-model-persistence ac-1 through ac-14
 
         Args:
             widen: Recipe tree root (should be RecipeMerge or RecipeBase)
+            save_model: Whether to save/cache the merged model
+            model_name: Filename for the saved model
+            save_workflow: Whether to embed workflow metadata
+            prompt: ComfyUI prompt (hidden input)
+            extra_pnginfo: ComfyUI workflow info (hidden input)
 
         Returns:
             Tuple containing cloned ModelPatcher with merged weights as set patches
@@ -318,31 +396,44 @@ class WIDENExitNode:
                 f"got {type(widen).__name__}. Connect a Merge node to Exit."
             )
 
-        # Phase 1: Analyze recipe tree (loads LoRAs, builds set map)
         # Build resolver that searches all ComfyUI LoRA directories
         lora_path_resolver = _build_lora_resolver()
 
+        # --- Shared setup: compute base_state ONCE ---
+        model_patcher = walk_to_base(widen).model_patcher
+        _unpatch_loaded_clones(model_patcher)
+        base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
+        storage_dtype = next(iter(base_state.values())).dtype
+
+        # --- Persistence: pre-GPU cache check ---
+        save_path = serialized = recipe_hash = None
+        if save_model:
+            validated_name = validate_model_name(model_name)
+            save_path = _resolve_checkpoints_path(validated_name)
+
+            base_identity = compute_base_identity(base_state)
+            lora_stats = compute_lora_stats(widen, lora_path_resolver)
+            serialized = serialize_recipe(widen, base_identity, lora_stats)
+            recipe_hash = compute_recipe_hash(serialized)
+
+            cached_metadata = check_cache(save_path, recipe_hash)
+            if cached_metadata is not None:
+                # CACHE HIT — skip GPU entirely, no LoRA loading
+                affected = json.loads(cached_metadata["__ecaj_affected_keys__"])
+                merged_state = load_affected_keys(save_path, affected)
+                if ProgressBar is not None:
+                    pbar = ProgressBar(1)
+                    pbar.update(1)
+                return (install_merged_patches(model_patcher, merged_state, storage_dtype),)
+
+        # --- Normal GPU pipeline ---
         analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
 
         try:
-            model_patcher = analysis.model_patcher
             loader = analysis.loader
             set_affected = analysis.set_affected
             affected_keys = analysis.affected_keys
             arch = analysis.arch
-
-            # Force-unpatch any loaded clone from a previous run so that
-            # model_state_dict() returns clean (unpatched) base weights.
-            # Without this, "set" patches from the prior clone remain applied
-            # in-place on the shared model, causing LoRA double-application.
-            _unpatch_loaded_clones(model_patcher)
-
-            # Get base model state dict (prefixed keys: diffusion_model.X.weight)
-            # Must match the key format produced by LoRA loaders
-            base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
-
-            # Determine storage dtype from base model
-            storage_dtype = next(iter(base_state.values())).dtype
 
             # Computation dtype is fp32 for numerical stability
             compute_dtype = torch.float32
@@ -457,5 +548,19 @@ class WIDENExitNode:
         # AC-7: Set patches work with downstream LoRA patches additively
         # AC-8: Patch tensors match base model dtype (handled by install_merged_patches)
         result = install_merged_patches(model_patcher, merged_state, storage_dtype)
+
+        # --- Persistence: save after GPU ---
+        if save_model and save_path is not None:
+            # Overlay merged keys into base_state in-place (base_state is
+            # already a dict copy from model_state_dict, not used after this)
+            for key, tensor in merged_state.items():
+                base_state[key] = tensor.cpu().to(storage_dtype)
+            workflow_json = (
+                json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
+            )
+            metadata = build_metadata(
+                serialized, recipe_hash, sorted(merged_state.keys()), workflow_json
+            )
+            atomic_save(base_state, save_path, metadata)
 
         return (result,)

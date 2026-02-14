@@ -135,10 +135,10 @@ class TestAC1TreeWalk:
 
         # Just check we can analyze the base directly
         # (no LoRAs, so no loading needed)
-        from lib.analysis import _walk_to_base
+        from lib.analysis import walk_to_base
 
-        assert _walk_to_base(base_sdxl).arch == "sdxl"
-        assert _walk_to_base(base_zimage).arch == "zimage"
+        assert walk_to_base(base_sdxl).arch == "sdxl"
+        assert walk_to_base(base_zimage).arch == "zimage"
 
     def test_rejects_lora_as_root(self):
         """RecipeLoRA cannot be the root of a recipe tree."""
