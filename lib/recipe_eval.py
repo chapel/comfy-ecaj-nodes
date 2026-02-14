@@ -483,6 +483,13 @@ def execute_plan(
                 base = regs[op.input_reg]
                 stacked = base + op.strength * (stacked - base)
 
+            # AC: @full-model-execution ac-15
+            # Apply per-block strength scaling to model deltas
+            if op.block_config is not None and arch is not None:
+                stacked = _apply_per_block_lora_strength(
+                    keys, regs[op.input_reg], stacked, op.block_config, arch, device, dtype
+                )
+
             regs[op.out_reg] = stacked
 
         elif op_type is OpFilterDelta:
