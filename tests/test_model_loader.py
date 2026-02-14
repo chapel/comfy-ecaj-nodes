@@ -410,3 +410,115 @@ class TestUnsupportedFormatError:
             ModelLoader(non_safetensors_path)
 
         assert "convert" in str(exc_info.value).lower()
+
+
+# ---------------------------------------------------------------------------
+# Qwen Architecture Support
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def qwen_checkpoint_path() -> str:
+    """Create a temporary Qwen-format checkpoint file.
+
+    Uses transformer_blocks structure with 60+ blocks as required for Qwen detection.
+    """
+    # Build enough transformer_blocks keys to trigger Qwen detection (≥60)
+    tensors = {}
+    for i in range(65):
+        tensors[f"transformer.transformer_blocks.{i}.attn.to_q.weight"] = torch.randn(4, 4)
+        tensors[f"transformer.transformer_blocks.{i}.attn.to_k.weight"] = torch.randn(4, 4)
+        tensors[f"transformer.transformer_blocks.{i}.attn.to_v.weight"] = torch.randn(4, 4)
+        tensors[f"transformer.transformer_blocks.{i}.mlp.gate_proj.weight"] = torch.randn(4, 4)
+    # VAE keys (should be excluded)
+    tensors["first_stage_model.encoder.weight"] = torch.randn(4, 4)
+
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        save_file(tensors, f.name)
+        return f.name
+
+
+@pytest.fixture
+def qwen_model_prefix_checkpoint_path() -> str:
+    """Create a Qwen checkpoint with model.transformer prefix."""
+    tensors = {}
+    for i in range(65):
+        tensors[f"model.transformer.transformer_blocks.{i}.attn.weight"] = torch.randn(4, 4)
+
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        save_file(tensors, f.name)
+        return f.name
+
+
+# AC: @qwen-model-loader ac-7
+class TestQwenArchitectureDetection:
+    """Tests for Qwen architecture detection from checkpoint keys."""
+
+    def test_detect_qwen_architecture(self, qwen_checkpoint_path: str) -> None:
+        """Qwen checkpoint detected from transformer_blocks count ≥60."""
+        with ModelLoader(qwen_checkpoint_path) as loader:
+            assert loader.arch == "qwen"
+
+    def test_detect_qwen_with_model_prefix(
+        self, qwen_model_prefix_checkpoint_path: str
+    ) -> None:
+        """Qwen checkpoint with model.transformer prefix detected."""
+        with ModelLoader(qwen_model_prefix_checkpoint_path) as loader:
+            assert loader.arch == "qwen"
+
+    def test_detect_qwen_architecture_without_loading_tensors(self) -> None:
+        """Qwen detection uses only key inspection, no tensor loading."""
+        # Test with exactly 60 transformer_blocks keys (threshold)
+        qwen_keys = frozenset(
+            f"diffusion_model.transformer_blocks.{i}.weight" for i in range(60)
+        )
+        assert _detect_architecture_from_keys(qwen_keys) == "qwen"
+
+    def test_below_threshold_not_detected_as_qwen(self) -> None:
+        """Less than 60 transformer_blocks keys does not trigger Qwen detection."""
+        # 59 keys - just below threshold
+        keys = frozenset(
+            f"diffusion_model.transformer_blocks.{i}.weight" for i in range(59)
+        )
+        assert _detect_architecture_from_keys(keys) != "qwen"
+
+
+class TestQwenKeyNormalization:
+    """Tests for Qwen checkpoint key normalization."""
+
+    def test_normalize_key_handles_transformer_prefix(self) -> None:
+        """transformer.transformer_blocks.X normalizes to diffusion_model.transformer_blocks.X."""
+        file_key = "transformer.transformer_blocks.0.attn.to_q.weight"
+        normalized = _normalize_key(file_key)
+        assert normalized == "diffusion_model.transformer_blocks.0.attn.to_q.weight"
+
+    def test_normalize_key_handles_model_transformer_prefix(self) -> None:
+        """model.transformer.transformer_blocks.X normalizes correctly."""
+        file_key = "model.transformer.transformer_blocks.5.attn.weight"
+        normalized = _normalize_key(file_key)
+        assert normalized == "diffusion_model.transformer_blocks.5.attn.weight"
+
+    def test_qwen_checkpoint_keys_normalized_correctly(
+        self, qwen_checkpoint_path: str
+    ) -> None:
+        """Qwen checkpoint keys are normalized to base model format."""
+        with ModelLoader(qwen_checkpoint_path) as loader:
+            for key in loader.affected_keys:
+                assert key.startswith("diffusion_model.")
+                assert "transformer_blocks" in key
+
+    def test_qwen_checkpoint_excludes_vae(self, qwen_checkpoint_path: str) -> None:
+        """Qwen checkpoint VAE keys are excluded."""
+        with ModelLoader(qwen_checkpoint_path) as loader:
+            for key in loader.affected_keys:
+                assert "first_stage_model" not in key
+
+    def test_qwen_keys_retrievable(self, qwen_checkpoint_path: str) -> None:
+        """Keys can be retrieved from Qwen checkpoint after normalization."""
+        with ModelLoader(qwen_checkpoint_path) as loader:
+            # Get first few keys and retrieve tensors
+            keys = list(loader.affected_keys)[:3]
+            tensors = loader.get_weights(keys)
+            assert len(tensors) == 3
+            for t in tensors:
+                assert isinstance(t, torch.Tensor)
