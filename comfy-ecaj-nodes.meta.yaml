@@ -1000,4 +1000,13 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHCXXSJRS54J8QTRBVZ8X1C3
+    type: success
+    content: "Tensor raw bytes without numpy: use bytes(tensor.untyped_storage())[:n] instead of
+      tensor.numpy().tobytes(). numpy may not be installed in all environments (ComfyUI bundles
+      torch but not always numpy). Pattern used in lib/persistence.py compute_base_identity."
+    created_at: 2026-02-14T01:58:26.137Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
