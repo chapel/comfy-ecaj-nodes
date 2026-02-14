@@ -463,8 +463,10 @@ features:
           - id: ac-6
             given: a saved safetensors file
             when: examined for metadata
-            then: header contains recipe identity hash, LoRA file stats (paths + mtime + size), base model
-              identity, and per-block config
+            then: "header contains recipe identity hash (covering LoRA paths + stats + strengths, t_factors at
+              each merge level, block_config overrides, tree topology, and base model identity),
+              plus individual fields for introspection: LoRA file stats, base model identity, and
+              per-block config"
           - id: ac-7
             given: LoRA files on disk have changed (different mtime or size)
             when: exit node checks cache validity
