@@ -1365,6 +1365,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-14T02:56:00.552Z
+    completed_at: 2026-02-14T02:56:46.528Z
     step_results:
       - step_index: 0
         status: completed
@@ -1396,4 +1397,11 @@ runs:
         notes: No new items to capture. All friction already tracked in inbox (01KHCXS4, 01KHCXS7). Session
           was smooth - well-specified task with detailed implementation notes. Reflection complete.
     initiated_by: "@claude"
-    completed_at: 2026-02-14T02:56:46.528Z
+  - _ulid: 01KHD196E5Z9K2PK2CFH6R163K
+    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
+    status: active
+    current_step: 0
+    total_steps: 10
+    started_at: 2026-02-14T02:57:05.477Z
+    step_results: []
+    initiated_by: "@claude"
