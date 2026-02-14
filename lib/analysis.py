@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 __all__ = [
     "AnalysisResult",
     "analyze_recipe",
+    "walk_to_base",
 ]
 
 
@@ -48,7 +49,7 @@ class AnalysisResult:
     affected_keys: set[str]
 
 
-def _walk_to_base(node: RecipeNode) -> RecipeBase:
+def walk_to_base(node: RecipeNode) -> RecipeBase:
     """Walk the recipe tree to find the RecipeBase root.
 
     AC: @exit-recipe-analysis ac-1
@@ -67,7 +68,7 @@ def _walk_to_base(node: RecipeNode) -> RecipeBase:
         return node
     elif isinstance(node, RecipeMerge):
         # Recurse through base link until we hit RecipeBase
-        return _walk_to_base(node.base)
+        return walk_to_base(node.base)
     elif isinstance(node, RecipeLoRA):
         raise ValueError(
             "RecipeLoRA cannot be the root of a recipe tree. "
@@ -190,7 +191,7 @@ def analyze_recipe(
         ValueError: If recipe structure is invalid
     """
     # AC-1: Walk to base and extract model_patcher and arch
-    base = _walk_to_base(node)
+    base = walk_to_base(node)
     model_patcher = base.model_patcher
     arch = base.arch
 

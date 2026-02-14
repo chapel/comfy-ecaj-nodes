@@ -741,3 +741,263 @@ class TestExitNodeIntegration:
         assert WIDENExitNode.RETURN_NAMES == ("model",)
         assert WIDENExitNode.FUNCTION == "execute"
         assert WIDENExitNode.CATEGORY == "ecaj/merge"
+
+
+# =============================================================================
+# Persistence INPUT_TYPES
+# =============================================================================
+
+
+class TestExitNodePersistenceInputs:
+    """Verify persistence-related INPUT_TYPES are present."""
+
+    def test_save_model_input(self):
+        """save_model BOOLEAN should be in optional inputs."""
+        optional = WIDENExitNode.INPUT_TYPES()["optional"]
+        assert "save_model" in optional
+        assert optional["save_model"][0] == "BOOLEAN"
+        assert optional["save_model"][1]["default"] is False
+
+    def test_model_name_input(self):
+        """model_name STRING should be in optional inputs."""
+        optional = WIDENExitNode.INPUT_TYPES()["optional"]
+        assert "model_name" in optional
+        assert optional["model_name"][0] == "STRING"
+
+    def test_save_workflow_input(self):
+        """save_workflow BOOLEAN should default to True."""
+        optional = WIDENExitNode.INPUT_TYPES()["optional"]
+        assert "save_workflow" in optional
+        assert optional["save_workflow"][1]["default"] is True
+
+    def test_hidden_inputs(self):
+        """prompt and extra_pnginfo should be hidden inputs."""
+        hidden = WIDENExitNode.INPUT_TYPES()["hidden"]
+        assert hidden["prompt"] == "PROMPT"
+        assert hidden["extra_pnginfo"] == "EXTRA_PNGINFO"
+
+
+# =============================================================================
+# AC-1: save_model=False — default behavior unchanged
+# =============================================================================
+
+
+class TestSaveModelOff:
+    """AC: @exit-model-persistence ac-1
+
+    save_model=False should not trigger any persistence I/O.
+    """
+
+    # AC: @exit-model-persistence ac-1
+    def test_default_no_persistence(self, mock_model_patcher):
+        """With save_model=False, no persistence functions should be called."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+
+        node = WIDENExitNode()
+        # RecipeBase input — quick exit path
+        (result,) = node.execute(base, save_model=False, model_name="test")
+        assert result is not mock_model_patcher
+
+
+# =============================================================================
+# AC-3: Cache hit skips GPU
+# =============================================================================
+
+
+class TestSaveModelCacheHit:
+    """AC: @exit-model-persistence ac-3
+
+    On cache hit, GPU pipeline (analyze_recipe) should be skipped entirely.
+    """
+
+    # AC: @exit-model-persistence ac-3
+    def test_cache_hit_skips_analyze(self, mock_model_patcher, tmp_path):
+        """Cache hit should skip analyze_recipe and return patched model."""
+        from safetensors.torch import save_file
+
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        # Create a fake cached file
+        cached_path = tmp_path / "cached.safetensors"
+        key = "diffusion_model.input_blocks.0.0.weight"
+        cached_tensors = {key: torch.randn(4, 4)}
+        cached_metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "will_match",
+            "__ecaj_affected_keys__": f'["{key}"]',
+        }
+        save_file(cached_tensors, str(cached_path), metadata=cached_metadata)
+
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="cached.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=str(cached_path)),
+            patch("nodes.exit.compute_recipe_hash", return_value="will_match"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+        ):
+            (result,) = node.execute(
+                merge, save_model=True, model_name="cached"
+            )
+
+            # analyze_recipe should NOT have been called
+            mock_analyze.assert_not_called()
+
+        # Result should be a patched model
+        assert result is not mock_model_patcher
+        assert key in result.patches
+
+
+# =============================================================================
+# AC-2, AC-4: Cache miss — saves after GPU
+# =============================================================================
+
+
+class TestSaveModelCacheMiss:
+    """AC: @exit-model-persistence ac-2, ac-4
+
+    On cache miss, GPU pipeline runs normally and file is saved after.
+    """
+
+    # AC: @exit-model-persistence ac-2
+    def test_saves_after_gpu(self, mock_model_patcher, tmp_path):
+        """Cache miss should run GPU pipeline and save result."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        affected_key = "diffusion_model.input_blocks.0.0.weight"
+
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_cache", return_value=None),  # cache miss
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch("nodes.exit.atomic_save") as mock_save,
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+            (result,) = node.execute(
+                merge, save_model=True, model_name="model"
+            )
+
+            # analyze_recipe SHOULD have been called
+            mock_analyze.assert_called_once()
+            # atomic_save SHOULD have been called
+            mock_save.assert_called_once()
+
+    # AC: @exit-model-persistence ac-4
+    def test_overwrites_stale_cache(self, mock_model_patcher, tmp_path):
+        """Hash mismatch should overwrite the stale cached file."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        affected_key = "diffusion_model.input_blocks.0.0.weight"
+
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="new_hash"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_cache", return_value=None),  # stale = mismatch
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch("nodes.exit.atomic_save") as mock_save,
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+            (result,) = node.execute(
+                merge, save_model=True, model_name="model"
+            )
+
+            mock_save.assert_called_once()
+
+
+# =============================================================================
+# IS_CHANGED with persistence
+# =============================================================================
+
+
+class TestIsChangedPersistence:
+    """IS_CHANGED should incorporate save_model, model_name, and file mtime."""
+
+    def test_save_model_false_uses_base_hash(self, mock_model_patcher):
+        """save_model=False should return the base recipe hash."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        result = WIDENExitNode.IS_CHANGED(merge, save_model=False)
+        # Should be a hex string (SHA-256)
+        assert len(result) == 64
+
+    def test_save_model_true_different_from_false(self, mock_model_patcher):
+        """save_model=True should produce a different hash than False."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        result_off = WIDENExitNode.IS_CHANGED(merge, save_model=False)
+        result_on = WIDENExitNode.IS_CHANGED(
+            merge, save_model=True, model_name="test"
+        )
+        assert result_off != result_on
+
+    def test_ignores_prompt_and_extra_pnginfo(self, mock_model_patcher):
+        """prompt and extra_pnginfo should not affect the hash."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        result1 = WIDENExitNode.IS_CHANGED(
+            merge, save_model=True, model_name="test",
+            prompt={"a": 1}, extra_pnginfo={"workflow": {}},
+        )
+        result2 = WIDENExitNode.IS_CHANGED(
+            merge, save_model=True, model_name="test",
+            prompt={"b": 2}, extra_pnginfo={"different": {}},
+        )
+        assert result1 == result2
