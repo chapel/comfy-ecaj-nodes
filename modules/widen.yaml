@@ -937,6 +937,9 @@ features:
             given: arch=None or an unsupported architecture
             when: classify_layer_type is called
             then: it returns None (no error)
+        status:
+          maturity: draft
+          implementation: in_progress
     status:
       maturity: draft
       implementation: implemented
