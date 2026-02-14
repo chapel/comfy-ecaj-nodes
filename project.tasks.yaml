@@ -3463,6 +3463,10 @@
   plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #54. Implemented full model execution for WIDEN checkpoint merging.
+    Added RecipeModel support across the codebase: analyze_recipe_models() in lib/analysis.py,
+    OpApplyModel in lib/recipe_eval.py, model path collection in nodes/exit.py, and RecipeModel as
+    valid type in compose/merge nodes. All 13 ACs verified with 20 tests."
   depends_on:
     - "@implement-full-model-recipe-type"
     - "@implement-model-input-node"
@@ -3473,6 +3477,7 @@
   vcs_refs: []
   created_at: 2026-02-13T22:32:08.027Z
   started_at: 2026-02-14T02:45:27.285Z
+  completed_at: 2026-02-14T02:57:50.644Z
   notes:
     - _ulid: 01KHCJ41JV61GEG140NXPX6FWA
       created_at: 2026-02-13T22:32:08.027Z
@@ -3663,11 +3668,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-14T02:57:50.644Z
-  closed_reason: "Merged in PR #54. Implemented full model execution for WIDEN checkpoint merging.
-    Added RecipeModel support across the codebase: analyze_recipe_models() in lib/analysis.py,
-    OpApplyModel in lib/recipe_eval.py, model path collection in nodes/exit.py, and RecipeModel as
-    valid type in compose/merge nodes. All 13 ACs verified with 20 tests."
 - _ulid: 01KHCQWYAEA21JA0ZB7FB9100T
   slugs: []
   title: Fix AC annotation style in test_graph.py
@@ -3973,4 +3973,285 @@
         reproducibility. Changing the workflow JSON (e.g. rearranging nodes) should not invalidate
         the cache.
       supersedes: null
+  todos: []
+- _ulid: 01KHDHEGN0BWGH3XGZWXX31TPX
+  slugs:
+    - qwen-detect-classify
+  title: Implement Qwen detection and block classification
+  type: task
+  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
+  tags:
+    - qwen
+    - classification
+  vcs_refs: []
+  created_at: 2026-02-14T07:39:36.992Z
+  notes:
+    - _ulid: 01KHDHEGN0K0DA5TXDDN194GND
+      created_at: 2026-02-14T07:39:36.992Z
+      author: "@claude"
+      content: |
+        Enable Qwen detection in nodes/entry.py (add "qwen" to
+        _SUPPORTED_ARCHITECTURES). Add classify_key_qwen() in
+        lib/block_classify.py mapping transformer_blocks.N to TB00-TB59
+        with dynamic index discovery (regex, not hardcoded 60).
+        Add Qwen layer type patterns (attention/feed_forward/norm).
+        Register in _CLASSIFIERS and _LAYER_TYPE_PATTERNS.
+        Update __all__ in block_classify.py to export new functions.
+
+        BREAKING TESTS to update:
+        - tests/test_entry.py: test_qwen_detected_but_unsupported (line 189)
+          must become test_qwen_detected_and_supported.
+        - tests/test_layer_type_classify.py: assertions that qwen returns
+          None must become positive classification tests.
+        - tests/test_merge_block_config.py: assertion that
+          get_block_classifier("qwen") is None must test real classifier.
+        - tests/test_lora_loaders.py: assertion that get_loader("qwen")
+          raises ValueError must test real loader (covered by lora task).
+
+        New tests in: tests/test_entry.py, tests/test_layer_type_classify.py,
+        tests/test_merge_block_config.py.
+        Covers ac-1, ac-2, ac-3.
+  todos: []
+- _ulid: 01KHDHEGPKY3Y9YTGX54CEYCWC
+  slugs:
+    - qwen-lora-loader
+  title: Implement Qwen LoRA loader
+  type: task
+  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
+  tags:
+    - qwen
+    - lora
+  vcs_refs: []
+  created_at: 2026-02-14T07:39:37.043Z
+  notes:
+    - _ulid: 01KHDHEGPK45VJ5WB2HH51A4JM
+      created_at: 2026-02-14T07:39:37.043Z
+      author: "@claude"
+      content: |
+        Create lib/lora/qwen.py implementing QwenLoader (subclass LoRALoader).
+        Handle 3 LoRA formats -- diffusers, A1111/kohya, LyCORIS -- with
+        compound name preservation from merge-router reference
+        (qwen_merge.py lines 254-283). No QKV fusion needed (separate
+        to_q/to_k/to_v). Standard up/down DeltaSpec production.
+        Register in LOADER_REGISTRY in lib/lora/__init__.py.
+
+        Update tests/test_lora_loaders.py: replace ValueError assertion for
+        get_loader("qwen") with real loader tests. Add new tests with
+        synthetic safetensors LoRA files for each format.
+        Covers ac-4, ac-5, ac-6.
+  todos: []
+- _ulid: 01KHDHEGRC0TP9TR9YKFD2Q9AY
+  slugs:
+    - qwen-model-loader
+  title: Implement Qwen model loader support
+  type: task
+  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
+  tags:
+    - qwen
+    - model-loader
+  vcs_refs: []
+  created_at: 2026-02-14T07:39:37.100Z
+  notes:
+    - _ulid: 01KHDHEGRB3RQZ78GSBMKYFHG6
+      created_at: 2026-02-14T07:39:37.099Z
+      author: "@claude"
+      content: |
+        Add Qwen architecture detection pattern to _ARCH_PATTERNS in
+        lib/model_loader.py (match transformer_blocks, distinguish from
+        Flux double_blocks). Add Qwen-specific entries to _FILE_KEY_PREFIXES
+        (e.g. model.transformer.) and _EXCLUDED_PREFIXES if needed.
+        Update _normalize_key() for any Qwen-specific prefix stripping.
+
+        Tests in tests/test_model_loader.py: add Qwen detection and
+        key normalization tests.
+        Covers ac-7.
+  todos: []
+- _ulid: 01KHDHEGSHFQVSWEK3F2A93R9Y
+  slugs:
+    - qwen-block-config
+  title: Implement Qwen block config node and registration
+  type: task
+  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
+  tags:
+    - qwen
+    - node
+  vcs_refs: []
+  created_at: 2026-02-14T07:39:37.137Z
+  notes:
+    - _ulid: 01KHDHEGSH1DNT69YH2CCK2YNM
+      created_at: 2026-02-14T07:39:37.137Z
+      author: "@claude"
+      content: |
+        Create nodes/block_config_qwen.py using make_block_config_node()
+        factory with 60 block definitions (TB00-TB59) and 3 layer-type
+        sliders. Register WIDENBlockConfigQwen in NODE_CLASS_MAPPINGS and
+        NODE_DISPLAY_NAME_MAPPINGS in __init__.py. Verify all registries
+        are wired (ac-9). Add integration test exercising mock Qwen recipe
+        through the full pipeline.
+
+        Tests in: tests/test_per_block_control.py (new Qwen node tests).
+        Covers ac-8, ac-9.
+  todos: []
+- _ulid: 01KHDHEGTTYESTY0BGZ64NV8EZ
+  slugs:
+    - flux-detect-classify
+  title: Implement Flux Klein detection and block classification
+  type: task
+  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
+  tags:
+    - flux
+    - classification
+  vcs_refs: []
+  created_at: 2026-02-14T07:39:37.178Z
+  notes:
+    - _ulid: 01KHDHEGTTV23EK1E4EGA7G4P8
+      created_at: 2026-02-14T07:39:37.178Z
+      author: "@claude"
+      content: |
+        Enable Flux detection in nodes/entry.py (add "flux" to
+        _SUPPORTED_ARCHITECTURES). Add classify_key_flux() in
+        lib/block_classify.py mapping double_blocks.N to DB0N and
+        single_blocks.N to SB0N with dynamic index discovery.
+        Add Flux layer type patterns. Register in _CLASSIFIERS and
+        _LAYER_TYPE_PATTERNS. Update __all__ exports.
+
+        BREAKING TESTS to update:
+        - tests/test_entry.py: test_flux_detected_but_unsupported (line 174)
+          must become test_flux_detected_and_supported.
+        - tests/test_layer_type_classify.py: assertions that flux returns
+          None must become positive classification tests.
+        - tests/test_merge_block_config.py: assertion that
+          get_block_classifier("flux") is None must test real classifier.
+
+        New tests in: tests/test_entry.py, tests/test_layer_type_classify.py,
+        tests/test_merge_block_config.py.
+        Covers ac-1, ac-2, ac-3.
+  todos: []
+- _ulid: 01KHDHEGVX7ZCMG3A20X4XWBCA
+  slugs:
+    - flux-lora-loader
+  title: Implement Flux Klein LoRA loader
+  type: task
+  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
+  tags:
+    - flux
+    - lora
+  vcs_refs: []
+  created_at: 2026-02-14T07:39:37.213Z
+  notes:
+    - _ulid: 01KHDHEGVX65KJJGA1XQC642CV
+      created_at: 2026-02-14T07:39:37.213Z
+      author: "@claude"
+      content: |
+        Create lib/lora/flux.py implementing FluxLoader (subclass LoRALoader).
+        Handle double_block QKV fusing (img_attn.qkv and txt_attn.qkv per
+        block, two streams) using existing qkv_q/qkv_k/qkv_v DeltaSpec kinds
+        with offset=(start, length).
+
+        Handle single_block linear1 fusing (4-way offset split for
+        to_q/to_k/to_v/proj_mlp). Q/K/V components reuse qkv_q/qkv_k/qkv_v
+        kinds. The MLP projection slice needs a new DeltaSpec kind (e.g.
+        "offset_mlp") and a minor executor update in lib/gpu_ops.py to add
+        it to the offset-aware kind set at line 200. This is a one-line
+        change to extend the tuple.
+
+        Follow Z-Image offset-based DeltaSpec pattern from lib/lora/zimage.py.
+        Support both BFL/kohya and diffusers LoRA formats.
+        Register in LOADER_REGISTRY.
+
+        Update tests/test_lora_loaders.py: replace ValueError assertion for
+        get_loader("flux") with real loader tests. Add synthetic safetensors
+        LoRA files testing both double_block QKV and single_block linear1.
+        Covers ac-4, ac-5, ac-6, ac-7.
+  todos: []
+- _ulid: 01KHDHEGWYT9Y2847GMYDB85NZ
+  slugs:
+    - flux-model-loader
+  title: Implement Flux Klein model loader support
+  type: task
+  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
+  tags:
+    - flux
+    - model-loader
+  vcs_refs: []
+  created_at: 2026-02-14T07:39:37.246Z
+  notes:
+    - _ulid: 01KHDHEGWYFSX7Y4267T1B22K9
+      created_at: 2026-02-14T07:39:37.246Z
+      author: "@claude"
+      content: |
+        Add Flux architecture detection pattern to _ARCH_PATTERNS in
+        lib/model_loader.py (match double_blocks). Add Flux-specific entries
+        to _FILE_KEY_PREFIXES and _EXCLUDED_PREFIXES. Update _normalize_key()
+        for Flux-specific prefix stripping.
+
+        Tests in tests/test_model_loader.py: add Flux detection and
+        key normalization tests.
+        Covers ac-8.
+  todos: []
+- title: Implement Flux Klein block config node and registration
+  type: task
+  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+  priority: 2
+  slugs:
+    - flux-block-config
+  tags:
+    - flux
+    - node
+  depends_on: []
+  notes:
+    - _ulid: 01KHDHEGXXP8J47WJCR68S2KNG
+      created_at: 2026-02-14T07:39:37.277Z
+      author: "@claude"
+      content: |
+        Create nodes/block_config_flux.py using make_block_config_node()
+        factory with 32 block definitions for Klein 9B max (DB00-DB07 +
+        SB00-SB23) and 3 layer-type sliders. Register WIDENBlockConfigFlux
+        in NODE_CLASS_MAPPINGS and NODE_DISPLAY_NAME_MAPPINGS in __init__.py.
+        Verify both 4B and 9B variants work with same "flux" arch tag (ac-10).
+        Verify all registries wired (ac-11). Add integration test.
+
+        Tests in: tests/test_per_block_control.py (new Flux node tests).
+        Covers ac-9, ac-10, ac-11.
+  _ulid: 01KHDHEGXXH30KS31R7RXA41NC
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-14T07:39:37.277Z
   todos: []
