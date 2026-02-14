@@ -2850,6 +2850,7 @@
     - blocks
   vcs_refs: []
   created_at: 2026-02-13T00:43:25.166Z
+  started_at: 2026-02-14T02:09:57.814Z
   notes:
     - _ulid: 01KHA7ANS0RW3QBZ4TAKK3W5QP
       created_at: 2026-02-13T00:45:02.112Z
@@ -2971,9 +2972,30 @@
 
         pytest -v && ruff check
       supersedes: null
+    - _ulid: 01KHCYZ5TN9N58KX92M2DY4YAR
+      created_at: 2026-02-14T02:16:40.021Z
+      author: "@claude"
+      content: |-
+        Implementation complete. Refactored from grouped blocks to individual blocks:
+
+        SDXL: 7 grouped sliders → 19 individual sliders (IN00-IN08, MID, OUT00-OUT08)
+        Z-Image: 8 grouped sliders → 34 individual sliders (L00-L29, NOISE_REF0-1, CTX_REF0-1)
+
+        Files modified:
+        - lib/block_classify.py: Updated both classifiers
+        - lib/recipe.py: Updated docstring example
+        - nodes/block_config_sdxl.py: Updated _SDXL_BLOCKS tuple
+        - nodes/block_config_zimage.py: Updated _ZIMAGE_BLOCKS tuple
+        - tests/conftest.py: Updated _ZIMAGE_KEYS with numbered refiner submodules
+        - tests/test_per_block_control.py: Updated expected block names and counts
+        - tests/test_merge_block_config.py: Updated all block name references
+        - tests/test_lora_block_strength.py: Updated block config overrides
+        - tests/test_block_config.py: Updated example block names
+
+        All 600 tests pass, ruff clean.
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T02:09:57.814Z
 - _ulid: 01KHA77QE33PJTTXZCP29H88DS
   slugs:
     - layer-type-filter-impl
