@@ -74,6 +74,13 @@ _ARCH_PATTERNS = (
         "qwen",
         lambda keys: sum(1 for k in keys if "transformer_blocks" in k) >= 60,
     ),
+    # Flux Klein: double_blocks structure (4B: 5 double + 20 single, 9B: 8 double + 24 single)
+    # Must not match Qwen which uses transformer_blocks instead of double_blocks.
+    # AC: @flux-model-loader ac-8
+    (
+        "flux",
+        lambda keys: any("double_blocks" in k for k in keys),
+    ),
 )
 
 
