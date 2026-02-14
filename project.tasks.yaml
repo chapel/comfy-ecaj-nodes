@@ -4017,6 +4017,7 @@
         tests/test_merge_block_config.py.
         Covers ac-1, ac-2, ac-3.
   todos: []
+  automation: eligible
 - _ulid: 01KHDHEGPKY3Y9YTGX54CEYCWC
   slugs:
     - qwen-lora-loader
@@ -4050,6 +4051,7 @@
         synthetic safetensors LoRA files for each format.
         Covers ac-4, ac-5, ac-6.
   todos: []
+  automation: eligible
 - _ulid: 01KHDHEGRC0TP9TR9YKFD2Q9AY
   slugs:
     - qwen-model-loader
@@ -4081,6 +4083,7 @@
         key normalization tests.
         Covers ac-7.
   todos: []
+  automation: eligible
 - _ulid: 01KHDHEGSHFQVSWEK3F2A93R9Y
   slugs:
     - qwen-block-config
@@ -4112,6 +4115,7 @@
         Tests in: tests/test_per_block_control.py (new Qwen node tests).
         Covers ac-8, ac-9.
   todos: []
+  automation: eligible
 - _ulid: 01KHDHEGTTYESTY0BGZ64NV8EZ
   slugs:
     - flux-detect-classify
@@ -4152,6 +4156,7 @@
         tests/test_merge_block_config.py.
         Covers ac-1, ac-2, ac-3.
   todos: []
+  automation: eligible
 - _ulid: 01KHDHEGVX7ZCMG3A20X4XWBCA
   slugs:
     - flux-lora-loader
@@ -4194,6 +4199,7 @@
         LoRA files testing both double_block QKV and single_block linear1.
         Covers ac-4, ac-5, ac-6, ac-7.
   todos: []
+  automation: eligible
 - _ulid: 01KHDHEGWYT9Y2847GMYDB85NZ
   slugs:
     - flux-model-loader
@@ -4224,16 +4230,23 @@
         key normalization tests.
         Covers ac-8.
   todos: []
-- title: Implement Flux Klein block config node and registration
-  type: task
-  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  priority: 2
+  automation: eligible
+- _ulid: 01KHDHEGXXH30KS31R7RXA41NC
   slugs:
     - flux-block-config
+  title: Implement Flux Klein block config node and registration
+  type: task
+  plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 2
   tags:
     - flux
     - node
-  depends_on: []
+  vcs_refs: []
+  created_at: 2026-02-14T07:39:37.277Z
   notes:
     - _ulid: 01KHDHEGXXP8J47WJCR68S2KNG
       created_at: 2026-02-14T07:39:37.277Z
@@ -4248,10 +4261,5 @@
 
         Tests in: tests/test_per_block_control.py (new Flux node tests).
         Covers ac-9, ac-10, ac-11.
-  _ulid: 01KHDHEGXXH30KS31R7RXA41NC
-  status: pending
-  blocked_by: []
-  context: []
-  vcs_refs: []
-  created_at: 2026-02-14T07:39:37.277Z
   todos: []
+  automation: eligible
