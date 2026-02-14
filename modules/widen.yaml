@@ -1208,6 +1208,12 @@ features:
         then: |
           only one batch of model weights per loader is on GPU at a time
           (streaming loaders are read sequentially, not all at once)
+      - id: ac-14
+        given: a RecipeModel with strength != 1.0 in a recipe tree
+        when: OpApplyModel loads its weights during batched evaluation
+        then: "the loaded weights are blended toward the base register: result = base + strength *
+          (model_weights - base), so strength=0 yields the base (zero contribution) and strength=1
+          yields raw model weights (current default)"
     depends_on:
       - "@full-model-recipe"
       - "@model-input-node"
