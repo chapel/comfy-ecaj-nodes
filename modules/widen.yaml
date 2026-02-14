@@ -939,7 +939,7 @@ features:
             then: it returns None (no error)
     status:
       maturity: draft
-      implementation: implemented
+      implementation: in_progress
   - _ulid: 01KHCJ41CGXX0V1FTCF9J0H3YK
     slugs:
       - full-model-recipe
