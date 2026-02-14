@@ -1,6 +1,6 @@
 """WIDEN Compose Node — Accumulates branches for simultaneous merge."""
 
-from ..lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+from ..lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeModel
 
 
 class WIDENComposeNode:
@@ -45,9 +45,9 @@ class WIDENComposeNode:
             )
 
         # Validate branch is a valid recipe type
-        if not isinstance(branch, (RecipeLoRA, RecipeCompose, RecipeMerge)):
+        if not isinstance(branch, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
             raise TypeError(
-                f"branch must be RecipeLoRA, RecipeCompose, or RecipeMerge, "
+                f"branch must be RecipeLoRA, RecipeModel, RecipeCompose, or RecipeMerge, "
                 f"got {type(branch).__name__}"
             )
 

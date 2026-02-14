@@ -89,7 +89,14 @@ def serialize_recipe(
     Returns:
         Deterministic JSON string
     """
-    from .recipe import BlockConfig, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+    from .recipe import (
+        BlockConfig,
+        RecipeBase,
+        RecipeCompose,
+        RecipeLoRA,
+        RecipeMerge,
+        RecipeModel,
+    )
 
     def _serialize_node(n: RecipeNode) -> dict:
         if isinstance(n, RecipeBase):
@@ -113,6 +120,21 @@ def serialize_recipe(
                     entry["size"] = size
                 loras.append(entry)
             result: dict = {"type": "RecipeLoRA", "loras": loras}
+            if n.block_config is not None:
+                result["block_config"] = _serialize_block_config(n.block_config)
+            return result
+        elif isinstance(n, RecipeModel):
+            # Include model file stats for cache invalidation
+            result: dict = {
+                "type": "RecipeModel",
+                "path": n.path,
+                "strength": n.strength,
+            }
+            # Include file stats if available (using lora_stats which also has model stats)
+            if n.path in lora_stats:
+                mtime, size = lora_stats[n.path]
+                result["mtime"] = mtime
+                result["size"] = size
             if n.block_config is not None:
                 result["block_config"] = _serialize_block_config(n.block_config)
             return result
@@ -189,19 +211,22 @@ def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
 def compute_lora_stats(
     node: RecipeNode,
     resolver: Callable[[str], str | None],
+    model_resolver: Callable[[str], str | None] | None = None,
 ) -> dict[str, tuple[float, int]]:
-    """Walk recipe tree and collect LoRA file stats.
+    """Walk recipe tree and collect LoRA and model file stats.
 
     AC: @exit-model-persistence ac-7
+    AC: @full-model-execution ac-11
 
     Args:
         node: Recipe tree root
         resolver: Resolves LoRA name to full filesystem path
+        model_resolver: Resolves model name to full filesystem path (optional)
 
     Returns:
-        Dict mapping LoRA path (as in recipe) -> (mtime, size)
+        Dict mapping file path (as in recipe) -> (mtime, size)
     """
-    from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+    from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeModel
 
     stats: dict[str, tuple[float, int]] = {}
 
@@ -219,6 +244,21 @@ def compute_lora_stats(
                         stats[path] = (st.st_mtime, st.st_size)
                     except OSError:
                         stats[path] = (0.0, 0)
+        elif isinstance(n, RecipeModel):
+            # AC: @full-model-execution ac-11
+            # Include checkpoint file stats for IS_CHANGED hash
+            path = n.path
+            if path not in stats:
+                full_path = path
+                if model_resolver is not None:
+                    resolved = model_resolver(path)
+                    if resolved is not None:
+                        full_path = resolved
+                try:
+                    st = os.stat(full_path)
+                    stats[path] = (st.st_mtime, st.st_size)
+                except OSError:
+                    stats[path] = (0.0, 0)
         elif isinstance(n, RecipeCompose):
             for branch in n.branches:
                 _walk(branch)

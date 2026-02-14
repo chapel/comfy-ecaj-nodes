@@ -11,7 +11,12 @@ from typing import TYPE_CHECKING
 
 import torch
 
-from ..lib.analysis import analyze_recipe, get_keys_to_process, walk_to_base
+from ..lib.analysis import (
+    analyze_recipe,
+    analyze_recipe_models,
+    get_keys_to_process,
+    walk_to_base,
+)
 from ..lib.executor import (
     chunked_evaluation,
     compile_batch_groups,
@@ -30,7 +35,14 @@ from ..lib.persistence import (
     serialize_recipe,
     validate_model_name,
 )
-from ..lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeNode
+from ..lib.recipe import (
+    RecipeBase,
+    RecipeCompose,
+    RecipeLoRA,
+    RecipeMerge,
+    RecipeModel,
+    RecipeNode,
+)
 from ..lib.widen import WIDEN, WIDENConfig
 
 try:
@@ -63,16 +75,20 @@ def _validate_recipe_tree(node: RecipeNode, path: str = "root") -> None:
         # Valid branch node (must be used as target or branch, not root)
         return
 
+    elif isinstance(node, RecipeModel):
+        # Valid branch node for full model merging
+        return
+
     elif isinstance(node, RecipeCompose):
         # Validate each branch
         if not node.branches:
             raise ValueError(f"RecipeCompose at {path} has no branches")
         for i, branch in enumerate(node.branches):
             branch_path = f"{path}.branches[{i}]"
-            if not isinstance(branch, (RecipeLoRA, RecipeCompose, RecipeMerge)):
+            if not isinstance(branch, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
                 raise ValueError(
                     f"Invalid branch type at {branch_path}: expected RecipeLoRA, "
-                    f"RecipeCompose, or RecipeMerge, got {type(branch).__name__}"
+                    f"RecipeModel, RecipeCompose, or RecipeMerge, got {type(branch).__name__}"
                 )
             _validate_recipe_tree(branch, branch_path)
 
@@ -88,10 +104,10 @@ def _validate_recipe_tree(node: RecipeNode, path: str = "root") -> None:
 
         # Validate target
         target_path = f"{path}.target"
-        if not isinstance(node.target, (RecipeLoRA, RecipeCompose, RecipeMerge)):
+        if not isinstance(node.target, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
             raise ValueError(
                 f"Invalid target type at {target_path}: expected RecipeLoRA, "
-                f"RecipeCompose, or RecipeMerge, got {type(node.target).__name__}"
+                f"RecipeModel, RecipeCompose, or RecipeMerge, got {type(node.target).__name__}"
             )
         _validate_recipe_tree(node.target, target_path)
 
@@ -189,6 +205,9 @@ def _collect_lora_paths(node: RecipeNode) -> list[str]:
         # Extract paths from loras tuple
         for lora_spec in node.loras:
             paths.append(lora_spec["path"])
+    elif isinstance(node, RecipeModel):
+        # Model nodes have no LoRAs - skip
+        pass
     elif isinstance(node, RecipeCompose):
         # Collect from all branches
         for branch in node.branches:
@@ -203,34 +222,72 @@ def _collect_lora_paths(node: RecipeNode) -> list[str]:
     return paths
 
 
+def _collect_model_paths(node: RecipeNode) -> list[str]:
+    """Recursively collect all model checkpoint paths from a recipe tree.
+
+    AC: @full-model-execution ac-11
+    Returns paths for IS_CHANGED hash computation.
+
+    Args:
+        node: Any recipe node
+
+    Returns:
+        List of model checkpoint paths in deterministic order
+    """
+    paths: list[str] = []
+
+    if isinstance(node, RecipeBase):
+        pass
+    elif isinstance(node, RecipeLoRA):
+        pass
+    elif isinstance(node, RecipeModel):
+        paths.append(node.path)
+    elif isinstance(node, RecipeCompose):
+        for branch in node.branches:
+            paths.extend(_collect_model_paths(branch))
+    elif isinstance(node, RecipeMerge):
+        paths.extend(_collect_model_paths(node.base))
+        paths.extend(_collect_model_paths(node.target))
+        if node.backbone is not None:
+            paths.extend(_collect_model_paths(node.backbone))
+
+    return paths
+
+
 def _compute_recipe_hash(
     widen: RecipeNode,
     lora_path_resolver: Callable[[str], str | None] | None = None,
+    model_path_resolver: Callable[[str], str | None] | None = None,
 ) -> str:
-    """Compute a hash of the recipe based on LoRA file paths and mtimes.
+    """Compute a hash of the recipe based on LoRA and model file paths and mtimes.
 
     AC: @exit-patch-install ac-5 — identical hash when no LoRA changes
     AC: @exit-patch-install ac-6 — different hash when LoRA modified
+    AC: @full-model-execution ac-11 — checkpoint file stats included in hash
 
     Args:
         widen: Recipe tree root
         lora_path_resolver: Callable that resolves a LoRA name to its full
             filesystem path, or None if not found. Same resolver as
             used by analyze_recipe.
+        model_path_resolver: Callable that resolves a model name to its full
+            filesystem path.
 
     Returns:
         Hex digest of SHA-256 hash
     """
-    paths = _collect_lora_paths(widen)
+    lora_paths = _collect_lora_paths(widen)
+    model_paths = _collect_model_paths(widen)
 
     # Sort for deterministic ordering
-    paths = sorted(set(paths))
+    lora_paths = sorted(set(lora_paths))
+    model_paths = sorted(set(model_paths))
 
     # Build hash from (path, mtime, size) tuples
     hasher = hashlib.sha256()
 
-    for path in paths:
-        # Resolve full path using resolver if available
+    # Hash LoRA files
+    for path in lora_paths:
         full_path = path
         if lora_path_resolver is not None:
             resolved = lora_path_resolver(path)
@@ -242,12 +299,29 @@ def _compute_recipe_hash(
             mtime = stat.st_mtime
             size = stat.st_size
         except OSError:
-            # File doesn't exist or inaccessible — use sentinel values
             mtime = 0.0
             size = 0
 
-        # Add to hash: path|mtime|size
-        hasher.update(f"{path}|{mtime}|{size}\n".encode())
+        hasher.update(f"lora:{path}|{mtime}|{size}\n".encode())
+
+    # AC: @full-model-execution ac-11
+    # Hash model checkpoint files
+    for path in model_paths:
+        full_path = path
+        if model_path_resolver is not None:
+            resolved = model_path_resolver(path)
+            if resolved is not None:
+                full_path = resolved
+
+        try:
+            stat = os.stat(full_path)
+            mtime = stat.st_mtime
+            size = stat.st_size
+        except OSError:
+            mtime = 0.0
+            size = 0
+
+        hasher.update(f"model:{path}|{mtime}|{size}\n".encode())
 
     return hasher.hexdigest()
 
@@ -263,6 +337,20 @@ def _build_lora_resolver() -> Callable[[str], str | None]:
 
     def resolver(lora_name: str) -> str | None:
         return folder_paths.get_full_path("loras", lora_name)
+
+    return resolver
+
+
+def _build_model_resolver() -> Callable[[str], str | None]:
+    """Build a model path resolver using ComfyUI's folder_paths.
+
+    Returns a callable that resolves model names to their full filesystem path
+    by searching all registered checkpoint directories.
+    """
+    import folder_paths
+
+    def resolver(model_name: str) -> str | None:
+        return folder_paths.get_full_path("checkpoints", model_name)
 
     return resolver
 
@@ -323,15 +411,20 @@ class WIDENExitNode:
         prompt: object = None,
         extra_pnginfo: object = None,
     ) -> str:
-        """Compute cache key based on LoRA file modification times.
+        """Compute cache key based on LoRA and model file modification times.
 
         AC: @exit-patch-install ac-5 — identical hash on no LoRA changes
         AC: @exit-patch-install ac-6 — different hash on LoRA modifications
+        AC: @full-model-execution ac-11 — checkpoint file stats included
 
         Returns:
             Hash string for ComfyUI caching
         """
-        base_hash = _compute_recipe_hash(widen, lora_path_resolver=_build_lora_resolver())
+        base_hash = _compute_recipe_hash(
+            widen,
+            lora_path_resolver=_build_lora_resolver(),
+            model_path_resolver=_build_model_resolver(),
+        )
 
         if not save_model:
             return base_hash
@@ -396,8 +489,9 @@ class WIDENExitNode:
                 f"got {type(widen).__name__}. Connect a Merge node to Exit."
             )
 
-        # Build resolver that searches all ComfyUI LoRA directories
+        # Build resolvers that search all ComfyUI directories
         lora_path_resolver = _build_lora_resolver()
+        model_path_resolver = _build_model_resolver()
 
         # --- Shared setup: compute base_state ONCE ---
         model_patcher = walk_to_base(widen).model_patcher
@@ -412,13 +506,13 @@ class WIDENExitNode:
             save_path = _resolve_checkpoints_path(validated_name)
 
             base_identity = compute_base_identity(base_state)
-            lora_stats = compute_lora_stats(widen, lora_path_resolver)
+            lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
             serialized = serialize_recipe(widen, base_identity, lora_stats)
             recipe_hash = compute_recipe_hash(serialized)
 
             cached_metadata = check_cache(save_path, recipe_hash)
             if cached_metadata is not None:
-                # CACHE HIT — skip GPU entirely, no LoRA loading
+                # CACHE HIT — skip GPU entirely, no LoRA/model loading
                 affected = json.loads(cached_metadata["__ecaj_affected_keys__"])
                 merged_state = load_affected_keys(save_path, affected)
                 if ProgressBar is not None:
@@ -429,11 +523,24 @@ class WIDENExitNode:
         # --- Normal GPU pipeline ---
         analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
 
+        # AC: @full-model-execution ac-1
+        # Analyze recipe for full model checkpoints
+        base = walk_to_base(widen)
+        model_analysis = analyze_recipe_models(
+            widen, base.arch, model_path_resolver=model_path_resolver
+        )
+
         try:
             loader = analysis.loader
             set_affected = analysis.set_affected
-            affected_keys = analysis.affected_keys
+            lora_affected_keys = analysis.affected_keys
             arch = analysis.arch
+
+            # AC: @full-model-execution ac-12
+            # Model affected keys (all diffusion model keys in both base and checkpoint)
+            model_affected = model_analysis.model_affected
+            model_loaders = model_analysis.model_loaders
+            all_model_keys = model_analysis.all_model_keys
 
             # Computation dtype is fp32 for numerical stability
             compute_dtype = torch.float32
@@ -441,9 +548,13 @@ class WIDENExitNode:
             # Get device for GPU computation
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
-            # AC-6: Filter keys to only those affected by LoRAs
+            # AC: @full-model-execution ac-12
+            # For models-only recipes, process all diffusion keys in both base and model
+            # For mixed recipes, union of LoRA-affected and model-affected keys
             all_keys = set(base_state.keys())
-            keys_to_process = get_keys_to_process(all_keys, affected_keys)
+            lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
+            model_keys = all_keys & all_model_keys  # Keys in both base and model
+            keys_to_process = lora_keys | model_keys
 
             if not keys_to_process:
                 # No keys affected - return clone
@@ -456,6 +567,13 @@ class WIDENExitNode:
                 # set_key is str(id(RecipeLoRA)), convert back to int
                 set_id = int(set_key)
                 set_id_map[set_id] = set_key
+
+            # Build model_id_map from object ids to string keys
+            # AC: @full-model-execution ac-2
+            model_id_map: dict[int, str] = {}
+            for model_key in model_affected.keys():
+                model_id = int(model_key)
+                model_id_map[model_id] = model_key
 
             # Create WIDEN instance with t_factor from the root merge
             # AC-6: Single-branch compose will be handled by evaluate_recipe
@@ -480,11 +598,14 @@ class WIDENExitNode:
             pbar = ProgressBar(len(batch_groups)) if ProgressBar is not None else None
 
             # Pre-compile recipe tree into flat evaluation plan (once)
-            plan = compile_plan(widen, set_id_map, arch)
+            # AC: @full-model-execution ac-2
+            plan = compile_plan(widen, set_id_map, arch, model_id_map)
 
             for sig, group_keys in batch_groups.items():
                 # Estimate batch size based on shape and VRAM
-                n_models = len(set_affected)  # Number of LoRA sets
+                # AC: @full-model-execution ac-13
+                # Count both LoRA sets and model loaders for memory estimation
+                n_models = len(set_affected) + len(model_loaders)
                 batch_size = compute_batch_size(
                     sig.shape,
                     n_models,
@@ -493,8 +614,9 @@ class WIDENExitNode:
 
                 # Build evaluation function using pre-compiled plan
                 # AC: @merge-block-config ac-1, ac-2
-                # Pass arch and widen_config for per-block t_factor support
-                def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg):
+                # AC: @full-model-execution ac-3, ac-5
+                # Pass arch, widen_config, and model_loaders
+                def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs):
                     def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
                         return execute_plan(
                             plan=p,
@@ -506,15 +628,18 @@ class WIDENExitNode:
                             dtype=dtype,
                             arch=architecture,
                             widen_config=wcfg,
+                            model_loaders=mdl_ldrs,
                         )
                     return eval_fn
 
                 eval_fn = make_eval_fn(
                     plan, loader, widen_merger, device, compute_dtype,
-                    arch, widen_config
+                    arch, widen_config, model_loaders
                 )
 
                 # Run chunked evaluation with OOM backoff
+                # AC: @full-model-execution ac-8
+                # OOM backoff retries at batch_size=1 (streaming loader re-reads)
                 group_base = {k: base_state[k] for k in group_keys}
                 group_results = chunked_evaluation(
                     keys=group_keys,
@@ -542,6 +667,11 @@ class WIDENExitNode:
             # AC: @memory-management ac-3
             # Cleanup loader resources (delta caches and file handles)
             loader.cleanup()
+
+            # AC: @full-model-execution ac-7
+            # Cleanup model loaders (close file handles)
+            for model_loader in model_analysis.model_loaders.values():
+                model_loader.cleanup()
 
         # Phase 3: Install merged weights as set patches
         # AC-1: Returns MODEL (ModelPatcher clone) with set patches
