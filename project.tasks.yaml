@@ -3388,7 +3388,7 @@
   type: task
   spec_ref: "@full-model-loader"
   plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on: []
   context: []
