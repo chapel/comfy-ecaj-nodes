@@ -4,10 +4,12 @@ import pytest
 import torch
 
 from lib.recipe import (
+    BlockConfig,
     RecipeBase,
     RecipeCompose,
     RecipeLoRA,
     RecipeMerge,
+    RecipeModel,
     RecipeNode,
 )
 
@@ -218,3 +220,121 @@ class TestRecipeImports:
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
         assert merge.t_factor == 1.0
+
+
+class TestRecipeModel:
+    """RecipeModel tests — frozen, fields, composition with other recipes."""
+
+    # AC: @full-model-recipe ac-1
+    def test_recipe_model_frozen(self):
+        """RecipeModel is frozen — assignment after construction raises error."""
+        model = RecipeModel(path="checkpoint.safetensors")
+        with pytest.raises((AttributeError, TypeError)):
+            model.path = "other.safetensors"
+
+    # AC: @full-model-recipe ac-1
+    def test_recipe_model_frozen_strength(self):
+        """RecipeModel strength field is frozen."""
+        model = RecipeModel(path="checkpoint.safetensors", strength=0.5)
+        with pytest.raises((AttributeError, TypeError)):
+            model.strength = 1.0
+
+    # AC: @full-model-recipe ac-1
+    def test_recipe_model_frozen_block_config(self):
+        """RecipeModel block_config field is frozen."""
+        model = RecipeModel(path="checkpoint.safetensors")
+        with pytest.raises((AttributeError, TypeError)):
+            model.block_config = BlockConfig(arch="sdxl", block_overrides=())
+
+    # AC: @full-model-recipe ac-2
+    def test_recipe_model_has_path(self):
+        """RecipeModel has path field (str)."""
+        model = RecipeModel(path="checkpoint.safetensors")
+        assert model.path == "checkpoint.safetensors"
+        assert isinstance(model.path, str)
+
+    # AC: @full-model-recipe ac-2
+    def test_recipe_model_strength_default(self):
+        """RecipeModel strength defaults to 1.0."""
+        model = RecipeModel(path="checkpoint.safetensors")
+        assert model.strength == 1.0
+
+    # AC: @full-model-recipe ac-2
+    def test_recipe_model_strength_custom(self):
+        """RecipeModel strength can be set to custom value."""
+        model = RecipeModel(path="checkpoint.safetensors", strength=0.7)
+        assert model.strength == 0.7
+        assert isinstance(model.strength, float)
+
+    # AC: @full-model-recipe ac-2
+    def test_recipe_model_block_config_default(self):
+        """RecipeModel block_config defaults to None."""
+        model = RecipeModel(path="checkpoint.safetensors")
+        assert model.block_config is None
+
+    # AC: @full-model-recipe ac-2
+    def test_recipe_model_block_config_custom(self):
+        """RecipeModel can have a BlockConfig."""
+        block_cfg = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
+        model = RecipeModel(
+            path="checkpoint.safetensors", strength=0.8, block_config=block_cfg
+        )
+        assert model.block_config is block_cfg
+        assert model.block_config.arch == "sdxl"
+
+    # AC: @full-model-recipe ac-3
+    def test_recipe_model_with_branch(self):
+        """RecipeModel can be appended to RecipeCompose via with_branch."""
+        model = RecipeModel(path="checkpoint.safetensors", strength=0.5)
+        compose = RecipeCompose(branches=())
+        new_compose = compose.with_branch(model)
+        assert len(new_compose.branches) == 1
+        assert new_compose.branches[0] is model
+        assert isinstance(new_compose, RecipeCompose)
+
+    # AC: @full-model-recipe ac-3
+    def test_recipe_model_compose_with_lora(self):
+        """RecipeModel and RecipeLoRA can coexist in RecipeCompose."""
+        model = RecipeModel(path="checkpoint.safetensors", strength=0.5)
+        lora = RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},))
+        compose = RecipeCompose(branches=(model, lora))
+        assert len(compose.branches) == 2
+        assert isinstance(compose.branches[0], RecipeModel)
+        assert isinstance(compose.branches[1], RecipeLoRA)
+
+    # AC: @full-model-recipe ac-4
+    def test_recipe_merge_with_model_target(self):
+        """RecipeMerge can have RecipeModel as target."""
+        base = RecipeBase(model_patcher=object(), arch="sdxl")
+        model = RecipeModel(path="checkpoint.safetensors", strength=0.8)
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=0.6)
+        assert merge.target is model
+        assert merge.target.path == "checkpoint.safetensors"
+        assert merge.target.strength == 0.8
+
+    # AC: @full-model-recipe ac-5
+    def test_recipe_model_in_recipe_node_type(self):
+        """RecipeModel is included in RecipeNode type alias."""
+        # RecipeNode should include RecipeModel in its union
+        model = RecipeModel(path="checkpoint.safetensors")
+        # Type checking: RecipeModel is assignable to RecipeNode
+        node: RecipeNode = model
+        assert isinstance(node, RecipeModel)
+
+    # AC: @full-model-recipe ac-6
+    def test_recipe_model_no_gpu_tensors(self):
+        """RecipeModel contains no GPU tensors."""
+        model = RecipeModel(
+            path="checkpoint.safetensors",
+            strength=0.7,
+            block_config=BlockConfig(arch="sdxl", block_overrides=(("MID", 0.5),)),
+        )
+        # Check all fields
+        assert not isinstance(model.path, torch.Tensor)
+        assert not isinstance(model.strength, torch.Tensor)
+        # block_config is a BlockConfig with scalars
+        if model.block_config:
+            assert not isinstance(model.block_config.arch, torch.Tensor)
+            for name, val in model.block_config.block_overrides:
+                assert not isinstance(name, torch.Tensor)
+                assert not isinstance(val, torch.Tensor)

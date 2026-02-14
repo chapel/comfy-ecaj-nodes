@@ -11,6 +11,7 @@ __all__ = [
     "BlockConfig",
     "RecipeBase",
     "RecipeLoRA",
+    "RecipeModel",
     "RecipeCompose",
     "RecipeMerge",
     "RecipeNode",
@@ -58,6 +59,21 @@ class RecipeLoRA:
 
 
 @dataclass(frozen=True)
+class RecipeModel:
+    """Full model recipe — a checkpoint file to merge with the base model.
+
+    Unlike RecipeBase (which wraps a ComfyUI MODEL), RecipeModel stores only
+    the file path for deferred disk-based loading at Exit time via safetensors
+    streaming. This avoids loading full checkpoint tensors into memory during
+    recipe tree construction.
+    """
+
+    path: str  # Checkpoint filename (resolved to full path at Exit time)
+    strength: float = 1.0  # Merge strength
+    block_config: object = None  # BlockConfig or None
+
+
+@dataclass(frozen=True)
 class RecipeCompose:
     """Compose node output — accumulated branch list."""
 
@@ -83,4 +99,4 @@ class RecipeMerge:
 
 
 # Type alias for any recipe node
-RecipeNode = RecipeBase | RecipeLoRA | RecipeCompose | RecipeMerge
+RecipeNode = RecipeBase | RecipeLoRA | RecipeModel | RecipeCompose | RecipeMerge
