@@ -3272,6 +3272,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-13T22:32:07.907Z
+  started_at: 2026-02-14T02:19:54.593Z
   notes:
     - _ulid: 01KHCJ41F39ZSQPM36KT3FY13F
       created_at: 2026-02-13T22:32:07.907Z
@@ -3290,9 +3291,18 @@
         BlockConfig type.
 
         Files: lib/recipe.py.
+    - _ulid: 01KHCZ897NB4E8J2E4FDY16QD9
+      created_at: 2026-02-14T02:21:38.421Z
+      author: "@claude"
+      content: "Implementation complete. Added RecipeModel frozen dataclass with path (str), strength
+        (float, default 1.0), and block_config (BlockConfig or None). Updated RecipeNode type alias
+        and __all__ exports. Added 17 tests covering all 6 ACs: frozen immutability (ac-1), field
+        structure (ac-2), RecipeCompose.with_branch compatibility (ac-3), RecipeMerge target
+        compatibility (ac-4), RecipeNode inclusion (ac-5), no GPU tensors (ac-6). All 613 tests
+        pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T02:19:54.593Z
 - _ulid: 01KHCJ41G45JMGBJN3S459HJ52
   slugs:
     - implement-model-input-node
