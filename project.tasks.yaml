@@ -4149,6 +4149,10 @@
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #58. Implemented WIDENBlockConfigQwen node with 60 transformer block
+    sliders (TB00-TB59) and 3 layer-type sliders (attention, feed_forward, norm). Registered in
+    NODE_CLASS_MAPPINGS and NODE_DISPLAY_NAME_MAPPINGS. 9 tests covering AC-8 (60 individual blocks
+    + layer type sliders) and AC-9 (registry wiring). All CI passed."
   depends_on:
     - "@qwen-detect-classify"
     - "@qwen-lora-loader"
@@ -4161,6 +4165,7 @@
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.137Z
   started_at: 2026-02-14T08:05:08.615Z
+  completed_at: 2026-02-14T08:09:56.960Z
   notes:
     - _ulid: 01KHDHEGSH1DNT69YH2CCK2YNM
       created_at: 2026-02-14T07:39:37.137Z
@@ -4187,18 +4192,13 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-14T08:09:56.960Z
-  closed_reason: "Merged in PR #58. Implemented WIDENBlockConfigQwen node with 60 transformer block
-    sliders (TB00-TB59) and 3 layer-type sliders (attention, feed_forward, norm). Registered in
-    NODE_CLASS_MAPPINGS and NODE_DISPLAY_NAME_MAPPINGS. 9 tests covering AC-8 (60 individual blocks
-    + layer type sliders) and AC-9 (registry wiring). All CI passed."
 - _ulid: 01KHDHEGTTYESTY0BGZ64NV8EZ
   slugs:
     - flux-detect-classify
   title: Implement Flux Klein detection and block classification
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -4233,6 +4233,7 @@
         Covers ac-1, ac-2, ac-3.
   todos: []
   automation: eligible
+  started_at: 2026-02-14T08:10:27.852Z
 - _ulid: 01KHDHEGVX7ZCMG3A20X4XWBCA
   slugs:
     - flux-lora-loader
