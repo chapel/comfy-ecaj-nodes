@@ -149,6 +149,82 @@ class TestLayerTypeClassifyZImage:
 
 
 # =============================================================================
+# Qwen Layer Type Classification Tests
+# =============================================================================
+
+
+class TestLayerTypeClassifyQwen:
+    """Qwen layer type classification tests."""
+
+    # AC: @qwen-detect-classify ac-3
+    def test_attention_layers_attn(self):
+        """Qwen .attn. keys classify as attention."""
+        assert classify_layer_type("transformer_blocks.5.attn.weight", "qwen") == "attention"
+        key = "transformer_blocks.5.attn.to_q.weight"
+        assert classify_layer_type(key, "qwen") == "attention"
+
+    # AC: @qwen-detect-classify ac-3
+    def test_attention_layers_qkv(self):
+        """Qwen qkv keys classify as attention."""
+        assert classify_layer_type("transformer_blocks.5.qkv.weight", "qwen") == "attention"
+
+    # AC: @qwen-detect-classify ac-3
+    def test_attention_layers_proj(self):
+        """Qwen proj keys classify as attention."""
+        assert classify_layer_type("transformer_blocks.5.proj.weight", "qwen") == "attention"
+
+    # AC: @qwen-detect-classify ac-3
+    def test_attention_layers_to_kv(self):
+        """Qwen to_q/to_k/to_v/to_out keys classify as attention."""
+        assert classify_layer_type("transformer_blocks.5.to_q.weight", "qwen") == "attention"
+        assert classify_layer_type("transformer_blocks.5.to_k.weight", "qwen") == "attention"
+        assert classify_layer_type("transformer_blocks.5.to_v.weight", "qwen") == "attention"
+        assert classify_layer_type("transformer_blocks.5.to_out.weight", "qwen") == "attention"
+
+    # AC: @qwen-detect-classify ac-3
+    def test_feed_forward_layers_mlp(self):
+        """Qwen mlp keys classify as feed_forward."""
+        assert classify_layer_type("transformer_blocks.5.mlp.fc1.weight", "qwen") == "feed_forward"
+        assert classify_layer_type("transformer_blocks.5.mlp.fc2.weight", "qwen") == "feed_forward"
+
+    # AC: @qwen-detect-classify ac-3
+    def test_feed_forward_layers_ff(self):
+        """Qwen ff keys classify as feed_forward."""
+        key = "transformer_blocks.5.ff.net.0.weight"
+        assert classify_layer_type(key, "qwen") == "feed_forward"
+
+    # AC: @qwen-detect-classify ac-3
+    def test_feed_forward_layers_proj(self):
+        """Qwen gate_proj/up_proj/down_proj keys classify as feed_forward."""
+        key = "transformer_blocks.5.gate_proj.weight"
+        assert classify_layer_type(key, "qwen") == "feed_forward"
+        assert classify_layer_type("transformer_blocks.5.up_proj.weight", "qwen") == "feed_forward"
+        key = "transformer_blocks.5.down_proj.weight"
+        assert classify_layer_type(key, "qwen") == "feed_forward"
+
+    # AC: @qwen-detect-classify ac-3
+    def test_norm_layers(self):
+        """Qwen normalization keys classify as norm."""
+        assert classify_layer_type("transformer_blocks.5.norm.weight", "qwen") == "norm"
+        assert classify_layer_type("transformer_blocks.5.ln.weight", "qwen") == "norm"
+        assert classify_layer_type("transformer_blocks.5.layer_norm.weight", "qwen") == "norm"
+
+    # AC: @qwen-detect-classify ac-3
+    def test_mod_layers(self):
+        """Qwen img_mod/txt_mod keys classify as norm."""
+        assert classify_layer_type("transformer_blocks.5.img_mod.weight", "qwen") == "norm"
+        assert classify_layer_type("transformer_blocks.5.txt_mod.weight", "qwen") == "norm"
+
+    # AC: @qwen-detect-classify ac-3
+    def test_strips_prefixes(self):
+        """Layer type classification strips common prefixes."""
+        key = "diffusion_model.transformer_blocks.5.attn.weight"
+        assert classify_layer_type(key, "qwen") == "attention"
+        key = "transformer.transformer_blocks.5.mlp.fc1.weight"
+        assert classify_layer_type(key, "qwen") == "feed_forward"
+
+
+# =============================================================================
 # Architecture Edge Cases
 # =============================================================================
 
@@ -168,7 +244,6 @@ class TestLayerTypeClassifyArchEdgeCases:
         """Unsupported architectures return None."""
         assert classify_layer_type("layers.5.attn.qkv.weight", "flux") is None
         assert classify_layer_type("input_blocks.0.0.weight", "unknown") is None
-        assert classify_layer_type("some.key", "qwen") is None
 
 
 # =============================================================================

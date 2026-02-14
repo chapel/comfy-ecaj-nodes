@@ -186,18 +186,15 @@ class TestUnsupportedArchitectureError:
         assert "flux" in error_msg.lower()
         assert "no WIDEN loader is available yet" in error_msg
 
-    def test_qwen_detected_but_unsupported(self):
-        """Qwen architecture (60+ transformer_blocks) is detected but unsupported."""
+    def test_qwen_detected_and_supported(self):
+        """Qwen architecture (60+ transformer_blocks) is detected and supported."""
+        # AC: @qwen-detect-classify ac-1
         # Need 60+ keys with transformer_blocks
         keys = tuple(f"transformer_blocks.{i}.weight" for i in range(65))
         patcher = MockModelPatcher(keys=keys)
 
-        with pytest.raises(UnsupportedArchitectureError) as exc_info:
-            detect_architecture(patcher)
-
-        error_msg = str(exc_info.value)
-        assert "qwen" in error_msg.lower()
-        assert "no WIDEN loader is available yet" in error_msg
+        arch = detect_architecture(patcher)
+        assert arch == "qwen"
 
 
 # --- Node metadata tests ---
