@@ -1565,8 +1565,20 @@ runs:
   - _ulid: 01KHF0VSVJWBGFEQ47AADMEKSN
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-14T21:28:15.474Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-14T21:28:15.474Z
+        completed_at: 2026-02-14T21:28:43.890Z
+        notes: "Session reviewed. Key success: spec-first approach enforced (ac-14/ac-15 added before code).
+          Key learning already captured in MEMORY.md ('Spec before code' principle). No
+          high-confidence friction items to capture — both issues were one-off (pass placeholder,
+          function naming)."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-14T21:28:43.890Z
+        completed_at: 2026-02-14T21:28:43.890Z
     initiated_by: "@claude"
