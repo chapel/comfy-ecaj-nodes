@@ -1530,7 +1530,7 @@ runs:
   - _ulid: 01KHDNG8W0NSA9XY3VV1VST9EG
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-14T08:50:28.865Z
     step_results:
@@ -1551,5 +1551,11 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-14T08:51:23.747Z
-        completed_at: 2026-02-14T08:51:23.747Z
+        completed_at: 2026-02-14T08:51:28.626Z
+        notes: Both items already captured in step 2. inbox:01KHDNHH (plan import depends_on),
+          observation:01KHDNHK (parallel review). No duplicates found.
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-14T08:51:28.626Z
+        completed_at: 2026-02-14T08:51:28.626Z
     initiated_by: "@claude"
