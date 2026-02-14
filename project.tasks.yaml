@@ -3985,6 +3985,12 @@
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #55. Implemented Qwen architecture detection and block/layer-type
+    classification. Added classify_key_qwen() mapping transformer_blocks.N to TB00+ with dynamic
+    index discovery, Qwen layer type patterns for attention/feed_forward/norm classification
+    (including img_mod/txt_mod), and registered in _CLASSIFIERS/_LAYER_TYPE_PATTERNS. Added 'qwen'
+    to _SUPPORTED_ARCHITECTURES. All AC coverage verified: ac-1 (detection), ac-2 (block
+    classification), ac-3 (layer type classification). 730 tests pass."
   depends_on: []
   context: []
   priority: 2
@@ -3994,6 +4000,7 @@
   vcs_refs: []
   created_at: 2026-02-14T07:39:36.992Z
   started_at: 2026-02-14T07:42:14.482Z
+  completed_at: 2026-02-14T07:51:19.582Z
   notes:
     - _ulid: 01KHDHEGN0K0DA5TXDDN194GND
       created_at: 2026-02-14T07:39:36.992Z
@@ -4034,20 +4041,13 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-14T07:51:19.582Z
-  closed_reason: "Merged in PR #55. Implemented Qwen architecture detection and block/layer-type
-    classification. Added classify_key_qwen() mapping transformer_blocks.N to TB00+ with dynamic
-    index discovery, Qwen layer type patterns for attention/feed_forward/norm classification
-    (including img_mod/txt_mod), and registered in _CLASSIFIERS/_LAYER_TYPE_PATTERNS. Added 'qwen'
-    to _SUPPORTED_ARCHITECTURES. All AC coverage verified: ac-1 (detection), ac-2 (block
-    classification), ac-3 (layer type classification). 730 tests pass."
 - _ulid: 01KHDHEGPKY3Y9YTGX54CEYCWC
   slugs:
     - qwen-lora-loader
   title: Implement Qwen LoRA loader
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@qwen-detect-classify"
@@ -4076,6 +4076,7 @@
         Covers ac-4, ac-5, ac-6.
   todos: []
   automation: eligible
+  started_at: 2026-02-14T07:51:52.341Z
 - _ulid: 01KHDHEGRC0TP9TR9YKFD2Q9AY
   slugs:
     - qwen-model-loader
