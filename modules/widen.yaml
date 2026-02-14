@@ -1214,6 +1214,12 @@ features:
         then: "the loaded weights are blended toward the base register: result = base + strength *
           (model_weights - base), so strength=0 yields the base (zero contribution) and strength=1
           yields raw model weights (current default)"
+      - id: ac-15
+        given: a RecipeModel with block_config attached (via WIDEN Model Input node)
+        when: OpApplyModel loads its weights during batched evaluation
+        then: per-block strength scaling is applied to model deltas the same way
+          _apply_per_block_lora_strength applies to LoRA deltas — each key's delta is scaled by its
+          block override strength
     depends_on:
       - "@full-model-recipe"
       - "@model-input-node"
