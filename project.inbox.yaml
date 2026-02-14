@@ -28,3 +28,10 @@ inbox:
       - reflection
       - kspec
     added_by: "@claude"
+  - _ulid: 01KHDX4RQKGYKACV8GK2FWE8W0
+    text: Add test for composed strength + block_config on OpApplyModel (strength != 1.0 AND
+      block_config both active)
+    created_at: 2026-02-14T11:04:00.499Z
+    tags:
+      - test
+    added_by: "@claude"
