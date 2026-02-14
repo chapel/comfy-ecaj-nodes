@@ -1565,7 +1565,7 @@ runs:
   - _ulid: 01KHF0VSVJWBGFEQ47AADMEKSN
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-14T21:28:15.474Z
     step_results:
@@ -1580,5 +1580,14 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-14T21:28:43.890Z
-        completed_at: 2026-02-14T21:28:43.890Z
+        completed_at: 2026-02-14T21:28:50.388Z
+        notes: "Searched existing state. Identified items: (1) Friction: 'pass placeholder' in OpApplyModel
+          block_config — one-off, now fixed, skip. (2) Friction: _apply_per_block_lora_strength
+          naming is LoRA-specific but used generically — minor, skip. (3) Success: spec-first
+          enforcement caught two gaps (ac-14, ac-15) — already in MEMORY.md. No high-confidence
+          systemic items to capture."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-14T21:28:50.388Z
+        completed_at: 2026-02-14T21:28:50.388Z
     initiated_by: "@claude"
