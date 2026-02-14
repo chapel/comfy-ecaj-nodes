@@ -1,6 +1,6 @@
 """Tests for Full Model Execution — RecipeModel integration with Exit node.
 
-AC: @full-model-execution ac-1 through ac-13
+AC: @full-model-execution ac-1 through ac-14
 """
 
 import tempfile
@@ -228,7 +228,7 @@ class TestOpApplyModelCompilation:
 
     def test_input_regs_handles_opapplymodel(self) -> None:
         """_input_regs() correctly returns input registers for OpApplyModel."""
-        op = OpApplyModel(model_id="test", block_config=None, input_reg=5, out_reg=6)
+        op = OpApplyModel(model_id="test", block_config=None, strength=1.0, input_reg=5, out_reg=6)
         assert _input_regs(op) == (5,)
 
 
@@ -249,7 +249,7 @@ class TestOpApplyModelExecution:
         from lib.recipe_eval import EvalPlan, OpFilterDelta
 
         op_apply = OpApplyModel(
-            model_id="model1", block_config=None, input_reg=0, out_reg=1
+            model_id="model1", block_config=None, strength=1.0, input_reg=0, out_reg=1
         )
         op_filter = OpFilterDelta(
             input_reg=1, backbone_reg=0, t_factor=1.0,
@@ -307,7 +307,7 @@ class TestModelDeltaComputation:
         from lib.recipe_eval import EvalPlan, OpFilterDelta
 
         op_apply = OpApplyModel(
-            model_id="model1", block_config=None, input_reg=0, out_reg=1
+            model_id="model1", block_config=None, strength=1.0, input_reg=0, out_reg=1
         )
         op_filter = OpFilterDelta(
             input_reg=1,  # Uses model weights from OpApplyModel
@@ -443,7 +443,7 @@ class TestModelWeightsFreed:
         from lib.recipe_eval import EvalPlan, OpFilterDelta
 
         op_apply = OpApplyModel(
-            model_id="model1", block_config=None, input_reg=0, out_reg=1
+            model_id="model1", block_config=None, strength=1.0, input_reg=0, out_reg=1
         )
         op_filter = OpFilterDelta(
             input_reg=1, backbone_reg=0, t_factor=1.0,
@@ -690,6 +690,132 @@ class TestSequentialModelLoading:
         # Should end with OpMergeWeights combining both
         has_merge = any(isinstance(op, OpMergeWeights) for op in plan.ops)
         assert has_merge
+
+
+# ---------------------------------------------------------------------------
+# AC-14: Model strength scales delta toward base
+# ---------------------------------------------------------------------------
+
+
+# AC: @full-model-execution ac-14
+class TestModelStrengthScaling:
+    """Tests for RecipeModel.strength applied during OpApplyModel execution."""
+
+    def test_strength_zero_produces_base_weights(self) -> None:
+        """strength=0 makes model register equal to base (zero contribution)."""
+        from lib.recipe_eval import EvalPlan
+
+        op_apply = OpApplyModel(
+            model_id="model1", block_config=None, strength=0.0, input_reg=0, out_reg=1
+        )
+        plan = EvalPlan(
+            ops=(op_apply,),
+            result_reg=1,
+            dead_after=((),),
+        )
+
+        base_batch = torch.randn(2, 4, 4)
+        model_weights = torch.randn(2, 4, 4) * 5  # very different from base
+
+        mock_loader = MagicMock()
+        mock_loader.get_weights.return_value = [model_weights[i] for i in range(2)]
+
+        result = execute_plan(
+            plan=plan,
+            keys=["key0", "key1"],
+            base_batch=base_batch,
+            loader=MagicMock(),
+            widen=MagicMock(),
+            device="cpu",
+            dtype=torch.float32,
+            model_loaders={"model1": mock_loader},
+        )
+
+        torch.testing.assert_close(result, base_batch)
+
+    def test_strength_half_blends_toward_base(self) -> None:
+        """strength=0.5 blends model weights halfway toward base."""
+        from lib.recipe_eval import EvalPlan
+
+        op_apply = OpApplyModel(
+            model_id="model1", block_config=None, strength=0.5, input_reg=0, out_reg=1
+        )
+        plan = EvalPlan(
+            ops=(op_apply,),
+            result_reg=1,
+            dead_after=((),),
+        )
+
+        base_batch = torch.zeros(2, 4, 4)
+        model_weights = torch.ones(2, 4, 4) * 2.0
+
+        mock_loader = MagicMock()
+        mock_loader.get_weights.return_value = [model_weights[i] for i in range(2)]
+
+        result = execute_plan(
+            plan=plan,
+            keys=["key0", "key1"],
+            base_batch=base_batch,
+            loader=MagicMock(),
+            widen=MagicMock(),
+            device="cpu",
+            dtype=torch.float32,
+            model_loaders={"model1": mock_loader},
+        )
+
+        expected = torch.ones(2, 4, 4)  # base + 0.5 * (model - base) = 0 + 0.5 * 2 = 1
+        torch.testing.assert_close(result, expected)
+
+    def test_strength_one_preserves_model_weights(self) -> None:
+        """strength=1.0 (default) leaves model weights unchanged."""
+        from lib.recipe_eval import EvalPlan
+
+        op_apply = OpApplyModel(
+            model_id="model1", block_config=None, strength=1.0, input_reg=0, out_reg=1
+        )
+        plan = EvalPlan(
+            ops=(op_apply,),
+            result_reg=1,
+            dead_after=((),),
+        )
+
+        base_batch = torch.zeros(2, 4, 4)
+        model_weights = torch.ones(2, 4, 4) * 3.0
+
+        mock_loader = MagicMock()
+        mock_loader.get_weights.return_value = [model_weights[i] for i in range(2)]
+
+        result = execute_plan(
+            plan=plan,
+            keys=["key0", "key1"],
+            base_batch=base_batch,
+            loader=MagicMock(),
+            widen=MagicMock(),
+            device="cpu",
+            dtype=torch.float32,
+            model_loaders={"model1": mock_loader},
+        )
+
+        torch.testing.assert_close(result, model_weights)
+
+    def test_compile_plan_captures_strength_from_recipe_model(
+        self, recipe_base: RecipeBase, sdxl_checkpoint_path: str
+    ) -> None:
+        """compile_plan propagates RecipeModel.strength into OpApplyModel."""
+        recipe_model = RecipeModel(path=sdxl_checkpoint_path, strength=0.75)
+        recipe = RecipeMerge(
+            base=recipe_base,
+            target=recipe_model,
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        model_id_map = {id(recipe_model): "model1"}
+        plan = compile_plan(recipe, set_id_map={}, arch="sdxl", model_id_map=model_id_map)
+
+        apply_model_ops = [op for op in plan.ops if isinstance(op, OpApplyModel)]
+        assert len(apply_model_ops) == 1
+        assert apply_model_ops[0].strength == 0.75
 
 
 # ---------------------------------------------------------------------------
