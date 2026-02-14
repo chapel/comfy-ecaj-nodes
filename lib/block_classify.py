@@ -21,6 +21,7 @@ __all__ = [
     "classify_key_sdxl",
     "classify_key_zimage",
     "classify_key_qwen",
+    "classify_key_flux",
 ]
 
 
@@ -141,11 +142,51 @@ def classify_key_qwen(key: str) -> str | None:
     return None
 
 
+@functools.lru_cache(maxsize=4096)
+def classify_key_flux(key: str) -> str | None:
+    """Classify a Flux Klein parameter key into an individual block.
+
+    Flux Klein block structure (ac-2):
+    - double_blocks.N → DB00-DB07 (8 for Klein 9B) or DB00-DB04 (5 for Klein 4B)
+    - single_blocks.N → SB00-SB23 (24 for Klein 9B) or SB00-SB19 (20 for Klein 4B)
+
+    Block indices discovered dynamically from keys (not hardcoded).
+    Non-block keys (guidance_in, time_in, vector_in, img_in, txt_in,
+    final_layer) return None.
+
+    Args:
+        key: Parameter key (with or without diffusion_model./transformer. prefix)
+
+    Returns:
+        Individual block name (e.g., "DB00", "SB05") or None if no match
+    """
+    # Strip common prefixes
+    for prefix in ("diffusion_model.", "transformer."):
+        if key.startswith(prefix):
+            key = key[len(prefix) :]
+
+    # Match double_blocks.N
+    match = re.match(r"double_blocks\.(\d+)\.", key)
+    if match:
+        block_num = int(match.group(1))
+        return f"DB{block_num:02d}"
+
+    # Match single_blocks.N
+    match = re.match(r"single_blocks\.(\d+)\.", key)
+    if match:
+        block_num = int(match.group(1))
+        return f"SB{block_num:02d}"
+
+    # No block match (guidance_in, time_in, vector_in, img_in, txt_in, final_layer)
+    return None
+
+
 # Registry of architecture classifiers
 _CLASSIFIERS: dict[str, Callable[[str], str | None]] = {
     "sdxl": classify_key_sdxl,
     "zimage": classify_key_zimage,
     "qwen": classify_key_qwen,
+    "flux": classify_key_flux,
 }
 
 
@@ -248,11 +289,34 @@ _QWEN_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
     ("txt_mod", "norm"),
 )
 
+# Layer type patterns for Flux Klein (ac-3)
+# Attention: img_attn, txt_attn, qkv, proj, norm.query_norm, norm.key_norm
+# Feed-forward: img_mlp, txt_mlp, linear2
+# Norm: img_mod, txt_mod, modulation (excluding attention-specific norms)
+_FLUX_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
+    # Attention patterns (most specific first per precedence)
+    ("img_attn", "attention"),
+    ("txt_attn", "attention"),
+    (".qkv", "attention"),
+    (".proj", "attention"),
+    ("query_norm", "attention"),
+    ("key_norm", "attention"),
+    # Feed-forward patterns
+    ("img_mlp", "feed_forward"),
+    ("txt_mlp", "feed_forward"),
+    ("linear2", "feed_forward"),
+    # Norm patterns (general, after attention-specific norms)
+    ("img_mod", "norm"),
+    ("txt_mod", "norm"),
+    ("modulation", "norm"),
+)
+
 # Registry of layer type patterns by architecture
 _LAYER_TYPE_PATTERNS: dict[str, tuple[tuple[str, str], ...]] = {
     "sdxl": _SDXL_LAYER_PATTERNS,
     "zimage": _ZIMAGE_LAYER_PATTERNS,
     "qwen": _QWEN_LAYER_PATTERNS,
+    "flux": _FLUX_LAYER_PATTERNS,
 }
 
 

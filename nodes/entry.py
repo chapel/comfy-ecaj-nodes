@@ -37,7 +37,7 @@ _ARCH_PATTERNS = (
 )
 
 # Architectures with implemented WIDEN loaders
-_SUPPORTED_ARCHITECTURES = frozenset({"sdxl", "zimage", "qwen"})
+_SUPPORTED_ARCHITECTURES = frozenset({"sdxl", "zimage", "qwen", "flux"})
 
 
 def detect_architecture(model_patcher: object) -> str:
