@@ -1009,4 +1009,13 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHDNHK4E7S29P2T0B02ABQVS
+    type: success
+    content: "Parallel plan review (holistic agent + Codex) catches more issues than either alone.
+      Holistic review found 7 gaps and 6 issues, Codex independently confirmed 3 MUST-FIX items.
+      Pattern: launch both in parallel, consolidate findings, then update plan before ExitPlanMode."
+    created_at: 2026-02-14T08:51:12.142Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 includes: []
