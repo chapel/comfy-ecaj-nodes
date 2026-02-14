@@ -494,6 +494,14 @@ features:
             given: model_name provided without .safetensors extension
             when: resolving the save path
             then: .safetensors extension is appended automatically
+          - id: ac-13
+            given: save_model enabled and save_workflow toggle is enabled (default)
+            when: saving merged model to disk
+            then: ComfyUI workflow JSON is embedded in safetensors metadata alongside the recipe
+          - id: ac-14
+            given: save_model enabled and save_workflow toggle is disabled
+            when: saving merged model to disk
+            then: no workflow JSON is included in safetensors metadata
     status:
       maturity: draft
       implementation: implemented
