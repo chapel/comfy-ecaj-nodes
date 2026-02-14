@@ -3472,6 +3472,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-13T22:32:08.027Z
+  started_at: 2026-02-14T02:45:27.285Z
   notes:
     - _ulid: 01KHCJ41JV61GEG140NXPX6FWA
       created_at: 2026-02-13T22:32:08.027Z
@@ -3567,9 +3568,101 @@
 
         Files: lib/recipe.py, lib/recipe_eval.py, lib/analysis.py,
         nodes/exit.py, nodes/merge.py, nodes/compose.py.
+    - _ulid: 01KHD15E0NYMFVT96CK3F5TJPZ
+      created_at: 2026-02-14T02:55:02.165Z
+      author: "@claude"
+      content: >-
+        Implementation complete. Added full model execution support:
+
+
+        **lib/analysis.py:**
+
+        - Added RecipeModel case to walk_to_base (raises ValueError like RecipeLoRA)
+
+        - Added RecipeModel skip case in _collect_lora_sets
+
+        - Added ModelAnalysisResult dataclass
+
+        - Added _collect_model_refs() to collect unique RecipeModel nodes
+
+        - Added analyze_recipe_models() to open ModelLoader instances, validate architecture, build
+        affected-key maps
+
+
+        **lib/recipe_eval.py:**
+
+        - Added OpApplyModel frozen dataclass with model_id, block_config, input_reg, out_reg
+
+        - Added OpApplyModel to _Op type alias
+
+        - Added OpApplyModel case to _input_regs()
+
+        - Added model_id_map parameter to _PlanCompiler
+
+        - Added _compile_model() method for RecipeModel -> OpApplyModel
+
+        - Updated _compile_merge() to handle RecipeModel as valid target
+
+        - Added model_id_map to compile_plan()
+
+        - Added model_loaders parameter to execute_plan()
+
+        - Added OpApplyModel handler in execute_plan() that loads weights from streaming loader
+
+        - Added model_id_map and model_loaders to evaluate_recipe()
+
+
+        **lib/persistence.py:**
+
+        - Added RecipeModel case to serialize_recipe()
+
+        - Added model_resolver parameter to compute_lora_stats()
+
+        - Added RecipeModel handling in _walk() for file stats
+
+
+        **nodes/exit.py:**
+
+        - Added RecipeModel to imports
+
+        - Added RecipeModel case in _validate_recipe_tree()
+
+        - Added RecipeModel skip case in _collect_lora_paths()
+
+        - Added _collect_model_paths() function
+
+        - Added _build_model_resolver() function
+
+        - Updated _compute_recipe_hash() to include model files (ac-11)
+
+        - Updated IS_CHANGED to use model resolver
+
+        - Updated execute() to call analyze_recipe_models()
+
+        - Updated execute() to pass model_loaders and model_id_map to compile_plan/execute_plan
+
+        - Added cleanup for model loaders in finally block
+
+
+        **nodes/compose.py:**
+
+        - Added RecipeModel as valid branch type
+
+
+        **nodes/merge.py:**
+
+        - Added RecipeModel as valid target type
+
+
+        **tests/test_full_model_execution.py:**
+
+        - Added 20 tests covering all 13 ACs
+
+
+        All 688 tests pass, ruff clean.
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T02:45:27.285Z
 - _ulid: 01KHCQWYAEA21JA0ZB7FB9100T
   slugs: []
   title: Fix AC annotation style in test_graph.py
