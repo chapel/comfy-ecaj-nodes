@@ -3471,16 +3471,22 @@
   created_at: 2026-02-14T00:13:06.763Z
   notes: []
   todos: []
-- title: "Implement: Exit Model Persistence"
+- _ulid: 01KHCRP1YM8442EBH98DBHWPPQ
+  slugs:
+    - task-exit-model-persistence
+  title: "Implement: Exit Model Persistence"
   type: task
   spec_ref: "@exit-model-persistence"
   derivation: auto
-  priority: 3
-  slugs:
-    - task-exit-model-persistence
-  tags: []
+  status: pending
+  blocked_by: []
   depends_on:
     - "@implement-exit-node"
+  context: []
+  priority: 3
+  tags: []
+  vcs_refs: []
+  created_at: 2026-02-14T00:26:49.684Z
   notes:
     - _ulid: 01KHCRP1YMEMWB6TAH6W9W1YAD
       created_at: 2026-02-14T00:26:49.684Z
@@ -3532,10 +3538,143 @@
         header, when exit node attempts save or cache-check, then raises error indicating file was
         not created by this node and suggests a different model_name
       supersedes: null
-  _ulid: 01KHCRP1YM8442EBH98DBHWPPQ
-  status: pending
-  blocked_by: []
-  context: []
-  vcs_refs: []
-  created_at: 2026-02-14T00:26:49.684Z
+    - _ulid: 01KHCS6Z5HQM6ANZGZCDWJ90K5
+      created_at: 2026-02-14T00:36:03.889Z
+      author: "@claude"
+      content: >-
+        ## Implementation Notes
+
+
+        ### Files to Modify
+
+
+        1. **lib/recipe.py** — Add model_path: str | None field to RecipeBase (frozen dataclass).
+        This threads the checkpoint filename from Entry node for save directory resolution and base
+        model identity hashing.
+
+
+        2. **nodes/entry.py** — Set model_path on RecipeBase when creating the recipe tree. ComfyUI
+        provides the checkpoint name as a node input string; pass it through.
+
+
+        3. **nodes/exit.py** — Primary changes:
+           - Add save_model (BOOLEAN, default False) and model_name (STRING) to INPUT_TYPES
+           - Add cache-check at start of execute() (before GPU work)
+           - Add save step after merged_state is computed (before install_merged_patches)
+           - Use folder_paths.get_folder_paths('checkpoints') to resolve base model directory from model_path
+
+        4. **lib/persistence.py** (new) — Separation of concerns:
+           - compute_persistence_hash(recipe_tree) -> str (full config identity)
+           - save_merged_model(path, state_dict, metadata) -> None (atomic write)
+           - load_cached_model(path, expected_hash) -> dict | None
+           - validate_model_name(name) -> str (sanitization)
+
+        ### Recipe Identity Hash
+
+
+        The existing _compute_recipe_hash in nodes/exit.py only covers LoRA file paths+stats for
+        IS_CHANGED. The persistence hash must be a SEPARATE, more comprehensive function covering:
+
+        - LoRA paths + mtime + size (existing)
+
+        - LoRA strengths per entry
+
+        - t_factor values at each merge level
+
+        - block_config overrides (serialized)
+
+        - Recipe tree topology (structural identity)
+
+        - Base model identity (checkpoint filename or content hash)
+
+
+        Approach: Serialize the frozen recipe tree deterministically, replacing model_patcher refs
+        with model_path string, then SHA-256 the repr. Frozen dataclasses make this natural.
+
+
+        ### Safetensors Metadata Keys
+
+
+        All keys prefixed with __ecaj_ to avoid collision:
+
+        - __ecaj_version__: '1'
+
+        - __ecaj_recipe_hash__: '<sha256 hex>'
+
+        - __ecaj_lora_stats__: JSON array of [path, mtime, size]
+
+        - __ecaj_base_model__: checkpoint filename string
+
+        - __ecaj_block_config__: JSON serialized config (or 'null')
+
+        - __ecaj_t_factors__: JSON array of t_factor values
+
+
+        Note: safetensors metadata values must be strings. Use json.dumps().
+
+        The hash alone is used for cache validation (fast path). Individual fields are for
+        introspection/debugging.
+
+
+        ### Save/Load Flow in execute()
+
+
+        SAVE PATH (after GPU merge, before install_merged_patches):
+
+        1. Validate model_name: non-empty, no path separators, no '..' (AC-5, AC-11)
+
+        2. Append .safetensors if missing (AC-12)
+
+        3. Resolve save_path via folder_paths from model_path directory
+
+        4. Build full state_dict: start from base model state_dict, overlay merged keys
+
+        5. Compute metadata with persistence hash
+
+        6. Atomic write: write to save_path.tmp, then os.rename() (AC-10)
+
+
+        CACHE CHECK (at start of execute(), after validation):
+
+        1. Resolve expected path from model_name + base model directory
+
+        2. If file doesn't exist -> proceed to GPU merge
+
+        3. If file exists -> read safetensors header metadata only (fast, no tensor load)
+
+        4. If no __ecaj_version__ key -> raise error (AC-9, not our file)
+
+        5. If __ecaj_recipe_hash__ matches -> load tensors, skip GPU pipeline (AC-3)
+
+        6. If hash mismatch -> proceed to GPU merge, will overwrite (AC-4)
+
+
+        ### Gotchas
+
+
+        1. Cache hit still needs install_merged_patches() — the cache replaces GPU merge (phases
+        1-2), NOT patch installation (phase 3). Loaded state_dict feeds into install_merged_patches
+        like normal.
+
+
+        2. _unpatch_loaded_clones() MUST still run even on cache hit — base model state could be
+        corrupted from prior run patches.
+
+
+        3. storage_dtype must match between cached file and base model. Save in storage_dtype,
+        verify on load.
+
+
+        4. The existing finally block calls loader.cleanup(). On cache-hit path, loader may not be
+        initialized. Restructure try/finally or guard with hasattr/None check.
+
+
+        5. ProgressBar on cache hit: show single step 'loaded from cache' instead of batch group
+        progress.
+
+
+        6. Full state dict for AC-8: must save ALL base model keys (2-7GB for SDXL), not just
+        WIDEN-affected keys. Read full base state_dict, overlay merged keys, write complete model.
+        Memory implication: need full state_dict in RAM during save.
+      supersedes: null
   todos: []
