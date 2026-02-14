@@ -4101,6 +4101,10 @@
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #57. Added Qwen architecture detection to model_loader.py:
+    model.transformer. prefix in _FILE_KEY_PREFIXES, Qwen pattern in _ARCH_PATTERNS (≥60
+    transformer_blocks keys). Added 9 tests covering Qwen detection, key normalization (transformer.
+    and model.transformer. prefixes), VAE exclusion, and tensor retrieval. AC-7 fully covered."
   depends_on: []
   context: []
   priority: 2
@@ -4110,6 +4114,7 @@
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.100Z
   started_at: 2026-02-14T07:59:48.141Z
+  completed_at: 2026-02-14T08:04:09.940Z
   notes:
     - _ulid: 01KHDHEGRB3RQZ78GSBMKYFHG6
       created_at: 2026-02-14T07:39:37.099Z
@@ -4136,18 +4141,13 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-14T08:04:09.940Z
-  closed_reason: "Merged in PR #57. Added Qwen architecture detection to model_loader.py:
-    model.transformer. prefix in _FILE_KEY_PREFIXES, Qwen pattern in _ARCH_PATTERNS (≥60
-    transformer_blocks keys). Added 9 tests covering Qwen detection, key normalization (transformer.
-    and model.transformer. prefixes), VAE exclusion, and tensor retrieval. AC-7 fully covered."
 - _ulid: 01KHDHEGSHFQVSWEK3F2A93R9Y
   slugs:
     - qwen-block-config
   title: Implement Qwen block config node and registration
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@qwen-detect-classify"
@@ -4176,6 +4176,7 @@
         Covers ac-8, ac-9.
   todos: []
   automation: eligible
+  started_at: 2026-02-14T08:05:08.615Z
 - _ulid: 01KHDHEGTTYESTY0BGZ64NV8EZ
   slugs:
     - flux-detect-classify
