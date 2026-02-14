@@ -1330,6 +1330,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-14T01:57:49.559Z
+    completed_at: 2026-02-14T01:58:48.234Z
     step_results:
       - step_index: 0
         status: completed
@@ -1358,4 +1359,11 @@ runs:
         notes: All items already captured. Observation 01KHCXXS (numpy-free tensor bytes) was the only
           high-confidence item. Session complete.
     initiated_by: "@claude"
-    completed_at: 2026-02-14T01:58:48.234Z
+  - _ulid: 01KHD17718NJRC51W398YFZP1F
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-14T02:56:00.552Z
+    step_results: []
+    initiated_by: "@claude"
