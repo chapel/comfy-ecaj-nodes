@@ -3344,6 +3344,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-13T22:32:07.940Z
+  started_at: 2026-02-14T02:35:52.210Z
   notes:
     - _ulid: 01KHCJ41G4WJBH40F9NG3HZ17Q
       created_at: 2026-02-13T22:32:07.940Z
@@ -3364,9 +3365,18 @@
         folder_paths.get_full_path("checkpoints", name) at execution time.
 
         Files: nodes/model_input.py, __init__.py.
+    - _ulid: 01KHD053RE7W2NN8QR0C87DW5X
+      created_at: 2026-02-14T02:37:23.086Z
+      author: "@claude"
+      content: "Implementation complete. Created WIDENModelInputNode in nodes/model_input.py with
+        checkpoint file combo via folder_paths, strength slider (0.0-2.0, default 1.0), and optional
+        BLOCK_CONFIG input. Returns RecipeModel via WIDEN type. Registered in __init__.py. 15 tests
+        covering all 6 ACs: ac-1 (model_name/strength inputs), ac-2 (returns RecipeModel), ac-3 (no
+        GPU/IO), ac-4 (CATEGORY ecaj/merge), ac-5 (RETURN_TYPES WIDEN), ac-6 (block_config
+        optional). 669 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T02:35:52.210Z
 - _ulid: 01KHCJ41HRS122HRGWERT8R5V2
   slugs:
     - implement-full-model-loader
