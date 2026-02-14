@@ -789,14 +789,46 @@ class TestSaveModelOff:
     """
 
     # AC: @exit-model-persistence ac-1
-    def test_default_no_persistence(self, mock_model_patcher):
-        """With save_model=False, no persistence functions should be called."""
+    def test_default_no_persistence_base(self, mock_model_patcher):
+        """With save_model=False on RecipeBase, no persistence functions should be called."""
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
 
         node = WIDENExitNode()
-        # RecipeBase input — quick exit path
         (result,) = node.execute(base, save_model=False, model_name="test")
         assert result is not mock_model_patcher
+
+    # AC: @exit-model-persistence ac-1
+    def test_no_persistence_on_merge_flow(self, mock_model_patcher):
+        """With save_model=False on RecipeMerge, persistence functions are skipped."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.validate_model_name") as mock_validate,
+            patch("nodes.exit.atomic_save") as mock_save,
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={},
+                affected_keys=set(),
+            )
+
+            (result,) = node.execute(merge, save_model=False, model_name="test")
+
+            # Persistence functions should NOT be called
+            mock_validate.assert_not_called()
+            mock_save.assert_not_called()
 
 
 # =============================================================================

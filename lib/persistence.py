@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import secrets
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
@@ -18,6 +19,8 @@ from safetensors.torch import save_file
 
 if TYPE_CHECKING:
     import torch
+
+    from .recipe import RecipeNode
 
 __all__ = [
     "atomic_save",
@@ -67,7 +70,7 @@ def validate_model_name(name: str) -> str:
 
 
 def serialize_recipe(
-    node: object,
+    node: RecipeNode,
     base_identity: str,
     lora_stats: dict[str, tuple[float, int]],
 ) -> str:
@@ -88,7 +91,7 @@ def serialize_recipe(
     """
     from .recipe import BlockConfig, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
-    def _serialize_node(n: object) -> dict:
+    def _serialize_node(n: RecipeNode) -> dict:
         if isinstance(n, RecipeBase):
             return {
                 "type": "RecipeBase",
@@ -133,7 +136,7 @@ def serialize_recipe(
         else:
             raise ValueError(f"Unknown recipe node type: {type(n).__name__}")
 
-    def _serialize_block_config(bc: object) -> dict:
+    def _serialize_block_config(bc: BlockConfig) -> dict:
         if not isinstance(bc, BlockConfig):
             raise ValueError(f"Expected BlockConfig, got {type(bc).__name__}")
         result: dict = {"arch": bc.arch}
@@ -152,8 +155,9 @@ def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
 
     AC: @exit-model-persistence ac-6
 
-    Uses sorted key signatures (key|shape|dtype) plus a small tensor data
-    sample from the first key to distinguish models with identical architecture.
+    Uses sorted key signatures (key|shape|dtype) plus tensor data samples
+    from first, middle, and last keys to distinguish models with identical
+    architecture but different weights.
 
     Args:
         base_state: Base model state dict
@@ -168,17 +172,22 @@ def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
         tensor = base_state[key]
         hasher.update(f"{key}|{tuple(tensor.shape)}|{tensor.dtype}\n".encode())
 
-    # Sample tensor data from first key to catch weight differences
+    # Sample tensor data from first, middle, and last keys to catch weight
+    # differences between models with identical architecture (~768 bytes total)
     if sorted_keys:
-        sample_tensor = base_state[sorted_keys[0]]
-        flat = sample_tensor.detach().float().reshape(-1)[:64].contiguous().cpu()
-        hasher.update(bytes(flat.untyped_storage())[:flat.nelement() * flat.element_size()])
+        sample_indices = {0, len(sorted_keys) // 2, len(sorted_keys) - 1}
+        for idx in sorted(sample_indices):
+            sample_tensor = base_state[sorted_keys[idx]]
+            flat = sample_tensor.detach().float().reshape(-1)[:64].contiguous().cpu()
+            hasher.update(
+                bytes(flat.untyped_storage())[:flat.nelement() * flat.element_size()]
+            )
 
     return hasher.hexdigest()
 
 
 def compute_lora_stats(
-    node: object,
+    node: RecipeNode,
     resolver: Callable[[str], str | None],
 ) -> dict[str, tuple[float, int]]:
     """Walk recipe tree and collect LoRA file stats.
@@ -196,7 +205,7 @@ def compute_lora_stats(
 
     stats: dict[str, tuple[float, int]] = {}
 
-    def _walk(n: object) -> None:
+    def _walk(n: RecipeNode) -> None:
         if isinstance(n, RecipeBase):
             return
         elif isinstance(n, RecipeLoRA):
@@ -352,7 +361,8 @@ def atomic_save(
         metadata: Safetensors metadata dict
     """
     directory = os.path.dirname(save_path) or "."
-    tmp_path = os.path.join(directory, ".ecaj_tmp_" + os.path.basename(save_path))
+    suffix = secrets.token_hex(4)
+    tmp_path = os.path.join(directory, f".ecaj_tmp_{suffix}_{os.path.basename(save_path)}")
 
     try:
         save_file(tensors, tmp_path, metadata=metadata)

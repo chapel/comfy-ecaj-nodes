@@ -551,15 +551,16 @@ class WIDENExitNode:
 
         # --- Persistence: save after GPU ---
         if save_model and save_path is not None:
-            full_state = dict(base_state)
+            # Overlay merged keys into base_state in-place (base_state is
+            # already a dict copy from model_state_dict, not used after this)
             for key, tensor in merged_state.items():
-                full_state[key] = tensor.cpu().to(storage_dtype)
+                base_state[key] = tensor.cpu().to(storage_dtype)
             workflow_json = (
                 json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
             )
             metadata = build_metadata(
                 serialized, recipe_hash, sorted(merged_state.keys()), workflow_json
             )
-            atomic_save(full_state, save_path, metadata)
+            atomic_save(base_state, save_path, metadata)
 
         return (result,)
