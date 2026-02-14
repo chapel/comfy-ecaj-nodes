@@ -420,6 +420,25 @@ features:
         status:
           maturity: draft
           implementation: implemented
+      - _ulid: 01KHCRNGPTNBM5D6JG68N1A6RY
+        slugs:
+          - exit-model-persistence
+        title: Exit Model Persistence
+        type: requirement
+        tags: []
+        description: "Opt-in save/cache for merged model output. When enabled, the exit node saves the
+          fully-merged model as safetensors adjacent to the base model directory. On subsequent
+          runs, if the cached file metadata matches the current recipe configuration, the node loads
+          directly from disk instead of recomputing the GPU merge pipeline. The saved file is a
+          complete standalone model loadable by ComfyUI standard model loader. New inputs:
+          save_model (boolean toggle, default off) and model_name (string filename)."
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-14T00:26:32.026Z
     status:
       maturity: draft
       implementation: implemented
