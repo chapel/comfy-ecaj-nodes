@@ -447,7 +447,8 @@ features:
           - id: ac-2
             given: save_model enabled and model_name provided
             when: exit node completes GPU merge
-            then: fully-merged state dict saved as safetensors adjacent to base model using model_name
+            then: fully-merged state dict (all base model keys with WIDEN-affected keys replaced) saved as
+              safetensors in the base model directory using model_name
           - id: ac-3
             given: cached safetensors exists at expected path
             when: exit node executes with save_model enabled and metadata matches current config
