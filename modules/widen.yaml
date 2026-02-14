@@ -477,6 +477,19 @@ features:
             given: file with model_name already exists but lacks ecaj metadata in safetensors header
             when: exit node attempts save or cache-check
             then: raises error indicating file was not created by this node and suggests a different model_name
+          - id: ac-10
+            given: save_model enabled and GPU merge completes
+            when: saving merged model to disk
+            then: file is written atomically (temp file + rename) so partial writes never leave a corrupt cache
+              file
+          - id: ac-11
+            given: model_name contains path separators or .. sequences
+            when: exit node validates inputs
+            then: raises clear error rejecting the model_name as unsafe
+          - id: ac-12
+            given: model_name provided without .safetensors extension
+            when: resolving the save path
+            then: .safetensors extension is appended automatically
     status:
       maturity: draft
       implementation: implemented
