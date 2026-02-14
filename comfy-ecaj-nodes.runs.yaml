@@ -1327,7 +1327,7 @@ runs:
   - _ulid: 01KHCXWNVQ5E348Q3DX4PCJQ4C
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-14T01:57:49.559Z
     step_results:
@@ -1348,5 +1348,11 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-14T01:58:37.493Z
-        completed_at: 2026-02-14T01:58:37.493Z
+        completed_at: 2026-02-14T01:58:43.215Z
+        notes: One item already captured in step 1 (observation 01KHCXXS — tensor bytes without numpy). No
+          additional items to evaluate. All other friction was one-off.
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-14T01:58:43.215Z
+        completed_at: 2026-02-14T01:58:43.215Z
     initiated_by: "@claude"
