@@ -1041,7 +1041,7 @@ features:
     created: 2026-02-13T22:32:07.845Z
     status:
       maturity: draft
-      implementation: in_progress
+      implementation: implemented
   - _ulid: 01KHCJ41DMYNDJH45JQQ0FAQ3K
     slugs:
       - full-model-loader
