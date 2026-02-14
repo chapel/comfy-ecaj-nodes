@@ -80,13 +80,14 @@ class OpMergeWeights:
 class OpApplyModel:
     """Load full model weights into a register for WIDEN merge.
 
-    AC: @full-model-execution ac-2, ac-3
-    Loads raw checkpoint weights (no arithmetic) into a register.
+    AC: @full-model-execution ac-2, ac-3, ac-14
+    Loads checkpoint weights into a register, scaled by strength.
     OpFilterDelta/OpMergeWeights compute deltas internally.
     """
 
     model_id: str
     block_config: BlockConfig | None
+    strength: float
     input_reg: int
     out_reg: int
 
@@ -255,6 +256,7 @@ class _PlanCompiler:
             OpApplyModel(
                 model_id=model_id,
                 block_config=node.block_config,
+                strength=node.strength,
                 input_reg=current_base_reg,
                 out_reg=out,
             )
@@ -475,15 +477,11 @@ def execute_plan(
             # Stack into [B, *shape] tensor and move to GPU
             stacked = torch.stack(weight_tensors, dim=0).to(device=device, dtype=dtype)
 
-            # AC: @full-model-execution ac-9
-            # Apply per-block strength scaling to model weights
-            if op.block_config is not None and arch is not None:
-                # For models, we apply strength scaling differently:
-                # The model weights themselves are what we're merging,
-                # so block_config affects how much of the model's delta
-                # (vs backbone) is used. This is handled by OpFilterDelta
-                # which receives the model weights as input_reg.
-                pass
+            # AC: @full-model-execution ac-14
+            # Apply per-model strength: blend toward base register
+            if op.strength != 1.0:
+                base = regs[op.input_reg]
+                stacked = base + op.strength * (stacked - base)
 
             regs[op.out_reg] = stacked
 
