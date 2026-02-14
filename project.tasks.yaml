@@ -3677,4 +3677,53 @@
         WIDEN-affected keys. Read full base state_dict, overlay merged keys, write complete model.
         Memory implication: need full state_dict in RAM during save.
       supersedes: null
+    - _ulid: 01KHCSEZN608XBYKMKF92JT1SX
+      created_at: 2026-02-14T00:40:26.534Z
+      author: "@claude"
+      content: >-
+        ## Updated: Recipe-in-Metadata Approach
+
+
+        Embed the full serialized recipe tree in safetensors metadata rather than storing individual
+        fields. The hash is derived FROM the serialized recipe, not computed separately.
+
+
+        ### Safetensors Metadata Keys (revised)
+
+
+        - __ecaj_version__: '1'
+
+        - __ecaj_recipe__: JSON-serialized frozen recipe tree (model_patcher replaced with
+        model_path string, all other fields preserved — strengths, t_factors, block_config, tree
+        structure)
+
+        - __ecaj_recipe_hash__: sha256(__ecaj_recipe__) — fast comparison key
+
+
+        ### Cache Validation Flow (revised)
+
+
+        1. Read header metadata (fast, no tensor load)
+
+        2. Compare __ecaj_recipe_hash__ against hash of current serialized recipe (fast path)
+
+        3. On hash match → cache hit, load tensors
+
+        4. On mismatch → recompute
+
+
+        The recipe serialization is deterministic because the tree is frozen dataclasses with
+        tuples. Replace model_patcher with model_path, serialize with json.dumps(sort_keys=True) or
+        deterministic repr().
+
+
+        Benefits: single source of truth, no separate fields to sync, full recipe is inspectable in
+        metadata for debugging, and LoRA file stats (mtime/size) are naturally included since
+        they're part of the recipe tree walk during serialization.
+
+
+        Previous note about individual __ecaj_lora_stats__, __ecaj_base_model__,
+        __ecaj_block_config__, __ecaj_t_factors__ fields is SUPERSEDED — these are replaced by the
+        single __ecaj_recipe__ field.
+      supersedes: null
   todos: []
