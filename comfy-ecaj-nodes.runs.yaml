@@ -1327,8 +1327,19 @@ runs:
   - _ulid: 01KHCXWNVQ5E348Q3DX4PCJQ4C
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-14T01:57:49.559Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-14T01:57:49.559Z
+        completed_at: 2026-02-14T01:58:31.655Z
+        notes: Reviewed session. One success pattern captured (numpy-free tensor bytes). Parallel reviewer
+          pattern already tracked. Other friction was one-off (codex empty output, missing deps,
+          mock setup).
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-14T01:58:31.655Z
+        completed_at: 2026-02-14T01:58:31.655Z
     initiated_by: "@claude"
