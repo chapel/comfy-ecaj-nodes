@@ -4099,7 +4099,7 @@
   title: Implement Qwen model loader support
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -4136,6 +4136,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T08:04:09.940Z
+  closed_reason: "Merged in PR #57. Added Qwen architecture detection to model_loader.py:
+    model.transformer. prefix in _FILE_KEY_PREFIXES, Qwen pattern in _ARCH_PATTERNS (≥60
+    transformer_blocks keys). Added 9 tests covering Qwen detection, key normalization (transformer.
+    and model.transformer. prefixes), VAE exclusion, and tensor retrieval. AC-7 fully covered."
 - _ulid: 01KHDHEGSHFQVSWEK3F2A93R9Y
   slugs:
     - qwen-block-config
