@@ -3388,7 +3388,7 @@
   type: task
   spec_ref: "@full-model-loader"
   plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -3447,6 +3447,13 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T02:44:52.539Z
+  closed_reason: "Merged in PR #53. Implemented ModelLoader class in lib/model_loader.py using
+    safetensors safe_open() for memory-mapped checkpoint access. Key features: key normalization
+    (strips model.diffusion_model. and transformer. prefixes), excludes VAE/text encoder keys,
+    architecture detection from normalized keys, get_weights() for batch tensor retrieval, cleanup()
+    for resource release, UnsupportedFormatError for non-safetensors files. All 9 ACs covered by 27
+    tests."
 - _ulid: 01KHCJ41JV9XBWBJ8VSVB748W8
   slugs:
     - implement-full-model-execution

@@ -1,0 +1,263 @@
+{
+  "generated_at": "2026-02-14T02:38:28.788Z",
+  "branch": "feat/model-input-node",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-14T02:38:28.788Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KHCJ41G",
+      "title": "Implement Model Input Node",
+      "started_at": "2026-02-14T02:35:52.210Z",
+      "priority": 3,
+      "spec_ref": "@model-input-node",
+      "note_count": 2,
+      "last_note_at": "2026-02-14T02:37:23.086Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KHCJ41G",
+      "task_title": "Implement Model Input Node",
+      "task_status": "pending_review",
+      "note_ulid": "01KHD053",
+      "created_at": "2026-02-14T02:37:23.086Z",
+      "author": "@claude",
+      "content": "Implementation complete. Created WIDENModelInputNode in nodes/model_input.py with checkpoint file combo via folder_paths, strength slider (0.0-2.0, default 1.0), and optional BLOCK_CONFIG input. Returns RecipeModel via WIDEN type. Registered in __init__.py. 15 tests covering all 6 ACs: ac-1 (model_name/strength inputs), ac-2 (returns RecipeModel), ac-3 (no GPU/IO), ac-4 (CATEGORY ecaj/merge), ac-5 (RETURN_TYPES WIDEN), ac-6 (block_config optional). 669 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHA77QE",
+      "task_title": "Add layer-type filtering to block config",
+      "task_status": "completed",
+      "note_ulid": "01KHCZTZ",
+      "created_at": "2026-02-14T02:31:51.186Z",
+      "author": "@claude",
+      "content": "Implementation complete. Added classify_layer_type function to lib/block_classify.py with architecture-specific patterns (SDXL: attn1/attn2/to_q/to_k/to_v/proj_in/proj_out → attention, ff. → feed_forward, norm → norm; Z-Image: attn.qkv/attn.out/q_norm/k_norm → attention, feed_forward/mlp/w1/w2/w3/fc1/fc2 → feed_forward, norm/ln/rms → norm). Extended make_block_config_node to accept layer_types parameter. Updated SDXL and Z-Image block config nodes with attention/feed_forward/norm sliders. Modified _apply_per_block_lora_strength and _get_block_t_factors to apply layer_type_overrides multiplicatively with block overrides. All 8 ACs covered: ac-1 (classification), ac-2 (LoRA multiplicative), ac-3 (t_factor multiplicative), ac-4 (backwards compatible), ac-5 (UI sliders), ac-6 (None for unmatched), ac-7 (precedence), ac-8 (None for unknown arch). 654 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHCJ41F",
+      "task_title": "Implement Full Model Recipe Type",
+      "task_status": "completed",
+      "note_ulid": "01KHCZ89",
+      "created_at": "2026-02-14T02:21:38.421Z",
+      "author": "@claude",
+      "content": "Implementation complete. Added RecipeModel frozen dataclass with path (str), strength (float, default 1.0), and block_config (BlockConfig or None). Updated RecipeNode type alias and __all__ exports. Added 17 tests covering all 6 ACs: frozen immutability (ac-1), field structure (ac-2), RecipeCompose.with_branch compatibility (ac-3), RecipeMerge target compatibility (ac-4), RecipeNode inclusion (ac-5), no GPU tensors (ac-6). All 613 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHA77Q3",
+      "task_title": "Refactor block config from grouped to individual blocks",
+      "task_status": "completed",
+      "note_ulid": "01KHCYZ5",
+      "created_at": "2026-02-14T02:16:40.021Z",
+      "author": "@claude",
+      "content": "Implementation complete. Refactored from grouped blocks to individual blocks:\n\nSDXL: 7 grouped sliders → 19 individual sliders (IN00-IN08, MID, OUT00-OUT08)\nZ-Image: 8 grouped sliders → 34 individual sliders (L00-L29, NOISE_REF0-1, CTX_REF0-1)\n\nFiles modified:\n- lib/block_classify.py: Updated both classifiers\n- lib/recipe.py: Updated docstring example\n- nodes/block_config_sdxl.py: Updated _SDXL_BLOCKS tuple\n- nodes/block_config_zimage.py: Updated _ZIMAGE_BLOCKS tuple\n- tests/conftest.py: Updated _ZIMAGE_KEYS with numbered refiner submodules\n- tests/test_per_block_control.py: Updated expected block names and counts\n- tests/test_merge_block_config.py: Updated all block name references\n- tests/test_lora_block_strength.py: Updated block config overrides\n- tests/test_block_config.py: Updated example block names\n\nAll 600 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHCRP1",
+      "task_title": "Implement: Exit Model Persistence",
+      "task_status": "completed",
+      "note_ulid": "01KHCSMX",
+      "created_at": "2026-02-14T00:43:40.978Z",
+      "author": "@claude",
+      "content": "## Workflow Embedding\n\nNew input: save_workflow (BOOLEAN, default True). When enabled, embed the ComfyUI workflow JSON in safetensors metadata.\n\nAccess the workflow via HIDDEN inputs in INPUT_TYPES:\n  'hidden': {'prompt': 'PROMPT', 'extra_pnginfo': 'EXTRA_PNGINFO'}\n\nEXTRA_PNGINFO contains the workflow dict. Serialize with json.dumps() into metadata key __ecaj_workflow__. This mirrors how ComfyUI embeds workflow in PNG images via the SaveImage node.\n\nNote: workflow is NOT included in the recipe hash — it's purely informational metadata for reproducibility. Changing the workflow JSON (e.g. rearranging nodes) should not invalidate the cache."
+    },
+    {
+      "task_ref": "01KHCJ41G",
+      "task_title": "Implement Model Input Node",
+      "task_status": "pending_review",
+      "note_ulid": "01KHCJ41",
+      "created_at": "2026-02-13T22:32:07.940Z",
+      "author": "@claude",
+      "content": "Implementation notes:\n\nNew file nodes/model_input.py. Pattern follows nodes/lora.py closely:\ncheckpoint file combo via folder_paths.get_filename_list(\"checkpoints\"),\nstrength slider, optional BLOCK_CONFIG input. No chaining (unlike LoRA\nnode) -- each RecipeModel represents one model. To merge multiple models,\nuse Compose node.\n\nRegister in __init__.py NODE_CLASS_MAPPINGS as\n\"WIDENModelInput\": WIDENModelInputNode with display name\n\"WIDEN Model Input\". The file path is stored as-is (the filename,\nnot full path) -- Exit resolves via\nfolder_paths.get_full_path(\"checkpoints\", name) at execution time.\n\nFiles: nodes/model_input.py, __init__.py.\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [
+    {
+      "ref": "01KHCJ41H",
+      "title": "Implement Full Model Loader",
+      "priority": 3,
+      "spec_ref": "@full-model-loader",
+      "tags": []
+    }
+  ],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KHA77QE",
+      "title": "Add layer-type filtering to block config",
+      "completed_at": "2026-02-14T02:35:14.566Z",
+      "closed_reason": "Merged in PR #51. Added layer-type filtering with classify_layer_type function supporting SDXL and Z-Image architectures. Layer types (attention, feed_forward, norm) apply multiplicatively with block overrides for both LoRA strength and WIDEN t_factor. UI sliders added to block config nodes. All 8 ACs covered with 897 lines of implementation and tests."
+    },
+    {
+      "ref": "01KHCJ41F",
+      "title": "Implement Full Model Recipe Type",
+      "completed_at": "2026-02-14T02:23:52.069Z",
+      "closed_reason": "Merged in PR #50. Added RecipeModel frozen dataclass to lib/recipe.py with path (str), strength (float, default 1.0), and block_config (BlockConfig | None) fields. Updated RecipeNode type alias. All 6 ACs covered by 17 tests."
+    },
+    {
+      "ref": "01KHA77Q3",
+      "title": "Refactor block config from grouped to individual blocks",
+      "completed_at": "2026-02-14T02:19:17.185Z",
+      "closed_reason": "Merged in PR #49. Refactored block config from grouped to individual blocks: SDXL 7→19 sliders (IN00-IN08, MID, OUT00-OUT08), Z-Image 8→34 sliders (L00-L29, NOISE_REF0-1, CTX_REF0-1). All 5 ACs covered with tests, CI passing."
+    },
+    {
+      "ref": "01KHCQWY",
+      "title": "Fix AC annotation style in test_graph.py",
+      "completed_at": "2026-02-14T02:09:31.349Z",
+      "closed_reason": "Merged in PR #48. Moved 17 AC annotations from docstring format to standard before-def comment format in test_graph.py. All 6 ACs (@node-graph-testing ac-1 through ac-6) have full test coverage."
+    },
+    {
+      "ref": "01KHCRP1",
+      "title": "Implement: Exit Model Persistence",
+      "completed_at": "2026-02-14T02:03:37.720Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KHC3H8",
+      "title": "Add full model merging support",
+      "completed_at": "2026-02-13T22:32:26.896Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KHA4D4",
+      "title": "Add test for comfyui-packaging ac-3 registry metadata",
+      "completed_at": "2026-02-13T05:09:17.859Z",
+      "closed_reason": "Added 3 tests for [tool.comfy] metadata in test_packaging.py. PR #46."
+    },
+    {
+      "ref": "01KHA4D1",
+      "title": "Add spec coverage for _unpatch_loaded_clones",
+      "completed_at": "2026-02-13T04:22:10.603Z",
+      "closed_reason": "PR #44 merged. Added ac-7 to @exit-patch-install and annotated 5 tests."
+    },
+    {
+      "ref": "01KHA4CV",
+      "title": "Fill missing AC annotations in tests",
+      "completed_at": "2026-02-13T01:01:47.213Z",
+      "closed_reason": "Fixed AC annotations in 3 files: added # AC comments to test_lora_block_strength.py (14 tests), corrected wrong refs in test_recipe.py (3 classes), converted hybrid docstring format in test_compile_plan.py (13 tests). 67 tests pass, ruff clean."
+    },
+    {
+      "ref": "01KHA4CQ",
+      "title": "Delete docs/design.md",
+      "completed_at": "2026-02-13T00:58:35.578Z",
+      "closed_reason": "Deleted docs/design.md, removed references from AGENTS.md, removed empty docs/ directory"
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "f58222a",
+      "full_hash": "f58222a30e45aa4fb1a9e742e1a736fdee705f9b",
+      "date": "2026-02-14T02:37:37.000Z",
+      "message": "feat: add WIDEN Model Input node for full model merging",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ad65042",
+      "full_hash": "ad65042774c90183b9c8f64f22a92dc3804b4ba9",
+      "date": "2026-02-14T02:35:04.000Z",
+      "message": "Merge pull request #51 from chapel/feat/layer-type-filtering",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "f1a83f4",
+      "full_hash": "f1a83f41caf6a05e5b23edeb73ffdb7f2c4e9b15",
+      "date": "2026-02-14T02:32:46.000Z",
+      "message": "feat: add layer-type filtering to block config",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "20f5376",
+      "full_hash": "20f5376b5f12e8334a2bf374d3c180c7b2607a14",
+      "date": "2026-02-14T02:23:41.000Z",
+      "message": "Merge pull request #50 from chapel/feat/recipe-model-type",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "e834850",
+      "full_hash": "e8348500854c977473168d37daa4cb0f7d145a33",
+      "date": "2026-02-14T02:21:54.000Z",
+      "message": "feat: add RecipeModel type for full model merging",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ae42314",
+      "full_hash": "ae42314987988d215867f11c7b1277272bc40de7",
+      "date": "2026-02-14T02:19:07.000Z",
+      "message": "Merge pull request #49 from chapel/refactor/individual-block-control",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "265f767",
+      "full_hash": "265f7673cb9fb619c23ed63cce50872d3380d21c",
+      "date": "2026-02-14T02:17:00.000Z",
+      "message": "refactor: change block config from grouped to individual blocks",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "01ea19a",
+      "full_hash": "01ea19a7edf97595347cdf8ae7a952f107582d46",
+      "date": "2026-02-14T02:09:24.000Z",
+      "message": "Merge pull request #48 from chapel/style/ac-annotation-test-graph",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "7e9dbfb",
+      "full_hash": "7e9dbfbcd6658fe783266addf038f90c6e93268b",
+      "date": "2026-02-14T02:07:35.000Z",
+      "message": "style: move AC annotations to before-def placement in test_graph.py",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ec98f47",
+      "full_hash": "ec98f4704ea1bf4f78b000f8909c8f11d38d28d1",
+      "date": "2026-02-14T01:56:53.000Z",
+      "message": "Merge pull request #47 from chapel/feat/exit-model-persistence",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": true,
+    "staged": [],
+    "unstaged": [],
+    "untracked": []
+  },
+  "inbox_items": [
+    {
+      "ref": "01KHCXS4",
+      "text": "Recipe serialization as a trait/protocol — serialize_recipe currently uses isinstance checks for each recipe type. Should be a protocol method on RecipeNode so new recipe types implement their own serialization. Prevents silent skips and keeps persistence.py decoupled from recipe type enumeration.",
+      "created_at": "2026-02-14T01:55:53.531Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS7",
+      "text": "compute_lora_stats._walk() silently ignores unknown recipe node types — should raise ValueError like serialize_recipe does. Related to serialization-as-trait refactor.",
+      "created_at": "2026-02-14T01:55:56.494Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS9",
+      "text": "load_affected_keys should wrap safetensors errors with helpful message pointing to cached file corruption — tells users to delete and re-run.",
+      "created_at": "2026-02-14T01:55:58.446Z",
+      "tags": [],
+      "added_by": "@claude"
+    }
+  ],
+  "stats": {
+    "total_tasks": 67,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 3,
+    "blocked": 0,
+    "completed": 61,
+    "inbox_items": 3
+  }
+}
