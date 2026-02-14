@@ -819,6 +819,102 @@ class TestModelStrengthScaling:
 
 
 # ---------------------------------------------------------------------------
+# AC-15: Per-block strength scaling applied to model deltas
+# ---------------------------------------------------------------------------
+
+
+# AC: @full-model-execution ac-15
+class TestModelBlockConfigScaling:
+    """Tests for per-block strength scaling on model weights via OpApplyModel."""
+
+    def test_block_config_scales_model_delta_per_block(self) -> None:
+        """block_config on OpApplyModel scales model deltas by per-block override."""
+        from lib.recipe_eval import EvalPlan
+
+        block_config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN00", 0.0), ("IN01", 0.5)),
+        )
+        op_apply = OpApplyModel(
+            model_id="model1", block_config=block_config, strength=1.0,
+            input_reg=0, out_reg=1,
+        )
+        plan = EvalPlan(
+            ops=(op_apply,),
+            result_reg=1,
+            dead_after=((),),
+        )
+
+        # Keys that classify to IN00 and IN01 under SDXL
+        keys = [
+            "diffusion_model.input_blocks.0.0.weight",  # IN00 → strength 0.0
+            "diffusion_model.input_blocks.1.0.weight",  # IN01 → strength 0.5
+        ]
+        base_batch = torch.zeros(2, 4, 4)
+        model_weights = torch.ones(2, 4, 4) * 2.0
+
+        mock_loader = MagicMock()
+        mock_loader.get_weights.return_value = [model_weights[i] for i in range(2)]
+
+        result = execute_plan(
+            plan=plan,
+            keys=keys,
+            base_batch=base_batch,
+            loader=MagicMock(),
+            widen=MagicMock(),
+            device="cpu",
+            dtype=torch.float32,
+            arch="sdxl",
+            model_loaders={"model1": mock_loader},
+        )
+
+        # IN00 block_strength=0.0: base + 0.0 * (model - base) = 0.0
+        torch.testing.assert_close(result[0], torch.zeros(4, 4))
+        # IN01 block_strength=0.5: base + 0.5 * (model - base) = 0.0 + 0.5 * 2.0 = 1.0
+        torch.testing.assert_close(result[1], torch.ones(4, 4))
+
+    def test_block_config_not_applied_without_arch(self) -> None:
+        """block_config is ignored when arch is None."""
+        from lib.recipe_eval import EvalPlan
+
+        block_config = BlockConfig(
+            arch="sdxl",
+            block_overrides=(("IN00", 0.0),),
+        )
+        op_apply = OpApplyModel(
+            model_id="model1", block_config=block_config, strength=1.0,
+            input_reg=0, out_reg=1,
+        )
+        plan = EvalPlan(
+            ops=(op_apply,),
+            result_reg=1,
+            dead_after=((),),
+        )
+
+        keys = ["diffusion_model.input_blocks.0.0.weight"]
+        base_batch = torch.zeros(1, 4, 4)
+        model_weights = torch.ones(1, 4, 4) * 2.0
+
+        mock_loader = MagicMock()
+        mock_loader.get_weights.return_value = [model_weights[0]]
+
+        result = execute_plan(
+            plan=plan,
+            keys=keys,
+            base_batch=base_batch,
+            loader=MagicMock(),
+            widen=MagicMock(),
+            device="cpu",
+            dtype=torch.float32,
+            arch=None,  # No arch → block_config not applied
+            model_loaders={"model1": mock_loader},
+        )
+
+        # Without arch, block_config is skipped, raw model weights preserved
+        torch.testing.assert_close(result[0], torch.ones(4, 4) * 2.0)
+
+
+# ---------------------------------------------------------------------------
 # Additional tests for edge cases
 # ---------------------------------------------------------------------------
 
