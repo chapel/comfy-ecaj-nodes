@@ -4372,7 +4372,7 @@
   title: Implement Flux Klein block config node and registration
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@flux-detect-classify"
@@ -4415,3 +4415,9 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-14T08:38:56.263Z
+  closed_reason: "Merged in PR #62. Implemented WIDENBlockConfigFlux node with 32 block sliders
+    (DB00-DB07 + SB00-SB23) plus 3 layer-type sliders (attention, feed_forward, norm). Registered in
+    NODE_CLASS_MAPPINGS. Klein 4B/9B variants handled with same 'flux' arch tag. All ACs covered:
+    ac-9 (block sliders), ac-10 (variant handling), ac-11 (registry wiring). 18 tests added, all 815
+    tests pass."

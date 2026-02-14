@@ -1,0 +1,255 @@
+{
+  "generated_at": "2026-02-14T08:30:09.804Z",
+  "branch": "feat/flux-model-loader",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-14T08:30:09.804Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KHDHEGW",
+      "title": "Implement Flux Klein model loader support",
+      "started_at": "2026-02-14T08:27:28.574Z",
+      "priority": 2,
+      "spec_ref": null,
+      "note_count": 2,
+      "last_note_at": "2026-02-14T08:28:35.679Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KHDHEGW",
+      "task_title": "Implement Flux Klein model loader support",
+      "task_status": "pending_review",
+      "note_ulid": "01KHDM86",
+      "created_at": "2026-02-14T08:28:35.679Z",
+      "author": "@claude",
+      "content": "Implementation complete. Added Flux architecture detection to _ARCH_PATTERNS in lib/model_loader.py matching double_blocks pattern. Key normalization already handles diffusion_model. and transformer. prefix stripping. Added 9 tests: TestFluxArchitectureDetection (4 tests) for ac-8 covering flux detection from double_blocks, transformer prefix handling, key-only detection, and negative test for single_blocks-only keys. TestFluxKeyNormalization (5 tests) covering diffusion_model prefix preservation, transformer prefix stripping, normalized key format, VAE exclusion, and tensor retrieval. All 798 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGV",
+      "task_title": "Implement Flux Klein LoRA loader",
+      "task_status": "completed",
+      "note_ulid": "01KHDKXE",
+      "created_at": "2026-02-14T08:22:43.119Z",
+      "author": "@claude",
+      "content": "Implementation complete. Created lib/lora/flux.py with FluxLoader class supporting BFL/kohya and diffusers LoRA formats. Double block img_attn/txt_attn QKV fusing uses qkv_q/qkv_k/qkv_v DeltaSpec kinds with offset=(start, length). Single block linear1 4-way fusing (to_q/to_k/to_v/proj_mlp) uses qkv_* for Q/K/V and new offset_mlp kind for MLP projection. Added offset_mlp to gpu_ops.py offset-aware kinds tuple at line 200. Registered FluxLoader in LOADER_REGISTRY. Updated tests: changed test_unsupported_arch_raises_value_error to use 'unknown_arch', added test_flux_loader_selected_for_flux_arch, added TestFluxLoader class with 12 tests covering ac-4, ac-5, ac-6, ac-7. 789 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGT",
+      "task_title": "Implement Flux Klein detection and block classification",
+      "task_status": "completed",
+      "note_ulid": "01KHDKCM",
+      "created_at": "2026-02-14T08:13:32.370Z",
+      "author": "@claude",
+      "content": "Implementation complete. Added classify_key_flux() to lib/block_classify.py mapping double_blocks.N to DB0N and single_blocks.N to SB0N with dynamic index discovery (no upper bound). Added Flux layer type patterns (_FLUX_LAYER_PATTERNS) for attention (img_attn, txt_attn, qkv, proj, query_norm, key_norm), feed_forward (img_mlp, txt_mlp, linear2), and norm (img_mod, txt_mod, modulation). Registered in _CLASSIFIERS and _LAYER_TYPE_PATTERNS. Added 'flux' to _SUPPORTED_ARCHITECTURES in nodes/entry.py. Updated tests: test_flux_detected_but_unsupported → test_flux_detected_and_supported, added TestBlockClassifyFlux (5 tests) and TestLayerTypeClassifyFlux (12 tests), updated test_returns_flux_classifier. 777 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGS",
+      "task_title": "Implement Qwen block config node and registration",
+      "task_status": "completed",
+      "note_ulid": "01KHDK0B",
+      "created_at": "2026-02-14T08:06:50.226Z",
+      "author": "@claude",
+      "content": "Implementation complete. Created nodes/block_config_qwen.py with 60 transformer blocks (TB00-TB59) and 3 layer-type sliders (attention, feed_forward, norm). Registered WIDENBlockConfigQwen in __init__.py mappings. Added 10 tests covering: 60 individual block sliders, layer type sliders, total input count (63), slider config, return types, create_config behavior, block overrides storage, layer type overrides storage, and boundary values. 759 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGR",
+      "task_title": "Implement Qwen model loader support",
+      "task_status": "completed",
+      "note_ulid": "01KHDJPW",
+      "created_at": "2026-02-14T08:01:39.870Z",
+      "author": "@claude",
+      "content": "Implementation complete. Added Qwen architecture detection to lib/model_loader.py: model.transformer. prefix in _FILE_KEY_PREFIXES, Qwen pattern in _ARCH_PATTERNS (≥60 transformer_blocks keys). Added 9 tests covering Qwen detection (qwen_checkpoint_path, qwen_model_prefix_checkpoint_path fixtures), key normalization (transformer. and model.transformer. prefixes), VAE exclusion, and tensor retrieval. 750 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHDHEGW",
+      "task_title": "Implement Flux Klein model loader support",
+      "task_status": "pending_review",
+      "note_ulid": "01KHDHEG",
+      "created_at": "2026-02-14T07:39:37.246Z",
+      "author": "@claude",
+      "content": "Add Flux architecture detection pattern to _ARCH_PATTERNS in\nlib/model_loader.py (match double_blocks). Add Flux-specific entries\nto _FILE_KEY_PREFIXES and _EXCLUDED_PREFIXES. Update _normalize_key()\nfor Flux-specific prefix stripping.\n\nTests in tests/test_model_loader.py: add Flux detection and\nkey normalization tests.\nCovers ac-8.\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KHDHEGV",
+      "title": "Implement Flux Klein LoRA loader",
+      "completed_at": "2026-02-14T08:26:22.584Z",
+      "closed_reason": "Merged in PR #60. Implemented FluxLoader for Flux Klein architecture (4B/9B) with: double_block img_attn/txt_attn QKV fusing using qkv_q/qkv_k/qkv_v kinds with offsets; single_block linear1 4-way fusing (to_q/to_k/to_v/proj_mlp) with offset_mlp kind; support for BFL/kohya and diffusers LoRA formats; registered in LOADER_REGISTRY. AC coverage verified: ac-4 (double_block QKV fusing), ac-5 (single_block linear1 fusing), ac-6 (BFL/kohya format), ac-7 (diffusers format). 12 tests added, all 789 tests pass."
+    },
+    {
+      "ref": "01KHDHEGT",
+      "title": "Implement Flux Klein detection and block classification",
+      "completed_at": "2026-02-14T08:16:03.308Z",
+      "closed_reason": "Merged in PR #59. Added Flux Klein detection (ac-1) and block classification (ac-2, ac-10) with classify_key_flux() mapping double_blocks.N to DB0N and single_blocks.N to SB0N via dynamic index discovery. Added layer type patterns (ac-3) for attention, feed_forward, and norm. Registered in _CLASSIFIERS, _LAYER_TYPE_PATTERNS, and _SUPPORTED_ARCHITECTURES. 17 new tests with AC annotations, all 777 tests passing."
+    },
+    {
+      "ref": "01KHDHEGS",
+      "title": "Implement Qwen block config node and registration",
+      "completed_at": "2026-02-14T08:09:56.960Z",
+      "closed_reason": "Merged in PR #58. Implemented WIDENBlockConfigQwen node with 60 transformer block sliders (TB00-TB59) and 3 layer-type sliders (attention, feed_forward, norm). Registered in NODE_CLASS_MAPPINGS and NODE_DISPLAY_NAME_MAPPINGS. 9 tests covering AC-8 (60 individual blocks + layer type sliders) and AC-9 (registry wiring). All CI passed."
+    },
+    {
+      "ref": "01KHDHEGR",
+      "title": "Implement Qwen model loader support",
+      "completed_at": "2026-02-14T08:04:09.940Z",
+      "closed_reason": "Merged in PR #57. Added Qwen architecture detection to model_loader.py: model.transformer. prefix in _FILE_KEY_PREFIXES, Qwen pattern in _ARCH_PATTERNS (≥60 transformer_blocks keys). Added 9 tests covering Qwen detection, key normalization (transformer. and model.transformer. prefixes), VAE exclusion, and tensor retrieval. AC-7 fully covered."
+    },
+    {
+      "ref": "01KHDHEGP",
+      "title": "Implement Qwen LoRA loader",
+      "completed_at": "2026-02-14T07:59:18.823Z",
+      "closed_reason": "Merged in PR #56. Implemented QwenLoader supporting 3 LoRA formats (diffusers, A1111/kohya, LyCORIS). Features: compound name preservation, no QKV fusion (separate to_q/to_k/to_v), standard DeltaSpec production. Registered in LOADER_REGISTRY. 11 tests covering ac-4, ac-5, ac-6."
+    },
+    {
+      "ref": "01KHDHEGN",
+      "title": "Implement Qwen detection and block classification",
+      "completed_at": "2026-02-14T07:51:19.582Z",
+      "closed_reason": "Merged in PR #55. Implemented Qwen architecture detection and block/layer-type classification. Added classify_key_qwen() mapping transformer_blocks.N to TB00+ with dynamic index discovery, Qwen layer type patterns for attention/feed_forward/norm classification (including img_mod/txt_mod), and registered in _CLASSIFIERS/_LAYER_TYPE_PATTERNS. Added 'qwen' to _SUPPORTED_ARCHITECTURES. All AC coverage verified: ac-1 (detection), ac-2 (block classification), ac-3 (layer type classification). 730 tests pass."
+    },
+    {
+      "ref": "01KHC3H6",
+      "title": "Add Qwen and Flux 2 Klein architecture support",
+      "completed_at": "2026-02-14T07:39:50.714Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KHCJ41J",
+      "title": "Implement Full Model Execution",
+      "completed_at": "2026-02-14T02:57:50.644Z",
+      "closed_reason": "Merged in PR #54. Implemented full model execution for WIDEN checkpoint merging. Added RecipeModel support across the codebase: analyze_recipe_models() in lib/analysis.py, OpApplyModel in lib/recipe_eval.py, model path collection in nodes/exit.py, and RecipeModel as valid type in compose/merge nodes. All 13 ACs verified with 20 tests."
+    },
+    {
+      "ref": "01KHCJ41H",
+      "title": "Implement Full Model Loader",
+      "completed_at": "2026-02-14T02:44:52.539Z",
+      "closed_reason": "Merged in PR #53. Implemented ModelLoader class in lib/model_loader.py using safetensors safe_open() for memory-mapped checkpoint access. Key features: key normalization (strips model.diffusion_model. and transformer. prefixes), excludes VAE/text encoder keys, architecture detection from normalized keys, get_weights() for batch tensor retrieval, cleanup() for resource release, UnsupportedFormatError for non-safetensors files. All 9 ACs covered by 27 tests."
+    },
+    {
+      "ref": "01KHCJ41G",
+      "title": "Implement Model Input Node",
+      "completed_at": "2026-02-14T02:39:35.284Z",
+      "closed_reason": "Merged in PR #52. Implemented WIDENModelInputNode that produces RecipeModel from checkpoint file picker. Includes: checkpoint combo via folder_paths, strength slider (0.0-2.0), optional BLOCK_CONFIG input, returns WIDEN type. All 6 ACs covered by 15 tests."
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "85c357c",
+      "full_hash": "85c357cc22df3e516033b39cab40b894bc2f2db8",
+      "date": "2026-02-14T08:28:48.000Z",
+      "message": "feat: add Flux Klein model loader support",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "b8b4031",
+      "full_hash": "b8b40316079d3d54fc739b313983346d8b5fa921",
+      "date": "2026-02-14T08:26:08.000Z",
+      "message": "Merge pull request #60 from chapel/feat/flux-lora-loader",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "cfb38ee",
+      "full_hash": "cfb38eea9be182a9c47377928767ce6ea2500c70",
+      "date": "2026-02-14T08:23:05.000Z",
+      "message": "feat: add Flux Klein LoRA loader with QKV and linear1 fusing",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "9d1a189",
+      "full_hash": "9d1a189ad4d6acc5650f2dab1da28c6785873d92",
+      "date": "2026-02-14T08:15:53.000Z",
+      "message": "Merge pull request #59 from chapel/feat/flux-detect-classify",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "9629531",
+      "full_hash": "962953150bb0a5b5cf4d46fb62dd0d3972165715",
+      "date": "2026-02-14T08:13:51.000Z",
+      "message": "feat: add Flux Klein detection and block classification",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "cb0de8e",
+      "full_hash": "cb0de8e1098d205b41e6efb7a0b559fa50a745c6",
+      "date": "2026-02-14T08:09:48.000Z",
+      "message": "Merge pull request #58 from chapel/feat/qwen-block-config",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "7c9fa75",
+      "full_hash": "7c9fa75fdcbc3caa48cf3243081230436a7b0db7",
+      "date": "2026-02-14T08:07:11.000Z",
+      "message": "feat: add Qwen block config node with 60 TB sliders",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "83f8226",
+      "full_hash": "83f8226f836fcdc24828a43f1ed00cd9cf4a3e69",
+      "date": "2026-02-14T08:03:56.000Z",
+      "message": "Merge pull request #57 from chapel/feat/qwen-model-loader",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ab453e5",
+      "full_hash": "ab453e596c4a11a355e4ceb9b555ec7b2e8d972f",
+      "date": "2026-02-14T08:01:31.000Z",
+      "message": "feat: add Qwen model loader support",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "a16a649",
+      "full_hash": "a16a64932eee2f6296a577d36545aa2df12a415d",
+      "date": "2026-02-14T07:59:09.000Z",
+      "message": "Merge pull request #56 from chapel/feat/qwen-lora-loader",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": true,
+    "staged": [],
+    "unstaged": [],
+    "untracked": []
+  },
+  "inbox_items": [
+    {
+      "ref": "01KHCXS4",
+      "text": "Recipe serialization as a trait/protocol — serialize_recipe currently uses isinstance checks for each recipe type. Should be a protocol method on RecipeNode so new recipe types implement their own serialization. Prevents silent skips and keeps persistence.py decoupled from recipe type enumeration.",
+      "created_at": "2026-02-14T01:55:53.531Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS7",
+      "text": "compute_lora_stats._walk() silently ignores unknown recipe node types — should raise ValueError like serialize_recipe does. Related to serialization-as-trait refactor.",
+      "created_at": "2026-02-14T01:55:56.494Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS9",
+      "text": "load_affected_keys should wrap safetensors errors with helpful message pointing to cached file corruption — tells users to delete and re-run.",
+      "created_at": "2026-02-14T01:55:58.446Z",
+      "tags": [],
+      "added_by": "@claude"
+    }
+  ],
+  "stats": {
+    "total_tasks": 75,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 1,
+    "blocked": 0,
+    "completed": 71,
+    "inbox_items": 3
+  }
+}
