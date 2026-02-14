@@ -3453,21 +3453,89 @@
         Files: lib/recipe.py, lib/recipe_eval.py, lib/analysis.py,
         nodes/exit.py, nodes/merge.py, nodes/compose.py.
   todos: []
-- title: Fix AC annotation style in test_graph.py
+- _ulid: 01KHCQWYAEA21JA0ZB7FB9100T
+  slugs: []
+  title: Fix AC annotation style in test_graph.py
   type: task
-  priority: 3
-  spec_ref: null
-  tags:
-    - annotations
   description: "test_graph.py has 5 docstring-only AC annotations (AC: @node-graph-testing ac-N
     without # prefix) that should be converted to standard # AC: comment style"
-  _ulid: 01KHCQWYAEA21JA0ZB7FB9100T
-  slugs: []
+  spec_ref: null
   status: pending
   blocked_by: []
   depends_on: []
   context: []
+  priority: 3
+  tags:
+    - annotations
   vcs_refs: []
   created_at: 2026-02-14T00:13:06.763Z
   notes: []
+  todos: []
+- title: "Implement: Exit Model Persistence"
+  type: task
+  spec_ref: "@exit-model-persistence"
+  derivation: auto
+  priority: 3
+  slugs:
+    - task-exit-model-persistence
+  tags: []
+  depends_on:
+    - "@implement-exit-node"
+  notes:
+    - _ulid: 01KHCRP1YMEMWB6TAH6W9W1YAD
+      created_at: 2026-02-14T00:26:49.684Z
+      author: "@claude"
+      content: >-
+        Implementation notes (auto-generated from spec):
+
+
+        Opt-in save/cache for merged model output. When enabled, the exit node saves the
+        fully-merged model as safetensors adjacent to the base model directory. On subsequent runs,
+        if the cached file metadata matches the current recipe configuration, the node loads
+        directly from disk instead of recomputing the GPU merge pipeline. The saved file is a
+        complete standalone model loadable by ComfyUI standard model loader. New inputs: save_model
+        (boolean toggle, default off) and model_name (string filename).
+
+
+
+        Acceptance Criteria:
+
+        - ac-1: Given save_model toggle is disabled (default), when exit node executes, then
+        behavior is unchanged from baseline — no file I/O
+
+        - ac-2: Given save_model enabled and model_name provided, when exit node completes GPU
+        merge, then fully-merged state dict saved as safetensors adjacent to base model using
+        model_name
+
+        - ac-3: Given cached safetensors exists at expected path, when exit node executes with
+        save_model enabled and metadata matches current config, then model loaded from disk and GPU
+        merge pipeline skipped entirely
+
+        - ac-4: Given cached file exists but metadata does not match, when exit node executes with
+        save_model enabled, then GPU merge pipeline runs and cached file is overwritten with new
+        results
+
+        - ac-5: Given save_model enabled and model_name is empty or not provided, when exit node
+        validates inputs, then raises clear error requesting a model name
+
+        - ac-6: Given a saved safetensors file, when examined for metadata, then header contains
+        recipe identity hash, LoRA file stats (paths + mtime + size), base model identity, and
+        per-block config
+
+        - ac-7: Given LoRA files on disk have changed (different mtime or size), when exit node
+        checks cache validity, then cache is invalidated and merge recomputes
+
+        - ac-8: Given saved safetensors from exit node, when loaded by ComfyUI standard model
+        loader, then functions as a complete standalone model
+
+        - ac-9: Given file with model_name already exists but lacks ecaj metadata in safetensors
+        header, when exit node attempts save or cache-check, then raises error indicating file was
+        not created by this node and suggests a different model_name
+      supersedes: null
+  _ulid: 01KHCRP1YM8442EBH98DBHWPPQ
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-14T00:26:49.684Z
   todos: []
