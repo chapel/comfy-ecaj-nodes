@@ -1245,6 +1245,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-13T22:37:42.668Z
+    completed_at: 2026-02-13T22:39:32.529Z
     step_results:
       - step_index: 0
         status: completed
@@ -1315,4 +1316,11 @@ runs:
           2. Observation 01KHCJHD: Subagent plan review for standalone-ness catches real blockers
           (success pattern)
     initiated_by: "@claude"
-    completed_at: 2026-02-13T22:39:32.529Z
+  - _ulid: 01KHCR1B71ZACV1GXQM9KNZ2EB
+    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
+    status: active
+    current_step: 0
+    total_steps: 5
+    started_at: 2026-02-14T00:15:31.041Z
+    step_results: []
+    initiated_by: "@claude"
