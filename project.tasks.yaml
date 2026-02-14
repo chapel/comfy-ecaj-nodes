@@ -3022,6 +3022,7 @@
     - blocks
   vcs_refs: []
   created_at: 2026-02-13T00:43:25.507Z
+  started_at: 2026-02-14T02:24:23.423Z
   notes:
     - _ulid: 01KHA7AP8GK10K6PZS4K3SBZ8Z
       created_at: 2026-02-13T00:45:02.608Z
@@ -3193,9 +3194,23 @@
 
         pytest -v && ruff check
       supersedes: null
+    - _ulid: 01KHCZTZMJ4EB3HC6D8J3DGWKJ
+      created_at: 2026-02-14T02:31:51.186Z
+      author: "@claude"
+      content: "Implementation complete. Added classify_layer_type function to lib/block_classify.py with
+        architecture-specific patterns (SDXL: attn1/attn2/to_q/to_k/to_v/proj_in/proj_out →
+        attention, ff. → feed_forward, norm → norm; Z-Image: attn.qkv/attn.out/q_norm/k_norm →
+        attention, feed_forward/mlp/w1/w2/w3/fc1/fc2 → feed_forward, norm/ln/rms → norm). Extended
+        make_block_config_node to accept layer_types parameter. Updated SDXL and Z-Image block
+        config nodes with attention/feed_forward/norm sliders. Modified
+        _apply_per_block_lora_strength and _get_block_t_factors to apply layer_type_overrides
+        multiplicatively with block overrides. All 8 ACs covered: ac-1 (classification), ac-2 (LoRA
+        multiplicative), ac-3 (t_factor multiplicative), ac-4 (backwards compatible), ac-5 (UI
+        sliders), ac-6 (None for unmatched), ac-7 (precedence), ac-8 (None for unknown arch). 654
+        tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T02:24:23.423Z
 - _ulid: 01KHC3H6MZJMGDCM7VNB74K1Y4
   slugs: []
   title: Add Qwen and Flux 2 Klein architecture support
