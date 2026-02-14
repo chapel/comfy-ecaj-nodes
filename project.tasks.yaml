@@ -4261,6 +4261,12 @@
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #60. Implemented FluxLoader for Flux Klein architecture (4B/9B) with:
+    double_block img_attn/txt_attn QKV fusing using qkv_q/qkv_k/qkv_v kinds with offsets;
+    single_block linear1 4-way fusing (to_q/to_k/to_v/proj_mlp) with offset_mlp kind; support for
+    BFL/kohya and diffusers LoRA formats; registered in LOADER_REGISTRY. AC coverage verified: ac-4
+    (double_block QKV fusing), ac-5 (single_block linear1 fusing), ac-6 (BFL/kohya format), ac-7
+    (diffusers format). 12 tests added, all 789 tests pass."
   depends_on:
     - "@flux-detect-classify"
   context: []
@@ -4271,6 +4277,7 @@
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.213Z
   started_at: 2026-02-14T08:16:55.723Z
+  completed_at: 2026-02-14T08:26:22.584Z
   notes:
     - _ulid: 01KHDHEGVX65KJJGA1XQC642CV
       created_at: 2026-02-14T07:39:37.213Z
@@ -4311,20 +4318,13 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-14T08:26:22.584Z
-  closed_reason: "Merged in PR #60. Implemented FluxLoader for Flux Klein architecture (4B/9B) with:
-    double_block img_attn/txt_attn QKV fusing using qkv_q/qkv_k/qkv_v kinds with offsets;
-    single_block linear1 4-way fusing (to_q/to_k/to_v/proj_mlp) with offset_mlp kind; support for
-    BFL/kohya and diffusers LoRA formats; registered in LOADER_REGISTRY. AC coverage verified: ac-4
-    (double_block QKV fusing), ac-5 (single_block linear1 fusing), ac-6 (BFL/kohya format), ac-7
-    (diffusers format). 12 tests added, all 789 tests pass."
 - _ulid: 01KHDHEGWYT9Y2847GMYDB85NZ
   slugs:
     - flux-model-loader
   title: Implement Flux Klein model loader support
   type: task
   plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -4349,6 +4349,7 @@
         Covers ac-8.
   todos: []
   automation: eligible
+  started_at: 2026-02-14T08:27:28.574Z
 - _ulid: 01KHDHEGXXH30KS31R7RXA41NC
   slugs:
     - flux-block-config
