@@ -4,6 +4,7 @@
 # In ComfyUI, this is always set (errors propagate immediately).
 # In pytest, __init__.py is loaded standalone — skip registration.
 if __package__:
+    from .nodes.block_config_flux import WIDENBlockConfigFluxNode
     from .nodes.block_config_qwen import WIDENBlockConfigQwenNode
     from .nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
     from .nodes.block_config_zimage import WIDENBlockConfigZImageNode
@@ -23,6 +24,7 @@ if __package__:
         "WIDENBlockConfigSDXL": WIDENBlockConfigSDXLNode,
         "WIDENBlockConfigZImage": WIDENBlockConfigZImageNode,
         "WIDENBlockConfigQwen": WIDENBlockConfigQwenNode,
+        "WIDENBlockConfigFlux": WIDENBlockConfigFluxNode,
         "WIDENModelInput": WIDENModelInputNode,
     }
 
@@ -35,6 +37,7 @@ if __package__:
         "WIDENBlockConfigSDXL": "WIDEN Block Config (SDXL)",
         "WIDENBlockConfigZImage": "WIDEN Block Config (Z-Image)",
         "WIDENBlockConfigQwen": "WIDEN Block Config (Qwen)",
+        "WIDENBlockConfigFlux": "WIDEN Block Config (Flux)",
         "WIDENModelInput": "WIDEN Model Input",
     }
 
