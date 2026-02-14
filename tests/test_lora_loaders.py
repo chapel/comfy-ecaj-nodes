@@ -18,6 +18,7 @@ from lib.executor import DeltaSpec
 from lib.lora import (
     LOADER_REGISTRY,
     LoRALoader,
+    QwenLoader,
     SDXLLoader,
     ZImageLoader,
     get_loader,
@@ -65,11 +66,70 @@ def zimage_lora_file() -> str:
 
 
 @pytest.fixture
-def cleanup_lora_files(sdxl_lora_file: str, zimage_lora_file: str):
+def qwen_diffusers_lora_file() -> str:
+    """Create a temporary Qwen Diffusers-format LoRA file."""
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        tensors = {
+            # Diffusers format: transformer.transformer_blocks.N.*.lora_A/B.weight
+            "transformer.transformer_blocks.0.attn.to_q.lora_A.weight": torch.randn(8, 3072),
+            "transformer.transformer_blocks.0.attn.to_q.lora_B.weight": torch.randn(3072, 8),
+            "transformer.transformer_blocks.0.attn.to_k.lora_A.weight": torch.randn(8, 3072),
+            "transformer.transformer_blocks.0.attn.to_k.lora_B.weight": torch.randn(3072, 8),
+            "transformer.transformer_blocks.0.attn.to_v.lora_A.weight": torch.randn(8, 3072),
+            "transformer.transformer_blocks.0.attn.to_v.lora_B.weight": torch.randn(3072, 8),
+            # Feed-forward
+            "transformer.transformer_blocks.0.mlp.gate_proj.lora_A.weight": torch.randn(16, 3072),
+            "transformer.transformer_blocks.0.mlp.gate_proj.lora_B.weight": torch.randn(12288, 16),
+        }
+        save_file(tensors, f.name)
+        return f.name
+
+
+@pytest.fixture
+def qwen_kohya_lora_file() -> str:
+    """Create a temporary Qwen A1111/kohya-format LoRA file."""
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        tensors = {
+            # Kohya format: lora_unet_transformer_blocks_N_*.lora_up/down.weight
+            "lora_unet_transformer_blocks_5_attn_to_q.lora_down.weight": torch.randn(8, 3072),
+            "lora_unet_transformer_blocks_5_attn_to_q.lora_up.weight": torch.randn(3072, 8),
+            "lora_unet_transformer_blocks_5_ff_gate_proj.lora_down.weight": torch.randn(8, 3072),
+            "lora_unet_transformer_blocks_5_ff_gate_proj.lora_up.weight": torch.randn(12288, 8),
+        }
+        save_file(tensors, f.name)
+        return f.name
+
+
+@pytest.fixture
+def qwen_lycoris_lora_file() -> str:
+    """Create a temporary Qwen LyCORIS-format LoRA file."""
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        tensors = {
+            # LyCORIS format: lycoris_transformer_blocks_N_*.lora_down/up.weight
+            "lycoris_transformer_blocks_10_attn_to_q.lora_down.weight": torch.randn(8, 3072),
+            "lycoris_transformer_blocks_10_attn_to_q.lora_up.weight": torch.randn(3072, 8),
+            "lycoris_transformer_blocks_10_mlp_down_proj.lora_down.weight": torch.randn(16, 12288),
+            "lycoris_transformer_blocks_10_mlp_down_proj.lora_up.weight": torch.randn(3072, 16),
+        }
+        save_file(tensors, f.name)
+        return f.name
+
+
+@pytest.fixture
+def cleanup_lora_files(
+    sdxl_lora_file: str,
+    zimage_lora_file: str,
+    qwen_diffusers_lora_file: str,
+    qwen_kohya_lora_file: str,
+    qwen_lycoris_lora_file: str,
+):
     """Clean up temporary files after tests."""
     yield
     Path(sdxl_lora_file).unlink(missing_ok=True)
     Path(zimage_lora_file).unlink(missing_ok=True)
+    Path(qwen_diffusers_lora_file).unlink(missing_ok=True)
+    Path(qwen_kohya_lora_file).unlink(missing_ok=True)
+    Path(qwen_lycoris_lora_file).unlink(missing_ok=True)
 
 
 # ---------------------------------------------------------------------------
@@ -431,3 +491,209 @@ class TestIntegration:
         assert "standard" in kinds
 
         loader.cleanup()
+
+
+# ---------------------------------------------------------------------------
+# Qwen-specific tests
+# ---------------------------------------------------------------------------
+
+
+class TestQwenLoader:
+    """Tests for Qwen architecture LoRA loader."""
+
+    def test_qwen_loader_selected_for_qwen_arch(self):
+        """Qwen architecture tag returns QwenLoader."""
+        # AC: @qwen-lora-loader ac-4
+        loader = get_loader("qwen")
+        assert isinstance(loader, QwenLoader)
+
+    def test_qwen_loader_in_registry(self):
+        """QwenLoader is registered in LOADER_REGISTRY."""
+        # AC: @lora-loaders ac-3
+        assert "qwen" in LOADER_REGISTRY
+        assert LOADER_REGISTRY["qwen"] is QwenLoader
+
+    def test_qwen_diffusers_format_loads(
+        self, qwen_diffusers_lora_file: str, cleanup_lora_files
+    ):
+        """Qwen loader handles diffusers format LoRA files."""
+        # AC: @qwen-lora-loader ac-4
+        loader = QwenLoader()
+        loader.load(qwen_diffusers_lora_file)
+
+        affected = loader.affected_keys
+        assert len(affected) > 0, "Should have affected keys"
+
+        # Keys should be in diffusion_model.transformer_blocks.N format
+        for key in affected:
+            assert key.startswith("diffusion_model."), f"Key {key} missing prefix"
+            assert "transformer_blocks" in key, f"Key {key} missing transformer_blocks"
+            assert key.endswith(".weight"), f"Key {key} missing suffix"
+
+        loader.cleanup()
+
+    def test_qwen_kohya_format_loads(
+        self, qwen_kohya_lora_file: str, cleanup_lora_files
+    ):
+        """Qwen loader handles A1111/kohya format LoRA files."""
+        # AC: @qwen-lora-loader ac-4
+        loader = QwenLoader()
+        loader.load(qwen_kohya_lora_file)
+
+        affected = loader.affected_keys
+        assert len(affected) > 0, "Should have affected keys"
+
+        # Verify key mapping: lora_unet_transformer_blocks_5 -> transformer_blocks.5
+        assert any("transformer_blocks.5" in k for k in affected), (
+            f"Expected transformer_blocks.5 in keys: {affected}"
+        )
+
+        loader.cleanup()
+
+    def test_qwen_lycoris_format_loads(
+        self, qwen_lycoris_lora_file: str, cleanup_lora_files
+    ):
+        """Qwen loader handles LyCORIS format LoRA files."""
+        # AC: @qwen-lora-loader ac-4, ac-5
+        loader = QwenLoader()
+        loader.load(qwen_lycoris_lora_file)
+
+        affected = loader.affected_keys
+        assert len(affected) > 0, "Should have affected keys"
+
+        # Verify key mapping: lycoris_transformer_blocks_10 -> transformer_blocks.10
+        assert any("transformer_blocks.10" in k for k in affected), (
+            f"Expected transformer_blocks.10 in keys: {affected}"
+        )
+
+        loader.cleanup()
+
+    def test_qwen_produces_deltaspec_objects(
+        self, qwen_diffusers_lora_file: str, cleanup_lora_files
+    ):
+        """Qwen loader produces DeltaSpec with correct fields."""
+        # AC: @qwen-lora-loader ac-6
+        loader = QwenLoader()
+        loader.load(qwen_diffusers_lora_file, strength=0.8)
+
+        keys = list(loader.affected_keys)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs = loader.get_delta_specs(keys, key_indices)
+
+        assert len(specs) > 0, "Should produce at least one DeltaSpec"
+
+        for spec in specs:
+            assert isinstance(spec, DeltaSpec)
+            # Qwen uses standard specs only (no QKV fusing)
+            assert spec.kind == "standard", f"Expected standard kind, got {spec.kind}"
+            assert spec.key_index in key_indices.values()
+            assert spec.up is not None
+            assert spec.down is not None
+            assert isinstance(spec.scale, float)
+
+        loader.cleanup()
+
+    def test_qwen_no_qkv_fusing(
+        self, qwen_diffusers_lora_file: str, cleanup_lora_files
+    ):
+        """Qwen loader does NOT fuse QKV weights (unlike Z-Image)."""
+        # AC: @qwen-lora-loader ac-6
+        loader = QwenLoader()
+        loader.load(qwen_diffusers_lora_file)
+
+        keys = list(loader.affected_keys)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs = loader.get_delta_specs(keys, key_indices)
+
+        # All specs should be 'standard', not qkv_*
+        kinds = {s.kind for s in specs}
+        assert kinds == {"standard"}, f"Expected only standard kind, got {kinds}"
+
+        # to_q, to_k, to_v should be separate keys
+        qkv_keys = [k for k in keys if any(p in k for p in ["to_q", "to_k", "to_v"])]
+        assert len(qkv_keys) == 3, f"Expected 3 separate QKV keys, got {qkv_keys}"
+
+        loader.cleanup()
+
+    def test_qwen_compound_names_preserved(
+        self, qwen_lycoris_lora_file: str, cleanup_lora_files
+    ):
+        """Compound names like to_q, mlp, down_proj are preserved during normalization."""
+        # AC: @qwen-lora-loader ac-5
+        loader = QwenLoader()
+        loader.load(qwen_lycoris_lora_file)
+
+        affected = loader.affected_keys
+
+        # to_q should be preserved (not split into to.q)
+        to_q_keys = [k for k in affected if "to_q" in k]
+        assert len(to_q_keys) > 0, f"Expected to_q in keys: {affected}"
+
+        # down_proj should be preserved
+        down_proj_keys = [k for k in affected if "down_proj" in k]
+        assert len(down_proj_keys) > 0, f"Expected down_proj in keys: {affected}"
+
+        loader.cleanup()
+
+    def test_qwen_strength_affects_scale(
+        self, qwen_diffusers_lora_file: str, cleanup_lora_files
+    ):
+        """LoRA strength multiplier affects DeltaSpec scale."""
+        # AC: @qwen-lora-loader ac-6
+        loader1 = QwenLoader()
+        loader1.load(qwen_diffusers_lora_file, strength=1.0)
+        keys = list(loader1.affected_keys)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs1 = loader1.get_delta_specs(keys, key_indices)
+        loader1.cleanup()
+
+        loader2 = QwenLoader()
+        loader2.load(qwen_diffusers_lora_file, strength=0.5)
+        specs2 = loader2.get_delta_specs(keys, key_indices)
+        loader2.cleanup()
+
+        # Same key should have half the scale
+        assert len(specs1) == len(specs2)
+        for s1, s2 in zip(specs1, specs2, strict=True):
+            assert abs(s1.scale - 2 * s2.scale) < 1e-6, (
+                f"Scale mismatch: {s1.scale} vs {s2.scale}"
+            )
+
+    def test_qwen_cleanup_clears_state(
+        self, qwen_diffusers_lora_file: str, cleanup_lora_files
+    ):
+        """cleanup() releases loaded tensors."""
+        # AC: @lora-loaders ac-4
+        loader = QwenLoader()
+        loader.load(qwen_diffusers_lora_file)
+        assert len(loader.affected_keys) > 0, "Should have affected keys"
+
+        loader.cleanup()
+        assert len(loader.affected_keys) == 0, "cleanup should clear affected keys"
+
+    def test_qwen_full_workflow(
+        self, qwen_diffusers_lora_file: str, cleanup_lora_files
+    ):
+        """Full workflow: get loader, load, get specs, cleanup."""
+        # Get architecture-appropriate loader
+        loader = get_loader("qwen")
+
+        # Load LoRA file
+        loader.load(qwen_diffusers_lora_file, strength=0.75)
+
+        # Check affected keys
+        affected = loader.affected_keys
+        assert len(affected) > 0
+
+        # Get delta specs for batched execution
+        keys = list(affected)
+        key_indices = {k: i for i, k in enumerate(keys)}
+        specs = loader.get_delta_specs(keys, key_indices)
+
+        # Verify specs are executor-compatible
+        assert all(isinstance(s, DeltaSpec) for s in specs)
+        assert all(s.kind == "standard" for s in specs)
+
+        # Cleanup
+        loader.cleanup()
+        assert len(loader.affected_keys) == 0
