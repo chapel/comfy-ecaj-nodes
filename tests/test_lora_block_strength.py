@@ -36,7 +36,7 @@ class TestApplyPerBlockLoraStrength:
         # Block config with 1.0 override (no-op)
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 1.0),),
+            block_overrides=(("IN00", 1.0), ("IN01", 1.0)),
         )
 
         result = _apply_per_block_lora_strength(
@@ -51,9 +51,9 @@ class TestApplyPerBlockLoraStrength:
         """Per-block strength scales the LoRA delta (lora_applied - base).
 
         AC: @lora-block-config ac-1
-        Given: a BLOCK_CONFIG with strength 0.5 for IN00-02
+        Given: a BLOCK_CONFIG with strength 0.5 for IN00 and IN01
         When: Exit applies LoRA deltas
-        Then: delta for IN00-02 keys is scaled by 0.5
+        Then: delta for these keys is scaled by 0.5
         """
         keys = ["input_blocks.0.0.weight", "input_blocks.1.0.weight"]
         base = torch.zeros(2, 4, 4)
@@ -62,7 +62,7 @@ class TestApplyPerBlockLoraStrength:
 
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5), ("IN01", 0.5)),
         )
 
         result = _apply_per_block_lora_strength(
@@ -80,9 +80,9 @@ class TestApplyPerBlockLoraStrength:
         AC: @lora-block-config ac-1
         """
         keys = [
-            "input_blocks.0.0.weight",   # IN00-02 -> 0.5
+            "input_blocks.0.0.weight",   # IN00 -> 0.5
             "middle_block.0.weight",     # MID -> 2.0
-            "output_blocks.3.0.weight",  # OUT03-05 -> no override (1.0)
+            "output_blocks.3.0.weight",  # OUT03 -> no override (1.0)
         ]
         base = torch.zeros(3, 4, 4)
         # LoRA adds 4.0 to all values
@@ -91,7 +91,7 @@ class TestApplyPerBlockLoraStrength:
         config = BlockConfig(
             arch="sdxl",
             block_overrides=(
-                ("IN00-02", 0.5),
+                ("IN00", 0.5),
                 ("MID", 2.0),
             ),
         )
@@ -101,11 +101,11 @@ class TestApplyPerBlockLoraStrength:
         )
 
         # Check each key's result
-        # IN00-02: delta 4.0 * 0.5 = 2.0
+        # IN00: delta 4.0 * 0.5 = 2.0
         assert torch.allclose(result[0], torch.full((4, 4), 2.0))
         # MID: delta 4.0 * 2.0 = 8.0
         assert torch.allclose(result[1], torch.full((4, 4), 8.0))
-        # OUT03-05: delta 4.0 * 1.0 (default) = 4.0
+        # OUT03: delta 4.0 * 1.0 (default) = 4.0
         assert torch.allclose(result[2], torch.full((4, 4), 4.0))
 
     # AC: @lora-block-config ac-1
@@ -120,7 +120,7 @@ class TestApplyPerBlockLoraStrength:
 
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.0),),
+            block_overrides=(("IN00", 0.0),),
         )
 
         result = _apply_per_block_lora_strength(
@@ -165,7 +165,7 @@ class TestApplyPerBlockLoraStrength:
 
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),  # Doesn't apply to these keys
+            block_overrides=(("IN00", 0.5),),  # Doesn't apply to these keys
         )
 
         result = _apply_per_block_lora_strength(
@@ -182,9 +182,9 @@ class TestApplyPerBlockLoraStrength:
         AC: @lora-block-config ac-1
         """
         keys = [
-            "layers.0.attn.weight",   # L00-04 -> 0.25
-            "layers.10.mlp.weight",   # L10-14 -> 1.0 (default)
-            "noise_refiner.weight",   # noise_refiner -> 0.75
+            "layers.0.attn.weight",        # L00 -> 0.25
+            "layers.10.mlp.weight",        # L10 -> 1.0 (default)
+            "noise_refiner.0.attn.weight", # NOISE_REF0 -> 0.75
         ]
         base = torch.zeros(3, 4, 4)
         lora_applied = torch.full((3, 4, 4), 8.0)  # Delta of 8.0
@@ -192,8 +192,8 @@ class TestApplyPerBlockLoraStrength:
         config = BlockConfig(
             arch="zimage",
             block_overrides=(
-                ("L00-04", 0.25),
-                ("noise_refiner", 0.75),
+                ("L00", 0.25),
+                ("NOISE_REF0", 0.75),
             ),
         )
 
@@ -201,11 +201,11 @@ class TestApplyPerBlockLoraStrength:
             keys, base, lora_applied, config, "zimage", "cpu", torch.float32
         )
 
-        # L00-04: delta 8.0 * 0.25 = 2.0
+        # L00: delta 8.0 * 0.25 = 2.0
         assert torch.allclose(result[0], torch.full((4, 4), 2.0))
-        # L10-14: delta 8.0 * 1.0 = 8.0 (no override)
+        # L10: delta 8.0 * 1.0 = 8.0 (no override)
         assert torch.allclose(result[1], torch.full((4, 4), 8.0))
-        # noise_refiner: delta 8.0 * 0.75 = 6.0
+        # NOISE_REF0: delta 8.0 * 0.75 = 6.0
         assert torch.allclose(result[2], torch.full((4, 4), 6.0))
 
     # AC: @lora-block-config ac-1
@@ -220,7 +220,7 @@ class TestApplyPerBlockLoraStrength:
 
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
 
         result = _apply_per_block_lora_strength(
@@ -243,7 +243,7 @@ class TestApplyPerBlockLoraStrength:
 
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
 
         result = _apply_per_block_lora_strength(
@@ -271,7 +271,7 @@ class TestRecipeLoRABlockConfig:
         """
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
         lora = RecipeLoRA(
             loras=({"path": "test.safetensors", "strength": 1.0},),
@@ -279,7 +279,7 @@ class TestRecipeLoRABlockConfig:
         )
 
         assert lora.block_config is config
-        assert lora.block_config.block_overrides == (("IN00-02", 0.5),)
+        assert lora.block_config.block_overrides == (("IN00", 0.5),)
 
     # AC: @lora-block-config ac-2
     def test_recipe_lora_none_block_config(self):

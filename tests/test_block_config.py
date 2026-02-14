@@ -25,7 +25,7 @@ class TestBlockConfigFrozen:
         """BlockConfig instances are immutable."""
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5), ("MID", 1.0)),
+            block_overrides=(("IN00", 0.5), ("MID", 1.0)),
         )
         with pytest.raises((AttributeError, TypeError)):
             config.arch = "flux"
@@ -37,7 +37,7 @@ class TestBlockConfigFrozen:
 
     def test_block_config_block_overrides_tuple(self):
         """BlockConfig stores block_overrides as tuple of pairs."""
-        overrides = (("IN00-02", 0.5), ("MID", 1.0), ("OUT00-02", 0.8))
+        overrides = (("IN00", 0.5), ("MID", 1.0), ("OUT00", 0.8))
         config = BlockConfig(arch="sdxl", block_overrides=overrides)
         assert config.block_overrides == overrides
         assert isinstance(config.block_overrides, tuple)
@@ -62,7 +62,7 @@ class TestBlockConfigFrozen:
         """block_overrides field cannot be reassigned."""
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
         with pytest.raises((AttributeError, TypeError)):
             config.block_overrides = ()
@@ -130,7 +130,7 @@ class TestRecipeLoRABlockConfig:
         """RecipeLoRA accepts BlockConfig instance."""
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
         lora = RecipeLoRA(
             loras=({"path": "test.safetensors", "strength": 1.0},),
@@ -174,7 +174,7 @@ class TestRecipeMergeBlockConfig:
         """RecipeMerge accepts BlockConfig instance."""
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("MID", 0.8), ("OUT00-02", 1.0)),
+            block_overrides=(("MID", 0.8), ("OUT00", 1.0)),
         )
         base = RecipeBase(model_patcher=object(), arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -203,7 +203,7 @@ class TestBlockConfigIntegration:
         """Full recipe tree can use BlockConfig at multiple levels."""
         lora_config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
         merge_config = BlockConfig(
             arch="sdxl",
@@ -225,8 +225,8 @@ class TestBlockConfigIntegration:
 
     def test_compose_with_block_config_loras(self):
         """RecipeCompose can hold RecipeLoRA instances with BlockConfig."""
-        config_a = BlockConfig(arch="sdxl", block_overrides=(("IN00-02", 0.5),))
-        config_b = BlockConfig(arch="sdxl", block_overrides=(("OUT00-02", 0.8),))
+        config_a = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
+        config_b = BlockConfig(arch="sdxl", block_overrides=(("OUT00", 0.8),))
 
         lora_a = RecipeLoRA(
             loras=({"path": "lora_a.safetensors", "strength": 1.0},),
@@ -245,18 +245,18 @@ class TestBlockConfigIntegration:
         """BlockConfig instances with same values are equal (dataclass behavior)."""
         config_a = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
         config_b = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
         assert config_a == config_b
 
     def test_block_config_inequality(self):
         """BlockConfig instances with different values are not equal."""
-        config_a = BlockConfig(arch="sdxl", block_overrides=(("IN00-02", 0.5),))
-        config_b = BlockConfig(arch="sdxl", block_overrides=(("IN00-02", 0.8),))
-        config_c = BlockConfig(arch="flux", block_overrides=(("IN00-02", 0.5),))
+        config_a = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
+        config_b = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.8),))
+        config_c = BlockConfig(arch="flux", block_overrides=(("IN00", 0.5),))
         assert config_a != config_b
         assert config_a != config_c

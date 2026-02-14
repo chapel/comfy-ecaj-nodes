@@ -26,7 +26,7 @@ class BlockConfig:
     """
 
     arch: str  # Must match RecipeBase.arch at Exit time
-    block_overrides: tuple  # ((block_pattern, float), ...) e.g., (("IN00-02", 0.5), ...)
+    block_overrides: tuple  # ((block_name, float), ...) e.g., (("IN00", 0.5), ...)
     layer_type_overrides: tuple = ()  # ((layer_type, float), ...) for cross-cutting control
 
 

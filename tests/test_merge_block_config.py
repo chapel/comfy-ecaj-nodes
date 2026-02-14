@@ -22,27 +22,19 @@ from lib.recipe import BlockConfig, RecipeBase, RecipeLoRA, RecipeMerge
 class TestBlockClassifySDXL:
     """SDXL block classification tests."""
 
-    def test_input_block_0_to_2(self):
-        """Input blocks 0-2 classify as IN00-02."""
+    def test_input_blocks_classify_individually(self):
+        """Input blocks 0-8 classify as individual IN00-IN08."""
         # AC: @merge-block-config ac-1
-        assert classify_key_sdxl("input_blocks.0.0.proj_in.weight") == "IN00-02"
+        assert classify_key_sdxl("input_blocks.0.0.proj_in.weight") == "IN00"
         key = "input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight"
-        assert classify_key_sdxl(key) == "IN00-02"
-        assert classify_key_sdxl("input_blocks.2.1.proj_out.weight") == "IN00-02"
-
-    def test_input_block_3_to_5(self):
-        """Input blocks 3-5 classify as IN03-05."""
-        # AC: @merge-block-config ac-1
-        assert classify_key_sdxl("input_blocks.3.0.proj_in.weight") == "IN03-05"
-        assert classify_key_sdxl("input_blocks.4.1.proj_out.weight") == "IN03-05"
-        assert classify_key_sdxl("input_blocks.5.0.attn1.to_v.weight") == "IN03-05"
-
-    def test_input_block_6_to_8(self):
-        """Input blocks 6-8 classify as IN06-08."""
-        # AC: @merge-block-config ac-1
-        assert classify_key_sdxl("input_blocks.6.1.weight") == "IN06-08"
-        assert classify_key_sdxl("input_blocks.7.0.proj_in.weight") == "IN06-08"
-        assert classify_key_sdxl("input_blocks.8.1.attn2.to_k.weight") == "IN06-08"
+        assert classify_key_sdxl(key) == "IN01"
+        assert classify_key_sdxl("input_blocks.2.1.proj_out.weight") == "IN02"
+        assert classify_key_sdxl("input_blocks.3.0.proj_in.weight") == "IN03"
+        assert classify_key_sdxl("input_blocks.4.1.proj_out.weight") == "IN04"
+        assert classify_key_sdxl("input_blocks.5.0.attn1.to_v.weight") == "IN05"
+        assert classify_key_sdxl("input_blocks.6.1.weight") == "IN06"
+        assert classify_key_sdxl("input_blocks.7.0.proj_in.weight") == "IN07"
+        assert classify_key_sdxl("input_blocks.8.1.attn2.to_k.weight") == "IN08"
 
     def test_middle_block(self):
         """Middle block classifies as MID."""
@@ -51,33 +43,25 @@ class TestBlockClassifySDXL:
         assert classify_key_sdxl("middle_block.1.transformer_blocks.0.attn1.to_q.weight") == "MID"
         assert classify_key_sdxl("middle_block.2.proj_out.weight") == "MID"
 
-    def test_output_block_0_to_2(self):
-        """Output blocks 0-2 classify as OUT00-02."""
+    def test_output_blocks_classify_individually(self):
+        """Output blocks 0-8 classify as individual OUT00-OUT08."""
         # AC: @merge-block-config ac-1
-        assert classify_key_sdxl("output_blocks.0.0.weight") == "OUT00-02"
-        assert classify_key_sdxl("output_blocks.1.1.proj_in.weight") == "OUT00-02"
-        assert classify_key_sdxl("output_blocks.2.1.attn1.to_v.weight") == "OUT00-02"
-
-    def test_output_block_3_to_5(self):
-        """Output blocks 3-5 classify as OUT03-05."""
-        # AC: @merge-block-config ac-1
-        assert classify_key_sdxl("output_blocks.3.0.weight") == "OUT03-05"
-        assert classify_key_sdxl("output_blocks.4.1.proj_out.weight") == "OUT03-05"
-        assert classify_key_sdxl("output_blocks.5.0.attn2.to_k.weight") == "OUT03-05"
-
-    def test_output_block_6_to_8(self):
-        """Output blocks 6-8 classify as OUT06-08."""
-        # AC: @merge-block-config ac-1
-        assert classify_key_sdxl("output_blocks.6.1.weight") == "OUT06-08"
-        assert classify_key_sdxl("output_blocks.7.0.proj_in.weight") == "OUT06-08"
-        assert classify_key_sdxl("output_blocks.8.1.attn1.to_q.weight") == "OUT06-08"
+        assert classify_key_sdxl("output_blocks.0.0.weight") == "OUT00"
+        assert classify_key_sdxl("output_blocks.1.1.proj_in.weight") == "OUT01"
+        assert classify_key_sdxl("output_blocks.2.1.attn1.to_v.weight") == "OUT02"
+        assert classify_key_sdxl("output_blocks.3.0.weight") == "OUT03"
+        assert classify_key_sdxl("output_blocks.4.1.proj_out.weight") == "OUT04"
+        assert classify_key_sdxl("output_blocks.5.0.attn2.to_k.weight") == "OUT05"
+        assert classify_key_sdxl("output_blocks.6.1.weight") == "OUT06"
+        assert classify_key_sdxl("output_blocks.7.0.proj_in.weight") == "OUT07"
+        assert classify_key_sdxl("output_blocks.8.1.attn1.to_q.weight") == "OUT08"
 
     def test_strips_diffusion_model_prefix(self):
         """Key classification strips diffusion_model. prefix."""
         # AC: @merge-block-config ac-1
-        assert classify_key_sdxl("diffusion_model.input_blocks.0.0.weight") == "IN00-02"
+        assert classify_key_sdxl("diffusion_model.input_blocks.0.0.weight") == "IN00"
         assert classify_key_sdxl("diffusion_model.middle_block.0.weight") == "MID"
-        assert classify_key_sdxl("diffusion_model.output_blocks.3.0.weight") == "OUT03-05"
+        assert classify_key_sdxl("diffusion_model.output_blocks.3.0.weight") == "OUT03"
 
     def test_unmatched_returns_none(self):
         """Keys not matching any block return None."""
@@ -90,77 +74,49 @@ class TestBlockClassifySDXL:
 class TestBlockClassifyZImage:
     """Z-Image/S3-DiT block classification tests."""
 
-    def test_layers_0_to_4(self):
-        """Layers 0-4 classify as L00-04."""
+    def test_layers_classify_individually(self):
+        """Layers 0-29 classify as individual L00-L29."""
         # AC: @merge-block-config ac-1
-        assert classify_key_zimage("layers.0.attn.qkv.weight") == "L00-04"
-        assert classify_key_zimage("layers.2.mlp.fc1.weight") == "L00-04"
-        assert classify_key_zimage("layers.4.attn.out.weight") == "L00-04"
+        assert classify_key_zimage("layers.0.attn.qkv.weight") == "L00"
+        assert classify_key_zimage("layers.2.mlp.fc1.weight") == "L02"
+        assert classify_key_zimage("layers.4.attn.out.weight") == "L04"
+        assert classify_key_zimage("layers.5.attn.qkv.weight") == "L05"
+        assert classify_key_zimage("layers.10.attn.qkv.weight") == "L10"
+        assert classify_key_zimage("layers.15.attn.qkv.weight") == "L15"
+        assert classify_key_zimage("layers.20.attn.qkv.weight") == "L20"
+        assert classify_key_zimage("layers.25.attn.qkv.weight") == "L25"
+        assert classify_key_zimage("layers.29.norm.weight") == "L29"
 
-    def test_layers_5_to_9(self):
-        """Layers 5-9 classify as L05-09."""
+    def test_noise_refiner_submodules(self):
+        """Noise refiner keys classify as NOISE_REF0 or NOISE_REF1."""
         # AC: @merge-block-config ac-1
-        assert classify_key_zimage("layers.5.attn.qkv.weight") == "L05-09"
-        assert classify_key_zimage("layers.7.mlp.fc2.weight") == "L05-09"
-        assert classify_key_zimage("layers.9.norm.weight") == "L05-09"
+        assert classify_key_zimage("noise_refiner.0.attn.qkv.weight") == "NOISE_REF0"
+        assert classify_key_zimage("noise_refiner.0.mlp.fc1.weight") == "NOISE_REF0"
+        assert classify_key_zimage("noise_refiner.1.attn.qkv.weight") == "NOISE_REF1"
 
-    def test_layers_10_to_14(self):
-        """Layers 10-14 classify as L10-14."""
+    def test_context_refiner_submodules(self):
+        """Context refiner keys classify as CTX_REF0 or CTX_REF1."""
         # AC: @merge-block-config ac-1
-        assert classify_key_zimage("layers.10.attn.qkv.weight") == "L10-14"
-        assert classify_key_zimage("layers.12.mlp.fc1.weight") == "L10-14"
-        assert classify_key_zimage("layers.14.attn.out.weight") == "L10-14"
-
-    def test_layers_15_to_19(self):
-        """Layers 15-19 classify as L15-19."""
-        # AC: @merge-block-config ac-1
-        assert classify_key_zimage("layers.15.attn.qkv.weight") == "L15-19"
-        assert classify_key_zimage("layers.17.mlp.fc2.weight") == "L15-19"
-        assert classify_key_zimage("layers.19.norm.weight") == "L15-19"
-
-    def test_layers_20_to_24(self):
-        """Layers 20-24 classify as L20-24."""
-        # AC: @merge-block-config ac-1
-        assert classify_key_zimage("layers.20.attn.qkv.weight") == "L20-24"
-        assert classify_key_zimage("layers.22.mlp.fc1.weight") == "L20-24"
-        assert classify_key_zimage("layers.24.attn.out.weight") == "L20-24"
-
-    def test_layers_25_to_29(self):
-        """Layers 25-29 classify as L25-29."""
-        # AC: @merge-block-config ac-1
-        assert classify_key_zimage("layers.25.attn.qkv.weight") == "L25-29"
-        assert classify_key_zimage("layers.27.mlp.fc2.weight") == "L25-29"
-        assert classify_key_zimage("layers.29.norm.weight") == "L25-29"
-
-    def test_noise_refiner(self):
-        """Noise refiner keys classify as noise_refiner."""
-        # AC: @merge-block-config ac-1
-        assert classify_key_zimage("noise_refiner.attn.qkv.weight") == "noise_refiner"
-        assert classify_key_zimage("noise_refiner.mlp.fc1.weight") == "noise_refiner"
-
-    def test_context_refiner(self):
-        """Context refiner keys classify as context_refiner."""
-        # AC: @merge-block-config ac-1
-        assert classify_key_zimage("context_refiner.attn.qkv.weight") == "context_refiner"
-        assert classify_key_zimage("context_refiner.mlp.fc2.weight") == "context_refiner"
+        assert classify_key_zimage("context_refiner.0.attn.qkv.weight") == "CTX_REF0"
+        assert classify_key_zimage("context_refiner.1.mlp.fc2.weight") == "CTX_REF1"
 
     def test_strips_prefixes(self):
         """Key classification strips common prefixes."""
         # AC: @merge-block-config ac-1
-        assert classify_key_zimage("diffusion_model.layers.0.attn.qkv.weight") == "L00-04"
-        assert classify_key_zimage("transformer.layers.15.mlp.fc1.weight") == "L15-19"
+        assert classify_key_zimage("diffusion_model.layers.0.attn.qkv.weight") == "L00"
+        assert classify_key_zimage("transformer.layers.15.mlp.fc1.weight") == "L15"
 
     def test_blocks_alternate_name(self):
         """Classification handles 'blocks' as alternate to 'layers'."""
         # AC: @merge-block-config ac-1
-        assert classify_key_zimage("blocks.0.attn.qkv.weight") == "L00-04"
-        assert classify_key_zimage("blocks.25.mlp.fc1.weight") == "L25-29"
+        assert classify_key_zimage("blocks.0.attn.qkv.weight") == "L00"
+        assert classify_key_zimage("blocks.25.mlp.fc1.weight") == "L25"
 
-    def test_refiner_substring_not_matched(self):
-        """Keys containing refiner as substring but not prefix are rejected."""
-        # Anchored patterns should only match keys starting with the refiner name
-        assert classify_key_zimage("some_noise_refiner.weight") is None
-        assert classify_key_zimage("prefix_context_refiner.weight") is None
+    def test_refiner_without_submodule_not_matched(self):
+        """Refiner keys without submodule number are not matched."""
+        # These don't match the noise_refiner.N. pattern
+        assert classify_key_zimage("noise_refiner.attn.qkv.weight") is None
+        assert classify_key_zimage("context_refiner.mlp.fc2.weight") is None
 
     def test_unmatched_returns_none(self):
         """Keys not matching any block return None."""
@@ -190,8 +146,8 @@ class TestGetBlockClassifier:
     def test_classify_key_convenience_function(self):
         """classify_key convenience function works correctly."""
         # AC: @merge-block-config ac-1
-        assert classify_key("input_blocks.0.0.weight", "sdxl") == "IN00-02"
-        assert classify_key("layers.0.attn.weight", "zimage") == "L00-04"
+        assert classify_key("input_blocks.0.0.weight", "sdxl") == "IN00"
+        assert classify_key("layers.0.attn.weight", "zimage") == "L00"
         assert classify_key("input_blocks.0.0.weight", "unknown") is None
 
 
@@ -249,15 +205,16 @@ class TestGetBlockTFactors:
         Then: per-block t_factor overrides are applied
         """
         keys = [
-            "input_blocks.0.0.weight",   # IN00-02 -> 0.5
-            "input_blocks.1.0.weight",   # IN00-02 -> 0.5
+            "input_blocks.0.0.weight",   # IN00 -> 0.5
+            "input_blocks.1.0.weight",   # IN01 -> 0.5
             "middle_block.0.weight",     # MID -> 1.2
-            "output_blocks.3.0.weight",  # OUT03-05 -> default 1.0
+            "output_blocks.3.0.weight",  # OUT03 -> default 1.0
         ]
         config = BlockConfig(
             arch="sdxl",
             block_overrides=(
-                ("IN00-02", 0.5),
+                ("IN00", 0.5),
+                ("IN01", 0.5),
                 ("MID", 1.2),
             ),
         )
@@ -286,7 +243,7 @@ class TestGetBlockTFactors:
         keys = ["time_embed.0.weight", "label_emb.weight"]  # No block match
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
         default_t = 1.0
 
@@ -300,22 +257,22 @@ class TestGetBlockTFactors:
         assert len(groups[1.0]) == 2
 
     def test_zimage_block_grouping(self):
-        """Z-Image keys are grouped by layer range.
+        """Z-Image keys are grouped by individual blocks.
 
         AC: @merge-block-config ac-1
         """
         keys = [
-            "layers.0.attn.weight",   # L00-04 -> 0.3
-            "layers.5.attn.weight",   # L05-09 -> default 1.0
-            "layers.25.attn.weight",  # L25-29 -> 1.5
-            "noise_refiner.weight",   # noise_refiner -> 0.8
+            "layers.0.attn.weight",        # L00 -> 0.3
+            "layers.5.attn.weight",        # L05 -> default 1.0
+            "layers.25.attn.weight",       # L25 -> 1.5
+            "noise_refiner.0.attn.weight", # NOISE_REF0 -> 0.8
         ]
         config = BlockConfig(
             arch="zimage",
             block_overrides=(
-                ("L00-04", 0.3),
-                ("L25-29", 1.5),
-                ("noise_refiner", 0.8),
+                ("L00", 0.3),
+                ("L25", 1.5),
+                ("NOISE_REF0", 0.8),
             ),
         )
         default_t = 1.0
@@ -325,10 +282,10 @@ class TestGetBlockTFactors:
         )
 
         assert len(groups) == 4
-        assert groups[0.3] == [0]   # L00-04
-        assert groups[1.0] == [1]   # L05-09 (no override)
-        assert groups[1.5] == [2]   # L25-29
-        assert groups[0.8] == [3]   # noise_refiner
+        assert groups[0.3] == [0]   # L00
+        assert groups[1.0] == [1]   # L05 (no override)
+        assert groups[1.5] == [2]   # L25
+        assert groups[0.8] == [3]   # NOISE_REF0
 
 
 # =============================================================================
@@ -346,7 +303,7 @@ class TestRecipeMergeBlockConfig:
         """
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5), ("MID", 1.2)),
+            block_overrides=(("IN00", 0.5), ("MID", 1.2)),
         )
         base = RecipeBase(model_patcher=object(), arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -428,12 +385,12 @@ class TestBlockConfigEdgeCases:
         """All keys matching same block have single group."""
         keys = [
             "input_blocks.0.0.weight",
-            "input_blocks.1.0.weight",
-            "input_blocks.2.0.weight",
+            "input_blocks.0.1.weight",
+            "input_blocks.0.2.weight",
         ]
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00-02", 0.5),),
+            block_overrides=(("IN00", 0.5),),
         )
 
         groups = _get_block_t_factors(
@@ -453,13 +410,13 @@ class TestBlockConfigEdgeCases:
         # BlockConfig says zimage but we're classifying as sdxl
         config = BlockConfig(
             arch="zimage",
-            block_overrides=(("IN00-02", 0.5),),  # This override won't match
+            block_overrides=(("IN00", 0.5),),  # This override won't match
         )
 
-        # Classify as sdxl - IN00-02 would match if BlockConfig arch matched
+        # Classify as sdxl - IN00 would match if BlockConfig arch matched
         groups = _get_block_t_factors(
             keys, block_config=config, arch="sdxl", default_t_factor=1.0
         )
 
-        # Should still apply the IN00-02 override since we look up by block name
+        # Should still apply the IN00 override since we look up by block name
         assert groups[0.5] == [0]
