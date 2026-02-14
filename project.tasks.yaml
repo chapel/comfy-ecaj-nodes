@@ -4124,6 +4124,16 @@
         Tests in tests/test_model_loader.py: add Qwen detection and
         key normalization tests.
         Covers ac-7.
+    - _ulid: 01KHDJPWGX6PBH3Q86WJ8JMJ9M
+      created_at: 2026-02-14T08:01:39.870Z
+      author: "@claude"
+      content: "Implementation complete. Added Qwen architecture detection to lib/model_loader.py:
+        model.transformer. prefix in _FILE_KEY_PREFIXES, Qwen pattern in _ARCH_PATTERNS (≥60
+        transformer_blocks keys). Added 9 tests covering Qwen detection (qwen_checkpoint_path,
+        qwen_model_prefix_checkpoint_path fixtures), key normalization (transformer. and
+        model.transformer. prefixes), VAE exclusion, and tensor retrieval. 750 tests pass, ruff
+        clean."
+      supersedes: null
   todos: []
   automation: eligible
 - _ulid: 01KHDHEGSHFQVSWEK3F2A93R9Y
