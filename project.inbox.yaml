@@ -1,13 +1,4 @@
 inbox:
-  - _ulid: 01KHA133FXW08DZ1W8KM0JWWMH
-    text: "pr-review skill: detect single-account repos and skip --approve (GitHub blocks
-      self-approval). Fall back to --comment with approval verdict in body. Agent already does this
-      on error, but should be proactive."
-    created_at: 2026-02-12T22:56:02.557Z
-    tags:
-      - reflection
-      - skill
-    added_by: "@claude"
   - _ulid: 01KHA976BQY4QMF0BRCCY7ZVD6
     text: "test_graph.py has 5 docstring-only AC annotations (AC: @node-graph-testing ac-N without #
       prefix) that should be converted to standard # AC: comment style"
