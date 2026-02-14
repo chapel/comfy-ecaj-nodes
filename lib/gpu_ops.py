@@ -197,7 +197,7 @@ def apply_lora_batch_gpu(
                 result[spec.key_index] += delta
                 del delta
 
-        elif kind in ("qkv_q", "qkv_k", "qkv_v"):
+        elif kind in ("qkv_q", "qkv_k", "qkv_v", "offset_mlp"):
             # QKV components: apply delta to the correct slice
             # Use DeltaSpec.offset as source of truth for slice placement
             # when available; fall back to hardcoded hidden // 3 otherwise
