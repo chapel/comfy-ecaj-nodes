@@ -21,11 +21,13 @@ Usage:
 """
 
 from .base import LoRALoader
+from .qwen import QwenLoader
 from .sdxl import SDXLLoader
 from .zimage import ZImageLoader
 
 __all__ = [
     "LoRALoader",
+    "QwenLoader",
     "SDXLLoader",
     "ZImageLoader",
     "LOADER_REGISTRY",
@@ -44,6 +46,7 @@ __all__ = [
 LOADER_REGISTRY: dict[str, type[LoRALoader]] = {
     "sdxl": SDXLLoader,
     "zimage": ZImageLoader,
+    "qwen": QwenLoader,
 }
 
 
