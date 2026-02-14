@@ -4160,6 +4160,7 @@
     - node
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.137Z
+  started_at: 2026-02-14T08:05:08.615Z
   notes:
     - _ulid: 01KHDHEGSH1DNT69YH2CCK2YNM
       created_at: 2026-02-14T07:39:37.137Z
@@ -4174,9 +4175,18 @@
 
         Tests in: tests/test_per_block_control.py (new Qwen node tests).
         Covers ac-8, ac-9.
+    - _ulid: 01KHDK0BKH0HQRNP2FV6YXGDCK
+      created_at: 2026-02-14T08:06:50.226Z
+      author: "@claude"
+      content: "Implementation complete. Created nodes/block_config_qwen.py with 60 transformer blocks
+        (TB00-TB59) and 3 layer-type sliders (attention, feed_forward, norm). Registered
+        WIDENBlockConfigQwen in __init__.py mappings. Added 10 tests covering: 60 individual block
+        sliders, layer type sliders, total input count (63), slider config, return types,
+        create_config behavior, block overrides storage, layer type overrides storage, and boundary
+        values. 759 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T08:05:08.615Z
 - _ulid: 01KHDHEGTTYESTY0BGZ64NV8EZ
   slugs:
     - flux-detect-classify
