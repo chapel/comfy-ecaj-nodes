@@ -4334,6 +4334,7 @@
     - model-loader
   vcs_refs: []
   created_at: 2026-02-14T07:39:37.246Z
+  started_at: 2026-02-14T08:27:28.574Z
   notes:
     - _ulid: 01KHDHEGWYFSX7Y4267T1B22K9
       created_at: 2026-02-14T07:39:37.246Z
@@ -4347,9 +4348,20 @@
         Tests in tests/test_model_loader.py: add Flux detection and
         key normalization tests.
         Covers ac-8.
+    - _ulid: 01KHDM86EZNC4YFS1YDSNCGCRC
+      created_at: 2026-02-14T08:28:35.679Z
+      author: "@claude"
+      content: "Implementation complete. Added Flux architecture detection to _ARCH_PATTERNS in
+        lib/model_loader.py matching double_blocks pattern. Key normalization already handles
+        diffusion_model. and transformer. prefix stripping. Added 9 tests:
+        TestFluxArchitectureDetection (4 tests) for ac-8 covering flux detection from double_blocks,
+        transformer prefix handling, key-only detection, and negative test for single_blocks-only
+        keys. TestFluxKeyNormalization (5 tests) covering diffusion_model prefix preservation,
+        transformer prefix stripping, normalized key format, VAE exclusion, and tensor retrieval.
+        All 798 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-14T08:27:28.574Z
 - _ulid: 01KHDHEGXXH30KS31R7RXA41NC
   slugs:
     - flux-block-config
