@@ -3726,4 +3726,27 @@
         __ecaj_block_config__, __ecaj_t_factors__ fields is SUPERSEDED — these are replaced by the
         single __ecaj_recipe__ field.
       supersedes: null
+    - _ulid: 01KHCSMXHHRXF2W77HZGXVZE5B
+      created_at: 2026-02-14T00:43:40.978Z
+      author: "@claude"
+      content: >-
+        ## Workflow Embedding
+
+
+        New input: save_workflow (BOOLEAN, default True). When enabled, embed the ComfyUI workflow
+        JSON in safetensors metadata.
+
+
+        Access the workflow via HIDDEN inputs in INPUT_TYPES:
+          'hidden': {'prompt': 'PROMPT', 'extra_pnginfo': 'EXTRA_PNGINFO'}
+
+        EXTRA_PNGINFO contains the workflow dict. Serialize with json.dumps() into metadata key
+        __ecaj_workflow__. This mirrors how ComfyUI embeds workflow in PNG images via the SaveImage
+        node.
+
+
+        Note: workflow is NOT included in the recipe hash — it's purely informational metadata for
+        reproducibility. Changing the workflow JSON (e.g. rearranging nodes) should not invalidate
+        the cache.
+      supersedes: null
   todos: []
