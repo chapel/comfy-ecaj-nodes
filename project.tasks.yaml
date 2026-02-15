@@ -4883,7 +4883,7 @@
   type: task
   spec_ref: "@clip-graph-nodes"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
