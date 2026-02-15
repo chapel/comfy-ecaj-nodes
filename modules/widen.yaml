@@ -643,6 +643,10 @@ features:
         given: a non-OOM error during merge_weights_batched
         when: the error is caught
         then: simple averaging is used as fallback and a warning is logged
+      - id: ac-10
+        given: multiple model tensors and a backbone
+        when: merge_weights is called with t_factor <= 0
+        then: backbone is returned unchanged (target contributions ignored)
     depends_on: []
     implements: []
     relates_to: []
