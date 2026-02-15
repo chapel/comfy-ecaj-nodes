@@ -4702,6 +4702,10 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #71. Added domain field to RecipeBase with default 'diffusion' for CLIP
+    pipeline support. Implementation includes: domain dispatch in get_loader(), analyze_recipe(),
+    analyze_recipe_models(), classify_key(), and serialize_recipe(). All 9 ACs covered by 28 tests.
+    Backward compatible - existing code continues to work unchanged."
   depends_on: []
   context: []
   priority: 2
@@ -4709,6 +4713,7 @@
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.360Z
   started_at: 2026-02-15T21:44:35.322Z
+  completed_at: 2026-02-15T21:52:40.189Z
   notes:
     - _ulid: 01KHHE6K3GYC7TS02TVN8ACX1X
       created_at: 2026-02-15T19:59:49.360Z
@@ -4734,11 +4739,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-15T21:52:40.189Z
-  closed_reason: "Merged in PR #71. Added domain field to RecipeBase with default 'diffusion' for CLIP
-    pipeline support. Implementation includes: domain dispatch in get_loader(), analyze_recipe(),
-    analyze_recipe_models(), classify_key(), and serialize_recipe(). All 9 ACs covered by 28 tests.
-    Backward compatible - existing code continues to work unchanged."
 - _ulid: 01KHHE6K4Q1A06V0PX9PZ8E0JX
   slugs:
     - implement-clip-merging-pipeline
@@ -4780,7 +4780,7 @@
   type: task
   spec_ref: "@clip-entry-node"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -4812,6 +4812,7 @@
       supersedes: null
   todos: []
   automation: eligible
+  started_at: 2026-02-15T21:53:08.503Z
 - _ulid: 01KHHE6K733GXVMAQKB1QEDPQD
   slugs:
     - implement-clip-exit-node
