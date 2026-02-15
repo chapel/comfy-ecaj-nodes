@@ -1901,6 +1901,7 @@ runs:
     current_step: 5
     total_steps: 6
     started_at: 2026-02-15T21:10:16.192Z
+    completed_at: 2026-02-15T21:17:34.292Z
     step_results:
       - step_index: 0
         status: completed
@@ -1948,4 +1949,11 @@ runs:
           observations: batch triage pattern and question-driven spike investigations. Skipped spike
           tag friction (user declined)."
     initiated_by: "@claude"
-    completed_at: 2026-02-15T21:17:34.292Z
+  - _ulid: 01KHHP90RP3256T8PWZ1PN868R
+    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
+    status: active
+    current_step: 0
+    total_steps: 10
+    started_at: 2026-02-15T22:20:57.495Z
+    step_results: []
+    initiated_by: "@claude"
