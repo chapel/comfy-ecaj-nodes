@@ -656,7 +656,7 @@ features:
     created: 2026-02-10T19:44:03.186Z
     status:
       maturity: draft
-      implementation: in_progress
+      implementation: implemented
   - _ulid: 01KH4HA43RMA4PGDRWR8FFRMND
     slugs:
       - batched-executor
