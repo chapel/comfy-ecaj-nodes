@@ -1766,8 +1766,20 @@ runs:
   - _ulid: 01KHH4CGPGYPTQBGP0ZVDQJWYK
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-15T17:08:17.744Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-15T17:08:17.744Z
+        completed_at: 2026-02-15T17:08:54.108Z
+        notes: "Reviewed session. What worked: detailed plan with exact line numbers made implementation
+          mechanical (all 5 files changed on first pass, 870 tests green). Subagent PR review caught
+          2 real minor issues. Branch-before-commit pattern worked. Friction: minor (kspec ac get
+          doesn't exist, task lifecycle ceremony). All low-confidence or already tracked."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-15T17:08:54.108Z
+        completed_at: 2026-02-15T17:08:54.108Z
     initiated_by: "@claude"
