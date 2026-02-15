@@ -17,6 +17,7 @@ from ..lib.analysis import (
     get_keys_to_process,
     walk_to_base,
 )
+from ..lib.block_classify import compute_changed_blocks, filter_changed_keys
 from ..lib.executor import (
     chunked_evaluation,
     compile_batch_groups,
@@ -28,9 +29,11 @@ from ..lib.persistence import (
     atomic_save,
     build_metadata,
     check_cache,
+    collect_block_configs,
     compute_base_identity,
     compute_lora_stats,
     compute_recipe_hash,
+    compute_structural_fingerprint,
     load_affected_keys,
     serialize_recipe,
     validate_model_name,
@@ -51,7 +54,44 @@ except ImportError:  # testing without ComfyUI
     ProgressBar = None  # type: ignore[assignment,misc]
 
 if TYPE_CHECKING:
-    pass
+    from ..lib.recipe import BlockConfig
+
+
+class _CacheEntry:
+    """Single incremental recompute cache entry.
+
+    AC: @incremental-block-recompute ac-1, ac-9
+    Stores the structural fingerprint, block configs, and merged state
+    from a previous execution. Tensors are cloned on insertion to avoid
+    aliasing with tensors passed to install_merged_patches.
+    """
+
+    __slots__ = ("structural_fingerprint", "block_configs", "merged_state", "storage_dtype")
+
+    def __init__(
+        self,
+        structural_fingerprint: str,
+        block_configs: list[tuple[str, BlockConfig | None]],
+        merged_state: dict[str, torch.Tensor],
+        storage_dtype: torch.dtype,
+    ) -> None:
+        self.structural_fingerprint = structural_fingerprint
+        self.block_configs = block_configs
+        self.merged_state = merged_state
+        self.storage_dtype = storage_dtype
+
+
+# LRU-1 cache: at most one entry keyed by structural fingerprint
+# AC: @incremental-block-recompute ac-9
+_incremental_cache: dict[str, _CacheEntry] = {}
+
+
+def clear_incremental_cache() -> None:
+    """Clear the incremental recompute cache.
+
+    AC: @incremental-block-recompute ac-12
+    """
+    _incremental_cache.clear()
 
 
 def _validate_recipe_tree(node: RecipeNode, path: str = "root") -> None:
@@ -499,14 +539,16 @@ class WIDENExitNode:
         base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
         storage_dtype = next(iter(base_state.values())).dtype
 
+        # --- Compute base_identity and lora_stats for both persistence and incremental cache ---
+        base_identity = compute_base_identity(base_state)
+        lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+
         # --- Persistence: pre-GPU cache check ---
         save_path = serialized = recipe_hash = None
         if save_model:
             validated_name = validate_model_name(model_name)
             save_path = _resolve_checkpoints_path(validated_name)
 
-            base_identity = compute_base_identity(base_state)
-            lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
             serialized = serialize_recipe(widen, base_identity, lora_stats)
             recipe_hash = compute_recipe_hash(serialized)
 
@@ -591,77 +633,153 @@ class WIDENExitNode:
                 arch=arch,
             )
 
-            # Phase 2: Batched GPU evaluation per group
-            merged_state: dict[str, torch.Tensor] = {}
-
-            # AC-9: Report progress per batch group via ComfyUI ProgressBar
-            pbar = ProgressBar(len(batch_groups)) if ProgressBar is not None else None
-
             # Pre-compile recipe tree into flat evaluation plan (once)
             # AC: @full-model-execution ac-2
             plan = compile_plan(widen, set_id_map, arch, model_id_map)
 
-            for sig, group_keys in batch_groups.items():
-                # Estimate batch size based on shape and VRAM
-                # AC: @full-model-execution ac-13
-                # Count both LoRA sets and model loaders for memory estimation
-                n_models = len(set_affected) + len(model_loaders)
-                batch_size = compute_batch_size(
-                    sig.shape,
-                    n_models,
-                    compute_dtype,
-                )
+            # --- Incremental cache: detect which blocks changed ---
+            # AC: @incremental-block-recompute ac-1 through ac-16
+            structural_fp = compute_structural_fingerprint(
+                widen, base_identity, lora_stats
+            )
+            current_block_configs = collect_block_configs(widen)
+            cached_entry = _incremental_cache.get(structural_fp)
+            incremental_hit = False
 
-                # Build evaluation function using pre-compiled plan
-                # AC: @merge-block-config ac-1, ac-2
-                # AC: @full-model-execution ac-3, ac-5
-                # Pass arch, widen_config, and model_loaders
-                def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs):
-                    def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
-                        return execute_plan(
-                            plan=p,
-                            keys=keys,
-                            base_batch=base_batch,
-                            loader=ldr,
-                            widen=wdn,
-                            device=dev,
-                            dtype=dtype,
-                            arch=architecture,
-                            widen_config=wcfg,
-                            model_loaders=mdl_ldrs,
+            if (
+                cached_entry is not None
+                and cached_entry.storage_dtype == storage_dtype
+            ):
+                diff = compute_changed_blocks(
+                    cached_entry.block_configs, current_block_configs, arch
+                )
+                if diff is not None:
+                    changed_blocks, changed_layer_types = diff
+
+                    if not changed_blocks and not changed_layer_types:
+                        # AC-2: Full cache hit — all keys identical
+                        merged_state = {
+                            k: v for k, v in cached_entry.merged_state.items()
+                        }
+                        incremental_hit = True
+                        batch_groups = {}  # Skip GPU loop entirely
+
+                        if ProgressBar is not None:
+                            pbar = ProgressBar(1)
+                            pbar.update(1)
+                    else:
+                        # AC-3, AC-5, AC-6, AC-15: Partial hit
+                        recompute_keys = filter_changed_keys(
+                            keys_to_process, changed_blocks,
+                            changed_layer_types, arch,
                         )
-                    return eval_fn
 
-                eval_fn = make_eval_fn(
-                    plan, loader, widen_merger, device, compute_dtype,
-                    arch, widen_config, model_loaders
-                )
+                        if not recompute_keys:
+                            # Edge case: changed blocks don't affect any keys
+                            merged_state = {
+                                k: v for k, v in cached_entry.merged_state.items()
+                            }
+                            incremental_hit = True
+                            batch_groups = {}  # Skip GPU loop
+                        else:
+                            # Start from cached state, recompute subset
+                            merged_state = {
+                                k: v for k, v in cached_entry.merged_state.items()
+                            }
 
-                # Run chunked evaluation with OOM backoff
-                # AC: @full-model-execution ac-8
-                # OOM backoff retries at batch_size=1 (streaming loader re-reads)
-                group_base = {k: base_state[k] for k in group_keys}
-                group_results = chunked_evaluation(
-                    keys=group_keys,
-                    base_tensors=group_base,
-                    eval_fn=eval_fn,
-                    batch_size=batch_size,
-                    device=device,
-                    dtype=compute_dtype,
-                    storage_dtype=storage_dtype,  # AC-8: match base model dtype
-                )
+                            # Rebuild batch_groups for only changed keys
+                            batch_groups = compile_batch_groups(
+                                list(recompute_keys), base_state, arch=arch,
+                            )
+                            incremental_hit = True
 
-                merged_state.update(group_results)
+            if not incremental_hit:
+                merged_state = {}
 
-                # AC-9: Update progress after each batch group
-                if pbar is not None:
-                    pbar.update(1)
+            # Phase 2: Batched GPU evaluation per group
+            # (skipped entirely on full cache hit)
+            if batch_groups:
+                pbar_count = len(batch_groups)
+                pbar = ProgressBar(pbar_count) if ProgressBar is not None else None
+
+                for sig, group_keys in batch_groups.items():
+                    # Estimate batch size based on shape and VRAM
+                    # AC: @full-model-execution ac-13
+                    # Count both LoRA sets and model loaders for memory estimation
+                    n_models = len(set_affected) + len(model_loaders)
+                    batch_size = compute_batch_size(
+                        sig.shape,
+                        n_models,
+                        compute_dtype,
+                    )
+
+                    # Build evaluation function using pre-compiled plan
+                    # AC: @merge-block-config ac-1, ac-2
+                    # AC: @full-model-execution ac-3, ac-5
+                    # Pass arch, widen_config, and model_loaders
+                    def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs):
+                        def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
+                            return execute_plan(
+                                plan=p,
+                                keys=keys,
+                                base_batch=base_batch,
+                                loader=ldr,
+                                widen=wdn,
+                                device=dev,
+                                dtype=dtype,
+                                arch=architecture,
+                                widen_config=wcfg,
+                                model_loaders=mdl_ldrs,
+                            )
+                        return eval_fn
+
+                    eval_fn = make_eval_fn(
+                        plan, loader, widen_merger, device, compute_dtype,
+                        arch, widen_config, model_loaders
+                    )
+
+                    # Run chunked evaluation with OOM backoff
+                    # AC: @full-model-execution ac-8
+                    # OOM backoff retries at batch_size=1 (streaming loader re-reads)
+                    group_base = {k: base_state[k] for k in group_keys}
+                    group_results = chunked_evaluation(
+                        keys=group_keys,
+                        base_tensors=group_base,
+                        eval_fn=eval_fn,
+                        batch_size=batch_size,
+                        device=device,
+                        dtype=compute_dtype,
+                        storage_dtype=storage_dtype,  # AC-8: match base model dtype
+                    )
+
+                    merged_state.update(group_results)
+
+                    # AC-9: Update progress after each batch group
+                    if pbar is not None:
+                        pbar.update(1)
 
             # AC: @memory-management ac-2
             # Cleanup after all groups complete (OOM backoff handles per-group pressure)
             gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
+
+            # AC: @incremental-block-recompute ac-1, ac-16
+            # Store result in incremental cache (atomic swap)
+            # Build new entry fully, then swap. On exception above,
+            # old entry is preserved (we never reach this point).
+            # Skip redundant clone when full cache hit (no GPU work done).
+            if batch_groups or not incremental_hit:
+                new_entry = _CacheEntry(
+                    structural_fingerprint=structural_fp,
+                    block_configs=current_block_configs,
+                    merged_state={
+                        k: v.clone() for k, v in merged_state.items()
+                    },
+                    storage_dtype=storage_dtype,
+                )
+                _incremental_cache.clear()
+                _incremental_cache[structural_fp] = new_entry
 
         finally:
             # AC: @memory-management ac-3
@@ -680,6 +798,7 @@ class WIDENExitNode:
         result = install_merged_patches(model_patcher, merged_state, storage_dtype)
 
         # --- Persistence: save after GPU ---
+        # AC: @incremental-block-recompute ac-10
         if save_model and save_path is not None:
             # Overlay merged keys into base_state in-place (base_state is
             # already a dict copy from model_state_dict, not used after this)

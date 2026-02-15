@@ -26,9 +26,11 @@ __all__ = [
     "atomic_save",
     "build_metadata",
     "check_cache",
+    "collect_block_configs",
     "compute_base_identity",
     "compute_lora_stats",
     "compute_recipe_hash",
+    "compute_structural_fingerprint",
     "load_affected_keys",
     "serialize_recipe",
     "validate_model_name",
@@ -73,6 +75,8 @@ def serialize_recipe(
     node: RecipeNode,
     base_identity: str,
     lora_stats: dict[str, tuple[float, int]],
+    *,
+    strip_block_config: bool = False,
 ) -> str:
     """Serialize a recipe tree to deterministic JSON.
 
@@ -85,6 +89,10 @@ def serialize_recipe(
         node: Recipe tree root (RecipeNode)
         base_identity: SHA-256 identity of the base model
         lora_stats: Map of resolved LoRA path -> (mtime, size)
+        strip_block_config: If True, omit all block_config fields from
+            serialization. Used by compute_structural_fingerprint() so
+            that two trees differing only in BlockConfig values produce
+            the same serialized output.
 
     Returns:
         Deterministic JSON string
@@ -120,7 +128,7 @@ def serialize_recipe(
                     entry["size"] = size
                 loras.append(entry)
             result: dict = {"type": "RecipeLoRA", "loras": loras}
-            if n.block_config is not None:
+            if not strip_block_config and n.block_config is not None:
                 result["block_config"] = _serialize_block_config(n.block_config)
             return result
         elif isinstance(n, RecipeModel):
@@ -135,7 +143,7 @@ def serialize_recipe(
                 mtime, size = lora_stats[n.path]
                 result["mtime"] = mtime
                 result["size"] = size
-            if n.block_config is not None:
+            if not strip_block_config and n.block_config is not None:
                 result["block_config"] = _serialize_block_config(n.block_config)
             return result
         elif isinstance(n, RecipeCompose):
@@ -152,7 +160,7 @@ def serialize_recipe(
             }
             if n.backbone is not None:
                 result["backbone"] = _serialize_node(n.backbone)
-            if n.block_config is not None:
+            if not strip_block_config and n.block_config is not None:
                 result["block_config"] = _serialize_block_config(n.block_config)
             return result
         else:
@@ -422,3 +430,75 @@ def atomic_save(
         except OSError:
             pass
         raise
+
+
+def compute_structural_fingerprint(
+    node: RecipeNode,
+    base_identity: str,
+    lora_stats: dict[str, tuple[float, int]],
+) -> str:
+    """Compute a structural fingerprint of a recipe tree, ignoring BlockConfig values.
+
+    AC: @incremental-block-recompute ac-1, ac-4, ac-9, ac-13, ac-14
+
+    Two recipe trees differing only in BlockConfig values produce the same
+    fingerprint. Changes to LoRA paths/strengths, model paths/strengths,
+    t_factor, arch, compose topology, base_identity, or file stats produce
+    different fingerprints.
+
+    Reuses serialize_recipe() with strip_block_config=True to avoid
+    serialization divergence.
+
+    Args:
+        node: Recipe tree root
+        base_identity: SHA-256 identity of base model weights
+        lora_stats: Map of file path -> (mtime, size)
+
+    Returns:
+        SHA-256 hex digest
+    """
+    serialized = serialize_recipe(
+        node, base_identity, lora_stats, strip_block_config=True
+    )
+    return hashlib.sha256(serialized.encode()).hexdigest()
+
+
+def collect_block_configs(
+    node: RecipeNode,
+) -> list[tuple[str, object]]:
+    """Walk recipe tree and collect BlockConfig at each position.
+
+    AC: @incremental-block-recompute ac-3, ac-5, ac-6, ac-7, ac-8, ac-15
+
+    Deterministic pre-order traversal. Returns a list of (path, BlockConfig|None)
+    pairs for every recipe node that can carry a block_config.
+
+    Args:
+        node: Recipe tree root
+
+    Returns:
+        List of (position_path, BlockConfig or None) in pre-order
+    """
+    from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeModel
+
+    configs: list[tuple[str, object]] = []
+
+    def _walk(n: RecipeNode, path: str) -> None:
+        if isinstance(n, RecipeBase):
+            return
+        elif isinstance(n, RecipeLoRA):
+            configs.append((path, n.block_config))
+        elif isinstance(n, RecipeModel):
+            configs.append((path, n.block_config))
+        elif isinstance(n, RecipeCompose):
+            for i, branch in enumerate(n.branches):
+                _walk(branch, f"{path}.branches[{i}]")
+        elif isinstance(n, RecipeMerge):
+            configs.append((path, n.block_config))
+            _walk(n.base, f"{path}.base")
+            _walk(n.target, f"{path}.target")
+            if n.backbone is not None:
+                _walk(n.backbone, f"{path}.backbone")
+
+    _walk(node, "root")
+    return configs
