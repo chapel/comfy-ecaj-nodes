@@ -7,6 +7,7 @@ if __package__:
     from .nodes.block_config_flux import WIDENBlockConfigFluxNode
     from .nodes.block_config_qwen import WIDENBlockConfigQwenNode
     from .nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
+    from .nodes.block_config_sdxl_clip import WIDENBlockConfigSDXLCLIPNode
     from .nodes.block_config_zimage import WIDENBlockConfigZImageNode
     from .nodes.clip_entry import WIDENCLIPEntryNode
     from .nodes.clip_nodes import (
@@ -31,6 +32,7 @@ if __package__:
         "WIDENMerge": WIDENMergeNode,
         "WIDENExit": WIDENExitNode,
         "WIDENBlockConfigSDXL": WIDENBlockConfigSDXLNode,
+        "WIDENBlockConfigSDXLCLIP": WIDENBlockConfigSDXLCLIPNode,
         "WIDENBlockConfigZImage": WIDENBlockConfigZImageNode,
         "WIDENBlockConfigQwen": WIDENBlockConfigQwenNode,
         "WIDENBlockConfigFlux": WIDENBlockConfigFluxNode,
@@ -50,6 +52,7 @@ if __package__:
         "WIDENMerge": "WIDEN Merge",
         "WIDENExit": "WIDEN Exit",
         "WIDENBlockConfigSDXL": "WIDEN Block Config (SDXL)",
+        "WIDENBlockConfigSDXLCLIP": "WIDEN Block Config (SDXL CLIP)",
         "WIDENBlockConfigZImage": "WIDEN Block Config (Z-Image)",
         "WIDENBlockConfigQwen": "WIDEN Block Config (Qwen)",
         "WIDENBlockConfigFlux": "WIDEN Block Config (Flux)",

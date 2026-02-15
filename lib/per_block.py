@@ -128,6 +128,7 @@ def _get_block_t_factors(
     block_config: BlockConfig | None,
     arch: str | None,
     default_t_factor: float,
+    domain: str = "diffusion",
 ) -> dict[float, list[int]]:
     """Group key indices by their effective t_factor based on block classification.
 
@@ -145,11 +146,15 @@ def _get_block_t_factors(
     # AC: @layer-type-filter ac-4
     Empty layer_type_overrides preserves backwards-compatible behavior.
 
+    # AC: @sdxl-clip-block-config ac-5
+    Domain parameter allows CLIP block classification for text encoder keys.
+
     Args:
         keys: List of parameter keys
         block_config: BlockConfig with block_overrides, or None
         arch: Architecture name for block classification
         default_t_factor: Global t_factor to use when no override applies
+        domain: Domain type ("diffusion" or "clip"). Defaults to "diffusion".
 
     Returns:
         Dict mapping t_factor -> list of key indices with that t_factor
@@ -170,14 +175,14 @@ def _get_block_t_factors(
 
     for idx, key in enumerate(keys):
         # Block t_factor (absolute value)
-        block_group = classify_key(key, arch)
+        block_group = classify_key(key, arch, domain)
         if block_group is not None and block_group in block_overrides:
             block_t = block_overrides[block_group]
         else:
             block_t = default_t_factor
 
         # Layer type multiplier (multiplicative on top of block)
-        layer_type = classify_layer_type(key, arch)
+        layer_type = classify_layer_type(key, arch, domain)
         if layer_type is not None and layer_type in layer_type_overrides:
             layer_mult = layer_type_overrides[layer_type]
         else:
