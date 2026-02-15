@@ -3,19 +3,17 @@
 from __future__ import annotations
 
 import gc
-import hashlib
-import os
 from collections.abc import Callable
-from typing import TYPE_CHECKING
 
 import torch
 
 from ..lib.analysis import (
     analyze_recipe,
+    analyze_recipe_models,
+    compute_recipe_file_hash,
     get_keys_to_process,
     walk_to_base,
 )
-from ..lib.clip_model_loader import CLIPModelLoader
 from ..lib.executor import (
     chunked_evaluation,
     compile_batch_groups,
@@ -37,9 +35,6 @@ try:
     from comfy.utils import ProgressBar
 except ImportError:  # testing without ComfyUI
     ProgressBar = None  # type: ignore[assignment,misc]
-
-if TYPE_CHECKING:
-    pass
 
 __all__ = [
     "WIDENCLIPExitNode",
@@ -187,117 +182,6 @@ def install_merged_clip_patches(
     return cloned
 
 
-def _collect_lora_paths(node: RecipeNode) -> list[str]:
-    """Recursively collect all LoRA file paths from a recipe tree."""
-    paths: list[str] = []
-
-    if isinstance(node, RecipeBase):
-        pass
-    elif isinstance(node, RecipeLoRA):
-        for lora_spec in node.loras:
-            paths.append(lora_spec["path"])
-    elif isinstance(node, RecipeModel):
-        pass
-    elif isinstance(node, RecipeCompose):
-        for branch in node.branches:
-            paths.extend(_collect_lora_paths(branch))
-    elif isinstance(node, RecipeMerge):
-        paths.extend(_collect_lora_paths(node.base))
-        paths.extend(_collect_lora_paths(node.target))
-        if node.backbone is not None:
-            paths.extend(_collect_lora_paths(node.backbone))
-
-    return paths
-
-
-def _collect_model_paths(node: RecipeNode) -> list[tuple[str, str]]:
-    """Recursively collect all model checkpoint paths from a recipe tree."""
-    paths: list[tuple[str, str]] = []
-
-    if isinstance(node, RecipeBase):
-        pass
-    elif isinstance(node, RecipeLoRA):
-        pass
-    elif isinstance(node, RecipeModel):
-        paths.append((node.path, node.source_dir))
-    elif isinstance(node, RecipeCompose):
-        for branch in node.branches:
-            paths.extend(_collect_model_paths(branch))
-    elif isinstance(node, RecipeMerge):
-        paths.extend(_collect_model_paths(node.base))
-        paths.extend(_collect_model_paths(node.target))
-        if node.backbone is not None:
-            paths.extend(_collect_model_paths(node.backbone))
-
-    return paths
-
-
-def _compute_clip_recipe_hash(
-    widen: RecipeNode,
-    lora_path_resolver: Callable[[str], str | None] | None = None,
-    model_path_resolver: Callable[[str, str], str | None] | None = None,
-) -> str:
-    """Compute a hash of the CLIP recipe based on file paths and mtimes.
-
-    AC: @clip-exit-node ac-8 — different hash when files change
-
-    Args:
-        widen: Recipe tree root
-        lora_path_resolver: Callable that resolves a LoRA name to full path
-        model_path_resolver: Callable that resolves (model_name, source_dir) to path
-
-    Returns:
-        Hex digest of SHA-256 hash
-    """
-    lora_paths = _collect_lora_paths(widen)
-    model_path_tuples = _collect_model_paths(widen)
-
-    # Sort for deterministic ordering
-    lora_paths = sorted(set(lora_paths))
-    model_path_tuples = sorted(set(model_path_tuples))
-
-    # Build hash from (path, mtime, size) tuples
-    hasher = hashlib.sha256()
-
-    # Hash LoRA files
-    for path in lora_paths:
-        full_path = path
-        if lora_path_resolver is not None:
-            resolved = lora_path_resolver(path)
-            if resolved is not None:
-                full_path = resolved
-
-        try:
-            stat = os.stat(full_path)
-            mtime = stat.st_mtime
-            size = stat.st_size
-        except OSError:
-            mtime = 0.0
-            size = 0
-
-        hasher.update(f"lora:{path}|{mtime}|{size}\n".encode())
-
-    # Hash model checkpoint files
-    for path, source_dir in model_path_tuples:
-        full_path = path
-        if model_path_resolver is not None:
-            resolved = model_path_resolver(path, source_dir)
-            if resolved is not None:
-                full_path = resolved
-
-        try:
-            stat = os.stat(full_path)
-            mtime = stat.st_mtime
-            size = stat.st_size
-        except OSError:
-            mtime = 0.0
-            size = 0
-
-        hasher.update(f"model:{path}|{source_dir}|{mtime}|{size}\n".encode())
-
-    return hasher.hexdigest()
-
-
 def _build_lora_resolver() -> Callable[[str], str | None]:
     """Build a LoRA path resolver using ComfyUI's folder_paths."""
     import folder_paths
@@ -321,65 +205,6 @@ def _build_clip_model_resolver() -> Callable[[str, str], str | None]:
         return folder_paths.get_full_path("checkpoints", model_name)
 
     return resolver
-
-
-def _analyze_clip_recipe_models(
-    node: RecipeNode,
-    base_arch: str,
-    model_path_resolver: Callable[[str, str], str | None] | None = None,
-) -> dict[str, CLIPModelLoader]:
-    """Analyze CLIP recipe for model checkpoints and open CLIPModelLoaders.
-
-    AC: @clip-exit-node ac-3
-    Uses CLIPModelLoader instead of ModelLoader to get text encoder keys.
-
-    Args:
-        node: Root recipe node
-        base_arch: Architecture of the base CLIP
-        model_path_resolver: Callable to resolve model paths
-
-    Returns:
-        Dict mapping model_id -> CLIPModelLoader
-
-    Raises:
-        FileNotFoundError: If checkpoint doesn't exist
-    """
-    from ..lib.analysis import _collect_model_refs
-
-    model_refs = _collect_model_refs(node)
-    model_loaders: dict[str, CLIPModelLoader] = {}
-    opened_loaders: list[CLIPModelLoader] = []
-
-    try:
-        for model_id, recipe_model in model_refs.items():
-            model_key = str(model_id)
-            model_name = recipe_model.path
-            source_dir = recipe_model.source_dir
-
-            # Resolve path — for CLIP, always use checkpoints
-            full_path = model_name
-            if model_path_resolver is not None:
-                resolved = model_path_resolver(model_name, source_dir)
-                if resolved is not None:
-                    full_path = resolved
-
-            if not os.path.exists(full_path):
-                raise FileNotFoundError(
-                    f"Checkpoint file not found: {model_name}\n"
-                    f"Referenced by CLIP Model Input node with strength {recipe_model.strength}"
-                )
-
-            # Open CLIP-specific streaming loader
-            loader = CLIPModelLoader(full_path)
-            opened_loaders.append(loader)
-            model_loaders[model_key] = loader
-
-    except Exception:
-        for loader in opened_loaders:
-            loader.cleanup()
-        raise
-
-    return model_loaders
 
 
 class WIDENCLIPExitNode:
@@ -413,7 +238,7 @@ class WIDENCLIPExitNode:
         Returns:
             Hash string for ComfyUI caching
         """
-        return _compute_clip_recipe_hash(
+        return compute_recipe_file_hash(
             widen_clip,
             lora_path_resolver=_build_lora_resolver(),
             model_path_resolver=_build_clip_model_resolver(),
@@ -473,9 +298,10 @@ class WIDENCLIPExitNode:
         # --- AC-2: Analyze recipe with domain="clip" to get CLIP LoRA loader ---
         analysis = analyze_recipe(widen_clip, lora_path_resolver=lora_path_resolver)
 
-        # AC-3: Analyze recipe for CLIP model checkpoints
-        clip_model_loaders = _analyze_clip_recipe_models(
-            widen_clip, base.arch, model_path_resolver=model_path_resolver
+        # AC-3: Analyze recipe for CLIP model checkpoints via domain dispatch
+        model_analysis = analyze_recipe_models(
+            widen_clip, base.arch, model_path_resolver=model_path_resolver,
+            domain="clip",
         )
 
         try:
@@ -484,12 +310,10 @@ class WIDENCLIPExitNode:
             lora_affected_keys = analysis.affected_keys
             arch = analysis.arch
 
-            # Build model affected keys from CLIP model loaders
-            model_affected: dict[str, frozenset[str]] = {}
-            all_model_keys: set[str] = set()
-            for model_key, model_loader in clip_model_loaders.items():
-                model_affected[model_key] = model_loader.affected_keys
-                all_model_keys.update(model_loader.affected_keys)
+            # Model affected keys from CLIP model loaders
+            model_affected = model_analysis.model_affected
+            clip_model_loaders = model_analysis.model_loaders
+            all_model_keys = model_analysis.all_model_keys
 
             # Computation dtype is fp32 for numerical stability
             compute_dtype = torch.float32
@@ -602,7 +426,7 @@ class WIDENCLIPExitNode:
             loader.cleanup()
 
             # Cleanup CLIP model loaders
-            for model_loader in clip_model_loaders.values():
+            for model_loader in model_analysis.model_loaders.values():
                 model_loader.cleanup()
 
         # Phase 3: Install merged weights as set patches
