@@ -608,7 +608,8 @@ class TestIsChangedIncludesModels:
         paths = _collect_model_paths(recipe)
 
         assert len(paths) == 1
-        assert sdxl_checkpoint_path in paths
+        # _collect_model_paths returns (path, source_dir) tuples
+        assert (sdxl_checkpoint_path, "checkpoints") in paths
 
 
 # ---------------------------------------------------------------------------

@@ -262,26 +262,26 @@ def _collect_lora_paths(node: RecipeNode) -> list[str]:
     return paths
 
 
-def _collect_model_paths(node: RecipeNode) -> list[str]:
+def _collect_model_paths(node: RecipeNode) -> list[tuple[str, str]]:
     """Recursively collect all model checkpoint paths from a recipe tree.
 
     AC: @full-model-execution ac-11
-    Returns paths for IS_CHANGED hash computation.
+    Returns (path, source_dir) tuples for IS_CHANGED hash computation.
 
     Args:
         node: Any recipe node
 
     Returns:
-        List of model checkpoint paths in deterministic order
+        List of (path, source_dir) tuples in deterministic order
     """
-    paths: list[str] = []
+    paths: list[tuple[str, str]] = []
 
     if isinstance(node, RecipeBase):
         pass
     elif isinstance(node, RecipeLoRA):
         pass
     elif isinstance(node, RecipeModel):
-        paths.append(node.path)
+        paths.append((node.path, node.source_dir))
     elif isinstance(node, RecipeCompose):
         for branch in node.branches:
             paths.extend(_collect_model_paths(branch))
@@ -297,7 +297,7 @@ def _collect_model_paths(node: RecipeNode) -> list[str]:
 def _compute_recipe_hash(
     widen: RecipeNode,
     lora_path_resolver: Callable[[str], str | None] | None = None,
-    model_path_resolver: Callable[[str], str | None] | None = None,
+    model_path_resolver: Callable[[str, str], str | None] | None = None,
 ) -> str:
     """Compute a hash of the recipe based on LoRA and model file paths and mtimes.
 
@@ -310,18 +310,18 @@ def _compute_recipe_hash(
         lora_path_resolver: Callable that resolves a LoRA name to its full
             filesystem path, or None if not found. Same resolver as
             used by analyze_recipe.
-        model_path_resolver: Callable that resolves a model name to its full
-            filesystem path.
+        model_path_resolver: Callable that resolves (model_name, source_dir)
+            to its full filesystem path.
 
     Returns:
         Hex digest of SHA-256 hash
     """
     lora_paths = _collect_lora_paths(widen)
-    model_paths = _collect_model_paths(widen)
+    model_path_tuples = _collect_model_paths(widen)
 
     # Sort for deterministic ordering
     lora_paths = sorted(set(lora_paths))
-    model_paths = sorted(set(model_paths))
+    model_path_tuples = sorted(set(model_path_tuples))
 
     # Build hash from (path, mtime, size) tuples
     hasher = hashlib.sha256()
@@ -346,10 +346,10 @@ def _compute_recipe_hash(
 
     # AC: @full-model-execution ac-11
     # Hash model checkpoint files
-    for path in model_paths:
+    for path, source_dir in model_path_tuples:
         full_path = path
         if model_path_resolver is not None:
-            resolved = model_path_resolver(path)
+            resolved = model_path_resolver(path, source_dir)
             if resolved is not None:
                 full_path = resolved
 
@@ -361,7 +361,7 @@ def _compute_recipe_hash(
             mtime = 0.0
             size = 0
 
-        hasher.update(f"model:{path}|{mtime}|{size}\n".encode())
+        hasher.update(f"model:{path}|{source_dir}|{mtime}|{size}\n".encode())
 
     return hasher.hexdigest()
 
@@ -381,16 +381,23 @@ def _build_lora_resolver() -> Callable[[str], str | None]:
     return resolver
 
 
-def _build_model_resolver() -> Callable[[str], str | None]:
+def _build_model_resolver() -> Callable[[str, str], str | None]:
     """Build a model path resolver using ComfyUI's folder_paths.
 
-    Returns a callable that resolves model names to their full filesystem path
-    by searching all registered checkpoint directories.
+    Returns a callable that resolves (model_name, source_dir) to full filesystem
+    path by searching the appropriate ComfyUI directory.
     """
     import folder_paths
 
-    def resolver(model_name: str) -> str | None:
-        return folder_paths.get_full_path("checkpoints", model_name)
+    def resolver(model_name: str, source_dir: str) -> str | None:
+        # Map source_dir to ComfyUI folder name
+        # "diffusion_models" may need "unet" fallback for older ComfyUI
+        if source_dir == "diffusion_models":
+            result = folder_paths.get_full_path("diffusion_models", model_name)
+            if result is None:
+                result = folder_paths.get_full_path("unet", model_name)
+            return result
+        return folder_paths.get_full_path(source_dir, model_name)
 
     return resolver
 

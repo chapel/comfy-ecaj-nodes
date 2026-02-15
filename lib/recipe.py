@@ -68,9 +68,10 @@ class RecipeModel:
     recipe tree construction.
     """
 
-    path: str  # Checkpoint filename (resolved to full path at Exit time)
+    path: str  # Model filename (resolved to full path at Exit time)
     strength: float = 1.0  # Merge strength
     block_config: object = None  # BlockConfig or None
+    source_dir: str = "checkpoints"  # Folder to resolve path from
 
 
 @dataclass(frozen=True)
