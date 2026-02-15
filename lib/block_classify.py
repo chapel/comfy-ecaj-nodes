@@ -170,8 +170,8 @@ def classify_key_flux(key: str) -> str | None:
     - single_blocks.N → SB00-SB23 (24 for Klein 9B) or SB00-SB19 (20 for Klein 4B)
 
     Block indices discovered dynamically from keys (not hardcoded).
-    Non-block keys (guidance_in, time_in, vector_in, img_in, txt_in,
-    final_layer) return None.
+    Structural keys (guidance_in, time_in, vector_in, img_in, txt_in,
+    final_layer) return named groups (e.g. GUIDANCE_IN).
 
     Args:
         key: Parameter key (with or without diffusion_model./transformer. prefix)

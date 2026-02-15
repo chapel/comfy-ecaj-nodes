@@ -380,7 +380,7 @@ class TestFilterChangedKeys:
         assert "diffusion_model.input_blocks.9.0.weight" in result
 
     def test_classified_structural_keys_not_spuriously_included(self):
-        """Structural keys (time_embed etc.) are classified and only included when their block changes."""
+        """Structural keys are classified; only included when their block changes."""
         keys = set(_SDXL_KEYS)
         changed_blocks = {"IN05"}
         result = filter_changed_keys(keys, changed_blocks, set(), "sdxl")
