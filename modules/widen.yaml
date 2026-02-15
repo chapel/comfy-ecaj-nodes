@@ -1818,6 +1818,11 @@ features:
             when: each batch group completes
             then: |
               progress is reported via ComfyUI ProgressBar
+          - id: ac-10
+            given: a CLIP recipe tree with domain="clip" and a BlockConfig with CLIP block overrides
+            when: the CLIP Exit node evaluates batch groups with per-block scaling
+            then: domain="clip" is propagated to classify_key and classify_layer_type calls in per-block
+              helpers, so CLIP block overrides are applied correctly
         depends_on: []
         implements: []
         relates_to: []

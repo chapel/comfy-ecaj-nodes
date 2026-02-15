@@ -1,0 +1,315 @@
+{
+  "generated_at": "2026-02-15T22:27:29.716Z",
+  "branch": "feat/implement-clip-model-loader",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-15T22:27:29.716Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KHHE6KC",
+      "title": "Implement CLIP Model Loader",
+      "started_at": "2026-02-15T22:22:29.898Z",
+      "priority": 3,
+      "spec_ref": "@clip-model-loader",
+      "note_count": 2,
+      "last_note_at": "2026-02-15T22:26:34.615Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KHHE6KC",
+      "task_title": "Implement CLIP Model Loader",
+      "task_status": "pending_review",
+      "note_ulid": "01KHHPK9",
+      "created_at": "2026-02-15T22:26:34.615Z",
+      "author": "@claude",
+      "content": "Implemented CLIPModelLoader: (1) Created lib/clip_model_loader.py with streaming loader for text encoder weights from checkpoints, (2) Key normalization maps conditioner.embedders.0.* to clip_l.* and embedders.1.* to clip_g.*, (3) Validates embedder structure, raises CLIPKeyMappingError for unexpected indices, (4) Excludes diffusion model and VAE keys (inverse of ModelLoader), (5) Uses safe_open() for memory-efficient access, (6) Reuses UnsupportedFormatError from model_loader. 35 new tests covering all 7 ACs. 1079 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHHE6KB",
+      "task_title": "Implement SDXL CLIP LoRA Loader",
+      "task_status": "completed",
+      "note_ulid": "01KHHP60",
+      "created_at": "2026-02-15T22:19:19.051Z",
+      "author": "@claude",
+      "content": "Implemented SDXL CLIP LoRA loader: (1) Created lib/lora/sdxl_clip.py with SDXLCLIPLoader class that maps lora_te1_* keys to clip_l.transformer.* and lora_te2_* keys to clip_g.transformer.*, (2) Handles compound tokens (text_model, encoder, layers, self_attn, k_proj, mlp, etc.), (3) Ignores UNet keys for mixed LoRAs, (4) Registered in LOADER_REGISTRY as 'sdxl_clip' for get_loader(arch='sdxl', domain='clip'), (5) Updated test_recipe_domain_field.py to use zimage for missing CLIP loader test. 33 new tests covering all 7 ACs. 1044 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHHE6K9",
+      "task_title": "Implement SDXL CLIP Block Config",
+      "task_status": "completed",
+      "note_ulid": "01KHHNPH",
+      "created_at": "2026-02-15T22:10:52.039Z",
+      "author": "@claude",
+      "content": "Implemented SDXL CLIP block config: (1) Added classify_key_sdxl_clip() for CLIP-L (CL00-CL11) and CLIP-G (CG00-CG31) blocks plus structural keys, (2) Added CLIP layer type patterns to classify_layer_type() with domain dispatch, (3) Created WIDENBlockConfigSDXLCLIPNode using make_block_config_node factory, (4) Updated _get_block_t_factors to accept domain parameter for CLIP classification, (5) Registered node in __init__.py, (6) 41 tests covering all 10 ACs. 1011 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHHE6K8",
+      "task_title": "Implement CLIP Graph Nodes",
+      "task_status": "completed",
+      "note_ulid": "01KHHN6C",
+      "created_at": "2026-02-15T22:02:02.852Z",
+      "author": "@claude",
+      "content": "Implemented CLIP graph nodes: (1) Created nodes/clip_nodes.py with WIDENCLIPLoRANode, WIDENCLIPComposeNode, WIDENCLIPMergeNode, WIDENCLIPModelInputNode, (2) All nodes use WIDEN_CLIP type for type safety, (3) CATEGORY is ecaj/merge/clip, (4) CLIP Model Input reads from checkpoints folder (ac-5), (5) Delegate to original WIDEN nodes for logic reuse (ac-7), (6) Registered in __init__.py with CLIP-prefixed display names, (7) 30 tests covering all 8 ACs. 969 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHHE6K5",
+      "task_title": "Implement CLIP Entry Node",
+      "task_status": "completed",
+      "note_ulid": "01KHHMTA",
+      "created_at": "2026-02-15T21:55:27.076Z",
+      "author": "@claude",
+      "content": "Implemented CLIP Entry node: (1) Created nodes/clip_entry.py with WIDENCLIPEntryNode that wraps ComfyUI CLIP in RecipeBase with domain='clip', (2) detect_clip_architecture() detects SDXL via clip_l+clip_g key prefixes using clip.patcher.model_state_dict() (zero GPU), (3) Non-SDXL raises UnsupportedCLIPArchitectureError with clear message, (4) Registered node as WIDENCLIPEntry with display name 'WIDEN CLIP Entry', (5) 15 tests covering all 7 ACs. 939 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHHE6KC",
+      "task_title": "Implement CLIP Model Loader",
+      "task_status": "pending_review",
+      "note_ulid": "01KHHE6K",
+      "created_at": "2026-02-15T19:59:49.634Z",
+      "author": "@claude",
+      "content": "Implementation notes:\n\nCreate lib/clip_model_loader.py with its own _normalize_key and\n_INCLUDED_PREFIXES (inverse of ModelLoader's _EXCLUDED_PREFIXES).\nDo NOT reuse ModelLoader._normalize_key -- they filter opposite key\nsets. Key mapping: conditioner.embedders.0.transformer.* -> clip_l.*,\nconditioner.embedders.1.transformer.* -> clip_g.*. Validate embedder\ncount and ordering during init. Verify against real SDXL checkpoints.\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KHHE6KB",
+      "title": "Implement SDXL CLIP LoRA Loader",
+      "completed_at": "2026-02-15T22:22:04.699Z",
+      "closed_reason": "Merged in PR #75. Implemented SDXLCLIPLoader in lib/lora/sdxl_clip.py with full kohya/A1111 key mapping for lora_te1_* (CLIP-L) and lora_te2_* (CLIP-G) text encoder keys. Registered in LOADER_REGISTRY as 'sdxl_clip', accessible via get_loader(arch='sdxl', domain='clip'). All 7 ACs verified with 33 tests covering key mapping, DeltaSpec production, loader interface, UNet key filtering, and registry integration."
+    },
+    {
+      "ref": "01KHHE6K9",
+      "title": "Implement SDXL CLIP Block Config",
+      "completed_at": "2026-02-15T22:13:13.540Z",
+      "closed_reason": "Merged in PR #74. Implemented SDXL CLIP block config with per-block strength control for text encoders: CLIP-L (12 blocks CL00-CL11) and CLIP-G (32 blocks CG00-CG31) plus structural keys. Added classify_key_sdxl_clip() and domain-aware dispatch in classify_key/classify_layer_type. All 10 ACs covered by 41 tests."
+    },
+    {
+      "ref": "01KHHE6K8",
+      "title": "Implement CLIP Graph Nodes",
+      "completed_at": "2026-02-15T22:05:01.281Z",
+      "closed_reason": "Merged in PR #73. Implemented WIDEN_CLIP-typed graph nodes (LoRA, Compose, Merge, Model Input) for CLIP pipeline type safety. All 8 ACs covered with 30 tests. Nodes delegate to original WIDEN implementations for logic reuse."
+    },
+    {
+      "ref": "01KHHE6K5",
+      "title": "Implement CLIP Entry Node",
+      "completed_at": "2026-02-15T21:57:45.365Z",
+      "closed_reason": "Merged in PR #72. Implemented WIDENCLIPEntryNode that wraps ComfyUI CLIP in RecipeBase with domain='clip'. Architecture detection via clip.patcher.model_state_dict() keys (zero GPU). SDXL detected from clip_l+clip_g prefixes; non-SDXL raises UnsupportedCLIPArchitectureError. All 7 ACs verified with 15 tests."
+    },
+    {
+      "ref": "01KHHE6K3",
+      "title": "Implement Recipe Domain Field",
+      "completed_at": "2026-02-15T21:52:40.189Z",
+      "closed_reason": "Merged in PR #71. Added domain field to RecipeBase with default 'diffusion' for CLIP pipeline support. Implementation includes: domain dispatch in get_loader(), analyze_recipe(), analyze_recipe_models(), classify_key(), and serialize_recipe(). All 9 ACs covered by 28 tests. Backward compatible - existing code continues to work unchanged."
+    },
+    {
+      "ref": "01KHHE6K2",
+      "title": "Implement Diffusion Model Path Resolution",
+      "completed_at": "2026-02-15T21:43:48.682Z",
+      "closed_reason": "Merged in PR #70. Implemented diffusion model path resolution with source_dir support:\n\n- ac-6: serialize_recipe now includes source_dir in JSON output\n- ac-8: compute_lora_stats passes source_dir to model_resolver\n\nAll 9 ACs verified:\n- ac-1/ac-2/ac-5: _build_model_resolver resolves paths by source_dir\n- ac-3: Independent resolution for mixed trees\n- ac-4: RecipeModel.source_dir defaults to \"checkpoints\"\n- ac-6: serialize_recipe includes source_dir (6 new tests)\n- ac-7: _compute_recipe_hash includes source_dir in hash\n- ac-8: compute_lora_stats uses correct folder (6 new tests)\n- ac-9: Silent cache miss on hash change (implicit)\n\nCI passed (lint + test), 12 new tests added."
+    },
+    {
+      "ref": "01KHHE6K1",
+      "title": "Implement Diffusion Model Input Node",
+      "completed_at": "2026-02-15T21:34:29.052Z",
+      "closed_reason": "Merged in PR #69. Implemented WIDENDiffusionModelInputNode that produces RecipeModel from diffusion_models directory (with unet fallback). Added source_dir field to RecipeModel. All 8 ACs verified with 18 tests. 890 tests pass, ruff clean."
+    },
+    {
+      "ref": "01KHHE6KD",
+      "title": "Rename existing Model Input node display name",
+      "completed_at": "2026-02-15T21:21:26.171Z",
+      "closed_reason": "Merged in PR #68. Renamed Model Input node display name from 'WIDEN Model Input' to 'WIDEN Checkpoint Input' in NODE_DISPLAY_NAME_MAPPINGS. This preparatory change clarifies the existing node reads from checkpoints/ directory, distinguishing it from the upcoming Diffusion Model Input node."
+    },
+    {
+      "ref": "01KHHE6KF",
+      "title": "Investigate ComfyUI CLIP clone and patch API",
+      "completed_at": "2026-02-15T21:07:37.385Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KHGYM2",
+      "title": "Rework t_factor semantics: 0=base-only, remove negative values",
+      "completed_at": "2026-02-15T15:29:51.070Z",
+      "closed_reason": "Implemented t_factor rework: 0=base-only, removed negative values. 4 spec ACs updated/added, code in widen.py + merge.py, tests updated. 870 tests pass, ruff clean."
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "061eeb8",
+      "full_hash": "061eeb80ef1b37b2b59f3fffbf19b658af6127ed",
+      "date": "2026-02-15T22:26:45.000Z",
+      "message": "feat: implement CLIP model loader for text encoder weights from checkpoints",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "a1108a5",
+      "full_hash": "a1108a5239efcf7294c8cd8b0697686bb79c232c",
+      "date": "2026-02-15T22:21:55.000Z",
+      "message": "Merge pull request #75 from chapel/feat/implement-sdxl-clip-lora-loader",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "b8cfeae",
+      "full_hash": "b8cfeaee2902138ee6e3a16028c37c1e791016d0",
+      "date": "2026-02-15T22:19:39.000Z",
+      "message": "feat: implement SDXL CLIP LoRA loader for text encoder merging",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "26a5467",
+      "full_hash": "26a54670917c937dd0d5630ec9b7a3b92f46923b",
+      "date": "2026-02-15T22:13:05.000Z",
+      "message": "Merge pull request #74 from chapel/feat/implement-sdxl-clip-block-config",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "10301d8",
+      "full_hash": "10301d8614956ff624071aba6e5b23aa21c8e7de",
+      "date": "2026-02-15T22:11:11.000Z",
+      "message": "feat: implement SDXL CLIP block config for per-block text encoder control",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "e345cab",
+      "full_hash": "e345cab81dd2538d737fff1cedd8b5272f252420",
+      "date": "2026-02-15T22:04:50.000Z",
+      "message": "Merge pull request #73 from chapel/feat/implement-clip-graph-nodes",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ebcf01a",
+      "full_hash": "ebcf01afd61eda3efd9d3b6734c4bd874f6ed646",
+      "date": "2026-02-15T22:02:39.000Z",
+      "message": "feat: implement CLIP graph nodes",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "1882713",
+      "full_hash": "1882713b2bbb8647eb475c7e6e757c69fdff54b3",
+      "date": "2026-02-15T21:57:35.000Z",
+      "message": "Merge pull request #72 from chapel/feat/implement-clip-entry-node",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "b90a148",
+      "full_hash": "b90a148917aad421a9972fe9b6355c147a046837",
+      "date": "2026-02-15T21:55:47.000Z",
+      "message": "feat: implement WIDEN CLIP Entry node",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "7e05c73",
+      "full_hash": "7e05c73e12591238dc2f224db67bc6470cdd9704",
+      "date": "2026-02-15T21:52:28.000Z",
+      "message": "Merge pull request #71 from chapel/feat/implement-recipe-domain-field",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": true,
+    "staged": [],
+    "unstaged": [],
+    "untracked": []
+  },
+  "inbox_items": [
+    {
+      "ref": "01KHCXS4",
+      "text": "Recipe serialization as a trait/protocol — serialize_recipe currently uses isinstance checks for each recipe type. Should be a protocol method on RecipeNode so new recipe types implement their own serialization. Prevents silent skips and keeps persistence.py decoupled from recipe type enumeration.",
+      "created_at": "2026-02-14T01:55:53.531Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS7",
+      "text": "compute_lora_stats._walk() silently ignores unknown recipe node types — should raise ValueError like serialize_recipe does. Related to serialization-as-trait refactor.",
+      "created_at": "2026-02-14T01:55:56.494Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS9",
+      "text": "load_affected_keys should wrap safetensors errors with helpful message pointing to cached file corruption — tells users to delete and re-run.",
+      "created_at": "2026-02-14T01:55:58.446Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHDNHH",
+      "text": "kspec plan import should wire depends_on from task YAML — currently ignores the field, requiring manual kspec batch to set dependencies after import. Encountered when importing Qwen/Flux plan with 4 dependent tasks.",
+      "created_at": "2026-02-14T08:51:10.255Z",
+      "tags": [
+        "reflection",
+        "kspec"
+      ],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHDX4R",
+      "text": "Add test for composed strength + block_config on OpApplyModel (strength != 1.0 AND block_config both active)",
+      "created_at": "2026-02-14T11:04:00.499Z",
+      "tags": [
+        "test"
+      ],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHFVFM",
+      "text": "v2: Auto per-block LoRA importance analysis for targeted merging — compute Frobenius norm of B@A per block at recipe build time to auto-populate per-block strengths. Could extend to SVD spectral analysis, TIES/DARE pruning during merge execution, and TSV interference detection for multi-LoRA conflict prediction. Natural hook point: existing per_block.py infrastructure. See FreeFuse (spatial segmentation, different problem), LoRA Inspector, resize_lora, LoRA Power-Merger, Task Singular Vectors paper for prior art.",
+      "created_at": "2026-02-15T05:13:28.800Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHG2ZK",
+      "text": "Missing AC-10 test for incremental-block-recompute — no test covers save_model=True partial-recompute path with saved-state + metadata behavior. Flagged by codex review on PR #66.",
+      "created_at": "2026-02-15T07:24:31.884Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHG2ZP",
+      "text": "Incremental recompute cache-hit tests lack bit-identical output assertions — AC-2 requires bit-identical output vs full recompute, but tests only check that chunked_evaluation is not called, never comparing output tensors. Flagged by codex review on PR #66.",
+      "created_at": "2026-02-15T07:24:35.005Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHG3A2",
+      "text": "Add test helper fixture for block config node kwargs — generate full kwargs from node.INPUT_TYPES() with defaults, so tests only need to override specific values. Would prevent the 15+ manual edits needed when adding new sliders (as happened with structural keys fix).",
+      "created_at": "2026-02-15T07:30:15.101Z",
+      "tags": [
+        "reflection",
+        "test"
+      ],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHHGS4",
+      "text": "kspec plan import puts manual task description field into notes instead of task description — task shows no Description section, only notes. Means manual tasks from plan import are less self-documenting than spec-derived tasks. Related to 01KHDNHH (depends_on gap) — both are plan import fidelity issues.",
+      "created_at": "2026-02-15T20:44:54.504Z",
+      "tags": [
+        "reflection",
+        "kspec"
+      ],
+      "added_by": "@claude"
+    }
+  ],
+  "stats": {
+    "total_tasks": 90,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 1,
+    "blocked": 0,
+    "completed": 85,
+    "inbox_items": 10
+  }
+}
