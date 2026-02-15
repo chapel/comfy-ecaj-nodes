@@ -38,7 +38,7 @@ if __package__:
         "WIDENBlockConfigZImage": "WIDEN Block Config (Z-Image)",
         "WIDENBlockConfigQwen": "WIDEN Block Config (Qwen)",
         "WIDENBlockConfigFlux": "WIDEN Block Config (Flux)",
-        "WIDENModelInput": "WIDEN Model Input",
+        "WIDENModelInput": "WIDEN Checkpoint Input",
     }
 
     __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
