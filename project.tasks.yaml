@@ -4607,6 +4607,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.284Z
+  started_at: 2026-02-15T21:22:19.223Z
   notes:
     - _ulid: 01KHHE6K14VCK6ZDXA5CB3BHKF
       created_at: 2026-02-15T19:59:49.284Z
@@ -4619,9 +4620,18 @@
         to "unet" for older ComfyUI versions (try/except at runtime).
         Set source_dir="diffusion_models" on the RecipeModel.
         Register in __init__.py with display name "WIDEN Diffusion Model Input".
+    - _ulid: 01KHHKEE3F68R1V2RJCQ16CY87
+      created_at: 2026-02-15T21:31:29.263Z
+      author: "@claude"
+      content: "Implemented: (1) Added source_dir field to RecipeModel with default 'checkpoints', (2)
+        Created WIDENDiffusionModelInputNode in nodes/diffusion_model_input.py with
+        source_dir='diffusion_models' and unet fallback, (3) Updated analyze_recipe_models and
+        _compute_recipe_hash to use source_dir for path resolution, (4) Updated
+        _build_model_resolver to accept (name, source_dir) tuple and handle diffusion_models/unet
+        fallback, (5) 18 tests covering all 8 ACs. 890 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-15T21:22:19.223Z
 - _ulid: 01KHHE6K2EVJP9ERE69DJRZXFQ
   slugs:
     - implement-diffusion-model-path-resolution
