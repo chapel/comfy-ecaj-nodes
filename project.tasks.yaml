@@ -4568,23 +4568,24 @@
         5. Tests: test_incremental_recompute.py covering all 16 ACs.
       supersedes: null
   todos: []
-- title: "Rework t_factor semantics: 0=base-only, remove negative values"
+- _ulid: 01KHGYM2DQ2CAVNSHBD1KC6GCW
+  slugs:
+    - rework-t-factor-semantics
+  title: "Rework t_factor semantics: 0=base-only, remove negative values"
   type: task
   spec_ref: "@widen-core"
   meta_ref: null
   plan_ref: null
+  status: in_progress
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 2
-  slugs:
-    - rework-t-factor-semantics
   tags:
     - ux
     - breaking-change
-  depends_on: []
-  _ulid: 01KHGYM2DQ2CAVNSHBD1KC6GCW
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-15T15:27:33.813Z
   notes: []
   todos: []
+  started_at: 2026-02-15T15:29:48.288Z
