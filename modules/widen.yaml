@@ -585,6 +585,9 @@ features:
             given: Partial recompute is in progress
             when: Execution is interrupted or raises an exception
             then: Cache retains the previous valid entry, not a partially-updated entry
+        status:
+          maturity: draft
+          implementation: in_progress
     status:
       maturity: draft
       implementation: implemented
