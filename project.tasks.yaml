@@ -4892,6 +4892,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.519Z
+  started_at: 2026-02-15T21:58:47.311Z
   notes:
     - _ulid: 01KHHE6K8FFBVHRVVDP19E8242
       created_at: 2026-02-15T19:59:49.519Z
@@ -4903,9 +4904,18 @@
         wraps existing node classes, swapping WIDEN for WIDEN_CLIP in
         INPUT_TYPES and RETURN_TYPES. Each CLIP variant gets CATEGORY
         "ecaj/merge/clip". Register all variants in __init__.py.
+    - _ulid: 01KHHN6CQ44FK5VS4JVRQEH8J0
+      created_at: 2026-02-15T22:02:02.852Z
+      author: "@claude"
+      content: "Implemented CLIP graph nodes: (1) Created nodes/clip_nodes.py with WIDENCLIPLoRANode,
+        WIDENCLIPComposeNode, WIDENCLIPMergeNode, WIDENCLIPModelInputNode, (2) All nodes use
+        WIDEN_CLIP type for type safety, (3) CATEGORY is ecaj/merge/clip, (4) CLIP Model Input reads
+        from checkpoints folder (ac-5), (5) Delegate to original WIDEN nodes for logic reuse (ac-7),
+        (6) Registered in __init__.py with CLIP-prefixed display names, (7) 30 tests covering all 8
+        ACs. 969 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-15T21:58:47.311Z
 - _ulid: 01KHHE6K9T79NA624RARW0D7TA
   slugs:
     - implement-sdxl-clip-block-config
