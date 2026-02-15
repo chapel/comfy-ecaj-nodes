@@ -2015,7 +2015,7 @@ features:
         created: 2026-02-15T19:59:49.214Z
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
       - _ulid: 01KHHE6JZK0B5D8PEJXX9QH3CJ
         slugs:
           - clip-model-loader
