@@ -4576,7 +4576,7 @@
   spec_ref: "@widen-core"
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -4589,3 +4589,6 @@
   started_at: 2026-02-15T15:29:48.288Z
   notes: []
   todos: []
+  completed_at: 2026-02-15T15:29:51.070Z
+  closed_reason: "Implemented t_factor rework: 0=base-only, removed negative values. 4 spec ACs
+    updated/added, code in widen.py + merge.py, tests updated. 870 tests pass, ruff clean."
