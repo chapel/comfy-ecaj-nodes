@@ -887,6 +887,10 @@ features:
         when: block config node is used
         then: each of the 34 individual blocks (L00-L29, NOISE_REF0, NOISE_REF1, CTX_REF0, CTX_REF1) has its
           own slider
+      - id: ac-6
+        given: a block config with a block override set to 0.0
+        when: per-block WIDEN processing runs for that block
+        then: backbone is returned for those keys (widen skipped)
     depends_on: []
     implements: []
     relates_to: []
