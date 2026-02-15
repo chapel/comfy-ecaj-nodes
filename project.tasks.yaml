@@ -5025,7 +5025,7 @@
   type: task
   spec_ref: "@clip-model-loader"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -5061,6 +5061,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-15T22:28:45.949Z
+  closed_reason: "Merged in PR #76. Implemented CLIPModelLoader: streaming loader for text encoder
+    weights from SDXL checkpoints. Maps conditioner.embedders.0.* to clip_l.* and embedders.1.* to
+    clip_g.*. Validates embedder structure, raises CLIPKeyMappingError for unexpected indices. Uses
+    safetensors safe_open() for memory-efficient access. All 7 ACs covered with 35 tests."
 - _ulid: 01KHHE6KDVABV5Z7KKEJ3H0SJ7
   slugs:
     - rename-model-input-display
