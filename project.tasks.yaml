@@ -4975,7 +4975,7 @@
   type: task
   spec_ref: "@sdxl-clip-lora-loader"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -5012,6 +5012,12 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-15T22:22:04.699Z
+  closed_reason: "Merged in PR #75. Implemented SDXLCLIPLoader in lib/lora/sdxl_clip.py with full
+    kohya/A1111 key mapping for lora_te1_* (CLIP-L) and lora_te2_* (CLIP-G) text encoder keys.
+    Registered in LOADER_REGISTRY as 'sdxl_clip', accessible via get_loader(arch='sdxl',
+    domain='clip'). All 7 ACs verified with 33 tests covering key mapping, DeltaSpec production,
+    loader interface, UNet key filtering, and registry integration."
 - _ulid: 01KHHE6KC20EBB6501Y5QAJRFG
   slugs:
     - implement-clip-model-loader
