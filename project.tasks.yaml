@@ -4933,7 +4933,7 @@
   type: task
   spec_ref: "@diffusion-model-input-node"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -4953,6 +4953,7 @@
       supersedes: null
   todos: []
   automation: eligible
+  started_at: 2026-02-15T21:19:03.371Z
 - _ulid: 01KHHE6KF4CCCBM1R9DD3T84XM
   slugs:
     - investigate-clip-api
