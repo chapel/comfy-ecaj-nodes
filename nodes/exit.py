@@ -588,7 +588,7 @@ class WIDENExitNode:
                     # AC: @merge-block-config ac-1, ac-2
                     # AC: @full-model-execution ac-3, ac-5
                     # Pass arch, widen_config, and model_loaders
-                    def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs):
+                    def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
                         def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
                             return execute_plan(
                                 plan=p,
@@ -601,12 +601,13 @@ class WIDENExitNode:
                                 arch=architecture,
                                 widen_config=wcfg,
                                 model_loaders=mdl_ldrs,
+                                domain=dom,
                             )
                         return eval_fn
 
                     eval_fn = make_eval_fn(
                         plan, loader, widen_merger, device, compute_dtype,
-                        arch, widen_config, model_loaders
+                        arch, widen_config, model_loaders, domain,
                     )
 
                     # Run chunked evaluation with OOM backoff

@@ -378,7 +378,9 @@ class WIDENCLIPExitNode:
                 )
 
                 # Build evaluation function using pre-compiled plan
-                def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs):
+                # AC: @clip-exit-node ac-10
+                # Pass domain="clip" so per-block helpers use CLIP classifiers
+                def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
                     def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
                         return execute_plan(
                             plan=p,
@@ -391,12 +393,13 @@ class WIDENCLIPExitNode:
                             arch=architecture,
                             widen_config=wcfg,
                             model_loaders=mdl_ldrs,
+                            domain=dom,
                         )
                     return eval_fn
 
                 eval_fn = make_eval_fn(
                     plan, loader, widen_merger, device, compute_dtype,
-                    arch, widen_config, clip_model_loaders
+                    arch, widen_config, clip_model_loaders, "clip",
                 )
 
                 # Run chunked evaluation with OOM backoff

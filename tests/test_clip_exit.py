@@ -13,7 +13,14 @@ import pytest
 import torch
 
 from lib.analysis import collect_lora_paths, collect_model_paths, compute_recipe_file_hash
-from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeModel
+from lib.recipe import (
+    BlockConfig,
+    RecipeBase,
+    RecipeCompose,
+    RecipeLoRA,
+    RecipeMerge,
+    RecipeModel,
+)
 from nodes.clip_exit import (
     WIDENCLIPExitNode,
     _unpatch_loaded_clip_clones,
@@ -720,6 +727,98 @@ class TestCollectPaths:
         paths = collect_lora_paths(merge)
         assert "target.safetensors" in paths
         assert "backbone.safetensors" in paths
+
+
+# --- AC-10: Domain propagation to per-block helpers ---
+
+
+class TestDomainPropagation:
+    """AC: @clip-exit-node ac-10 — domain='clip' propagates to classify_key."""
+
+    # AC: @clip-exit-node ac-10
+    def test_per_block_lora_strength_uses_clip_domain(self):
+        """_apply_per_block_lora_strength classifies CLIP keys correctly with domain='clip'."""
+        from lib.per_block import _apply_per_block_lora_strength
+
+        # CLIP-L layer 5 key → block group "CL05"
+        keys = [_SDXL_CLIP_KEYS[0]]  # clip_l...layers.0...
+        base = torch.ones(1, 4, 4)
+        lora_applied = torch.full((1, 4, 4), 2.0)  # delta = 1.0
+
+        # Block override: CL00 → strength 0.0 (zero out the delta)
+        block_config = BlockConfig(arch="sdxl", block_overrides=(("CL00", 0.0),))
+
+        # Without domain="clip", classify_key returns None → override is ignored
+        result_diffusion = _apply_per_block_lora_strength(
+            keys, base, lora_applied, block_config, "sdxl", "cpu", torch.float32,
+            domain="diffusion",
+        )
+        # delta preserved (override not matched)
+        assert torch.equal(result_diffusion, lora_applied)
+
+        # With domain="clip", classify_key returns "CL00" → override applies
+        result_clip = _apply_per_block_lora_strength(
+            keys, base, lora_applied, block_config, "sdxl", "cpu", torch.float32,
+            domain="clip",
+        )
+        # delta zeroed out (strength 0.0)
+        assert torch.equal(result_clip, base)
+
+    # AC: @clip-exit-node ac-10
+    def test_widen_filter_per_block_uses_clip_domain(self):
+        """_apply_widen_filter_per_block passes domain to _get_block_t_factors."""
+        from lib.per_block import _get_block_t_factors
+
+        keys = [_SDXL_CLIP_KEYS[0]]  # clip_l...layers.0... → "CL00"
+        block_config = BlockConfig(arch="sdxl", block_overrides=(("CL00", 0.5),))
+
+        # Without domain="clip": key unrecognized, falls back to default t_factor
+        groups_diffusion = _get_block_t_factors(keys, block_config, "sdxl", 1.0)
+        assert 1.0 in groups_diffusion
+
+        # With domain="clip": key classified as CL00, override 0.5 applied
+        groups_clip = _get_block_t_factors(keys, block_config, "sdxl", 1.0, domain="clip")
+        assert 0.5 in groups_clip
+
+    # AC: @clip-exit-node ac-10
+    def test_execute_plan_passes_domain_to_per_block(self, monkeypatch):
+        """execute_plan(domain='clip') propagates domain to per-block calls."""
+        from lib.per_block import _apply_per_block_lora_strength as orig_fn
+        from lib.recipe_eval import EvalPlan, OpApplyLoRA, execute_plan
+
+        captured_domains = []
+
+        def tracking_per_block(*args, **kwargs):
+            # domain is the 8th positional arg (index 7) or keyword
+            if "domain" in kwargs:
+                captured_domains.append(kwargs["domain"])
+            elif len(args) > 7:
+                captured_domains.append(args[7])
+            return orig_fn(*args, **kwargs)
+
+        import lib.recipe_eval as recipe_eval_mod
+        monkeypatch.setattr(recipe_eval_mod, "_apply_per_block_lora_strength", tracking_per_block)
+
+        # Build a minimal plan with an OpApplyLoRA that has a block_config
+        block_config = BlockConfig(arch="sdxl", block_overrides=(("CL00", 0.5),))
+        op = OpApplyLoRA(set_id="test", block_config=block_config, input_reg=0, out_reg=1)
+        plan = EvalPlan(ops=(op,), result_reg=1, dead_after=((),))
+
+        keys = [_SDXL_CLIP_KEYS[0]]
+        base_batch = torch.randn(1, 4, 4)
+
+        # Mock loader to return no-op delta specs
+        class FakeLoader:
+            def get_delta_specs(self, keys, key_indices, set_id):
+                return []
+
+        execute_plan(
+            plan=plan, keys=keys, base_batch=base_batch,
+            loader=FakeLoader(), widen=None, device="cpu", dtype=torch.float32,
+            arch="sdxl", domain="clip",
+        )
+
+        assert captured_domains == ["clip"]
 
 
 # --- Node metadata ---

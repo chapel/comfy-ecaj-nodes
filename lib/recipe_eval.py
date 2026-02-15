@@ -405,6 +405,7 @@ def execute_plan(
     arch: str | None = None,
     widen_config: object | None = None,
     model_loaders: dict[str, object] | None = None,
+    domain: str = "diffusion",
 ) -> torch.Tensor:
     """Execute a pre-compiled plan on a batch of parameters.
 
@@ -449,7 +450,8 @@ def execute_plan(
             # AC: @lora-block-config ac-1, ac-2
             if op.block_config is not None and arch is not None:
                 result = _apply_per_block_lora_strength(
-                    keys, current, result, op.block_config, arch, device, dtype
+                    keys, current, result, op.block_config, arch, device, dtype,
+                    domain,
                 )
 
             regs[op.out_reg] = result
@@ -487,7 +489,8 @@ def execute_plan(
             # Apply per-block strength scaling to model deltas
             if op.block_config is not None and arch is not None:
                 stacked = _apply_per_block_lora_strength(
-                    keys, regs[op.input_reg], stacked, op.block_config, arch, device, dtype
+                    keys, regs[op.input_reg], stacked, op.block_config, arch, device, dtype,
+                    domain,
                 )
 
             regs[op.out_reg] = stacked
@@ -499,7 +502,7 @@ def execute_plan(
             if op.use_per_block:
                 regs[op.out_reg] = _apply_widen_filter_per_block(
                     keys, lora_applied, backbone,
-                    op.block_config, arch, op.t_factor, widen_config,
+                    op.block_config, arch, op.t_factor, widen_config, domain,
                 )
             else:
                 regs[op.out_reg] = widen.filter_delta_batched(lora_applied, backbone)
@@ -511,7 +514,7 @@ def execute_plan(
             if op.use_per_block:
                 regs[op.out_reg] = _apply_widen_merge_per_block(
                     keys, branch_tensors, backbone,
-                    op.block_config, arch, op.t_factor, widen_config,
+                    op.block_config, arch, op.t_factor, widen_config, domain,
                 )
             else:
                 regs[op.out_reg] = widen.merge_weights_batched(branch_tensors, backbone)
@@ -547,6 +550,7 @@ def evaluate_recipe(
     widen_config: object | None = None,
     model_id_map: dict[int, str] | None = None,
     model_loaders: dict[str, object] | None = None,
+    domain: str = "diffusion",
 ) -> torch.Tensor:
     """Evaluate a recipe tree on a batch of parameters.
 
@@ -600,5 +604,5 @@ def evaluate_recipe(
     # Evaluate and return - result stays on GPU
     return execute_plan(
         plan, keys, base_batch, loader, widen,
-        device, dtype, arch, widen_config, model_loaders,
+        device, dtype, arch, widen_config, model_loaders, domain,
     )
