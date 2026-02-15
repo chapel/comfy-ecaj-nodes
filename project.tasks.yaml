@@ -4904,7 +4904,14 @@
     - enhancement-1
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.691Z
-  notes: []
+  notes:
+    - _ulid: 01KHHGFF214ZV8CZQM7K4PNG5G
+      created_at: 2026-02-15T20:39:37.281Z
+      author: "@claude"
+      content: Change NODE_DISPLAY_NAME_MAPPINGS in __init__.py from 'WIDEN Model Input' to 'WIDEN
+        Checkpoint Input'. This distinguishes it from the new Diffusion Model Input node. Only
+        __init__.py needs to change.
+      supersedes: null
   todos: []
 - _ulid: 01KHHE6KF4CCCBM1R9DD3T84XM
   slugs:
