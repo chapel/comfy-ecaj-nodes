@@ -25,6 +25,7 @@ from lib.recipe import (
     RecipeCompose,
     RecipeLoRA,
     RecipeMerge,
+    RecipeModel,
 )
 
 # =============================================================================
@@ -182,6 +183,38 @@ class TestSerializeRecipe:
         assert "backbone" in parsed
         assert parsed["backbone"]["type"] == "RecipeLoRA"
 
+    # AC: @diffusion-model-path-resolution ac-6
+    def test_recipe_model_includes_source_dir(self):
+        """RecipeModel serialization should include source_dir."""
+        model = RecipeModel(path="test.safetensors", strength=0.8, source_dir="checkpoints")
+        result = serialize_recipe(model, "abc", {})
+        parsed = json.loads(result)
+        assert parsed["type"] == "RecipeModel"
+        assert parsed["source_dir"] == "checkpoints"
+
+    # AC: @diffusion-model-path-resolution ac-6
+    def test_recipe_model_diffusion_models_source_dir(self):
+        """RecipeModel with diffusion_models source_dir should serialize correctly."""
+        model = RecipeModel(
+            path="flux_dev.safetensors", strength=1.0, source_dir="diffusion_models"
+        )
+        result = serialize_recipe(model, "abc", {})
+        parsed = json.loads(result)
+        assert parsed["source_dir"] == "diffusion_models"
+
+    # AC: @diffusion-model-path-resolution ac-6
+    def test_recipe_model_source_dir_affects_hash(self):
+        """Same path with different source_dir should produce different serialization."""
+        model_ckpt = RecipeModel(
+            path="model.safetensors", strength=1.0, source_dir="checkpoints"
+        )
+        model_diff = RecipeModel(
+            path="model.safetensors", strength=1.0, source_dir="diffusion_models"
+        )
+        result_ckpt = serialize_recipe(model_ckpt, "abc", {})
+        result_diff = serialize_recipe(model_diff, "abc", {})
+        assert result_ckpt != result_diff
+
 
 # =============================================================================
 # AC-6: compute_base_identity
@@ -303,6 +336,80 @@ class TestComputeLoraStats:
         stats = compute_lora_stats(merge, resolver)
         assert "a.safetensors" in stats
         assert "b.safetensors" in stats
+
+    # AC: @diffusion-model-path-resolution ac-8
+    def test_model_resolver_receives_source_dir(self, tmp_path):
+        """Model resolver should receive source_dir from RecipeModel."""
+        model_file = tmp_path / "checkpoints" / "test.safetensors"
+        model_file.parent.mkdir(parents=True, exist_ok=True)
+        model_file.write_bytes(b"x" * 200)
+
+        model = RecipeModel(
+            path="test.safetensors", strength=1.0, source_dir="checkpoints"
+        )
+
+        received_args = []
+
+        def lora_resolver(name):
+            return None
+
+        def model_resolver(name, source_dir):
+            received_args.append((name, source_dir))
+            if source_dir == "checkpoints":
+                return str(tmp_path / "checkpoints" / name)
+            return None
+
+        stats = compute_lora_stats(model, lora_resolver, model_resolver)
+        assert received_args == [("test.safetensors", "checkpoints")]
+        assert "test.safetensors" in stats
+        assert stats["test.safetensors"][1] == 200
+
+    # AC: @diffusion-model-path-resolution ac-8
+    def test_diffusion_models_source_dir(self, tmp_path):
+        """Model with diffusion_models source_dir should resolve correctly."""
+        diff_dir = tmp_path / "diffusion_models"
+        diff_dir.mkdir(parents=True, exist_ok=True)
+        (diff_dir / "flux.safetensors").write_bytes(b"y" * 300)
+
+        model = RecipeModel(
+            path="flux.safetensors", strength=1.0, source_dir="diffusion_models"
+        )
+
+        def lora_resolver(name):
+            return None
+
+        def model_resolver(name, source_dir):
+            return str(tmp_path / source_dir / name)
+
+        stats = compute_lora_stats(model, lora_resolver, model_resolver)
+        assert stats["flux.safetensors"][1] == 300
+
+    # AC: @diffusion-model-path-resolution ac-8
+    def test_mixed_lora_and_model_stats(self, tmp_path):
+        """Should collect stats from both LoRAs and models with correct resolvers."""
+        # Setup files
+        (tmp_path / "lora.safetensors").write_bytes(b"L" * 100)
+        ckpt_dir = tmp_path / "checkpoints"
+        ckpt_dir.mkdir(parents=True, exist_ok=True)
+        (ckpt_dir / "model.safetensors").write_bytes(b"M" * 500)
+
+        base = RecipeBase(model_patcher=object(), arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},))
+        model = RecipeModel(
+            path="model.safetensors", strength=0.5, source_dir="checkpoints"
+        )
+        compose = RecipeCompose(branches=(lora, model))
+        merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=0.5)
+
+        def lora_resolver(name):
+            return str(tmp_path / name)
+
+        def model_resolver(name, source_dir):
+            return str(tmp_path / source_dir / name)
+
+        stats = compute_lora_stats(merge, lora_resolver, model_resolver)
+        assert stats["lora.safetensors"][1] == 100
+        assert stats["model.safetensors"][1] == 500
 
 
 # =============================================================================

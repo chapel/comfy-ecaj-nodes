@@ -133,10 +133,12 @@ def serialize_recipe(
             return result
         elif isinstance(n, RecipeModel):
             # Include model file stats for cache invalidation
+            # AC: @diffusion-model-path-resolution ac-6
             result: dict = {
                 "type": "RecipeModel",
                 "path": n.path,
                 "strength": n.strength,
+                "source_dir": n.source_dir,
             }
             # Include file stats if available (using lora_stats which also has model stats)
             if n.path in lora_stats:
@@ -219,17 +221,18 @@ def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
 def compute_lora_stats(
     node: RecipeNode,
     resolver: Callable[[str], str | None],
-    model_resolver: Callable[[str], str | None] | None = None,
+    model_resolver: Callable[[str, str], str | None] | None = None,
 ) -> dict[str, tuple[float, int]]:
     """Walk recipe tree and collect LoRA and model file stats.
 
     AC: @exit-model-persistence ac-7
     AC: @full-model-execution ac-11
+    AC: @diffusion-model-path-resolution ac-8
 
     Args:
         node: Recipe tree root
         resolver: Resolves LoRA name to full filesystem path
-        model_resolver: Resolves model name to full filesystem path (optional)
+        model_resolver: Resolves (model_name, source_dir) to full filesystem path
 
     Returns:
         Dict mapping file path (as in recipe) -> (mtime, size)
@@ -254,12 +257,13 @@ def compute_lora_stats(
                         stats[path] = (0.0, 0)
         elif isinstance(n, RecipeModel):
             # AC: @full-model-execution ac-11
+            # AC: @diffusion-model-path-resolution ac-8
             # Include checkpoint file stats for IS_CHANGED hash
             path = n.path
             if path not in stats:
                 full_path = path
                 if model_resolver is not None:
-                    resolved = model_resolver(path)
+                    resolved = model_resolver(path, n.source_dir)
                     if resolved is not None:
                         full_path = resolved
                 try:
