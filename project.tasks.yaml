@@ -4632,7 +4632,7 @@
   depends_on:
     - "@implement-diffusion-model-input-node"
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.326Z
