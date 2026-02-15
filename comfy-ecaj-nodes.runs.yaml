@@ -1843,6 +1843,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-15T20:43:41.340Z
+    completed_at: 2026-02-15T20:45:04.886Z
     step_results:
       - step_index: 0
         status: completed
@@ -1894,4 +1895,11 @@ runs:
         notes: "Captured 2 items: inbox 01KHHGS4 (plan import description loss), observation 01KHHGS7
           (one-at-a-time design questions). Skipped 3 items already tracked."
     initiated_by: "@claude"
-    completed_at: 2026-02-15T20:45:04.886Z
+  - _ulid: 01KHHJ7JVZMDX6MYVMM0JP2QVH
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-15T21:10:16.192Z
+    step_results: []
+    initiated_by: "@claude"
