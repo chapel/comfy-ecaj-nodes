@@ -4939,7 +4939,7 @@
   title: Investigate ComfyUI CLIP clone and patch API
   type: task
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -5106,3 +5106,5 @@
       supersedes: null
   todos: []
   automation: manual_only
+  completed_at: 2026-02-15T21:07:37.385Z
+  closed_reason: null
