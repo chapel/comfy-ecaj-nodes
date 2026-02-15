@@ -4687,7 +4687,10 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: pending
   blocked_by: []
-  depends_on: []
+  depends_on:
+    - "@implement-clip-entry-node"
+    - "@implement-clip-exit-node"
+    - "@implement-clip-graph-nodes"
   context: []
   priority: 3
   tags: []
