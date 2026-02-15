@@ -4599,7 +4599,7 @@
   type: task
   spec_ref: "@diffusion-model-input-node"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -4621,6 +4621,7 @@
         Register in __init__.py with display name "WIDEN Diffusion Model Input".
   todos: []
   automation: eligible
+  started_at: 2026-02-15T21:22:19.223Z
 - _ulid: 01KHHE6K2EVJP9ERE69DJRZXFQ
   slugs:
     - implement-diffusion-model-path-resolution
@@ -4935,6 +4936,10 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #68. Renamed Model Input node display name from 'WIDEN Model Input' to
+    'WIDEN Checkpoint Input' in NODE_DISPLAY_NAME_MAPPINGS. This preparatory change clarifies the
+    existing node reads from checkpoints/ directory, distinguishing it from the upcoming Diffusion
+    Model Input node."
   depends_on: []
   context: []
   priority: 1
@@ -4944,6 +4949,7 @@
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.691Z
   started_at: 2026-02-15T21:19:03.371Z
+  completed_at: 2026-02-15T21:21:26.171Z
   notes:
     - _ulid: 01KHHGFF214ZV8CZQM7K4PNG5G
       created_at: 2026-02-15T20:39:37.281Z
@@ -4954,11 +4960,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-15T21:21:26.171Z
-  closed_reason: "Merged in PR #68. Renamed Model Input node display name from 'WIDEN Model Input' to
-    'WIDEN Checkpoint Input' in NODE_DISPLAY_NAME_MAPPINGS. This preparatory change clarifies the
-    existing node reads from checkpoints/ directory, distinguishing it from the upcoming Diffusion
-    Model Input node."
 - _ulid: 01KHHE6KF4CCCBM1R9DD3T84XM
   slugs:
     - investigate-clip-api
