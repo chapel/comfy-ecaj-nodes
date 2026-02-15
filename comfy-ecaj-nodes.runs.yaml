@@ -1960,7 +1960,7 @@ runs:
   - _ulid: 01KHHQ76P2ESW3MD93XCWX9WVD
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-15T22:37:26.594Z
     step_results:
@@ -1978,5 +1978,17 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-15T22:37:40.685Z
-        completed_at: 2026-02-15T22:37:40.685Z
+        completed_at: 2026-02-15T22:38:16.707Z
+        notes: "Searched existing: (1) compile_batch_groups/compile_plan domain parameter gap is NOT tracked
+          - functions don't pass domain to classify_key or per_block functions, (2) This is a known
+          architectural gap that would need to be addressed if per-block CLIP controls are needed,
+          (3) Current CLIP implementation works because domain dispatch happens at loader level not
+          execution level. Potential friction: execute_plan doesn't pass domain to
+          _apply_per_block_lora_strength, but this is only needed if CLIP block configs with
+          per-block t_factors are used, which is not the current use case. LOW confidence - only one
+          occurrence, not blocking."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-15T22:38:16.707Z
+        completed_at: 2026-02-15T22:38:16.707Z
     initiated_by: "@claude"
