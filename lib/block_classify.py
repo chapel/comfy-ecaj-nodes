@@ -67,7 +67,14 @@ def classify_key_sdxl(key: str) -> str | None:
             return f"OUT{block_num:02d}"
         return None
 
-    # No block match (e.g., time_embed, label_emb at top level)
+    # Non-block structural keys
+    if key.startswith("time_embed"):
+        return "TIME_EMBED"
+    if key.startswith("label_emb"):
+        return "LABEL_EMB"
+    if key.startswith("out."):
+        return "FINAL_OUT"
+
     return None
 
 
@@ -111,7 +118,12 @@ def classify_key_zimage(key: str) -> str | None:
         refiner_num = int(match.group(1))
         return f"CTX_REF{refiner_num}"
 
-    # No block match
+    # Non-block structural keys
+    if key.startswith("patch_embed"):
+        return "PATCH_EMBED"
+    if key.startswith("final_norm"):
+        return "FINAL_NORM"
+
     return None
 
 
@@ -140,7 +152,12 @@ def classify_key_qwen(key: str) -> str | None:
         # Dynamic range - no upper bound check, format with width for sorting
         return f"TB{block_num:02d}"
 
-    # No block match
+    # Non-block structural keys
+    if key.startswith("time_embed"):
+        return "TIME_EMBED"
+    if key.startswith("final_norm"):
+        return "FINAL_NORM"
+
     return None
 
 
@@ -179,7 +196,20 @@ def classify_key_flux(key: str) -> str | None:
         block_num = int(match.group(1))
         return f"SB{block_num:02d}"
 
-    # No block match (guidance_in, time_in, vector_in, img_in, txt_in, final_layer)
+    # Non-block structural keys
+    if key.startswith("guidance_in"):
+        return "GUIDANCE_IN"
+    if key.startswith("time_in"):
+        return "TIME_IN"
+    if key.startswith("vector_in"):
+        return "VECTOR_IN"
+    if key.startswith("img_in"):
+        return "IMG_IN"
+    if key.startswith("txt_in"):
+        return "TXT_IN"
+    if key.startswith("final_layer"):
+        return "FINAL_LAYER"
+
     return None
 
 

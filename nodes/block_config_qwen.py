@@ -2,7 +2,11 @@
 
 from .block_config import make_block_config_node
 
-_QWEN_BLOCKS = tuple((f"TB{i:02d}", f"TB{i:02d}") for i in range(60))
+_QWEN_BLOCKS = (
+    *((f"TB{i:02d}", f"TB{i:02d}") for i in range(60)),
+    ("TIME_EMBED", "TIME_EMBED"),
+    ("FINAL_NORM", "FINAL_NORM"),
+)
 
 # Layer type overrides for cross-cutting control (ac-5)
 _LAYER_TYPES = (
@@ -20,6 +24,7 @@ Produces BlockConfig for Qwen architecture with individual block sliders.
 
 Qwen block structure:
 - transformer_blocks: TB00-TB59 (60 individual blocks)
+- non-block: TIME_EMBED, FINAL_NORM (structural keys)
 
 Layer type overrides:
 - attention: Controls attention layers (to_q, to_k, to_v, to_out, attn)

@@ -373,11 +373,23 @@ class TestFilterChangedKeys:
     # AC: @incremental-block-recompute ac-11
     def test_unclassified_keys_included(self):
         """Keys with classify_key→None are included conservatively."""
+        keys = set(_SDXL_KEYS) | {"diffusion_model.input_blocks.9.0.weight"}
+        changed_blocks = {"IN05"}
+        result = filter_changed_keys(keys, changed_blocks, set(), "sdxl")
+        # input_blocks.9 is unclassified (SDXL only covers 0-8), should be included
+        assert "diffusion_model.input_blocks.9.0.weight" in result
+
+    def test_classified_structural_keys_not_spuriously_included(self):
+        """Structural keys (time_embed etc.) are classified and only included when their block changes."""
         keys = set(_SDXL_KEYS)
         changed_blocks = {"IN05"}
         result = filter_changed_keys(keys, changed_blocks, set(), "sdxl")
-        # time_embed key should be in result (unclassified)
-        assert "diffusion_model.time_embed.0.weight" in result
+        # time_embed is now classified as TIME_EMBED, not in changed_blocks → excluded
+        assert "diffusion_model.time_embed.0.weight" not in result
+
+        # But if TIME_EMBED is in changed_blocks, it IS included
+        result2 = filter_changed_keys(keys, {"TIME_EMBED"}, set(), "sdxl")
+        assert "diffusion_model.time_embed.0.weight" in result2
 
     def test_no_changes_empty_result(self):
         """No changed blocks or layer types → only unclassified keys."""

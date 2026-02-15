@@ -8,6 +8,8 @@ _ZIMAGE_BLOCKS = (
     ("NOISE_REF1", "NOISE_REF1"),
     ("CTX_REF0", "CTX_REF0"),
     ("CTX_REF1", "CTX_REF1"),
+    ("PATCH_EMBED", "PATCH_EMBED"),
+    ("FINAL_NORM", "FINAL_NORM"),
 )
 
 # Layer type overrides for cross-cutting control (ac-5)
@@ -28,6 +30,7 @@ Z-Image block structure:
 - layers: L00-L29 (30 individual blocks)
 - noise_refiner: NOISE_REF0, NOISE_REF1 (2 blocks)
 - context_refiner: CTX_REF0, CTX_REF1 (2 blocks)
+- non-block: PATCH_EMBED, FINAL_NORM (structural keys)
 
 Layer type overrides:
 - attention: Controls attention layers (attn.qkv, attn.out, q_norm, k_norm)

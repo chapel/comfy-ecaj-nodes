@@ -154,25 +154,25 @@ class TestApplyPerBlockLoraStrength:
         assert torch.allclose(result, expected)
 
     # AC: @lora-block-config ac-2
-    def test_unmatched_keys_use_default_strength(self):
-        """Keys not matching any block pattern use 1.0 (unchanged).
+    def test_keys_without_override_use_default_strength(self):
+        """Keys whose block group has no override entry use 1.0 (unchanged).
 
         AC: @lora-block-config ac-2
         """
-        keys = ["time_embed.0.weight", "label_emb.weight"]  # Don't match SDXL blocks
+        keys = ["time_embed.0.weight", "label_emb.weight"]  # Classify as TIME_EMBED, LABEL_EMB
         base = torch.zeros(2, 4, 4)
         lora_applied = torch.full((2, 4, 4), 5.0)
 
         config = BlockConfig(
             arch="sdxl",
-            block_overrides=(("IN00", 0.5),),  # Doesn't apply to these keys
+            block_overrides=(("IN00", 0.5),),  # Doesn't apply to TIME_EMBED/LABEL_EMB
         )
 
         result = _apply_per_block_lora_strength(
             keys, base, lora_applied, config, "sdxl", "cpu", torch.float32
         )
 
-        # Keys don't match any block, so delta is unchanged
+        # TIME_EMBED/LABEL_EMB not in overrides, so delta is unchanged
         assert torch.allclose(result, lora_applied)
 
     # AC: @lora-block-config ac-1
