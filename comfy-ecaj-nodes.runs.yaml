@@ -1604,8 +1604,50 @@ runs:
   - _ulid: 01KHG0ETW1PGTRMD041WN6KZJ6
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-15T06:40:24.961Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-15T06:40:24.961Z
+        completed_at: 2026-02-15T06:40:46.047Z
+        notes: >-
+          Session: Implemented incremental block recomputation feature (16 ACs, ~1400 LOC).
+
+
+          WHAT WORKED WELL:
+
+          1. Plan-first approach: Having a detailed plan with exact file changes, AC list, and
+          review findings pre-addressed made implementation smooth — no ambiguity during coding.
+
+          2. Parallel reviews: Running pr-review + codex review in parallel caught complementary
+          issues (pr-review found perf concern, codex found test gaps). Both converged quickly.
+
+          3. Branch-before-commit discipline: Created feature branch before first commit, avoiding
+          the reset-and-rebase cleanup pattern.
+
+          4. Task tracking: Using TaskCreate/TaskUpdate kept work organized across 6 discrete steps.
+
+
+          FRICTION POINTS:
+
+          1. chunked_evaluation mock returning all keys instead of filtered keys — caused a test
+          failure that required understanding the actual call semantics. This is a recurring
+          pattern: mocks that return too much data hide bugs in tests.
+
+          2. compile_plan needing set_id_map with actual RecipeLoRA object IDs — integration tests
+          had to mock compile_plan too since the mock analyze_recipe returns different object IDs
+          than what compile_plan expects. This coupling makes integration testing harder.
+
+          3. codex agent tried to git checkout main after review, which is unnecessary and risky in
+          a shared worktree. The worktree guard hook caught it.
+
+          4. Full cache hit path was doing a redundant clone back to cache — caught by PR reviewer
+          but could have been caught during implementation with more careful analysis of the data
+          flow.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-15T06:40:46.047Z
+        completed_at: 2026-02-15T06:40:46.047Z
     initiated_by: "@claude"
