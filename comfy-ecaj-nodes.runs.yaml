@@ -1706,8 +1706,16 @@ runs:
   - _ulid: 01KHG37HNSSF87B1EGR5MRSN14
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-15T07:28:51.898Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-15T07:28:51.898Z
+        completed_at: 2026-02-15T07:29:26.227Z
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-15T07:29:26.227Z
+        completed_at: 2026-02-15T07:29:26.227Z
     initiated_by: "@claude"
