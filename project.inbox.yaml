@@ -35,3 +35,13 @@ inbox:
     tags:
       - test
     added_by: "@claude"
+  - _ulid: 01KHFVFMZ01C494TS3KEJVCAVS
+    text: "v2: Auto per-block LoRA importance analysis for targeted merging — compute Frobenius norm of
+      B@A per block at recipe build time to auto-populate per-block strengths. Could extend to SVD
+      spectral analysis, TIES/DARE pruning during merge execution, and TSV interference detection
+      for multi-LoRA conflict prediction. Natural hook point: existing per_block.py infrastructure.
+      See FreeFuse (spatial segmentation, different problem), LoRA Inspector, resize_lora, LoRA
+      Power-Merger, Task Singular Vectors paper for prior art."
+    created_at: 2026-02-15T05:13:28.800Z
+    tags: []
+    added_by: "@claude"
