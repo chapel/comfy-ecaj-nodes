@@ -4883,7 +4883,7 @@
   type: task
   spec_ref: "@clip-graph-nodes"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -4916,6 +4916,10 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-15T22:05:01.281Z
+  closed_reason: "Merged in PR #73. Implemented WIDEN_CLIP-typed graph nodes (LoRA, Compose, Merge,
+    Model Input) for CLIP pipeline type safety. All 8 ACs covered with 30 tests. Nodes delegate to
+    original WIDEN implementations for logic reuse."
 - _ulid: 01KHHE6K9T79NA624RARW0D7TA
   slugs:
     - implement-sdxl-clip-block-config
