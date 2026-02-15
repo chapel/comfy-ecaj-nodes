@@ -2011,8 +2011,51 @@ runs:
   - _ulid: 01KHHVSTC9TY10AN4R6BKPWCZD
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-15T23:57:30.890Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-15T23:57:30.890Z
+        completed_at: 2026-02-15T23:57:47.897Z
+        notes: >-
+          ## Session Review
+
+
+          ### What Worked Well
+
+          1. **Codex as sanity check** — Running /codex pr caught a real functional bug (domain
+          propagation) that manual review missed. The Codex agent independently verified the bug
+          with actual Python execution (`classify_key` calls), proving the issue concretely.
+
+          2. **Spec-before-code discipline** — Added AC-10 via `kspec item ac add` before
+          implementing the domain propagation fix. This kept the workflow clean.
+
+          3. **Systematic domain trace** — Using an Explore subagent to trace the full domain flow
+          chain (6 functions deep) produced a clear gap analysis that made the fix straightforward.
+
+          4. **Parallel task tracking** — TaskCreate/TaskUpdate kept the 3-step fix organized (spec,
+          code, tests).
+
+
+          ### Friction Points
+
+          1. **AC-5 encode/conditioning test keeps getting flagged** — Both human review and two
+          Codex rounds flagged AC-5 as needing a downstream text-encoding behavioral test. The AC
+          spec says "encode text, return conditioning" but testing this requires a high-fidelity
+          CLIP stub that doesn't exist yet. This is a systemic gap — CLIP encode testing
+          infrastructure is missing.
+
+          2. **Codex review comments not resolving on GitHub** — Previous review comments show
+          `resolved: false` even after fixes are pushed. No automated mechanism to resolve them,
+          creating noise for subsequent reviews.
+
+          3. **make_eval_fn closure pattern duplicated** — Both exit nodes (diffusion + CLIP) have
+          nearly identical `make_eval_fn` closures with the same parameter threading pattern. When
+          domain needed to be added, both had to be updated identically.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-15T23:57:47.897Z
+        completed_at: 2026-02-15T23:57:47.897Z
     initiated_by: "@claude"
