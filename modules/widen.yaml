@@ -1825,6 +1825,9 @@ features:
         traits: []
         notes: []
         created: 2026-02-15T19:59:49.127Z
+        status:
+          maturity: draft
+          implementation: in_progress
       - _ulid: 01KHHE6JX66Y33Q68HBC514CHV
         slugs:
           - clip-graph-nodes
