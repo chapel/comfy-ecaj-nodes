@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 import os
 import sys
 import tempfile
@@ -565,41 +564,98 @@ class TestProgressReporting:
     """AC: @clip-exit-node ac-9 — progress is reported via ProgressBar."""
 
     # AC: @clip-exit-node ac-9
-    def test_execute_source_creates_and_updates_progress_bar(self):
-        """execute() source creates ProgressBar and calls update(1) per group.
-
-        Verifies the progress reporting code is present in execute().
-        Full GPU pipeline E2E is needed to observe actual calls, but this
-        confirms the code structure reports progress per batch group.
-        """
-        source = inspect.getsource(WIDENCLIPExitNode.execute)
-
-        # ProgressBar is created with the batch group count
-        assert "ProgressBar(" in source
-        # Progress is updated after each group
-        assert "pbar.update(1)" in source
-
-    # AC: @clip-exit-node ac-9
-    def test_progress_bar_module_attribute_patchable(self, monkeypatch):
-        """ProgressBar module attribute can be monkeypatched for testing."""
+    def test_execute_creates_progress_bar_and_updates_per_group(self, monkeypatch):
+        """execute() creates ProgressBar(N) and calls update(1) N times for N batch groups."""
         import nodes.clip_exit as clip_exit_mod
 
-        calls = []
+        progress_calls = []
 
         class FakeProgressBar:
             def __init__(self, total):
-                calls.append(("init", total))
+                progress_calls.append(("init", total))
 
             def update(self, n):
-                calls.append(("update", n))
+                progress_calls.append(("update", n))
+
+        class FakeLoader:
+            def cleanup(self):
+                pass
+
+        class FakeAnalysis:
+            def __init__(self):
+                self.loader = FakeLoader()
+                self.set_affected = {}
+                self.affected_keys = set()
+                self.arch = "sdxl"
+
+        class FakeModelAnalysis:
+            def __init__(self):
+                self.model_affected = {}
+                self.model_loaders = {}
+                self.all_model_keys = set()
+
+        # 3 batch groups → expect ProgressBar(3) + 3× update(1)
+        affected = set(_SDXL_CLIP_KEYS[:5])
+
+        class FakeSig:
+            """Minimal OpSignature stub with shape attribute."""
+
+            def __init__(self, n):
+                self.shape = (4, 4)
+                self._n = n
+
+            def __hash__(self):
+                return self._n
+
+            def __eq__(self, other):
+                return self._n == other._n
+
+        fake_batch_groups = {
+            FakeSig(0): [_SDXL_CLIP_KEYS[0], _SDXL_CLIP_KEYS[1]],
+            FakeSig(1): [_SDXL_CLIP_KEYS[2], _SDXL_CLIP_KEYS[3]],
+            FakeSig(2): [_SDXL_CLIP_KEYS[4]],
+        }
 
         monkeypatch.setattr(clip_exit_mod, "ProgressBar", FakeProgressBar)
-        assert clip_exit_mod.ProgressBar is FakeProgressBar
+        monkeypatch.setattr(clip_exit_mod, "_build_lora_resolver", lambda: lambda name: name)
+        monkeypatch.setattr(
+            clip_exit_mod, "_build_clip_model_resolver", lambda: lambda name, sd: name,
+        )
+        monkeypatch.setattr(
+            clip_exit_mod, "analyze_recipe", lambda *a, **kw: FakeAnalysis(),
+        )
+        monkeypatch.setattr(
+            clip_exit_mod, "analyze_recipe_models", lambda *a, **kw: FakeModelAnalysis(),
+        )
+        monkeypatch.setattr(
+            clip_exit_mod, "get_keys_to_process", lambda all_k, aff: affected,
+        )
+        monkeypatch.setattr(
+            clip_exit_mod, "compile_batch_groups", lambda *a, **kw: fake_batch_groups,
+        )
+        monkeypatch.setattr(clip_exit_mod, "compile_plan", lambda *a, **kw: object())
+        monkeypatch.setattr(clip_exit_mod, "compute_batch_size", lambda *a, **kw: 32)
+        monkeypatch.setattr(
+            clip_exit_mod,
+            "chunked_evaluation",
+            lambda **kw: {k: torch.randn(4, 4) for k in kw["keys"]},
+        )
 
-        # Verify fake works as expected by the execute() code path
-        pbar = clip_exit_mod.ProgressBar(3)
-        pbar.update(1)
-        assert calls == [("init", 3), ("update", 1)]
+        mock_clip = MockCLIP()
+        base = RecipeBase(model_patcher=mock_clip, arch="sdxl", domain="clip")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        recipe = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        node = WIDENCLIPExitNode()
+        (result,) = node.execute(recipe)
+
+        # ProgressBar(3) was created — one per batch group
+        assert ("init", 3) in progress_calls
+        # update(1) called once per batch group
+        assert progress_calls.count(("update", 1)) == 3
+        # Result is a valid CLIP clone with patches installed
+        assert result is not mock_clip
+        assert len(result.patcher.patches) > 0
 
     def test_category_is_clip_merge(self):
         """CATEGORY is ecaj/merge/clip."""
