@@ -4825,7 +4825,8 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: pending
   blocked_by: []
-  depends_on: []
+  depends_on:
+    - "@implement-recipe-domain-field"
   context: []
   priority: 3
   tags: []
