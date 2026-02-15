@@ -2010,7 +2010,7 @@ runs:
     initiated_by: "@claude"
   - _ulid: 01KHHVSTC9TY10AN4R6BKPWCZD
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
-    status: active
+    status: completed
     current_step: 3
     total_steps: 4
     started_at: 2026-02-15T23:57:30.890Z
@@ -2111,5 +2111,8 @@ runs:
       - step_index: 3
         status: completed
         started_at: 2026-02-15T23:58:20.285Z
-        completed_at: 2026-02-15T23:58:20.285Z
+        completed_at: 2026-02-15T23:58:31.747Z
+        notes: "Captured 1 friction observation (01KHHVVH: make_eval_fn duplication). Skipped 3 items
+          already tracked. Session complete."
     initiated_by: "@claude"
+    completed_at: 2026-02-15T23:58:31.749Z
