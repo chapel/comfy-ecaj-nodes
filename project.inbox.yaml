@@ -69,3 +69,13 @@ inbox:
       - reflection
       - test
     added_by: "@claude"
+  - _ulid: 01KHHGS4V8NZ0CXA71SW9JGGJQ
+    text: kspec plan import puts manual task description field into notes instead of task description —
+      task shows no Description section, only notes. Means manual tasks from plan import are less
+      self-documenting than spec-derived tasks. Related to 01KHDNHH (depends_on gap) — both are plan
+      import fidelity issues.
+    created_at: 2026-02-15T20:44:54.504Z
+    tags:
+      - reflection
+      - kspec
+    added_by: "@claude"
