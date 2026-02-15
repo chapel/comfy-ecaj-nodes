@@ -340,7 +340,7 @@ class WIDEN:
             backbone: [B, *param_shape] -- original base weights
 
         Returns:
-            [B, *param_shape] -- backbone + filtered delta
+            [B, *param_shape] -- backbone (if t_factor <= 0) or backbone + filtered delta
         """
         try:
             delta = lora_applied - backbone
@@ -492,7 +492,7 @@ class WIDEN:
             D_scores = self.sparsity_fn(torch.stack(ranked_D), dim=0)
 
             # Step 5: Calibrate
-            if self.t_factor >= 0 and important_mask_m is not None:
+            if important_mask_m is not None:
                 M = self._calibrate(M, important_mask_m)
                 D_scores = self._calibrate(D_scores, important_mask_d)
 
