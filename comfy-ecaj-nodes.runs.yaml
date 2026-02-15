@@ -1568,6 +1568,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-14T21:28:15.474Z
+    completed_at: 2026-02-14T21:29:01.151Z
     step_results:
       - step_index: 0
         status: completed
@@ -1600,4 +1601,11 @@ runs:
         notes: Nothing to capture — all items were filtered out in step 3. Clean session with no untracked
           systemic friction.
     initiated_by: "@claude"
-    completed_at: 2026-02-14T21:29:01.151Z
+  - _ulid: 01KHG0ETW1PGTRMD041WN6KZJ6
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-15T06:40:24.961Z
+    step_results: []
+    initiated_by: "@claude"
