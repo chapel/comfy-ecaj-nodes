@@ -1656,6 +1656,9 @@ features:
         traits: []
         notes: []
         created: 2026-02-15T19:59:49.022Z
+    status:
+      maturity: draft
+      implementation: in_progress
   - _ulid: 01KHHE6JTHQQD0P2V7M2BWDVJV
     slugs:
       - clip-merge-pipeline
