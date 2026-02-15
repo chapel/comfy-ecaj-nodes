@@ -28,7 +28,7 @@ class WIDENMergeNode:
             "required": {
                 "base": ("WIDEN",),
                 "target": ("WIDEN",),
-                "t_factor": ("FLOAT", {"default": 1.0, "min": -1.0, "max": 5.0, "step": 0.05}),
+                "t_factor": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 5.0, "step": 0.05}),
             },
             "optional": {
                 "backbone": ("WIDEN",),
@@ -54,7 +54,7 @@ class WIDENMergeNode:
         Args:
             base: The base WIDEN recipe (must be RecipeBase or RecipeMerge).
             target: The target WIDEN recipe to merge (RecipeLoRA, RecipeCompose, or RecipeMerge).
-            t_factor: Merge strength factor. -1.0 means passthrough (no WIDEN).
+            t_factor: Merge strength factor. 0.0 means base-only (no WIDEN).
             backbone: Optional explicit backbone reference for WIDEN importance.
             block_config: Optional block configuration for per-block weight control.
 
@@ -99,7 +99,7 @@ class WIDENMergeNode:
 
         # AC-1, AC-2, AC-3, AC-6: Build RecipeMerge with all fields
         # backbone is None when not connected (AC-2), stored when connected (AC-3)
-        # t_factor of -1.0 is preserved as-is (AC-6) — Exit node interprets it
+        # t_factor of 0.0 is preserved as-is (AC-6) — Exit node interprets as base-only
         return (
             RecipeMerge(
                 base=base,

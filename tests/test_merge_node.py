@@ -238,34 +238,38 @@ class TestMergeRejectsInvalidBase:
 
 
 # ---------------------------------------------------------------------------
-# AC-6: t_factor of -1.0 → preserved (passthrough, no WIDEN)
+# AC-6: t_factor of 0 → preserved (base-only, no WIDEN)
 # ---------------------------------------------------------------------------
 
 
-class TestMergePassthroughTFactor:
-    """AC: @merge-node ac-6 — t_factor of -1.0 is preserved."""
+class TestMergeBaseOnlyTFactor:
+    """AC: @merge-node ac-6 — t_factor of 0 is preserved as base-only."""
 
-    def test_negative_one_t_factor_preserved(self):
-        """t_factor of -1.0 is stored exactly."""
+    # AC: @merge-node ac-6
+    def test_zero_t_factor_preserved(self):
+        """t_factor of 0.0 is stored exactly."""
         node = WIDENMergeNode()
         patcher = MockModelPatcher()
         base = RecipeBase(model_patcher=patcher, arch="sdxl")
         target = RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},))
 
-        (merge_result,) = node.merge(base=base, target=target, t_factor=-1.0)
+        (merge_result,) = node.merge(base=base, target=target, t_factor=0.0)
 
-        assert merge_result.t_factor == -1.0
+        assert merge_result.t_factor == 0.0
 
-    def test_negative_t_factor_not_clamped(self):
-        """Negative t_factor values close to -1.0 are preserved."""
+    # AC: @merge-node ac-6
+    def test_zero_t_factor_not_modified(self):
+        """t_factor of 0.0 is not changed or special-cased during storage."""
         node = WIDENMergeNode()
         patcher = MockModelPatcher()
         base = RecipeBase(model_patcher=patcher, arch="sdxl")
         target = RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},))
 
-        (merge_result,) = node.merge(base=base, target=target, t_factor=-0.5)
+        (merge_result,) = node.merge(base=base, target=target, t_factor=0.0)
 
-        assert merge_result.t_factor == -0.5
+        # Stored as float 0.0, not converted or special-cased
+        assert merge_result.t_factor == 0.0
+        assert isinstance(merge_result.t_factor, float)
 
 
 # ---------------------------------------------------------------------------
@@ -328,7 +332,7 @@ class TestMergeNodeMetadata:
         assert "t_factor" in input_types["required"]
         t_factor_config = input_types["required"]["t_factor"]
         assert t_factor_config[0] == "FLOAT"
-        assert t_factor_config[1]["min"] == -1.0
+        assert t_factor_config[1]["min"] == 0.0
         assert t_factor_config[1]["max"] == 5.0
 
         assert "optional" in input_types
