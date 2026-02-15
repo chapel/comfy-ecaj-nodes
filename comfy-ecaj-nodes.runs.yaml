@@ -1769,6 +1769,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-15T17:08:17.744Z
+    completed_at: 2026-02-15T17:09:25.008Z
     step_results:
       - step_index: 0
         status: completed
@@ -1799,4 +1800,11 @@ runs:
         notes: Already captured in step 3. 1 success observation (01KHH4E8). No friction or inbox items to
           add — all friction was low-confidence. Session complete.
     initiated_by: "@claude"
-    completed_at: 2026-02-15T17:09:25.008Z
+  - _ulid: 01KHH5H9690QNBZKT9JP4YZSF3
+    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
+    status: active
+    current_step: 0
+    total_steps: 5
+    started_at: 2026-02-15T17:28:22.473Z
+    step_results: []
+    initiated_by: "@claude"
