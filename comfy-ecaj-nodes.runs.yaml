@@ -1803,8 +1803,24 @@ runs:
   - _ulid: 01KHH5H9690QNBZKT9JP4YZSF3
     workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 5
     started_at: 2026-02-15T17:28:22.473Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-15T17:28:22.473Z
+        completed_at: 2026-02-15T17:28:41.179Z
+        inputs:
+          feature_description: "Two enhancements: (1) Model Loader Split - rename current checkpoint-based
+            model input node as Checkpoint Input, add new Diffusion Model Input node reading from
+            diffusion_models dir, both arch-agnostic. (2) CLIP Merging for SDXL - separate
+            WIDEN_CLIP type pipeline with
+            CLIPEntry/CLIPExit/CLIPLoRA/CLIPCompose/CLIPMerge/CLIPModelInput/CLIPBlockConfig nodes,
+            full WIDEN algorithm on text encoder weights, new SDXL CLIP block config (CLIP-L 12
+            blocks + CLIP-G 32 blocks), CLIP LoRA loader in lib/lora/, shared recipe dataclasses."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-15T17:28:41.179Z
+        completed_at: 2026-02-15T17:28:41.179Z
     initiated_by: "@claude"
