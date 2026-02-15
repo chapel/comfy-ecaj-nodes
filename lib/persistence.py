@@ -108,9 +108,11 @@ def serialize_recipe(
 
     def _serialize_node(n: RecipeNode) -> dict:
         if isinstance(n, RecipeBase):
+            # AC: @recipe-domain-field ac-7
             return {
                 "type": "RecipeBase",
                 "arch": n.arch,
+                "domain": getattr(n, "domain", "diffusion"),  # Backward compat
                 "base_identity": base_identity,
             }
         elif isinstance(n, RecipeLoRA):

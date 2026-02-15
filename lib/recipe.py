@@ -37,6 +37,7 @@ class RecipeBase:
 
     model_patcher: object  # ComfyUI ModelPatcher (holds state dict ref)
     arch: str  # auto-detected: "sdxl", "zimage", "flux", "qwen"
+    domain: str = "diffusion"  # "diffusion" or "clip" — AC: @recipe-domain-field ac-1, ac-2
 
 
 @dataclass(frozen=True)

@@ -47,6 +47,7 @@ class AnalysisResult:
     Contains everything needed to execute the recipe:
     - model_patcher: The base model from RecipeBase
     - arch: Architecture tag for LoRA loading
+    - domain: Domain type ("diffusion" or "clip")
     - set_affected: Map of set_id -> set of base model keys affected
     - loader: Loaded LoRALoader instance (caller must cleanup)
     - affected_keys: Union of all keys affected by any LoRA set
@@ -54,6 +55,7 @@ class AnalysisResult:
 
     model_patcher: object
     arch: str
+    domain: str
     set_affected: dict[str, set[str]]
     loader: LoRALoader
     affected_keys: set[str]
@@ -225,16 +227,19 @@ def analyze_recipe(
         FileNotFoundError: If any LoRA file does not exist (AC-6)
         ValueError: If recipe structure is invalid
     """
-    # AC-1: Walk to base and extract model_patcher and arch
+    # AC-1: Walk to base and extract model_patcher, arch, and domain
     base = walk_to_base(node)
     model_patcher = base.model_patcher
     arch = base.arch
+    # AC: @recipe-domain-field ac-3
+    domain = getattr(base, "domain", "diffusion")  # Backward compat for pre-domain bases
 
     # AC-2: Collect LoRA sets with IDs
     lora_sets = _collect_lora_sets(node)
 
     # AC-3: Get architecture-appropriate loader
-    loader = get_loader(arch)
+    # AC: @recipe-domain-field ac-3 — dispatch on (arch, domain)
+    loader = get_loader(arch, domain)
 
     # Load each LoRA set and track affected keys per set
     set_affected: dict[str, set[str]] = {}
@@ -267,6 +272,7 @@ def analyze_recipe(
     return AnalysisResult(
         model_patcher=model_patcher,
         arch=arch,
+        domain=domain,
         set_affected=set_affected,
         loader=loader,
         affected_keys=affected_keys,
@@ -334,19 +340,26 @@ def analyze_recipe_models(
     node: RecipeNode,
     base_arch: str,
     model_path_resolver: Callable[[str, str], str | None] | None = None,
+    *,
+    domain: str = "diffusion",
 ) -> ModelAnalysisResult:
     """Analyze a recipe tree for full model checkpoints.
 
     AC: @full-model-execution ac-1, ac-6, ac-10, ac-12
+    AC: @recipe-domain-field ac-4
 
     Opens ModelLoader instances for each unique RecipeModel path,
     validates architecture consistency, and builds affected-key maps.
+    Dispatches on (arch, domain) when selecting the model loader.
 
     Args:
         node: Root recipe node (typically RecipeMerge)
         base_arch: Architecture of the base model (for validation)
         model_path_resolver: Callable that resolves (model_name, source_dir) to
             full filesystem path. In production, wraps folder_paths.get_full_path.
+        domain: Domain type ("diffusion" or "clip"). Defaults to "diffusion"
+            for backward compatibility. Used to select domain-specific model
+            loaders when available.
 
     Returns:
         ModelAnalysisResult with loaders and affected key sets
@@ -355,6 +368,11 @@ def analyze_recipe_models(
         FileNotFoundError: If any checkpoint file doesn't exist (AC-10)
         ValueError: If checkpoint architecture doesn't match base (AC-6)
     """
+    # AC: @recipe-domain-field ac-4
+    # Currently only diffusion model loaders exist. CLIP model loaders will be
+    # added in a future task. The domain parameter enables dispatch without
+    # breaking existing code.
+    _ = domain  # Silence unused warning until CLIP loaders are implemented
     model_refs = _collect_model_refs(node)
 
     model_loaders: dict[str, ModelLoader] = {}

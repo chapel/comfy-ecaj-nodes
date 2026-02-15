@@ -573,10 +573,12 @@ class WIDENExitNode:
         analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
 
         # AC: @full-model-execution ac-1
-        # Analyze recipe for full model checkpoints
+        # AC: @recipe-domain-field ac-4
+        # Analyze recipe for full model checkpoints, passing domain for dispatch
         base = walk_to_base(widen)
+        domain = getattr(base, "domain", "diffusion")  # Backward compat
         model_analysis = analyze_recipe_models(
-            widen, base.arch, model_path_resolver=model_path_resolver
+            widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
         )
 
         try:

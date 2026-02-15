@@ -235,19 +235,35 @@ def get_block_classifier(arch: str) -> Callable[[str], str | None] | None:
 
 
 @functools.lru_cache(maxsize=4096)
-def classify_key(key: str, arch: str) -> str | None:
-    """Classify a parameter key into a block group for the given architecture.
+def classify_key(key: str, arch: str, domain: str = "diffusion") -> str | None:
+    """Classify a parameter key into a block group for the given architecture and domain.
 
     Convenience function that looks up and applies the appropriate classifier.
     Cached to avoid repeated dict lookups when called in per-key loops.
 
+    # AC: @recipe-domain-field ac-8, ac-9
+    Dispatches to domain-specific classifiers when available (e.g., CLIP block
+    classifiers for domain="clip"). Defaults to diffusion classifiers for
+    backward compatibility.
+
     Args:
         key: Parameter key
         arch: Architecture name
+        domain: Domain type ("diffusion" or "clip"). Defaults to "diffusion".
 
     Returns:
         Block group name or None if no match or unsupported architecture
     """
+    # AC: @recipe-domain-field ac-8
+    # CLIP classifiers will be keyed as "{arch}_clip" (e.g., "sdxl_clip")
+    if domain == "clip":
+        clip_classifier = get_block_classifier(f"{arch}_clip")
+        if clip_classifier is not None:
+            return clip_classifier(key)
+        # No CLIP-specific classifier yet, return None
+        return None
+
+    # AC: @recipe-domain-field ac-9 — domain="diffusion" uses existing classifiers
     classifier = get_block_classifier(arch)
     if classifier is None:
         return None
@@ -470,6 +486,7 @@ def filter_changed_keys(
     changed_blocks: set[str],
     changed_layer_types: set[str],
     arch: str,
+    domain: str = "diffusion",
 ) -> set[str]:
     """Filter keys to those belonging to changed blocks or layer types.
 
@@ -485,13 +502,14 @@ def filter_changed_keys(
         changed_blocks: Block group names that changed (e.g. {"IN00", "OUT03"})
         changed_layer_types: Layer type names that changed (e.g. {"attention"})
         arch: Architecture name
+        domain: Domain type ("diffusion" or "clip"). Defaults to "diffusion".
 
     Returns:
         Subset of keys that need recomputation
     """
     result: set[str] = set()
     for key in keys:
-        block = classify_key(key, arch)
+        block = classify_key(key, arch, domain)
         if block is None:
             # Unclassified key → include conservatively (AC-11)
             result.add(key)
