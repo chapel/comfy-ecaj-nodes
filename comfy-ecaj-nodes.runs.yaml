@@ -1766,7 +1766,7 @@ runs:
   - _ulid: 01KHH4CGPGYPTQBGP0ZVDQJWYK
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-15T17:08:17.744Z
     step_results:
@@ -1781,5 +1781,13 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-15T17:08:54.108Z
-        completed_at: 2026-02-15T17:08:54.108Z
+        completed_at: 2026-02-15T17:09:08.943Z
+        notes: "One high-confidence success: Plans with exact line numbers and before/after snippets make
+          implementation mechanical (zero debugging cycles). Not tracked anywhere. All friction
+          points were low-confidence/one-off (kspec ac get missing, task lifecycle ceremony). Skip
+          those."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-15T17:09:08.943Z
+        completed_at: 2026-02-15T17:09:08.943Z
     initiated_by: "@claude"
