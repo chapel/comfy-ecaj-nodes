@@ -216,9 +216,9 @@ features:
         then: |
           it raises an error because base must be RecipeBase or RecipeMerge
       - id: ac-6
-        given: t_factor is -1.0
+        given: t_factor is 0
         when: stored in RecipeMerge
-        then: the value is preserved (Exit interprets -1.0 as passthrough with no WIDEN)
+        then: the value is preserved (Exit interprets 0 as base-only with no WIDEN)
     depends_on: []
     implements: []
     relates_to: []
