@@ -4708,6 +4708,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.360Z
+  started_at: 2026-02-15T21:44:35.322Z
   notes:
     - _ulid: 01KHHE6K3GYC7TS02TVN8ACX1X
       created_at: 2026-02-15T19:59:49.360Z
@@ -4721,9 +4722,18 @@
         classify_key() to accept and dispatch on domain. Update
         persistence serialization. This is a cross-cutting change that
         enables the entire CLIP pipeline.
+    - _ulid: 01KHHMGT1MAAPHYSQW89NYCWJY
+      created_at: 2026-02-15T21:50:15.604Z
+      author: "@claude"
+      content: "Implemented domain field infrastructure: (1) Added domain: str = 'diffusion' to
+        RecipeBase, (2) Updated get_loader() to dispatch on (arch, domain) - CLIP loaders registered
+        as '{arch}_clip', (3) Updated analyze_recipe and analyze_recipe_models to pass domain, (4)
+        Updated classify_key to dispatch on domain - CLIP classifiers registered as '{arch}_clip',
+        (5) Updated serialize_recipe to include domain in JSON, (6) 28 tests covering all 9 ACs. 924
+        tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-15T21:44:35.322Z
 - _ulid: 01KHHE6K4Q1A06V0PX9PZ8E0JX
   slugs:
     - implement-clip-merging-pipeline
