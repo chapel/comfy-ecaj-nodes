@@ -4603,7 +4603,7 @@
   blocked_by: []
   depends_on: []
   context: []
-  priority: 3
+  priority: 2
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.284Z
@@ -4892,6 +4892,7 @@
     - rename-model-input-display
   title: Rename existing Model Input node display name
   type: task
+  spec_ref: "@diffusion-model-input-node"
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: pending
   blocked_by: []
@@ -4905,7 +4906,6 @@
   created_at: 2026-02-15T19:59:49.691Z
   notes: []
   todos: []
-  spec_ref: "@diffusion-model-input-node"
 - _ulid: 01KHHE6KF4CCCBM1R9DD3T84XM
   slugs:
     - investigate-clip-api
