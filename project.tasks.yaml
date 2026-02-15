@@ -4452,7 +4452,7 @@
   type: task
   spec_ref: "@incremental-block-recompute"
   derivation: auto
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-exit-node"
@@ -4564,3 +4564,7 @@
         5. Tests: test_incremental_recompute.py covering all 16 ACs.
       supersedes: null
   todos: []
+  completed_at: 2026-02-15T06:29:30.940Z
+  closed_reason: "Implemented incremental block recomputation: structural fingerprint in
+    persistence.py, change detection in block_classify.py, LRU-1 cache in exit.py. 41 tests covering
+    all 16 ACs, 862 total tests pass, ruff clean."
