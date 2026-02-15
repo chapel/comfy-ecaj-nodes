@@ -4984,6 +4984,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.601Z
+  started_at: 2026-02-15T22:13:46.628Z
   notes:
     - _ulid: 01KHHE6KB172YHXV61SKWWM1BZ
       created_at: 2026-02-15T19:59:49.601Z
@@ -4998,9 +4999,19 @@
         Similar for lora_te2_ -> clip_g. Handle compound tokens the same
         way as sdxl.py handles UNet compound tokens. Register in
         lib/lora/__init__.py LOADER_REGISTRY with key ("sdxl", "clip").
+    - _ulid: 01KHHP60MBVTSM3MZH031PNBHE
+      created_at: 2026-02-15T22:19:19.051Z
+      author: "@claude"
+      content: "Implemented SDXL CLIP LoRA loader: (1) Created lib/lora/sdxl_clip.py with SDXLCLIPLoader
+        class that maps lora_te1_* keys to clip_l.transformer.* and lora_te2_* keys to
+        clip_g.transformer.*, (2) Handles compound tokens (text_model, encoder, layers, self_attn,
+        k_proj, mlp, etc.), (3) Ignores UNet keys for mixed LoRAs, (4) Registered in LOADER_REGISTRY
+        as 'sdxl_clip' for get_loader(arch='sdxl', domain='clip'), (5) Updated
+        test_recipe_domain_field.py to use zimage for missing CLIP loader test. 33 new tests
+        covering all 7 ACs. 1044 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-15T22:13:46.628Z
 - _ulid: 01KHHE6KC20EBB6501Y5QAJRFG
   slugs:
     - implement-clip-model-loader
