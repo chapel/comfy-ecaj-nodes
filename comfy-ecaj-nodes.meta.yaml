@@ -1018,4 +1018,16 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHG39TG1KSM8V6Q9ZXCG6PW0
+    type: friction
+    content: Block config node tests have kwargs boilerplate — every test method in
+      test_per_block_control.py independently constructs full kwargs dicts. Adding new sliders
+      requires 15+ individual edits across the file. Missed some test methods on first pass
+      (klein_4b, boundary_values) causing iterative failures. A shared fixture or helper that
+      generates full kwargs from INPUT_TYPES would eliminate this.
+    created_at: 2026-02-15T07:30:06.465Z
+    author: "@claude"
+    resolved: false
+    resolution: null
+skills: []
 includes: []
