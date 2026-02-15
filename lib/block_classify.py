@@ -17,6 +17,8 @@ from collections.abc import Callable
 __all__ = [
     "classify_key",
     "classify_layer_type",
+    "compute_changed_blocks",
+    "filter_changed_keys",
     "get_block_classifier",
     "classify_key_sdxl",
     "classify_key_zimage",
@@ -368,3 +370,108 @@ def classify_layer_type(key: str, arch: str | None) -> str | None:
             return layer_type
 
     return None
+
+
+def compute_changed_blocks(
+    old_configs: list[tuple[str, object]],
+    new_configs: list[tuple[str, object]],
+    arch: str,
+) -> tuple[set[str], set[str]] | None:
+    """Diff two block config lists and return which blocks/layer types changed.
+
+    AC: @incremental-block-recompute ac-3, ac-5, ac-6, ac-7, ac-8, ac-15
+
+    Args:
+        old_configs: Previous (path, BlockConfig|None) list from collect_block_configs
+        new_configs: Current (path, BlockConfig|None) list from collect_block_configs
+        arch: Architecture name for block classification
+
+    Returns:
+        (changed_blocks, changed_layer_types) sets, or None if structural
+        mismatch (different number of config positions or different paths,
+        or presence change None <-> BlockConfig).
+    """
+    if len(old_configs) != len(new_configs):
+        return None
+
+    changed_blocks: set[str] = set()
+    changed_layer_types: set[str] = set()
+
+    for (old_path, old_bc), (new_path, new_bc) in zip(old_configs, new_configs):
+        if old_path != new_path:
+            return None
+
+        # Presence change (None <-> BlockConfig) → full recompute
+        if (old_bc is None) != (new_bc is None):
+            return None
+
+        # Both None → no change at this position
+        if old_bc is None:
+            continue
+
+        # Both present → diff block_overrides and layer_type_overrides
+        old_block_map = dict(old_bc.block_overrides)
+        new_block_map = dict(new_bc.block_overrides)
+
+        # Find blocks whose override value changed
+        all_block_names = set(old_block_map.keys()) | set(new_block_map.keys())
+        for block_name in all_block_names:
+            old_val = old_block_map.get(block_name)
+            new_val = new_block_map.get(block_name)
+            if old_val != new_val:
+                changed_blocks.add(block_name)
+
+        # Find layer types whose override value changed
+        old_layer_map = dict(old_bc.layer_type_overrides)
+        new_layer_map = dict(new_bc.layer_type_overrides)
+
+        all_layer_types = set(old_layer_map.keys()) | set(new_layer_map.keys())
+        for layer_type in all_layer_types:
+            old_val = old_layer_map.get(layer_type)
+            new_val = new_layer_map.get(layer_type)
+            if old_val != new_val:
+                changed_layer_types.add(layer_type)
+
+    return changed_blocks, changed_layer_types
+
+
+def filter_changed_keys(
+    keys: set[str],
+    changed_blocks: set[str],
+    changed_layer_types: set[str],
+    arch: str,
+) -> set[str]:
+    """Filter keys to those belonging to changed blocks or layer types.
+
+    AC: @incremental-block-recompute ac-3, ac-6, ac-11, ac-15
+
+    A key is included if:
+    - Its block group is in changed_blocks, OR
+    - Its layer type is in changed_layer_types, OR
+    - classify_key returns None (unclassified → conservative inclusion)
+
+    Args:
+        keys: All keys that would normally be processed
+        changed_blocks: Block group names that changed (e.g. {"IN00", "OUT03"})
+        changed_layer_types: Layer type names that changed (e.g. {"attention"})
+        arch: Architecture name
+
+    Returns:
+        Subset of keys that need recomputation
+    """
+    result: set[str] = set()
+    for key in keys:
+        block = classify_key(key, arch)
+        if block is None:
+            # Unclassified key → include conservatively (AC-11)
+            result.add(key)
+            continue
+        if block in changed_blocks:
+            result.add(key)
+            continue
+        if changed_layer_types:
+            layer_type = classify_layer_type(key, arch)
+            if layer_type is not None and layer_type in changed_layer_types:
+                result.add(key)
+
+    return result
