@@ -311,12 +311,20 @@ class TestAC8ClassifyKeyCLIPDispatch:
         params = list(sig.parameters.keys())
         assert "domain" in params
 
-    def test_classify_key_clip_returns_none_when_no_classifier(self):
-        """classify_key returns None for CLIP domain when no classifier exists."""
+    def test_classify_key_clip_domain_classifies_sdxl_clip_keys(self):
+        """classify_key returns block group for CLIP domain with registered classifier."""
         # AC: @recipe-domain-field ac-8
-        # No CLIP classifiers are registered yet
+        # SDXL CLIP classifier is registered as "sdxl_clip"
         clip_key = "clip_l.transformer.text_model.encoder.layers.0.weight"
         result = classify_key(clip_key, "sdxl", "clip")
+        assert result == "CL00"
+
+    def test_classify_key_clip_returns_none_for_unknown_arch(self):
+        """classify_key returns None for CLIP domain with unknown architecture."""
+        # AC: @recipe-domain-field ac-8
+        # No "unknown_clip" classifier exists
+        clip_key = "clip_l.transformer.text_model.encoder.layers.0.weight"
+        result = classify_key(clip_key, "unknown", "clip")
         assert result is None
 
     def test_classify_key_clip_uses_arch_clip_key(self):

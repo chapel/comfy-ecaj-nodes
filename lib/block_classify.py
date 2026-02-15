@@ -21,6 +21,7 @@ __all__ = [
     "filter_changed_keys",
     "get_block_classifier",
     "classify_key_sdxl",
+    "classify_key_sdxl_clip",
     "classify_key_zimage",
     "classify_key_qwen",
     "classify_key_flux",
@@ -213,9 +214,60 @@ def classify_key_flux(key: str) -> str | None:
     return None
 
 
+@functools.lru_cache(maxsize=4096)
+def classify_key_sdxl_clip(key: str) -> str | None:
+    """Classify an SDXL CLIP parameter key into an individual block.
+
+    SDXL CLIP block structure matches WIDENBlockConfigSDXLCLIPNode sliders:
+    - CLIP-L: 12 transformer blocks (CL00-CL11)
+    - CLIP-G: 32 transformer blocks (CG00-CG31)
+    - Structural keys: CL_EMBED, CL_FINAL, CG_EMBED, CG_FINAL, CG_PROJ
+
+    # AC: @sdxl-clip-block-config ac-7, ac-8, ac-9
+
+    Args:
+        key: Parameter key (e.g., clip_l.transformer.text_model.encoder.layers.5.X)
+
+    Returns:
+        Individual block name (e.g., "CL05", "CG20", "CL_EMBED") or None if no match
+    """
+    # CLIP-L transformer blocks: clip_l.transformer.text_model.encoder.layers.N
+    match = re.match(r"clip_l\.transformer\.text_model\.encoder\.layers\.(\d+)\.", key)
+    if match:
+        block_num = int(match.group(1))
+        if 0 <= block_num <= 11:
+            return f"CL{block_num:02d}"
+        return None
+
+    # CLIP-G transformer blocks: clip_g.transformer.text_model.encoder.layers.N
+    match = re.match(r"clip_g\.transformer\.text_model\.encoder\.layers\.(\d+)\.", key)
+    if match:
+        block_num = int(match.group(1))
+        if 0 <= block_num <= 31:
+            return f"CG{block_num:02d}"
+        return None
+
+    # CLIP-L structural keys
+    if key.startswith("clip_l.transformer.text_model.embeddings."):
+        return "CL_EMBED"
+    if key.startswith("clip_l.transformer.text_model.final_layer_norm"):
+        return "CL_FINAL"
+
+    # CLIP-G structural keys
+    if key.startswith("clip_g.transformer.text_model.embeddings."):
+        return "CG_EMBED"
+    if key.startswith("clip_g.transformer.text_model.final_layer_norm"):
+        return "CG_FINAL"
+    if key.startswith("clip_g.transformer.text_projection"):
+        return "CG_PROJ"
+
+    return None
+
+
 # Registry of architecture classifiers
 _CLASSIFIERS: dict[str, Callable[[str], str | None]] = {
     "sdxl": classify_key_sdxl,
+    "sdxl_clip": classify_key_sdxl_clip,
     "zimage": classify_key_zimage,
     "qwen": classify_key_qwen,
     "flux": classify_key_flux,
@@ -359,9 +411,30 @@ _FLUX_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
     ("modulation", "norm"),
 )
 
+# Layer type patterns for SDXL CLIP (ac-10)
+# CLIP text encoders use standard transformer patterns:
+# Attention: self_attn.q_proj, self_attn.k_proj, self_attn.v_proj, self_attn.out_proj
+# Feed-forward: mlp.fc1, mlp.fc2
+# Norm: layer_norm1, layer_norm2, final_layer_norm
+_SDXL_CLIP_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
+    # Attention patterns (self_attn components)
+    ("self_attn.q_proj", "attention"),
+    ("self_attn.k_proj", "attention"),
+    ("self_attn.v_proj", "attention"),
+    ("self_attn.out_proj", "attention"),
+    # Feed-forward patterns (MLP components)
+    ("mlp.fc1", "feed_forward"),
+    ("mlp.fc2", "feed_forward"),
+    # Norm patterns
+    ("layer_norm1", "norm"),
+    ("layer_norm2", "norm"),
+    ("final_layer_norm", "norm"),
+)
+
 # Registry of layer type patterns by architecture
 _LAYER_TYPE_PATTERNS: dict[str, tuple[tuple[str, str], ...]] = {
     "sdxl": _SDXL_LAYER_PATTERNS,
+    "sdxl_clip": _SDXL_CLIP_LAYER_PATTERNS,
     "zimage": _ZIMAGE_LAYER_PATTERNS,
     "qwen": _QWEN_LAYER_PATTERNS,
     "flux": _FLUX_LAYER_PATTERNS,
@@ -369,8 +442,10 @@ _LAYER_TYPE_PATTERNS: dict[str, tuple[tuple[str, str], ...]] = {
 
 
 @functools.lru_cache(maxsize=4096)
-def classify_layer_type(key: str, arch: str | None) -> str | None:
-    """Classify a parameter key into a layer type for the given architecture.
+def classify_layer_type(
+    key: str, arch: str | None, domain: str = "diffusion"
+) -> str | None:
+    """Classify a parameter key into a layer type for the given architecture and domain.
 
     # AC: @layer-type-filter ac-1
     Returns one of: attention, feed_forward, norm, or None.
@@ -385,9 +460,14 @@ def classify_layer_type(key: str, arch: str | None) -> str | None:
     # AC: @layer-type-filter ac-8
     Returns None for arch=None or unsupported architectures.
 
+    # AC: @sdxl-clip-block-config ac-10
+    When domain="clip", dispatches to domain-specific layer type patterns
+    (e.g., "sdxl_clip" for CLIP text encoder layer types).
+
     Args:
         key: Parameter key
         arch: Architecture name (e.g., "sdxl", "zimage") or None
+        domain: Domain type ("diffusion" or "clip"). Defaults to "diffusion".
 
     Returns:
         Layer type ("attention", "feed_forward", "norm") or None
@@ -395,7 +475,12 @@ def classify_layer_type(key: str, arch: str | None) -> str | None:
     if arch is None:
         return None
 
-    patterns = _LAYER_TYPE_PATTERNS.get(arch)
+    # AC: @sdxl-clip-block-config ac-10 — CLIP uses "{arch}_clip" pattern registry
+    if domain == "clip":
+        patterns = _LAYER_TYPE_PATTERNS.get(f"{arch}_clip")
+    else:
+        patterns = _LAYER_TYPE_PATTERNS.get(arch)
+
     if patterns is None:
         return None
 
