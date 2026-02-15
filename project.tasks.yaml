@@ -4700,7 +4700,7 @@
   type: task
   spec_ref: "@recipe-domain-field"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -4734,6 +4734,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-15T21:52:40.189Z
+  closed_reason: "Merged in PR #71. Added domain field to RecipeBase with default 'diffusion' for CLIP
+    pipeline support. Implementation includes: domain dispatch in get_loader(), analyze_recipe(),
+    analyze_recipe_models(), classify_key(), and serialize_recipe(). All 9 ACs covered by 28 tests.
+    Backward compatible - existing code continues to work unchanged."
 - _ulid: 01KHHE6K4Q1A06V0PX9PZ8E0JX
   slugs:
     - implement-clip-merging-pipeline
