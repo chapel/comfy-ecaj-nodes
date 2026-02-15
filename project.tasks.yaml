@@ -4977,6 +4977,11 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #75. Implemented SDXLCLIPLoader in lib/lora/sdxl_clip.py with full
+    kohya/A1111 key mapping for lora_te1_* (CLIP-L) and lora_te2_* (CLIP-G) text encoder keys.
+    Registered in LOADER_REGISTRY as 'sdxl_clip', accessible via get_loader(arch='sdxl',
+    domain='clip'). All 7 ACs verified with 33 tests covering key mapping, DeltaSpec production,
+    loader interface, UNet key filtering, and registry integration."
   depends_on:
     - "@implement-recipe-domain-field"
   context: []
@@ -4985,6 +4990,7 @@
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.601Z
   started_at: 2026-02-15T22:13:46.628Z
+  completed_at: 2026-02-15T22:22:04.699Z
   notes:
     - _ulid: 01KHHE6KB172YHXV61SKWWM1BZ
       created_at: 2026-02-15T19:59:49.601Z
@@ -5012,12 +5018,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-15T22:22:04.699Z
-  closed_reason: "Merged in PR #75. Implemented SDXLCLIPLoader in lib/lora/sdxl_clip.py with full
-    kohya/A1111 key mapping for lora_te1_* (CLIP-L) and lora_te2_* (CLIP-G) text encoder keys.
-    Registered in LOADER_REGISTRY as 'sdxl_clip', accessible via get_loader(arch='sdxl',
-    domain='clip'). All 7 ACs verified with 33 tests covering key mapping, DeltaSpec production,
-    loader interface, UNet key filtering, and registry integration."
 - _ulid: 01KHHE6KC20EBB6501Y5QAJRFG
   slugs:
     - implement-clip-model-loader
@@ -5025,7 +5025,7 @@
   type: task
   spec_ref: "@clip-model-loader"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -5049,6 +5049,7 @@
         count and ordering during init. Verify against real SDXL checkpoints.
   todos: []
   automation: eligible
+  started_at: 2026-02-15T22:22:29.898Z
 - _ulid: 01KHHE6KDVABV5Z7KKEJ3H0SJ7
   slugs:
     - rename-model-input-display
