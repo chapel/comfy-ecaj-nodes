@@ -4652,6 +4652,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.326Z
+  started_at: 2026-02-15T21:36:02.336Z
   notes:
     - _ulid: 01KHHE6K2EES8KWXV3BSQ6CWX5
       created_at: 2026-02-15T19:59:49.326Z
@@ -4664,9 +4665,17 @@
         Update serialize_recipe to include source_dir. Update _compute_recipe_hash
         to include source_dir. Update compute_lora_stats model path resolution.
         Cache invalidation from the new field is expected and acceptable.
+    - _ulid: 01KHHKT3K0F4T18ASDTKEMK92W
+      created_at: 2026-02-15T21:37:51.712Z
+      author: "@claude"
+      content: "Fixed ac-6 (serialize_recipe includes source_dir) and ac-8 (compute_lora_stats passes
+        source_dir to model_resolver). Added 6 tests covering both ACs. All other ACs were already
+        implemented: ac-1/ac-2/ac-5 (_build_model_resolver), ac-3 (analyze_recipe_models), ac-4
+        (RecipeModel dataclass), ac-7 (_compute_recipe_hash), ac-9 (implicit - hash change causes
+        silent cache miss)."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-15T21:36:02.336Z
 - _ulid: 01KHHE6K3GGBH0SCYW6VDXGKB2
   slugs:
     - implement-recipe-domain-field
