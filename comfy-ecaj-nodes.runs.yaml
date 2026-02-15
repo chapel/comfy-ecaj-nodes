@@ -1839,7 +1839,7 @@ runs:
     initiated_by: "@claude"
   - _ulid: 01KHHGPXCWG732X3A3092JVEAH
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
-    status: active
+    status: completed
     current_step: 3
     total_steps: 4
     started_at: 2026-02-15T20:43:41.340Z
@@ -1890,5 +1890,8 @@ runs:
       - step_index: 3
         status: completed
         started_at: 2026-02-15T20:44:46.556Z
-        completed_at: 2026-02-15T20:44:46.556Z
+        completed_at: 2026-02-15T20:45:04.886Z
+        notes: "Captured 2 items: inbox 01KHHGS4 (plan import description loss), observation 01KHHGS7
+          (one-at-a-time design questions). Skipped 3 items already tracked."
     initiated_by: "@claude"
+    completed_at: 2026-02-15T20:45:04.886Z
