@@ -4629,7 +4629,8 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: pending
   blocked_by: []
-  depends_on: []
+  depends_on:
+    - "@implement-diffusion-model-input-node"
   context: []
   priority: 3
   tags: []
@@ -4890,16 +4891,22 @@
   created_at: 2026-02-15T19:59:49.691Z
   notes: []
   todos: []
-- title: Investigate ComfyUI CLIP clone and patch API
-  type: task
-  plan_ref: "@plan-model-loader-split-clip-merging"
-  priority: 1
+- _ulid: 01KHHE6KF4CCCBM1R9DD3T84XM
   slugs:
     - investigate-clip-api
+  title: Investigate ComfyUI CLIP clone and patch API
+  type: task
+  plan_ref: "@plan-model-loader-split-clip-merging"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  context: []
+  priority: 1
   tags:
     - spike
     - enhancement-2
-  depends_on: []
+  vcs_refs: []
+  created_at: 2026-02-15T19:59:49.732Z
   notes:
     - _ulid: 01KHHE6KF40Z59CVY377Y25E72
       created_at: 2026-02-15T19:59:49.732Z
@@ -4910,10 +4917,4 @@
         (in which case add_patches with set works) or needs a different
         mechanism (load_sd, direct state_dict manipulation). Document
         findings as task notes. This blocks CLIP Exit Node implementation.
-  _ulid: 01KHHE6KF4CCCBM1R9DD3T84XM
-  status: pending
-  blocked_by: []
-  context: []
-  vcs_refs: []
-  created_at: 2026-02-15T19:59:49.732Z
   todos: []
