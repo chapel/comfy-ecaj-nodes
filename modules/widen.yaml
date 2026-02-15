@@ -1954,7 +1954,7 @@ features:
         created: 2026-02-15T19:59:49.193Z
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
       - _ulid: 01KHHE6JYYY5MH30R9F5JQ3DQJ
         slugs:
           - sdxl-clip-lora-loader
