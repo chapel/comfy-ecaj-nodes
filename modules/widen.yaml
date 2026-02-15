@@ -587,7 +587,7 @@ features:
             then: Cache retains the previous valid entry, not a partially-updated entry
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
     status:
       maturity: draft
       implementation: implemented
