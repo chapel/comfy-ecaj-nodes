@@ -1038,5 +1038,16 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHHGS7XN71RE650P1SPJ392B
+    type: success
+    content: "One-at-a-time AskUserQuestion during spec-plan design phase produces clear,
+      non-backtracking decisions. This session: 5 design questions (merge algorithm, LoRA sharing,
+      block config org, loader scope, type safety) each with 2-3 concrete options and descriptions.
+      User chose decisively each time, no revisiting. Better than batching multiple questions or
+      open-ended discussion."
+    created_at: 2026-02-15T20:44:57.653Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 skills: []
 includes: []
