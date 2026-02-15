@@ -10,6 +10,7 @@ if __package__:
     from .nodes.block_config_sdxl_clip import WIDENBlockConfigSDXLCLIPNode
     from .nodes.block_config_zimage import WIDENBlockConfigZImageNode
     from .nodes.clip_entry import WIDENCLIPEntryNode
+    from .nodes.clip_exit import WIDENCLIPExitNode
     from .nodes.clip_nodes import (
         WIDENCLIPComposeNode,
         WIDENCLIPLoRANode,
@@ -27,6 +28,7 @@ if __package__:
     NODE_CLASS_MAPPINGS = {
         "WIDENEntry": WIDENEntryNode,
         "WIDENCLIPEntry": WIDENCLIPEntryNode,
+        "WIDENCLIPExit": WIDENCLIPExitNode,
         "WIDENLoRA": WIDENLoRANode,
         "WIDENCompose": WIDENComposeNode,
         "WIDENMerge": WIDENMergeNode,
@@ -47,6 +49,7 @@ if __package__:
     NODE_DISPLAY_NAME_MAPPINGS = {
         "WIDENEntry": "WIDEN Entry",
         "WIDENCLIPEntry": "WIDEN CLIP Entry",
+        "WIDENCLIPExit": "WIDEN CLIP Exit",
         "WIDENLoRA": "WIDEN LoRA",
         "WIDENCompose": "WIDEN Compose",
         "WIDENMerge": "WIDEN Merge",
