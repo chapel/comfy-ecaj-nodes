@@ -4643,7 +4643,7 @@
   type: task
   spec_ref: "@diffusion-model-path-resolution"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-diffusion-model-input-node"
@@ -4676,6 +4676,23 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-15T21:43:48.682Z
+  closed_reason: |-
+    Merged in PR #70. Implemented diffusion model path resolution with source_dir support:
+
+    - ac-6: serialize_recipe now includes source_dir in JSON output
+    - ac-8: compute_lora_stats passes source_dir to model_resolver
+
+    All 9 ACs verified:
+    - ac-1/ac-2/ac-5: _build_model_resolver resolves paths by source_dir
+    - ac-3: Independent resolution for mixed trees
+    - ac-4: RecipeModel.source_dir defaults to "checkpoints"
+    - ac-6: serialize_recipe includes source_dir (6 new tests)
+    - ac-7: _compute_recipe_hash includes source_dir in hash
+    - ac-8: compute_lora_stats uses correct folder (6 new tests)
+    - ac-9: Silent cache miss on hash change (implicit)
+
+    CI passed (lint + test), 12 new tests added.
 - _ulid: 01KHHE6K3GGBH0SCYW6VDXGKB2
   slugs:
     - implement-recipe-domain-field
