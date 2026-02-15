@@ -1898,7 +1898,7 @@ runs:
   - _ulid: 01KHHJ7JVZMDX6MYVMM0JP2QVH
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-15T21:10:16.192Z
     step_results:
@@ -1913,5 +1913,14 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-15T21:10:31.651Z
-        completed_at: 2026-02-15T21:10:31.651Z
+        completed_at: 2026-02-15T21:10:43.526Z
+        notes: "Friction: (1) 'kspec tasks assess automation --all' shows criteria recommendation not stored
+          status — can't verify batch-mark result. (2) Spike detection only checks type field, not
+          tags — @investigate-clip-api tagged spike but type:task passed not_spike check. (3) Minor:
+          'kspec task set --status' rejected, must use lifecycle commands (start/complete/etc) —
+          clear error message though."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-15T21:10:43.526Z
+        completed_at: 2026-02-15T21:10:43.526Z
     initiated_by: "@claude"
