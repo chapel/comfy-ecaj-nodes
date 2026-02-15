@@ -4848,6 +4848,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.475Z
+  started_at: 2026-02-15T22:29:14.714Z
   notes:
     - _ulid: 01KHHE6K73771E5DZFCKP7AWCG
       created_at: 2026-02-15T19:59:49.475Z
@@ -4874,9 +4875,19 @@
         clip.patcher (not diffusion model patcher) — is_clone() works correctly across all
         ModelPatcher instances."
       supersedes: null
+    - _ulid: 01KHHQ5RD14A51054RS2XDVGCS
+      created_at: 2026-02-15T22:36:39.201Z
+      author: "@claude"
+      content: "Implemented WIDENCLIPExitNode: (1) Created nodes/clip_exit.py with GPU execution node for
+        CLIP merging, (2) Accepts WIDEN_CLIP type, returns ComfyUI CLIP, (3) Uses analyze_recipe
+        with domain='clip' for CLIP LoRA loader dispatch, (4) Uses CLIPModelLoader for checkpoint
+        text encoder weights, (5) install_merged_clip_patches clones CLIP and applies patches via
+        add_patches(), (6) IS_CHANGED returns hash based on LoRA/model file mtimes, (7) Progress
+        reported via ComfyUI ProgressBar, (8) Validates recipe tree structure with domain='clip'
+        requirement. 31 new tests covering all 9 ACs. 1110 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-15T22:29:14.714Z
 - _ulid: 01KHHE6K8FD2XZ9S262EDCB4N3
   slugs:
     - implement-clip-graph-nodes
