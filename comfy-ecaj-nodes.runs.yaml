@@ -1960,8 +1960,23 @@ runs:
   - _ulid: 01KHHQ76P2ESW3MD93XCWX9WVD
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-15T22:37:26.594Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-15T22:37:26.594Z
+        completed_at: 2026-02-15T22:37:40.685Z
+        notes: "Session reviewed: Implemented CLIP Exit node successfully. Single task completed in this
+          iteration. Key observations: (1) compile_batch_groups and compile_plan don't accept domain
+          parameter - had to remove domain='clip' from calls, (2) Domain dispatch for CLIP is
+          already working at the loader level via get_loader(arch, domain='clip'), (3) The existing
+          per_block.py _get_block_t_factors already supports domain parameter but the plan executor
+          doesn't pass it through yet. No major friction - implementation followed existing patterns
+          well."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-15T22:37:40.685Z
+        completed_at: 2026-02-15T22:37:40.685Z
     initiated_by: "@claude"
