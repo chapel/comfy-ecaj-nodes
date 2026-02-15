@@ -4452,7 +4452,7 @@
   type: task
   spec_ref: "@incremental-block-recompute"
   derivation: auto
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-exit-node"
@@ -4563,3 +4563,4 @@
         5. Tests: test_incremental_recompute.py covering all 16 ACs.
       supersedes: null
   todos: []
+  started_at: 2026-02-15T06:29:28.315Z
