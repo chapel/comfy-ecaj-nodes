@@ -4929,6 +4929,10 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #74. Implemented SDXL CLIP block config with per-block strength control
+    for text encoders: CLIP-L (12 blocks CL00-CL11) and CLIP-G (32 blocks CG00-CG31) plus structural
+    keys. Added classify_key_sdxl_clip() and domain-aware dispatch in
+    classify_key/classify_layer_type. All 10 ACs covered by 41 tests."
   depends_on:
     - "@implement-recipe-domain-field"
   context: []
@@ -4937,6 +4941,7 @@
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.562Z
   started_at: 2026-02-15T22:05:32.432Z
+  completed_at: 2026-02-15T22:13:13.540Z
   notes:
     - _ulid: 01KHHE6K9T9TV3N0YAFXDTGY5V
       created_at: 2026-02-15T19:59:49.562Z
@@ -4963,11 +4968,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-15T22:13:13.540Z
-  closed_reason: "Merged in PR #74. Implemented SDXL CLIP block config with per-block strength control
-    for text encoders: CLIP-L (12 blocks CL00-CL11) and CLIP-G (32 blocks CG00-CG31) plus structural
-    keys. Added classify_key_sdxl_clip() and domain-aware dispatch in
-    classify_key/classify_layer_type. All 10 ACs covered by 41 tests."
 - _ulid: 01KHHE6KB1BFYPKWKNTD1GHWC1
   slugs:
     - implement-sdxl-clip-lora-loader
@@ -4975,7 +4975,7 @@
   type: task
   spec_ref: "@sdxl-clip-lora-loader"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -5000,6 +5000,7 @@
         lib/lora/__init__.py LOADER_REGISTRY with key ("sdxl", "clip").
   todos: []
   automation: eligible
+  started_at: 2026-02-15T22:13:46.628Z
 - _ulid: 01KHHE6KC20EBB6501Y5QAJRFG
   slugs:
     - implement-clip-model-loader
