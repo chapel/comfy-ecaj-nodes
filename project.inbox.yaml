@@ -59,3 +59,13 @@ inbox:
     created_at: 2026-02-15T07:24:35.005Z
     tags: []
     added_by: "@claude"
+  - _ulid: 01KHG3A2XWDWJBFPRMW5JNTQT5
+    text: Add test helper fixture for block config node kwargs — generate full kwargs from
+      node.INPUT_TYPES() with defaults, so tests only need to override specific values. Would
+      prevent the 15+ manual edits needed when adding new sliders (as happened with structural keys
+      fix).
+    created_at: 2026-02-15T07:30:15.101Z
+    tags:
+      - reflection
+      - test
+    added_by: "@claude"
