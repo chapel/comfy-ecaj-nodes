@@ -69,17 +69,29 @@ class TestFilterDelta:
 
         assert high_ratio > low_ratio, "High-importance delta should be preserved more"
 
-    def test_filter_delta_t_negative_passthrough(self):
-        """t_factor < 0 should pass through without filtering."""
-        widen = WIDEN(WIDENConfig(t_factor=-1.0))
+    # AC: @widen-core ac-1
+    def test_filter_delta_t_zero_returns_backbone(self):
+        """t_factor=0 should return backbone unchanged (base only)."""
+        widen = WIDEN(WIDENConfig(t_factor=0.0))
 
         backbone = torch.ones(8, 8)
         lora_applied = backbone + torch.randn(8, 8)
 
         result = widen.filter_delta(lora_applied, backbone)
 
-        # Should be identical to input
-        assert torch.allclose(result, lora_applied), "t<0 should pass through unfiltered"
+        assert torch.allclose(result, backbone), "t=0 should return backbone (base only)"
+
+    # AC: @widen-core ac-1
+    def test_filter_delta_batched_t_zero_returns_backbone(self):
+        """t_factor=0 batched should return backbone unchanged."""
+        widen = WIDEN(WIDENConfig(t_factor=0.0))
+
+        backbone = torch.randn(4, 8, 8)
+        lora_applied = backbone + torch.randn(4, 8, 8) * 0.5
+
+        result = widen.filter_delta_batched(lora_applied, backbone)
+
+        assert torch.allclose(result, backbone), "t=0 batched should return backbone"
 
 
 # ---------------------------------------------------------------------------
@@ -124,19 +136,31 @@ class TestMergeWeights:
         assert result[:8].abs().sum() > 0, "w1 region should have contribution"
         assert result[8:].abs().sum() > 0, "w2 region should have contribution"
 
-    def test_merge_weights_t_negative_exact_average(self):
-        """t_factor < 0 should compute exact average."""
-        widen = WIDEN(WIDENConfig(t_factor=-1.0))
+    # AC: @widen-core ac-10
+    def test_merge_weights_t_zero_returns_backbone(self):
+        """t_factor=0 should return backbone unchanged (base only)."""
+        widen = WIDEN(WIDENConfig(t_factor=0.0))
 
         backbone = torch.ones(4, 4)
-        w1 = backbone + torch.ones(4, 4)  # delta = 1
-        w2 = backbone + torch.ones(4, 4) * 3  # delta = 3
+        w1 = backbone + torch.ones(4, 4)
+        w2 = backbone + torch.ones(4, 4) * 3
 
         result = widen.merge_weights([w1, w2], backbone)
 
-        # Average delta = (1 + 3) / 2 = 2
-        expected = backbone + 2.0
-        assert torch.allclose(result, expected), "t<0 should produce exact average"
+        assert torch.allclose(result, backbone), "t=0 should return backbone (base only)"
+
+    # AC: @widen-core ac-10
+    def test_merge_weights_batched_t_zero_returns_backbone(self):
+        """t_factor=0 batched should return backbone unchanged."""
+        widen = WIDEN(WIDENConfig(t_factor=0.0))
+
+        backbone = torch.randn(4, 8, 8)
+        w1 = backbone + torch.randn(4, 8, 8) * 0.5
+        w2 = backbone + torch.randn(4, 8, 8) * 0.5
+
+        result = widen.merge_weights_batched([w1, w2], backbone)
+
+        assert torch.allclose(result, backbone), "t=0 batched should return backbone"
 
 
 # ---------------------------------------------------------------------------

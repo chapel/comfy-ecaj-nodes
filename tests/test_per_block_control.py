@@ -779,3 +779,71 @@ class TestFluxKleinRegistryWiring:
 
         arch_names = [arch_name for arch_name, _ in _ARCH_PATTERNS]
         assert "flux" in arch_names
+
+
+class TestBlockConfigZeroSkipsWiden:
+    """AC: @per-block-control ac-6 — block override 0.0 skips widen."""
+
+    # AC: @per-block-control ac-6
+    def test_block_override_zero_returns_backbone_filter(self):
+        """Block override 0.0 returns backbone for those keys (filter_delta)."""
+        import torch
+
+        from lib.per_block import _apply_widen_filter_per_block
+        from lib.recipe import BlockConfig
+        from lib.widen import WIDENConfig
+
+        # Keys: IN00 overridden to 0.0, IN01 uses default t=1.0
+        keys = ["input_blocks.0.0.weight", "input_blocks.1.0.weight"]
+        config = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.0), ("IN01", 1.0)))
+
+        backbone = torch.randn(2, 8, 8)
+        lora_applied = backbone + torch.randn(2, 8, 8) * 0.5
+
+        result = _apply_widen_filter_per_block(
+            keys=keys,
+            lora_applied=lora_applied,
+            backbone=backbone,
+            block_config=config,
+            arch="sdxl",
+            default_t_factor=1.0,
+            widen_config=WIDENConfig(),
+        )
+
+        # IN00 (index 0) with t=0.0 should return backbone
+        assert torch.allclose(result[0], backbone[0]), (
+            "Block override 0.0 should return backbone"
+        )
+        # IN01 (index 1) with t=1.0 should apply WIDEN filtering (not equal to backbone)
+        # (non-zero delta means filtered result differs from backbone)
+
+    # AC: @per-block-control ac-6
+    def test_block_override_zero_returns_backbone_merge(self):
+        """Block override 0.0 returns backbone for those keys (merge_weights)."""
+        import torch
+
+        from lib.per_block import _apply_widen_merge_per_block
+        from lib.recipe import BlockConfig
+        from lib.widen import WIDENConfig
+
+        keys = ["input_blocks.0.0.weight", "input_blocks.1.0.weight"]
+        config = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.0), ("IN01", 1.0)))
+
+        backbone = torch.randn(2, 8, 8)
+        w1 = backbone + torch.randn(2, 8, 8) * 0.5
+        w2 = backbone + torch.randn(2, 8, 8) * 0.5
+
+        result = _apply_widen_merge_per_block(
+            keys=keys,
+            branch_results=[w1, w2],
+            backbone=backbone,
+            block_config=config,
+            arch="sdxl",
+            default_t_factor=1.0,
+            widen_config=WIDENConfig(),
+        )
+
+        # IN00 (index 0) with t=0.0 should return backbone
+        assert torch.allclose(result[0], backbone[0]), (
+            "Block override 0.0 should return backbone for merge"
+        )
