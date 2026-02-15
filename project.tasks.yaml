@@ -4782,6 +4782,10 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #72. Implemented WIDENCLIPEntryNode that wraps ComfyUI CLIP in
+    RecipeBase with domain='clip'. Architecture detection via clip.patcher.model_state_dict() keys
+    (zero GPU). SDXL detected from clip_l+clip_g prefixes; non-SDXL raises
+    UnsupportedCLIPArchitectureError. All 7 ACs verified with 15 tests."
   depends_on:
     - "@implement-recipe-domain-field"
     - "@investigate-clip-api"
@@ -4791,6 +4795,7 @@
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.433Z
   started_at: 2026-02-15T21:53:08.503Z
+  completed_at: 2026-02-15T21:57:45.365Z
   notes:
     - _ulid: 01KHHE6K5T1RMCMHK95DFZQ1EY
       created_at: 2026-02-15T19:59:49.434Z
@@ -4823,11 +4828,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-15T21:57:45.365Z
-  closed_reason: "Merged in PR #72. Implemented WIDENCLIPEntryNode that wraps ComfyUI CLIP in
-    RecipeBase with domain='clip'. Architecture detection via clip.patcher.model_state_dict() keys
-    (zero GPU). SDXL detected from clip_l+clip_g prefixes; non-SDXL raises
-    UnsupportedCLIPArchitectureError. All 7 ACs verified with 15 tests."
 - _ulid: 01KHHE6K733GXVMAQKB1QEDPQD
   slugs:
     - implement-clip-exit-node
@@ -4883,7 +4883,7 @@
   type: task
   spec_ref: "@clip-graph-nodes"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -4905,6 +4905,7 @@
         "ecaj/merge/clip". Register all variants in __init__.py.
   todos: []
   automation: eligible
+  started_at: 2026-02-15T21:58:47.311Z
 - _ulid: 01KHHE6K9T79NA624RARW0D7TA
   slugs:
     - implement-sdxl-clip-block-config
