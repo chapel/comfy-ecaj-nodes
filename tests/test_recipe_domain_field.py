@@ -172,11 +172,11 @@ class TestAC5GetLoaderCLIPDispatch:
     """AC-5: get_loader returns CLIP LoRA loader for domain='clip'."""
 
     def test_get_loader_raises_for_missing_clip_loader(self):
-        """get_loader raises ValueError when CLIP loader not registered."""
+        """get_loader raises ValueError when CLIP loader not registered for arch."""
         # AC: @recipe-domain-field ac-5
-        # Currently no CLIP loaders are registered
+        # zimage does not have a CLIP loader
         with pytest.raises(ValueError, match="No CLIP LoRA loader"):
-            get_loader("sdxl", domain="clip")
+            get_loader("zimage", domain="clip")
 
     def test_get_loader_clip_looks_for_arch_clip_key(self):
         """get_loader looks for '{arch}_clip' key in registry for CLIP domain."""

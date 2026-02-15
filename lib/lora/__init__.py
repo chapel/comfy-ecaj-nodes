@@ -24,6 +24,7 @@ from .base import LoRALoader
 from .flux import FluxLoader
 from .qwen import QwenLoader
 from .sdxl import SDXLLoader
+from .sdxl_clip import SDXLCLIPLoader
 from .zimage import ZImageLoader
 
 __all__ = [
@@ -31,6 +32,7 @@ __all__ = [
     "FluxLoader",
     "QwenLoader",
     "SDXLLoader",
+    "SDXLCLIPLoader",
     "ZImageLoader",
     "LOADER_REGISTRY",
     "get_loader",
@@ -47,6 +49,7 @@ __all__ = [
 # 2. Add an entry here: "{arch}": {Arch}Loader
 LOADER_REGISTRY: dict[str, type[LoRALoader]] = {
     "sdxl": SDXLLoader,
+    "sdxl_clip": SDXLCLIPLoader,  # AC: @sdxl-clip-lora-loader ac-7
     "zimage": ZImageLoader,
     "qwen": QwenLoader,
     "flux": FluxLoader,
