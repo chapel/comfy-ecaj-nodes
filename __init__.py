@@ -9,6 +9,12 @@ if __package__:
     from .nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
     from .nodes.block_config_zimage import WIDENBlockConfigZImageNode
     from .nodes.clip_entry import WIDENCLIPEntryNode
+    from .nodes.clip_nodes import (
+        WIDENCLIPComposeNode,
+        WIDENCLIPLoRANode,
+        WIDENCLIPMergeNode,
+        WIDENCLIPModelInputNode,
+    )
     from .nodes.compose import WIDENComposeNode
     from .nodes.diffusion_model_input import WIDENDiffusionModelInputNode
     from .nodes.entry import WIDENEntryNode
@@ -30,6 +36,10 @@ if __package__:
         "WIDENBlockConfigFlux": WIDENBlockConfigFluxNode,
         "WIDENModelInput": WIDENModelInputNode,
         "WIDENDiffusionModelInput": WIDENDiffusionModelInputNode,
+        "WIDENCLIPLoRA": WIDENCLIPLoRANode,
+        "WIDENCLIPCompose": WIDENCLIPComposeNode,
+        "WIDENCLIPMerge": WIDENCLIPMergeNode,
+        "WIDENCLIPModelInput": WIDENCLIPModelInputNode,
     }
 
     NODE_DISPLAY_NAME_MAPPINGS = {
@@ -45,6 +55,10 @@ if __package__:
         "WIDENBlockConfigFlux": "WIDEN Block Config (Flux)",
         "WIDENModelInput": "WIDEN Checkpoint Input",
         "WIDENDiffusionModelInput": "WIDEN Diffusion Model Input",
+        "WIDENCLIPLoRA": "WIDEN CLIP LoRA",
+        "WIDENCLIPCompose": "WIDEN CLIP Compose",
+        "WIDENCLIPMerge": "WIDEN CLIP Merge",
+        "WIDENCLIPModelInput": "WIDEN CLIP Model Input",
     }
 
     __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
