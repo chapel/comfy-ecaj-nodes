@@ -4599,7 +4599,7 @@
   type: task
   spec_ref: "@diffusion-model-input-node"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -4632,6 +4632,10 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-15T21:34:29.052Z
+  closed_reason: "Merged in PR #69. Implemented WIDENDiffusionModelInputNode that produces RecipeModel
+    from diffusion_models directory (with unet fallback). Added source_dir field to RecipeModel. All
+    8 ACs verified with 18 tests. 890 tests pass, ruff clean."
 - _ulid: 01KHHE6K2EVJP9ERE69DJRZXFQ
   slugs:
     - implement-diffusion-model-path-resolution
