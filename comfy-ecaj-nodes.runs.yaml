@@ -2011,7 +2011,7 @@ runs:
   - _ulid: 01KHHVSTC9TY10AN4R6BKPWCZD
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-15T23:57:30.890Z
     step_results:
@@ -2057,5 +2057,43 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-15T23:57:47.897Z
-        completed_at: 2026-02-15T23:57:47.897Z
+        completed_at: 2026-02-15T23:58:12.720Z
+        notes: >-
+          ## High-Confidence Items
+
+
+          ### Friction: make_eval_fn closure duplication across exit nodes
+
+          - Both nodes/exit.py and nodes/clip_exit.py have nearly identical make_eval_fn closures
+
+          - When domain parameter was added, both had to be updated identically
+
+          - NOT tracked anywhere (searched "make_eval_fn", "exit node duplication", "deduplicate
+          exit")
+
+          - Concrete, repeatable: any new parameter to execute_plan requires editing both closures
+
+
+          ### Success: Codex PR review catching functional bugs
+
+          - Codex independently verified the domain propagation bug with Python execution
+
+          - Proved classify_key("clip_l...", "sdxl") → None vs with domain="clip" → "CL05"
+
+          - Already partially tracked: observation 01KH9YAW (parallel codex + pr-review
+          complementary)
+
+          - This session adds evidence: Codex found a bug that human review and 3 prior commits
+          missed
+
+
+          ### Already Tracked (skip):
+
+          - AC-5 encode test gap → already captured as inbox 01KHHVR8 (just added)
+
+          - Mock test quality friction → already observation 01KH6Y61
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-15T23:58:12.720Z
+        completed_at: 2026-02-15T23:58:12.720Z
     initiated_by: "@claude"
