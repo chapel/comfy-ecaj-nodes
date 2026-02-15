@@ -4956,4 +4956,11 @@
         not, what is the CLIP clone/patch API? (4) How to access CLIP state dict keys without GPU
         load? Findings feed into @implement-clip-entry-node and @implement-clip-exit-node."
       supersedes: null
+    - _ulid: 01KHHH74PKN82VB8E01E9JHH57
+      created_at: 2026-02-15T20:52:33.107Z
+      author: "@claude"
+      content: "Automation status set to manual_only: Spike - output is knowledge (documented in task
+        notes), not code"
+      supersedes: null
   todos: []
+  automation: manual_only
