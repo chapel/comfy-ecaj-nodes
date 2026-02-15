@@ -1604,7 +1604,7 @@ runs:
   - _ulid: 01KHG0ETW1PGTRMD041WN6KZJ6
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-15T06:40:24.961Z
     step_results:
@@ -1649,5 +1649,46 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-15T06:40:46.047Z
-        completed_at: 2026-02-15T06:40:46.047Z
+        completed_at: 2026-02-15T06:41:23.051Z
+        notes: >-
+          Checked existing observations. Analysis:
+
+
+          FRICTION 1 (chunked_evaluation mock returning all keys): This is a specific instance of
+          existing observation 01KH6Y61 'Unit tests with mocks can validate the wrong behavior'.
+          Already tracked. SKIP.
+
+
+          FRICTION 2 (compile_plan/set_id_map coupling): One-off issue specific to these tests. Not
+          systemic enough to capture. SKIP.
+
+
+          FRICTION 3 (codex agent checkout main): One-off, caught by worktree guard hook. Working as
+          designed. SKIP.
+
+
+          FRICTION 4 (redundant clone on full cache hit): Caught by reviewer, one-off code issue.
+          Not a process friction. SKIP.
+
+
+          SUCCESS 1 (detailed plan with review findings pre-addressed): Already covered by existing
+          observations 01KHCJHD and 01KHDNHK about plan review catching issues. The new aspect here
+          is that the plan INCLUDED the review findings and their resolutions, so implementation was
+          smooth. However, this is a natural extension of the plan review pattern, not a distinct
+          observation. SKIP.
+
+
+          SUCCESS 2 (parallel codex + pr-review): Already tracked in 01KH6Y5Y and 01KH9YAW. SKIP.
+
+
+          SUCCESS 3 (branch-before-commit): Already tracked in 01KHAKZC (friction) and resolved in
+          MEMORY.md. SKIP.
+
+
+          CONCLUSION: All friction points and successes from this session are already covered by
+          existing observations. Nothing new to capture.
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-15T06:41:23.051Z
+        completed_at: 2026-02-15T06:41:23.051Z
     initiated_by: "@claude"
