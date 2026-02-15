@@ -4701,6 +4701,15 @@
       created_at: 2026-02-15T19:59:49.399Z
       author: "@claude"
       content: See plan @plan-model-loader-split-clip-merging for implementation notes
+    - _ulid: 01KHHGFJYW5GWXSQCQ9Q7DW8K1
+      created_at: 2026-02-15T20:39:41.276Z
+      author: "@claude"
+      content: "This is an integration/validation task. After all child tasks complete (entry, exit, graph
+        nodes, loaders, classifiers), write integration tests: (1) WIDEN_CLIP type used throughout
+        pipeline (AC-1), (2) End-to-end merge produces different embeddings via mock CLIP (AC-2),
+        (3) WIDEN_CLIP cannot connect to WIDEN Exit — verify type mismatch (AC-3), (4) Entry node
+        sets domain='clip' (AC-4). Do NOT start until all dependencies complete."
+      supersedes: null
   todos: []
 - _ulid: 01KHHE6K5SF2WQ0M5X30JG1TA5
   slugs:
