@@ -4431,6 +4431,9 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "Implemented per-block strength scaling for model weights in OpApplyModel. Added
+    _apply_per_block_lora_strength call mirroring LoRA pattern. AC-15 covered with 2 tests. PR #64
+    created, awaiting CI/merge."
   depends_on: []
   context: []
   priority: 2
@@ -4439,9 +4442,97 @@
   vcs_refs: []
   created_at: 2026-02-14T09:40:54.145Z
   started_at: 2026-02-14T09:41:50.277Z
+  completed_at: 2026-02-14T09:43:29.104Z
   notes: []
   todos: []
-  completed_at: 2026-02-14T09:43:29.104Z
-  closed_reason: "Implemented per-block strength scaling for model weights in OpApplyModel. Added
-    _apply_per_block_lora_strength call mirroring LoRA pattern. AC-15 covered with 2 tests. PR #64
-    created, awaiting CI/merge."
+- title: "Implement: Incremental Block Recomputation"
+  type: task
+  spec_ref: "@incremental-block-recompute"
+  derivation: auto
+  priority: 3
+  slugs:
+    - task-incremental-block-recomputation
+  tags: []
+  depends_on:
+    - "@implement-exit-node"
+  notes:
+    - _ulid: 01KHFZ61S4QD09F8RATHC0QQWD
+      created_at: 2026-02-15T06:18:08.548Z
+      author: "@claude"
+      content: >-
+        Implementation notes (auto-generated from spec):
+
+
+
+        Acceptance Criteria:
+
+        - ac-1: Given Exit node executes for the first time with no cache entry, when A recipe with
+        block_config is evaluated, then All keys computed via full GPU pipeline and result stored in
+        incremental cache
+
+        - ac-2: Given Previous execution with recipe R and block_config B produced cached
+        merged_state, when Exit node re-executes with structurally identical R and identical B, then
+        All keys served from cache without GPU computation, output bit-identical to full recompute
+
+        - ac-3: Given Previous execution with block_overrides including (IN00, 0.5), when
+        Re-executes with (IN00, 0.7) and all other overrides identical, then Only keys classified as
+        block group IN00 are recomputed, all others served from cache, output bit-identical
+
+        - ac-4: Given Previous execution cached with recipe R1, when Re-executes with structurally
+        different R2 (different LoRA, t_factor, or branches), then Full recomputation occurs and new
+        result replaces cache entry
+
+        - ac-5: Given Recipe tree has block_config on both RecipeLoRA and RecipeMerge, when Only
+        RecipeLoRA block_config changes for block IN05, then Only IN05 keys recomputed, output
+        bit-identical to full recompute
+
+        - ac-6: Given Previous execution with layer_type_overrides attention=0.5, when Re-executes
+        with attention=0.8, feed_forward and norm overrides unchanged, then Only keys classified as
+        attention layer type are recomputed, feed_forward and norm keys from cache, output
+        bit-identical
+
+        - ac-7: Given Previous execution with block_config=None on a recipe node, when Re-executes
+        with block_config attached to that node, then All keys recomputed due to presence change
+
+        - ac-8: Given Previous execution with block_config present on a recipe node, when
+        Re-executes with block_config=None on that node, then All keys recomputed due to presence
+        change
+
+        - ac-9: Given Cache has entry for structural fingerprint F1, when Exit node executes with
+        different structural fingerprint F2, then F1 entry evicted before F2 stored, only one cache
+        entry exists
+
+        - ac-10: Given save_model=True and incremental cache is active, when Partial recompute
+        occurs with some blocks served from cache, then Saved model file contains complete merged
+        state with correct persistence metadata
+
+        - ac-11: Given Keys with classify_key returning None exist (e.g. time_embed, label_emb),
+        when Any block_config override value changes, then Unclassified keys recomputed
+        conservatively, output bit-identical
+
+        - ac-12: Given Incremental cache is populated with a previous result, when
+        clear_incremental_cache() is called, then Cache is empty and next execution performs full
+        recompute
+
+        - ac-13: Given Previous execution with base model checkpoint A, when Re-executes with
+        different base model B, same LoRAs and block_config, then Full recomputation occurs because
+        structural fingerprint includes base_identity
+
+        - ac-14: Given Previous execution cached with LoRA file at path P, when LoRA file at P is
+        modified with different mtime or size and re-executes with same recipe, then Full
+        recomputation occurs because fingerprint includes file stats
+
+        - ac-15: Given Recipe tree has RecipeModel with block_config overriding block OUT03=0.5,
+        when Re-executes with OUT03=0.8, all other overrides identical, then Only keys classified as
+        OUT03 are recomputed, output bit-identical to full recompute
+
+        - ac-16: Given Partial recompute is in progress, when Execution is interrupted or raises an
+        exception, then Cache retains the previous valid entry, not a partially-updated entry
+      supersedes: null
+  _ulid: 01KHFZ61S4KB9FVNDAQRGVBRE6
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-15T06:18:08.548Z
+  todos: []
