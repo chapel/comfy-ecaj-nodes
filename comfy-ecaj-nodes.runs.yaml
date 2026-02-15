@@ -1898,8 +1898,20 @@ runs:
   - _ulid: 01KHHJ7JVZMDX6MYVMM0JP2QVH
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 6
     started_at: 2026-02-15T21:10:16.192Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-15T21:10:16.192Z
+        completed_at: 2026-02-15T21:10:31.651Z
+        notes: "What worked: (1) Parallel fetch of specs+tasks then batch-mark with kspec batch — efficient
+          triage pattern. (2) Spike investigation driven by specific task-note questions — focused
+          and fast. (3) Manual review caught spike tag that automated criteria missed (type was task
+          but tag was spike)."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-15T21:10:31.651Z
+        completed_at: 2026-02-15T21:10:31.651Z
     initiated_by: "@claude"
