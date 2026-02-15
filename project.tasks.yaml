@@ -4620,6 +4620,7 @@
         Set source_dir="diffusion_models" on the RecipeModel.
         Register in __init__.py with display name "WIDEN Diffusion Model Input".
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6K2EVJP9ERE69DJRZXFQ
   slugs:
     - implement-diffusion-model-path-resolution
@@ -4649,6 +4650,7 @@
         to include source_dir. Update compute_lora_stats model path resolution.
         Cache invalidation from the new field is expected and acceptable.
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6K3GGBH0SCYW6VDXGKB2
   slugs:
     - implement-recipe-domain-field
@@ -4678,6 +4680,7 @@
         persistence serialization. This is a cross-cutting change that
         enables the entire CLIP pipeline.
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6K4Q1A06V0PX9PZ8E0JX
   slugs:
     - implement-clip-merging-pipeline
@@ -4711,6 +4714,7 @@
         sets domain='clip' (AC-4). Do NOT start until all dependencies complete."
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6K5SF2WQ0M5X30JG1TA5
   slugs:
     - implement-clip-entry-node
@@ -4740,6 +4744,7 @@
         to access state dict keys. Detect SDXL by presence of clip_l and
         clip_g key prefixes. Set domain="clip" on RecipeBase.
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6K733GXVMAQKB1QEDPQD
   slugs:
     - implement-clip-exit-node
@@ -4776,6 +4781,7 @@
         works. If not, may need load_sd() or direct state_dict manipulation.
         v1 does NOT include incremental block recompute for CLIP (add later).
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6K8FD2XZ9S262EDCB4N3
   slugs:
     - implement-clip-graph-nodes
@@ -4804,6 +4810,7 @@
         INPUT_TYPES and RETURN_TYPES. Each CLIP variant gets CATEGORY
         "ecaj/merge/clip". Register all variants in __init__.py.
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6K9T79NA624RARW0D7TA
   slugs:
     - implement-sdxl-clip-block-config
@@ -4835,6 +4842,7 @@
         to clip_g.transformer.text_model.encoder.layers.{N}. Verify exact
         key patterns against real SDXL CLIP state dicts.
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6KB1BFYPKWKNTD1GHWC1
   slugs:
     - implement-sdxl-clip-lora-loader
@@ -4866,6 +4874,7 @@
         way as sdxl.py handles UNet compound tokens. Register in
         lib/lora/__init__.py LOADER_REGISTRY with key ("sdxl", "clip").
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6KC20EBB6501Y5QAJRFG
   slugs:
     - implement-clip-model-loader
@@ -4896,6 +4905,7 @@
         conditioner.embedders.1.transformer.* -> clip_g.*. Validate embedder
         count and ordering during init. Verify against real SDXL checkpoints.
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6KDVABV5Z7KKEJ3H0SJ7
   slugs:
     - rename-model-input-display
@@ -4922,6 +4932,7 @@
         __init__.py needs to change.
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KHHE6KF4CCCBM1R9DD3T84XM
   slugs:
     - investigate-clip-api
