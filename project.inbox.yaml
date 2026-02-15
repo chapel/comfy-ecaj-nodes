@@ -79,3 +79,10 @@ inbox:
       - reflection
       - kspec
     added_by: "@claude"
+  - _ulid: 01KHHVR8FE095R6JEWN02N4DNF
+    text: AC-5 encode/conditioning behavioral test gap — @clip-exit-node ac-5 tests validate mock
+      patcher/clone/add_patches but don't exercise encode_from_tokens() → conditioning path. Needs
+      high-fidelity CLIP stub with encode method to prove downstream text encoding works.
+    created_at: 2026-02-15T23:56:39.791Z
+    tags: []
+    added_by: "@claude"
