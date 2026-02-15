@@ -1049,5 +1049,14 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHHJMPQV3DQE61NRTZR46HWJ
+    type: success
+    content: Parallel spec+task fetch then kspec batch for automation triage — fetching all specs/tasks
+      in parallel, reviewing as a batch, then using kspec batch --commands to mark all eligible
+      atomically is the most efficient triage pattern.
+    created_at: 2026-02-15T21:17:26.139Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 skills: []
 includes: []
