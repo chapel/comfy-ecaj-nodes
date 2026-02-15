@@ -4885,6 +4885,9 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #73. Implemented WIDEN_CLIP-typed graph nodes (LoRA, Compose, Merge,
+    Model Input) for CLIP pipeline type safety. All 8 ACs covered with 30 tests. Nodes delegate to
+    original WIDEN implementations for logic reuse."
   depends_on:
     - "@implement-recipe-domain-field"
   context: []
@@ -4893,6 +4896,7 @@
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.519Z
   started_at: 2026-02-15T21:58:47.311Z
+  completed_at: 2026-02-15T22:05:01.281Z
   notes:
     - _ulid: 01KHHE6K8FFBVHRVVDP19E8242
       created_at: 2026-02-15T19:59:49.519Z
@@ -4916,10 +4920,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-15T22:05:01.281Z
-  closed_reason: "Merged in PR #73. Implemented WIDEN_CLIP-typed graph nodes (LoRA, Compose, Merge,
-    Model Input) for CLIP pipeline type safety. All 8 ACs covered with 30 tests. Nodes delegate to
-    original WIDEN implementations for logic reuse."
 - _ulid: 01KHHE6K9T79NA624RARW0D7TA
   slugs:
     - implement-sdxl-clip-block-config
@@ -4927,7 +4927,7 @@
   type: task
   spec_ref: "@sdxl-clip-block-config"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -4952,6 +4952,7 @@
         key patterns against real SDXL CLIP state dicts.
   todos: []
   automation: eligible
+  started_at: 2026-02-15T22:05:32.432Z
 - _ulid: 01KHHE6KB1BFYPKWKNTD1GHWC1
   slugs:
     - implement-sdxl-clip-lora-loader
