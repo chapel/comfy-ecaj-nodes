@@ -606,8 +606,9 @@ features:
     acceptance_criteria:
       - id: ac-1
         given: base and delta tensors
-        when: filter_delta is called with a t_factor
-        then: importance-filtered delta is returned with low-importance parameters zeroed
+        when: filter_delta is called with t_factor <= 0
+        then: backbone is returned unchanged (LoRA delta ignored, base only); with t_factor > 0,
+          importance-filtered delta is returned with low-importance parameters zeroed
       - id: ac-2
         given: multiple model tensors and a backbone
         when: merge_weights is called
