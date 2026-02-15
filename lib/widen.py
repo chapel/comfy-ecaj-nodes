@@ -28,7 +28,7 @@ class WIDENConfig:
     Default values: ranking_strategy=percentile, sparsity_method=softmax, s_calibration=1.0
     """
 
-    t_factor: float = 1.0  # Threshold factor for important params (-1 for exact averaging)
+    t_factor: float = 1.0  # Threshold factor (0 = base only, >0 = selectivity)
     s_calibration: float = 1.0  # Score calibration value
     ranking_strategy: str = "percentile"  # percentile, zscore, minmax, soft
     sparsity_method: str = "softmax"  # softmax, sparsemax, entmax
@@ -311,10 +311,6 @@ class WIDEN:
         if not weights_list:
             raise ValueError("weights_list must not be empty")
 
-        # Handle backbone=None cases that the batched path doesn't support
-        if self.t_factor < 0 and backbone is None:
-            return torch.stack(weights_list).mean(dim=0)
-
         if weights_list[0].dim() == 1 and backbone is None:
             return torch.stack(weights_list).mean(dim=0)
 
@@ -344,13 +340,14 @@ class WIDEN:
             backbone: [B, *param_shape] -- original base weights
 
         Returns:
-            [B, *param_shape] -- backbone + filtered delta
+            [B, *param_shape] -- backbone (if t_factor <= 0) or backbone + filtered delta
         """
         try:
             delta = lora_applied - backbone
 
-            if self.t_factor < 0:
-                return backbone + delta
+            # AC: @widen-core ac-1
+            if self.t_factor <= 0:
+                return backbone
 
             eps = self.numerical_config.get_adaptive_epsilon(delta)
 
@@ -457,9 +454,9 @@ class WIDEN:
         try:
             N = len(weights_list)
 
-            # Fast-path for t<0 (exact averaging)
-            if self.t_factor < 0:
-                return torch.stack(weights_list).mean(dim=0)
+            # AC: @widen-core ac-10
+            if self.t_factor <= 0:
+                return backbone
 
             # Route 1D params (batch dim + 1 feature dim = ndim 2)
             if weights_list[0].ndim == 2:
@@ -495,7 +492,7 @@ class WIDEN:
             D_scores = self.sparsity_fn(torch.stack(ranked_D), dim=0)
 
             # Step 5: Calibrate
-            if self.t_factor >= 0 and important_mask_m is not None:
+            if important_mask_m is not None:
                 M = self._calibrate(M, important_mask_m)
                 D_scores = self._calibrate(D_scores, important_mask_d)
 
@@ -581,7 +578,7 @@ class WIDEN:
 
         Shape-agnostic: works for both scalar and batched ranked tensors.
         """
-        if t_factor < 0:
+        if t_factor <= 0:
             return None
 
         spatial_dims = tuple(range(1, ranked_list[0].ndim))
