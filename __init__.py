@@ -9,6 +9,7 @@ if __package__:
     from .nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
     from .nodes.block_config_zimage import WIDENBlockConfigZImageNode
     from .nodes.compose import WIDENComposeNode
+    from .nodes.diffusion_model_input import WIDENDiffusionModelInputNode
     from .nodes.entry import WIDENEntryNode
     from .nodes.exit import WIDENExitNode
     from .nodes.lora import WIDENLoRANode
@@ -26,6 +27,7 @@ if __package__:
         "WIDENBlockConfigQwen": WIDENBlockConfigQwenNode,
         "WIDENBlockConfigFlux": WIDENBlockConfigFluxNode,
         "WIDENModelInput": WIDENModelInputNode,
+        "WIDENDiffusionModelInput": WIDENDiffusionModelInputNode,
     }
 
     NODE_DISPLAY_NAME_MAPPINGS = {
@@ -39,6 +41,7 @@ if __package__:
         "WIDENBlockConfigQwen": "WIDEN Block Config (Qwen)",
         "WIDENBlockConfigFlux": "WIDEN Block Config (Flux)",
         "WIDENModelInput": "WIDEN Checkpoint Input",
+        "WIDENDiffusionModelInput": "WIDEN Diffusion Model Input",
     }
 
     __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]

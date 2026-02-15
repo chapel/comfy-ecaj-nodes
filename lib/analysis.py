@@ -333,7 +333,7 @@ def _collect_model_refs(node: RecipeNode) -> dict[int, RecipeModel]:
 def analyze_recipe_models(
     node: RecipeNode,
     base_arch: str,
-    model_path_resolver: Callable[[str], str | None] | None = None,
+    model_path_resolver: Callable[[str, str], str | None] | None = None,
 ) -> ModelAnalysisResult:
     """Analyze a recipe tree for full model checkpoints.
 
@@ -345,8 +345,8 @@ def analyze_recipe_models(
     Args:
         node: Root recipe node (typically RecipeMerge)
         base_arch: Architecture of the base model (for validation)
-        model_path_resolver: Callable that resolves a model name to its full
-            filesystem path. In production, wraps folder_paths.get_full_path.
+        model_path_resolver: Callable that resolves (model_name, source_dir) to
+            full filesystem path. In production, wraps folder_paths.get_full_path.
 
     Returns:
         ModelAnalysisResult with loaders and affected key sets
@@ -366,11 +366,12 @@ def analyze_recipe_models(
         for model_id, recipe_model in model_refs.items():
             model_key = str(model_id)
             model_name = recipe_model.path
+            source_dir = recipe_model.source_dir
 
-            # Resolve path
+            # Resolve path using source_dir from RecipeModel
             full_path = model_name
             if model_path_resolver is not None:
-                resolved = model_path_resolver(model_name)
+                resolved = model_path_resolver(model_name, source_dir)
                 if resolved is not None:
                     full_path = resolved
 
