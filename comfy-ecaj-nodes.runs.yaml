@@ -1607,6 +1607,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-15T06:40:24.961Z
+    completed_at: 2026-02-15T06:41:35.552Z
     step_results:
       - step_index: 0
         status: completed
@@ -1702,4 +1703,11 @@ runs:
           in existing observations (01KH6Y61, 01KH6Y5Y, 01KH9YAW, 01KHCJHD, 01KHDNHK, 01KHAKZC).
           Session was clean — established patterns worked as expected.
     initiated_by: "@claude"
-    completed_at: 2026-02-15T06:41:35.552Z
+  - _ulid: 01KHG37HNSSF87B1EGR5MRSN14
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-15T07:28:51.898Z
+    step_results: []
+    initiated_by: "@claude"
