@@ -1058,5 +1058,13 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHHJMRQ4NJEY0YEFQJ805PS6
+    type: success
+    content: Spike investigations driven by specific task-note questions — having 4 concrete questions
+      in the spike task notes focused the source code investigation and prevented scope creep.
+    created_at: 2026-02-15T21:17:28.165Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 skills: []
 includes: []
