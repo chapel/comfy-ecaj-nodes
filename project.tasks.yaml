@@ -4936,6 +4936,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.562Z
+  started_at: 2026-02-15T22:05:32.432Z
   notes:
     - _ulid: 01KHHE6K9T9TV3N0YAFXDTGY5V
       created_at: 2026-02-15T19:59:49.562Z
@@ -4950,9 +4951,18 @@
         clip_l.transformer.text_model.encoder.layers.{N}. CLIP-G blocks map
         to clip_g.transformer.text_model.encoder.layers.{N}. Verify exact
         key patterns against real SDXL CLIP state dicts.
+    - _ulid: 01KHHNPHG7ZJCSP004R79MAWZG
+      created_at: 2026-02-15T22:10:52.039Z
+      author: "@claude"
+      content: "Implemented SDXL CLIP block config: (1) Added classify_key_sdxl_clip() for CLIP-L
+        (CL00-CL11) and CLIP-G (CG00-CG31) blocks plus structural keys, (2) Added CLIP layer type
+        patterns to classify_layer_type() with domain dispatch, (3) Created
+        WIDENBlockConfigSDXLCLIPNode using make_block_config_node factory, (4) Updated
+        _get_block_t_factors to accept domain parameter for CLIP classification, (5) Registered node
+        in __init__.py, (6) 41 tests covering all 10 ACs. 1011 tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-15T22:05:32.432Z
 - _ulid: 01KHHE6KB1BFYPKWKNTD1GHWC1
   slugs:
     - implement-sdxl-clip-lora-loader
