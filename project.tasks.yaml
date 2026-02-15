@@ -4790,6 +4790,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.433Z
+  started_at: 2026-02-15T21:53:08.503Z
   notes:
     - _ulid: 01KHHE6K5T1RMCMHK95DFZQ1EY
       created_at: 2026-02-15T19:59:49.434Z
@@ -4810,9 +4811,18 @@
         Key format: clip_l.transformer.text_model.encoder.layers.{0-11}.* and
         clip_g.transformer.text_model.encoder.layers.{0-31}.*"
       supersedes: null
+    - _ulid: 01KHHMTA74FP86M37H2NK2YWER
+      created_at: 2026-02-15T21:55:27.076Z
+      author: "@claude"
+      content: "Implemented CLIP Entry node: (1) Created nodes/clip_entry.py with WIDENCLIPEntryNode that
+        wraps ComfyUI CLIP in RecipeBase with domain='clip', (2) detect_clip_architecture() detects
+        SDXL via clip_l+clip_g key prefixes using clip.patcher.model_state_dict() (zero GPU), (3)
+        Non-SDXL raises UnsupportedCLIPArchitectureError with clear message, (4) Registered node as
+        WIDENCLIPEntry with display name 'WIDEN CLIP Entry', (5) 15 tests covering all 7 ACs. 939
+        tests pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-15T21:53:08.503Z
 - _ulid: 01KHHE6K733GXVMAQKB1QEDPQD
   slugs:
     - implement-clip-exit-node
