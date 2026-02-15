@@ -768,14 +768,18 @@ class WIDENExitNode:
             # Store result in incremental cache (atomic swap)
             # Build new entry fully, then swap. On exception above,
             # old entry is preserved (we never reach this point).
-            new_entry = _CacheEntry(
-                structural_fingerprint=structural_fp,
-                block_configs=current_block_configs,
-                merged_state={k: v.clone() for k, v in merged_state.items()},
-                storage_dtype=storage_dtype,
-            )
-            _incremental_cache.clear()
-            _incremental_cache[structural_fp] = new_entry
+            # Skip redundant clone when full cache hit (no GPU work done).
+            if batch_groups or not incremental_hit:
+                new_entry = _CacheEntry(
+                    structural_fingerprint=structural_fp,
+                    block_configs=current_block_configs,
+                    merged_state={
+                        k: v.clone() for k, v in merged_state.items()
+                    },
+                    storage_dtype=storage_dtype,
+                )
+                _incremental_cache.clear()
+                _incremental_cache[structural_fp] = new_entry
 
         finally:
             # AC: @memory-management ac-3

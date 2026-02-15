@@ -559,7 +559,11 @@ class TestExitNodeIncrementalCache:
 
     # AC: @incremental-block-recompute ac-2
     def test_identical_reexecution_uses_cache(self, mock_model_patcher):
-        """Re-execution with identical recipe uses cache, no GPU compute."""
+        """Re-execution with identical recipe uses cache, no GPU compute.
+
+        Verifies both control flow (no GPU call) and value correctness
+        (output patches contain cached tensor values).
+        """
         keys = list(mock_model_patcher.model_state_dict().keys())
         bc = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
         recipe = RecipeMerge(
@@ -572,7 +576,7 @@ class TestExitNodeIncrementalCache:
             t_factor=1.0,
         )
 
-        # Pre-populate cache
+        # Pre-populate cache with known tensor values
         fp = "test_fingerprint"
         cached_state = {k: torch.randn(4, 4) for k in keys}
         _incremental_cache[fp] = _CacheEntry(
@@ -599,10 +603,22 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.compile_batch_groups", return_value={}),
         ):
             node = WIDENExitNode()
-            node.execute(recipe)
+            (result,) = node.execute(recipe)
 
         # chunked_evaluation should NOT have been called (full cache hit)
         chunked_eval_mock.assert_not_called()
+
+        # Value check: output patches contain cached tensor values
+        for key in keys:
+            assert key in result.patches, f"Missing patch for {key}"
+            # Patches format: [(strength, ("set", (tensor,)), ...)]
+            patch_entry = result.patches[key][-1]
+            set_tuple = patch_entry[1]  # ("set", (tensor,))
+            output_tensor = set_tuple[1][0]
+            expected = cached_state[key].to(torch.float32)
+            assert torch.equal(output_tensor, expected), (
+                f"Value mismatch for {key}"
+            )
 
     # AC: @incremental-block-recompute ac-3
     def test_single_block_change_partial_recompute(self, mock_model_patcher):
@@ -654,6 +670,9 @@ class TestExitNodeIncrementalCache:
 
         new_results = {k: torch.randn(4, 4) for k in keys}
 
+        def mock_chunked_eval(keys, **kwargs):
+            return {k: new_results[k] for k in keys}
+
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
@@ -662,7 +681,7 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.compile_batch_groups", side_effect=track_batch_groups),
-            patch("nodes.exit.chunked_evaluation", return_value=new_results),
+            patch("nodes.exit.chunked_evaluation", side_effect=mock_chunked_eval),
         ):
             node = WIDENExitNode()
             node.execute(recipe_new)
@@ -675,6 +694,16 @@ class TestExitNodeIncrementalCache:
         for k in recomputed_keys:
             block = classify_key(k, "sdxl")
             assert block in ("IN00", None), f"Key {k} classified as {block}, expected IN00 or None"
+
+        # Value check: unchanged keys in cache should be preserved in output
+        entry = next(iter(_incremental_cache.values()))
+        for k in keys:
+            block = classify_key(k, "sdxl")
+            if block not in ("IN00", None):
+                # Unchanged key — should match original cached value
+                assert torch.equal(
+                    entry.merged_state[k], cached_state[k]
+                ), f"Unchanged key {k} should match cache"
 
     # AC: @incremental-block-recompute ac-4
     def test_structural_change_full_recompute(self, mock_model_patcher):
@@ -825,6 +854,98 @@ class TestExitNodeIncrementalCache:
         entry = _incremental_cache[fp]
         for k in keys:
             assert torch.equal(entry.merged_state[k], old_state[k])
+
+    # AC: @incremental-block-recompute ac-10
+    def test_save_model_with_partial_recompute(self, mock_model_patcher):
+        """save_model=True with partial recompute saves complete state."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        bc_old = BlockConfig(
+            arch="sdxl", block_overrides=(("IN00", 0.5), ("MID", 1.0)),
+        )
+        bc_new = BlockConfig(
+            arch="sdxl", block_overrides=(("IN00", 0.7), ("MID", 1.0)),
+        )
+
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc_new,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # Pre-populate cache with old block config
+        fp = "test_fingerprint"
+        cached_state = {k: torch.randn(4, 4) for k in keys}
+        old_recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc_old,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+        _incremental_cache[fp] = _CacheEntry(
+            structural_fingerprint=fp,
+            block_configs=collect_block_configs(old_recipe),
+            merged_state={k: v.clone() for k, v in cached_state.items()},
+            storage_dtype=torch.float32,
+        )
+
+        mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+
+        from lib.batch_groups import OpSignature
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        new_results = {k: torch.randn(4, 4) for k in keys}
+        atomic_save_mock = MagicMock()
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models",
+                  return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compute_structural_fingerprint",
+                  return_value=fp),
+            patch("nodes.exit.compute_base_identity",
+                  return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.compile_batch_groups",
+                  return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation",
+                  return_value=new_results),
+            patch("nodes.exit.validate_model_name",
+                  return_value="test.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path",
+                  return_value="/tmp/test.safetensors"),
+            patch("nodes.exit.serialize_recipe",
+                  return_value='{"test": true}'),
+            patch("nodes.exit.compute_recipe_hash",
+                  return_value="recipe_hash"),
+            patch("nodes.exit.check_cache", return_value=None),
+            patch("nodes.exit.build_metadata",
+                  return_value={"__ecaj_version__": "1"}),
+            patch("nodes.exit.atomic_save", atomic_save_mock),
+        ):
+            node = WIDENExitNode()
+            node.execute(
+                recipe, save_model=True, model_name="test",
+            )
+
+        # atomic_save should have been called
+        atomic_save_mock.assert_called_once()
+        saved_state = atomic_save_mock.call_args[0][0]
+
+        # Saved state should contain ALL keys (complete merged state)
+        for k in keys:
+            assert k in saved_state, (
+                f"Key {k} missing from saved state"
+            )
 
 
 # ===========================================================================
