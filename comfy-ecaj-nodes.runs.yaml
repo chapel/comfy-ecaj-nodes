@@ -1898,7 +1898,7 @@ runs:
   - _ulid: 01KHHJ7JVZMDX6MYVMM0JP2QVH
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 4
+    current_step: 5
     total_steps: 6
     started_at: 2026-02-15T21:10:16.192Z
     step_results:
@@ -1937,5 +1937,11 @@ runs:
       - step_index: 4
         status: completed
         started_at: 2026-02-15T21:11:09.452Z
-        completed_at: 2026-02-15T21:11:09.452Z
+        completed_at: 2026-02-15T21:17:19.791Z
+        notes: User approved Improvement A — added to kynetic-spec inbox (01KHHJMA) tagged
+          kspec-cli+reflection. User skipped Improvement B (spike tag detection) — rare edge case.
+      - step_index: 5
+        status: completed
+        started_at: 2026-02-15T21:17:19.791Z
+        completed_at: 2026-02-15T21:17:19.791Z
     initiated_by: "@claude"
