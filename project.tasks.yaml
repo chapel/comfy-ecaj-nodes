@@ -5034,6 +5034,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.634Z
+  started_at: 2026-02-15T22:22:29.898Z
   notes:
     - _ulid: 01KHHE6KC2HJVB9NGZ5FNREM8P
       created_at: 2026-02-15T19:59:49.634Z
@@ -5047,9 +5048,19 @@
         sets. Key mapping: conditioner.embedders.0.transformer.* -> clip_l.*,
         conditioner.embedders.1.transformer.* -> clip_g.*. Validate embedder
         count and ordering during init. Verify against real SDXL checkpoints.
+    - _ulid: 01KHHPK9ZQEAHXQQ5R6BTJ6FVA
+      created_at: 2026-02-15T22:26:34.615Z
+      author: "@claude"
+      content: "Implemented CLIPModelLoader: (1) Created lib/clip_model_loader.py with streaming loader
+        for text encoder weights from checkpoints, (2) Key normalization maps
+        conditioner.embedders.0.* to clip_l.* and embedders.1.* to clip_g.*, (3) Validates embedder
+        structure, raises CLIPKeyMappingError for unexpected indices, (4) Excludes diffusion model
+        and VAE keys (inverse of ModelLoader), (5) Uses safe_open() for memory-efficient access, (6)
+        Reuses UnsupportedFormatError from model_loader. 35 new tests covering all 7 ACs. 1079 tests
+        pass, ruff clean."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-15T22:22:29.898Z
 - _ulid: 01KHHE6KDVABV5Z7KKEJ3H0SJ7
   slugs:
     - rename-model-input-display
