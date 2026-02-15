@@ -1884,7 +1884,7 @@ features:
         created: 2026-02-15T19:59:49.158Z
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
       - _ulid: 01KHHE6JY9EFKY49S0MGQJAP1P
         slugs:
           - sdxl-clip-block-config
