@@ -1,0 +1,315 @@
+{
+  "generated_at": "2026-02-15T21:51:24.358Z",
+  "branch": "feat/implement-recipe-domain-field",
+  "context": {
+    "focus": null,
+    "threads": [],
+    "open_questions": [],
+    "updated_at": "2026-02-15T21:51:24.358Z"
+  },
+  "active_tasks": [],
+  "pending_review_tasks": [
+    {
+      "ref": "01KHHE6K3",
+      "title": "Implement Recipe Domain Field",
+      "started_at": "2026-02-15T21:44:35.322Z",
+      "priority": 2,
+      "spec_ref": "@recipe-domain-field",
+      "note_count": 2,
+      "last_note_at": "2026-02-15T21:50:15.604Z",
+      "todo_count": 0,
+      "incomplete_todos": 0
+    }
+  ],
+  "recent_notes": [
+    {
+      "task_ref": "01KHHE6K3",
+      "task_title": "Implement Recipe Domain Field",
+      "task_status": "pending_review",
+      "note_ulid": "01KHHMGT",
+      "created_at": "2026-02-15T21:50:15.604Z",
+      "author": "@claude",
+      "content": "Implemented domain field infrastructure: (1) Added domain: str = 'diffusion' to RecipeBase, (2) Updated get_loader() to dispatch on (arch, domain) - CLIP loaders registered as '{arch}_clip', (3) Updated analyze_recipe and analyze_recipe_models to pass domain, (4) Updated classify_key to dispatch on domain - CLIP classifiers registered as '{arch}_clip', (5) Updated serialize_recipe to include domain in JSON, (6) 28 tests covering all 9 ACs. 924 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHHE6K2",
+      "task_title": "Implement Diffusion Model Path Resolution",
+      "task_status": "completed",
+      "note_ulid": "01KHHKT3",
+      "created_at": "2026-02-15T21:37:51.712Z",
+      "author": "@claude",
+      "content": "Fixed ac-6 (serialize_recipe includes source_dir) and ac-8 (compute_lora_stats passes source_dir to model_resolver). Added 6 tests covering both ACs. All other ACs were already implemented: ac-1/ac-2/ac-5 (_build_model_resolver), ac-3 (analyze_recipe_models), ac-4 (RecipeModel dataclass), ac-7 (_compute_recipe_hash), ac-9 (implicit - hash change causes silent cache miss)."
+    },
+    {
+      "task_ref": "01KHHE6K1",
+      "task_title": "Implement Diffusion Model Input Node",
+      "task_status": "completed",
+      "note_ulid": "01KHHKEE",
+      "created_at": "2026-02-15T21:31:29.263Z",
+      "author": "@claude",
+      "content": "Implemented: (1) Added source_dir field to RecipeModel with default 'checkpoints', (2) Created WIDENDiffusionModelInputNode in nodes/diffusion_model_input.py with source_dir='diffusion_models' and unet fallback, (3) Updated analyze_recipe_models and _compute_recipe_hash to use source_dir for path resolution, (4) Updated _build_model_resolver to accept (name, source_dir) tuple and handle diffusion_models/unet fallback, (5) 18 tests covering all 8 ACs. 890 tests pass, ruff clean."
+    },
+    {
+      "task_ref": "01KHHE6KF",
+      "task_title": "Investigate ComfyUI CLIP clone and patch API",
+      "task_status": "completed",
+      "note_ulid": "01KHHJ2F",
+      "created_at": "2026-02-15T21:07:28.723Z",
+      "author": "@claude",
+      "content": "## Spike Findings: ComfyUI CLIP clone and patch API\n\n### Q1: Does ComfyUI CLIP use ModelPatcher internally?\n\n**YES.** The CLIP class (comfy/sd.py:103-163) wraps its cond_stage_model in a ModelPatcher at line 131:\n\n    self.patcher = comfy.model_patcher.ModelPatcher(\n        self.cond_stage_model, load_device=load_device, offload_device=offload_device)\n\nThe patcher gets is_clip=True and hook_mode=MinVram.\n\n### Q2: Can add_patches('set', ...) apply CLIP weight patches?\n\n**YES.** CLIP.add_patches() delegates directly to self.patcher.add_patches() (sd.py:179-180). The same ('set', (tensor,)) patch format used for diffusion models works identically for CLIP. ComfyUI's own load_lora_for_models() at sd.py:72-100 demonstrates this — it calls clip.clone() then clip.add_patches(loaded, strength_clip) with exactly the same pattern as model patching.\n\n### Q3: What is the CLIP clone/patch API?\n\nCLIP.clone() (sd.py:165-174):\n- Creates a new CLIP(no_init=True)\n- Clones the patcher: n.patcher = self.patcher.clone()\n- SHARES cond_stage_model: n.cond_stage_model = self.cond_stage_model\n- Copies tokenizer, layer_idx, tokenizer_options\n\nThis is the SAME clone-and-patch pattern as the diffusion model pipeline. Our install_merged_patches() in exit.py should work on CLIP objects with minimal adaptation:\n1. Call clip.clone() instead of model_patcher.clone()\n2. Call clip.add_patches(patches, strength_patch=1.0) instead of model_patcher.add_patches(...)\n3. Or equivalently, work at the patcher level: clip.patcher.clone() + patcher.add_patches()\n\n### Q4: How to access CLIP state dict keys without loading weights to GPU?\n\nUse clip.patcher.model_state_dict() (model_patcher.py:604-612). This calls self.model.state_dict() under use_ejected() context, returning CPU tensors without GPU load.\n\nFor SDXL, the cond_stage_model is SDXLClipModel (sdxl_clip.py:41-68) which has:\n- self.clip_l (SD1 CLIP, 12 layers): keys like clip_l.transformer.text_model.encoder.layers.{N}.{component}.weight\n- self.clip_g (CLIP-G, 32 layers): keys like clip_g.transformer.text_model.encoder.layers.{N}.{component}.weight\n\nThe state_dict() returns ALL these keys together with their correct prefixes.\n\n### Key Architecture Details\n\n**State dict key format (SDXL CLIP):**\n- clip_l.transformer.text_model.encoder.layers.{0-11}.self_attn.{q,k,v,out}_proj.{weight,bias}\n- clip_l.transformer.text_model.encoder.layers.{0-11}.mlp.fc{1,2}.{weight,bias}\n- clip_l.transformer.text_model.encoder.layers.{0-11}.layer_norm{1,2}.{weight,bias}\n- clip_l.transformer.text_model.embeddings.token_embedding.weight\n- clip_l.transformer.text_model.embeddings.position_embedding.weight\n- clip_l.transformer.text_model.final_layer_norm.{weight,bias}\n- (same pattern for clip_g with 32 layers instead of 12)\n\n**LoRA key mapping (from comfy/lora.py:97-156):**\n- lora_te1_text_model_encoder_layers_{N}_{component} → clip_l.transformer.text_model.encoder.layers.{N}.{component}.weight\n- lora_te2_text_model_encoder_layers_{N}_{component} → clip_g.transformer.text_model.encoder.layers.{N}.{component}.weight\n- Also supports generic format: text_encoders.{full_key_without_.weight} → {full_key}\n\n**_unpatch_loaded_clones concern:**\nThe existing _unpatch_loaded_clones() in exit.py uses is_clone() which works across ALL ModelPatcher instances. A CLIP patcher clone would be detected correctly. However, the CLIP exit node should implement its own unpatch using the CLIP's patcher, not the diffusion model patcher.\n\n### Impact on Implementation\n\n1. **CLIP Entry node**: Access keys via clip.patcher.model_state_dict().keys() — zero GPU cost\n2. **CLIP Exit node**: Clone clip, install merged patches via add_patches('set', ...), return CLIP — same pattern as diffusion Exit\n3. **CLIP LoRA loader**: Map lora_te1_ → clip_l, lora_te2_ → clip_g (confirmed by comfy/lora.py)\n4. **CLIP Model loader**: Include conditioner.embedders.* keys, normalize to clip_l/clip_g format\n5. **Arch detection**: Check for both clip_l and clip_g prefixes in state dict → SDXL"
+    },
+    {
+      "task_ref": "01KHHE6KF",
+      "task_title": "Investigate ComfyUI CLIP clone and patch API",
+      "task_status": "completed",
+      "note_ulid": "01KHHH74",
+      "created_at": "2026-02-15T20:52:33.107Z",
+      "author": "@claude",
+      "content": "Automation status set to manual_only: Spike - output is knowledge (documented in task notes), not code"
+    },
+    {
+      "task_ref": "01KHHE6K3",
+      "task_title": "Implement Recipe Domain Field",
+      "task_status": "pending_review",
+      "note_ulid": "01KHHE6K",
+      "created_at": "2026-02-15T19:59:49.360Z",
+      "author": "@claude",
+      "content": "Implementation notes:\n\nAdd domain: str = \"diffusion\" to RecipeBase. Update get_loader()\nsignature to accept domain param. Update analyze_recipe() and\nanalyze_recipe_models() to pass domain through. Update\nclassify_key() to accept and dispatch on domain. Update\npersistence serialization. This is a cross-cutting change that\nenables the entire CLIP pipeline.\n"
+    }
+  ],
+  "active_todos": [],
+  "ready_tasks": [],
+  "blocked_tasks": [],
+  "recently_completed": [
+    {
+      "ref": "01KHHE6K2",
+      "title": "Implement Diffusion Model Path Resolution",
+      "completed_at": "2026-02-15T21:43:48.682Z",
+      "closed_reason": "Merged in PR #70. Implemented diffusion model path resolution with source_dir support:\n\n- ac-6: serialize_recipe now includes source_dir in JSON output\n- ac-8: compute_lora_stats passes source_dir to model_resolver\n\nAll 9 ACs verified:\n- ac-1/ac-2/ac-5: _build_model_resolver resolves paths by source_dir\n- ac-3: Independent resolution for mixed trees\n- ac-4: RecipeModel.source_dir defaults to \"checkpoints\"\n- ac-6: serialize_recipe includes source_dir (6 new tests)\n- ac-7: _compute_recipe_hash includes source_dir in hash\n- ac-8: compute_lora_stats uses correct folder (6 new tests)\n- ac-9: Silent cache miss on hash change (implicit)\n\nCI passed (lint + test), 12 new tests added."
+    },
+    {
+      "ref": "01KHHE6K1",
+      "title": "Implement Diffusion Model Input Node",
+      "completed_at": "2026-02-15T21:34:29.052Z",
+      "closed_reason": "Merged in PR #69. Implemented WIDENDiffusionModelInputNode that produces RecipeModel from diffusion_models directory (with unet fallback). Added source_dir field to RecipeModel. All 8 ACs verified with 18 tests. 890 tests pass, ruff clean."
+    },
+    {
+      "ref": "01KHHE6KD",
+      "title": "Rename existing Model Input node display name",
+      "completed_at": "2026-02-15T21:21:26.171Z",
+      "closed_reason": "Merged in PR #68. Renamed Model Input node display name from 'WIDEN Model Input' to 'WIDEN Checkpoint Input' in NODE_DISPLAY_NAME_MAPPINGS. This preparatory change clarifies the existing node reads from checkpoints/ directory, distinguishing it from the upcoming Diffusion Model Input node."
+    },
+    {
+      "ref": "01KHHE6KF",
+      "title": "Investigate ComfyUI CLIP clone and patch API",
+      "completed_at": "2026-02-15T21:07:37.385Z",
+      "closed_reason": null
+    },
+    {
+      "ref": "01KHGYM2",
+      "title": "Rework t_factor semantics: 0=base-only, remove negative values",
+      "completed_at": "2026-02-15T15:29:51.070Z",
+      "closed_reason": "Implemented t_factor rework: 0=base-only, removed negative values. 4 spec ACs updated/added, code in widen.py + merge.py, tests updated. 870 tests pass, ruff clean."
+    },
+    {
+      "ref": "01KHFZ61",
+      "title": "Implement: Incremental Block Recomputation",
+      "completed_at": "2026-02-15T06:29:30.940Z",
+      "closed_reason": "Implemented incremental block recomputation: structural fingerprint in persistence.py, change detection in block_classify.py, LRU-1 cache in exit.py. 41 tests covering all 16 ACs, 862 total tests pass, ruff clean."
+    },
+    {
+      "ref": "01KHDRCK",
+      "title": "Apply per-block strength scaling to model weights in OpApplyModel",
+      "completed_at": "2026-02-14T09:43:29.104Z",
+      "closed_reason": "Implemented per-block strength scaling for model weights in OpApplyModel. Added _apply_per_block_lora_strength call mirroring LoRA pattern. AC-15 covered with 2 tests. PR #64 created, awaiting CI/merge."
+    },
+    {
+      "ref": "01KHDHEGX",
+      "title": "Implement Flux Klein block config node and registration",
+      "completed_at": "2026-02-14T08:38:56.263Z",
+      "closed_reason": "Merged in PR #62. Implemented WIDENBlockConfigFlux node with 32 block sliders (DB00-DB07 + SB00-SB23) plus 3 layer-type sliders (attention, feed_forward, norm). Registered in NODE_CLASS_MAPPINGS. Klein 4B/9B variants handled with same 'flux' arch tag. All ACs covered: ac-9 (block sliders), ac-10 (variant handling), ac-11 (registry wiring). 18 tests added, all 815 tests pass."
+    },
+    {
+      "ref": "01KHDHEGW",
+      "title": "Implement Flux Klein model loader support",
+      "completed_at": "2026-02-14T08:31:39.765Z",
+      "closed_reason": "Merged in PR #61. Implemented Flux Klein model loader support with architecture detection from double_blocks pattern and key normalization (transformer. → diffusion_model.). 9 tests covering ac-8. All CI checks passed."
+    },
+    {
+      "ref": "01KHDHEGV",
+      "title": "Implement Flux Klein LoRA loader",
+      "completed_at": "2026-02-14T08:26:22.584Z",
+      "closed_reason": "Merged in PR #60. Implemented FluxLoader for Flux Klein architecture (4B/9B) with: double_block img_attn/txt_attn QKV fusing using qkv_q/qkv_k/qkv_v kinds with offsets; single_block linear1 4-way fusing (to_q/to_k/to_v/proj_mlp) with offset_mlp kind; support for BFL/kohya and diffusers LoRA formats; registered in LOADER_REGISTRY. AC coverage verified: ac-4 (double_block QKV fusing), ac-5 (single_block linear1 fusing), ac-6 (BFL/kohya format), ac-7 (diffusers format). 12 tests added, all 789 tests pass."
+    }
+  ],
+  "recent_commits": [
+    {
+      "hash": "31815cb",
+      "full_hash": "31815cb635fd0b40955a6266d205175b38d7166d",
+      "date": "2026-02-15T21:50:30.000Z",
+      "message": "feat: implement recipe domain field for CLIP pipeline support",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "e946dd9",
+      "full_hash": "e946dd9e48d1eb94641bfae918e5cc7ac7ad9240",
+      "date": "2026-02-15T21:43:31.000Z",
+      "message": "Merge pull request #70 from chapel/feat/implement-diffusion-model-path-resolution",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "d049b7d",
+      "full_hash": "d049b7dfa3cc7e014ae0585af27a7bcd0e162bd4",
+      "date": "2026-02-15T21:38:11.000Z",
+      "message": "feat: implement diffusion model path resolution (ac-6, ac-8)",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "0236be8",
+      "full_hash": "0236be83775185672dad0a19da00b2285445feb6",
+      "date": "2026-02-15T21:34:18.000Z",
+      "message": "Merge pull request #69 from chapel/feat/implement-diffusion-model-input-node",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "d7e9515",
+      "full_hash": "d7e951549fdb78eb1c75ca1740f39979d49a6cb5",
+      "date": "2026-02-15T21:31:53.000Z",
+      "message": "feat: implement WIDEN Diffusion Model Input node",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "014594b",
+      "full_hash": "014594bb6200ef80d940d3b7f52a234c2352ca03",
+      "date": "2026-02-15T21:21:17.000Z",
+      "message": "Merge pull request #68 from chapel/fix/rename-model-input-display",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "ec61944",
+      "full_hash": "ec6194465cacc9fcb4c63a82dbb3fe484c1c9640",
+      "date": "2026-02-15T21:19:25.000Z",
+      "message": "fix: rename Model Input display name to Checkpoint Input",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "2603994",
+      "full_hash": "260399441bdc57b1552f83b132da59ad6c2ec897",
+      "date": "2026-02-15T17:07:53.000Z",
+      "message": "Merge pull request #67 from chapel/feat/rework-t-factor-semantics",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "62c5825",
+      "full_hash": "62c58250a34a835902597f69989d90d504b7f48c",
+      "date": "2026-02-15T17:06:44.000Z",
+      "message": "fix: address review findings — dead guard and docstring",
+      "author": "Jacob Chapel"
+    },
+    {
+      "hash": "1028605",
+      "full_hash": "1028605761409d753c838f69404c31f1f65d23e9",
+      "date": "2026-02-15T15:29:39.000Z",
+      "message": "feat: rework t_factor semantics — 0 = base only, remove negative values",
+      "author": "Jacob Chapel"
+    }
+  ],
+  "working_tree": {
+    "clean": true,
+    "staged": [],
+    "unstaged": [],
+    "untracked": []
+  },
+  "inbox_items": [
+    {
+      "ref": "01KHCXS4",
+      "text": "Recipe serialization as a trait/protocol — serialize_recipe currently uses isinstance checks for each recipe type. Should be a protocol method on RecipeNode so new recipe types implement their own serialization. Prevents silent skips and keeps persistence.py decoupled from recipe type enumeration.",
+      "created_at": "2026-02-14T01:55:53.531Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS7",
+      "text": "compute_lora_stats._walk() silently ignores unknown recipe node types — should raise ValueError like serialize_recipe does. Related to serialization-as-trait refactor.",
+      "created_at": "2026-02-14T01:55:56.494Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHCXS9",
+      "text": "load_affected_keys should wrap safetensors errors with helpful message pointing to cached file corruption — tells users to delete and re-run.",
+      "created_at": "2026-02-14T01:55:58.446Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHDNHH",
+      "text": "kspec plan import should wire depends_on from task YAML — currently ignores the field, requiring manual kspec batch to set dependencies after import. Encountered when importing Qwen/Flux plan with 4 dependent tasks.",
+      "created_at": "2026-02-14T08:51:10.255Z",
+      "tags": [
+        "reflection",
+        "kspec"
+      ],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHDX4R",
+      "text": "Add test for composed strength + block_config on OpApplyModel (strength != 1.0 AND block_config both active)",
+      "created_at": "2026-02-14T11:04:00.499Z",
+      "tags": [
+        "test"
+      ],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHFVFM",
+      "text": "v2: Auto per-block LoRA importance analysis for targeted merging — compute Frobenius norm of B@A per block at recipe build time to auto-populate per-block strengths. Could extend to SVD spectral analysis, TIES/DARE pruning during merge execution, and TSV interference detection for multi-LoRA conflict prediction. Natural hook point: existing per_block.py infrastructure. See FreeFuse (spatial segmentation, different problem), LoRA Inspector, resize_lora, LoRA Power-Merger, Task Singular Vectors paper for prior art.",
+      "created_at": "2026-02-15T05:13:28.800Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHG2ZK",
+      "text": "Missing AC-10 test for incremental-block-recompute — no test covers save_model=True partial-recompute path with saved-state + metadata behavior. Flagged by codex review on PR #66.",
+      "created_at": "2026-02-15T07:24:31.884Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHG2ZP",
+      "text": "Incremental recompute cache-hit tests lack bit-identical output assertions — AC-2 requires bit-identical output vs full recompute, but tests only check that chunked_evaluation is not called, never comparing output tensors. Flagged by codex review on PR #66.",
+      "created_at": "2026-02-15T07:24:35.005Z",
+      "tags": [],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHG3A2",
+      "text": "Add test helper fixture for block config node kwargs — generate full kwargs from node.INPUT_TYPES() with defaults, so tests only need to override specific values. Would prevent the 15+ manual edits needed when adding new sliders (as happened with structural keys fix).",
+      "created_at": "2026-02-15T07:30:15.101Z",
+      "tags": [
+        "reflection",
+        "test"
+      ],
+      "added_by": "@claude"
+    },
+    {
+      "ref": "01KHHGS4",
+      "text": "kspec plan import puts manual task description field into notes instead of task description — task shows no Description section, only notes. Means manual tasks from plan import are less self-documenting than spec-derived tasks. Related to 01KHDNHH (depends_on gap) — both are plan import fidelity issues.",
+      "created_at": "2026-02-15T20:44:54.504Z",
+      "tags": [
+        "reflection",
+        "kspec"
+      ],
+      "added_by": "@claude"
+    }
+  ],
+  "stats": {
+    "total_tasks": 90,
+    "in_progress": 0,
+    "pending_review": 1,
+    "ready": 1,
+    "blocked": 0,
+    "completed": 80,
+    "inbox_items": 10
+  }
+}

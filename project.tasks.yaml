@@ -4780,7 +4780,7 @@
   type: task
   spec_ref: "@clip-entry-node"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -4823,6 +4823,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-15T21:57:45.365Z
+  closed_reason: "Merged in PR #72. Implemented WIDENCLIPEntryNode that wraps ComfyUI CLIP in
+    RecipeBase with domain='clip'. Architecture detection via clip.patcher.model_state_dict() keys
+    (zero GPU). SDXL detected from clip_l+clip_g prefixes; non-SDXL raises
+    UnsupportedCLIPArchitectureError. All 7 ACs verified with 15 tests."
 - _ulid: 01KHHE6K733GXVMAQKB1QEDPQD
   slugs:
     - implement-clip-exit-node
