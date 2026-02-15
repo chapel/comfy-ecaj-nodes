@@ -65,12 +65,16 @@ class TestBlockClassifySDXL:
         assert classify_key_sdxl("diffusion_model.middle_block.0.weight") == "MID"
         assert classify_key_sdxl("diffusion_model.output_blocks.3.0.weight") == "OUT03"
 
+    def test_non_block_structural_keys(self):
+        """Non-block structural keys classify to named groups."""
+        assert classify_key_sdxl("time_embed.0.weight") == "TIME_EMBED"
+        assert classify_key_sdxl("label_emb.weight") == "LABEL_EMB"
+        assert classify_key_sdxl("out.0.weight") == "FINAL_OUT"
+
     def test_unmatched_returns_none(self):
-        """Keys not matching any block return None."""
+        """Keys not matching any known pattern return None."""
         # AC: @merge-block-config ac-2
-        assert classify_key_sdxl("time_embed.0.weight") is None
-        assert classify_key_sdxl("label_emb.weight") is None
-        assert classify_key_sdxl("out.0.weight") is None
+        assert classify_key_sdxl("unknown_module.weight") is None
 
 
 class TestBlockClassifyZImage:
@@ -120,11 +124,15 @@ class TestBlockClassifyZImage:
         assert classify_key_zimage("noise_refiner.attn.qkv.weight") is None
         assert classify_key_zimage("context_refiner.mlp.fc2.weight") is None
 
+    def test_non_block_structural_keys(self):
+        """Non-block structural keys classify to named groups."""
+        assert classify_key_zimage("patch_embed.weight") == "PATCH_EMBED"
+        assert classify_key_zimage("final_norm.weight") == "FINAL_NORM"
+
     def test_unmatched_returns_none(self):
-        """Keys not matching any block return None."""
+        """Keys not matching any known pattern return None."""
         # AC: @merge-block-config ac-2
-        assert classify_key_zimage("patch_embed.weight") is None
-        assert classify_key_zimage("final_norm.weight") is None
+        assert classify_key_zimage("unknown_module.weight") is None
 
 
 class TestBlockClassifyQwen:
@@ -151,11 +159,16 @@ class TestBlockClassifyQwen:
         assert classify_key_qwen(key) == "TB15"
 
     # AC: @qwen-detect-classify ac-2
+    def test_non_block_structural_keys(self):
+        """Non-block structural keys classify to named groups."""
+        assert classify_key_qwen("time_embed.0.weight") == "TIME_EMBED"
+        assert classify_key_qwen("final_norm.weight") == "FINAL_NORM"
+
+    # AC: @qwen-detect-classify ac-2
     def test_unmatched_returns_none(self):
-        """Keys not matching any block return None."""
-        assert classify_key_qwen("time_embed.0.weight") is None
-        assert classify_key_qwen("final_norm.weight") is None
+        """Keys not matching any known pattern return None."""
         assert classify_key_qwen("transformer_blocks.attn.weight") is None
+        assert classify_key_qwen("unknown_module.weight") is None
 
 
 class TestBlockClassifyFlux:
@@ -198,16 +211,21 @@ class TestBlockClassifyFlux:
         assert classify_key_flux("single_blocks.23.linear1.weight") == "SB23"
 
     # AC: @flux-klein-support ac-2
+    def test_non_block_structural_keys(self):
+        """Non-block structural keys classify to named groups."""
+        assert classify_key_flux("guidance_in.weight") == "GUIDANCE_IN"
+        assert classify_key_flux("time_in.weight") == "TIME_IN"
+        assert classify_key_flux("vector_in.weight") == "VECTOR_IN"
+        assert classify_key_flux("img_in.weight") == "IMG_IN"
+        assert classify_key_flux("txt_in.weight") == "TXT_IN"
+        assert classify_key_flux("final_layer.weight") == "FINAL_LAYER"
+
+    # AC: @flux-klein-support ac-2
     def test_unmatched_returns_none(self):
-        """Non-block keys return None."""
-        assert classify_key_flux("guidance_in.weight") is None
-        assert classify_key_flux("time_in.weight") is None
-        assert classify_key_flux("vector_in.weight") is None
-        assert classify_key_flux("img_in.weight") is None
-        assert classify_key_flux("txt_in.weight") is None
-        assert classify_key_flux("final_layer.weight") is None
+        """Keys not matching any known pattern return None."""
         # Missing block index
         assert classify_key_flux("double_blocks.img_attn.weight") is None
+        assert classify_key_flux("unknown_module.weight") is None
 
 
 class TestGetBlockClassifier:
@@ -336,7 +354,7 @@ class TestGetBlockTFactors:
 
         AC: @merge-block-config ac-2
         """
-        keys = ["time_embed.0.weight", "label_emb.weight"]  # No block match
+        keys = ["time_embed.0.weight", "label_emb.weight"]  # TIME_EMBED/LABEL_EMB, no override
         config = BlockConfig(
             arch="sdxl",
             block_overrides=(("IN00", 0.5),),
@@ -347,7 +365,7 @@ class TestGetBlockTFactors:
             keys, block_config=config, arch="sdxl", default_t_factor=default_t
         )
 
-        # Both keys don't match any block, use default
+        # Both keys have no override entry, use default
         assert len(groups) == 1
         assert 1.0 in groups
         assert len(groups[1.0]) == 2
@@ -611,7 +629,7 @@ class TestLayerTypeTFactor:
             "input_blocks.1.1.transformer_blocks.0.attn1.to_q.weight",  # IN01, attention
             "input_blocks.1.1.transformer_blocks.0.ff.net.0.proj.weight",  # IN01, feed_forward
             "input_blocks.1.1.transformer_blocks.0.norm1.weight",  # IN01, norm
-            "time_embed.0.weight",  # no block, no layer type
+            "time_embed.0.weight",  # TIME_EMBED (no override), no layer type
         ]
         config = BlockConfig(
             arch="sdxl",

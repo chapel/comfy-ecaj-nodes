@@ -8,7 +8,15 @@ from .block_config import make_block_config_node
 # Total: 32 block sliders for Klein 9B max
 _FLUX_DOUBLE_BLOCKS = tuple((f"DB{i:02d}", f"DB{i:02d}") for i in range(8))
 _FLUX_SINGLE_BLOCKS = tuple((f"SB{i:02d}", f"SB{i:02d}") for i in range(24))
-_FLUX_BLOCKS = _FLUX_DOUBLE_BLOCKS + _FLUX_SINGLE_BLOCKS
+_FLUX_NON_BLOCK = (
+    ("GUIDANCE_IN", "GUIDANCE_IN"),
+    ("TIME_IN", "TIME_IN"),
+    ("VECTOR_IN", "VECTOR_IN"),
+    ("IMG_IN", "IMG_IN"),
+    ("TXT_IN", "TXT_IN"),
+    ("FINAL_LAYER", "FINAL_LAYER"),
+)
+_FLUX_BLOCKS = _FLUX_DOUBLE_BLOCKS + _FLUX_SINGLE_BLOCKS + _FLUX_NON_BLOCK
 
 # Layer type overrides for cross-cutting control (ac-5)
 _LAYER_TYPES = (
@@ -27,6 +35,7 @@ Produces BlockConfig for Flux Klein architecture with individual block sliders.
 Flux Klein block structure:
 - double_blocks: DB00-DB07 (8 blocks for 9B, 5 for 4B)
 - single_blocks: SB00-SB23 (24 blocks for 9B, 20 for 4B)
+- non-block: GUIDANCE_IN, TIME_IN, VECTOR_IN, IMG_IN, TXT_IN, FINAL_LAYER (structural keys)
 
 Klein 4B models have 5 double + 20 single blocks; unused sliders (DB05-DB07, SB20-SB23)
 remain at default 1.0 and are effectively no-ops for that model variant.
