@@ -45,3 +45,10 @@ inbox:
     created_at: 2026-02-15T05:13:28.800Z
     tags: []
     added_by: "@claude"
+  - _ulid: 01KHG2ZKRCDWGZQJ84N4BTNCKT
+    text: "Missing AC-10 test for incremental-block-recompute — no test covers save_model=True
+      partial-recompute path with saved-state + metadata behavior. Flagged by codex review on PR
+      #66."
+    created_at: 2026-02-15T07:24:31.884Z
+    tags: []
+    added_by: "@claude"
