@@ -9,11 +9,10 @@ from unittest.mock import MagicMock
 import pytest
 import torch
 
+from lib.analysis import collect_lora_paths, compute_recipe_file_hash
 from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 from nodes.exit import (
     WIDENExitNode,
-    _collect_lora_paths,
-    _compute_recipe_hash,
     _unpatch_loaded_clones,
     install_merged_patches,
 )
@@ -210,18 +209,18 @@ class TestUnpatchLoadedClones:
 
 
 class TestCollectLoraPaths:
-    """Tests for _collect_lora_paths helper."""
+    """Tests for collect_lora_paths helper."""
 
     def test_recipe_base_returns_empty(self, mock_model_patcher: MockModelPatcher):
         """RecipeBase has no LoRA paths."""
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
-        paths = _collect_lora_paths(base)
+        paths = collect_lora_paths(base)
         assert paths == []
 
     def test_recipe_lora_single(self):
         """RecipeLoRA with one LoRA returns its path."""
         lora = RecipeLoRA(loras=({"path": "lora_a.safetensors", "strength": 1.0},))
-        paths = _collect_lora_paths(lora)
+        paths = collect_lora_paths(lora)
         assert paths == ["lora_a.safetensors"]
 
     def test_recipe_lora_multiple(self):
@@ -232,7 +231,7 @@ class TestCollectLoraPaths:
                 {"path": "lora_b.safetensors", "strength": 0.5},
             )
         )
-        paths = _collect_lora_paths(lora)
+        paths = collect_lora_paths(lora)
         assert paths == ["lora_a.safetensors", "lora_b.safetensors"]
 
     def test_recipe_compose(self):
@@ -240,7 +239,7 @@ class TestCollectLoraPaths:
         lora_a = RecipeLoRA(loras=({"path": "lora_a.safetensors", "strength": 1.0},))
         lora_b = RecipeLoRA(loras=({"path": "lora_b.safetensors", "strength": 0.5},))
         compose = RecipeCompose(branches=(lora_a, lora_b))
-        paths = _collect_lora_paths(compose)
+        paths = collect_lora_paths(compose)
         assert "lora_a.safetensors" in paths
         assert "lora_b.safetensors" in paths
 
@@ -250,7 +249,7 @@ class TestCollectLoraPaths:
         target = RecipeLoRA(loras=({"path": "lora_a.safetensors", "strength": 1.0},))
         backbone_lora = RecipeLoRA(loras=({"path": "backbone.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=target, backbone=backbone_lora, t_factor=1.0)
-        paths = _collect_lora_paths(merge)
+        paths = collect_lora_paths(merge)
         assert "lora_a.safetensors" in paths
         assert "backbone.safetensors" in paths
 
@@ -268,12 +267,12 @@ class TestCollectLoraPaths:
         # Merge 2: merge1 + compose
         merge2 = RecipeMerge(base=merge1, target=compose, backbone=None, t_factor=0.8)
 
-        paths = _collect_lora_paths(merge2)
+        paths = collect_lora_paths(merge2)
         assert set(paths) == {"lora_a.safetensors", "lora_b.safetensors", "lora_c.safetensors"}
 
 
 class TestComputeRecipeHash:
-    """Tests for _compute_recipe_hash function."""
+    """Tests for compute_recipe_file_hash function."""
 
     # AC: @exit-patch-install ac-5
     def test_identical_hash_no_changes(self):
@@ -286,8 +285,8 @@ class TestComputeRecipeHash:
 
             lora = RecipeLoRA(loras=({"path": "lora_a.safetensors", "strength": 1.0},))
 
-            hash1 = _compute_recipe_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
-            hash2 = _compute_recipe_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
+            hash1 = compute_recipe_file_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
+            hash2 = compute_recipe_file_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
 
             assert hash1 == hash2
 
@@ -302,7 +301,7 @@ class TestComputeRecipeHash:
                 f.write(b"initial data")
 
             lora = RecipeLoRA(loras=({"path": "lora_a.safetensors", "strength": 1.0},))
-            hash1 = _compute_recipe_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
+            hash1 = compute_recipe_file_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
 
             # Wait to ensure mtime changes (filesystem resolution)
             time.sleep(0.1)
@@ -311,7 +310,7 @@ class TestComputeRecipeHash:
             with open(lora_path, "wb") as f:
                 f.write(b"modified data with more content")
 
-            hash2 = _compute_recipe_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
+            hash2 = compute_recipe_file_hash(lora, lora_path_resolver=_dir_resolver(tmpdir))
 
             assert hash1 != hash2
 
@@ -321,8 +320,8 @@ class TestComputeRecipeHash:
         lora_b = RecipeLoRA(loras=({"path": "lora_b.safetensors", "strength": 1.0},))
 
         # Both files don't exist, but paths differ
-        hash_a = _compute_recipe_hash(lora_a)
-        hash_b = _compute_recipe_hash(lora_b)
+        hash_a = compute_recipe_file_hash(lora_a)
+        hash_b = compute_recipe_file_hash(lora_b)
 
         assert hash_a != hash_b
 
@@ -330,8 +329,8 @@ class TestComputeRecipeHash:
         """Missing file produces consistent hash (sentinel values)."""
         lora = RecipeLoRA(loras=({"path": "nonexistent.safetensors", "strength": 1.0},))
 
-        hash1 = _compute_recipe_hash(lora)
-        hash2 = _compute_recipe_hash(lora)
+        hash1 = compute_recipe_file_hash(lora)
+        hash2 = compute_recipe_file_hash(lora)
 
         assert hash1 == hash2
 
@@ -345,8 +344,8 @@ class TestComputeRecipeHash:
         compose1 = RecipeCompose(branches=(lora_a, lora_b, lora_c))
         compose2 = RecipeCompose(branches=(lora_c, lora_a, lora_b))
 
-        hash1 = _compute_recipe_hash(compose1)
-        hash2 = _compute_recipe_hash(compose2)
+        hash1 = compute_recipe_file_hash(compose1)
+        hash2 = compute_recipe_file_hash(compose2)
 
         # Same files, different order in tree — should produce same hash
         assert hash1 == hash2

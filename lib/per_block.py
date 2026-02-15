@@ -30,6 +30,7 @@ def _apply_per_block_lora_strength(
     arch: str,
     device: str,
     dtype: torch.dtype,
+    domain: str = "diffusion",
 ) -> torch.Tensor:
     """Apply per-block strength scaling to LoRA deltas.
 
@@ -66,14 +67,14 @@ def _apply_per_block_lora_strength(
     # Check if any key has a non-1.0 effective override
     has_overrides = False
     for key in keys:
-        block_group = classify_key(key, arch)
+        block_group = classify_key(key, arch, domain)
         block_strength = (
             block_overrides[block_group]
             if block_group is not None and block_group in block_overrides
             else 1.0
         )
 
-        layer_type = classify_layer_type(key, arch)
+        layer_type = classify_layer_type(key, arch, domain)
         layer_strength = (
             layer_type_overrides[layer_type]
             if layer_type is not None and layer_type in layer_type_overrides
@@ -95,14 +96,14 @@ def _apply_per_block_lora_strength(
     # Build strength multiplier for each key
     strength_multipliers = []
     for key in keys:
-        block_group = classify_key(key, arch)
+        block_group = classify_key(key, arch, domain)
         block_strength = (
             block_overrides[block_group]
             if block_group is not None and block_group in block_overrides
             else 1.0
         )
 
-        layer_type = classify_layer_type(key, arch)
+        layer_type = classify_layer_type(key, arch, domain)
         layer_strength = (
             layer_type_overrides[layer_type]
             if layer_type is not None and layer_type in layer_type_overrides
@@ -202,6 +203,7 @@ def _apply_widen_filter_per_block(
     arch: str | None,
     default_t_factor: float,
     widen_config: object,
+    domain: str = "diffusion",
 ) -> torch.Tensor:
     """Apply WIDEN filter_delta with per-block t_factor overrides.
 
@@ -226,7 +228,9 @@ def _apply_widen_filter_per_block(
     from .widen import WIDEN, WIDENConfig
 
     # Get per-block t_factor groupings
-    t_factor_groups = _get_block_t_factors(keys, block_config, arch, default_t_factor)
+    t_factor_groups = _get_block_t_factors(
+        keys, block_config, arch, default_t_factor, domain,
+    )
 
     # If all keys have the same t_factor, use simple path
     if len(t_factor_groups) == 1:
@@ -274,6 +278,7 @@ def _apply_widen_merge_per_block(
     arch: str | None,
     default_t_factor: float,
     widen_config: object,
+    domain: str = "diffusion",
 ) -> torch.Tensor:
     """Apply WIDEN merge_weights with per-block t_factor overrides.
 
@@ -298,7 +303,9 @@ def _apply_widen_merge_per_block(
     from .widen import WIDEN, WIDENConfig
 
     # Get per-block t_factor groupings
-    t_factor_groups = _get_block_t_factors(keys, block_config, arch, default_t_factor)
+    t_factor_groups = _get_block_t_factors(
+        keys, block_config, arch, default_t_factor, domain,
+    )
 
     # If all keys have the same t_factor, use simple path
     if len(t_factor_groups) == 1:

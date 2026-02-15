@@ -595,7 +595,7 @@ class TestIsChangedIncludesModels:
         self, recipe_base: RecipeBase, sdxl_checkpoint_path: str
     ) -> None:
         """Model paths are collected for IS_CHANGED hash."""
-        from nodes.exit import _collect_model_paths
+        from lib.analysis import collect_model_paths
 
         recipe_model = RecipeModel(path=sdxl_checkpoint_path)
         recipe = RecipeMerge(
@@ -605,10 +605,10 @@ class TestIsChangedIncludesModels:
             t_factor=1.0,
         )
 
-        paths = _collect_model_paths(recipe)
+        paths = collect_model_paths(recipe)
 
         assert len(paths) == 1
-        # _collect_model_paths returns (path, source_dir) tuples
+        # collect_model_paths returns (path, source_dir) tuples
         assert (sdxl_checkpoint_path, "checkpoints") in paths
 
 

@@ -14,6 +14,7 @@ import torch
 from ..lib.analysis import (
     analyze_recipe,
     analyze_recipe_models,
+    compute_recipe_file_hash,
     get_keys_to_process,
     walk_to_base,
 )
@@ -227,145 +228,6 @@ def install_merged_patches(
     return cloned
 
 
-def _collect_lora_paths(node: RecipeNode) -> list[str]:
-    """Recursively collect all LoRA file paths from a recipe tree.
-
-    Args:
-        node: Any recipe node
-
-    Returns:
-        List of LoRA file paths in deterministic order
-    """
-    paths: list[str] = []
-
-    if isinstance(node, RecipeBase):
-        # Base node has no LoRAs
-        pass
-    elif isinstance(node, RecipeLoRA):
-        # Extract paths from loras tuple
-        for lora_spec in node.loras:
-            paths.append(lora_spec["path"])
-    elif isinstance(node, RecipeModel):
-        # Model nodes have no LoRAs - skip
-        pass
-    elif isinstance(node, RecipeCompose):
-        # Collect from all branches
-        for branch in node.branches:
-            paths.extend(_collect_lora_paths(branch))
-    elif isinstance(node, RecipeMerge):
-        # Collect from base, target, and backbone
-        paths.extend(_collect_lora_paths(node.base))
-        paths.extend(_collect_lora_paths(node.target))
-        if node.backbone is not None:
-            paths.extend(_collect_lora_paths(node.backbone))
-
-    return paths
-
-
-def _collect_model_paths(node: RecipeNode) -> list[tuple[str, str]]:
-    """Recursively collect all model checkpoint paths from a recipe tree.
-
-    AC: @full-model-execution ac-11
-    Returns (path, source_dir) tuples for IS_CHANGED hash computation.
-
-    Args:
-        node: Any recipe node
-
-    Returns:
-        List of (path, source_dir) tuples in deterministic order
-    """
-    paths: list[tuple[str, str]] = []
-
-    if isinstance(node, RecipeBase):
-        pass
-    elif isinstance(node, RecipeLoRA):
-        pass
-    elif isinstance(node, RecipeModel):
-        paths.append((node.path, node.source_dir))
-    elif isinstance(node, RecipeCompose):
-        for branch in node.branches:
-            paths.extend(_collect_model_paths(branch))
-    elif isinstance(node, RecipeMerge):
-        paths.extend(_collect_model_paths(node.base))
-        paths.extend(_collect_model_paths(node.target))
-        if node.backbone is not None:
-            paths.extend(_collect_model_paths(node.backbone))
-
-    return paths
-
-
-def _compute_recipe_hash(
-    widen: RecipeNode,
-    lora_path_resolver: Callable[[str], str | None] | None = None,
-    model_path_resolver: Callable[[str, str], str | None] | None = None,
-) -> str:
-    """Compute a hash of the recipe based on LoRA and model file paths and mtimes.
-
-    AC: @exit-patch-install ac-5 — identical hash when no LoRA changes
-    AC: @exit-patch-install ac-6 — different hash when LoRA modified
-    AC: @full-model-execution ac-11 — checkpoint file stats included in hash
-
-    Args:
-        widen: Recipe tree root
-        lora_path_resolver: Callable that resolves a LoRA name to its full
-            filesystem path, or None if not found. Same resolver as
-            used by analyze_recipe.
-        model_path_resolver: Callable that resolves (model_name, source_dir)
-            to its full filesystem path.
-
-    Returns:
-        Hex digest of SHA-256 hash
-    """
-    lora_paths = _collect_lora_paths(widen)
-    model_path_tuples = _collect_model_paths(widen)
-
-    # Sort for deterministic ordering
-    lora_paths = sorted(set(lora_paths))
-    model_path_tuples = sorted(set(model_path_tuples))
-
-    # Build hash from (path, mtime, size) tuples
-    hasher = hashlib.sha256()
-
-    # Hash LoRA files
-    for path in lora_paths:
-        full_path = path
-        if lora_path_resolver is not None:
-            resolved = lora_path_resolver(path)
-            if resolved is not None:
-                full_path = resolved
-
-        try:
-            stat = os.stat(full_path)
-            mtime = stat.st_mtime
-            size = stat.st_size
-        except OSError:
-            mtime = 0.0
-            size = 0
-
-        hasher.update(f"lora:{path}|{mtime}|{size}\n".encode())
-
-    # AC: @full-model-execution ac-11
-    # Hash model checkpoint files
-    for path, source_dir in model_path_tuples:
-        full_path = path
-        if model_path_resolver is not None:
-            resolved = model_path_resolver(path, source_dir)
-            if resolved is not None:
-                full_path = resolved
-
-        try:
-            stat = os.stat(full_path)
-            mtime = stat.st_mtime
-            size = stat.st_size
-        except OSError:
-            mtime = 0.0
-            size = 0
-
-        hasher.update(f"model:{path}|{source_dir}|{mtime}|{size}\n".encode())
-
-    return hasher.hexdigest()
-
-
 def _build_lora_resolver() -> Callable[[str], str | None]:
     """Build a LoRA path resolver using ComfyUI's folder_paths.
 
@@ -467,7 +329,7 @@ class WIDENExitNode:
         Returns:
             Hash string for ComfyUI caching
         """
-        base_hash = _compute_recipe_hash(
+        base_hash = compute_recipe_file_hash(
             widen,
             lora_path_resolver=_build_lora_resolver(),
             model_path_resolver=_build_model_resolver(),
@@ -726,7 +588,7 @@ class WIDENExitNode:
                     # AC: @merge-block-config ac-1, ac-2
                     # AC: @full-model-execution ac-3, ac-5
                     # Pass arch, widen_config, and model_loaders
-                    def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs):
+                    def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
                         def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
                             return execute_plan(
                                 plan=p,
@@ -739,12 +601,13 @@ class WIDENExitNode:
                                 arch=architecture,
                                 widen_config=wcfg,
                                 model_loaders=mdl_ldrs,
+                                domain=dom,
                             )
                         return eval_fn
 
                     eval_fn = make_eval_fn(
                         plan, loader, widen_merger, device, compute_dtype,
-                        arch, widen_config, model_loaders
+                        arch, widen_config, model_loaders, domain,
                     )
 
                     # Run chunked evaluation with OOM backoff

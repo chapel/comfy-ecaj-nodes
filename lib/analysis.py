@@ -12,11 +12,13 @@ AC: @exit-recipe-analysis ac-1 through ac-6
 
 from __future__ import annotations
 
+import hashlib
 import os
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from .clip_model_loader import CLIPModelLoader
 from .lora import LoRALoader, get_loader
 from .model_loader import ModelLoader
 from .recipe import (
@@ -36,6 +38,9 @@ __all__ = [
     "ModelAnalysisResult",
     "analyze_recipe",
     "analyze_recipe_models",
+    "collect_lora_paths",
+    "collect_model_paths",
+    "compute_recipe_file_hash",
     "walk_to_base",
 ]
 
@@ -66,14 +71,14 @@ class ModelAnalysisResult:
     """Result of recipe model analysis.
 
     Contains model loaders and affected keys for full checkpoint merging:
-    - model_loaders: Map of model_id -> ModelLoader (streaming access)
+    - model_loaders: Map of model_id -> ModelLoader or CLIPModelLoader (streaming access)
     - model_affected: Map of model_id -> set of keys affected by that model
     - all_model_keys: Union of all keys affected by any model
 
     AC: @full-model-execution ac-1
     """
 
-    model_loaders: dict[str, ModelLoader]
+    model_loaders: dict[str, ModelLoader | CLIPModelLoader]
     model_affected: dict[str, frozenset[str]]
     all_model_keys: frozenset[str]
 
@@ -298,6 +303,139 @@ def get_keys_to_process(
     return all_keys & affected_keys
 
 
+def collect_lora_paths(node: RecipeNode) -> list[str]:
+    """Recursively collect all LoRA file paths from a recipe tree.
+
+    Args:
+        node: Any recipe node
+
+    Returns:
+        List of LoRA file paths in deterministic order
+    """
+    paths: list[str] = []
+
+    if isinstance(node, RecipeBase):
+        pass
+    elif isinstance(node, RecipeLoRA):
+        for lora_spec in node.loras:
+            paths.append(lora_spec["path"])
+    elif isinstance(node, RecipeModel):
+        pass
+    elif isinstance(node, RecipeCompose):
+        for branch in node.branches:
+            paths.extend(collect_lora_paths(branch))
+    elif isinstance(node, RecipeMerge):
+        paths.extend(collect_lora_paths(node.base))
+        paths.extend(collect_lora_paths(node.target))
+        if node.backbone is not None:
+            paths.extend(collect_lora_paths(node.backbone))
+
+    return paths
+
+
+def collect_model_paths(node: RecipeNode) -> list[tuple[str, str]]:
+    """Recursively collect all model checkpoint paths from a recipe tree.
+
+    AC: @full-model-execution ac-11
+    Returns (path, source_dir) tuples for IS_CHANGED hash computation.
+
+    Args:
+        node: Any recipe node
+
+    Returns:
+        List of (path, source_dir) tuples in deterministic order
+    """
+    paths: list[tuple[str, str]] = []
+
+    if isinstance(node, RecipeBase):
+        pass
+    elif isinstance(node, RecipeLoRA):
+        pass
+    elif isinstance(node, RecipeModel):
+        paths.append((node.path, node.source_dir))
+    elif isinstance(node, RecipeCompose):
+        for branch in node.branches:
+            paths.extend(collect_model_paths(branch))
+    elif isinstance(node, RecipeMerge):
+        paths.extend(collect_model_paths(node.base))
+        paths.extend(collect_model_paths(node.target))
+        if node.backbone is not None:
+            paths.extend(collect_model_paths(node.backbone))
+
+    return paths
+
+
+def compute_recipe_file_hash(
+    widen: RecipeNode,
+    lora_path_resolver: Callable[[str], str | None] | None = None,
+    model_path_resolver: Callable[[str, str], str | None] | None = None,
+) -> str:
+    """Compute a hash of the recipe based on LoRA and model file paths and mtimes.
+
+    AC: @exit-patch-install ac-5 — identical hash when no LoRA changes
+    AC: @exit-patch-install ac-6 — different hash when LoRA modified
+    AC: @full-model-execution ac-11 — checkpoint file stats included in hash
+    AC: @clip-exit-node ac-8 — different hash when files change
+
+    Args:
+        widen: Recipe tree root
+        lora_path_resolver: Callable that resolves a LoRA name to its full
+            filesystem path, or None if not found.
+        model_path_resolver: Callable that resolves (model_name, source_dir)
+            to its full filesystem path.
+
+    Returns:
+        Hex digest of SHA-256 hash
+    """
+    lora_paths = collect_lora_paths(widen)
+    model_path_tuples = collect_model_paths(widen)
+
+    # Sort for deterministic ordering
+    lora_paths = sorted(set(lora_paths))
+    model_path_tuples = sorted(set(model_path_tuples))
+
+    # Build hash from (path, mtime, size) tuples
+    hasher = hashlib.sha256()
+
+    # Hash LoRA files
+    for path in lora_paths:
+        full_path = path
+        if lora_path_resolver is not None:
+            resolved = lora_path_resolver(path)
+            if resolved is not None:
+                full_path = resolved
+
+        try:
+            stat = os.stat(full_path)
+            mtime = stat.st_mtime
+            size = stat.st_size
+        except OSError:
+            mtime = 0.0
+            size = 0
+
+        hasher.update(f"lora:{path}|{mtime}|{size}\n".encode())
+
+    # Hash model checkpoint files
+    for path, source_dir in model_path_tuples:
+        full_path = path
+        if model_path_resolver is not None:
+            resolved = model_path_resolver(path, source_dir)
+            if resolved is not None:
+                full_path = resolved
+
+        try:
+            stat = os.stat(full_path)
+            mtime = stat.st_mtime
+            size = stat.st_size
+        except OSError:
+            mtime = 0.0
+            size = 0
+
+        hasher.update(f"model:{path}|{source_dir}|{mtime}|{size}\n".encode())
+
+    return hasher.hexdigest()
+
+
 def _collect_model_refs(node: RecipeNode) -> dict[int, RecipeModel]:
     """Collect all unique RecipeModel nodes with synthetic model IDs.
 
@@ -369,16 +507,13 @@ def analyze_recipe_models(
         ValueError: If checkpoint architecture doesn't match base (AC-6)
     """
     # AC: @recipe-domain-field ac-4
-    # Currently only diffusion model loaders exist. CLIP model loaders will be
-    # added in a future task. The domain parameter enables dispatch without
-    # breaking existing code.
-    _ = domain  # Silence unused warning until CLIP loaders are implemented
+    # AC: @clip-exit-node ac-3 — domain="clip" selects CLIPModelLoader
     model_refs = _collect_model_refs(node)
 
-    model_loaders: dict[str, ModelLoader] = {}
+    model_loaders: dict[str, ModelLoader | CLIPModelLoader] = {}
     model_affected: dict[str, frozenset[str]] = {}
     all_model_keys: set[str] = set()
-    opened_loaders: list[ModelLoader] = []  # For cleanup on error
+    opened_loaders: list[ModelLoader | CLIPModelLoader] = []
 
     try:
         for model_id, recipe_model in model_refs.items():
@@ -400,12 +535,20 @@ def analyze_recipe_models(
                     f"Referenced by Model Input node with strength {recipe_model.strength}"
                 )
 
-            # Open streaming loader
-            loader = ModelLoader(full_path)
+            # Dispatch on domain for loader type
+            if domain == "clip":
+                loader: ModelLoader | CLIPModelLoader = CLIPModelLoader(full_path)
+            else:
+                loader = ModelLoader(full_path)
             opened_loaders.append(loader)
 
-            # AC-6: Validate architecture matches base model
-            if loader.arch is not None and loader.arch != base_arch:
+            # AC-6: Validate architecture matches base model (diffusion only;
+            # CLIPModelLoader does not expose .arch)
+            if (
+                isinstance(loader, ModelLoader)
+                and loader.arch is not None
+                and loader.arch != base_arch
+            ):
                 raise ValueError(
                     f"Architecture mismatch: checkpoint '{model_name}' has "
                     f"architecture '{loader.arch}' but base model has '{base_arch}'\n"
@@ -414,14 +557,14 @@ def analyze_recipe_models(
 
             model_loaders[model_key] = loader
 
-            # AC-12: All diffusion model keys in the checkpoint are affected
+            # AC-12: All keys in the checkpoint are affected
             model_affected[model_key] = loader.affected_keys
             all_model_keys.update(loader.affected_keys)
 
     except Exception:
         # Cleanup any opened loaders on error
-        for loader in opened_loaders:
-            loader.cleanup()
+        for ldr in opened_loaders:
+            ldr.cleanup()
         raise
 
     return ModelAnalysisResult(
