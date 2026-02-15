@@ -53,21 +53,39 @@ LOADER_REGISTRY: dict[str, type[LoRALoader]] = {
 }
 
 
-def get_loader(arch: str) -> LoRALoader:
-    """Get a LoRA loader instance for the given architecture.
+def get_loader(arch: str, domain: str = "diffusion") -> LoRALoader:
+    """Get a LoRA loader instance for the given architecture and domain.
 
     # AC: @lora-loaders ac-1
-    Selects the appropriate architecture-specific loader.
+    # AC: @recipe-domain-field ac-5, ac-6
+    Selects the appropriate architecture-specific loader, dispatching on
+    both architecture and domain. For domain="clip", returns CLIP-specific
+    loaders when available.
 
     Args:
         arch: Architecture tag (e.g. "sdxl", "zimage")
+        domain: Domain type ("diffusion" or "clip"). Defaults to "diffusion"
+            for backward compatibility.
 
     Returns:
-        LoRALoader instance for the architecture
+        LoRALoader instance for the architecture and domain
 
     Raises:
-        ValueError: If architecture is not supported
+        ValueError: If architecture/domain combination is not supported
     """
+    # AC: @recipe-domain-field ac-5
+    # CLIP loaders will be keyed as "{arch}_clip" (e.g., "sdxl_clip")
+    if domain == "clip":
+        clip_key = f"{arch}_clip"
+        loader_cls = LOADER_REGISTRY.get(clip_key)
+        if loader_cls is None:
+            raise ValueError(
+                f"No CLIP LoRA loader for architecture '{arch}'. "
+                f"CLIP loaders are registered as '{clip_key}'."
+            )
+        return loader_cls()
+
+    # AC: @recipe-domain-field ac-6 — domain="diffusion" (or unset) uses existing loaders
     loader_cls = LOADER_REGISTRY.get(arch)
     if loader_cls is None:
         supported = ", ".join(sorted(LOADER_REGISTRY.keys()))
