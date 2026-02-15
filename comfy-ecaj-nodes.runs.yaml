@@ -1840,7 +1840,7 @@ runs:
   - _ulid: 01KHHGPXCWG732X3A3092JVEAH
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-15T20:43:41.340Z
     step_results:
@@ -1864,5 +1864,22 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-15T20:43:55.008Z
-        completed_at: 2026-02-15T20:43:55.008Z
+        completed_at: 2026-02-15T20:44:38.363Z
+        notes: "HIGH CONFIDENCE ITEMS: (1) FRICTION - Manual task descriptions in plan YAML are imported as
+          notes, not as the task description field. Verified: @investigate-clip-api has no
+          Description section, content ended up in notes only. Systemic — happens for every manual
+          task with description in plan import. NOT already tracked (inbox 01KHDNHH is about
+          depends_on, different issue). (2) SUCCESS - One-at-a-time AskUserQuestion for design
+          decisions during spec-plan is highly effective — produced 5 clear decisions (WIDEN
+          algorithm, LoRA sharing, block config, loader scope, type safety) with no backtracking.
+          Not tracked. (3) SUCCESS - Post-import subagent review for task standalone quality catches
+          dependency gaps and missing context every time. This session and the Qwen/Flux session
+          both benefited. Partially tracked by 01KHCJHD (subagent plan review for standalone-ness)
+          but that was pre-import; this is specifically post-import review which is a distinct
+          checkpoint. ALREADY TRACKED (skip): Plan import missing depends_on (inbox 01KHDNHH).
+          Parallel holistic+Codex review (observation 01KHDNHK)."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-15T20:44:38.363Z
+        completed_at: 2026-02-15T20:44:38.363Z
     initiated_by: "@claude"
