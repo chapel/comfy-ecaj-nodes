@@ -8,6 +8,7 @@ if __package__:
     from .nodes.block_config_qwen import WIDENBlockConfigQwenNode
     from .nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
     from .nodes.block_config_zimage import WIDENBlockConfigZImageNode
+    from .nodes.clip_entry import WIDENCLIPEntryNode
     from .nodes.compose import WIDENComposeNode
     from .nodes.diffusion_model_input import WIDENDiffusionModelInputNode
     from .nodes.entry import WIDENEntryNode
@@ -18,6 +19,7 @@ if __package__:
 
     NODE_CLASS_MAPPINGS = {
         "WIDENEntry": WIDENEntryNode,
+        "WIDENCLIPEntry": WIDENCLIPEntryNode,
         "WIDENLoRA": WIDENLoRANode,
         "WIDENCompose": WIDENComposeNode,
         "WIDENMerge": WIDENMergeNode,
@@ -32,6 +34,7 @@ if __package__:
 
     NODE_DISPLAY_NAME_MAPPINGS = {
         "WIDENEntry": "WIDEN Entry",
+        "WIDENCLIPEntry": "WIDEN CLIP Entry",
         "WIDENLoRA": "WIDEN LoRA",
         "WIDENCompose": "WIDEN Compose",
         "WIDENMerge": "WIDEN Merge",
