@@ -4933,7 +4933,7 @@
   type: task
   spec_ref: "@diffusion-model-input-node"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -4954,6 +4954,11 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-15T21:21:26.171Z
+  closed_reason: "Merged in PR #68. Renamed Model Input node display name from 'WIDEN Model Input' to
+    'WIDEN Checkpoint Input' in NODE_DISPLAY_NAME_MAPPINGS. This preparatory change clarifies the
+    existing node reads from checkpoints/ directory, distinguishing it from the upcoming Diffusion
+    Model Input node."
 - _ulid: 01KHHE6KF4CCCBM1R9DD3T84XM
   slugs:
     - investigate-clip-api
