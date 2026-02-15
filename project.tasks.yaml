@@ -4789,6 +4789,17 @@
         ModelPatcher internally, the same add_patches("set", ...) mechanism
         works. If not, may need load_sd() or direct state_dict manipulation.
         v1 does NOT include incremental block recompute for CLIP (add later).
+    - _ulid: 01KHHJ6HH0HBW7HXDXJ99HGEFE
+      created_at: 2026-02-15T21:09:42.048Z
+      author: "@claude"
+      content: "Spike findings (@investigate-clip-api): CLIP uses the same clone+patch pattern as
+        diffusion models. clip.clone() clones the patcher and shares cond_stage_model.
+        clip.add_patches(patches, strength) delegates to patcher.add_patches(). The ('set',
+        (tensor,)) format works identically. install_merged_patches() can be reused — operate on
+        clip object directly (it exposes clone() and add_patches()). For _unpatch_loaded_clones: use
+        clip.patcher (not diffusion model patcher) — is_clone() works correctly across all
+        ModelPatcher instances."
+      supersedes: null
   todos: []
   automation: eligible
 - _ulid: 01KHHE6K8FD2XZ9S262EDCB4N3
