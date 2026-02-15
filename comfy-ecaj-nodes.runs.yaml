@@ -1897,7 +1897,7 @@ runs:
     initiated_by: "@claude"
   - _ulid: 01KHHJ7JVZMDX6MYVMM0JP2QVH
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
-    status: active
+    status: completed
     current_step: 5
     total_steps: 6
     started_at: 2026-02-15T21:10:16.192Z
@@ -1943,5 +1943,9 @@ runs:
       - step_index: 5
         status: completed
         started_at: 2026-02-15T21:17:19.791Z
-        completed_at: 2026-02-15T21:17:19.791Z
+        completed_at: 2026-02-15T21:17:34.291Z
+        notes: "Captured: (1) inbox item in kynetic-spec for assess --all status display. (2) Two success
+          observations: batch triage pattern and question-driven spike investigations. Skipped spike
+          tag friction (user declined)."
     initiated_by: "@claude"
+    completed_at: 2026-02-15T21:17:34.292Z
