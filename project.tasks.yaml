@@ -4939,4 +4939,12 @@
         (in which case add_patches with set works) or needs a different
         mechanism (load_sd, direct state_dict manipulation). Document
         findings as task notes. This blocks CLIP Exit Node implementation.
+    - _ulid: 01KHHGFH1HQR0Y6C3HGHXN55PG
+      created_at: 2026-02-15T20:39:39.314Z
+      author: "@claude"
+      content: "Output: document findings as task notes. Key questions: (1) Does ComfyUI CLIP use
+        ModelPatcher internally? (2) Can add_patches('set', ...) apply CLIP weight patches? (3) If
+        not, what is the CLIP clone/patch API? (4) How to access CLIP state dict keys without GPU
+        load? Findings feed into @implement-clip-entry-node and @implement-clip-exit-node."
+      supersedes: null
   todos: []
