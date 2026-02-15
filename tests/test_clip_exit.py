@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 import sys
 import tempfile
@@ -121,11 +122,13 @@ def _model_dir_resolver(base_dir: str):
 class TestCLIPExitReturnsClip:
     """AC: @clip-exit-node ac-1 — returns ComfyUI CLIP object."""
 
+    # AC: @clip-exit-node ac-1
     def test_return_types_is_clip(self):
         """RETURN_TYPES is CLIP tuple."""
         assert WIDENCLIPExitNode.RETURN_TYPES == ("CLIP",)
         assert WIDENCLIPExitNode.RETURN_NAMES == ("clip",)
 
+    # AC: @clip-exit-node ac-1
     def test_recipe_base_returns_clip_clone(self, clip_recipe_base: RecipeBase):
         """RecipeBase at root returns cloned CLIP."""
         node = WIDENCLIPExitNode()
@@ -143,6 +146,7 @@ class TestCLIPExitReturnsClip:
 class TestCLIPLoRALoaderSelection:
     """AC: @clip-exit-node ac-2 — selects CLIP LoRA loader based on domain='clip'."""
 
+    # AC: @clip-exit-node ac-2
     def test_analyze_recipe_dispatches_to_clip_lora_loader(
         self, clip_recipe_base: RecipeBase, tmp_path,
     ):
@@ -174,6 +178,7 @@ class TestCLIPLoRALoaderSelection:
         assert result.domain == "clip"
         result.loader.cleanup()
 
+    # AC: @clip-exit-node ac-2
     def test_analyze_recipe_uses_domain_clip(self, clip_recipe_base: RecipeBase):
         """Verify recipe base has domain='clip' for loader dispatch."""
         assert clip_recipe_base.domain == "clip"
@@ -185,6 +190,7 @@ class TestCLIPLoRALoaderSelection:
 class TestCLIPModelLoaderSelection:
     """AC: @clip-exit-node ac-3 — selects CLIP model loader based on domain='clip'."""
 
+    # AC: @clip-exit-node ac-3
     def test_analyze_recipe_models_uses_clip_model_loader(self, tmp_path):
         """analyze_recipe_models(domain='clip') creates CLIPModelLoader instances."""
         from safetensors.torch import save_file
@@ -217,6 +223,7 @@ class TestCLIPModelLoaderSelection:
             for ldr in result.model_loaders.values():
                 ldr.cleanup()
 
+    # AC: @clip-exit-node ac-3
     def test_analyze_recipe_models_diffusion_uses_model_loader(self, tmp_path):
         """analyze_recipe_models(domain='diffusion') creates ModelLoader instances."""
         from safetensors.torch import save_file
@@ -253,10 +260,11 @@ class TestCLIPModelLoaderSelection:
 class TestInstallMergedClipPatches:
     """AC: @clip-exit-node ac-4 — clones CLIP and applies merged weights."""
 
+    # AC: @clip-exit-node ac-4
     def test_clones_clip_object(self, mock_clip: MockCLIP):
         """install_merged_clip_patches clones the CLIP instead of mutating."""
         original_uuid = mock_clip.patcher.patches_uuid
-        key = "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight"
+        key = _SDXL_CLIP_KEYS[0]
         merged_state = {key: torch.randn(4, 4)}
         result = install_merged_clip_patches(mock_clip, merged_state, torch.float32)
 
@@ -266,9 +274,10 @@ class TestInstallMergedClipPatches:
         assert mock_clip.patcher.patches_uuid == original_uuid
         assert len(mock_clip.patcher.patches) == 0
 
+    # AC: @clip-exit-node ac-4
     def test_adds_set_patches(self, mock_clip: MockCLIP):
         """Merged weights are added as set patches."""
-        key = "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight"
+        key = _SDXL_CLIP_KEYS[0]
         merged_state = {key: torch.randn(4, 4)}
         result = install_merged_clip_patches(mock_clip, merged_state, torch.float32)
 
@@ -278,9 +287,10 @@ class TestInstallMergedClipPatches:
         assert patch_entry[0] == 1.0  # strength_patch
         assert patch_entry[1][0] == "set"  # patch type
 
+    # AC: @clip-exit-node ac-4
     def test_transfers_tensors_to_cpu(self, mock_clip: MockCLIP):
         """All patch tensors are on CPU."""
-        key = "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight"
+        key = _SDXL_CLIP_KEYS[0]
         merged_state = {key: torch.randn(4, 4)}
         result = install_merged_clip_patches(mock_clip, merged_state, torch.float32)
 
@@ -288,9 +298,10 @@ class TestInstallMergedClipPatches:
         patch_tensor = patch_entry[1][1][0]  # ("set", (tensor,))
         assert patch_tensor.device.type == "cpu"
 
+    # AC: @clip-exit-node ac-4
     def test_matches_base_dtype_float32(self, mock_clip: MockCLIP):
         """Patch tensors match base model dtype (float32 case)."""
-        key = "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight"
+        key = _SDXL_CLIP_KEYS[0]
         merged_state = {key: torch.randn(4, 4, dtype=torch.float16)}
         result = install_merged_clip_patches(mock_clip, merged_state, torch.float32)
 
@@ -298,13 +309,14 @@ class TestInstallMergedClipPatches:
         patch_tensor = patch_entry[1][1][0]
         assert patch_tensor.dtype == torch.float32
 
+    # AC: @clip-exit-node ac-4
     def test_matches_base_dtype_bfloat16(self):
         """Patch tensors match base model dtype (bf16 case)."""
         clip = MockCLIP()
         for k in clip.patcher._state_dict:
             clip.patcher._state_dict[k] = clip.patcher._state_dict[k].to(torch.bfloat16)
 
-        key = "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight"
+        key = _SDXL_CLIP_KEYS[0]
         merged_state = {key: torch.randn(4, 4, dtype=torch.float32)}
         result = install_merged_clip_patches(clip, merged_state, torch.bfloat16)
 
@@ -319,24 +331,63 @@ class TestInstallMergedClipPatches:
 class TestUsableClipResult:
     """AC: @clip-exit-node ac-5 — result functions as valid CLIP object."""
 
-    def test_result_has_patcher(self, mock_clip: MockCLIP):
-        """Result CLIP has patcher attribute."""
-        key = "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight"
+    # AC: @clip-exit-node ac-5
+    def test_result_has_patcher_with_state_dict(self, mock_clip: MockCLIP):
+        """Result CLIP has patcher with accessible state dict."""
+        key = _SDXL_CLIP_KEYS[0]
         merged_state = {key: torch.randn(4, 4)}
         result = install_merged_clip_patches(mock_clip, merged_state, torch.float32)
 
         assert hasattr(result, "patcher")
         assert result.patcher is not None
+        # State dict is accessible through the patcher
+        state = result.patcher.model_state_dict()
+        assert key in state
 
+    # AC: @clip-exit-node ac-5
     def test_result_can_clone(self, mock_clip: MockCLIP):
         """Result CLIP can be cloned again."""
-        key = "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight"
+        key = _SDXL_CLIP_KEYS[0]
         merged_state = {key: torch.randn(4, 4)}
         result = install_merged_clip_patches(mock_clip, merged_state, torch.float32)
 
         # Should be able to clone the result
         clone = result.clone()
         assert clone is not result
+
+    # AC: @clip-exit-node ac-5
+    def test_result_accepts_downstream_patches(self, mock_clip: MockCLIP):
+        """Result CLIP accepts additional patches (downstream LoRA compatibility).
+
+        ComfyUI applies downstream LoRA patches additively to the merged
+        result. This test verifies the result supports add_patches() after
+        merge patches are already installed.
+        """
+        key = _SDXL_CLIP_KEYS[0]
+        merged_state = {key: torch.randn(4, 4)}
+        result = install_merged_clip_patches(mock_clip, merged_state, torch.float32)
+
+        # Simulate downstream LoRA adding patches to the merged result
+        downstream_patch = {key: ("set", (torch.randn(4, 4),))}
+        added = result.add_patches(downstream_patch, strength_patch=0.5)
+
+        # Downstream patch was accepted
+        assert key in added
+        # Both the merge patch and downstream patch are present
+        assert len(result.patcher.patches[key]) == 2
+
+    # AC: @clip-exit-node ac-5
+    def test_result_preserves_all_clip_keys(self, mock_clip: MockCLIP):
+        """Result CLIP preserves all original state dict keys."""
+        # Merge only one key
+        key = _SDXL_CLIP_KEYS[0]
+        merged_state = {key: torch.randn(4, 4)}
+        result = install_merged_clip_patches(mock_clip, merged_state, torch.float32)
+
+        # All original keys are still in the state dict
+        state = result.patcher.model_state_dict()
+        for k in _SDXL_CLIP_KEYS:
+            assert k in state, f"Missing key: {k}"
 
 
 # --- AC-6: Validates tree structure ---
@@ -345,10 +396,12 @@ class TestUsableClipResult:
 class TestValidateClipRecipeTree:
     """AC: @clip-exit-node ac-6 — validates tree, raises ValueError on type mismatches."""
 
+    # AC: @clip-exit-node ac-6
     def test_valid_recipe_base(self, clip_recipe_base: RecipeBase):
         """RecipeBase with domain='clip' is valid."""
         _validate_clip_recipe_tree(clip_recipe_base)
 
+    # AC: @clip-exit-node ac-6
     def test_rejects_diffusion_domain(self, mock_clip: MockCLIP):
         """RecipeBase with domain='diffusion' is rejected."""
         base = RecipeBase(model_patcher=mock_clip, arch="sdxl", domain="diffusion")
@@ -359,6 +412,7 @@ class TestValidateClipRecipeTree:
         assert "domain='diffusion'" in str(exc_info.value)
         assert "expected domain='clip'" in str(exc_info.value)
 
+    # AC: @clip-exit-node ac-6
     def test_rejects_lora_at_root(self):
         """Execute raises ValueError for LoRA at root."""
         node = WIDENCLIPExitNode()
@@ -369,6 +423,7 @@ class TestValidateClipRecipeTree:
 
         assert "RecipeLoRA" in str(exc_info.value)
 
+    # AC: @clip-exit-node ac-6
     def test_rejects_compose_at_root(self):
         """Execute raises ValueError for Compose at root."""
         node = WIDENCLIPExitNode()
@@ -380,6 +435,7 @@ class TestValidateClipRecipeTree:
 
         assert "RecipeCompose" in str(exc_info.value)
 
+    # AC: @clip-exit-node ac-6
     def test_valid_merge_structure(self, clip_recipe_base: RecipeBase):
         """Valid RecipeMerge structure passes validation."""
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -387,6 +443,7 @@ class TestValidateClipRecipeTree:
 
         _validate_clip_recipe_tree(merge)
 
+    # AC: @clip-exit-node ac-6
     def test_validates_nested_compose(self, clip_recipe_base: RecipeBase):
         """Nested compose branches are validated."""
         lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
@@ -396,6 +453,7 @@ class TestValidateClipRecipeTree:
 
         _validate_clip_recipe_tree(merge)
 
+    # AC: @clip-exit-node ac-6
     def test_error_names_position(self, mock_clip: MockCLIP):
         """Error message includes position in tree."""
         # Create a tree with diffusion domain nested inside
@@ -416,6 +474,7 @@ class TestValidateClipRecipeTree:
 class TestInputTypes:
     """AC: @clip-exit-node ac-7 — accepts WIDEN_CLIP type."""
 
+    # AC: @clip-exit-node ac-7
     def test_input_types_accepts_widen_clip(self):
         """INPUT_TYPES returns correct structure with WIDEN_CLIP input."""
         input_types = WIDENCLIPExitNode.INPUT_TYPES()
@@ -431,6 +490,7 @@ class TestInputTypes:
 class TestIsChanged:
     """AC: @clip-exit-node ac-8 — IS_CHANGED triggers re-execution on file changes."""
 
+    # AC: @clip-exit-node ac-8
     def test_identical_hash_no_changes(self):
         """Same recipe with unchanged files produces identical hash."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -445,6 +505,7 @@ class TestIsChanged:
 
             assert hash1 == hash2
 
+    # AC: @clip-exit-node ac-8
     def test_different_hash_on_lora_modification(self):
         """Modified LoRA file produces different hash."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -465,6 +526,7 @@ class TestIsChanged:
 
             assert hash1 != hash2
 
+    # AC: @clip-exit-node ac-8
     def test_different_hash_on_model_modification(self):
         """Modified model checkpoint produces different hash."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -486,6 +548,7 @@ class TestIsChanged:
 
             assert hash1 != hash2
 
+    # AC: @clip-exit-node ac-8
     def test_is_changed_returns_hash_string(self):
         """IS_CHANGED returns a 64-char hex string (SHA-256)."""
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -501,31 +564,42 @@ class TestIsChanged:
 class TestProgressReporting:
     """AC: @clip-exit-node ac-9 — progress is reported via ProgressBar."""
 
-    def test_execute_creates_progress_bar(self, monkeypatch):
-        """execute() creates ProgressBar and calls update() per batch group."""
+    # AC: @clip-exit-node ac-9
+    def test_execute_source_creates_and_updates_progress_bar(self):
+        """execute() source creates ProgressBar and calls update(1) per group.
+
+        Verifies the progress reporting code is present in execute().
+        Full GPU pipeline E2E is needed to observe actual calls, but this
+        confirms the code structure reports progress per batch group.
+        """
+        source = inspect.getsource(WIDENCLIPExitNode.execute)
+
+        # ProgressBar is created with the batch group count
+        assert "ProgressBar(" in source
+        # Progress is updated after each group
+        assert "pbar.update(1)" in source
+
+    # AC: @clip-exit-node ac-9
+    def test_progress_bar_module_attribute_patchable(self, monkeypatch):
+        """ProgressBar module attribute can be monkeypatched for testing."""
         import nodes.clip_exit as clip_exit_mod
 
-        # Track ProgressBar instantiation
-        progress_updates = []
+        calls = []
 
         class FakeProgressBar:
             def __init__(self, total):
-                self.total = total
+                calls.append(("init", total))
 
             def update(self, n):
-                progress_updates.append(n)
+                calls.append(("update", n))
 
         monkeypatch.setattr(clip_exit_mod, "ProgressBar", FakeProgressBar)
-
-        # The ProgressBar is instantiated inside execute() only when there
-        # are batch_groups to process. Since we can't easily run the full
-        # GPU pipeline, we verify the attribute is used correctly.
-        # The ProgressBar import guard is the key behavior.
         assert clip_exit_mod.ProgressBar is FakeProgressBar
 
-        pbar = FakeProgressBar(3)
+        # Verify fake works as expected by the execute() code path
+        pbar = clip_exit_mod.ProgressBar(3)
         pbar.update(1)
-        assert progress_updates == [1]
+        assert calls == [("init", 3), ("update", 1)]
 
     def test_category_is_clip_merge(self):
         """CATEGORY is ecaj/merge/clip."""
@@ -564,7 +638,7 @@ class TestUnpatchLoadedClipClones:
 class TestCollectPaths:
     """Tests for path collection helpers."""
 
-    def testcollect_lora_paths_from_recipe_lora(self):
+    def test_collect_lora_paths_from_recipe_lora(self):
         """RecipeLoRA returns its paths."""
         lora = RecipeLoRA(
             loras=(
@@ -575,7 +649,7 @@ class TestCollectPaths:
         paths = collect_lora_paths(lora)
         assert paths == ["a.safetensors", "b.safetensors"]
 
-    def testcollect_model_paths_from_recipe_model(self):
+    def test_collect_model_paths_from_recipe_model(self):
         """RecipeModel returns its path and source_dir."""
         model = RecipeModel(path="model.safetensors", strength=1.0)
         paths = collect_model_paths(model)

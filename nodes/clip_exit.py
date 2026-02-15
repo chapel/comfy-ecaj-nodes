@@ -297,14 +297,15 @@ class WIDENCLIPExitNode:
 
         # --- AC-2: Analyze recipe with domain="clip" to get CLIP LoRA loader ---
         analysis = analyze_recipe(widen_clip, lora_path_resolver=lora_path_resolver)
-
-        # AC-3: Analyze recipe for CLIP model checkpoints via domain dispatch
-        model_analysis = analyze_recipe_models(
-            widen_clip, base.arch, model_path_resolver=model_path_resolver,
-            domain="clip",
-        )
+        model_analysis = None
 
         try:
+            # AC-3: Analyze recipe for CLIP model checkpoints via domain dispatch
+            model_analysis = analyze_recipe_models(
+                widen_clip, base.arch, model_path_resolver=model_path_resolver,
+                domain="clip",
+            )
+
             loader = analysis.loader
             set_affected = analysis.set_affected
             lora_affected_keys = analysis.affected_keys
@@ -422,12 +423,13 @@ class WIDENCLIPExitNode:
                 torch.cuda.empty_cache()
 
         finally:
-            # Cleanup loader resources
-            loader.cleanup()
+            # Cleanup LoRA loader
+            analysis.loader.cleanup()
 
-            # Cleanup CLIP model loaders
-            for model_loader in model_analysis.model_loaders.values():
-                model_loader.cleanup()
+            # Cleanup CLIP model loaders (if they were opened)
+            if model_analysis is not None:
+                for model_loader in model_analysis.model_loaders.values():
+                    model_loader.cleanup()
 
         # Phase 3: Install merged weights as set patches
         # AC-4, AC-5: Returns CLIP with set patches
