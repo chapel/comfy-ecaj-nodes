@@ -52,3 +52,10 @@ inbox:
     created_at: 2026-02-15T07:24:31.884Z
     tags: []
     added_by: "@claude"
+  - _ulid: 01KHG2ZPSX22HDP87E878QB6W7
+    text: "Incremental recompute cache-hit tests lack bit-identical output assertions — AC-2 requires
+      bit-identical output vs full recompute, but tests only check that chunked_evaluation is not
+      called, never comparing output tensors. Flagged by codex review on PR #66."
+    created_at: 2026-02-15T07:24:35.005Z
+    tags: []
+    added_by: "@claude"
