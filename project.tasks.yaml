@@ -4835,7 +4835,7 @@
   type: task
   spec_ref: "@clip-exit-node"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-recipe-domain-field"
@@ -4888,6 +4888,8 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-16T00:48:17.738Z
+  closed_reason: "Merged in PR #77. All 10 ACs covered, 31 tests, ruff clean."
 - _ulid: 01KHHE6K8FD2XZ9S262EDCB4N3
   slugs:
     - implement-clip-graph-nodes
@@ -5301,6 +5303,9 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "All 3 fixes implemented: removed cache clone, freed base_state early via persistence
+    reorder, removed redundant .cpu().to() copies. Added ac-17 and ac-6. Tests replaced and all 862+
+    pass, ruff clean."
   depends_on: []
   context: []
   priority: 1
@@ -5310,6 +5315,7 @@
   vcs_refs: []
   created_at: 2026-02-16T00:16:21.575Z
   started_at: 2026-02-16T00:19:39.361Z
+  completed_at: 2026-02-16T00:24:45.925Z
   notes:
     - _ulid: 01KHHXB13KWQPDBRDVGMH0PNG8
       created_at: 2026-02-16T00:24:23.412Z
@@ -5324,7 +5330,3 @@
         clean."
       supersedes: null
   todos: []
-  completed_at: 2026-02-16T00:24:45.925Z
-  closed_reason: "All 3 fixes implemented: removed cache clone, freed base_state early via persistence
-    reorder, removed redundant .cpu().to() copies. Added ac-17 and ac-6. Tests replaced and all 862+
-    pass, ruff clean."
