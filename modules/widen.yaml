@@ -860,6 +860,10 @@ features:
         then: Tensors are referenced not cloned unless dtype or device conversion requires a new allocation
           — no redundant .clone(), deepcopy, or identity .cpu().to() copies that would duplicate
           model-sized data in RAM
+      - id: ac-7
+        given: save_model=True
+        when: writing checkpoint
+        then: tensors are streamed to disk one at a time (peak memory is +1 tensor, not +full model)
     depends_on: []
     implements: []
     relates_to: []
