@@ -5411,4 +5411,79 @@
         3. _incremental_cache persists between executions (exit.py:89, 673-680) — Holds merged_state
         tensors by reference until next different fingerprint. Adds ~1-4GB baseline memory pressure.
       supersedes: null
+    - _ulid: 01KHKDA32TPQAR3FBZHXCEF4JF
+      created_at: 2026-02-16T14:22:44.314Z
+      author: "@claude"
+      content: >-
+        ## Fix Paths to Investigate
+
+
+        ### Path A: Lazy base access (highest impact)
+
+        - Don't call model_state_dict() upfront
+
+        - For base_identity (line 413): compute hash by iterating model params without copying
+
+        - For compile_batch_groups (line 502-506): only needs keys + shapes, not tensor data
+
+        - For GPU eval per-batch (line 617): pull tensors directly from model_patcher on demand
+
+        - For save: rebuild state_dict only at save time, free immediately after
+
+        - Key files: nodes/exit.py, lib/batch_groups.py, lib/gpu_ops.py
+
+
+        ### Path B: Stream the save
+
+        - Instead of holding full base_state for save, iterate keys: read from model, overlay
+        merged, write
+
+        - Challenge: safetensors save_file() requires all tensors at once
+
+        - Possible: use safetensors streaming/incremental write API or write temp file key-by-key
+
+        - Key files: lib/persistence.py
+
+
+        ### Path C: Cache eviction / opt-in cache
+
+        - Add explicit cleanup of _incremental_cache when not in iterative workflow
+
+        - Or make cache opt-in via node parameter
+
+        - Or add memory-pressure detection that evicts cache
+
+        - Key files: nodes/exit.py (_incremental_cache, _CacheEntry)
+
+
+        ### Path D: Hybrid (recommended)
+
+        - Combine A + C for biggest impact
+
+        - Lazy base access eliminates the ~5-6GB base_state copy during GPU eval
+
+        - Cache eviction reduces baseline pressure between runs
+
+        - Save streaming (B) is nice-to-have but harder due to safetensors API
+
+
+        ## Files involved
+
+        - nodes/exit.py (lines 407-698) — main execution flow
+
+        - lib/persistence.py — atomic_save, save_file calls
+
+        - lib/batch_groups.py — compile_batch_groups (currently takes base_state)
+
+        - lib/gpu_ops.py — chunked_evaluation (takes base_tensors dict)
+
+        - lib/model_loader.py — ModelLoader streaming access
+
+
+        ## Spec coverage needed
+
+        - @memory-management spec exists but may need new ACs for lazy access pattern
+
+        - @incremental-block-recompute cache behavior may need AC for eviction
+      supersedes: null
   todos: []
