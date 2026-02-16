@@ -864,6 +864,10 @@ features:
         given: save_model=True
         when: writing checkpoint
         then: tensors are streamed to disk one at a time (peak memory is +1 tensor, not +full model)
+      - id: ac-8
+        given: save_model=True
+        when: save completes
+        then: GPU models are offloaded and VRAM cache cleared
     depends_on: []
     implements: []
     relates_to: []
