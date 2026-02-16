@@ -850,6 +850,12 @@ features:
         given: peak GPU usage during a chunk
         when: compared to compute_batch_size estimate
         then: actual usage does not exceed the estimate by more than 20 percent
+      - id: ac-6
+        given: Model tensors flow through the execution pipeline (base_state, merged_state, cache, patches)
+        when: Tensors are passed between pipeline stages
+        then: Tensors are referenced not cloned unless dtype or device conversion requires a new allocation
+          — no redundant .clone(), deepcopy, or identity .cpu().to() copies that would duplicate
+          model-sized data in RAM
     depends_on: []
     implements: []
     relates_to: []
