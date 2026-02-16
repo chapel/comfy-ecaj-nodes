@@ -1084,6 +1084,138 @@ class TestEdgeCases:
         # Cached tensor must be unmodified
         assert torch.equal(entry.merged_state["diffusion_model.key"], expected)
 
+    # AC: @incremental-block-recompute ac-18
+    def test_enable_cache_false_skips_lookup(self, mock_model_patcher):
+        """enable_cache=False skips cache lookup, does full GPU compute."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        bc = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # Pre-populate cache — should be ignored when enable_cache=False
+        fp = "test_fingerprint"
+        _incremental_cache[fp] = _CacheEntry(
+            structural_fingerprint=fp,
+            block_configs=collect_block_configs(recipe),
+            merged_state={k: torch.randn(4, 4) for k in keys},
+            storage_dtype=torch.float32,
+        )
+
+        mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+        from lib.batch_groups import OpSignature
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        chunked_eval_mock = MagicMock(
+            return_value={k: torch.randn(4, 4) for k in keys}
+        )
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compute_structural_fingerprint", return_value=fp),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation", chunked_eval_mock),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe, enable_cache=False)
+
+        # GPU compute SHOULD have been called (cache was not used)
+        chunked_eval_mock.assert_called_once()
+        # Cache should be empty (evicted, not populated)
+        assert len(_incremental_cache) == 0
+
+    # AC: @incremental-block-recompute ac-18
+    def test_enable_cache_false_evicts_existing(self, mock_model_patcher):
+        """enable_cache=False evicts existing cache entries."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # Pre-populate with unrelated entry
+        _incremental_cache["old_fp"] = _CacheEntry(
+            structural_fingerprint="old_fp",
+            block_configs=[],
+            merged_state={},
+            storage_dtype=torch.float32,
+        )
+        assert len(_incremental_cache) == 1
+
+        mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+        from lib.batch_groups import OpSignature
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compute_structural_fingerprint", return_value="new_fp"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation",
+                  return_value={k: torch.randn(4, 4) for k in keys}),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe, enable_cache=False)
+
+        # All cache entries should be evicted
+        assert len(_incremental_cache) == 0
+
+    # AC: @incremental-block-recompute ac-18
+    def test_enable_cache_true_populates_cache(self, mock_model_patcher):
+        """enable_cache=True (default) populates cache as normal."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+        from lib.batch_groups import OpSignature
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compute_structural_fingerprint", return_value="fp"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation",
+                  return_value={k: torch.randn(4, 4) for k in keys}),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe, enable_cache=True)
+
+        assert len(_incremental_cache) == 1
+
     # AC: @incremental-block-recompute ac-17
     # AC: @memory-management ac-6
     def test_persistence_overlay_does_not_mutate_cached_tensors(self):

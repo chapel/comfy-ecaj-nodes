@@ -5,6 +5,7 @@ from __future__ import annotations
 import gc
 import hashlib
 import json
+import logging
 import os
 from collections.abc import Callable
 from typing import TYPE_CHECKING
@@ -56,6 +57,33 @@ except ImportError:  # testing without ComfyUI
 
 if TYPE_CHECKING:
     from ..lib.recipe import BlockConfig
+
+logger = logging.getLogger("ecaj.exit")
+
+
+def _log_memory(label: str) -> None:
+    """Log current RAM and VRAM usage.
+
+    Uses /proc/self/status for RSS (Linux, no dependency) and
+    torch.cuda for VRAM. Silently no-ops on non-Linux or errors.
+    """
+    try:
+        with open("/proc/self/status") as f:
+            for line in f:
+                if line.startswith("VmRSS:"):
+                    rss_kb = int(line.split()[1])
+                    break
+            else:
+                rss_kb = 0
+    except (OSError, ValueError):
+        rss_kb = 0
+
+    parts = [f"[mem] {label}: RSS={rss_kb // 1024}MB"]
+    if torch.cuda.is_available():
+        alloc = torch.cuda.memory_allocated() // (1024 * 1024)
+        reserved = torch.cuda.memory_reserved() // (1024 * 1024)
+        parts.append(f"VRAM={alloc}MB(reserved={reserved}MB)")
+    logger.info(" ".join(parts))
 
 
 class _CacheEntry:
@@ -298,6 +326,7 @@ class WIDENExitNode:
                 "save_model": ("BOOLEAN", {"default": False}),
                 "model_name": ("STRING", {"default": ""}),
                 "save_workflow": ("BOOLEAN", {"default": True}),
+                "enable_cache": ("BOOLEAN", {"default": True}),
             },
             "hidden": {
                 "prompt": "PROMPT",
@@ -318,6 +347,7 @@ class WIDENExitNode:
         save_model: bool = False,
         model_name: str = "",
         save_workflow: bool = True,
+        enable_cache: bool = True,
         prompt: object = None,
         extra_pnginfo: object = None,
     ) -> str:
@@ -357,6 +387,7 @@ class WIDENExitNode:
         save_model: bool = False,
         model_name: str = "",
         save_workflow: bool = True,
+        enable_cache: bool = True,
         prompt: object = None,
         extra_pnginfo: object = None,
     ) -> tuple[object]:
@@ -425,6 +456,7 @@ class WIDENExitNode:
             cached_metadata = check_cache(save_path, recipe_hash)
             if cached_metadata is not None:
                 # CACHE HIT — skip GPU entirely, no LoRA/model loading
+                del base_state  # Free dict refs before loading cached tensors
                 affected = json.loads(cached_metadata["__ecaj_affected_keys__"])
                 merged_state = load_affected_keys(save_path, affected)
                 if ProgressBar is not None:
@@ -515,7 +547,9 @@ class WIDENExitNode:
                 widen, base_identity, lora_stats
             )
             current_block_configs = collect_block_configs(widen)
-            cached_entry = _incremental_cache.get(structural_fp)
+            # AC: @incremental-block-recompute ac-18
+            # When enable_cache=False, skip cache lookup entirely.
+            cached_entry = _incremental_cache.get(structural_fp) if enable_cache else None
             incremental_hit = False
 
             if (
@@ -570,6 +604,7 @@ class WIDENExitNode:
 
             # Phase 2: Batched GPU evaluation per group
             # (skipped entirely on full cache hit)
+            _log_memory("before-gpu-eval")
             if batch_groups:
                 pbar_count = len(batch_groups)
                 pbar = ProgressBar(pbar_count) if ProgressBar is not None else None
@@ -633,11 +668,13 @@ class WIDENExitNode:
 
             # AC: @memory-management ac-2
             # Cleanup after all groups complete (OOM backoff handles per-group pressure)
+            _log_memory("after-gpu-eval")
             gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
             # --- Persistence: save after GPU, before cache write ---
+            _log_memory("before-save")
             # AC: @incremental-block-recompute ac-10
             # Moved before cache write so base_state can be freed early.
             if save_model and save_path is not None:
@@ -654,6 +691,7 @@ class WIDENExitNode:
                     serialized, recipe_hash, sorted(merged_state.keys()), workflow_json
                 )
                 atomic_save(base_state, save_path, metadata)
+                _log_memory("after-save")
 
             # AC: @memory-management ac-6
             # Free base_state (~model-sized) before cache write and patch install.
@@ -661,7 +699,23 @@ class WIDENExitNode:
             # tensors by reference (not cloned from base_state).
             del base_state
 
-            # AC: @incremental-block-recompute ac-1, ac-16, ac-17
+            # AC: @memory-management ac-8
+            # After save completes, offload GPU models and clear VRAM cache.
+            # Done after del base_state so refs don't hold GPU memory.
+            if save_model:
+                try:
+                    from comfy.model_management import (
+                        free_memory,
+                        get_torch_device,
+                        soft_empty_cache,
+                    )
+                    free_memory(1e30, get_torch_device())
+                    soft_empty_cache()
+                except (ImportError, AttributeError):
+                    pass
+                _log_memory("after-save-offload")
+
+            # AC: @incremental-block-recompute ac-1, ac-16, ac-17, ac-18
             # AC: @memory-management ac-6
             # Store result in incremental cache (atomic swap).
             # Build new entry fully, then swap. On exception above,
@@ -669,7 +723,10 @@ class WIDENExitNode:
             # Skip when full cache hit (no GPU work done).
             # Tensors stored by reference — no clone. Downstream consumers
             # (install_merged_patches, persistence) are read-only.
-            if batch_groups or not incremental_hit:
+            # When enable_cache=False, evict existing entries instead.
+            if not enable_cache:
+                _incremental_cache.clear()
+            elif batch_groups or not incremental_hit:
                 new_entry = _CacheEntry(
                     structural_fingerprint=structural_fp,
                     block_configs=current_block_configs,
@@ -678,6 +735,7 @@ class WIDENExitNode:
                 )
                 _incremental_cache.clear()
                 _incremental_cache[structural_fp] = new_entry
+            _log_memory("before-cache-write")
 
         finally:
             # AC: @memory-management ac-3

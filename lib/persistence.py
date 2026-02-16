@@ -15,7 +15,7 @@ import secrets
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from safetensors.torch import save_file
+from .streaming_save import stream_save_file
 
 if TYPE_CHECKING:
     import torch
@@ -419,7 +419,7 @@ def atomic_save(
     tmp_path = os.path.join(directory, f".ecaj_tmp_{suffix}_{os.path.basename(save_path)}")
 
     try:
-        save_file(tensors, tmp_path, metadata=metadata)
+        stream_save_file(tensors, tmp_path, metadata)
 
         # fsync for crash safety
         fd = os.open(tmp_path, os.O_RDONLY)
