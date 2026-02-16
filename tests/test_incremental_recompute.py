@@ -1045,16 +1045,39 @@ class TestEdgeCases:
         changed_blocks, _ = result
         assert changed_blocks == {"IN05"}
 
-    def test_cache_entry_clones_tensors(self):
-        """Verify _CacheEntry stores independent tensor copies."""
-        original = {"key": torch.randn(4, 4)}
-        cloned_state = {k: v.clone() for k, v in original.items()}
+    # AC: @incremental-block-recompute ac-17
+    def test_cache_entry_stores_references_not_clones(self):
+        """Cache stores tensor references — no clone, no memory duplication."""
+        tensor = torch.randn(4, 4)
+        state = {"key": tensor}
         entry = _CacheEntry(
             structural_fingerprint="fp",
             block_configs=[],
-            merged_state=cloned_state,
+            merged_state=state,
             storage_dtype=torch.float32,
         )
-        # Mutate original — cache should be unaffected
-        original["key"].zero_()
-        assert not torch.equal(entry.merged_state["key"], original["key"])
+        # Cache holds the same tensor object — no clone
+        assert entry.merged_state["key"] is tensor
+
+    # AC: @incremental-block-recompute ac-17
+    def test_install_merged_patches_does_not_mutate_cached_tensors(self):
+        """install_merged_patches is read-only — safe to alias with cache."""
+        from nodes.exit import install_merged_patches
+
+        state = {"diffusion_model.key": torch.randn(4, 4)}
+        expected = state["diffusion_model.key"].clone()
+
+        # Simulate cache + patch install sharing the same tensors
+        entry = _CacheEntry(
+            structural_fingerprint="fp",
+            block_configs=[],
+            merged_state=state,
+            storage_dtype=torch.float32,
+        )
+
+        patcher = MagicMock()
+        patcher.clone.return_value = MagicMock()
+        install_merged_patches(patcher, state, torch.float32)
+
+        # Cached tensor must be unmodified
+        assert torch.equal(entry.merged_state["diffusion_model.key"], expected)
