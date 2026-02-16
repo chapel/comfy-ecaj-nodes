@@ -61,10 +61,12 @@ if TYPE_CHECKING:
 class _CacheEntry:
     """Single incremental recompute cache entry.
 
-    AC: @incremental-block-recompute ac-1, ac-9
+    AC: @incremental-block-recompute ac-1, ac-9, ac-17
+    AC: @memory-management ac-6
     Stores the structural fingerprint, block configs, and merged state
-    from a previous execution. Tensors are cloned on insertion to avoid
-    aliasing with tensors passed to install_merged_patches.
+    from a previous execution. Tensors are stored by reference (no clone)
+    — downstream consumers (install_merged_patches, persistence) are
+    read-only and must not mutate cached tensors.
     """
 
     __slots__ = ("structural_fingerprint", "block_configs", "merged_state", "storage_dtype")
@@ -213,14 +215,13 @@ def install_merged_patches(
     # Clone model (AC-1)
     cloned = model_patcher.clone()  # type: ignore[attr-defined]
 
-    # Build set patches: transfer to CPU (AC-3), cast to base dtype (AC-4)
-    # Keys already have diffusion_model. prefix (AC-2)
+    # Build set patches (AC-2, AC-3, AC-4)
+    # Keys already have diffusion_model. prefix.
+    # AC: @memory-management ac-6 — .to() is a no-op (returns self) when
+    # tensor is already CPU + storage_dtype; no memory duplication.
     patches = {}
     for key, tensor in merged_state.items():
-        cpu_tensor = tensor.cpu().to(storage_dtype)
-        # "set" patch format: replaces the weight entirely
-        # ComfyUI expects value wrapped in a tuple: ("set", (tensor,))
-        patches[key] = ("set", (cpu_tensor,))
+        patches[key] = ("set", (tensor.to(device="cpu", dtype=storage_dtype),))
 
     # Install patches (AC-1)
     cloned.add_patches(patches, strength_patch=1.0)  # type: ignore[attr-defined]
@@ -636,18 +637,43 @@ class WIDENExitNode:
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
-            # AC: @incremental-block-recompute ac-1, ac-16
-            # Store result in incremental cache (atomic swap)
+            # --- Persistence: save after GPU, before cache write ---
+            # AC: @incremental-block-recompute ac-10
+            # Moved before cache write so base_state can be freed early.
+            if save_model and save_path is not None:
+                # AC: @memory-management ac-6
+                # Overlay merged keys into base_state by reference (no copy).
+                # merged_state tensors are already CPU + storage_dtype from
+                # chunked_evaluation, so no conversion needed.
+                for key, tensor in merged_state.items():
+                    base_state[key] = tensor
+                workflow_json = (
+                    json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
+                )
+                metadata = build_metadata(
+                    serialized, recipe_hash, sorted(merged_state.keys()), workflow_json
+                )
+                atomic_save(base_state, save_path, metadata)
+
+            # AC: @memory-management ac-6
+            # Free base_state (~model-sized) before cache write and patch install.
+            # No longer needed: persistence save is done, cache stores merged_state
+            # tensors by reference (not cloned from base_state).
+            del base_state
+
+            # AC: @incremental-block-recompute ac-1, ac-16, ac-17
+            # AC: @memory-management ac-6
+            # Store result in incremental cache (atomic swap).
             # Build new entry fully, then swap. On exception above,
             # old entry is preserved (we never reach this point).
-            # Skip redundant clone when full cache hit (no GPU work done).
+            # Skip when full cache hit (no GPU work done).
+            # Tensors stored by reference — no clone. Downstream consumers
+            # (install_merged_patches, persistence) are read-only.
             if batch_groups or not incremental_hit:
                 new_entry = _CacheEntry(
                     structural_fingerprint=structural_fp,
                     block_configs=current_block_configs,
-                    merged_state={
-                        k: v.clone() for k, v in merged_state.items()
-                    },
+                    merged_state=dict(merged_state),
                     storage_dtype=storage_dtype,
                 )
                 _incremental_cache.clear()
@@ -668,20 +694,5 @@ class WIDENExitNode:
         # AC-7: Set patches work with downstream LoRA patches additively
         # AC-8: Patch tensors match base model dtype (handled by install_merged_patches)
         result = install_merged_patches(model_patcher, merged_state, storage_dtype)
-
-        # --- Persistence: save after GPU ---
-        # AC: @incremental-block-recompute ac-10
-        if save_model and save_path is not None:
-            # Overlay merged keys into base_state in-place (base_state is
-            # already a dict copy from model_state_dict, not used after this)
-            for key, tensor in merged_state.items():
-                base_state[key] = tensor.cpu().to(storage_dtype)
-            workflow_json = (
-                json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
-            )
-            metadata = build_metadata(
-                serialized, recipe_hash, sorted(merged_state.keys()), workflow_json
-            )
-            atomic_save(base_state, save_path, metadata)
 
         return (result,)
