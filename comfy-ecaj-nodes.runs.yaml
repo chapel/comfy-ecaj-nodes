@@ -2220,8 +2220,24 @@ runs:
   - _ulid: 01KHKC8VK31RTD9H4NGS4TH5S4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-16T14:04:35.299Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-16T14:04:35.299Z
+        completed_at: 2026-02-16T14:04:51.225Z
+        notes: "Session review: (1) What worked: Explore agent found the root cause efficiently in one pass.
+          Parallel PR reviews (pr-review + codex) caught complementary issues - lint from both,
+          widen.config fallback only from codex. Branch-before-commit pattern followed correctly.
+          Spec-before-code followed (added ac-6 before committing). (2) Friction: Had to manually
+          add t_factor to 9 separate MockWIDEN definitions across 5 test files. This is a recurring
+          pattern - when WIDEN interface changes, mocks are scattered everywhere. Also, MagicMock
+          auto-creating attributes caused a subtle test failure that required understanding Mock
+          internals."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-16T14:04:51.225Z
+        completed_at: 2026-02-16T14:04:51.225Z
     initiated_by: "@claude"
