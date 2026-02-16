@@ -1076,5 +1076,14 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHHXY941NB9143A3KHGJQMR6
+    type: friction
+    content: "Codex review leaves working tree on wrong branch — runs gh pr checkout but does not
+      restore original branch. Requires manual git checkout after codex review completes. Fix:
+      save/restore branch in codex skill, or use detached worktree."
+    created_at: 2026-02-16T00:34:54.209Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 skills: []
 includes: []
