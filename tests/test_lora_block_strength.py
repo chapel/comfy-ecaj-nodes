@@ -349,6 +349,7 @@ class TestBackwardsCompatibility:
 
         class MockWIDEN:
             def __init__(self):
+                self.t_factor = 1.0
                 self.filter_calls = []
 
             def filter_delta_batched(self, lora_applied, backbone):

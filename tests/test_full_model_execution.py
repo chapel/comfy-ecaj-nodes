@@ -269,6 +269,7 @@ class TestOpApplyModelExecution:
 
             # Create mock WIDEN and LoRA loader
             mock_widen = MagicMock()
+            mock_widen.t_factor = 1.0
             mock_widen.filter_delta_batched.return_value = torch.randn(len(keys), 4, 4)
             mock_lora_loader = MagicMock()
 
@@ -329,6 +330,7 @@ class TestModelDeltaComputation:
             base_batch = torch.randn(len(keys), 4, 4)
 
             mock_widen = MagicMock()
+            mock_widen.t_factor = 1.0
             expected_output = torch.randn(len(keys), 4, 4)
             mock_widen.filter_delta_batched.return_value = expected_output
 
@@ -462,6 +464,7 @@ class TestModelWeightsFreed:
             base_batch = torch.randn(len(keys), 4, 4)
 
             mock_widen = MagicMock()
+            mock_widen.t_factor = 1.0
             mock_widen.filter_delta_batched.return_value = torch.randn(len(keys), 4, 4)
 
             # Execute plan - dead registers should be freed

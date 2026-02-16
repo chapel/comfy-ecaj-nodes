@@ -756,7 +756,8 @@ class MockLoRALoader:
 class MockWIDEN:
     """Mock WIDEN for testing evaluate_recipe."""
 
-    def __init__(self):
+    def __init__(self, t_factor=1.0):
+        self.t_factor = t_factor
         self.filter_calls = []
         self.merge_calls = []
 
@@ -1465,3 +1466,78 @@ class TestMultiSetShapeOnlyGrouping:
         assert torch.allclose(results["k1"], delta_a / 2)
         assert torch.allclose(results["k2"], delta_b / 2)
         assert torch.allclose(results["k3"], delta_b / 2)
+
+
+class TestNestedMergeTFactor:
+    """AC: @exit-batched-eval ac-6
+
+    Given: a recipe tree with nested merge nodes having different t_factor values
+    When: batched evaluation runs each merge operation
+    Then: the merge uses its own t_factor, not the root merge t_factor
+    """
+
+    # AC: @exit-batched-eval ac-6
+    def test_nested_merge_uses_own_t_factor(self):
+        """Inner merge with different t_factor should create a new WIDEN instance."""
+        from lib.recipe_eval import _get_widen_for_op
+        from lib.widen import WIDEN, WIDENConfig
+
+        root_config = WIDENConfig(t_factor=1.4)
+        root_widen = WIDEN(root_config)
+
+        # Same t_factor — should reuse
+        result = _get_widen_for_op(root_widen, root_config, 1.4)
+        assert result is root_widen
+
+        # Different t_factor — should create new instance
+        result = _get_widen_for_op(root_widen, root_config, 0.5)
+        assert result is not root_widen
+        assert result.t_factor == 0.5
+
+    # AC: @exit-batched-eval ac-6
+    def test_nested_merge_t_factor_in_compose(self):
+        """A merge inside a compose should use its own t_factor during evaluation."""
+        from unittest.mock import patch
+
+        from lib.widen import WIDEN, WIDENConfig
+
+        batch_size = 2
+        base_batch = torch.randn(batch_size, 4, 4)
+
+        # Build: outer_merge(base, compose(inner_merge(base, lora, t=0.5)), t=1.4)
+        base = RecipeBase(model_patcher=None, arch="sdxl")
+        lora1 = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        lora2 = RecipeLoRA(loras=({"path": "b.safetensors", "strength": 1.0},))
+        inner_merge = RecipeMerge(base=base, target=lora1, backbone=None, t_factor=0.5)
+        compose = RecipeCompose(branches=(inner_merge, lora2))
+        outer_merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=1.4)
+
+        loader = MockLoRALoader()
+        set_id_map = {id(lora1): "set1", id(lora2): "set2"}
+
+        # Track which t_factors WIDEN instances are created with
+        created_t_factors = []
+        original_init = WIDEN.__init__
+
+        def tracking_init(self, config=None):
+            original_init(self, config)
+            created_t_factors.append(self.t_factor)
+
+        widen = WIDEN(WIDENConfig(t_factor=1.4))
+
+        with patch.object(WIDEN, "__init__", tracking_init):
+            evaluate_recipe(
+                keys=["k0", "k1"],
+                base_batch=base_batch,
+                recipe_node=outer_merge,
+                loader=loader,
+                widen=widen,
+                set_id_map=set_id_map,
+                device="cpu",
+                dtype=torch.float32,
+            )
+
+        # Inner merge should have created a WIDEN with t_factor=0.5
+        assert 0.5 in created_t_factors, (
+            f"Expected t_factor=0.5 for inner merge, got: {created_t_factors}"
+        )

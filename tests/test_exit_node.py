@@ -257,6 +257,7 @@ class TestComposeCallsMergeWeights:
 
         class MockWIDEN:
             def __init__(self):
+                self.t_factor = 1.0
                 self.merge_calls = []
                 self.filter_calls = []
 
@@ -323,6 +324,7 @@ class TestLoRACallsFilterDelta:
 
         class MockWIDEN:
             def __init__(self):
+                self.t_factor = 1.0
                 self.filter_calls = []
                 self.merge_calls = []
 
@@ -400,6 +402,8 @@ class TestChainedMergeOrder:
         call_order = []
 
         class MockWIDEN:
+            t_factor = 1.0
+
             def filter_delta_batched(self, lora_applied, backbone):
                 call_order.append("filter")
                 return lora_applied
@@ -464,6 +468,7 @@ class TestSingleBranchCompose:
 
         class MockWIDEN:
             def __init__(self):
+                self.t_factor = 1.0
                 self.filter_calls = []
                 self.merge_calls = []
 
