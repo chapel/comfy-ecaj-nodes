@@ -2119,7 +2119,7 @@ runs:
   - _ulid: 01KHHXX27DBEJQH7BX82HHM9J6
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-16T00:34:14.382Z
     step_results:
@@ -2164,5 +2164,31 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-16T00:34:33.867Z
-        completed_at: 2026-02-16T00:34:33.867Z
+        completed_at: 2026-02-16T00:34:48.791Z
+        notes: >-
+          ## Search Results
+
+          - 'codex branch', 'codex checkout', 'working tree' — no existing matches in
+          specs/tasks/inbox
+
+
+          ## High-Confidence Items
+
+
+          1. **FRICTION: Codex review leaves working tree on wrong branch** — Codex runs gh pr
+          checkout to review the PR diff, but does not restore the original branch when done. This
+          forces manual git checkout after codex completes. Repeatable: happens every time codex
+          reviews a PR while you are on the feature branch. Concrete fix: codex skill should
+          save/restore branch, or run in a detached worktree.
+
+
+          2. **SUCCESS: Analysis-first with Explore agent for memory bugs** — Spawning an Explore
+          agent to trace full tensor lifecycle before proposing fixes prevented wrong assumptions.
+          Both the user's initial suggestions and the issue description had some correct and some
+          incorrect claims. The deep analysis corrected course (e.g., .cpu().to() is actually a
+          no-op, not a copy).
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-16T00:34:48.791Z
+        completed_at: 2026-02-16T00:34:48.791Z
     initiated_by: "@claude"
