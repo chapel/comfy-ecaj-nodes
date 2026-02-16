@@ -366,12 +366,15 @@ class WIDENExitNode:
             model_path_resolver=_build_model_resolver(),
         )
 
-        if not save_model:
+        if not save_model and enable_cache:
             return base_hash
 
-        # Include save parameters and cached file state
+        # Include save parameters, cache toggle, and cached file state
         hasher = hashlib.sha256(base_hash.encode())
-        hasher.update(f"|save={save_model}|name={model_name}|wf={save_workflow}".encode())
+        hasher.update(
+            f"|save={save_model}|name={model_name}"
+            f"|wf={save_workflow}|cache={enable_cache}".encode()
+        )
         try:
             validated = validate_model_name(model_name)
             path = _resolve_checkpoints_path(validated)

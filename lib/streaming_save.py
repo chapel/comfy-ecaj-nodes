@@ -32,32 +32,20 @@ _DTYPE_MAP: dict[torch.dtype, str] = {
     torch.int64: "I64",
     torch.uint8: "U8",
     torch.bool: "BOOL",
+    torch.complex64: "C64",
 }
 
-# Forward compat: float8 types (available in torch >= 2.1)
-for _attr, _name in (("float8_e4m3fn", "F8_E4M3"), ("float8_e5m2", "F8_E5M2")):
+# Optional dtypes — available depending on torch version
+for _attr, _name in (
+    ("float8_e4m3fn", "F8_E4M3"),
+    ("float8_e5m2", "F8_E5M2"),
+    ("uint16", "U16"),
+    ("uint32", "U32"),
+    ("uint64", "U64"),
+):
     _dt = getattr(torch, _attr, None)
     if _dt is not None:
         _DTYPE_MAP[_dt] = _name
-
-# Maps torch dtype → element size in bytes.
-_SIZE_MAP: dict[torch.dtype, int] = {
-    torch.float32: 4,
-    torch.float64: 8,
-    torch.float16: 2,
-    torch.bfloat16: 2,
-    torch.int8: 1,
-    torch.int16: 2,
-    torch.int32: 4,
-    torch.int64: 8,
-    torch.uint8: 1,
-    torch.bool: 1,
-}
-
-for _attr2 in ("float8_e4m3fn", "float8_e5m2"):
-    _dt2 = getattr(torch, _attr2, None)
-    if _dt2 is not None:
-        _SIZE_MAP[_dt2] = 1
 
 
 def _tensor_bytes(t: torch.Tensor) -> bytes:
@@ -74,10 +62,12 @@ def _tensor_bytes(t: torch.Tensor) -> bytes:
     try:
         return t.numpy().tobytes()
     except TypeError:
-        # bfloat16, float8 etc. — numpy doesn't support these dtypes.
-        # After contiguous(), storage_offset is 0, so untyped_storage is safe.
+        # bfloat16, float8, complex64 etc. — numpy doesn't support these.
+        # Use explicit offset for safety even though contiguous() should
+        # produce offset=0.
         nbytes = t.nelement() * t.element_size()
-        return bytes(t.untyped_storage()[:nbytes])
+        offset = t.storage_offset() * t.element_size()
+        return bytes(t.untyped_storage()[offset:offset + nbytes])
 
 
 def stream_save_file(
@@ -122,7 +112,7 @@ def stream_save_file(
     for name in sorted_names:
         t = tensors[name]
         dtype_str = _DTYPE_MAP[t.dtype]
-        nbytes = t.nelement() * _SIZE_MAP[t.dtype]
+        nbytes = t.nelement() * t.element_size()
         header_info[name] = {
             "dtype": dtype_str,
             "shape": list(t.shape),
