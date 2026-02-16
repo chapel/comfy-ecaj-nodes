@@ -2014,6 +2014,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-15T23:57:30.890Z
+    completed_at: 2026-02-15T23:58:31.749Z
     step_results:
       - step_index: 0
         status: completed
@@ -2115,4 +2116,11 @@ runs:
         notes: "Captured 1 friction observation (01KHHVVH: make_eval_fn duplication). Skipped 3 items
           already tracked. Session complete."
     initiated_by: "@claude"
-    completed_at: 2026-02-15T23:58:31.749Z
+  - _ulid: 01KHHXX27DBEJQH7BX82HHM9J6
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-16T00:34:14.382Z
+    step_results: []
+    initiated_by: "@claude"
