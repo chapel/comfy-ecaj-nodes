@@ -585,6 +585,11 @@ features:
             given: Partial recompute is in progress
             when: Execution is interrupted or raises an exception
             then: Cache retains the previous valid entry, not a partially-updated entry
+          - id: ac-17
+            given: Cache entry stores references to merged_state tensors (no clone)
+            when: merged_state is consumed by install_merged_patches and persistence save
+            then: All downstream consumers are read-only — no in-place mutation of shared tensors; aliasing
+              between cache and patch install is safe
         status:
           maturity: draft
           implementation: implemented
