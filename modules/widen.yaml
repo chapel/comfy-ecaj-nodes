@@ -356,6 +356,10 @@ features:
             given: a RecipeMerge with an explicit backbone reference that differs from the base
             when: batched evaluation runs the WIDEN step
             then: the backbone model (not the base) is used as the importance reference for WIDEN analysis
+          - id: ac-6
+            given: a recipe tree with nested merge nodes having different t_factor values
+            when: batched evaluation runs each merge operation
+            then: the merge uses its own t_factor, not the root merge t_factor
         depends_on: []
         implements: []
         relates_to: []
