@@ -2119,8 +2119,50 @@ runs:
   - _ulid: 01KHHXX27DBEJQH7BX82HHM9J6
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-16T00:34:14.382Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-16T00:34:14.382Z
+        completed_at: 2026-02-16T00:34:33.867Z
+        notes: >-
+          ## What Worked Well
+
+
+          1. **Analysis-first approach** — Spawned an Explore agent to map the full tensor lifecycle
+          before proposing fixes. This gave a complete picture (4 copies, their sources, and which
+          were necessary) and prevented premature optimization.
+
+
+          2. **Parallel reviewers** — Running pr-review + codex review in parallel caught the same
+          MUST-FIX (ac-6 annotation gap) independently, plus codex caught the persistence-path
+          coverage gap. Both posted to GitHub. Total wall time ~4 min for both reviews.
+
+
+          3. **Spec-before-code** — Added ac-17 and ac-6 BEFORE implementing. This gave reviewers
+          clear acceptance criteria to check against, and the review feedback was about annotation
+          gaps rather than design disagreements.
+
+
+          4. **Branch-before-commit** — Created fix/exit-ram-oom before committing. No cleanup
+          needed.
+
+
+          ## Friction Points
+
+
+          1. **Codex switched git branch** — codex checked out fix/exit-ram-oom for review, then
+          left the working tree on main. Had to manually switch back before addressing review
+          feedback. This has happened before with codex review.
+
+
+          2. **pr-review agent hit disk space issue** — The agent gh pr review command failed with
+          no space left on device for the heredoc body, had to fall back to writing a temp file.
+          This is a /tmp tmpfs issue, not a skill issue, but it caused a retry.
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-16T00:34:33.867Z
+        completed_at: 2026-02-16T00:34:33.867Z
     initiated_by: "@claude"
