@@ -5299,7 +5299,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -5324,3 +5324,7 @@
         clean."
       supersedes: null
   todos: []
+  completed_at: 2026-02-16T00:24:45.925Z
+  closed_reason: "All 3 fixes implemented: removed cache clone, freed base_state early via persistence
+    reorder, removed redundant .cpu().to() copies. Added ac-17 and ac-6. Tests replaced and all 862+
+    pass, ruff clean."
