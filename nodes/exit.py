@@ -673,7 +673,7 @@ class WIDENExitNode:
                 new_entry = _CacheEntry(
                     structural_fingerprint=structural_fp,
                     block_configs=current_block_configs,
-                    merged_state={k: v for k, v in merged_state.items()},
+                    merged_state=dict(merged_state),
                     storage_dtype=storage_dtype,
                 )
                 _incremental_cache.clear()

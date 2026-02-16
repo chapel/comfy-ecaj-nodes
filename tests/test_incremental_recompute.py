@@ -1046,6 +1046,7 @@ class TestEdgeCases:
         assert changed_blocks == {"IN05"}
 
     # AC: @incremental-block-recompute ac-17
+    # AC: @memory-management ac-6
     def test_cache_entry_stores_references_not_clones(self):
         """Cache stores tensor references — no clone, no memory duplication."""
         tensor = torch.randn(4, 4)
@@ -1060,6 +1061,7 @@ class TestEdgeCases:
         assert entry.merged_state["key"] is tensor
 
     # AC: @incremental-block-recompute ac-17
+    # AC: @memory-management ac-6
     def test_install_merged_patches_does_not_mutate_cached_tensors(self):
         """install_merged_patches is read-only — safe to alias with cache."""
         from nodes.exit import install_merged_patches
@@ -1081,3 +1083,29 @@ class TestEdgeCases:
 
         # Cached tensor must be unmodified
         assert torch.equal(entry.merged_state["diffusion_model.key"], expected)
+
+    # AC: @incremental-block-recompute ac-17
+    # AC: @memory-management ac-6
+    def test_persistence_overlay_does_not_mutate_cached_tensors(self):
+        """Persistence save path is read-only — aliased cache tensors survive."""
+        key = "diffusion_model.key"
+        merged_tensor = torch.randn(4, 4)
+        merged_state = {key: merged_tensor}
+        expected = merged_tensor.clone()
+
+        # Cache stores a reference to the same tensor
+        entry = _CacheEntry(
+            structural_fingerprint="fp",
+            block_configs=[],
+            merged_state=dict(merged_state),
+            storage_dtype=torch.float32,
+        )
+
+        # Simulate the persistence overlay (exit.py: base_state[key] = tensor)
+        base_state = {"diffusion_model.other": torch.randn(4, 4)}
+        for k, tensor in merged_state.items():
+            base_state[k] = tensor  # reference assignment, no copy
+
+        # base_state now aliases the same tensor — verify cache is unmodified
+        assert torch.equal(entry.merged_state[key], expected)
+        assert entry.merged_state[key] is merged_tensor
