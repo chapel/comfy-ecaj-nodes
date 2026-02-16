@@ -1,12 +1,16 @@
 """Tests for GPU memory management during merge execution.
 
-Covers all 5 acceptance criteria for @memory-management spec.
+Covers acceptance criteria for @memory-management spec.
 """
 
 import gc
+import inspect
+import os
+import tempfile
 from unittest.mock import MagicMock, patch
 
 import torch
+from safetensors import safe_open
 
 from lib.executor import (
     chunked_evaluation,
@@ -544,3 +548,91 @@ class TestMemoryManagementIntegration:
         # All results on CPU
         for tensor in results.values():
             assert tensor.device == torch.device("cpu")
+
+
+# =============================================================================
+# AC-7: Streaming safetensors writer — peak memory +1 tensor
+# =============================================================================
+
+
+class TestStreamingSave:
+    """AC: @memory-management ac-7
+
+    Given save_model=True, when writing checkpoint, then tensors are
+    streamed to disk one at a time (peak memory is +1 tensor, not +full model).
+    """
+
+    # AC: @memory-management ac-7
+    def test_atomic_save_uses_streaming_writer(self):
+        """atomic_save should use stream_save_file, not safetensors.save_file."""
+        source = inspect.getsource(
+            __import__("lib.persistence", fromlist=["atomic_save"]).atomic_save
+        )
+        assert "stream_save_file" in source
+
+    # AC: @memory-management ac-7
+    def test_atomic_save_produces_valid_safetensors(self):
+        """atomic_save output is readable by safe_open."""
+        from lib.persistence import atomic_save
+
+        tensors = {
+            "weight": torch.randn(8, 8),
+            "bias": torch.randn(8),
+        }
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe_hash__": "test_hash",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_affected_keys__": '["weight","bias"]',
+        }
+
+        with tempfile.NamedTemporaryFile(
+            suffix=".safetensors", delete=False
+        ) as f:
+            path = f.name
+
+        try:
+            atomic_save(tensors, path, metadata)
+
+            with safe_open(path, framework="pt", device="cpu") as sf:
+                for name, expected in tensors.items():
+                    loaded = sf.get_tensor(name)
+                    assert torch.equal(loaded, expected)
+                loaded_meta = sf.metadata()
+                assert loaded_meta["__ecaj_version__"] == "1"
+        finally:
+            os.unlink(path)
+
+
+# =============================================================================
+# AC-8: GPU offload after save
+# =============================================================================
+
+
+class TestGpuOffloadAfterSave:
+    """AC: @memory-management ac-8
+
+    Given save_model=True, when save completes, then GPU models are
+    offloaded and VRAM cache cleared.
+    """
+
+    # AC: @memory-management ac-8
+    def test_exit_node_calls_free_memory_after_save(self):
+        """Exit node source contains free_memory call after save."""
+        source = inspect.getsource(
+            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
+        )
+        # free_memory should appear after atomic_save in the source
+        save_idx = source.index("atomic_save")
+        free_idx = source.index("free_memory")
+        assert free_idx > save_idx, "free_memory must come after atomic_save"
+
+    # AC: @memory-management ac-8
+    def test_exit_node_calls_soft_empty_cache_after_save(self):
+        """Exit node source contains soft_empty_cache call after save."""
+        source = inspect.getsource(
+            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
+        )
+        save_idx = source.index("atomic_save")
+        cache_idx = source.index("soft_empty_cache")
+        assert cache_idx > save_idx, "soft_empty_cache must come after atomic_save"
