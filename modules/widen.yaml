@@ -594,6 +594,10 @@ features:
             when: merged_state is consumed by install_merged_patches and persistence save
             then: All downstream consumers are read-only — no in-place mutation of shared tensors; aliasing
               between cache and patch install is safe
+          - id: ac-18
+            given: enable_cache=False
+            when: execute runs
+            then: cache lookup is skipped, cache is not populated, and any existing entry is evicted
         status:
           maturity: draft
           implementation: implemented
