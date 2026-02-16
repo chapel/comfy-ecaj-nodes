@@ -86,12 +86,3 @@ inbox:
     created_at: 2026-02-15T23:56:39.791Z
     tags: []
     added_by: "@claude"
-  - _ulid: 01KHKCGVYR07R6T0Z2FDT3B266
-    text: "Consolidate MockWIDEN: 10 duplicate definitions across 5 test files into a shared fixture in
-      conftest.py or tests/helpers.py. Two variants (passthrough + recording) can be unified into
-      one class. Reduces maintenance burden when WIDEN interface changes."
-    created_at: 2026-02-16T14:08:57.816Z
-    tags:
-      - testing
-      - cleanup
-    added_by: "@claude"
