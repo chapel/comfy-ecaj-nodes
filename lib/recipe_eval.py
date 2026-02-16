@@ -14,7 +14,7 @@ lib.gpu_ops) - no ComfyUI imports.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 import torch
@@ -393,6 +393,22 @@ def compile_plan(
 # ---------------------------------------------------------------------------
 
 
+def _get_widen_for_op(widen: object, widen_config: object | None, op_t_factor: float) -> object:
+    """Return a WIDEN instance with the correct t_factor for this op.
+
+    If the op's t_factor matches the existing widen instance, reuse it.
+    Otherwise create a new instance with the correct t_factor.
+    """
+    if widen.t_factor == op_t_factor:
+        return widen
+    from .widen import WIDEN, WIDENConfig
+    if widen_config is not None:
+        cfg = replace(widen_config, t_factor=op_t_factor)
+    else:
+        cfg = WIDENConfig(t_factor=op_t_factor)
+    return WIDEN(cfg)
+
+
 @torch.inference_mode()
 def execute_plan(
     plan: EvalPlan,
@@ -505,7 +521,8 @@ def execute_plan(
                     op.block_config, arch, op.t_factor, widen_config, domain,
                 )
             else:
-                regs[op.out_reg] = widen.filter_delta_batched(lora_applied, backbone)
+                w = _get_widen_for_op(widen, widen_config, op.t_factor)
+                regs[op.out_reg] = w.filter_delta_batched(lora_applied, backbone)
 
         elif op_type is OpMergeWeights:
             branch_tensors = [regs[r] for r in op.branch_regs]
@@ -517,7 +534,8 @@ def execute_plan(
                     op.block_config, arch, op.t_factor, widen_config, domain,
                 )
             else:
-                regs[op.out_reg] = widen.merge_weights_batched(branch_tensors, backbone)
+                w = _get_widen_for_op(widen, widen_config, op.t_factor)
+                regs[op.out_reg] = w.merge_weights_batched(branch_tensors, backbone)
 
         else:
             raise ValueError(f"Unknown op type: {op_type}")

@@ -311,6 +311,8 @@ class TestMissingSetIdError:
                 return []
 
         class MockWIDEN:
+            t_factor = 1.0
+
             def filter_delta_batched(self, lora_applied, backbone):
                 return lora_applied
 
@@ -348,6 +350,8 @@ class TestMissingSetIdError:
                 return []
 
         class MockWIDEN:
+            t_factor = 1.0
+
             def filter_delta_batched(self, lora_applied, backbone):
                 return lora_applied
 
@@ -386,6 +390,8 @@ class TestMissingSetIdError:
                 return []
 
         class MockWIDEN:
+            t_factor = 1.0
+
             def filter_delta_batched(self, lora_applied, backbone):
                 return lora_applied
 
