@@ -4837,6 +4837,7 @@
   plan_ref: "@plan-model-loader-split-clip-merging"
   status: completed
   blocked_by: []
+  closed_reason: "Merged in PR #77. All 10 ACs covered, 31 tests, ruff clean."
   depends_on:
     - "@implement-recipe-domain-field"
     - "@investigate-clip-api"
@@ -4849,6 +4850,7 @@
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.475Z
   started_at: 2026-02-15T22:29:14.714Z
+  completed_at: 2026-02-16T00:48:17.738Z
   notes:
     - _ulid: 01KHHE6K73771E5DZFCKP7AWCG
       created_at: 2026-02-15T19:59:49.475Z
@@ -4888,8 +4890,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-16T00:48:17.738Z
-  closed_reason: "Merged in PR #77. All 10 ACs covered, 31 tests, ruff clean."
 - _ulid: 01KHHE6K8FD2XZ9S262EDCB4N3
   slugs:
     - implement-clip-graph-nodes
@@ -5329,4 +5329,27 @@
         test_install_merged_patches_does_not_mutate_cached_tensors. All 862+ tests pass, ruff
         clean."
       supersedes: null
+  todos: []
+- title: Consolidate MockWIDEN into shared test fixture
+  description: 10 duplicate MockWIDEN definitions across 5 test files (test_executor, test_exit_node,
+    test_lora_block_strength, test_lora_set_scoping, test_full_model_execution). Unify into a single
+    shared class in conftest.py or tests/helpers.py. Two variants (passthrough + call-recording) can
+    be one class. Reduces maintenance burden when WIDEN interface changes.
+  type: task
+  spec_ref: null
+  meta_ref: null
+  plan_ref: null
+  priority: 3
+  slugs: []
+  tags:
+    - testing
+    - cleanup
+  depends_on: []
+  _ulid: 01KHKCHX5ZMWKRSMNEVB7F4EVN
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-16T14:09:31.832Z
+  notes: []
   todos: []
