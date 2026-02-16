@@ -5286,28 +5286,29 @@
       supersedes: null
   todos: []
   automation: manual_only
-- title: "Fix exit node RAM exhaustion: 4 concurrent model copies cause OOM"
+- _ulid: 01KHHWWAJ7C05M686MV82V4HM2
+  slugs:
+    - fix-exit-ram-oom
+  title: "Fix exit node RAM exhaustion: 4 concurrent model copies cause OOM"
+  type: bug
   description: "Four full-model copies live simultaneously in system RAM during execute(), causing
     ~30GB peak for SDXL (~7.6GB model). The incremental cache clone at exit.py:649 is unnecessary —
     install_merged_patches only reads tensors. Additionally base_state lingers too long. Fixes: (1)
     remove cache clone, (2) free base_state early, (3) selective state_dict copy. Target: peak RAM
     ~30GB → ~15GB."
-  type: bug
   spec_ref: null
   meta_ref: null
   plan_ref: null
+  status: in_progress
+  blocked_by: []
+  depends_on: []
+  context: []
   priority: 1
-  slugs:
-    - fix-exit-ram-oom
   tags:
     - bug
     - memory
-  depends_on: []
-  _ulid: 01KHHWWAJ7C05M686MV82V4HM2
-  status: pending
-  blocked_by: []
-  context: []
   vcs_refs: []
   created_at: 2026-02-16T00:16:21.575Z
   notes: []
   todos: []
+  started_at: 2026-02-16T00:19:39.361Z
