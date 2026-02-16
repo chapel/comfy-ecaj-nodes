@@ -402,8 +402,10 @@ def _get_widen_for_op(widen: object, widen_config: object | None, op_t_factor: f
     if widen.t_factor == op_t_factor:
         return widen
     from .widen import WIDEN, WIDENConfig
-    if widen_config is not None:
-        cfg = replace(widen_config, t_factor=op_t_factor)
+    # Prefer widen_config, then widen.config, then defaults
+    base_cfg = widen_config or getattr(widen, "config", None)
+    if base_cfg is not None:
+        cfg = replace(base_cfg, t_factor=op_t_factor)
     else:
         cfg = WIDENConfig(t_factor=op_t_factor)
     return WIDEN(cfg)

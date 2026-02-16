@@ -1479,7 +1479,6 @@ class TestNestedMergeTFactor:
     # AC: @exit-batched-eval ac-6
     def test_nested_merge_uses_own_t_factor(self):
         """Inner merge with different t_factor should create a new WIDEN instance."""
-        from unittest.mock import patch
         from lib.recipe_eval import _get_widen_for_op
         from lib.widen import WIDEN, WIDENConfig
 
@@ -1499,6 +1498,7 @@ class TestNestedMergeTFactor:
     def test_nested_merge_t_factor_in_compose(self):
         """A merge inside a compose should use its own t_factor during evaluation."""
         from unittest.mock import patch
+
         from lib.widen import WIDEN, WIDENConfig
 
         batch_size = 2
