@@ -2265,7 +2265,7 @@ runs:
   - _ulid: 01KHN0MTC5977F2CPVRYXZWB47
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-17T05:19:53.222Z
     step_results:
@@ -2279,5 +2279,12 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-17T05:20:23.309Z
-        completed_at: 2026-02-17T05:20:23.309Z
+        completed_at: 2026-02-17T05:20:33.091Z
+        notes: No new high-confidence items. Both friction points (cache leaking, VRAM non-determinism) were
+          one-off and resolved. Existing observation 01KH6Y61 covers the mock-test-quality pattern.
+          Nothing to capture.
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-17T05:20:33.091Z
+        completed_at: 2026-02-17T05:20:33.091Z
     initiated_by: "@claude"
