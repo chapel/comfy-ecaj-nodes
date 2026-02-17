@@ -5514,4 +5514,24 @@
       author: "@claude"
       content: Reset from completed to pending
       supersedes: null
+    - _ulid: 01KHMEVQTQZPCJHPSVCXFG5E6C
+      created_at: 2026-02-17T00:09:05.623Z
+      author: "@claude"
+      content: "Status review: implementation complete, tests need rework. Implementation (all done): -
+        lib/gpu_ops.py: get_available_ram_bytes(), estimate_peak_ram(), check_ram_preflight(),
+        pin_memory gate (ac-9), broader OOM catch (ac-11) - nodes/exit.py: pre-flight RAM check
+        (ac-10), cache eviction under pressure (ac-12) - nodes/clip_exit.py: pre-flight RAM check
+        (ac-11 on clip-exit-node) - lib/executor.py: re-exports new functions Test quality issues
+        (13 of 42 tests are static analysis, not behavioral): - ac-2:
+        test_exit_node_calls_gc_after_groups only checks hasattr(gc), doesn't test behavior - ac-3:
+        test_exit_node_cleanup_in_finally does inspect.getsource string matching - ac-7:
+        test_atomic_save_uses_streaming_writer does inspect.getsource string matching - ac-8: both
+        tests do inspect.getsource + string index ordering - ac-9:
+        test_pin_memory_used_when_ram_sufficient does inspect.getsource instead of behavioral test -
+        ac-12: BOTH tests do inspect.getsource string matching — zero behavioral coverage -
+        @exit-node ac-9: both tests do inspect.getsource or hasattr — no behavioral test -
+        @clip-exit-node ac-11: both tests do inspect.getsource or hasattr — no behavioral test
+        Remaining work: rewrite 13 static-analysis tests as behavioral tests that actually exercise
+        the code paths."
+      supersedes: null
   todos: []
