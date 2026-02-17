@@ -5497,7 +5497,7 @@
   spec_ref: "@memory-management"
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -5508,3 +5508,7 @@
   started_at: 2026-02-17T00:06:50.876Z
   notes: []
   todos: []
+  completed_at: 2026-02-17T00:06:53.502Z
+  closed_reason: "Implemented all 6 ACs: pin_memory gate, pre-flight RAM check, broader OOM exception
+    handling, cache eviction under pressure. 16 new tests, 1159 total passing. Committed on
+    fix/prevent-system-oom branch."
