@@ -635,6 +635,7 @@ class TestProgressBarPerBatchGroup:
             patch("nodes.exit.analyze_recipe") as mock_analyze,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", mock_pbar_cls),
+            patch("nodes.exit.check_ram_preflight"),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -680,6 +681,7 @@ class TestProgressBarPerBatchGroup:
             patch("nodes.exit.analyze_recipe") as mock_analyze,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.check_ram_preflight"),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()

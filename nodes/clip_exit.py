@@ -374,12 +374,19 @@ class WIDENCLIPExitNode:
                     (base_state[k].shape for keys in batch_groups.values() for k in keys),
                     key=lambda s: torch.Size(s).numel(),
                 )
+                n_models = len(set_affected) + len(clip_model_loaders)
+                # Compute worst-case batch_size across all groups for preflight
+                worst_batch = max(
+                    compute_batch_size(sig.shape, n_models, compute_dtype)
+                    for sig in batch_groups
+                )
                 check_ram_preflight(
                     base_state_bytes=base_state_bytes,
-                    n_models=len(set_affected) + len(clip_model_loaders),
+                    n_models=n_models,
                     largest_shape=largest_shape,
                     dtype=compute_dtype,
                     save_model=False,  # CLIP exit doesn't save
+                    batch_size=worst_batch,
                 )
 
             # Phase 2: Batched GPU evaluation per group

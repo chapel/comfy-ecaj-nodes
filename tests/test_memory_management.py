@@ -880,17 +880,26 @@ class TestPinMemoryGate:
             pin_memory_called.append(True)
             return self  # Don't actually pin (no CUDA device needed)
 
+        original_to = torch.Tensor.to
+
+        def mock_to(self, *args, **kwargs):
+            # Redirect non-cpu device .to() to cpu to avoid needing real CUDA
+            if args and isinstance(args[0], str) and args[0] not in ("cpu",):
+                return original_to(self, "cpu", *args[1:], **kwargs)
+            return original_to(self, *args, **kwargs)
+
         # Mock low RAM: return 100 bytes (way below 3x threshold)
         with (
             patch("lib.gpu_ops.get_available_ram_bytes", return_value=100),
             patch.object(torch.Tensor, "pin_memory", mock_pin),
+            patch.object(torch.Tensor, "to", mock_to),
         ):
             chunked_evaluation(
                 keys,
                 base,
                 lambda k, b: b * 2,
                 batch_size=1,
-                device="cpu",
+                device="cuda:0",  # Non-cpu to enter the pin_memory gate
                 dtype=torch.float32,
                 storage_dtype=torch.float32,
             )

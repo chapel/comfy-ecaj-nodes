@@ -76,11 +76,12 @@ def estimate_peak_ram(
     - base_state dict kept in RAM throughout
     - merged_state accumulating on CPU (~same size as base_state)
     - pin_memory cost for the largest chunk (2x: original stack + pinned copy)
+    - per-model LoRA delta data held in RAM during evaluation
     - save path keeping an extra base_state reference
 
     Args:
         base_state_bytes: Total bytes of the base state dict
-        n_models: Number of models being merged
+        n_models: Number of models being merged (LoRA sets + model loaders)
         largest_shape: Shape of the largest parameter tensor (without batch dim)
         dtype: Computation dtype (typically float32)
         save_model: Whether model will be saved (doubles base_state cost)
@@ -94,7 +95,11 @@ def estimate_peak_ram(
     # pin_memory allocates a copy: original stack + pinned = 2x
     chunk_pinned_cost = 2 * chunk_tensor_bytes
 
-    peak = base_state_bytes + base_state_bytes + chunk_pinned_cost
+    # Each LoRA/model loader holds delta tensors (~2 rank-sized matrices per key).
+    # Conservative estimate: each model adds ~10% of base_state in delta data.
+    loader_overhead = int(base_state_bytes * 0.1) * n_models
+
+    peak = base_state_bytes + base_state_bytes + chunk_pinned_cost + loader_overhead
     if save_model:
         # save path overlays merged into base_state, but both dicts exist briefly
         peak += base_state_bytes
@@ -376,6 +381,10 @@ def chunked_evaluation(
     """
     results: dict[str, torch.Tensor] = {}
 
+    # Cache available RAM once before the loop to avoid reading /proc/meminfo
+    # per chunk. RAM doesn't change significantly within a single evaluation.
+    avail_ram = get_available_ram_bytes() if device != "cpu" else 0
+
     for chunk_keys in chunked(keys, batch_size):
         try:
             # Stack base tensors and move to GPU
@@ -383,9 +392,8 @@ def chunked_evaluation(
             base_stack = torch.stack([base_tensors[k].cpu() for k in chunk_keys])
             tensor_bytes = base_stack.nelement() * base_stack.element_size()
             if device != "cpu" and base_stack.numel() > 65536:
-                avail = get_available_ram_bytes()
                 # 3x headroom: original stack + pinned copy + GC margin
-                if avail > tensor_bytes * 3:
+                if avail_ram > tensor_bytes * 3:
                     base_gpu = base_stack.pin_memory().to(device, dtype=dtype)
                 else:
                     base_gpu = base_stack.to(device, dtype=dtype)
