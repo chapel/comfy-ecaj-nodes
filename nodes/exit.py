@@ -21,11 +21,13 @@ from ..lib.analysis import (
 )
 from ..lib.block_classify import compute_changed_blocks, filter_changed_keys
 from ..lib.executor import (
+    check_ram_preflight,
     chunked_evaluation,
     compile_batch_groups,
     compile_plan,
     compute_batch_size,
     execute_plan,
+    get_available_ram_bytes,
 )
 from ..lib.persistence import (
     atomic_save,
@@ -605,6 +607,33 @@ class WIDENExitNode:
             if not incremental_hit:
                 merged_state = {}
 
+            # AC: @exit-node ac-9
+            # Pre-flight RAM check before GPU loop
+            if batch_groups:
+                # Only count keys being processed — not the full base_state.
+                # LoRA merges typically affect a subset of keys.
+                processed_keys = {k for keys in batch_groups.values() for k in keys}
+                merged_state_bytes = sum(
+                    base_state[k].nelement() * base_state[k].element_size()
+                    for k in processed_keys
+                )
+                n_models = len(set_affected) + len(model_loaders)
+                element_size = torch.finfo(compute_dtype).bits // 8
+                # Compute worst-case chunk bytes: pair each group's batch_size
+                # with its own shape (not max_batch * max_shape).
+                worst_chunk_bytes = max(
+                    element_size
+                    * torch.Size(sig.shape).numel()
+                    * compute_batch_size(sig.shape, n_models, compute_dtype)
+                    for sig in batch_groups
+                )
+                check_ram_preflight(
+                    merged_state_bytes=merged_state_bytes,
+                    n_models=n_models,
+                    worst_chunk_bytes=worst_chunk_bytes,
+                    save_model=save_model,
+                )
+
             # Phase 2: Batched GPU evaluation per group
             # (skipped entirely on full cache hit)
             _log_memory("before-gpu-eval")
@@ -730,14 +759,24 @@ class WIDENExitNode:
             if not enable_cache:
                 _incremental_cache.clear()
             elif batch_groups or not incremental_hit:
-                new_entry = _CacheEntry(
-                    structural_fingerprint=structural_fp,
-                    block_configs=current_block_configs,
-                    merged_state=dict(merged_state),
-                    storage_dtype=storage_dtype,
+                # AC: @memory-management ac-12
+                # Check if RAM is too low to safely store the cache entry
+                cache_bytes = sum(
+                    t.nelement() * t.element_size() for t in merged_state.values()
                 )
-                _incremental_cache.clear()
-                _incremental_cache[structural_fp] = new_entry
+                avail = get_available_ram_bytes()
+                if avail < cache_bytes * 2:
+                    # Evict instead of storing — RAM is too tight
+                    _incremental_cache.clear()
+                else:
+                    new_entry = _CacheEntry(
+                        structural_fingerprint=structural_fp,
+                        block_configs=current_block_configs,
+                        merged_state=dict(merged_state),
+                        storage_dtype=storage_dtype,
+                    )
+                    _incremental_cache.clear()
+                    _incremental_cache[structural_fp] = new_entry
             _log_memory("before-cache-write")
 
         finally:
