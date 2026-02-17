@@ -17,7 +17,6 @@ import logging
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
-from math import prod
 from typing import TypeVar
 
 import torch
@@ -63,10 +62,8 @@ def get_available_ram_bytes() -> int:
 def estimate_peak_ram(
     base_state_bytes: int,
     n_models: int,
-    largest_shape: tuple,
-    dtype: torch.dtype,
+    worst_chunk_bytes: int,
     save_model: bool,
-    batch_size: int = 1,
 ) -> int:
     """Estimate peak system RAM needed for the GPU evaluation pipeline.
 
@@ -82,18 +79,15 @@ def estimate_peak_ram(
     Args:
         base_state_bytes: Total bytes of the base state dict
         n_models: Number of models being merged (LoRA sets + model loaders)
-        largest_shape: Shape of the largest parameter tensor (without batch dim)
-        dtype: Computation dtype (typically float32)
+        worst_chunk_bytes: Largest single-chunk allocation in bytes
+            (element_size * prod(shape) * batch_size for that group)
         save_model: Whether model will be saved (doubles base_state cost)
-        batch_size: Batch size for chunked evaluation
 
     Returns:
         Estimated peak RAM in bytes
     """
-    element_size = torch.finfo(dtype).bits // 8 if dtype.is_floating_point else 4
-    chunk_tensor_bytes = element_size * prod(largest_shape) * batch_size
     # pin_memory allocates a copy: original stack + pinned = 2x
-    chunk_pinned_cost = 2 * chunk_tensor_bytes
+    chunk_pinned_cost = 2 * worst_chunk_bytes
 
     # Each LoRA/model loader holds delta tensors (~2 rank-sized matrices per key).
     # Conservative estimate: each model adds ~10% of base_state in delta data.
@@ -109,10 +103,8 @@ def estimate_peak_ram(
 def check_ram_preflight(
     base_state_bytes: int,
     n_models: int,
-    largest_shape: tuple,
-    dtype: torch.dtype,
+    worst_chunk_bytes: int,
     save_model: bool,
-    batch_size: int = 1,
 ) -> None:
     """Raise RuntimeError if available RAM is insufficient for merge.
 
@@ -122,12 +114,18 @@ def check_ram_preflight(
 
     Called by exit nodes before the GPU loop to fail early with a clear message.
 
+    Args:
+        base_state_bytes: Total bytes of the base state dict
+        n_models: Number of models being merged
+        worst_chunk_bytes: Largest single-chunk allocation in bytes
+        save_model: Whether model will be saved
+
     Raises:
         RuntimeError: With shortfall in MB if RAM is insufficient
     """
     avail = get_available_ram_bytes()
     peak = estimate_peak_ram(
-        base_state_bytes, n_models, largest_shape, dtype, save_model, batch_size
+        base_state_bytes, n_models, worst_chunk_bytes, save_model
     )
     if avail < peak:
         raise RuntimeError(

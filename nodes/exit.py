@@ -613,23 +613,21 @@ class WIDENExitNode:
                 base_state_bytes = sum(
                     t.nelement() * t.element_size() for t in base_state.values()
                 )
-                largest_shape = max(
-                    (base_state[k].shape for keys in batch_groups.values() for k in keys),
-                    key=lambda s: torch.Size(s).numel(),
-                )
                 n_models = len(set_affected) + len(model_loaders)
-                # Compute worst-case batch_size across all groups for preflight
-                worst_batch = max(
-                    compute_batch_size(sig.shape, n_models, compute_dtype)
+                element_size = torch.finfo(compute_dtype).bits // 8
+                # Compute worst-case chunk bytes: pair each group's batch_size
+                # with its own shape (not max_batch * max_shape).
+                worst_chunk_bytes = max(
+                    element_size
+                    * torch.Size(sig.shape).numel()
+                    * compute_batch_size(sig.shape, n_models, compute_dtype)
                     for sig in batch_groups
                 )
                 check_ram_preflight(
                     base_state_bytes=base_state_bytes,
                     n_models=n_models,
-                    largest_shape=largest_shape,
-                    dtype=compute_dtype,
+                    worst_chunk_bytes=worst_chunk_bytes,
                     save_model=save_model,
-                    batch_size=worst_batch,
                 )
 
             # Phase 2: Batched GPU evaluation per group

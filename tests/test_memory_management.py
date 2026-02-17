@@ -967,14 +967,11 @@ class TestPreflightRamCheck:
         from lib.gpu_ops import check_ram_preflight
 
         with patch("lib.gpu_ops.get_available_ram_bytes", return_value=100 * 1024**2):
-            import pytest
-
             with pytest.raises(RuntimeError, match="Insufficient system RAM"):
                 check_ram_preflight(
                     base_state_bytes=2 * 1024**3,  # 2 GB base state
                     n_models=2,
-                    largest_shape=(4096, 4096),
-                    dtype=torch.float32,
+                    worst_chunk_bytes=1 * 1024**3,  # 1 GB chunk
                     save_model=False,
                 )
 
@@ -988,16 +985,13 @@ class TestPreflightRamCheck:
             check_ram_preflight(
                 base_state_bytes=1024,
                 n_models=1,
-                largest_shape=(64, 64),
-                dtype=torch.float32,
+                worst_chunk_bytes=1024,
                 save_model=False,
             )
 
     # AC: @memory-management ac-10
     def test_error_message_includes_mb_values(self):
         """Error message should include available and needed MB."""
-        import pytest
-
         from lib.gpu_ops import check_ram_preflight
 
         with patch("lib.gpu_ops.get_available_ram_bytes", return_value=500 * 1024**2):
@@ -1005,8 +999,7 @@ class TestPreflightRamCheck:
                 check_ram_preflight(
                     base_state_bytes=2 * 1024**3,
                     n_models=2,
-                    largest_shape=(4096, 4096),
-                    dtype=torch.float32,
+                    worst_chunk_bytes=1 * 1024**3,
                     save_model=True,
                 )
 
@@ -1018,15 +1011,13 @@ class TestPreflightRamCheck:
         base = estimate_peak_ram(
             base_state_bytes=1024**3,
             n_models=2,
-            largest_shape=(512, 512),
-            dtype=torch.float32,
+            worst_chunk_bytes=4 * 1024**2,
             save_model=False,
         )
         with_save = estimate_peak_ram(
             base_state_bytes=1024**3,
             n_models=2,
-            largest_shape=(512, 512),
-            dtype=torch.float32,
+            worst_chunk_bytes=4 * 1024**2,
             save_model=True,
         )
         assert with_save > base
