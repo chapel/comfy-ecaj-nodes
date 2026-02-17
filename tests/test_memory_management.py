@@ -969,7 +969,7 @@ class TestPreflightRamCheck:
         with patch("lib.gpu_ops.get_available_ram_bytes", return_value=100 * 1024**2):
             with pytest.raises(RuntimeError, match="Insufficient system RAM"):
                 check_ram_preflight(
-                    base_state_bytes=2 * 1024**3,  # 2 GB base state
+                    merged_state_bytes=2 * 1024**3,  # 2 GB base state
                     n_models=2,
                     worst_chunk_bytes=1 * 1024**3,  # 1 GB chunk
                     save_model=False,
@@ -983,7 +983,7 @@ class TestPreflightRamCheck:
         # 100 GB available, tiny base state
         with patch("lib.gpu_ops.get_available_ram_bytes", return_value=100 * 1024**3):
             check_ram_preflight(
-                base_state_bytes=1024,
+                merged_state_bytes=1024,
                 n_models=1,
                 worst_chunk_bytes=1024,
                 save_model=False,
@@ -997,7 +997,7 @@ class TestPreflightRamCheck:
         with patch("lib.gpu_ops.get_available_ram_bytes", return_value=500 * 1024**2):
             with pytest.raises(RuntimeError, match=r"\d+ MB available.*\d+ MB needed"):
                 check_ram_preflight(
-                    base_state_bytes=2 * 1024**3,
+                    merged_state_bytes=2 * 1024**3,
                     n_models=2,
                     worst_chunk_bytes=1 * 1024**3,
                     save_model=True,
@@ -1009,13 +1009,13 @@ class TestPreflightRamCheck:
         from lib.gpu_ops import estimate_peak_ram
 
         base = estimate_peak_ram(
-            base_state_bytes=1024**3,
+            merged_state_bytes=1024**3,
             n_models=2,
             worst_chunk_bytes=4 * 1024**2,
             save_model=False,
         )
         with_save = estimate_peak_ram(
-            base_state_bytes=1024**3,
+            merged_state_bytes=1024**3,
             n_models=2,
             worst_chunk_bytes=4 * 1024**2,
             save_model=True,
@@ -1274,6 +1274,196 @@ class TestClipExitNodeRamPreflight:
                 node.execute(recipe)
 
         chunked_mock.assert_not_called()
+
+
+# =============================================================================
+# Regression: preflight byte calculations use processed keys and per-sig batching
+# =============================================================================
+
+
+class TestExitNodePreflightByteCalculation:
+    """Regression tests asserting exact preflight byte values passed to
+    check_ram_preflight by the exit node.
+
+    Ensures:
+    - merged_state_bytes reflects only processed keys (not full base_state)
+    - worst_chunk_bytes pairs each signature's shape with its own batch_size
+    """
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        _incremental_cache.clear()
+        yield
+        _incremental_cache.clear()
+
+    # AC: @exit-node ac-9
+    def test_preflight_args_use_processed_keys_only(self, mock_model_patcher):
+        """merged_state_bytes counts only keys in batch_groups, not full state."""
+        state = mock_model_patcher.model_state_dict()
+        all_keys = list(state.keys())
+        # Use only the first key in batch_groups — the rest are unaffected
+        processed_key = all_keys[0]
+        unprocessed_keys = all_keys[1:]
+        assert len(unprocessed_keys) > 0, "Need at least 2 keys for this test"
+
+        sig = OpSignature(shape=(4, 4), ndim=2)
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, all_keys, recipe=recipe,
+        )
+        preflight_mock = MagicMock()
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: [processed_key]}),
+            patch("nodes.exit.chunked_evaluation"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.check_ram_preflight", preflight_mock),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe)
+
+        preflight_mock.assert_called_once()
+        call_kwargs = preflight_mock.call_args
+        t = state[processed_key]
+        expected_merged_bytes = t.nelement() * t.element_size()
+        assert call_kwargs.kwargs["merged_state_bytes"] == expected_merged_bytes
+
+    # AC: @exit-node ac-9
+    def test_preflight_worst_chunk_pairs_shape_with_own_batch_size(self, mock_model_patcher):
+        """worst_chunk_bytes = max over sigs of (numel * batch_size_i * elem_size).
+
+        Uses two signatures with skewed shapes. With deterministic batch sizes,
+        we can assert the exact worst_chunk value and verify per-sig pairing.
+        """
+        state = mock_model_patcher.model_state_dict()
+        all_keys = list(state.keys())
+
+        # Two signatures: small shape gets large batch, large shape gets small batch
+        sig_small = OpSignature(shape=(4, 4), ndim=2)       # numel=16
+        sig_large = OpSignature(shape=(16, 16), ndim=2)     # numel=256
+        batch_groups = {
+            sig_small: [all_keys[0]],
+            sig_large: [all_keys[1]] if len(all_keys) > 1 else [all_keys[0]],
+        }
+
+        # Deterministic batch sizes: small shape → batch 100, large shape → batch 2
+        def fake_batch_size(shape, n_models, dtype, **kw):
+            numel = 1
+            for d in shape:
+                numel *= d
+            return 100 if numel <= 16 else 2
+
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, all_keys, recipe=recipe,
+        )
+        preflight_mock = MagicMock()
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value=batch_groups),
+            patch("nodes.exit.chunked_evaluation"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.check_ram_preflight", preflight_mock),
+            patch("nodes.exit.compute_batch_size", side_effect=fake_batch_size),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe)
+
+        preflight_mock.assert_called_once()
+        call_kwargs = preflight_mock.call_args
+
+        element_size = torch.finfo(torch.float32).bits // 8  # 4
+        # Per-sig: small = 4 * 16 * 100 = 6400, large = 4 * 256 * 2 = 2048
+        # worst_chunk = max(6400, 2048) = 6400
+        expected_worst = max(
+            element_size * 16 * 100,   # sig_small
+            element_size * 256 * 2,    # sig_large
+        )
+        assert expected_worst == 6400  # sanity check
+        assert call_kwargs.kwargs["worst_chunk_bytes"] == expected_worst
+
+
+class TestClipExitNodePreflightByteCalculation:
+    """Regression tests for CLIP exit node preflight byte calculations."""
+
+    # AC: @clip-exit-node ac-11
+    def test_preflight_args_use_processed_keys_only(self):
+        """merged_state_bytes counts only keys in batch_groups, not full state."""
+        from nodes.clip_exit import WIDENCLIPExitNode
+
+        mock_clip = MagicMock()
+        mock_patcher = MagicMock()
+        state = {
+            "clip_l.transformer.text_model.weight": torch.randn(4, 4, dtype=torch.float32),
+            "clip_l.transformer.text_model.bias": torch.randn(4, dtype=torch.float32),
+        }
+        mock_patcher.model_state_dict.return_value = state
+        mock_clip.patcher = mock_patcher
+        mock_clip.clone.return_value = MagicMock()
+
+        all_keys = list(state.keys())
+        processed_key = all_keys[0]
+
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_clip, arch="sdxl", domain="clip"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        mock_loader = MagicMock()
+        mock_loader.cleanup = MagicMock()
+        mock_analyze = MagicMock(
+            arch="sdxl",
+            loader=mock_loader,
+            set_affected={str(id(None)): set(all_keys)},
+            affected_keys=set(all_keys),
+        )
+        mock_model_analysis = MagicMock()
+        mock_model_analysis.model_loaders = {}
+        mock_model_analysis.model_affected = {}
+        mock_model_analysis.all_model_keys = frozenset()
+
+        sig = OpSignature(shape=(4, 4), ndim=2)
+        dummy_plan = EvalPlan(ops=(), result_reg=0, dead_after=())
+        preflight_mock = MagicMock()
+
+        with (
+            patch("nodes.clip_exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.clip_exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.clip_exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.clip_exit.compile_batch_groups", return_value={sig: [processed_key]}),
+            patch("nodes.clip_exit.chunked_evaluation"),
+            patch("nodes.clip_exit.check_ram_preflight", preflight_mock),
+        ):
+            node = WIDENCLIPExitNode()
+            node.execute(recipe)
+
+        preflight_mock.assert_called_once()
+        call_kwargs = preflight_mock.call_args
+        t = state[processed_key]
+        expected_merged_bytes = t.nelement() * t.element_size()
+        assert call_kwargs.kwargs["merged_state_bytes"] == expected_merged_bytes
 
 
 # =============================================================================

@@ -60,7 +60,7 @@ def get_available_ram_bytes() -> int:
 
 
 def estimate_peak_ram(
-    base_state_bytes: int,
+    merged_state_bytes: int,
     n_models: int,
     worst_chunk_bytes: int,
     save_model: bool,
@@ -73,12 +73,13 @@ def estimate_peak_ram(
     models. This function estimates only the additional RAM that execute()
     will allocate:
 
-    - merged_state: new CPU tensors accumulating results (~base_state_bytes)
+    - merged_state: new CPU tensors accumulating results (~merged_state_bytes)
     - pin_memory: temporary 2x cost for one chunk at a time
     - loader deltas: LoRA/model delta data held during evaluation
 
     Args:
-        base_state_bytes: Total bytes of the base state dict
+        merged_state_bytes: Total bytes of processed keys (not the full base
+            state dict — only keys actually being merged).
         n_models: Number of models being merged (LoRA sets + model loaders)
         worst_chunk_bytes: Largest single-chunk allocation in bytes
             (element_size * prod(shape) * batch_size for that group)
@@ -91,21 +92,21 @@ def estimate_peak_ram(
     chunk_pinned_cost = 2 * worst_chunk_bytes
 
     # Each LoRA/model loader holds delta tensors (~2 rank-sized matrices per key).
-    # Conservative estimate: each model adds ~10% of base_state in delta data.
-    loader_overhead = int(base_state_bytes * 0.1) * n_models
+    # Conservative estimate: each model adds ~10% of merged state in delta data.
+    loader_overhead = int(merged_state_bytes * 0.1) * n_models
 
-    # merged_state accumulates new CPU tensors (up to ~base_state_bytes)
+    # merged_state accumulates new CPU tensors (up to ~merged_state_bytes)
     # + temporary pin_memory cost + loader deltas
-    peak = base_state_bytes + chunk_pinned_cost + loader_overhead
+    peak = merged_state_bytes + chunk_pinned_cost + loader_overhead
     if save_model:
         # Streaming writer holds one tensor at a time, but metadata + temp
-        # file overhead adds ~5% of base_state
-        peak += int(base_state_bytes * 0.05)
+        # file overhead adds ~5% of merged state
+        peak += int(merged_state_bytes * 0.05)
     return peak
 
 
 def check_ram_preflight(
-    base_state_bytes: int,
+    merged_state_bytes: int,
     n_models: int,
     worst_chunk_bytes: int,
     save_model: bool,
@@ -119,7 +120,7 @@ def check_ram_preflight(
     Called by exit nodes before the GPU loop to fail early with a clear message.
 
     Args:
-        base_state_bytes: Total bytes of the base state dict
+        merged_state_bytes: Total bytes of processed keys (only keys being merged)
         n_models: Number of models being merged
         worst_chunk_bytes: Largest single-chunk allocation in bytes
         save_model: Whether model will be saved
@@ -129,7 +130,7 @@ def check_ram_preflight(
     """
     avail = get_available_ram_bytes()
     peak = estimate_peak_ram(
-        base_state_bytes, n_models, worst_chunk_bytes, save_model
+        merged_state_bytes, n_models, worst_chunk_bytes, save_model
     )
     if avail < peak:
         raise RuntimeError(

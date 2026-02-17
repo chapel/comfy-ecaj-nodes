@@ -384,7 +384,7 @@ class WIDENCLIPExitNode:
                     for sig in batch_groups
                 )
                 check_ram_preflight(
-                    base_state_bytes=merged_state_bytes,
+                    merged_state_bytes=merged_state_bytes,
                     n_models=n_models,
                     worst_chunk_bytes=worst_chunk_bytes,
                     save_model=False,  # CLIP exit doesn't save
