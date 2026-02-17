@@ -55,6 +55,7 @@ class MockCLIP:
 class TestCLIPEntryNodeReturnsRecipeBase:
     """AC: @clip-entry-node ac-1 — returns RecipeBase wrapping CLIP with arch and domain='clip'."""
 
+    # AC: @clip-entry-node ac-1
     def test_entry_returns_tuple_with_recipe_base(self):
         """Entry node returns a tuple containing a RecipeBase."""
         clip = MockCLIP()
@@ -65,6 +66,7 @@ class TestCLIPEntryNodeReturnsRecipeBase:
         assert len(result) == 1
         assert isinstance(result[0], RecipeBase)
 
+    # AC: @clip-entry-node ac-1
     def test_recipe_base_wraps_same_clip(self):
         """RecipeBase contains the exact same CLIP reference (no clone)."""
         clip = MockCLIP()
@@ -73,6 +75,7 @@ class TestCLIPEntryNodeReturnsRecipeBase:
 
         assert recipe.model_patcher is clip
 
+    # AC: @clip-entry-node ac-1
     def test_recipe_base_has_domain_clip(self):
         """RecipeBase has domain='clip' set."""
         clip = MockCLIP()
@@ -88,6 +91,7 @@ class TestCLIPEntryNodeReturnsRecipeBase:
 class TestSDXLCLIPArchitectureDetection:
     """AC: @clip-entry-node ac-2 — SDXL detection via clip_l and clip_g keys."""
 
+    # AC: @clip-entry-node ac-2
     def test_sdxl_clip_detected_as_sdxl(self):
         """CLIP with clip_l and clip_g keys returns arch='sdxl'."""
         clip = MockCLIP(keys=_SDXL_CLIP_KEYS)
@@ -95,6 +99,7 @@ class TestSDXLCLIPArchitectureDetection:
 
         assert arch == "sdxl"
 
+    # AC: @clip-entry-node ac-2
     def test_entry_node_sets_sdxl_arch(self):
         """Entry node sets arch field to 'sdxl' for SDXL CLIP."""
         clip = MockCLIP(keys=_SDXL_CLIP_KEYS)
@@ -110,6 +115,7 @@ class TestSDXLCLIPArchitectureDetection:
 class TestNoGPUMemoryAllocation:
     """AC: @clip-entry-node ac-3 — no GPU memory allocated and no tensors copied."""
 
+    # AC: @clip-entry-node ac-3
     def test_clip_not_cloned(self):
         """Entry node stores reference, not a clone."""
         clip = MockCLIP()
@@ -119,6 +125,7 @@ class TestNoGPUMemoryAllocation:
         # Same object, not cloned
         assert recipe.model_patcher is clip
 
+    # AC: @clip-entry-node ac-3
     def test_state_dict_tensors_not_copied(self):
         """State dict tensors share memory (no copy)."""
         clip = MockCLIP()
@@ -133,6 +140,7 @@ class TestNoGPUMemoryAllocation:
         for key in original_state:
             assert original_state[key] is new_state[key]
 
+    # AC: @clip-entry-node ac-3
     def test_no_cuda_tensors_created(self):
         """No CUDA tensors are created during entry node execution."""
         clip = MockCLIP()
@@ -151,6 +159,7 @@ class TestNoGPUMemoryAllocation:
 class TestReturnTypes:
     """AC: @clip-entry-node ac-4 — returns WIDEN_CLIP type."""
 
+    # AC: @clip-entry-node ac-4
     def test_return_types_is_widen_clip(self):
         """RETURN_TYPES is WIDEN_CLIP tuple."""
         assert WIDENCLIPEntryNode.RETURN_TYPES == ("WIDEN_CLIP",)
@@ -163,6 +172,7 @@ class TestReturnTypes:
 class TestNonSDXLError:
     """AC: @clip-entry-node ac-5 — non-SDXL raises clear error."""
 
+    # AC: @clip-entry-node ac-5
     def test_sd15_clip_raises_error(self):
         """SD1.5 CLIP (only clip_l) raises UnsupportedCLIPArchitectureError."""
         clip = MockCLIP(keys=_SD15_CLIP_KEYS)
@@ -173,6 +183,7 @@ class TestNonSDXLError:
         error_msg = str(exc_info.value)
         assert "Only SDXL CLIP merging is supported in v1" in error_msg
 
+    # AC: @clip-entry-node ac-5
     def test_unknown_clip_keys_raise_error(self):
         """CLIP with unknown keys raises UnsupportedCLIPArchitectureError."""
         unknown_keys = (
@@ -194,6 +205,7 @@ class TestNonSDXLError:
 class TestInputTypes:
     """AC: @clip-entry-node ac-6 — accepts CLIP input type."""
 
+    # AC: @clip-entry-node ac-6
     def test_input_types_accepts_clip(self):
         """INPUT_TYPES returns correct structure with CLIP input."""
         input_types = WIDENCLIPEntryNode.INPUT_TYPES()
@@ -209,6 +221,7 @@ class TestInputTypes:
 class TestPatcherAPIAccess:
     """AC: @clip-entry-node ac-7 — keys accessed via patcher API without GPU load."""
 
+    # AC: @clip-entry-node ac-7
     def test_architecture_detection_uses_patcher_api(self):
         """Architecture detection accesses keys via clip.patcher.model_state_dict()."""
         # Create a mock that tracks method calls

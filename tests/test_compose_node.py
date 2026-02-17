@@ -14,6 +14,7 @@ from tests.conftest import MockModelPatcher  # noqa: I001
 class TestComposeNoCompose:
     """AC: @compose-node ac-1 — branch input with no compose returns single-element."""
 
+    # AC: @compose-node ac-1
     def test_returns_tuple_with_recipe_compose(self):
         """Compose node returns tuple containing RecipeCompose."""
         node = WIDENComposeNode()
@@ -25,6 +26,7 @@ class TestComposeNoCompose:
         assert len(result) == 1
         assert isinstance(result[0], RecipeCompose)
 
+    # AC: @compose-node ac-1
     def test_single_branch_in_branches_tuple(self):
         """With no compose input, branches tuple has single element."""
         node = WIDENComposeNode()
@@ -35,6 +37,7 @@ class TestComposeNoCompose:
         assert len(compose_result.branches) == 1
         assert compose_result.branches[0] is lora
 
+    # AC: @compose-node ac-1
     def test_explicit_none_compose(self):
         """Explicit compose=None gives single-element branches."""
         node = WIDENComposeNode()
@@ -53,6 +56,7 @@ class TestComposeNoCompose:
 class TestComposeChaining:
     """AC: @compose-node ac-2 — branch appended to existing compose branches."""
 
+    # AC: @compose-node ac-2
     def test_appends_to_existing_compose(self):
         """New branch is appended to existing compose branches."""
         node = WIDENComposeNode()
@@ -68,6 +72,7 @@ class TestComposeChaining:
         assert second_compose.branches[0] is lora_a
         assert second_compose.branches[1] is lora_b
 
+    # AC: @compose-node ac-2
     def test_original_compose_unchanged(self):
         """Chaining creates new RecipeCompose, original unchanged (persistent semantics)."""
         node = WIDENComposeNode()
@@ -93,6 +98,7 @@ class TestComposeChaining:
 class TestTripleChain:
     """AC: @compose-node ac-3 — three chained nodes preserve order."""
 
+    # AC: @compose-node ac-3
     def test_three_branches_in_order(self):
         """Three chained Compose nodes result in three branches in order."""
         node = WIDENComposeNode()
@@ -109,6 +115,7 @@ class TestTripleChain:
         assert c3.branches[1] is lora_b
         assert c3.branches[2] is lora_c
 
+    # AC: @compose-node ac-3
     def test_five_branches_maintain_order(self):
         """Five chained Compose nodes maintain insertion order."""
         node = WIDENComposeNode()
@@ -134,6 +141,7 @@ class TestTripleChain:
 class TestRejectsRawRecipeBase:
     """AC: @compose-node ac-4 — raw RecipeBase raises error."""
 
+    # AC: @compose-node ac-4
     def test_recipe_base_raises_value_error(self):
         """RecipeBase as branch raises ValueError."""
         node = WIDENComposeNode()
@@ -147,6 +155,7 @@ class TestRejectsRawRecipeBase:
         assert "raw base model" in error_msg.lower()
         assert "LoRA" in error_msg or "lora" in error_msg.lower()
 
+    # AC: @compose-node ac-4
     def test_error_mentions_use_as_merge_base(self):
         """Error message suggests using as Merge base input."""
         node = WIDENComposeNode()

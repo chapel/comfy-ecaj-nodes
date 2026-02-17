@@ -31,6 +31,7 @@ from nodes.block_config_sdxl_clip import WIDENBlockConfigSDXLCLIPNode
 class TestSDXLCLIPBlockConfigInputTypes:
     """AC: @sdxl-clip-block-config ac-1 — node has correct sliders."""
 
+    # AC: @sdxl-clip-block-config ac-1
     def test_has_clip_l_block_sliders(self):
         """INPUT_TYPES has CLIP-L block sliders CL00-CL11."""
         input_types = WIDENBlockConfigSDXLCLIPNode.INPUT_TYPES()
@@ -43,6 +44,7 @@ class TestSDXLCLIPBlockConfigInputTypes:
             assert required[slider_name][1]["min"] == 0.0
             assert required[slider_name][1]["max"] == 2.0
 
+    # AC: @sdxl-clip-block-config ac-1
     def test_has_clip_g_block_sliders(self):
         """INPUT_TYPES has CLIP-G block sliders CG00-CG31."""
         input_types = WIDENBlockConfigSDXLCLIPNode.INPUT_TYPES()
@@ -55,6 +57,7 @@ class TestSDXLCLIPBlockConfigInputTypes:
             assert required[slider_name][1]["min"] == 0.0
             assert required[slider_name][1]["max"] == 2.0
 
+    # AC: @sdxl-clip-block-config ac-1
     def test_has_clip_l_structural_sliders(self):
         """INPUT_TYPES has CLIP-L structural key sliders."""
         input_types = WIDENBlockConfigSDXLCLIPNode.INPUT_TYPES()
@@ -63,6 +66,7 @@ class TestSDXLCLIPBlockConfigInputTypes:
         assert "CL_EMBED" in required
         assert "CL_FINAL" in required
 
+    # AC: @sdxl-clip-block-config ac-1
     def test_has_clip_g_structural_sliders(self):
         """INPUT_TYPES has CLIP-G structural key sliders."""
         input_types = WIDENBlockConfigSDXLCLIPNode.INPUT_TYPES()
@@ -72,6 +76,7 @@ class TestSDXLCLIPBlockConfigInputTypes:
         assert "CG_FINAL" in required
         assert "CG_PROJ" in required
 
+    # AC: @sdxl-clip-block-config ac-1
     def test_has_layer_type_sliders(self):
         """INPUT_TYPES has layer type sliders."""
         input_types = WIDENBlockConfigSDXLCLIPNode.INPUT_TYPES()
@@ -81,6 +86,7 @@ class TestSDXLCLIPBlockConfigInputTypes:
         assert "feed_forward" in required
         assert "norm" in required
 
+    # AC: @sdxl-clip-block-config ac-1
     def test_slider_default_values(self):
         """All sliders default to 1.0."""
         input_types = WIDENBlockConfigSDXLCLIPNode.INPUT_TYPES()
@@ -98,11 +104,9 @@ class TestSDXLCLIPBlockConfigInputTypes:
 class TestSliderValueEffects:
     """AC: @sdxl-clip-block-config ac-2, ac-3 — slider values affect merge strength."""
 
+    # AC: @sdxl-clip-block-config ac-2
     def test_slider_zero_preserves_base(self):
-        """Slider at 0.0 means no merge for that block.
-
-        AC: @sdxl-clip-block-config ac-2
-        """
+        """Slider at 0.0 means no merge for that block."""
         keys = ["clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight"]
         config = BlockConfig(
             arch="sdxl",
@@ -116,10 +120,10 @@ class TestSliderValueEffects:
         assert 0.0 in groups
         assert groups[0.0] == [0]
 
+    # AC: @sdxl-clip-block-config ac-3
     def test_slider_doubled_at_two(self):
         """Slider at 2.0 doubles merge strength.
 
-        AC: @sdxl-clip-block-config ac-3
         Block overrides are absolute t_factor values, so slider=2.0 means
         that block merges at 2x strength (t_factor=2.0 instead of default 1.0).
         """
@@ -146,6 +150,7 @@ class TestSliderValueEffects:
 class TestBlockConfigProduction:
     """AC: @sdxl-clip-block-config ac-4 — create_config produces correct BlockConfig."""
 
+    # AC: @sdxl-clip-block-config ac-4
     def test_block_config_arch_is_sdxl(self):
         """BlockConfig.arch is 'sdxl'."""
         node = WIDENBlockConfigSDXLCLIPNode()
@@ -168,6 +173,7 @@ class TestBlockConfigProduction:
 
         assert config.arch == "sdxl"
 
+    # AC: @sdxl-clip-block-config ac-4
     def test_block_config_contains_per_block_values(self):
         """BlockConfig.block_overrides contains per-block values."""
         node = WIDENBlockConfigSDXLCLIPNode()
@@ -195,6 +201,7 @@ class TestBlockConfigProduction:
         assert override_dict["CL_FINAL"] == 0.7
         assert override_dict["CG_PROJ"] == 0.9
 
+    # AC: @sdxl-clip-block-config ac-4
     def test_return_types_is_block_config(self):
         """RETURN_TYPES is ('BLOCK_CONFIG',)."""
         assert WIDENBlockConfigSDXLCLIPNode.RETURN_TYPES == ("BLOCK_CONFIG",)
@@ -208,11 +215,9 @@ class TestBlockConfigProduction:
 class TestCLIPMergeIntegration:
     """AC: @sdxl-clip-block-config ac-5, ac-6 — integration with CLIP Merge."""
 
+    # AC: @sdxl-clip-block-config ac-5
     def test_block_config_applies_per_block_control(self):
-        """Block config connected to CLIP Merge applies per-block control.
-
-        AC: @sdxl-clip-block-config ac-5
-        """
+        """Block config connected to CLIP Merge applies per-block control."""
         keys = [
             "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight",
             "clip_l.transformer.text_model.encoder.layers.5.mlp.fc1.weight",
@@ -238,11 +243,9 @@ class TestCLIPMergeIntegration:
         assert groups[1.5] == [1]
         assert groups[0.8] == [2]
 
+    # AC: @sdxl-clip-block-config ac-6
     def test_no_block_config_uniform_strength(self):
-        """No block config connected means uniform strength.
-
-        AC: @sdxl-clip-block-config ac-6
-        """
+        """No block config connected means uniform strength."""
         keys = [
             "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight",
             "clip_l.transformer.text_model.encoder.layers.5.mlp.fc1.weight",
@@ -267,29 +270,23 @@ class TestCLIPMergeIntegration:
 class TestClassifyKeySDXLCLIP:
     """AC: @sdxl-clip-block-config ac-7, ac-8, ac-9 — classify_key for CLIP keys."""
 
+    # AC: @sdxl-clip-block-config ac-7
     def test_clip_l_layer_5_returns_cl05(self):
-        """CLIP-L layer 5 key returns 'CL05'.
-
-        AC: @sdxl-clip-block-config ac-7
-        """
+        """CLIP-L layer 5 key returns 'CL05'."""
         key = "clip_l.transformer.text_model.encoder.layers.5.self_attn.q_proj.weight"
         result = classify_key(key, "sdxl", domain="clip")
         assert result == "CL05"
 
+    # AC: @sdxl-clip-block-config ac-8
     def test_clip_g_layer_20_returns_cg20(self):
-        """CLIP-G layer 20 key returns 'CG20'.
-
-        AC: @sdxl-clip-block-config ac-8
-        """
+        """CLIP-G layer 20 key returns 'CG20'."""
         key = "clip_g.transformer.text_model.encoder.layers.20.mlp.fc1.weight"
         result = classify_key(key, "sdxl", domain="clip")
         assert result == "CG20"
 
+    # AC: @sdxl-clip-block-config ac-9
     def test_clip_l_embeddings_returns_cl_embed(self):
-        """CLIP-L embeddings key returns 'CL_EMBED'.
-
-        AC: @sdxl-clip-block-config ac-9
-        """
+        """CLIP-L embeddings key returns 'CL_EMBED'."""
         key = "clip_l.transformer.text_model.embeddings.token_embedding.weight"
         result = classify_key(key, "sdxl", domain="clip")
         assert result == "CL_EMBED"
@@ -358,66 +355,77 @@ class TestClassifyKeySDXLCLIP:
 class TestClassifyLayerTypeSDXLCLIP:
     """AC: @sdxl-clip-block-config ac-10 — classify_layer_type for CLIP keys."""
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_self_attn_q_proj_is_attention(self):
         """self_attn.q_proj is classified as 'attention'."""
         key = "clip_l.transformer.text_model.encoder.layers.0.self_attn.q_proj.weight"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result == "attention"
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_self_attn_k_proj_is_attention(self):
         """self_attn.k_proj is classified as 'attention'."""
         key = "clip_g.transformer.text_model.encoder.layers.5.self_attn.k_proj.weight"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result == "attention"
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_self_attn_v_proj_is_attention(self):
         """self_attn.v_proj is classified as 'attention'."""
         key = "clip_l.transformer.text_model.encoder.layers.10.self_attn.v_proj.weight"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result == "attention"
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_self_attn_out_proj_is_attention(self):
         """self_attn.out_proj is classified as 'attention'."""
         key = "clip_g.transformer.text_model.encoder.layers.20.self_attn.out_proj.weight"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result == "attention"
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_mlp_fc1_is_feed_forward(self):
         """mlp.fc1 is classified as 'feed_forward'."""
         key = "clip_l.transformer.text_model.encoder.layers.5.mlp.fc1.weight"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result == "feed_forward"
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_mlp_fc2_is_feed_forward(self):
         """mlp.fc2 is classified as 'feed_forward'."""
         key = "clip_g.transformer.text_model.encoder.layers.25.mlp.fc2.weight"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result == "feed_forward"
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_layer_norm1_is_norm(self):
         """layer_norm1 is classified as 'norm'."""
         key = "clip_l.transformer.text_model.encoder.layers.0.layer_norm1.weight"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result == "norm"
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_layer_norm2_is_norm(self):
         """layer_norm2 is classified as 'norm'."""
         key = "clip_g.transformer.text_model.encoder.layers.15.layer_norm2.bias"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result == "norm"
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_final_layer_norm_is_norm(self):
         """final_layer_norm is classified as 'norm'."""
         key = "clip_l.transformer.text_model.final_layer_norm.weight"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result == "norm"
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_embeddings_return_none(self):
         """Embedding keys return None (not a layer type)."""
         key = "clip_l.transformer.text_model.embeddings.token_embedding.weight"
         result = classify_layer_type(key, "sdxl", domain="clip")
         assert result is None
 
+    # AC: @sdxl-clip-block-config ac-10
     def test_text_projection_returns_none(self):
         """Text projection returns None (not a standard layer type)."""
         key = "clip_g.transformer.text_projection.weight"
