@@ -278,6 +278,10 @@ features:
         when: each batch group completes
         then: progress is reported via ComfyUI ProgressBar with value incrementing and max equal to total
           groups
+      - id: ac-10
+        given: system MemAvailable is below the estimated peak working set
+        when: execute() checks RAM before the GPU loop
+        then: a RuntimeError is raised naming the shortfall before any GPU work begins
     depends_on: []
     implements: []
     relates_to: []
@@ -872,6 +876,25 @@ features:
         given: save_model=True
         when: save completes
         then: GPU models are offloaded and VRAM cache cleared
+      - id: ac-9
+        given: system RAM is below a safe threshold
+        when: chunked_evaluation transfers tensors to GPU
+        then: pin_memory() is skipped and plain .to() is used instead
+      - id: ac-10
+        given: an exit node begins GPU evaluation
+        when: available system RAM is estimated
+        then: if MemAvailable is below the estimated peak working set (base_state + largest chunk +
+          merged_state accumulation), a RuntimeError is raised with a message naming the shortfall
+          in MB
+      - id: ac-11
+        given: a non-CUDA memory exception occurs during chunked evaluation
+        when: the exception is caught
+        then: gc.collect() and empty_cache() run, then a RuntimeError is re-raised with the original as
+          __cause__
+      - id: ac-12
+        given: the incremental cache holds tensors and MemAvailable drops below a threshold
+        when: cache write is attempted
+        then: the cache entry is evicted instead of stored
     depends_on: []
     implements: []
     relates_to: []
@@ -1850,6 +1873,10 @@ features:
             when: the CLIP Exit node evaluates batch groups with per-block scaling
             then: domain="clip" is propagated to classify_key and classify_layer_type calls in per-block
               helpers, so CLIP block overrides are applied correctly
+          - id: ac-11
+            given: system MemAvailable is below the estimated peak working set
+            when: execute() checks RAM before the GPU loop
+            then: a RuntimeError is raised naming the shortfall before any GPU work begins
         depends_on: []
         implements: []
         relates_to: []
