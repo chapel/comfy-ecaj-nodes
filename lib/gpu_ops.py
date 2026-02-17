@@ -13,14 +13,123 @@ This module is pure torch and stdlib - no ComfyUI imports.
 from __future__ import annotations
 
 import gc
+import logging
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
+from math import prod
 from typing import TypeVar
 
 import torch
 
+logger = logging.getLogger("ecaj.gpu_ops")
+
+# Conservative fallback when /proc/meminfo is unavailable (non-Linux).
+_FALLBACK_RAM_BYTES = 4 * 1024**3  # 4 GB
+_meminfo_warned = False
+
 T = TypeVar("T")
+
+
+def get_available_ram_bytes() -> int:
+    """Return available system RAM in bytes.
+
+    # AC: @memory-management ac-9
+    # AC: @memory-management ac-10
+
+    Parses /proc/meminfo for MemAvailable (Linux). On non-Linux or parse
+    failure, returns a conservative fallback (4 GB) so protections stay
+    active, and logs a warning on the first call.
+    """
+    global _meminfo_warned  # noqa: PLW0603
+    try:
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) * 1024  # kB -> bytes
+    except (OSError, ValueError):
+        pass
+
+    if not _meminfo_warned:
+        logger.warning(
+            "/proc/meminfo unavailable; using conservative %d MB RAM estimate. "
+            "System RAM protections may be less accurate.",
+            _FALLBACK_RAM_BYTES // (1024**2),
+        )
+        _meminfo_warned = True
+    return _FALLBACK_RAM_BYTES
+
+
+def estimate_peak_ram(
+    base_state_bytes: int,
+    n_models: int,
+    largest_shape: tuple,
+    dtype: torch.dtype,
+    save_model: bool,
+    batch_size: int = 1,
+) -> int:
+    """Estimate peak system RAM needed for the GPU evaluation pipeline.
+
+    # AC: @memory-management ac-10
+
+    Formula accounts for:
+    - base_state dict kept in RAM throughout
+    - merged_state accumulating on CPU (~same size as base_state)
+    - pin_memory cost for the largest chunk (2x: original stack + pinned copy)
+    - save path keeping an extra base_state reference
+
+    Args:
+        base_state_bytes: Total bytes of the base state dict
+        n_models: Number of models being merged
+        largest_shape: Shape of the largest parameter tensor (without batch dim)
+        dtype: Computation dtype (typically float32)
+        save_model: Whether model will be saved (doubles base_state cost)
+        batch_size: Batch size for chunked evaluation
+
+    Returns:
+        Estimated peak RAM in bytes
+    """
+    element_size = torch.finfo(dtype).bits // 8 if dtype.is_floating_point else 4
+    chunk_tensor_bytes = element_size * prod(largest_shape) * batch_size
+    # pin_memory allocates a copy: original stack + pinned = 2x
+    chunk_pinned_cost = 2 * chunk_tensor_bytes
+
+    peak = base_state_bytes + base_state_bytes + chunk_pinned_cost
+    if save_model:
+        # save path overlays merged into base_state, but both dicts exist briefly
+        peak += base_state_bytes
+    return peak
+
+
+def check_ram_preflight(
+    base_state_bytes: int,
+    n_models: int,
+    largest_shape: tuple,
+    dtype: torch.dtype,
+    save_model: bool,
+    batch_size: int = 1,
+) -> None:
+    """Raise RuntimeError if available RAM is insufficient for merge.
+
+    # AC: @memory-management ac-10
+    # AC: @exit-node ac-9
+    # AC: @clip-exit-node ac-11
+
+    Called by exit nodes before the GPU loop to fail early with a clear message.
+
+    Raises:
+        RuntimeError: With shortfall in MB if RAM is insufficient
+    """
+    avail = get_available_ram_bytes()
+    peak = estimate_peak_ram(
+        base_state_bytes, n_models, largest_shape, dtype, save_model, batch_size
+    )
+    if avail < peak:
+        raise RuntimeError(
+            f"Insufficient system RAM for merge: {avail // (1024**2)} MB available, "
+            f"estimated {peak // (1024**2)} MB needed. Close other applications or "
+            f"reduce model count."
+        )
 
 
 @dataclass
@@ -270,9 +379,16 @@ def chunked_evaluation(
     for chunk_keys in chunked(keys, batch_size):
         try:
             # Stack base tensors and move to GPU
+            # AC: @memory-management ac-9 — gate pin_memory on available RAM
             base_stack = torch.stack([base_tensors[k].cpu() for k in chunk_keys])
+            tensor_bytes = base_stack.nelement() * base_stack.element_size()
             if device != "cpu" and base_stack.numel() > 65536:
-                base_gpu = base_stack.pin_memory().to(device, dtype=dtype)
+                avail = get_available_ram_bytes()
+                # 3x headroom: original stack + pinned copy + GC margin
+                if avail > tensor_bytes * 3:
+                    base_gpu = base_stack.pin_memory().to(device, dtype=dtype)
+                else:
+                    base_gpu = base_stack.to(device, dtype=dtype)
             else:
                 base_gpu = base_stack.to(device, dtype=dtype)
             del base_stack
@@ -329,5 +445,41 @@ def chunked_evaluation(
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
                     raise
+                except (MemoryError, RuntimeError) as inner_e:
+                    # AC: @memory-management ac-11
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                    if isinstance(inner_e, MemoryError) or (
+                        isinstance(inner_e, RuntimeError)
+                        and ("not enough memory" in str(inner_e).lower()
+                             or "out of memory" in str(inner_e).lower())
+                    ):
+                        raise RuntimeError(
+                            f"System memory exhausted during single-key retry for '{key}'"
+                        ) from inner_e
+                    raise
+
+        except MemoryError as e:
+            # AC: @memory-management ac-11
+            # System RAM exhaustion during chunk evaluation
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            raise RuntimeError(
+                "System memory exhausted during chunked evaluation"
+            ) from e
+
+        except RuntimeError as e:
+            # AC: @memory-management ac-11
+            # PyTorch CPU allocator OOM or similar
+            if "not enough memory" in str(e).lower() or "out of memory" in str(e).lower():
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                raise RuntimeError(
+                    "System memory exhausted during chunked evaluation"
+                ) from e
+            raise
 
     return results

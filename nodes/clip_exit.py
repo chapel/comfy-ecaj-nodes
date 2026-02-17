@@ -15,6 +15,7 @@ from ..lib.analysis import (
     walk_to_base,
 )
 from ..lib.executor import (
+    check_ram_preflight,
     chunked_evaluation,
     compile_batch_groups,
     compile_plan,
@@ -362,6 +363,24 @@ class WIDENCLIPExitNode:
             plan = compile_plan(widen_clip, set_id_map, arch, model_id_map)
 
             merged_state: dict[str, torch.Tensor] = {}
+
+            # AC: @clip-exit-node ac-11
+            # Pre-flight RAM check before GPU loop
+            if batch_groups:
+                base_state_bytes = sum(
+                    t.nelement() * t.element_size() for t in base_state.values()
+                )
+                largest_shape = max(
+                    (base_state[k].shape for keys in batch_groups.values() for k in keys),
+                    key=lambda s: torch.Size(s).numel(),
+                )
+                check_ram_preflight(
+                    base_state_bytes=base_state_bytes,
+                    n_models=len(set_affected) + len(clip_model_loaders),
+                    largest_shape=largest_shape,
+                    dtype=compute_dtype,
+                    save_model=False,  # CLIP exit doesn't save
+                )
 
             # Phase 2: Batched GPU evaluation per group
             # AC-9: Progress reporting

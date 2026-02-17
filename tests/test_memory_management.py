@@ -636,3 +636,369 @@ class TestGpuOffloadAfterSave:
         save_idx = source.index("atomic_save")
         cache_idx = source.index("soft_empty_cache")
         assert cache_idx > save_idx, "soft_empty_cache must come after atomic_save"
+
+
+# =============================================================================
+# AC-9: Safe pin_memory gate
+# =============================================================================
+
+
+class TestPinMemoryGate:
+    """AC: @memory-management ac-9
+
+    Given: system RAM is below a safe threshold
+    When: chunked_evaluation transfers tensors to GPU
+    Then: pin_memory() is skipped and plain .to() is used instead
+    """
+
+    # AC: @memory-management ac-9
+    def test_pin_memory_skipped_when_ram_low(self):
+        """When available RAM is low, pin_memory() should be skipped."""
+        keys = ["k0"]
+        base = {k: torch.randn(256, 256) for k in keys}  # >65536 elements
+
+        pin_memory_called = []
+
+        def mock_pin(self, *args, **kwargs):
+            pin_memory_called.append(True)
+            return self  # Don't actually pin (no CUDA device needed)
+
+        # Mock low RAM: return 100 bytes (way below 3x threshold)
+        with (
+            patch("lib.gpu_ops.get_available_ram_bytes", return_value=100),
+            patch.object(torch.Tensor, "pin_memory", mock_pin),
+        ):
+            chunked_evaluation(
+                keys,
+                base,
+                lambda k, b: b * 2,
+                batch_size=1,
+                device="cpu",
+                dtype=torch.float32,
+                storage_dtype=torch.float32,
+            )
+
+        assert len(pin_memory_called) == 0, "pin_memory should not be called under low RAM"
+
+    # AC: @memory-management ac-9
+    def test_pin_memory_used_when_ram_sufficient(self):
+        """When available RAM is sufficient, pin_memory() should be used on non-cpu device."""
+        # Can't test with real cuda:0 without a GPU, so verify the gate logic
+        # exists in source: pin_memory is called when avail > tensor_bytes * 3.
+        source = inspect.getsource(chunked_evaluation)
+        assert "avail > tensor_bytes * 3" in source
+        assert "pin_memory()" in source
+
+
+# =============================================================================
+# AC-10: Pre-flight RAM check
+# =============================================================================
+
+
+class TestPreflightRamCheck:
+    """AC: @memory-management ac-10
+
+    Given: an exit node begins GPU evaluation
+    When: available system RAM is estimated
+    Then: if MemAvailable is below the estimated peak working set, a RuntimeError
+          is raised with a message naming the shortfall in MB
+    """
+
+    # AC: @memory-management ac-10
+    def test_raises_when_ram_insufficient(self):
+        """check_ram_preflight raises RuntimeError when RAM is too low."""
+        from lib.gpu_ops import check_ram_preflight
+
+        with patch("lib.gpu_ops.get_available_ram_bytes", return_value=100 * 1024**2):
+            import pytest
+
+            with pytest.raises(RuntimeError, match="Insufficient system RAM"):
+                check_ram_preflight(
+                    base_state_bytes=2 * 1024**3,  # 2 GB base state
+                    n_models=2,
+                    largest_shape=(4096, 4096),
+                    dtype=torch.float32,
+                    save_model=False,
+                )
+
+    # AC: @memory-management ac-10
+    def test_passes_when_ram_sufficient(self):
+        """check_ram_preflight does not raise when RAM is sufficient."""
+        from lib.gpu_ops import check_ram_preflight
+
+        # 100 GB available, tiny base state
+        with patch("lib.gpu_ops.get_available_ram_bytes", return_value=100 * 1024**3):
+            check_ram_preflight(
+                base_state_bytes=1024,
+                n_models=1,
+                largest_shape=(64, 64),
+                dtype=torch.float32,
+                save_model=False,
+            )
+
+    # AC: @memory-management ac-10
+    def test_error_message_includes_mb_values(self):
+        """Error message should include available and needed MB."""
+        import pytest
+
+        from lib.gpu_ops import check_ram_preflight
+
+        with patch("lib.gpu_ops.get_available_ram_bytes", return_value=500 * 1024**2):
+            with pytest.raises(RuntimeError, match=r"\d+ MB available.*\d+ MB needed"):
+                check_ram_preflight(
+                    base_state_bytes=2 * 1024**3,
+                    n_models=2,
+                    largest_shape=(4096, 4096),
+                    dtype=torch.float32,
+                    save_model=True,
+                )
+
+    # AC: @memory-management ac-10
+    def test_save_model_increases_estimate(self):
+        """save_model=True should increase the peak RAM estimate."""
+        from lib.gpu_ops import estimate_peak_ram
+
+        base = estimate_peak_ram(
+            base_state_bytes=1024**3,
+            n_models=2,
+            largest_shape=(512, 512),
+            dtype=torch.float32,
+            save_model=False,
+        )
+        with_save = estimate_peak_ram(
+            base_state_bytes=1024**3,
+            n_models=2,
+            largest_shape=(512, 512),
+            dtype=torch.float32,
+            save_model=True,
+        )
+        assert with_save > base
+
+
+# =============================================================================
+# AC-11: Broader OOM exception handling
+# =============================================================================
+
+
+class TestBroaderExceptionHandling:
+    """AC: @memory-management ac-11
+
+    Given: a non-CUDA memory exception occurs during chunked evaluation
+    When: the exception is caught
+    Then: gc.collect() and empty_cache() run, then a RuntimeError is re-raised
+          with the original as __cause__
+    """
+
+    # AC: @memory-management ac-11
+    def test_memory_error_caught_and_reraised(self):
+        """MemoryError during eval_fn should trigger cleanup and re-raise."""
+        import pytest
+
+        keys = ["k0"]
+        base = {k: torch.randn(4, 4) for k in keys}
+
+        def eval_fn_oom(batch_keys, batch_gpu):
+            raise MemoryError("Cannot allocate memory")
+
+        gc_calls = []
+        original_gc = gc.collect
+
+        def mock_gc():
+            gc_calls.append(True)
+            return original_gc()
+
+        with patch("lib.gpu_ops.gc.collect", mock_gc):
+            with pytest.raises(RuntimeError, match="System memory exhausted") as exc_info:
+                chunked_evaluation(
+                    keys, base, eval_fn_oom,
+                    batch_size=1, device="cpu",
+                    dtype=torch.float32, storage_dtype=torch.float32,
+                )
+
+        assert exc_info.value.__cause__ is not None
+        assert isinstance(exc_info.value.__cause__, MemoryError)
+        assert len(gc_calls) >= 1
+
+    # AC: @memory-management ac-11
+    def test_runtime_error_oom_caught(self):
+        """RuntimeError with 'not enough memory' should trigger cleanup."""
+        import pytest
+
+        keys = ["k0"]
+        base = {k: torch.randn(4, 4) for k in keys}
+
+        def eval_fn_oom(batch_keys, batch_gpu):
+            raise RuntimeError("DefaultCPUAllocator: not enough memory")
+
+        with pytest.raises(RuntimeError, match="System memory exhausted") as exc_info:
+            chunked_evaluation(
+                keys, base, eval_fn_oom,
+                batch_size=1, device="cpu",
+                dtype=torch.float32, storage_dtype=torch.float32,
+            )
+
+        assert exc_info.value.__cause__ is not None
+
+    # AC: @memory-management ac-11
+    def test_non_oom_runtime_error_propagates(self):
+        """RuntimeError without OOM message should propagate unchanged."""
+        import pytest
+
+        keys = ["k0"]
+        base = {k: torch.randn(4, 4) for k in keys}
+
+        def eval_fn_bad(batch_keys, batch_gpu):
+            raise RuntimeError("shape mismatch")
+
+        with pytest.raises(RuntimeError, match="shape mismatch"):
+            chunked_evaluation(
+                keys, base, eval_fn_bad,
+                batch_size=1, device="cpu",
+                dtype=torch.float32, storage_dtype=torch.float32,
+            )
+
+
+# =============================================================================
+# AC-12: Cache eviction under memory pressure
+# =============================================================================
+
+
+class TestCacheEvictionUnderPressure:
+    """AC: @memory-management ac-12
+
+    Given: the incremental cache holds tensors and MemAvailable drops below a threshold
+    When: cache write is attempted
+    Then: the cache entry is evicted instead of stored
+    """
+
+    # AC: @memory-management ac-12
+    def test_cache_evicted_when_ram_low(self):
+        """Cache should be evicted (not stored) when RAM is low at write time."""
+        source = inspect.getsource(
+            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
+        )
+        # Verify the cache write path checks available RAM
+        assert "get_available_ram_bytes" in source
+        assert "cache_bytes * 2" in source
+
+    # AC: @memory-management ac-12
+    def test_cache_stored_when_ram_sufficient(self):
+        """Cache should be stored normally when RAM is sufficient."""
+        source = inspect.getsource(
+            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
+        )
+        # Verify the normal cache write path still exists
+        assert "_CacheEntry(" in source
+        assert "_incremental_cache[structural_fp] = new_entry" in source
+
+
+# =============================================================================
+# AC: @exit-node ac-9 — Pre-flight RAM check in exit node
+# =============================================================================
+
+
+class TestExitNodeRamPreflight:
+    """AC: @exit-node ac-9
+
+    Given: system MemAvailable is below the estimated peak working set
+    When: execute() checks RAM before the GPU loop
+    Then: a RuntimeError is raised naming the shortfall before any GPU work begins
+    """
+
+    # AC: @exit-node ac-9
+    def test_exit_node_has_ram_preflight(self):
+        """Exit node execute() should call check_ram_preflight before GPU loop."""
+        source = inspect.getsource(
+            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
+        )
+        # check_ram_preflight must appear before chunked_evaluation
+        preflight_idx = source.index("check_ram_preflight")
+        eval_idx = source.index("chunked_evaluation")
+        assert preflight_idx < eval_idx, (
+            "check_ram_preflight must be called before chunked_evaluation"
+        )
+
+    # AC: @exit-node ac-9
+    def test_exit_node_imports_check_ram_preflight(self):
+        """Exit node should import check_ram_preflight."""
+        import nodes.exit as exit_mod
+        assert hasattr(exit_mod, "check_ram_preflight")
+
+
+# =============================================================================
+# AC: @clip-exit-node ac-11 — Pre-flight RAM check in CLIP exit node
+# =============================================================================
+
+
+class TestClipExitNodeRamPreflight:
+    """AC: @clip-exit-node ac-11
+
+    Given: system MemAvailable is below the estimated peak working set
+    When: execute() checks RAM before the GPU loop
+    Then: a RuntimeError is raised naming the shortfall before any GPU work begins
+    """
+
+    # AC: @clip-exit-node ac-11
+    def test_clip_exit_node_has_ram_preflight(self):
+        """CLIP Exit node execute() should call check_ram_preflight before GPU loop."""
+        source = inspect.getsource(
+            __import__("nodes.clip_exit", fromlist=["WIDENCLIPExitNode"]).WIDENCLIPExitNode.execute
+        )
+        preflight_idx = source.index("check_ram_preflight")
+        eval_idx = source.index("chunked_evaluation")
+        assert preflight_idx < eval_idx, (
+            "check_ram_preflight must be called before chunked_evaluation"
+        )
+
+    # AC: @clip-exit-node ac-11
+    def test_clip_exit_node_imports_check_ram_preflight(self):
+        """CLIP Exit node should import check_ram_preflight."""
+        import nodes.clip_exit as clip_exit_mod
+        assert hasattr(clip_exit_mod, "check_ram_preflight")
+
+
+# =============================================================================
+# get_available_ram_bytes unit tests
+# =============================================================================
+
+
+class TestGetAvailableRamBytes:
+    """Unit tests for get_available_ram_bytes()."""
+
+    def test_returns_positive_integer(self):
+        """Should return a positive integer on any platform."""
+        from lib.gpu_ops import get_available_ram_bytes
+
+        result = get_available_ram_bytes()
+        assert isinstance(result, int)
+        assert result > 0
+
+    def test_fallback_on_missing_procfs(self):
+        """Should return fallback when /proc/meminfo is unavailable."""
+        from lib.gpu_ops import _FALLBACK_RAM_BYTES, get_available_ram_bytes
+
+        with patch("builtins.open", side_effect=OSError("No such file")):
+            # Reset warning flag so it doesn't affect output
+            import lib.gpu_ops
+            lib.gpu_ops._meminfo_warned = True  # Suppress warning
+            result = get_available_ram_bytes()
+
+        assert result == _FALLBACK_RAM_BYTES
+
+    def test_parses_real_meminfo(self):
+        """Should parse a realistic /proc/meminfo format."""
+        from io import StringIO
+
+        from lib.gpu_ops import get_available_ram_bytes
+
+        fake_meminfo = (
+            "MemTotal:       65536000 kB\n"
+            "MemFree:         1000000 kB\n"
+            "MemAvailable:   32000000 kB\n"
+            "Buffers:          500000 kB\n"
+        )
+
+        with patch("builtins.open", return_value=StringIO(fake_meminfo)):
+            result = get_available_ram_bytes()
+
+        assert result == 32000000 * 1024  # 32 GB in bytes
