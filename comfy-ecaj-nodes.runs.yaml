@@ -2265,8 +2265,19 @@ runs:
   - _ulid: 01KHN0MTC5977F2CPVRYXZWB47
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-17T05:19:53.222Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-17T05:19:53.222Z
+        completed_at: 2026-02-17T05:20:23.309Z
+        notes: "Short session: addressed PR #81 review feedback (rename base_state_bytes, add regression
+          tests). Friction: incremental_cache leaking between tests (fixed with autouse fixture) and
+          compute_batch_size VRAM non-determinism (fixed by patching). Both one-off, not systemic."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-17T05:20:23.309Z
+        completed_at: 2026-02-17T05:20:23.309Z
     initiated_by: "@claude"
