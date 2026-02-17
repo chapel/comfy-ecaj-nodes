@@ -4746,7 +4746,7 @@
   type: task
   spec_ref: "@clip-merge-pipeline"
   plan_ref: "@plan-model-loader-split-clip-merging"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@implement-clip-entry-node"
@@ -4757,6 +4757,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-15T19:59:49.399Z
+  started_at: 2026-02-17T05:30:18.448Z
   notes:
     - _ulid: 01KHHE6K4QQHDYJTPEFRQ3CFAE
       created_at: 2026-02-15T19:59:49.399Z
@@ -4773,7 +4774,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-17T05:30:18.448Z
 - _ulid: 01KHHE6K5SF2WQ0M5X30JG1TA5
   slugs:
     - implement-clip-entry-node
