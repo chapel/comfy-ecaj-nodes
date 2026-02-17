@@ -4,19 +4,133 @@ Covers acceptance criteria for @memory-management spec.
 """
 
 import gc
-import inspect
 import os
 import tempfile
 from unittest.mock import MagicMock, patch
 
+import pytest
 import torch
 from safetensors import safe_open
 
+from lib.batch_groups import OpSignature
 from lib.executor import (
     chunked_evaluation,
     compile_batch_groups,
     compute_batch_size,
 )
+from lib.recipe import (
+    RecipeBase,
+    RecipeCompose,
+    RecipeLoRA,
+    RecipeMerge,
+)
+from lib.recipe_eval import EvalPlan
+from nodes.exit import (
+    WIDENExitNode,
+    _incremental_cache,
+)
+
+# ===========================================================================
+# Shared helper: build mocks for WIDENExitNode.execute()
+# ===========================================================================
+
+def _make_exit_mocks(mock_model_patcher, keys_to_process, *, recipe=None, arch="sdxl"):
+    """Create mocks for WIDENExitNode.execute() — adapted from test_incremental_recompute."""
+    mock_loader = MagicMock()
+    mock_loader.affected_keys = set(keys_to_process)
+    mock_loader.affected_keys_for_set = MagicMock(return_value=set(keys_to_process))
+    mock_loader.cleanup = MagicMock()
+
+    set_affected = {}
+    if recipe is not None:
+        def _find_loras(n):
+            if isinstance(n, RecipeLoRA):
+                set_affected[str(id(n))] = set(keys_to_process)
+            elif isinstance(n, RecipeCompose):
+                for b in n.branches:
+                    _find_loras(b)
+            elif isinstance(n, RecipeMerge):
+                _find_loras(n.base)
+                _find_loras(n.target)
+                if n.backbone is not None:
+                    _find_loras(n.backbone)
+        _find_loras(recipe)
+    if not set_affected:
+        set_affected = {str(id(None)): set(keys_to_process)}
+
+    mock_analyze = MagicMock(
+        model_patcher=mock_model_patcher,
+        arch=arch,
+        loader=mock_loader,
+        set_affected=set_affected,
+        affected_keys=set(keys_to_process),
+    )
+    mock_model_analysis = MagicMock()
+    mock_model_analysis.model_loaders = {}
+    mock_model_analysis.model_affected = {}
+    mock_model_analysis.all_model_keys = frozenset()
+
+    dummy_plan = EvalPlan(ops=(), result_reg=0, dead_after=())
+
+    return mock_analyze, mock_model_analysis, mock_loader, dummy_plan
+
+
+def _run_exit_node(recipe, mock_model_patcher, keys, *, extra_patches=None, **execute_kwargs):
+    """Run WIDENExitNode.execute() with full mocking. Returns (result, mocks_dict)."""
+    mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
+        mock_model_patcher, keys, recipe=recipe,
+    )
+    merged = {k: torch.randn(4, 4) for k in keys}
+    sig = OpSignature(shape=(4, 4), ndim=2)
+
+    patches = {
+        "nodes.exit.analyze_recipe": mock_analyze,
+        "nodes.exit.analyze_recipe_models": mock_model_analysis,
+        "nodes.exit.compile_plan": dummy_plan,
+        "nodes.exit.compile_batch_groups": {sig: keys},
+        "nodes.exit.chunked_evaluation": merged,
+        "nodes.exit.compute_base_identity": "base_id",
+        "nodes.exit.compute_lora_stats": {},
+    }
+    if extra_patches:
+        patches.update(extra_patches)
+
+    ctx_managers = []
+    mock_refs = {}
+    for target, value in patches.items():
+        if isinstance(value, MagicMock) and hasattr(value, "return_value"):
+            # Already a MagicMock used as return_value
+            p = patch(target, return_value=value)
+        elif isinstance(value, dict) or isinstance(value, EvalPlan):
+            p = patch(target, return_value=value)
+        elif isinstance(value, str):
+            p = patch(target, return_value=value)
+        elif isinstance(value, MagicMock):
+            p = patch(target, value)
+        else:
+            p = patch(target, return_value=value)
+        ctx_managers.append((target, p))
+
+    # Enter all patches
+    entered = []
+    try:
+        for target, p in ctx_managers:
+            m = p.start()
+            mock_refs[target] = m
+            entered.append(p)
+
+        node = WIDENExitNode()
+        result = node.execute(recipe, **execute_kwargs)
+    finally:
+        for p in entered:
+            p.stop()
+
+    return result, {
+        "mock_loader": mock_loader,
+        "mock_analyze": mock_analyze,
+        "mock_model_analysis": mock_model_analysis,
+        "merged": merged,
+    }
 
 # =============================================================================
 # AC-1: Per-chunk GPU tensor cleanup
@@ -183,15 +297,28 @@ class TestBetweenGroupCleanup:
         # Should have 2 groups due to different shapes
         assert len(groups) == 2
 
-    def test_exit_node_calls_gc_after_groups(self):
+    def test_exit_node_calls_gc_after_groups(self, mock_model_patcher):
         """Exit node should call gc.collect after all OpSignature groups complete."""
         # AC: @memory-management ac-2
-        # gc.collect runs once after the evaluation loop, not per-group.
-        # OOM backoff in chunked_evaluation handles per-group memory pressure.
-        import nodes.exit
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
 
-        # Verify gc is imported
-        assert hasattr(nodes.exit, "gc") or "gc" in dir(nodes.exit)
+        gc_calls = []
+        original_gc = gc.collect
+
+        def tracking_gc(*a, **kw):
+            gc_calls.append(True)
+            return original_gc(*a, **kw)
+
+        with patch("nodes.exit.gc.collect", tracking_gc):
+            _run_exit_node(recipe, mock_model_patcher, keys)
+
+        assert len(gc_calls) >= 1, "gc.collect should be called after groups complete"
 
 
 # =============================================================================
@@ -271,17 +398,40 @@ class TestLoaderCleanup:
 
         assert len(cleanup_called) == 1
 
-    def test_exit_node_cleanup_in_finally(self):
-        """Exit node should call loader.cleanup() in finally block."""
+    def test_exit_node_cleanup_in_finally(self, mock_model_patcher):
+        """Exit node should call loader.cleanup() even when evaluation raises."""
         # AC: @memory-management ac-3
-        # Verify by reading the source that cleanup is in finally
-        import inspect
+        _incremental_cache.clear()
 
-        from nodes.exit import WIDENExitNode
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
 
-        source = inspect.getsource(WIDENExitNode.execute)
-        assert "finally:" in source
-        assert "loader.cleanup()" in source
+        mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation", side_effect=RuntimeError("boom")),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            node = WIDENExitNode()
+            with pytest.raises(RuntimeError, match="boom"):
+                node.execute(recipe)
+
+        mock_loader.cleanup.assert_called_once()
+        _incremental_cache.clear()
 
 
 # =============================================================================
@@ -564,11 +714,38 @@ class TestStreamingSave:
 
     # AC: @memory-management ac-7
     def test_atomic_save_uses_streaming_writer(self):
-        """atomic_save should use stream_save_file, not safetensors.save_file."""
-        source = inspect.getsource(
-            __import__("lib.persistence", fromlist=["atomic_save"]).atomic_save
-        )
-        assert "stream_save_file" in source
+        """atomic_save should call stream_save_file for streaming writes."""
+        from lib.persistence import atomic_save
+
+        tensors = {"weight": torch.randn(4, 4)}
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe_hash__": "h",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_affected_keys__": '["weight"]',
+        }
+
+        with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+            path = f.name
+
+        try:
+            with (
+                patch("lib.persistence.stream_save_file") as mock_stream,
+                patch("os.open", return_value=42),
+                patch("os.fsync"),
+                patch("os.close"),
+                patch("os.replace"),
+            ):
+                atomic_save(tensors, path, metadata)
+
+            mock_stream.assert_called_once()
+            call_args = mock_stream.call_args
+            assert call_args[0][0] is tensors  # first arg is tensors dict
+        finally:
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
 
     # AC: @memory-management ac-7
     def test_atomic_save_produces_valid_safetensors(self):
@@ -617,25 +794,65 @@ class TestGpuOffloadAfterSave:
     """
 
     # AC: @memory-management ac-8
-    def test_exit_node_calls_free_memory_after_save(self):
-        """Exit node source contains free_memory call after save."""
-        source = inspect.getsource(
-            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
-        )
-        # free_memory should appear after atomic_save in the source
-        save_idx = source.index("atomic_save")
-        free_idx = source.index("free_memory")
-        assert free_idx > save_idx, "free_memory must come after atomic_save"
+    def test_exit_node_calls_free_memory_and_soft_empty_cache_after_save(self, mock_model_patcher):
+        """Exit node calls free_memory then soft_empty_cache after save_model=True."""
+        import sys
 
-    # AC: @memory-management ac-8
-    def test_exit_node_calls_soft_empty_cache_after_save(self):
-        """Exit node source contains soft_empty_cache call after save."""
-        source = inspect.getsource(
-            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
         )
-        save_idx = source.index("atomic_save")
-        cache_idx = source.index("soft_empty_cache")
-        assert cache_idx > save_idx, "soft_empty_cache must come after atomic_save"
+
+        mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+        merged = {k: torch.randn(4, 4) for k in keys}
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        # Track call order
+        call_order = []
+
+        mock_atomic_save = MagicMock(side_effect=lambda *a, **kw: call_order.append("atomic_save"))
+
+        # Inject comfy.model_management with trackable functions
+        mm_mod = sys.modules.get("comfy.model_management")
+        mock_free = MagicMock(side_effect=lambda *a, **kw: call_order.append("free_memory"))
+        mock_device = MagicMock(return_value="cpu")
+        mock_sec = MagicMock(side_effect=lambda *a, **kw: call_order.append("soft_empty_cache"))
+
+        if mm_mod is not None:
+            mm_mod.free_memory = mock_free
+            mm_mod.get_torch_device = mock_device
+            mm_mod.soft_empty_cache = mock_sec
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation", return_value=merged),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.validate_model_name", return_value="test.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value="/tmp/test.safetensors"),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash"),
+            patch("nodes.exit.check_cache", return_value=None),
+            patch("nodes.exit.build_metadata", return_value={"__ecaj_version__": "1"}),
+            patch("nodes.exit.atomic_save", mock_atomic_save),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe, save_model=True, model_name="test")
+
+        assert "atomic_save" in call_order
+        assert "free_memory" in call_order
+        assert "soft_empty_cache" in call_order
+        # Ordering: save before free_memory before soft_empty_cache
+        assert call_order.index("atomic_save") < call_order.index("free_memory")
+        assert call_order.index("free_memory") < call_order.index("soft_empty_cache")
 
 
 # =============================================================================
@@ -655,7 +872,7 @@ class TestPinMemoryGate:
     def test_pin_memory_skipped_when_ram_low(self):
         """When available RAM is low, pin_memory() should be skipped."""
         keys = ["k0"]
-        base = {k: torch.randn(256, 256) for k in keys}  # >65536 elements
+        base = {k: torch.randn(257, 257) for k in keys}  # >65536 elements (66049)
 
         pin_memory_called = []
 
@@ -682,12 +899,43 @@ class TestPinMemoryGate:
 
     # AC: @memory-management ac-9
     def test_pin_memory_used_when_ram_sufficient(self):
-        """When available RAM is sufficient, pin_memory() should be used on non-cpu device."""
-        # Can't test with real cuda:0 without a GPU, so verify the gate logic
-        # exists in source: pin_memory is called when avail > tensor_bytes * 3.
-        source = inspect.getsource(chunked_evaluation)
-        assert "avail > tensor_bytes * 3" in source
-        assert "pin_memory()" in source
+        """When RAM is sufficient and device != cpu, pin_memory() is called."""
+        keys = ["k0"]
+        base = {k: torch.randn(257, 257) for k in keys}  # >65536 elements (66049)
+
+        pin_memory_called = []
+
+        def mock_pin(self, *args, **kwargs):
+            pin_memory_called.append(True)
+            return self  # Return self (don't actually pin, no CUDA needed)
+
+        original_to = torch.Tensor.to
+
+        def mock_to(self, *args, **kwargs):
+            # Redirect any device .to() to cpu to avoid needing real CUDA
+            if args and isinstance(args[0], str) and args[0] not in ("cpu",):
+                return original_to(self, "cpu", *args[1:], **kwargs)
+            return original_to(self, *args, **kwargs)
+
+        def eval_fn(batch_keys, batch_gpu):
+            return batch_gpu * 2
+
+        with (
+            patch("lib.gpu_ops.get_available_ram_bytes", return_value=100 * 1024**3),
+            patch.object(torch.Tensor, "pin_memory", mock_pin),
+            patch.object(torch.Tensor, "to", mock_to),
+        ):
+            chunked_evaluation(
+                keys,
+                base,
+                eval_fn,
+                batch_size=1,
+                device="cuda:0",  # Non-cpu device to trigger pin_memory path
+                dtype=torch.float32,
+                storage_dtype=torch.float32,
+            )
+
+        assert len(pin_memory_called) > 0, "pin_memory should be called with sufficient RAM"
 
 
 # =============================================================================
@@ -871,25 +1119,45 @@ class TestCacheEvictionUnderPressure:
     Then: the cache entry is evicted instead of stored
     """
 
-    # AC: @memory-management ac-12
-    def test_cache_evicted_when_ram_low(self):
-        """Cache should be evicted (not stored) when RAM is low at write time."""
-        source = inspect.getsource(
-            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
-        )
-        # Verify the cache write path checks available RAM
-        assert "get_available_ram_bytes" in source
-        assert "cache_bytes * 2" in source
+    def setup_method(self):
+        _incremental_cache.clear()
+
+    def teardown_method(self):
+        _incremental_cache.clear()
 
     # AC: @memory-management ac-12
-    def test_cache_stored_when_ram_sufficient(self):
-        """Cache should be stored normally when RAM is sufficient."""
-        source = inspect.getsource(
-            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
+    def test_cache_evicted_when_ram_low(self, mock_model_patcher):
+        """Cache should be evicted (not stored) when RAM is low at write time."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
         )
-        # Verify the normal cache write path still exists
-        assert "_CacheEntry(" in source
-        assert "_incremental_cache[structural_fp] = new_entry" in source
+
+        # Return very low RAM so cache_bytes * 2 > avail
+        with patch("nodes.exit.get_available_ram_bytes", return_value=1):
+            _run_exit_node(recipe, mock_model_patcher, keys)
+
+        assert len(_incremental_cache) == 0, "Cache should be evicted under low RAM"
+
+    # AC: @memory-management ac-12
+    def test_cache_stored_when_ram_sufficient(self, mock_model_patcher):
+        """Cache should be stored normally when RAM is sufficient."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # Return very high RAM so cache write succeeds
+        with patch("nodes.exit.get_available_ram_bytes", return_value=100 * 1024**3):
+            _run_exit_node(recipe, mock_model_patcher, keys)
+
+        assert len(_incremental_cache) == 1, "Cache should have one entry with sufficient RAM"
 
 
 # =============================================================================
@@ -906,23 +1174,38 @@ class TestExitNodeRamPreflight:
     """
 
     # AC: @exit-node ac-9
-    def test_exit_node_has_ram_preflight(self):
-        """Exit node execute() should call check_ram_preflight before GPU loop."""
-        source = inspect.getsource(
-            __import__("nodes.exit", fromlist=["WIDENExitNode"]).WIDENExitNode.execute
-        )
-        # check_ram_preflight must appear before chunked_evaluation
-        preflight_idx = source.index("check_ram_preflight")
-        eval_idx = source.index("chunked_evaluation")
-        assert preflight_idx < eval_idx, (
-            "check_ram_preflight must be called before chunked_evaluation"
+    def test_exit_node_has_ram_preflight(self, mock_model_patcher):
+        """Exit node raises RuntimeError before GPU work when RAM is insufficient."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
         )
 
-    # AC: @exit-node ac-9
-    def test_exit_node_imports_check_ram_preflight(self):
-        """Exit node should import check_ram_preflight."""
-        import nodes.exit as exit_mod
-        assert hasattr(exit_mod, "check_ram_preflight")
+        mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+        sig = OpSignature(shape=(4, 4), ndim=2)
+        chunked_mock = MagicMock()
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation", chunked_mock),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("lib.gpu_ops.get_available_ram_bytes", return_value=100),
+        ):
+            node = WIDENExitNode()
+            with pytest.raises(RuntimeError, match="Insufficient system RAM"):
+                node.execute(recipe)
+
+        # chunked_evaluation should NOT have been called (preflight aborted first)
+        chunked_mock.assert_not_called()
 
 
 # =============================================================================
@@ -940,21 +1223,57 @@ class TestClipExitNodeRamPreflight:
 
     # AC: @clip-exit-node ac-11
     def test_clip_exit_node_has_ram_preflight(self):
-        """CLIP Exit node execute() should call check_ram_preflight before GPU loop."""
-        source = inspect.getsource(
-            __import__("nodes.clip_exit", fromlist=["WIDENCLIPExitNode"]).WIDENCLIPExitNode.execute
-        )
-        preflight_idx = source.index("check_ram_preflight")
-        eval_idx = source.index("chunked_evaluation")
-        assert preflight_idx < eval_idx, (
-            "check_ram_preflight must be called before chunked_evaluation"
+        """CLIP Exit node raises RuntimeError before GPU work when RAM is insufficient."""
+        from nodes.clip_exit import WIDENCLIPExitNode
+
+        # Build a CLIP-compatible mock
+        mock_clip = MagicMock()
+        mock_patcher = MagicMock()
+        mock_patcher.model_state_dict.return_value = {
+            "clip_l.transformer.text_model.weight": torch.randn(4, 4, dtype=torch.float32),
+        }
+        mock_clip.patcher = mock_patcher
+        mock_clip.clone.return_value = MagicMock()
+
+        keys = list(mock_patcher.model_state_dict().keys())
+
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_clip, arch="sdxl", domain="clip"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
         )
 
-    # AC: @clip-exit-node ac-11
-    def test_clip_exit_node_imports_check_ram_preflight(self):
-        """CLIP Exit node should import check_ram_preflight."""
-        import nodes.clip_exit as clip_exit_mod
-        assert hasattr(clip_exit_mod, "check_ram_preflight")
+        mock_loader = MagicMock()
+        mock_loader.cleanup = MagicMock()
+        mock_analyze = MagicMock(
+            arch="sdxl",
+            loader=mock_loader,
+            set_affected={str(id(None)): set(keys)},
+            affected_keys=set(keys),
+        )
+        mock_model_analysis = MagicMock()
+        mock_model_analysis.model_loaders = {}
+        mock_model_analysis.model_affected = {}
+        mock_model_analysis.all_model_keys = frozenset()
+
+        dummy_plan = EvalPlan(ops=(), result_reg=0, dead_after=())
+        sig = OpSignature(shape=(4, 4), ndim=2)
+        chunked_mock = MagicMock()
+
+        with (
+            patch("nodes.clip_exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.clip_exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.clip_exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.clip_exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.clip_exit.chunked_evaluation", chunked_mock),
+            patch("lib.gpu_ops.get_available_ram_bytes", return_value=100),
+        ):
+            node = WIDENCLIPExitNode()
+            with pytest.raises(RuntimeError, match="Insufficient system RAM"):
+                node.execute(recipe)
+
+        chunked_mock.assert_not_called()
 
 
 # =============================================================================
