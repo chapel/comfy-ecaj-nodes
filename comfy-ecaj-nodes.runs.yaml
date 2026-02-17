@@ -2265,7 +2265,7 @@ runs:
   - _ulid: 01KHN0MTC5977F2CPVRYXZWB47
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-17T05:19:53.222Z
     step_results:
@@ -2286,5 +2286,10 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-17T05:20:33.091Z
-        completed_at: 2026-02-17T05:20:33.091Z
+        completed_at: 2026-02-17T05:20:37.674Z
+        notes: Nothing to capture — all friction was one-off and resolved in-session.
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-17T05:20:37.674Z
+        completed_at: 2026-02-17T05:20:37.674Z
     initiated_by: "@claude"
