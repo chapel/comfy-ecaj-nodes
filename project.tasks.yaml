@@ -5497,7 +5497,7 @@
   spec_ref: "@memory-management"
   meta_ref: null
   plan_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   closed_reason: null
   depends_on: []
@@ -5506,7 +5506,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-17T00:01:56.888Z
-  started_at: null
+  started_at: 2026-02-17T00:08:51.848Z
   completed_at: null
   notes:
     - _ulid: 01KHMEV93ZT1WBVQBZV72CZ482
