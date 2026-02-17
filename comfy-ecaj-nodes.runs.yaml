@@ -2223,6 +2223,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-16T14:04:35.299Z
+    completed_at: 2026-02-16T14:05:27.847Z
     step_results:
       - step_index: 0
         status: completed
@@ -2261,4 +2262,11 @@ runs:
         notes: Nothing to capture — all items were either already tracked or low-confidence. Session was
           clean.
     initiated_by: "@claude"
-    completed_at: 2026-02-16T14:05:27.847Z
+  - _ulid: 01KHN0MTC5977F2CPVRYXZWB47
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    status: active
+    current_step: 0
+    total_steps: 4
+    started_at: 2026-02-17T05:19:53.222Z
+    step_results: []
+    initiated_by: "@claude"
