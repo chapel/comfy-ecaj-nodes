@@ -1582,6 +1582,8 @@ features:
     traits: []
     notes: []
     created: 2026-02-14T07:39:36.945Z
+    status:
+      implementation: implemented
   - _ulid: 01KHHE6JQV33FGJ2HGGVEH2A1S
     slugs:
       - diffusion-model-input-node
