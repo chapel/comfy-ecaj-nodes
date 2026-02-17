@@ -610,8 +610,12 @@ class WIDENExitNode:
             # AC: @exit-node ac-9
             # Pre-flight RAM check before GPU loop
             if batch_groups:
-                base_state_bytes = sum(
-                    t.nelement() * t.element_size() for t in base_state.values()
+                # Only count keys being processed — not the full base_state.
+                # LoRA merges typically affect a subset of keys.
+                processed_keys = {k for keys in batch_groups.values() for k in keys}
+                merged_state_bytes = sum(
+                    base_state[k].nelement() * base_state[k].element_size()
+                    for k in processed_keys
                 )
                 n_models = len(set_affected) + len(model_loaders)
                 element_size = torch.finfo(compute_dtype).bits // 8
@@ -624,7 +628,7 @@ class WIDENExitNode:
                     for sig in batch_groups
                 )
                 check_ram_preflight(
-                    base_state_bytes=base_state_bytes,
+                    base_state_bytes=merged_state_bytes,
                     n_models=n_models,
                     worst_chunk_bytes=worst_chunk_bytes,
                     save_model=save_model,

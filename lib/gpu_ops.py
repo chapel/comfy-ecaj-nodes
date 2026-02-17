@@ -65,26 +65,27 @@ def estimate_peak_ram(
     worst_chunk_bytes: int,
     save_model: bool,
 ) -> int:
-    """Estimate peak system RAM needed for the GPU evaluation pipeline.
+    """Estimate NEW system RAM needed beyond what's already allocated.
 
     # AC: @memory-management ac-10
 
-    Formula accounts for:
-    - base_state dict kept in RAM throughout
-    - merged_state accumulating on CPU (~same size as base_state)
-    - pin_memory cost for the largest chunk (2x: original stack + pinned copy)
-    - per-model LoRA delta data held in RAM during evaluation
-    - save path keeping an extra base_state reference
+    MemAvailable already reflects the base model, ComfyUI, and other loaded
+    models. This function estimates only the additional RAM that execute()
+    will allocate:
+
+    - merged_state: new CPU tensors accumulating results (~base_state_bytes)
+    - pin_memory: temporary 2x cost for one chunk at a time
+    - loader deltas: LoRA/model delta data held during evaluation
 
     Args:
         base_state_bytes: Total bytes of the base state dict
         n_models: Number of models being merged (LoRA sets + model loaders)
         worst_chunk_bytes: Largest single-chunk allocation in bytes
             (element_size * prod(shape) * batch_size for that group)
-        save_model: Whether model will be saved (doubles base_state cost)
+        save_model: Whether model will be saved (adds streaming overhead)
 
     Returns:
-        Estimated peak RAM in bytes
+        Estimated additional RAM needed in bytes
     """
     # pin_memory allocates a copy: original stack + pinned = 2x
     chunk_pinned_cost = 2 * worst_chunk_bytes
@@ -93,10 +94,13 @@ def estimate_peak_ram(
     # Conservative estimate: each model adds ~10% of base_state in delta data.
     loader_overhead = int(base_state_bytes * 0.1) * n_models
 
-    peak = base_state_bytes + base_state_bytes + chunk_pinned_cost + loader_overhead
+    # merged_state accumulates new CPU tensors (up to ~base_state_bytes)
+    # + temporary pin_memory cost + loader deltas
+    peak = base_state_bytes + chunk_pinned_cost + loader_overhead
     if save_model:
-        # save path overlays merged into base_state, but both dicts exist briefly
-        peak += base_state_bytes
+        # Streaming writer holds one tensor at a time, but metadata + temp
+        # file overhead adds ~5% of base_state
+        peak += int(base_state_bytes * 0.05)
     return peak
 
 
