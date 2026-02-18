@@ -5561,7 +5561,7 @@
   type: task
   spec_ref: "@accurate-ram-preflight"
   plan_ref: "@plan-fix-incremental-recompute-memory-estimation"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@implement-cache-loader-metadata"
