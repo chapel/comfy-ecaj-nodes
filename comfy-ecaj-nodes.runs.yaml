@@ -2422,7 +2422,7 @@ runs:
   - _ulid: 01KHQN6QA71XXGAAEP5ZYTZFF8
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 6
     started_at: 2026-02-18T05:57:40.295Z
     step_results:
@@ -2450,5 +2450,13 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-18T05:58:02.085Z
-        completed_at: 2026-02-18T05:58:02.085Z
+        completed_at: 2026-02-18T05:58:12.352Z
+        notes: Searched 'squash merge' and 'merge strategy' — not tracked. The squash merge failure is a
+          minor friction (retry with --merge works), but it's a known repo setting that could be in
+          MEMORY.md to avoid the retry. The self-approval GitHub limitation is a platform
+          constraint, not actionable.
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-18T05:58:12.352Z
+        completed_at: 2026-02-18T05:58:12.352Z
     initiated_by: "@claude"
