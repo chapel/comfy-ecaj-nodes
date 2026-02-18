@@ -1511,3 +1511,64 @@ class TestGetAvailableRamBytes:
             result = get_available_ram_bytes()
 
         assert result == 32000000 * 1024  # 32 GB in bytes
+
+
+# =============================================================================
+# AC-13: base_state freed before save, re-acquired fresh
+# =============================================================================
+
+
+class TestBaseStateFreedBeforeSave:
+    """AC: @memory-management ac-13
+
+    Given: GPU evaluation completes and results are in merged_state
+    When: save_model=True and save path is about to be written
+    Then: base_state is freed before save; state dict re-acquired fresh for save only
+    """
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        _incremental_cache.clear()
+        yield
+        _incremental_cache.clear()
+
+    # AC: @memory-management ac-13
+    def test_base_state_freed_before_save(self, mock_model_patcher):
+        """model_state_dict called twice (setup + save) when save_model=True."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # Track model_state_dict calls
+        call_count = [0]
+        original_msd = mock_model_patcher.model_state_dict
+
+        def tracking_msd():
+            call_count[0] += 1
+            return original_msd()
+
+        mock_model_patcher.model_state_dict = tracking_msd
+
+        _run_exit_node(
+            recipe, mock_model_patcher, keys,
+            extra_patches={
+                "nodes.exit.validate_model_name": "test.safetensors",
+                "nodes.exit._resolve_checkpoints_path": "/tmp/test.safetensors",
+                "nodes.exit.serialize_recipe": "{}",
+                "nodes.exit.compute_recipe_hash": "hash",
+                "nodes.exit.check_cache": None,
+                "nodes.exit.build_metadata": {"__ecaj_version__": "1"},
+                "nodes.exit.atomic_save": MagicMock(),
+            },
+            save_model=True,
+            model_name="test",
+        )
+
+        # Called once at setup (line 445) and once for save re-acquisition
+        assert call_count[0] == 2, (
+            f"Expected 2 model_state_dict calls (setup + save), got {call_count[0]}"
+        )

@@ -36,8 +36,10 @@ class OpSignature:
 
 def compile_batch_groups(
     keys: list[str],
-    base_state: dict[str, torch.Tensor],
+    base_state: dict[str, torch.Tensor] | None = None,
     arch: str | None = None,
+    *,
+    key_shapes: dict[str, tuple[int, ...]] | None = None,
 ) -> dict[OpSignature, list[str]]:
     """Group parameter keys by OpSignature for batched evaluation.
 
@@ -54,17 +56,31 @@ def compile_batch_groups(
 
     Args:
         keys: Parameter keys to group
-        base_state: Base model state dict (CPU)
+        base_state: Base model state dict (CPU). Optional if key_shapes provided.
         arch: Architecture name for block-aware sorting (optional)
+        key_shapes: Pre-extracted {key: shape_tuple} metadata. When provided,
+            used instead of base_state for shape lookup (avoids holding tensor refs).
 
     Returns:
         Dict mapping OpSignature -> list of param keys
+
+    Raises:
+        ValueError: If neither base_state nor key_shapes is provided.
     """
+    if base_state is None and key_shapes is None:
+        raise ValueError("compile_batch_groups requires base_state or key_shapes")
+
     groups: dict[OpSignature, list[str]] = {}
     for key in keys:
-        if key not in base_state:
-            continue
-        shape = tuple(base_state[key].shape)
+        if key_shapes is not None:
+            if key not in key_shapes:
+                continue
+            shape = key_shapes[key]
+        else:
+            assert base_state is not None  # for type checker
+            if key not in base_state:
+                continue
+            shape = tuple(base_state[key].shape)
         sig = OpSignature(shape, len(shape))
         groups.setdefault(sig, []).append(key)
 

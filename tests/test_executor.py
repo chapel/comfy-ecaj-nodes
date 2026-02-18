@@ -1541,3 +1541,48 @@ class TestNestedMergeTFactor:
         assert 0.5 in created_t_factors, (
             f"Expected t_factor=0.5 for inner merge, got: {created_t_factors}"
         )
+
+
+# =============================================================================
+# compile_batch_groups key_shapes parameter
+# =============================================================================
+
+
+class TestCompileBatchGroupsKeyShapes:
+    """Tests for key_shapes keyword parameter on compile_batch_groups."""
+
+    def test_compile_batch_groups_with_key_shapes(self):
+        """key_shapes should produce identical grouping as base_state."""
+        base_state = {
+            "layer1.weight": torch.randn(4, 4),
+            "layer2.weight": torch.randn(4, 4),
+            "layer3.weight": torch.randn(8, 8),
+        }
+        key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
+        keys = list(base_state.keys())
+
+        groups_base = compile_batch_groups(keys, base_state)
+        groups_shapes = compile_batch_groups(keys, key_shapes=key_shapes)
+
+        assert groups_base.keys() == groups_shapes.keys()
+        for sig in groups_base:
+            assert set(groups_base[sig]) == set(groups_shapes[sig])
+
+    def test_compile_batch_groups_requires_one_source(self):
+        """ValueError when neither base_state nor key_shapes provided."""
+        import pytest
+
+        with pytest.raises(ValueError, match="requires base_state or key_shapes"):
+            compile_batch_groups(["k0"])
+
+    def test_compile_batch_groups_key_shapes_missing_key(self):
+        """Keys not in key_shapes should be skipped (same as base_state behavior)."""
+        key_shapes = {"layer1.weight": (4, 4)}
+
+        groups = compile_batch_groups(
+            ["layer1.weight", "missing_key"], key_shapes=key_shapes
+        )
+
+        assert len(groups) == 1
+        sig = list(groups.keys())[0]
+        assert groups[sig] == ["layer1.weight"]

@@ -19,6 +19,7 @@ from lib.streaming_save import stream_save_file
 class TestStreamingSaveRoundTrip:
     """Round-trip tests: write with stream_save_file, read with safe_open."""
 
+    # AC: @memory-management ac-7
     def test_basic_f32(self):
         """F32 tensors round-trip correctly."""
         tensors = {
@@ -36,6 +37,7 @@ class TestStreamingSaveRoundTrip:
         finally:
             os.unlink(path)
 
+    # AC: @memory-management ac-7
     def test_multiple_dtypes(self):
         """All common dtypes round-trip correctly."""
         tensors = {
@@ -62,6 +64,7 @@ class TestStreamingSaveRoundTrip:
         finally:
             os.unlink(path)
 
+    # AC: @memory-management ac-7
     def test_metadata_preserved(self):
         """String metadata round-trips correctly."""
         tensors = {"x": torch.zeros(2)}
@@ -78,6 +81,7 @@ class TestStreamingSaveRoundTrip:
         finally:
             os.unlink(path)
 
+    # AC: @memory-management ac-7
     def test_empty_tensor(self):
         """Zero-element tensor round-trips correctly."""
         tensors = {"empty": torch.zeros(0, dtype=torch.float32)}
@@ -92,6 +96,7 @@ class TestStreamingSaveRoundTrip:
         finally:
             os.unlink(path)
 
+    # AC: @memory-management ac-7
     def test_scalar_tensor(self):
         """Scalar (0-dim) tensor round-trips correctly."""
         tensors = {"scalar": torch.tensor(3.14)}
@@ -106,6 +111,7 @@ class TestStreamingSaveRoundTrip:
         finally:
             os.unlink(path)
 
+    # AC: @memory-management ac-7
     def test_large_tensor(self):
         """Larger tensor (model-like) round-trips correctly."""
         tensors = {"big": torch.randn(512, 512)}
@@ -123,6 +129,7 @@ class TestStreamingSaveRoundTrip:
 class TestStreamingSaveViewSafety:
     """View safety: tensor views with storage_offset must round-trip correctly."""
 
+    # AC: @memory-management ac-7
     def test_view_with_storage_offset(self):
         """Tensor view (storage_offset > 0) round-trips correctly.
 
@@ -146,6 +153,7 @@ class TestStreamingSaveViewSafety:
         finally:
             os.unlink(path)
 
+    # AC: @memory-management ac-7
     def test_non_contiguous_tensor(self):
         """Non-contiguous tensor (e.g., transpose) round-trips correctly."""
         base = torch.randn(4, 8)
@@ -168,6 +176,7 @@ class TestStreamingSaveViewSafety:
 class TestStreamingSaveErrorCases:
     """Error case handling."""
 
+    # AC: @memory-management ac-7
     def test_rejects_shared_storage(self):
         """Tensors sharing the same data_ptr are rejected."""
         base = torch.randn(10)
@@ -185,6 +194,7 @@ class TestStreamingSaveErrorCases:
             if os.path.exists(path):
                 os.unlink(path)
 
+    # AC: @memory-management ac-7
     def test_rejects_sparse_tensor(self):
         """Sparse tensors are rejected."""
         sparse = torch.randn(3, 3).to_sparse()
@@ -198,6 +208,7 @@ class TestStreamingSaveErrorCases:
             if os.path.exists(path):
                 os.unlink(path)
 
+    # AC: @memory-management ac-7
     def test_empty_dict(self):
         """Empty tensor dict produces valid (header-only) file."""
         with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
@@ -209,6 +220,7 @@ class TestStreamingSaveErrorCases:
         finally:
             os.unlink(path)
 
+    # AC: @memory-management ac-7
     def test_no_metadata(self):
         """None metadata produces valid file with no __metadata__."""
         tensors = {"x": torch.zeros(2)}

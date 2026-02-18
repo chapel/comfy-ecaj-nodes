@@ -9,6 +9,7 @@ from lib.recipe import BlockConfig, RecipeModel
 # ---------------------------------------------------------------------------
 
 
+# AC: @model-input-node ac-1
 def test_input_types_has_model_name_combo(monkeypatch):
     """AC: @model-input-node ac-1 — model_name uses folder_paths.get_filename_list checkpoints."""
     import sys
@@ -38,6 +39,7 @@ def test_input_types_has_model_name_combo(monkeypatch):
     assert model_name_spec[0] == mock_checkpoint_list
 
 
+# AC: @model-input-node ac-1
 def test_input_types_has_strength_with_correct_defaults(monkeypatch):
     """AC: @model-input-node ac-1 — strength is FLOAT with default 1.0, range 0.0-2.0."""
     import sys
@@ -68,6 +70,7 @@ def test_input_types_has_strength_with_correct_defaults(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
+# AC: @model-input-node ac-2
 def test_create_model_returns_recipe_model():
     """AC: @model-input-node ac-2 — returns RecipeModel with filename and strength."""
     from nodes.model_input import WIDENModelInputNode
@@ -83,6 +86,7 @@ def test_create_model_returns_recipe_model():
     assert recipe.strength == 0.8
 
 
+# AC: @model-input-node ac-2
 def test_create_model_preserves_exact_values():
     """AC: @model-input-node ac-2 — path and strength preserved exactly."""
     from nodes.model_input import WIDENModelInputNode
@@ -100,6 +104,7 @@ def test_create_model_preserves_exact_values():
 # ---------------------------------------------------------------------------
 
 
+# AC: @model-input-node ac-3
 def test_create_model_no_gpu_or_io():
     """AC: @model-input-node ac-3 — no GPU memory, no file I/O (pure recipe building)."""
     from nodes.model_input import WIDENModelInputNode
@@ -125,6 +130,7 @@ def test_create_model_no_gpu_or_io():
 # ---------------------------------------------------------------------------
 
 
+# AC: @model-input-node ac-4
 def test_category_is_ecaj_merge():
     """AC: @model-input-node ac-4 — CATEGORY is ecaj/merge."""
     from nodes.model_input import WIDENModelInputNode
@@ -137,6 +143,7 @@ def test_category_is_ecaj_merge():
 # ---------------------------------------------------------------------------
 
 
+# AC: @model-input-node ac-5
 def test_return_types_is_widen():
     """AC: @model-input-node ac-5 — RETURN_TYPES is WIDEN."""
     from nodes.model_input import WIDENModelInputNode
@@ -144,6 +151,7 @@ def test_return_types_is_widen():
     assert WIDENModelInputNode.RETURN_TYPES == ("WIDEN",)
 
 
+# AC: @model-input-node ac-5
 def test_return_names_is_widen():
     """AC: @model-input-node ac-5 — RETURN_NAMES is widen."""
     from nodes.model_input import WIDENModelInputNode
@@ -156,6 +164,7 @@ def test_return_names_is_widen():
 # ---------------------------------------------------------------------------
 
 
+# AC: @model-input-node ac-6
 def test_input_types_has_optional_block_config(monkeypatch):
     """AC: @model-input-node ac-6 — optional block_config input exists."""
     import sys
@@ -178,6 +187,7 @@ def test_input_types_has_optional_block_config(monkeypatch):
     assert input_types["optional"]["block_config"] == ("BLOCK_CONFIG",)
 
 
+# AC: @model-input-node ac-6
 def test_block_config_stored_in_recipe():
     """AC: @model-input-node ac-6 — BlockConfig stored in RecipeModel.block_config."""
     from nodes.model_input import WIDENModelInputNode
@@ -191,6 +201,7 @@ def test_block_config_stored_in_recipe():
     assert recipe.block_config is block_cfg
 
 
+# AC: @model-input-node ac-6
 def test_block_config_none_by_default():
     """AC: @model-input-node ac-6 — block_config is None when not provided."""
     from nodes.model_input import WIDENModelInputNode

@@ -296,6 +296,12 @@ class WIDENCLIPExitNode:
         base_state = clip.patcher.model_state_dict()  # type: ignore[attr-defined]
         storage_dtype = next(iter(base_state.values())).dtype
 
+        # Extract shape/size metadata so compile_batch_groups and preflight
+        # don't need to hold tensor refs after GPU eval completes.
+        # AC: @memory-management ac-13
+        key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
+        key_byte_sizes = {k: v.nelement() * v.element_size() for k, v in base_state.items()}
+
         # --- AC-2: Analyze recipe with domain="clip" to get CLIP LoRA loader ---
         analysis = analyze_recipe(widen_clip, lora_path_resolver=lora_path_resolver)
         model_analysis = None
@@ -355,8 +361,8 @@ class WIDENCLIPExitNode:
             # Group keys by OpSignature for batched evaluation
             batch_groups = compile_batch_groups(
                 list(keys_to_process),
-                base_state,
                 arch=arch,
+                key_shapes=key_shapes,
             )
 
             # Pre-compile recipe tree into flat evaluation plan
@@ -370,8 +376,7 @@ class WIDENCLIPExitNode:
                 # Only count keys being processed — not the full base_state.
                 processed_keys = {k for keys in batch_groups.values() for k in keys}
                 merged_state_bytes = sum(
-                    base_state[k].nelement() * base_state[k].element_size()
-                    for k in processed_keys
+                    key_byte_sizes[k] for k in processed_keys
                 )
                 n_models = len(set_affected) + len(clip_model_loaders)
                 element_size = torch.finfo(compute_dtype).bits // 8
@@ -451,6 +456,10 @@ class WIDENCLIPExitNode:
             gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
+
+            # AC: @memory-management ac-13
+            # Free base_state after GPU eval — no longer needed (no save in CLIP exit).
+            del base_state
 
         finally:
             # Cleanup LoRA loader

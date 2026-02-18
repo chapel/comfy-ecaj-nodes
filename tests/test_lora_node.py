@@ -9,6 +9,7 @@ from lib.recipe import RecipeLoRA  # noqa: F401  (used for type checks in tests)
 # ---------------------------------------------------------------------------
 
 
+# AC: @lora-node ac-1
 def test_add_lora_returns_recipe_lora():
     """AC: @lora-node ac-1 — returns RecipeLoRA with path and strength."""
     from nodes.lora import WIDENLoRANode
@@ -25,6 +26,7 @@ def test_add_lora_returns_recipe_lora():
     assert recipe.loras[0]["strength"] == 0.8
 
 
+# AC: @lora-node ac-1
 def test_add_lora_preserves_exact_values():
     """AC: @lora-node ac-1 — strength and path preserved exactly."""
     from nodes.lora import WIDENLoRANode
@@ -42,6 +44,7 @@ def test_add_lora_preserves_exact_values():
 # ---------------------------------------------------------------------------
 
 
+# AC: @lora-node ac-2
 def test_chained_loras_contains_both():
     """AC: @lora-node ac-2 — chained LoRAs form a set with both."""
     from nodes.lora import WIDENLoRANode
@@ -62,6 +65,7 @@ def test_chained_loras_contains_both():
     assert chained_recipe.loras[1] == {"path": "lora_b.safetensors", "strength": 0.5}
 
 
+# AC: @lora-node ac-2
 def test_triple_chain_accumulates_all():
     """AC: @lora-node ac-2 — three chained LoRAs all appear in order."""
     from nodes.lora import WIDENLoRANode
@@ -83,6 +87,7 @@ def test_triple_chain_accumulates_all():
 # ---------------------------------------------------------------------------
 
 
+# AC: @lora-node ac-3
 def test_input_types_uses_folder_paths(monkeypatch):
     """AC: @lora-node ac-3 — lora_name uses folder_paths.get_filename_list."""
     import sys
@@ -117,6 +122,7 @@ def test_input_types_uses_folder_paths(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
+# AC: @lora-node ac-4
 def test_no_prev_returns_single_element_loras():
     """AC: @lora-node ac-4 — no prev gives single-element loras tuple."""
     from nodes.lora import WIDENLoRANode
@@ -129,6 +135,7 @@ def test_no_prev_returns_single_element_loras():
     assert recipe.loras == ({"path": "solo_lora.safetensors", "strength": 0.9},)
 
 
+# AC: @lora-node ac-4
 def test_explicit_none_prev_returns_single_element():
     """AC: @lora-node ac-4 — explicit prev=None gives single-element loras."""
     from nodes.lora import WIDENLoRANode
@@ -145,6 +152,7 @@ def test_explicit_none_prev_returns_single_element():
 # ---------------------------------------------------------------------------
 
 
+# AC: @lora-node ac-5
 def test_zero_strength_still_in_recipe():
     """AC: @lora-node ac-5 — strength=0.0 LoRA still appears in recipe."""
     from nodes.lora import WIDENLoRANode
@@ -158,6 +166,7 @@ def test_zero_strength_still_in_recipe():
     assert recipe.loras[0]["path"] == "disabled_lora.safetensors"
 
 
+# AC: @lora-node ac-5
 def test_zero_strength_in_chain():
     """AC: @lora-node ac-5 — zero-strength LoRA preserved when chaining."""
     from nodes.lora import WIDENLoRANode

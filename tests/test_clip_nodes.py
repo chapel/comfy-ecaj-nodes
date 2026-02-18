@@ -42,6 +42,7 @@ def mock_folder_paths(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
+# AC: @clip-graph-nodes ac-1
 def test_clip_lora_input_types_has_widen_clip_prev(mock_folder_paths):
     """AC: @clip-graph-nodes ac-1 — CLIP LoRA accepts WIDEN_CLIP prev input."""
     from nodes.clip_nodes import WIDENCLIPLoRANode
@@ -53,6 +54,7 @@ def test_clip_lora_input_types_has_widen_clip_prev(mock_folder_paths):
     assert input_types["optional"]["prev"] == ("WIDEN_CLIP",)
 
 
+# AC: @clip-graph-nodes ac-1
 def test_clip_lora_return_types_is_widen_clip(mock_folder_paths):
     """AC: @clip-graph-nodes ac-1 — CLIP LoRA returns WIDEN_CLIP."""
     from nodes.clip_nodes import WIDENCLIPLoRANode
@@ -60,6 +62,7 @@ def test_clip_lora_return_types_is_widen_clip(mock_folder_paths):
     assert WIDENCLIPLoRANode.RETURN_TYPES == ("WIDEN_CLIP",)
 
 
+# AC: @clip-graph-nodes ac-1
 def test_clip_lora_uses_loras_folder(mock_folder_paths):
     """AC: @clip-graph-nodes ac-1 — CLIP LoRA uses loras folder."""
     from nodes.clip_nodes import WIDENCLIPLoRANode
@@ -75,6 +78,7 @@ def test_clip_lora_uses_loras_folder(mock_folder_paths):
 # ---------------------------------------------------------------------------
 
 
+# AC: @clip-graph-nodes ac-2
 def test_clip_compose_input_types_has_widen_clip_branch(mock_folder_paths):
     """AC: @clip-graph-nodes ac-2 — CLIP Compose accepts WIDEN_CLIP branch."""
     from nodes.clip_nodes import WIDENCLIPComposeNode
@@ -86,6 +90,7 @@ def test_clip_compose_input_types_has_widen_clip_branch(mock_folder_paths):
     assert input_types["required"]["branch"] == ("WIDEN_CLIP",)
 
 
+# AC: @clip-graph-nodes ac-2
 def test_clip_compose_input_types_has_widen_clip_compose(mock_folder_paths):
     """AC: @clip-graph-nodes ac-2 — CLIP Compose accepts optional WIDEN_CLIP compose."""
     from nodes.clip_nodes import WIDENCLIPComposeNode
@@ -97,6 +102,7 @@ def test_clip_compose_input_types_has_widen_clip_compose(mock_folder_paths):
     assert input_types["optional"]["compose"] == ("WIDEN_CLIP",)
 
 
+# AC: @clip-graph-nodes ac-2
 def test_clip_compose_return_types_is_widen_clip(mock_folder_paths):
     """AC: @clip-graph-nodes ac-2 — CLIP Compose returns WIDEN_CLIP."""
     from nodes.clip_nodes import WIDENCLIPComposeNode
@@ -109,6 +115,7 @@ def test_clip_compose_return_types_is_widen_clip(mock_folder_paths):
 # ---------------------------------------------------------------------------
 
 
+# AC: @clip-graph-nodes ac-3
 def test_clip_merge_input_types_has_widen_clip_base(mock_folder_paths):
     """AC: @clip-graph-nodes ac-3 — CLIP Merge accepts WIDEN_CLIP base."""
     from nodes.clip_nodes import WIDENCLIPMergeNode
@@ -120,6 +127,7 @@ def test_clip_merge_input_types_has_widen_clip_base(mock_folder_paths):
     assert input_types["required"]["base"] == ("WIDEN_CLIP",)
 
 
+# AC: @clip-graph-nodes ac-3
 def test_clip_merge_input_types_has_widen_clip_target(mock_folder_paths):
     """AC: @clip-graph-nodes ac-3 — CLIP Merge accepts WIDEN_CLIP target."""
     from nodes.clip_nodes import WIDENCLIPMergeNode
@@ -131,6 +139,7 @@ def test_clip_merge_input_types_has_widen_clip_target(mock_folder_paths):
     assert input_types["required"]["target"] == ("WIDEN_CLIP",)
 
 
+# AC: @clip-graph-nodes ac-3
 def test_clip_merge_input_types_has_widen_clip_backbone(mock_folder_paths):
     """AC: @clip-graph-nodes ac-3 — CLIP Merge has optional WIDEN_CLIP backbone."""
     from nodes.clip_nodes import WIDENCLIPMergeNode
@@ -142,6 +151,7 @@ def test_clip_merge_input_types_has_widen_clip_backbone(mock_folder_paths):
     assert input_types["optional"]["backbone"] == ("WIDEN_CLIP",)
 
 
+# AC: @clip-graph-nodes ac-3
 def test_clip_merge_return_types_is_widen_clip(mock_folder_paths):
     """AC: @clip-graph-nodes ac-3 — CLIP Merge returns WIDEN_CLIP."""
     from nodes.clip_nodes import WIDENCLIPMergeNode
@@ -154,6 +164,7 @@ def test_clip_merge_return_types_is_widen_clip(mock_folder_paths):
 # ---------------------------------------------------------------------------
 
 
+# AC: @clip-graph-nodes ac-4
 def test_clip_model_input_return_types_is_widen_clip(mock_folder_paths):
     """AC: @clip-graph-nodes ac-4 — CLIP Model Input returns WIDEN_CLIP."""
     from nodes.clip_nodes import WIDENCLIPModelInputNode
@@ -166,6 +177,7 @@ def test_clip_model_input_return_types_is_widen_clip(mock_folder_paths):
 # ---------------------------------------------------------------------------
 
 
+# AC: @clip-graph-nodes ac-5
 def test_clip_model_input_uses_checkpoints_folder(mock_folder_paths):
     """AC: @clip-graph-nodes ac-5 — CLIP Model Input reads from checkpoints folder."""
     from nodes.clip_nodes import WIDENCLIPModelInputNode
@@ -176,6 +188,7 @@ def test_clip_model_input_uses_checkpoints_folder(mock_folder_paths):
     assert model_name_spec[0] == mock_folder_paths["checkpoints"]
 
 
+# AC: @clip-graph-nodes ac-5
 def test_clip_model_input_produces_recipe_model_with_path(mock_folder_paths):
     """AC: @clip-graph-nodes ac-5 — CLIP Model Input creates RecipeModel with correct path."""
     from nodes.clip_nodes import WIDENCLIPModelInputNode
@@ -193,6 +206,7 @@ def test_clip_model_input_produces_recipe_model_with_path(mock_folder_paths):
 # ---------------------------------------------------------------------------
 
 
+# AC: @clip-graph-nodes ac-6
 def test_clip_lora_category(mock_folder_paths):
     """AC: @clip-graph-nodes ac-6 — CLIP LoRA has CATEGORY ecaj/merge/clip."""
     from nodes.clip_nodes import WIDENCLIPLoRANode
@@ -200,6 +214,7 @@ def test_clip_lora_category(mock_folder_paths):
     assert WIDENCLIPLoRANode.CATEGORY == "ecaj/merge/clip"
 
 
+# AC: @clip-graph-nodes ac-6
 def test_clip_compose_category(mock_folder_paths):
     """AC: @clip-graph-nodes ac-6 — CLIP Compose has CATEGORY ecaj/merge/clip."""
     from nodes.clip_nodes import WIDENCLIPComposeNode
@@ -207,6 +222,7 @@ def test_clip_compose_category(mock_folder_paths):
     assert WIDENCLIPComposeNode.CATEGORY == "ecaj/merge/clip"
 
 
+# AC: @clip-graph-nodes ac-6
 def test_clip_merge_category(mock_folder_paths):
     """AC: @clip-graph-nodes ac-6 — CLIP Merge has CATEGORY ecaj/merge/clip."""
     from nodes.clip_nodes import WIDENCLIPMergeNode
@@ -214,6 +230,7 @@ def test_clip_merge_category(mock_folder_paths):
     assert WIDENCLIPMergeNode.CATEGORY == "ecaj/merge/clip"
 
 
+# AC: @clip-graph-nodes ac-6
 def test_clip_model_input_category(mock_folder_paths):
     """AC: @clip-graph-nodes ac-6 — CLIP Model Input has CATEGORY ecaj/merge/clip."""
     from nodes.clip_nodes import WIDENCLIPModelInputNode
@@ -226,6 +243,7 @@ def test_clip_model_input_category(mock_folder_paths):
 # ---------------------------------------------------------------------------
 
 
+# AC: @clip-graph-nodes ac-7
 def test_clip_lora_produces_recipe_lora(mock_folder_paths):
     """AC: @clip-graph-nodes ac-7 — CLIP LoRA produces RecipeLoRA."""
     from nodes.clip_nodes import WIDENCLIPLoRANode
@@ -239,6 +257,7 @@ def test_clip_lora_produces_recipe_lora(mock_folder_paths):
     assert recipe.loras[0]["strength"] == 1.0
 
 
+# AC: @clip-graph-nodes ac-7
 def test_clip_lora_chaining_produces_recipe_lora(mock_folder_paths):
     """AC: @clip-graph-nodes ac-7 — CLIP LoRA chaining produces RecipeLoRA with both."""
     from nodes.clip_nodes import WIDENCLIPLoRANode
@@ -253,6 +272,7 @@ def test_clip_lora_chaining_produces_recipe_lora(mock_folder_paths):
     assert r2.loras[1]["path"] == "b.safetensors"
 
 
+# AC: @clip-graph-nodes ac-7
 def test_clip_compose_produces_recipe_compose(mock_folder_paths):
     """AC: @clip-graph-nodes ac-7 — CLIP Compose produces RecipeCompose."""
     from nodes.clip_nodes import WIDENCLIPComposeNode, WIDENCLIPLoRANode
@@ -268,6 +288,7 @@ def test_clip_compose_produces_recipe_compose(mock_folder_paths):
     assert len(recipe.branches) == 1
 
 
+# AC: @clip-graph-nodes ac-7
 def test_clip_compose_chaining_produces_recipe_compose(mock_folder_paths):
     """AC: @clip-graph-nodes ac-7 — CLIP Compose chaining accumulates branches."""
     from nodes.clip_nodes import WIDENCLIPComposeNode, WIDENCLIPLoRANode
@@ -284,6 +305,7 @@ def test_clip_compose_chaining_produces_recipe_compose(mock_folder_paths):
     assert len(c2.branches) == 2
 
 
+# AC: @clip-graph-nodes ac-7
 def test_clip_merge_produces_recipe_merge(mock_folder_paths):
     """AC: @clip-graph-nodes ac-7 — CLIP Merge produces RecipeMerge."""
     from unittest.mock import MagicMock
@@ -306,6 +328,7 @@ def test_clip_merge_produces_recipe_merge(mock_folder_paths):
     assert recipe.t_factor == 1.0
 
 
+# AC: @clip-graph-nodes ac-7
 def test_clip_model_input_produces_recipe_model(mock_folder_paths):
     """AC: @clip-graph-nodes ac-7 — CLIP Model Input produces RecipeModel."""
     from nodes.clip_nodes import WIDENCLIPModelInputNode
@@ -325,6 +348,7 @@ def test_clip_model_input_produces_recipe_model(mock_folder_paths):
 # ---------------------------------------------------------------------------
 
 
+# AC: @clip-graph-nodes ac-8
 def test_clip_nodes_registered_in_mappings():
     """AC: @clip-graph-nodes ac-8 — All CLIP nodes in NODE_CLASS_MAPPINGS."""
     # Import the main module which has the mappings

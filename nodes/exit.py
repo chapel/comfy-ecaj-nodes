@@ -445,6 +445,12 @@ class WIDENExitNode:
         base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
         storage_dtype = next(iter(base_state.values())).dtype
 
+        # Extract shape/size metadata so compile_batch_groups and preflight
+        # don't need to hold tensor refs after GPU eval completes.
+        # AC: @memory-management ac-13
+        key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
+        key_byte_sizes = {k: v.nelement() * v.element_size() for k, v in base_state.items()}
+
         # --- Compute base_identity and lora_stats for both persistence and incremental cache ---
         base_identity = compute_base_identity(base_state)
         lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
@@ -538,8 +544,8 @@ class WIDENExitNode:
             # Group keys by OpSignature for batched evaluation
             batch_groups = compile_batch_groups(
                 list(keys_to_process),
-                base_state,
                 arch=arch,
+                key_shapes=key_shapes,
             )
 
             # Pre-compile recipe tree into flat evaluation plan (once)
@@ -600,7 +606,8 @@ class WIDENExitNode:
 
                             # Rebuild batch_groups for only changed keys
                             batch_groups = compile_batch_groups(
-                                list(recompute_keys), base_state, arch=arch,
+                                list(recompute_keys), arch=arch,
+                                key_shapes=key_shapes,
                             )
                             incremental_hit = True
 
@@ -614,8 +621,7 @@ class WIDENExitNode:
                 # LoRA merges typically affect a subset of keys.
                 processed_keys = {k for keys in batch_groups.values() for k in keys}
                 merged_state_bytes = sum(
-                    base_state[k].nelement() * base_state[k].element_size()
-                    for k in processed_keys
+                    key_byte_sizes[k] for k in processed_keys
                 )
                 n_models = len(set_affected) + len(model_loaders)
                 element_size = torch.finfo(compute_dtype).bits // 8
@@ -705,31 +711,34 @@ class WIDENExitNode:
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
+            # AC: @memory-management ac-13
+            # Free base_state after GPU eval completes — no longer needed.
+            # Re-acquired fresh below only if save_model requires it.
+            del base_state
+
             # --- Persistence: save after GPU, before cache write ---
             _log_memory("before-save")
             # AC: @incremental-block-recompute ac-10
             # Moved before cache write so base_state can be freed early.
             if save_model and save_path is not None:
+                # AC: @memory-management ac-13
+                # Re-acquire state dict fresh for save only.
+                save_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
                 # AC: @memory-management ac-6
-                # Overlay merged keys into base_state by reference (no copy).
+                # Overlay merged keys into save_state by reference (no copy).
                 # merged_state tensors are already CPU + storage_dtype from
                 # chunked_evaluation, so no conversion needed.
                 for key, tensor in merged_state.items():
-                    base_state[key] = tensor
+                    save_state[key] = tensor
                 workflow_json = (
                     json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
                 )
                 metadata = build_metadata(
                     serialized, recipe_hash, sorted(merged_state.keys()), workflow_json
                 )
-                atomic_save(base_state, save_path, metadata)
+                atomic_save(save_state, save_path, metadata)
+                del save_state
                 _log_memory("after-save")
-
-            # AC: @memory-management ac-6
-            # Free base_state (~model-sized) before cache write and patch install.
-            # No longer needed: persistence save is done, cache stores merged_state
-            # tensors by reference (not cloned from base_state).
-            del base_state
 
             # AC: @memory-management ac-8
             # After save completes, offload GPU models and clear VRAM cache.

@@ -9,6 +9,7 @@ from lib.recipe import BlockConfig, RecipeModel
 # ---------------------------------------------------------------------------
 
 
+# AC: @diffusion-model-input-node ac-1
 def test_input_types_has_model_name_combo_diffusion_models(monkeypatch):
     """AC: @diffusion-model-input-node ac-1 — model_name uses folder_paths for diffusion_models."""
     import sys
@@ -38,6 +39,7 @@ def test_input_types_has_model_name_combo_diffusion_models(monkeypatch):
     assert model_name_spec[0] == mock_model_list
 
 
+# AC: @diffusion-model-input-node ac-1
 def test_input_types_falls_back_to_unet_folder(monkeypatch):
     """AC: @diffusion-model-input-node ac-1 — falls back to unet folder for older ComfyUI."""
     import sys
@@ -74,6 +76,7 @@ def test_input_types_falls_back_to_unet_folder(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
+# AC: @diffusion-model-input-node ac-2
 def test_input_types_has_strength_with_correct_defaults(monkeypatch):
     """AC: @diffusion-model-input-node ac-2 — strength is FLOAT with default 1.0, range 0.0-2.0."""
     import sys
@@ -103,6 +106,7 @@ def test_input_types_has_strength_with_correct_defaults(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
+# AC: @diffusion-model-input-node ac-3
 def test_create_model_returns_recipe_model_with_source_dir():
     """AC: @diffusion-model-input-node ac-3 — returns RecipeModel with source_dir."""
     from nodes.diffusion_model_input import WIDENDiffusionModelInputNode
@@ -119,6 +123,7 @@ def test_create_model_returns_recipe_model_with_source_dir():
     assert recipe.source_dir == "diffusion_models"
 
 
+# AC: @diffusion-model-input-node ac-3
 def test_create_model_preserves_exact_values():
     """AC: @diffusion-model-input-node ac-3 — path, strength, source_dir preserved exactly."""
     from nodes.diffusion_model_input import WIDENDiffusionModelInputNode
@@ -137,6 +142,7 @@ def test_create_model_preserves_exact_values():
 # ---------------------------------------------------------------------------
 
 
+# AC: @diffusion-model-input-node ac-4
 def test_create_model_no_gpu_or_io():
     """AC: @diffusion-model-input-node ac-4 — no GPU memory, no file I/O (pure recipe building)."""
     from nodes.diffusion_model_input import WIDENDiffusionModelInputNode
@@ -162,6 +168,7 @@ def test_create_model_no_gpu_or_io():
 # ---------------------------------------------------------------------------
 
 
+# AC: @diffusion-model-input-node ac-5
 def test_category_is_ecaj_merge():
     """AC: @diffusion-model-input-node ac-5 — CATEGORY is ecaj/merge."""
     from nodes.diffusion_model_input import WIDENDiffusionModelInputNode
@@ -174,6 +181,7 @@ def test_category_is_ecaj_merge():
 # ---------------------------------------------------------------------------
 
 
+# AC: @diffusion-model-input-node ac-6
 def test_return_types_is_widen():
     """AC: @diffusion-model-input-node ac-6 — RETURN_TYPES is WIDEN."""
     from nodes.diffusion_model_input import WIDENDiffusionModelInputNode
@@ -181,6 +189,7 @@ def test_return_types_is_widen():
     assert WIDENDiffusionModelInputNode.RETURN_TYPES == ("WIDEN",)
 
 
+# AC: @diffusion-model-input-node ac-6
 def test_return_names_is_widen():
     """AC: @diffusion-model-input-node ac-6 — RETURN_NAMES is widen."""
     from nodes.diffusion_model_input import WIDENDiffusionModelInputNode
@@ -193,6 +202,7 @@ def test_return_names_is_widen():
 # ---------------------------------------------------------------------------
 
 
+# AC: @diffusion-model-input-node ac-7
 def test_input_types_has_optional_block_config(monkeypatch):
     """AC: @diffusion-model-input-node ac-7 — optional block_config input exists."""
     import sys
@@ -215,6 +225,7 @@ def test_input_types_has_optional_block_config(monkeypatch):
     assert input_types["optional"]["block_config"] == ("BLOCK_CONFIG",)
 
 
+# AC: @diffusion-model-input-node ac-7
 def test_block_config_stored_in_recipe():
     """AC: @diffusion-model-input-node ac-7 — BlockConfig stored in RecipeModel.block_config."""
     from nodes.diffusion_model_input import WIDENDiffusionModelInputNode
@@ -228,6 +239,7 @@ def test_block_config_stored_in_recipe():
     assert recipe.block_config is block_cfg
 
 
+# AC: @diffusion-model-input-node ac-7
 def test_block_config_none_by_default():
     """AC: @diffusion-model-input-node ac-7 — block_config is None when not provided."""
     from nodes.diffusion_model_input import WIDENDiffusionModelInputNode
@@ -244,6 +256,7 @@ def test_block_config_none_by_default():
 # ---------------------------------------------------------------------------
 
 
+# AC: @diffusion-model-input-node ac-8
 def test_node_registered_in_class_mappings():
     """AC: @diffusion-model-input-node ac-8 — node in NODE_CLASS_MAPPINGS."""
     # Import the node and verify it's properly defined
@@ -255,6 +268,7 @@ def test_node_registered_in_class_mappings():
     assert hasattr(WIDENDiffusionModelInputNode, "FUNCTION")
 
 
+# AC: @diffusion-model-input-node ac-8
 def test_display_name_contains_diffusion_model():
     """AC: @diffusion-model-input-node ac-8 — display name contains 'Diffusion Model'."""
     # Read the __init__.py file content to verify the mapping
