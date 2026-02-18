@@ -61,44 +61,50 @@ def get_available_ram_bytes() -> int:
 
 def estimate_peak_ram(
     merged_state_bytes: int,
-    n_models: int,
     worst_chunk_bytes: int,
     save_model: bool,
+    loader_bytes: int = 0,
 ) -> int:
     """Estimate NEW system RAM needed beyond what's already allocated.
 
     # AC: @memory-management ac-10
+    # AC: @accurate-ram-preflight ac-1
+    # AC: @accurate-ram-preflight ac-4
+    # AC: @accurate-ram-preflight ac-5
 
-    MemAvailable already reflects the base model, ComfyUI, and other loaded
-    models. This function estimates only the additional RAM that execute()
-    will allocate:
+    MemAvailable already reflects the base model, ComfyUI, loaders, and other
+    loaded models. This function estimates only the additional RAM that
+    execute() will allocate:
 
     - merged_state: new CPU tensors accumulating results (~merged_state_bytes)
     - pin_memory: temporary 2x cost for one chunk at a time
-    - loader deltas: LoRA/model delta data held during evaluation
+
+    Loader memory is NOT added to the estimate because loaders are populated
+    before preflight runs, so their cost is already reflected in MemAvailable.
 
     Args:
         merged_state_bytes: Total bytes of processed keys (not the full base
             state dict — only keys actually being merged).
-        n_models: Number of models being merged (LoRA sets + model loaders)
         worst_chunk_bytes: Largest single-chunk allocation in bytes
             (element_size * prod(shape) * batch_size for that group)
         save_model: Whether model will be saved (adds streaming overhead)
+        loader_bytes: Measured bytes already consumed by loaders (logged for
+            diagnostics only, not added to the estimate).
 
     Returns:
         Estimated additional RAM needed in bytes
     """
+    # AC: @accurate-ram-preflight ac-3
+    logger.debug("Preflight loader_bytes=%d (already in MemAvailable)", loader_bytes)
+
     # pin_memory allocates a copy: original stack + pinned = 2x
     chunk_pinned_cost = 2 * worst_chunk_bytes
 
-    # Each LoRA/model loader holds delta tensors (~2 rank-sized matrices per key).
-    # Conservative estimate: each model adds ~10% of merged state in delta data.
-    loader_overhead = int(merged_state_bytes * 0.1) * n_models
-
     # merged_state accumulates new CPU tensors (up to ~merged_state_bytes)
-    # + temporary pin_memory cost + loader deltas
-    peak = merged_state_bytes + chunk_pinned_cost + loader_overhead
+    # + temporary pin_memory cost
+    peak = merged_state_bytes + chunk_pinned_cost
     if save_model:
+        # AC: @accurate-ram-preflight ac-4
         # Streaming writer holds one tensor at a time, but metadata + temp
         # file overhead adds ~5% of merged state
         peak += int(merged_state_bytes * 0.05)
@@ -107,9 +113,9 @@ def estimate_peak_ram(
 
 def check_ram_preflight(
     merged_state_bytes: int,
-    n_models: int,
     worst_chunk_bytes: int,
     save_model: bool,
+    loader_bytes: int = 0,
 ) -> None:
     """Raise RuntimeError if available RAM is insufficient for merge.
 
@@ -121,16 +127,16 @@ def check_ram_preflight(
 
     Args:
         merged_state_bytes: Total bytes of processed keys (only keys being merged)
-        n_models: Number of models being merged
         worst_chunk_bytes: Largest single-chunk allocation in bytes
         save_model: Whether model will be saved
+        loader_bytes: Measured bytes already consumed by loaders (for logging)
 
     Raises:
         RuntimeError: With shortfall in MB if RAM is insufficient
     """
     avail = get_available_ram_bytes()
     peak = estimate_peak_ram(
-        merged_state_bytes, n_models, worst_chunk_bytes, save_model
+        merged_state_bytes, worst_chunk_bytes, save_model, loader_bytes
     )
     if avail < peak:
         raise RuntimeError(
