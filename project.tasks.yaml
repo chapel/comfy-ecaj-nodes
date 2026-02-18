@@ -5644,4 +5644,10 @@
         Available for future preflight improvements (e.g., pre-load estimation)
         and diagnostic logging. When cache is read on incremental hit, the stored
         loader_bytes is logged alongside the recompute plan.
+    - _ulid: 01KHQJGBF6ARSE3JY44CNG4QX1
+      created_at: 2026-02-18T05:10:30.118Z
+      author: "@claude"
+      content: "Test guidance: Add tests to tests/test_incremental_recompute.py. Test _CacheEntry
+        loader_bytes field population and logging. AC annotation: # AC: @cache-loader-metadata ac-N"
+      supersedes: null
   todos: []
