@@ -86,3 +86,12 @@ inbox:
     created_at: 2026-02-15T23:56:39.791Z
     tags: []
     added_by: "@claude"
+  - _ulid: 01KHQKRSPTDP78QNQPB61326KD
+    text: kspec item ac reorder command — currently requires remove+re-add with --force to fix
+      non-sequential AC IDs from plan import. Should support 'kspec item ac reorder @ref ac-1 ac-2
+      ac-3 ac-4' to reorder without data loss risk.
+    created_at: 2026-02-18T05:32:35.418Z
+    tags:
+      - reflection
+      - kspec
+    added_by: "@claude"
