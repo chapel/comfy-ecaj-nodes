@@ -2332,8 +2332,23 @@ runs:
   - _ulid: 01KHQFQ26HPYJMMR41V5VNKWQP
     workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 5
     started_at: 2026-02-18T04:21:44.273Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-18T04:21:44.273Z
+        completed_at: 2026-02-18T04:22:02.657Z
+        inputs:
+          feature_description: "Fix incremental recompute memory estimation: replace heuristic-based
+            loader_overhead formula (10% * merged_state_bytes * n_models) with measured actual
+            tensor.nbytes from loaders. Store measured loader memory in cache metadata. Account for
+            cached merged_state tensors already in MemAvailable during incremental runs. Affects
+            estimate_peak_ram(), check_ram_preflight(), exit.py, clip_exit.py, _CacheEntry, and
+            loader base classes."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-18T04:22:02.657Z
+        completed_at: 2026-02-18T04:22:02.657Z
     initiated_by: "@claude"
