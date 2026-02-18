@@ -2371,6 +2371,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-18T05:31:39.412Z
+    completed_at: 2026-02-18T05:32:40.486Z
     step_results:
       - step_index: 0
         status: completed
@@ -2418,4 +2419,11 @@ runs:
           observation 01KHQKRQ (checkpoint hook on plan files), inbox item 01KHQKRS (ac reorder
           command). Session reflection complete."
     initiated_by: "@claude"
-    completed_at: 2026-02-18T05:32:40.486Z
+  - _ulid: 01KHQN6QA71XXGAAEP5ZYTZFF8
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-18T05:57:40.295Z
+    step_results: []
+    initiated_by: "@claude"
