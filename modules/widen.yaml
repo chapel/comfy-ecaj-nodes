@@ -625,6 +625,10 @@ features:
                 given: cache entry exists with loader_bytes from a previous run
                 when: current run loads different LoRA files with different sizes
                 then: the new cache entry stores the new measured loader_bytes, not the old value
+              - id: ac-4
+                given: an incremental cache hit occurs with stored loader_bytes of L
+                when: preflight check runs for the recompute subset
+                then: L does not affect the peak RAM estimate returned by estimate_peak_ram
             depends_on: []
             implements: []
             relates_to: []
