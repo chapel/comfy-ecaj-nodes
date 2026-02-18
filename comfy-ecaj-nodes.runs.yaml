@@ -2298,7 +2298,7 @@ runs:
   - _ulid: 01KHQDM1JFD87C57Y8P42ZKJFG
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-18T03:45:08.175Z
     step_results:
@@ -2312,5 +2312,12 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-18T03:45:52.135Z
-        completed_at: 2026-02-18T03:45:52.135Z
+        completed_at: 2026-02-18T03:46:17.956Z
+        notes: "Searched observations, inbox, tasks. Parallel review success already tracked (01KH6Y5Y,
+          01KH9YAW). One untracked friction: reviewers attempt APPROVE/REQUEST_CHANGES on own PR,
+          get HTTP 422, waste time retrying as COMMENT."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-18T03:46:17.956Z
+        completed_at: 2026-02-18T03:46:17.956Z
     initiated_by: "@claude"
