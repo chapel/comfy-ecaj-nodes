@@ -2470,7 +2470,7 @@ runs:
   - _ulid: 01KHQP1AKSYFG09E5ZZZCMVRD5
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-18T06:12:12.025Z
     step_results:
@@ -2484,5 +2484,12 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-18T06:12:31.870Z
-        completed_at: 2026-02-18T06:12:31.870Z
+        completed_at: 2026-02-18T06:12:38.115Z
+        notes: "Friction 1: Logger name mismatch - nodes/exit.py uses logger('ecaj.exit') not 'nodes.exit'.
+          Easy to get wrong when writing caplog tests. Friction 2: kspec task complete --force
+          didn't bypass the start/submit requirement for already-completed work."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-18T06:12:38.115Z
+        completed_at: 2026-02-18T06:12:38.115Z
     initiated_by: "@claude"
