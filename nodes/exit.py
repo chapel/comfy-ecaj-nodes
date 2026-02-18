@@ -99,7 +99,10 @@ class _CacheEntry:
     read-only and must not mutate cached tensors.
     """
 
-    __slots__ = ("structural_fingerprint", "block_configs", "merged_state", "storage_dtype")
+    __slots__ = (
+        "structural_fingerprint", "block_configs", "merged_state",
+        "storage_dtype", "loader_bytes",
+    )
 
     def __init__(
         self,
@@ -107,11 +110,13 @@ class _CacheEntry:
         block_configs: list[tuple[str, BlockConfig | None]],
         merged_state: dict[str, torch.Tensor],
         storage_dtype: torch.dtype,
+        loader_bytes: int = 0,
     ) -> None:
         self.structural_fingerprint = structural_fingerprint
         self.block_configs = block_configs
         self.merged_state = merged_state
         self.storage_dtype = storage_dtype
+        self.loader_bytes = loader_bytes
 
 
 # LRU-1 cache: at most one entry keyed by structural fingerprint
@@ -558,6 +563,11 @@ class WIDENExitNode:
                 widen, base_identity, lora_stats
             )
             current_block_configs = collect_block_configs(widen)
+            # AC: @cache-loader-metadata ac-1, ac-3
+            # Measure loader bytes at time of evaluation (before cache lookup).
+            current_loader_bytes = loader.loaded_bytes + sum(
+                ml.loaded_bytes for ml in model_loaders.values()
+            )
             # AC: @incremental-block-recompute ac-18
             # When enable_cache=False, skip cache lookup entirely.
             cached_entry = _incremental_cache.get(structural_fp) if enable_cache else None
@@ -610,6 +620,16 @@ class WIDENExitNode:
                                 key_shapes=key_shapes,
                             )
                             incremental_hit = True
+
+            # AC: @cache-loader-metadata ac-2
+            # Log cached loader_bytes on any incremental cache hit.
+            if incremental_hit and cached_entry is not None:
+                cached_lb = cached_entry.loader_bytes
+                logger.info(
+                    "Incremental cache hit: cached loader_bytes=%d bytes (%.1f MB)",
+                    cached_lb,
+                    cached_lb / (1024 * 1024),
+                )
 
             if not incremental_hit:
                 merged_state = {}
@@ -778,11 +798,13 @@ class WIDENExitNode:
                     # Evict instead of storing — RAM is too tight
                     _incremental_cache.clear()
                 else:
+                    # AC: @cache-loader-metadata ac-1, ac-3
                     new_entry = _CacheEntry(
                         structural_fingerprint=structural_fp,
                         block_configs=current_block_configs,
                         merged_state=dict(merged_state),
                         storage_dtype=storage_dtype,
+                        loader_bytes=current_loader_bytes,
                     )
                     _incremental_cache.clear()
                     _incremental_cache[structural_fp] = new_entry
