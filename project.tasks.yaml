@@ -5584,6 +5584,7 @@
         incremental estimate <= full estimate. AC annotation: # AC: @accurate-ram-preflight ac-N"
       supersedes: null
   todos: []
+  automation: eligible
 - _ulid: 01KHQGTT5RK2RZH2YMX78CAS0F
   slugs:
     - implement-loader-memory-measurement
