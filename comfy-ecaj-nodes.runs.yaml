@@ -2517,7 +2517,7 @@ runs:
   - _ulid: 01KHQQVEXBPBXF3D5ZZAXFKK59
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-18T06:43:56.972Z
     step_results:
@@ -2538,5 +2538,18 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-18T06:44:16.876Z
-        completed_at: 2026-02-18T06:44:16.876Z
+        completed_at: 2026-02-18T06:44:29.993Z
+        notes: |-
+          No high-confidence friction points to capture:
+          - FakeLoader missing loaded_bytes: one-off, not systemic
+          - Codex shell escaping: Codex-side issue, not actionable
+
+          Success pattern already tracked:
+          - 01KHQP42 covers parallel codex + pr-review pattern
+
+          Nothing new to capture this session.
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-18T06:44:29.993Z
+        completed_at: 2026-02-18T06:44:29.993Z
     initiated_by: "@claude"
