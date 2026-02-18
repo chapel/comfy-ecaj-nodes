@@ -718,6 +718,86 @@ class TestExitNodeIncrementalCache:
                     entry.merged_state[k], cached_state[k]
                 ), f"Unchanged key {k} should match cache"
 
+    # AC: @accurate-ram-preflight ac-2
+    def test_incremental_preflight_uses_subset_bytes(self, mock_model_patcher):
+        """Incremental recompute preflight uses M (changed) bytes, not N (full)."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        bc_old = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5), ("MID", 1.0)))
+        bc_new = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.7), ("MID", 1.0)))
+
+        recipe_new = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc_new,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+        recipe_old = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc_old,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # Pre-populate cache with full state (N bytes)
+        fp = "test_fingerprint"
+        _incremental_cache[fp] = _CacheEntry(
+            structural_fingerprint=fp,
+            block_configs=collect_block_configs(recipe_old),
+            merged_state={k: torch.randn(4, 4) for k in keys},
+            storage_dtype=torch.float32,
+        )
+
+        mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe_new,
+        )
+        mock_loader.loaded_bytes = 0
+
+        # Track which keys end up in batch_groups for incremental recompute
+        from lib.batch_groups import OpSignature
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        def track_batch_groups(key_list, *args, **kwargs):
+            return {sig: list(key_list)}
+
+        new_results = {k: torch.randn(4, 4) for k in keys}
+
+        preflight_calls = []
+
+        def capture_preflight(**kwargs):
+            preflight_calls.append(kwargs)
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compute_structural_fingerprint", return_value=fp),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.compile_batch_groups", side_effect=track_batch_groups),
+            patch("nodes.exit.chunked_evaluation",
+                  side_effect=lambda keys, **kw: {k: new_results[k] for k in keys}),
+            patch("nodes.exit.check_ram_preflight", side_effect=capture_preflight),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe_new)
+
+        assert len(preflight_calls) == 1
+        # Full state bytes (N) = sum of all keys
+        state = mock_model_patcher.model_state_dict()
+        full_bytes = sum(t.nelement() * t.element_size() for t in state.values())
+        # Preflight merged_state_bytes (M) should be <= full bytes
+        # and for partial recompute should be strictly less
+        preflight_bytes = preflight_calls[0]["merged_state_bytes"]
+        assert preflight_bytes <= full_bytes
+        # At least one key wasn't changed (MID unchanged), so M < N
+        assert preflight_bytes < full_bytes
+
     # AC: @incremental-block-recompute ac-4
     def test_structural_change_full_recompute(self, mock_model_patcher):
         """Structural recipe change → full recomputation, cache replaced."""

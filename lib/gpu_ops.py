@@ -95,8 +95,7 @@ def estimate_peak_ram(
         Estimated additional RAM needed in bytes
     """
     # AC: @accurate-ram-preflight ac-3
-    if loader_bytes:
-        logger.debug("Preflight loader_bytes=%d (already in MemAvailable)", loader_bytes)
+    logger.debug("Preflight loader_bytes=%d (already in MemAvailable)", loader_bytes)
 
     # pin_memory allocates a copy: original stack + pinned = 2x
     chunk_pinned_cost = 2 * worst_chunk_bytes

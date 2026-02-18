@@ -1073,12 +1073,17 @@ class TestAccurateRamPreflight:
 
         from lib.gpu_ops import estimate_peak_ram
 
-        without_loader = estimate_peak_ram(
-            merged_state_bytes=1024**3,
-            worst_chunk_bytes=4 * 1024**2,
-            save_model=False,
-            loader_bytes=0,
-        )
+        with caplog.at_level(logging.DEBUG, logger="ecaj.gpu_ops"):
+            without_loader = estimate_peak_ram(
+                merged_state_bytes=1024**3,
+                worst_chunk_bytes=4 * 1024**2,
+                save_model=False,
+                loader_bytes=0,
+            )
+        # Zero value is still logged
+        assert "loader_bytes=0" in caplog.text
+
+        caplog.clear()
         with caplog.at_level(logging.DEBUG, logger="ecaj.gpu_ops"):
             with_loader = estimate_peak_ram(
                 merged_state_bytes=1024**3,
