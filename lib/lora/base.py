@@ -108,6 +108,16 @@ class LoRALoader(ABC):
         """
         raise NotImplementedError
 
+    @property
+    @abstractmethod
+    def loaded_bytes(self) -> int:
+        """Return total bytes of tensors held in memory by this loader.
+
+        Returns the sum of tensor.nbytes for all tensors currently held.
+        Returns 0 if no files have been loaded or after cleanup.
+        """
+        raise NotImplementedError
+
     @abstractmethod
     def cleanup(self) -> None:
         """Release resources held by the loader.

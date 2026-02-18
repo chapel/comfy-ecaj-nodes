@@ -645,3 +645,10 @@ class TestFluxKeyNormalization:
             assert len(tensors) == 3
             for t in tensors:
                 assert isinstance(t, torch.Tensor)
+
+
+# AC: @loader-memory-measurement ac-4
+def test_model_loader_loaded_bytes_is_zero(sdxl_checkpoint_path: str) -> None:
+    """ModelLoader.loaded_bytes returns 0 because it uses memory-mapped streaming."""
+    with ModelLoader(sdxl_checkpoint_path) as loader:
+        assert loader.loaded_bytes == 0

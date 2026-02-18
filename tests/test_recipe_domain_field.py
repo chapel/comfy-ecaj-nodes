@@ -196,6 +196,10 @@ class TestAC5GetLoaderCLIPDispatch:
             def get_delta_specs(self, keys, key_indices, set_id=None):
                 return []
 
+            @property
+            def loaded_bytes(self):
+                return 0
+
             def cleanup(self):
                 pass
 

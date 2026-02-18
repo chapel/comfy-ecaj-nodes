@@ -351,6 +351,10 @@ class TestAC3PluggableDesign:
             def get_delta_specs(self, keys, key_indices, set_id=None) -> list[DeltaSpec]:
                 return []
 
+            @property
+            def loaded_bytes(self) -> int:
+                return 0
+
             def cleanup(self) -> None:
                 pass
 
@@ -991,3 +995,136 @@ class TestFluxLoader:
         # Cleanup
         loader.cleanup()
         assert len(loader.affected_keys) == 0
+
+
+# ---------------------------------------------------------------------------
+# loaded_bytes tests
+# ---------------------------------------------------------------------------
+
+
+class TestLoadedBytes:
+    """Tests for loaded_bytes property across all loader types."""
+
+    # AC: @loader-memory-measurement ac-1
+    def test_sdxl_loaded_bytes_after_load(self, sdxl_lora_file: str):
+        """SDXLLoader loaded_bytes returns sum of tensor.nbytes after loading."""
+        loader = SDXLLoader()
+        loader.load(sdxl_lora_file)
+        assert loader.loaded_bytes > 0
+
+    # AC: @loader-memory-measurement ac-1
+    def test_zimage_loaded_bytes_after_load(self, zimage_lora_file: str):
+        """ZImageLoader loaded_bytes returns sum of tensor.nbytes after loading."""
+        loader = ZImageLoader()
+        loader.load(zimage_lora_file)
+        assert loader.loaded_bytes > 0
+
+    # AC: @loader-memory-measurement ac-1
+    def test_qwen_loaded_bytes_after_load(self, qwen_diffusers_lora_file: str):
+        """QwenLoader loaded_bytes returns sum of tensor.nbytes after loading."""
+        loader = QwenLoader()
+        loader.load(qwen_diffusers_lora_file)
+        assert loader.loaded_bytes > 0
+
+    # AC: @loader-memory-measurement ac-1
+    def test_flux_loaded_bytes_after_load(self, flux_double_block_lora_file: str):
+        """FluxLoader loaded_bytes returns sum of tensor.nbytes after loading."""
+        loader = FluxLoader()
+        loader.load(flux_double_block_lora_file)
+        assert loader.loaded_bytes > 0
+
+    # AC: @loader-memory-measurement ac-2
+    def test_sdxl_loaded_bytes_zero_before_load(self):
+        """SDXLLoader loaded_bytes returns 0 before any files are loaded."""
+        loader = SDXLLoader()
+        assert loader.loaded_bytes == 0
+
+    # AC: @loader-memory-measurement ac-2
+    def test_flux_loaded_bytes_zero_before_load(self):
+        """FluxLoader loaded_bytes returns 0 before any files are loaded."""
+        loader = FluxLoader()
+        assert loader.loaded_bytes == 0
+
+    # AC: @loader-memory-measurement ac-3
+    def test_sdxl_loaded_bytes_two_files(self, sdxl_lora_file: str):
+        """Loading two files accumulates loaded_bytes from both."""
+        loader = SDXLLoader()
+        loader.load(sdxl_lora_file, set_id="set1")
+        bytes_after_first = loader.loaded_bytes
+        loader.load(sdxl_lora_file, set_id="set2")
+        bytes_after_second = loader.loaded_bytes
+        assert bytes_after_second == bytes_after_first * 2
+
+    # AC: @loader-memory-measurement ac-3
+    def test_sdxl_loaded_bytes_exact_value(self):
+        """loaded_bytes equals exact sum of tensor.nbytes for known tensor sizes."""
+        with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+            up = torch.zeros(64, 8)   # 64*8*4 = 2048 bytes (float32)
+            down = torch.zeros(8, 32) # 8*32*4 = 1024 bytes (float32)
+            tensors = {
+                "lora_unet_input_blocks_0_0_proj_in.lora_up.weight": up,
+                "lora_unet_input_blocks_0_0_proj_in.lora_down.weight": down,
+            }
+            save_file(tensors, f.name)
+
+            loader = SDXLLoader()
+            loader.load(f.name)
+            assert loader.loaded_bytes == up.nbytes + down.nbytes  # 3072
+
+    # AC: @loader-memory-measurement ac-6
+    def test_sdxl_loaded_bytes_zero_after_cleanup(self, sdxl_lora_file: str):
+        """loaded_bytes returns 0 after cleanup releases all tensors."""
+        loader = SDXLLoader()
+        loader.load(sdxl_lora_file)
+        assert loader.loaded_bytes > 0
+        loader.cleanup()
+        assert loader.loaded_bytes == 0
+
+    # AC: @loader-memory-measurement ac-6
+    def test_flux_loaded_bytes_zero_after_cleanup(
+        self, flux_double_block_lora_file: str
+    ):
+        """FluxLoader loaded_bytes returns 0 after cleanup."""
+        loader = FluxLoader()
+        loader.load(flux_double_block_lora_file)
+        assert loader.loaded_bytes > 0
+        loader.cleanup()
+        assert loader.loaded_bytes == 0
+
+    # AC: @loader-memory-measurement ac-7
+    def test_flux_loaded_bytes_includes_qkv_data(
+        self, flux_double_block_lora_file: str
+    ):
+        """FluxLoader loaded_bytes includes tensors from _qkv_data_by_set."""
+        loader = FluxLoader()
+        loader.load(flux_double_block_lora_file)
+        # Double block LoRA has only QKV data (no standard data)
+        # so loaded_bytes must be > 0, proving QKV is counted
+        assert loader.loaded_bytes > 0
+        # Verify the QKV data structures have content
+        assert len(loader._qkv_data_by_set) > 0
+
+    # AC: @loader-memory-measurement ac-7
+    def test_zimage_loaded_bytes_includes_both_structures(
+        self, zimage_lora_file: str
+    ):
+        """ZImageLoader loaded_bytes includes both _lora_data and _qkv_data."""
+        loader = ZImageLoader()
+        loader.load(zimage_lora_file)
+        # Z-Image fixture has both standard (ff.linear_1) and QKV tensors
+        assert len(loader._lora_data_by_set) > 0
+        assert len(loader._qkv_data_by_set) > 0
+        # loaded_bytes should include both
+        std_bytes = sum(
+            up.nbytes + down.nbytes
+            for key_data in loader._lora_data_by_set.values()
+            for entries in key_data.values()
+            for up, down, _ in entries
+        )
+        qkv_bytes = sum(
+            up.nbytes + down.nbytes
+            for key_data in loader._qkv_data_by_set.values()
+            for entries in key_data.values()
+            for up, down, _, _comp in entries
+        )
+        assert loader.loaded_bytes == std_bytes + qkv_bytes

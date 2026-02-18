@@ -348,6 +348,20 @@ class ZImageLoader(LoRALoader):
         """
         return self._affected_by_set.get(set_id, set())
 
+    @property
+    def loaded_bytes(self) -> int:
+        """Return total bytes of tensors held in memory."""
+        total = 0
+        for key_data in self._lora_data_by_set.values():
+            for entries in key_data.values():
+                for up, down, _scale in entries:
+                    total += up.nbytes + down.nbytes
+        for key_data in self._qkv_data_by_set.values():
+            for entries in key_data.values():
+                for up, down, _scale, _comp in entries:
+                    total += up.nbytes + down.nbytes
+        return total
+
     def get_delta_specs(
         self,
         keys: Sequence[str],
