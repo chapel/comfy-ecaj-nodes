@@ -1040,7 +1040,7 @@ features:
         created: 2026-02-18T04:41:15.493Z
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
   - _ulid: 01KH4HA44TE1N5S7YYJJZK082G
     slugs:
       - per-block-control
