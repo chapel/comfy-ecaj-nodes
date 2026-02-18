@@ -605,6 +605,37 @@ features:
         status:
           maturity: draft
           implementation: implemented
+        requirements:
+          - _ulid: 01KHQGTT1A1597XN03DYYPM5PM
+            slugs:
+              - cache-loader-metadata
+            title: Cache Loader Metadata
+            type: requirement
+            tags: []
+            acceptance_criteria:
+              - id: ac-1
+                given: GPU evaluation completes and cache entry is stored
+                when: _CacheEntry is created
+                then: loader_bytes field contains the measured sum of all loader loaded_bytes at time of evaluation
+              - id: ac-2
+                given: an incremental cache hit occurs with stored loader_bytes of L
+                when: the recompute plan is logged
+                then: L is included in the log message for diagnostic purposes
+              - id: ac-4
+                given: an incremental cache hit occurs with stored loader_bytes of L
+                when: preflight check runs for the recompute subset
+                then: L does not affect the peak RAM estimate returned by estimate_peak_ram
+              - id: ac-3
+                given: cache entry exists with loader_bytes from a previous run
+                when: current run loads different LoRA files with different sizes
+                then: the new cache entry stores the new measured loader_bytes, not the old value
+            depends_on: []
+            implements: []
+            relates_to: []
+            tests: []
+            traits: []
+            notes: []
+            created: 2026-02-18T04:41:15.562Z
     status:
       maturity: draft
       implementation: implemented
@@ -827,6 +858,50 @@ features:
         status:
           maturity: draft
           implementation: implemented
+      - _ulid: 01KHQGTT070XQA57FZQQ4JYYHP
+        slugs:
+          - loader-memory-measurement
+        title: Loader Memory Measurement
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: a LoRA loader has loaded one or more LoRA files
+            when: loaded_bytes property is accessed
+            then: returns the sum of tensor.nbytes for all tensors held in memory by the loader
+          - id: ac-2
+            given: a LoRA loader has not loaded any files
+            when: loaded_bytes property is accessed
+            then: returns 0
+          - id: ac-3
+            given: a LoRA loader loads two LoRA files with known tensor sizes
+            when: loaded_bytes is accessed after both loads
+            then: the value equals the sum of tensor.nbytes for all tensors held across both files including up,
+              down, and any QKV-fused or LoKr component tensors
+          - id: ac-4
+            given: a ModelLoader is open with a safetensors file
+            when: loaded_bytes property is accessed
+            then: returns 0 because ModelLoader uses memory-mapped streaming access
+          - id: ac-5
+            given: a CLIPModelLoader is open with a safetensors file
+            when: loaded_bytes property is accessed
+            then: returns 0 because CLIPModelLoader uses memory-mapped streaming access
+          - id: ac-6
+            given: a LoRA loader has loaded files and cleanup is called
+            when: loaded_bytes is accessed after cleanup
+            then: returns 0 because all tensors have been released
+          - id: ac-7
+            given: a FluxLoader or ZImageLoader has loaded LoRA files containing both standard up/down pairs and
+              QKV-fused tensors
+            when: loaded_bytes is accessed
+            then: the value includes tensor.nbytes from both _lora_data_by_set and _qkv_data_by_set structures
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-18T04:41:15.527Z
     status:
       maturity: draft
       implementation: implemented
@@ -909,6 +984,54 @@ features:
     status:
       maturity: draft
       implementation: implemented
+    requirements:
+      - _ulid: 01KHQGTSZ5VPXE3RKPSBNQFQA5
+        slugs:
+          - accurate-ram-preflight
+        title: Accurate RAM Preflight Estimation
+        type: requirement
+        tags: []
+        acceptance_criteria:
+          - id: ac-1
+            given: LoRA loaders are populated before preflight check runs
+            when: estimate_peak_ram calculates peak new RAM
+            then: loader memory is not added to the estimate because it is already reflected in MemAvailable
+          - id: ac-2
+            given: incremental cache holds a previous merged_state of N bytes
+            when: one block config changes requiring recompute of M bytes where M is much less than N
+            then: preflight estimates peak new allocation as M bytes plus chunk and save costs, not N bytes
+          - id: ac-3
+            given: estimate_peak_ram receives measured loader_bytes
+            when: the estimate is computed
+            then: |
+              the ecaj.gpu_ops logger emits a DEBUG message containing the loader_bytes value,
+              and the returned peak estimate is identical regardless of whether loader_bytes is 0
+              or any positive value
+          - id: ac-4
+            given: save_model is True
+            when: estimate_peak_ram calculates peak
+            then: save overhead is computed as 5 percent of merged_state_bytes (streaming one tensor at a time)
+          - id: ac-5
+            given: save_model is False
+            when: estimate_peak_ram calculates peak
+            then: no save overhead is added to the estimate
+          - id: ac-6
+            given: estimate_peak_ram is called with merged_state_bytes=M_full for full recompute and
+              merged_state_bytes=M_sub for incremental recompute where M_sub is less than M_full,
+              with all other parameters identical
+            when: both estimates are compared
+            then: the incremental estimate is strictly less than or equal to the full recompute estimate
+          - id: ac-7
+            given: clip_exit node runs preflight
+            when: estimate_peak_ram is called
+            then: the same corrected formula is used as in the diffusion exit node
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        notes: []
+        created: 2026-02-18T04:41:15.493Z
   - _ulid: 01KH4HA44TE1N5S7YYJJZK082G
     slugs:
       - per-block-control
