@@ -5659,3 +5659,4 @@
         loader_bytes field population and logging. AC annotation: # AC: @cache-loader-metadata ac-N"
       supersedes: null
   todos: []
+  automation: eligible
