@@ -5650,6 +5650,7 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-18T04:41:15.747Z
+  started_at: 2026-02-18T06:01:42.427Z
   notes:
     - _ulid: 01KHQGTT73607RV2FVRTKB41M5
       created_at: 2026-02-18T04:41:15.747Z
@@ -5668,6 +5669,13 @@
       content: "Test guidance: Add tests to tests/test_incremental_recompute.py. Test _CacheEntry
         loader_bytes field population and logging. AC annotation: # AC: @cache-loader-metadata ac-N"
       supersedes: null
+    - _ulid: 01KHQNM8T1NTDAKJG6Y9DSFKG2
+      created_at: 2026-02-18T06:05:04.193Z
+      author: "@claude"
+      content: "Implementation complete: Added loader_bytes field to _CacheEntry (default 0). Measured
+        from loader.loaded_bytes + sum(model_loader.loaded_bytes) before cache lookup. Logged on
+        incremental cache hits. Preflight check confirmed to not reference loader_bytes (AC-4 by
+        design). 4 tests added to TestCacheLoaderMetadata."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-18T06:01:42.427Z
