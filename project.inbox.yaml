@@ -95,3 +95,10 @@ inbox:
       - reflection
       - kspec
     added_by: "@claude"
+  - _ulid: 01KHQMZ3CJSG3QGG793ED5K9G1
+    text: Add loaded_bytes test for LoKr tensor counting when LoKr storage is introduced. AC-3 of
+      @loader-memory-measurement mentions LoKr component tensors but current loaders don't store
+      LoKr tensors separately — when they do, add an explicit known-size byte-accounting test.
+    created_at: 2026-02-18T05:53:30.514Z
+    tags: []
+    added_by: "@claude"
