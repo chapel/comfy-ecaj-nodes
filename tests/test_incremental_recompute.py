@@ -482,6 +482,7 @@ def _make_exit_mocks(
     mock_loader.affected_keys = set(keys_to_process)
     mock_loader.affected_keys_for_set = MagicMock(return_value=set(keys_to_process))
     mock_loader.cleanup = MagicMock()
+    mock_loader.loaded_bytes = 0
 
     # Build set_affected from actual RecipeLoRA objects in the recipe tree
     set_affected = {}
@@ -1241,3 +1242,231 @@ class TestEdgeCases:
         # base_state now aliases the same tensor — verify cache is unmodified
         assert torch.equal(entry.merged_state[key], expected)
         assert entry.merged_state[key] is merged_tensor
+
+
+# ===========================================================================
+# Cache Loader Metadata — @cache-loader-metadata
+# ===========================================================================
+
+
+class TestCacheLoaderMetadata:
+    """Tests for loader_bytes metadata stored in _CacheEntry."""
+
+    def setup_method(self):
+        _incremental_cache.clear()
+
+    def teardown_method(self):
+        _incremental_cache.clear()
+
+    # AC: @cache-loader-metadata ac-1
+    def test_cache_entry_stores_loader_bytes(self, mock_model_patcher):
+        """_CacheEntry.loader_bytes contains measured sum of all loader loaded_bytes."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        bc = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+        mock_loader.loaded_bytes = 1024 * 1024  # 1 MB
+
+        merged = {k: torch.randn(4, 4) for k in keys}
+        from lib.batch_groups import OpSignature
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation", return_value=merged),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe)
+
+        assert len(_incremental_cache) == 1
+        entry = next(iter(_incremental_cache.values()))
+        assert entry.loader_bytes == 1024 * 1024
+
+    # AC: @cache-loader-metadata ac-2
+    def test_cache_hit_logs_loader_bytes(self, mock_model_patcher, caplog):
+        """Incremental cache hit logs cached loader_bytes."""
+        import logging
+
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        bc = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # Pre-populate cache with loader_bytes=2048
+        fp = "test_fingerprint"
+        _incremental_cache[fp] = _CacheEntry(
+            structural_fingerprint=fp,
+            block_configs=collect_block_configs(recipe),
+            merged_state={k: torch.randn(4, 4) for k in keys},
+            storage_dtype=torch.float32,
+            loader_bytes=2048,
+        )
+
+        mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compute_structural_fingerprint", return_value=fp),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.chunked_evaluation", MagicMock()),
+            patch("nodes.exit.compile_batch_groups", return_value={}),
+            caplog.at_level(logging.INFO, logger="ecaj.exit"),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe)
+
+        assert any(
+            "loader_bytes=2048" in record.message
+            for record in caplog.records
+        ), f"Expected loader_bytes=2048 in log, got: {[r.message for r in caplog.records]}"
+
+    # AC: @cache-loader-metadata ac-3
+    def test_new_run_stores_new_loader_bytes(self, mock_model_patcher):
+        """New run with different loaders stores new loader_bytes, not old."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        bc = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # Pre-populate cache with old loader_bytes
+        old_fp = "old_fingerprint"
+        _incremental_cache[old_fp] = _CacheEntry(
+            structural_fingerprint=old_fp,
+            block_configs=collect_block_configs(recipe),
+            merged_state={k: torch.randn(4, 4) for k in keys},
+            storage_dtype=torch.float32,
+            loader_bytes=999,
+        )
+
+        mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+        mock_loader.loaded_bytes = 5000  # Different loader size
+
+        merged = {k: torch.randn(4, 4) for k in keys}
+        from lib.batch_groups import OpSignature
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation", return_value=merged),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.compute_structural_fingerprint", return_value="new_fp"),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe)
+
+        assert len(_incremental_cache) == 1
+        entry = next(iter(_incremental_cache.values()))
+        assert entry.loader_bytes == 5000, f"Expected 5000, got {entry.loader_bytes}"
+
+    # AC: @cache-loader-metadata ac-4
+    def test_loader_bytes_not_in_preflight_estimate(self, mock_model_patcher):
+        """Cached loader_bytes does not affect preflight RAM estimate."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        bc = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # Pre-populate cache with LARGE loader_bytes — should not affect preflight
+        fp = "test_fingerprint"
+        bc_changed = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.9),))
+        recipe_changed = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(
+                loras=({"path": "lora_a.safetensors", "strength": 1.0},),
+                block_config=bc_changed,
+            ),
+            backbone=None,
+            t_factor=1.0,
+        )
+        _incremental_cache[fp] = _CacheEntry(
+            structural_fingerprint=fp,
+            block_configs=collect_block_configs(recipe_changed),
+            merged_state={k: torch.randn(4, 4) for k in keys},
+            storage_dtype=torch.float32,
+            loader_bytes=999_999_999_999,  # ~1 TB — absurd value
+        )
+
+        mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
+            mock_model_patcher, keys, recipe=recipe,
+        )
+        mock_loader.loaded_bytes = 100
+
+        merged = {k: torch.randn(4, 4) for k in keys}
+        from lib.batch_groups import OpSignature
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        preflight_calls = []
+
+        def capture_preflight(**kwargs):
+            preflight_calls.append(kwargs)
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation", return_value=merged),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.compute_structural_fingerprint", return_value="different_fp"),
+            patch("nodes.exit.check_ram_preflight", side_effect=capture_preflight),
+        ):
+            node = WIDENExitNode()
+            node.execute(recipe)
+
+        # Preflight was called, and none of its arguments reference loader_bytes
+        assert len(preflight_calls) == 1
+        call_kwargs = preflight_calls[0]
+        # The preflight args should be: merged_state_bytes, n_models, worst_chunk_bytes
+        # None should be inflated by the 1TB loader_bytes
+        assert "loader_bytes" not in call_kwargs
+        # merged_state_bytes should be reasonable (based on key sizes, not loader data)
+        assert call_kwargs["merged_state_bytes"] < 999_999_999_999
