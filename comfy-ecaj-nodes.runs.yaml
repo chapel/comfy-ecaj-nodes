@@ -2517,7 +2517,7 @@ runs:
   - _ulid: 01KHQQVEXBPBXF3D5ZZAXFKK59
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 2
+    current_step: 3
     total_steps: 4
     started_at: 2026-02-18T06:43:56.972Z
     step_results:
@@ -2551,5 +2551,10 @@ runs:
       - step_index: 2
         status: completed
         started_at: 2026-02-18T06:44:29.993Z
-        completed_at: 2026-02-18T06:44:29.993Z
+        completed_at: 2026-02-18T06:44:35.653Z
+        notes: All items either one-off or already tracked (01KHQP42). Nothing to capture.
+      - step_index: 3
+        status: completed
+        started_at: 2026-02-18T06:44:35.653Z
+        completed_at: 2026-02-18T06:44:35.653Z
     initiated_by: "@claude"
