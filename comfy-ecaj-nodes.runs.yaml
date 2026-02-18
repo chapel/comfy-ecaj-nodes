@@ -2422,7 +2422,7 @@ runs:
   - _ulid: 01KHQN6QA71XXGAAEP5ZYTZFF8
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 3
+    current_step: 4
     total_steps: 6
     started_at: 2026-02-18T05:57:40.295Z
     step_results:
@@ -2458,5 +2458,12 @@ runs:
       - step_index: 3
         status: completed
         started_at: 2026-02-18T05:58:12.352Z
-        completed_at: 2026-02-18T05:58:12.352Z
+        completed_at: 2026-02-18T05:58:18.951Z
+        notes: "One improvement: Add 'repo uses merge commits only (no squash)' to MEMORY.md so PR merge
+          commands use --merge directly. Scope: tiny (one line in memory). No other untracked
+          friction worth capturing."
+      - step_index: 4
+        status: completed
+        started_at: 2026-02-18T05:58:18.951Z
+        completed_at: 2026-02-18T05:58:18.951Z
     initiated_by: "@claude"
