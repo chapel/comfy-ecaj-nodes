@@ -621,6 +621,10 @@ features:
                 given: an incremental cache hit occurs with stored loader_bytes of L
                 when: the recompute plan is logged
                 then: L is included in the log message for diagnostic purposes
+              - id: ac-3
+                given: cache entry exists with loader_bytes from a previous run
+                when: current run loads different LoRA files with different sizes
+                then: the new cache entry stores the new measured loader_bytes, not the old value
             depends_on: []
             implements: []
             relates_to: []
