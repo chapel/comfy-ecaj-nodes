@@ -238,6 +238,11 @@ class CLIPModelLoader:
         return self._affected_keys
 
     @property
+    def loaded_bytes(self) -> int:
+        """Return 0 because CLIPModelLoader uses memory-mapped streaming access."""
+        return 0
+
+    @property
     def has_clip_l(self) -> bool:
         """Return True if CLIP-L encoder keys are present."""
         return self._has_clip_l

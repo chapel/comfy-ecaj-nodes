@@ -492,3 +492,10 @@ class TestEdgeCases:
         with CLIPModelLoader(sdxl_checkpoint_path) as loader:
             tensors = loader.get_weights([])
             assert tensors == []
+
+
+# AC: @loader-memory-measurement ac-5
+def test_clip_model_loader_loaded_bytes_is_zero(sdxl_checkpoint_path: str) -> None:
+    """CLIPModelLoader.loaded_bytes returns 0 because it uses memory-mapped streaming."""
+    with CLIPModelLoader(sdxl_checkpoint_path) as loader:
+        assert loader.loaded_bytes == 0

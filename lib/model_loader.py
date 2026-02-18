@@ -217,6 +217,11 @@ class ModelLoader:
         return self._affected_keys
 
     @property
+    def loaded_bytes(self) -> int:
+        """Return 0 because ModelLoader uses memory-mapped streaming access."""
+        return 0
+
+    @property
     def arch(self) -> str | None:
         """Return detected architecture or None if unknown.
 
