@@ -970,7 +970,6 @@ class TestPreflightRamCheck:
             with pytest.raises(RuntimeError, match="Insufficient system RAM"):
                 check_ram_preflight(
                     merged_state_bytes=2 * 1024**3,  # 2 GB base state
-                    n_models=2,
                     worst_chunk_bytes=1 * 1024**3,  # 1 GB chunk
                     save_model=False,
                 )
@@ -984,7 +983,6 @@ class TestPreflightRamCheck:
         with patch("lib.gpu_ops.get_available_ram_bytes", return_value=100 * 1024**3):
             check_ram_preflight(
                 merged_state_bytes=1024,
-                n_models=1,
                 worst_chunk_bytes=1024,
                 save_model=False,
             )
@@ -998,7 +996,6 @@ class TestPreflightRamCheck:
             with pytest.raises(RuntimeError, match=r"\d+ MB available.*\d+ MB needed"):
                 check_ram_preflight(
                     merged_state_bytes=2 * 1024**3,
-                    n_models=2,
                     worst_chunk_bytes=1 * 1024**3,
                     save_model=True,
                 )
@@ -1010,17 +1007,196 @@ class TestPreflightRamCheck:
 
         base = estimate_peak_ram(
             merged_state_bytes=1024**3,
-            n_models=2,
             worst_chunk_bytes=4 * 1024**2,
             save_model=False,
         )
         with_save = estimate_peak_ram(
             merged_state_bytes=1024**3,
-            n_models=2,
             worst_chunk_bytes=4 * 1024**2,
             save_model=True,
         )
         assert with_save > base
+
+
+# =============================================================================
+# Accurate RAM Preflight Estimation
+# =============================================================================
+
+
+class TestAccurateRamPreflight:
+    """Tests for accurate RAM preflight estimation.
+
+    Validates that the corrected formula does not include loader memory
+    (already reflected in MemAvailable) and properly handles incremental
+    recompute scenarios.
+    """
+
+    # AC: @accurate-ram-preflight ac-1
+    def test_loader_memory_not_in_estimate(self):
+        """Loader memory is already in MemAvailable, not added to estimate."""
+        from lib.gpu_ops import estimate_peak_ram
+
+        result = estimate_peak_ram(
+            merged_state_bytes=1024**3,
+            worst_chunk_bytes=4 * 1024**2,
+            save_model=False,
+            loader_bytes=500 * 1024**2,  # 500 MB of loaders
+        )
+        # Formula: merged_state_bytes + 2*worst_chunk_bytes (no loader term)
+        expected = 1024**3 + 2 * 4 * 1024**2
+        assert result == expected
+
+    # AC: @accurate-ram-preflight ac-2
+    def test_incremental_estimates_less_than_full(self):
+        """Incremental recompute of M bytes estimates less than full N bytes."""
+        from lib.gpu_ops import estimate_peak_ram
+
+        full_bytes = 1024**3  # 1 GB full recompute
+        incremental_bytes = 100 * 1024**2  # 100 MB incremental
+
+        full_estimate = estimate_peak_ram(
+            merged_state_bytes=full_bytes,
+            worst_chunk_bytes=4 * 1024**2,
+            save_model=True,
+        )
+        incremental_estimate = estimate_peak_ram(
+            merged_state_bytes=incremental_bytes,
+            worst_chunk_bytes=4 * 1024**2,
+            save_model=True,
+        )
+        assert incremental_estimate < full_estimate
+
+    # AC: @accurate-ram-preflight ac-3
+    def test_loader_bytes_logged_but_not_in_estimate(self, caplog):
+        """loader_bytes is logged at DEBUG but does not affect the estimate."""
+        import logging
+
+        from lib.gpu_ops import estimate_peak_ram
+
+        without_loader = estimate_peak_ram(
+            merged_state_bytes=1024**3,
+            worst_chunk_bytes=4 * 1024**2,
+            save_model=False,
+            loader_bytes=0,
+        )
+        with caplog.at_level(logging.DEBUG, logger="ecaj.gpu_ops"):
+            with_loader = estimate_peak_ram(
+                merged_state_bytes=1024**3,
+                worst_chunk_bytes=4 * 1024**2,
+                save_model=False,
+                loader_bytes=10**9,
+            )
+        assert with_loader == without_loader
+        assert "loader_bytes=1000000000" in caplog.text
+
+    # AC: @accurate-ram-preflight ac-4
+    def test_save_overhead_is_5_percent(self):
+        """Save overhead is exactly 5% of merged_state_bytes."""
+        from lib.gpu_ops import estimate_peak_ram
+
+        merged = 1000 * 1024**2  # 1000 MB
+        no_save = estimate_peak_ram(
+            merged_state_bytes=merged,
+            worst_chunk_bytes=0,
+            save_model=False,
+        )
+        with_save = estimate_peak_ram(
+            merged_state_bytes=merged,
+            worst_chunk_bytes=0,
+            save_model=True,
+        )
+        assert with_save - no_save == int(merged * 0.05)
+
+    # AC: @accurate-ram-preflight ac-5
+    def test_no_save_overhead_when_false(self):
+        """No save overhead is added when save_model=False."""
+        from lib.gpu_ops import estimate_peak_ram
+
+        merged = 1024**3
+        chunk = 4 * 1024**2
+        result = estimate_peak_ram(
+            merged_state_bytes=merged,
+            worst_chunk_bytes=chunk,
+            save_model=False,
+        )
+        # Exact formula: merged + 2*chunk, no save term
+        assert result == merged + 2 * chunk
+
+    # AC: @accurate-ram-preflight ac-6
+    def test_incremental_lte_full_recompute(self):
+        """Incremental estimate is strictly <= full recompute estimate."""
+        from lib.gpu_ops import estimate_peak_ram
+
+        chunk = 4 * 1024**2
+        for save_model in [True, False]:
+            full = estimate_peak_ram(
+                merged_state_bytes=1024**3,
+                worst_chunk_bytes=chunk,
+                save_model=save_model,
+            )
+            incremental = estimate_peak_ram(
+                merged_state_bytes=100 * 1024**2,
+                worst_chunk_bytes=chunk,
+                save_model=save_model,
+            )
+            assert incremental <= full
+
+    # AC: @accurate-ram-preflight ac-7
+    def test_clip_exit_uses_corrected_formula(self):
+        """CLIP exit node calls check_ram_preflight with same corrected signature."""
+        from nodes.clip_exit import WIDENCLIPExitNode
+
+        mock_clip = MagicMock()
+        mock_patcher = MagicMock()
+        state = {
+            "clip_l.transformer.text_model.weight": torch.randn(4, 4, dtype=torch.float32),
+        }
+        mock_patcher.model_state_dict.return_value = state
+        mock_clip.patcher = mock_patcher
+        mock_clip.clone.return_value = MagicMock()
+
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_clip, arch="sdxl", domain="clip"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        mock_loader = MagicMock()
+        mock_loader.cleanup = MagicMock()
+        mock_loader.loaded_bytes = 100 * 1024**2
+        mock_analyze = MagicMock(
+            arch="sdxl",
+            loader=mock_loader,
+            set_affected={str(id(None)): set(state.keys())},
+            affected_keys=set(state.keys()),
+        )
+        mock_model_analysis = MagicMock()
+        mock_model_analysis.model_loaders = {}
+        mock_model_analysis.model_affected = {}
+        mock_model_analysis.all_model_keys = frozenset()
+
+        sig = OpSignature(shape=(4, 4), ndim=2)
+        dummy_plan = EvalPlan(ops=(), result_reg=0, dead_after=())
+        preflight_mock = MagicMock()
+
+        with (
+            patch("nodes.clip_exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.clip_exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.clip_exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.clip_exit.compile_batch_groups", return_value={sig: list(state.keys())}),
+            patch("nodes.clip_exit.chunked_evaluation"),
+            patch("nodes.clip_exit.check_ram_preflight", preflight_mock),
+        ):
+            node = WIDENCLIPExitNode()
+            node.execute(recipe)
+
+        preflight_mock.assert_called_once()
+        call_kwargs = preflight_mock.call_args.kwargs
+        # AC-7: same corrected formula — no n_models, has loader_bytes
+        assert "n_models" not in call_kwargs
+        assert "loader_bytes" in call_kwargs
+        assert call_kwargs["save_model"] is False
 
 
 # =============================================================================

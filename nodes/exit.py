@@ -655,9 +655,9 @@ class WIDENExitNode:
                 )
                 check_ram_preflight(
                     merged_state_bytes=merged_state_bytes,
-                    n_models=n_models,
                     worst_chunk_bytes=worst_chunk_bytes,
                     save_model=save_model,
+                    loader_bytes=current_loader_bytes,
                 )
 
             # Phase 2: Batched GPU evaluation per group

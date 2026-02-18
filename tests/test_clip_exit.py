@@ -585,6 +585,8 @@ class TestProgressReporting:
                 progress_calls.append(("update", n))
 
         class FakeLoader:
+            loaded_bytes = 0
+
             def cleanup(self):
                 pass
 

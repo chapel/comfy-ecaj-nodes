@@ -1462,11 +1462,13 @@ class TestCacheLoaderMetadata:
             node = WIDENExitNode()
             node.execute(recipe)
 
-        # Preflight was called, and none of its arguments reference loader_bytes
+        # Preflight was called with loader_bytes for logging, but the estimate
+        # formula does not include loader memory (it's already in MemAvailable).
         assert len(preflight_calls) == 1
         call_kwargs = preflight_calls[0]
-        # The preflight args should be: merged_state_bytes, n_models, worst_chunk_bytes
-        # None should be inflated by the 1TB loader_bytes
-        assert "loader_bytes" not in call_kwargs
+        # loader_bytes is passed for diagnostic logging, not added to estimate
+        assert "loader_bytes" in call_kwargs
         # merged_state_bytes should be reasonable (based on key sizes, not loader data)
         assert call_kwargs["merged_state_bytes"] < 999_999_999_999
+        # n_models is no longer passed (loaders already reflected in MemAvailable)
+        assert "n_models" not in call_kwargs

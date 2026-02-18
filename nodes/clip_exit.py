@@ -370,6 +370,12 @@ class WIDENCLIPExitNode:
 
             merged_state: dict[str, torch.Tensor] = {}
 
+            # AC: @accurate-ram-preflight ac-7
+            # Measure loader bytes for preflight diagnostics
+            clip_loader_bytes = loader.loaded_bytes + sum(
+                ml.loaded_bytes for ml in clip_model_loaders.values()
+            )
+
             # AC: @clip-exit-node ac-11
             # Pre-flight RAM check before GPU loop
             if batch_groups:
@@ -390,9 +396,9 @@ class WIDENCLIPExitNode:
                 )
                 check_ram_preflight(
                     merged_state_bytes=merged_state_bytes,
-                    n_models=n_models,
                     worst_chunk_bytes=worst_chunk_bytes,
                     save_model=False,  # CLIP exit doesn't save
+                    loader_bytes=clip_loader_bytes,
                 )
 
             # Phase 2: Batched GPU evaluation per group
