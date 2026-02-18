@@ -2368,7 +2368,7 @@ runs:
   - _ulid: 01KHQKQ30MWMY1731XRZV4CCNW
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 4
     started_at: 2026-02-18T05:31:39.412Z
     step_results:
@@ -2390,5 +2390,19 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-18T05:31:51.570Z
-        completed_at: 2026-02-18T05:31:51.570Z
+        completed_at: 2026-02-18T05:32:13.458Z
+        notes: "High-confidence items after search: SUCCESS: (1) Post-import review agent pattern - caught
+          task dep gaps and AC ordering before any implementation started. Not a duplicate of
+          existing parallel review observations (01KHDNHK etc) because those are about plan reviews;
+          this is specifically about reviewing IMPORTED artifacts. FRICTION: (1) Session checkpoint
+          hook fires on .claude/plans/ working artifacts - 4 interruptions this session for a file
+          that was intentionally uncommitted as an import input. Not tracked anywhere. Systemic
+          because any spec-plan-import workflow will create a temp plan file. (2) kspec item ac
+          lacks reorder command - required remove+re-add with --force. Not tracked. Repeatable
+          whenever plan YAML produces non-sequential AC IDs. SKIP: kspec CLI flag discovery
+          (--depends-on vs --add-blocked-by) is one-off learning, not systemic. Already known now."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-18T05:32:13.458Z
+        completed_at: 2026-02-18T05:32:13.458Z
     initiated_by: "@claude"
