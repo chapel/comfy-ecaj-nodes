@@ -2368,8 +2368,27 @@ runs:
   - _ulid: 01KHQKQ30MWMY1731XRZV4CCNW
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-18T05:31:39.412Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-18T05:31:39.412Z
+        completed_at: 2026-02-18T05:31:51.570Z
+        notes: "Session: Deep dive memory estimation bug -> spec plan -> import -> review. What worked: (1)
+          Parallel review strategy - launching holistic subagent + codex review simultaneously saved
+          significant time, both converged on same MUST-FIX items (qkv_data_by_set coverage). (2)
+          Iterative plan refinement - writing plan, getting dual reviews, fixing, then importing
+          produced clean results (0 errors on import). (3) Post-import review agent caught real
+          issues (missing task deps, AC ordering) that would have caused problems during
+          implementation. Friction: (1) kspec CLI flag discovery - had to trial-and-error
+          --add-blocked-by vs --depends-on, wasted 3 attempts. (2) AC reorder required remove+re-add
+          dance with --force flag - no native reorder command. (3) Plan file in .claude/plans
+          triggered session checkpoint hook repeatedly since it was untracked - 4 interruptions for
+          a working artifact that was intentionally uncommitted."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-18T05:31:51.570Z
+        completed_at: 2026-02-18T05:31:51.570Z
     initiated_by: "@claude"
