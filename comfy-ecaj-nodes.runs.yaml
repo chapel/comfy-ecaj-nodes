@@ -2470,7 +2470,7 @@ runs:
   - _ulid: 01KHQP1AKSYFG09E5ZZZCMVRD5
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 3
+    current_step: 4
     total_steps: 6
     started_at: 2026-02-18T06:12:12.025Z
     step_results:
@@ -2498,5 +2498,12 @@ runs:
       - step_index: 3
         status: completed
         started_at: 2026-02-18T06:12:48.194Z
-        completed_at: 2026-02-18T06:12:48.194Z
+        completed_at: 2026-02-18T06:12:54.134Z
+        notes: "Proposal: Add logger name convention to MEMORY.md — 'Logger names use ecaj.* prefix (e.g.
+          ecaj.exit, ecaj.clip_exit), not module paths. Use this in caplog tests.' Small scope,
+          prevents recurring test failures."
+      - step_index: 4
+        status: completed
+        started_at: 2026-02-18T06:12:54.134Z
+        completed_at: 2026-02-18T06:12:54.134Z
     initiated_by: "@claude"
