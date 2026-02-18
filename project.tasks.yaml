@@ -5641,7 +5641,7 @@
   type: task
   spec_ref: "@cache-loader-metadata"
   plan_ref: "@plan-fix-incremental-recompute-memory-estimation"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-loader-memory-measurement"
@@ -5679,3 +5679,5 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-18T06:08:50.676Z
+  closed_reason: "Merged PR #84. All 4 ACs covered, both reviewers approved."
