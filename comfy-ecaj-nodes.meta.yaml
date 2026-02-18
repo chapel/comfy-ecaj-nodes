@@ -1114,5 +1114,16 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHQKRQDJAJAJJFP2CDG1X7DQ
+    type: friction
+    content: Session checkpoint hook fires repeatedly on .claude/plans/ working artifacts during
+      spec-plan-import workflow. Plan files are intentionally uncommitted (they are import inputs,
+      not source code). This session had 4 interruptions for the same file. Hook should either
+      exclude .claude/plans/ or the import workflow should delete the plan file immediately after
+      successful import.
+    created_at: 2026-02-18T05:32:33.074Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 skills: []
 includes: []
