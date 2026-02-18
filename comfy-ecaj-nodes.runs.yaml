@@ -2422,7 +2422,7 @@ runs:
   - _ulid: 01KHQN6QA71XXGAAEP5ZYTZFF8
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-18T05:57:40.295Z
     step_results:
@@ -2440,5 +2440,15 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-18T05:57:54.697Z
-        completed_at: 2026-02-18T05:57:54.697Z
+        completed_at: 2026-02-18T05:58:02.085Z
+        notes: "Friction points: (1) gh pr merge --squash failed because repo doesn't allow squash merges —
+          had to retry with --merge. This is a recurring pattern; the merge strategy should be known
+          upfront. (2) Both reviewers hit 'cannot approve own PR' GitHub limitation — expected, but
+          both had to fall back to COMMENT. No real friction, just noise in output. (3) No friction
+          in the implementation itself — task was well-scoped with clear ACs and implementation
+          notes."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-18T05:58:02.085Z
+        completed_at: 2026-02-18T05:58:02.085Z
     initiated_by: "@claude"
