@@ -2517,8 +2517,26 @@ runs:
   - _ulid: 01KHQQVEXBPBXF3D5ZZAXFKK59
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-18T06:43:56.972Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-18T06:43:56.972Z
+        completed_at: 2026-02-18T06:44:16.876Z
+        notes: |-
+          ## What Worked Well
+          1. Parallel reviews (pr-review + Codex) with non-overlapping feedback
+          2. Branch-before-commit pattern followed correctly
+          3. Fast fix turnaround on Codex review finding
+          4. Spec-driven: 7 ACs mapped cleanly to tests
+
+          ## Friction Points
+          1. FakeLoader missing loaded_bytes — one-off, not systemic
+          2. Codex shell escaping issues — Codex-side, not actionable here
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-18T06:44:16.876Z
+        completed_at: 2026-02-18T06:44:16.876Z
     initiated_by: "@claude"
