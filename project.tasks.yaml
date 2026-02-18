@@ -5363,7 +5363,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -5491,6 +5491,11 @@
         - @incremental-block-recompute cache behavior may need AC for eviction
       supersedes: null
   todos: []
+  completed_at: 2026-02-18T05:59:42.208Z
+  closed_reason: "Already implemented and merged in PR #82 (commit e730e51). base_state freed after
+    GPU eval, metadata extracted upfront for batch_groups/preflight, state dict re-acquired fresh
+    only for save. ac-13 added and covered. All 43 memory management tests + 52 executor tests
+    pass."
 - _ulid: 01KHMEEN4RC11YF94C8PE6YE5E
   slugs: []
   title: Prevent system OOM from ECAJ exit nodes
