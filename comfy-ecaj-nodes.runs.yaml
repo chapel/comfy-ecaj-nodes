@@ -2298,8 +2298,19 @@ runs:
   - _ulid: 01KHQDM1JFD87C57Y8P42ZKJFG
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 4
     started_at: 2026-02-18T03:45:08.175Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-18T03:45:08.175Z
+        completed_at: 2026-02-18T03:45:52.135Z
+        notes: "Reviewed session: plan-to-implement was smooth, parallel reviews worked well,
+          spec-before-code followed. One friction: reviewers fail APPROVE/REQUEST_CHANGES on own PR
+          then retry as COMMENT."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-18T03:45:52.135Z
+        completed_at: 2026-02-18T03:45:52.135Z
     initiated_by: "@claude"
