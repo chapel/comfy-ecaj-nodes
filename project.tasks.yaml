@@ -5557,7 +5557,8 @@
   plan_ref: "@plan-fix-incremental-recompute-memory-estimation"
   status: pending
   blocked_by: []
-  depends_on: []
+  depends_on:
+    - "@implement-cache-loader-metadata"
   context: []
   priority: 3
   tags: []
