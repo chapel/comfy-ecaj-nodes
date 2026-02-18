@@ -5592,7 +5592,7 @@
   type: task
   spec_ref: "@loader-memory-measurement"
   plan_ref: "@plan-fix-incremental-recompute-memory-estimation"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -5625,6 +5625,7 @@
       supersedes: null
   todos: []
   automation: eligible
+  started_at: 2026-02-18T05:34:07.062Z
 - _ulid: 01KHQGTT73GXMWM8F2842D0KK8
   slugs:
     - implement-cache-loader-metadata
