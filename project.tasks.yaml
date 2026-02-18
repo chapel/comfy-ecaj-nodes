@@ -5363,7 +5363,7 @@
   spec_ref: null
   meta_ref: null
   plan_ref: null
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   context: []
@@ -5490,6 +5490,7 @@
         - @incremental-block-recompute cache behavior may need AC for eviction
       supersedes: null
   todos: []
+  started_at: 2026-02-18T05:59:39.311Z
 - _ulid: 01KHMEEN4RC11YF94C8PE6YE5E
   slugs: []
   title: Prevent system OOM from ECAJ exit nodes
@@ -5594,6 +5595,7 @@
   plan_ref: "@plan-fix-incremental-recompute-memory-estimation"
   status: completed
   blocked_by: []
+  closed_reason: "Merged PR #83. All 7 ACs covered, 14 tests, both reviewers approved."
   depends_on: []
   context: []
   priority: 3
@@ -5601,6 +5603,7 @@
   vcs_refs: []
   created_at: 2026-02-18T04:41:15.704Z
   started_at: 2026-02-18T05:34:07.062Z
+  completed_at: 2026-02-18T05:53:43.883Z
   notes:
     - _ulid: 01KHQGTT5RP966JMAQBRCEYS2A
       created_at: 2026-02-18T04:41:15.704Z
@@ -5626,8 +5629,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-18T05:53:43.883Z
-  closed_reason: "Merged PR #83. All 7 ACs covered, 14 tests, both reviewers approved."
 - _ulid: 01KHQGTT73GXMWM8F2842D0KK8
   slugs:
     - implement-cache-loader-metadata
