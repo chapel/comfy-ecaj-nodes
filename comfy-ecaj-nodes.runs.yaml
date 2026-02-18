@@ -2470,8 +2470,19 @@ runs:
   - _ulid: 01KHQP1AKSYFG09E5ZZZCMVRD5
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 6
     started_at: 2026-02-18T06:12:12.025Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-18T06:12:12.025Z
+        completed_at: 2026-02-18T06:12:31.870Z
+        notes: "What worked: fast verification of done tasks, clean implementation cycle, parallel reviews.
+          Friction: logger name mismatch (ecaj.exit vs nodes.exit), task complete requires
+          start+submit cycle for already-done work."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-18T06:12:31.870Z
+        completed_at: 2026-02-18T06:12:31.870Z
     initiated_by: "@claude"
