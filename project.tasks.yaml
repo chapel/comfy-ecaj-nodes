@@ -5561,7 +5561,7 @@
   type: task
   spec_ref: "@accurate-ram-preflight"
   plan_ref: "@plan-fix-incremental-recompute-memory-estimation"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on:
     - "@implement-cache-loader-metadata"
@@ -5601,6 +5601,8 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-18T06:41:08.576Z
+  closed_reason: "Merged PR #85. All 7 ACs covered, both reviewers approved, Codex findings addressed."
 - _ulid: 01KHQGTT5RK2RZH2YMX78CAS0F
   slugs:
     - implement-loader-memory-measurement
