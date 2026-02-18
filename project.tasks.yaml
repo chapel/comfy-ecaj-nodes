@@ -5576,6 +5576,13 @@
         The formula becomes: peak = merged_state_bytes + 2*worst_chunk + save_overhead.
         Loaders are already loaded at preflight time so their cost is in MemAvailable.
         Update both exit.py and clip_exit.py call sites.
+    - _ulid: 01KHQJGCWWH09X7FTC8G3S3NQV
+      created_at: 2026-02-18T05:10:31.580Z
+      author: "@claude"
+      content: "Test guidance: Update tests in tests/test_memory_management.py. Key test: call
+        estimate_peak_ram with loader_bytes=0 and loader_bytes=10**9, assert identical return. Test
+        incremental estimate <= full estimate. AC annotation: # AC: @accurate-ram-preflight ac-N"
+      supersedes: null
   todos: []
 - _ulid: 01KHQGTT5RK2RZH2YMX78CAS0F
   slugs:
