@@ -621,10 +621,6 @@ features:
                 given: an incremental cache hit occurs with stored loader_bytes of L
                 when: the recompute plan is logged
                 then: L is included in the log message for diagnostic purposes
-              - id: ac-4
-                given: an incremental cache hit occurs with stored loader_bytes of L
-                when: preflight check runs for the recompute subset
-                then: L does not affect the peak RAM estimate returned by estimate_peak_ram
             depends_on: []
             implements: []
             relates_to: []
