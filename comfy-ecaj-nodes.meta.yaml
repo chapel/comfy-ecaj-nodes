@@ -1104,5 +1104,15 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHQKRHH93DR3YTM1SA3GJ82Z
+    type: success
+    content: "Post-import review agent catches structural issues (missing task deps, AC ordering,
+      missing test guidance) before implementation starts. Distinct from plan review which catches
+      spec gaps. Three-layer review: dual plan review (holistic + codex) -> import -> post-import
+      review of artifacts in kspec."
+    created_at: 2026-02-18T05:32:27.049Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 skills: []
 includes: []
