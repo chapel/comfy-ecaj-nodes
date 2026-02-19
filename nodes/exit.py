@@ -644,11 +644,14 @@ class WIDENExitNode:
                     key_byte_sizes[k] for k in processed_keys
                 )
                 n_models = len(set_affected) + len(model_loaders)
-                element_size = torch.finfo(compute_dtype).bits // 8
+                # Use storage_dtype for CPU RAM estimate — base_stack is created
+                # in model dtype, not compute_dtype. compute_dtype is only for
+                # GPU tensors which don't count against system RAM.
+                storage_element_size = torch.finfo(storage_dtype).bits // 8
                 # Compute worst-case chunk bytes: pair each group's batch_size
                 # with its own shape (not max_batch * max_shape).
                 worst_chunk_bytes = max(
-                    element_size
+                    storage_element_size
                     * torch.Size(sig.shape).numel()
                     * compute_batch_size(sig.shape, n_models, compute_dtype)
                     for sig in batch_groups

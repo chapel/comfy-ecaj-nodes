@@ -1042,8 +1042,9 @@ class TestAccurateRamPreflight:
             save_model=False,
             loader_bytes=500 * 1024**2,  # 500 MB of loaders
         )
-        # Formula: merged_state_bytes + 2*worst_chunk_bytes (no loader term)
-        expected = 1024**3 + 2 * 4 * 1024**2
+        # Formula: merged_state_bytes + worst_chunk_bytes (no loader term,
+        # no pin_memory doubling — pin_memory is conditionally skipped)
+        expected = 1024**3 + 4 * 1024**2
         assert result == expected
 
     # AC: @accurate-ram-preflight ac-2
@@ -1124,8 +1125,8 @@ class TestAccurateRamPreflight:
             worst_chunk_bytes=chunk,
             save_model=False,
         )
-        # Exact formula: merged + 2*chunk, no save term
-        assert result == merged + 2 * chunk
+        # Exact formula: merged + chunk, no save term
+        assert result == merged + chunk
 
     # AC: @accurate-ram-preflight ac-6
     def test_incremental_lte_full_recompute(self):
