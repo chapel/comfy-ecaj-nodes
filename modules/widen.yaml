@@ -1001,7 +1001,7 @@ features:
     created: 2026-02-10T19:44:03.219Z
     status:
       maturity: draft
-      implementation: implemented
+      implementation: in_progress
     requirements:
       - _ulid: 01KHQGTSZ5VPXE3RKPSBNQFQA5
         slugs:
