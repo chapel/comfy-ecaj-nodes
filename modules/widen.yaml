@@ -602,6 +602,11 @@ features:
             given: enable_cache=False
             when: execute runs
             then: cache lookup is skipped, cache is not populated, and any existing entry is evicted
+          - id: ac-19
+            given: Previous execution cached full merged_state and current execution changes only block L18
+            when: RAM preflight check runs
+            then: The preflight estimate uses only the recompute subset bytes (L18 keys) not the full model key
+              bytes, producing an estimate proportional to the changed block
         status:
           maturity: draft
           implementation: implemented
