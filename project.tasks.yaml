@@ -5734,6 +5734,10 @@
   plan_ref: null
   status: completed
   blocked_by: []
+  closed_reason: "Merged PR #86. Fixed cache eviction threshold (safety margin instead of
+    cache_bytes*2), corrected preflight estimate (storage_dtype + no pin_memory 2x), added 5 tests.
+    User's incremental recompute wasn't activating due to enable_cache=False in their workflow, not
+    a code bug."
   depends_on: []
   context: []
   priority: 1
@@ -5741,6 +5745,7 @@
   vcs_refs: []
   created_at: 2026-02-19T20:33:44.068Z
   started_at: 2026-02-19T20:39:25.615Z
+  completed_at: 2026-02-19T21:35:08.352Z
   notes:
     - _ulid: 01KHVTB0CV1AXNB5XAJ1Z9D3FJ
       created_at: 2026-02-19T20:44:21.276Z
@@ -5763,8 +5768,23 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-19T21:35:08.352Z
-  closed_reason: "Merged PR #86. Fixed cache eviction threshold (safety margin instead of
-    cache_bytes*2), corrected preflight estimate (storage_dtype + no pin_memory 2x), added 5 tests.
-    User's incremental recompute wasn't activating due to enable_cache=False in their workflow, not
-    a code bug."
+- title: Fix stale docstring in estimate_peak_ram
+  description: "The docstring in lib/gpu_ops.py estimate_peak_ram (line 80) still says 'pin_memory:
+    temporary 2x cost for one chunk at a time' but the code now uses 1x chunk cost (changed in PR
+    #86). Update the docstring bullet to match the actual behavior."
+  type: bug
+  spec_ref: "@accurate-ram-preflight"
+  meta_ref: null
+  plan_ref: null
+  priority: 4
+  slugs: []
+  tags: []
+  depends_on: []
+  _ulid: 01KHVXCYM37Y434ER5891GB1VB
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-19T21:37:50.723Z
+  notes: []
+  todos: []
