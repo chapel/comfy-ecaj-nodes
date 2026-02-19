@@ -2563,8 +2563,23 @@ runs:
   - _ulid: 01KHVXDCCQ6JSWQGRHV2DTDCH4
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 0
+    current_step: 1
     total_steps: 6
     started_at: 2026-02-19T21:38:04.823Z
-    step_results: []
+    step_results:
+      - step_index: 0
+        status: completed
+        started_at: 2026-02-19T21:38:04.823Z
+        completed_at: 2026-02-19T21:38:21.306Z
+        notes: "What worked well: (1) Parallel reviewers (pr-review + codex) caught a real test quality
+          issue — the ac-19 regression test used tiny tensors that wouldn't reproduce the old bug.
+          Fixed immediately. (2) Diagnostic logging insertion for live debugging — adding cache
+          decision/lookup logs to exit.py and restarting ComfyUI quickly identified
+          enable_cache=False as the root cause of the user's incremental recompute not activating.
+          (3) Spec gap check subagent after merge confirmed no gaps — validated all 14 ACs. (4) The
+          task-work skill workflow kept lifecycle clean."
+      - step_index: 1
+        status: completed
+        started_at: 2026-02-19T21:38:21.306Z
+        completed_at: 2026-02-19T21:38:21.306Z
     initiated_by: "@claude"
