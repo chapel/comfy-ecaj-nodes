@@ -5740,7 +5740,18 @@
   tags: []
   vcs_refs: []
   created_at: 2026-02-19T20:33:44.068Z
-  notes: []
+  started_at: 2026-02-19T20:39:25.615Z
+  notes:
+    - _ulid: 01KHVTB0CV1AXNB5XAJ1Z9D3FJ
+      created_at: 2026-02-19T20:44:21.276Z
+      author: "@claude"
+      content: "Fixed both bugs: (1) Changed cache eviction threshold from cache_bytes*2 to fixed 512 MB
+        safety margin — since cache storage is a pointer transfer, not a new allocation, the old
+        threshold falsely evicted large model caches. (2) Bug 2 (inflated preflight) was a
+        consequence of Bug 1 — when cache survives, incremental path reduces batch_groups and
+        preflight uses subset bytes. Added diagnostic logging for cache eviction/storage decisions.
+        5 new tests: 4 for ac-14 (safety margin threshold, logging), 1 for ac-19 (regression: cache
+        survives → incremental preflight uses subset)."
+      supersedes: null
   todos: []
   automation: eligible
-  started_at: 2026-02-19T20:39:25.615Z
