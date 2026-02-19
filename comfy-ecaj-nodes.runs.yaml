@@ -2520,6 +2520,7 @@ runs:
     current_step: 3
     total_steps: 4
     started_at: 2026-02-18T06:43:56.972Z
+    completed_at: 2026-02-18T06:44:42.991Z
     step_results:
       - step_index: 0
         status: completed
@@ -2559,4 +2560,11 @@ runs:
         completed_at: 2026-02-18T06:44:42.991Z
         notes: No items to capture — all friction was one-off or already tracked. Clean session.
     initiated_by: "@claude"
-    completed_at: 2026-02-18T06:44:42.991Z
+  - _ulid: 01KHVXDCCQ6JSWQGRHV2DTDCH4
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    status: active
+    current_step: 0
+    total_steps: 6
+    started_at: 2026-02-19T21:38:04.823Z
+    step_results: []
+    initiated_by: "@claude"
