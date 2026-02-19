@@ -97,12 +97,14 @@ def estimate_peak_ram(
     # AC: @accurate-ram-preflight ac-3
     logger.debug("Preflight loader_bytes=%d (already in MemAvailable)", loader_bytes)
 
-    # pin_memory allocates a copy: original stack + pinned = 2x
-    chunk_pinned_cost = 2 * worst_chunk_bytes
+    # base_stack is a temporary CPU tensor per chunk (freed before merged_cpu).
+    # pin_memory is conditionally skipped when RAM is low (see chunked_evaluation),
+    # so we estimate 1x chunk cost rather than 2x.
+    chunk_cost = worst_chunk_bytes
 
     # merged_state accumulates new CPU tensors (up to ~merged_state_bytes)
-    # + temporary pin_memory cost
-    peak = merged_state_bytes + chunk_pinned_cost
+    # + temporary chunk stack cost
+    peak = merged_state_bytes + chunk_cost
     if save_model:
         # AC: @accurate-ram-preflight ac-4
         # Streaming writer holds one tensor at a time, but metadata + temp

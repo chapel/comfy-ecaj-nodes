@@ -644,11 +644,14 @@ class WIDENExitNode:
                     key_byte_sizes[k] for k in processed_keys
                 )
                 n_models = len(set_affected) + len(model_loaders)
-                element_size = torch.finfo(compute_dtype).bits // 8
+                # Use storage_dtype for CPU RAM estimate — base_stack is created
+                # in model dtype, not compute_dtype. compute_dtype is only for
+                # GPU tensors which don't count against system RAM.
+                storage_element_size = torch.finfo(storage_dtype).bits // 8
                 # Compute worst-case chunk bytes: pair each group's batch_size
                 # with its own shape (not max_batch * max_shape).
                 worst_chunk_bytes = max(
-                    element_size
+                    storage_element_size
                     * torch.Size(sig.shape).numel()
                     * compute_batch_size(sig.shape, n_models, compute_dtype)
                     for sig in batch_groups
@@ -788,14 +791,22 @@ class WIDENExitNode:
             if not enable_cache:
                 _incremental_cache.clear()
             elif batch_groups or not incremental_hit:
-                # AC: @memory-management ac-12
-                # Check if RAM is too low to safely store the cache entry
-                cache_bytes = sum(
-                    t.nelement() * t.element_size() for t in merged_state.values()
-                )
+                # AC: @memory-management ac-12, ac-14
+                # Check if RAM is too low to safely store the cache entry.
+                # Cache storage is a pointer transfer (not a new allocation) —
+                # merged_state tensors are already resident in process memory.
+                # Evict only when MemAvailable is below a safety margin for the
+                # next execution's new allocations, not a multiple of cache size.
                 avail = get_available_ram_bytes()
-                if avail < cache_bytes * 2:
-                    # Evict instead of storing — RAM is too tight
+                _CACHE_EVICTION_MARGIN = 512 * 1024 * 1024  # 512 MB
+                if avail < _CACHE_EVICTION_MARGIN:
+                    # Evict instead of storing — RAM is too tight for next run
+                    logger.info(
+                        "Cache eviction: avail=%d MB < safety margin=%d MB; "
+                        "evicting instead of storing",
+                        avail // (1024 * 1024),
+                        _CACHE_EVICTION_MARGIN // (1024 * 1024),
+                    )
                     _incremental_cache.clear()
                 else:
                     # AC: @cache-loader-metadata ac-1, ac-3
@@ -805,6 +816,15 @@ class WIDENExitNode:
                         merged_state=dict(merged_state),
                         storage_dtype=storage_dtype,
                         loader_bytes=current_loader_bytes,
+                    )
+                    cache_bytes = sum(
+                        t.nelement() * t.element_size()
+                        for t in merged_state.values()
+                    )
+                    logger.info(
+                        "Cache stored: %d MB merged_state, avail=%d MB",
+                        cache_bytes // (1024 * 1024),
+                        avail // (1024 * 1024),
                     )
                     _incremental_cache.clear()
                     _incremental_cache[structural_fp] = new_entry
