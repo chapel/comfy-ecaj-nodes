@@ -5732,7 +5732,7 @@
   spec_ref: "@memory-management"
   meta_ref: null
   plan_ref: null
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   context: []
@@ -5763,3 +5763,8 @@
       supersedes: null
   todos: []
   automation: eligible
+  completed_at: 2026-02-19T21:35:08.352Z
+  closed_reason: "Merged PR #86. Fixed cache eviction threshold (safety margin instead of
+    cache_bytes*2), corrected preflight estimate (storage_dtype + no pin_memory 2x), added 5 tests.
+    User's incremental recompute wasn't activating due to enable_cache=False in their workflow, not
+    a code bug."
