@@ -1133,5 +1133,15 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHVXFNSANCJGHKA333R35WH7
+    type: success
+    content: "Parallel reviewers (pr-review + codex) catch complementary issues: pr-review validates
+      architecture/flow/AC coverage, codex catches test quality gaps (e.g., regression test using
+      tiny tensors that pass under both old and new logic). Running both in parallel adds ~2 min and
+      caught a real defect in PR #86."
+    created_at: 2026-02-19T21:39:19.979Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 skills: []
 includes: []
