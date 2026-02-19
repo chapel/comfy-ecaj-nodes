@@ -5753,5 +5753,13 @@
         5 new tests: 4 for ac-14 (safety margin threshold, logging), 1 for ac-19 (regression: cache
         survives → incremental preflight uses subset)."
       supersedes: null
+    - _ulid: 01KHVWANA2AQ0TFRN2CJDNFAFT
+      created_at: 2026-02-19T21:19:07.074Z
+      author: "@claude"
+      content: User testing revealed enable_cache=False in their workflow, which explains why incremental
+        recompute wasn't activating. Not a code bug — user config. Also fixed a separate
+        pre-existing preflight overestimate (compute_dtype vs storage_dtype for chunk bytes, and
+        phantom pin_memory 2x cost).
+      supersedes: null
   todos: []
   automation: eligible
