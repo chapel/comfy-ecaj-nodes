@@ -803,9 +803,13 @@ class TestExitNodeIncrementalCache:
         """Regression: large-model cache survives eviction so incremental preflight
         uses subset bytes, not full-model bytes.
 
-        Old bug: cache_bytes * 2 threshold evicted 11 GB cache when avail < 22 GB,
+        Old bug: cache_bytes * 2 threshold evicted large caches when avail < 2x cache,
         causing next run to miss cache and run full-model preflight. With the fixed
-        safety-margin threshold, cache survives and preflight uses only changed keys.
+        safety-margin threshold (512 MB), cache survives and preflight uses only
+        changed keys.
+
+        Uses torch.zeros (no physical allocation on Linux due to overcommit) so
+        cache_bytes * 2 exceeds avail, reproducing the old eviction behavior.
         """
         keys = list(mock_model_patcher.model_state_dict().keys())
         bc_old = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5), ("MID", 1.0)))
@@ -835,12 +839,19 @@ class TestExitNodeIncrementalCache:
             mock_model_patcher, keys, recipe=recipe_old,
         )
         mock_loader.loaded_bytes = 0
-        merged_run1 = {k: torch.randn(4, 4) for k in keys}
-        from lib.batch_groups import OpSignature
-        sig = OpSignature(shape=(4, 4), ndim=2)
 
-        # Simulate 1 GB available — above 512 MB safety margin but below
-        # old 2x threshold for any non-trivial model
+        # Use large tensors so cache_bytes * 2 > avail (old bug reproducer).
+        # 4 keys × 100 MB = 400 MB total. Old threshold: 800 MB.
+        # torch.zeros uses virtual memory only (no physical RAM on Linux).
+        elems_per_key = 100 * 1024 * 1024 // 4  # 100 MB per key (float32)
+        merged_run1 = {k: torch.zeros(elems_per_key) for k in keys}
+
+        from lib.batch_groups import OpSignature
+        sig = OpSignature(shape=(elems_per_key,), ndim=1)
+
+        # avail = 600 MB: above 512 MB safety margin (new: stores)
+        # but below cache_bytes * 2 = 800 MB (old: would evict)
+        avail_bytes = 600 * 1024 * 1024
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
@@ -849,14 +860,15 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.chunked_evaluation", return_value=merged_run1),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
-            patch("nodes.exit.get_available_ram_bytes", return_value=1 * 1024**3),
+            patch("nodes.exit.get_available_ram_bytes", return_value=avail_bytes),
         ):
             node = WIDENExitNode()
             node.execute(recipe_old)
 
         # Cache must survive (key fix: safety margin, not cache_bytes * 2)
         assert len(_incremental_cache) == 1, (
-            "Cache should survive with 1 GB avail > 512 MB safety margin"
+            "Cache should survive with 600 MB avail > 512 MB safety margin "
+            "(old cache_bytes*2 = 800 MB would have evicted)"
         )
 
         # --- Run 2: change IN00, preflight should use subset ---
@@ -876,7 +888,7 @@ class TestExitNodeIncrementalCache:
         def track_batch_groups(key_list, *args, **kwargs):
             return {sig: list(key_list)}
 
-        new_results = {k: torch.randn(4, 4) for k in keys}
+        new_results = {k: torch.zeros(elems_per_key) for k in keys}
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze2),
@@ -889,15 +901,14 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.chunked_evaluation",
                   side_effect=lambda keys, **kw: {k: new_results[k] for k in keys}),
             patch("nodes.exit.check_ram_preflight", side_effect=capture_preflight),
-            patch("nodes.exit.get_available_ram_bytes", return_value=1 * 1024**3),
+            patch("nodes.exit.get_available_ram_bytes", return_value=avail_bytes),
         ):
             node = WIDENExitNode()
             node.execute(recipe_new)
 
         # Preflight should have been called with reduced bytes (subset, not full)
         assert len(preflight_calls) == 1
-        state = mock_model_patcher.model_state_dict()
-        full_bytes = sum(t.nelement() * t.element_size() for t in state.values())
+        full_bytes = len(keys) * elems_per_key * 4  # float32
         preflight_bytes = preflight_calls[0]["merged_state_bytes"]
         assert preflight_bytes < full_bytes, (
             f"Incremental preflight should use subset bytes ({preflight_bytes}) "
