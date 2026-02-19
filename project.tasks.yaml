@@ -5563,6 +5563,7 @@
   plan_ref: "@plan-fix-incremental-recompute-memory-estimation"
   status: completed
   blocked_by: []
+  closed_reason: "Merged PR #85. All 7 ACs covered, both reviewers approved, Codex findings addressed."
   depends_on:
     - "@implement-cache-loader-metadata"
   context: []
@@ -5571,6 +5572,7 @@
   vcs_refs: []
   created_at: 2026-02-18T04:41:15.656Z
   started_at: 2026-02-18T06:16:26.895Z
+  completed_at: 2026-02-18T06:41:08.576Z
   notes:
     - _ulid: 01KHQGTT48SSQAHGJPRACJMSTX
       created_at: 2026-02-18T04:41:15.657Z
@@ -5601,8 +5603,6 @@
       supersedes: null
   todos: []
   automation: eligible
-  completed_at: 2026-02-18T06:41:08.576Z
-  closed_reason: "Merged PR #85. All 7 ACs covered, both reviewers approved, Codex findings addressed."
 - _ulid: 01KHQGTT5RK2RZH2YMX78CAS0F
   slugs:
     - implement-loader-memory-measurement
@@ -5693,3 +5693,53 @@
       supersedes: null
   todos: []
   automation: eligible
+- title: Fix incremental cache eviction and preflight for large models
+  description: >-
+    Two related bugs prevent incremental block recompute from working on large models (Z-Image ~11
+    GB merged state).
+
+
+    Bug 1: Cache eviction too aggressive (@memory-management ac-14). The cache write at exit.py:797
+    evicts when avail < cache_bytes * 2. For Z-Image, cache_bytes is about 11 GB, requiring 22 GB
+    free. But the merged_state tensors are already in process memory — storing them in the cache
+    dict is a pointer transfer, not a new allocation. The 2x threshold is wrong.
+
+
+    Bug 2: Full-model preflight on cache miss (@incremental-block-recompute ac-19). When the cache
+    is evicted, batch_groups is built from ALL keys_to_process. The incremental path would replace
+    it with only recompute_keys, but the cache lookup finds nothing (evicted), so incremental_hit
+    stays False. The preflight uses the full batch_groups and estimates 13.6 GB for a change that
+    only needs L18 at about 400 MB.
+
+
+    Observed: User has 4 Z-Image LoRAs, changes only L18 block_config after first successful run.
+    Every subsequent run fails preflight with 13612 MB needed despite incremental recompute being
+    designed for exactly this case.
+
+
+    Fix approach: (1) Change cache eviction threshold to a small fixed safety margin instead of
+    cache_bytes * 2. (2) Verify the incremental path produces correct reduced batch_groups when
+    cache survives. (3) Add diagnostic logging for cache eviction decisions.
+
+
+    ACs: @memory-management ac-14, @incremental-block-recompute ac-19
+
+    Files: nodes/exit.py (lines 786-810, 550-661), lib/gpu_ops.py
+  type: bug
+  spec_ref: "@memory-management"
+  meta_ref: null
+  plan_ref: null
+  priority: 1
+  slugs:
+    - fix-cache-eviction-large-models
+  tags: []
+  depends_on: []
+  automation: eligible
+  _ulid: 01KHVSQJ44FYASZW21V875Q8TZ
+  status: pending
+  blocked_by: []
+  context: []
+  vcs_refs: []
+  created_at: 2026-02-19T20:33:44.068Z
+  notes: []
+  todos: []
