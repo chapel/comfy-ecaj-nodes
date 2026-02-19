@@ -2563,7 +2563,7 @@ runs:
   - _ulid: 01KHVXDCCQ6JSWQGRHV2DTDCH4
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
-    current_step: 1
+    current_step: 2
     total_steps: 6
     started_at: 2026-02-19T21:38:04.823Z
     step_results:
@@ -2581,5 +2581,19 @@ runs:
       - step_index: 1
         status: completed
         started_at: 2026-02-19T21:38:21.306Z
-        completed_at: 2026-02-19T21:38:21.306Z
+        completed_at: 2026-02-19T21:38:32.041Z
+        notes: "Friction points: (1) Preflight estimate used wrong dtype (compute_dtype fp32 vs
+          storage_dtype bf16) for CPU RAM chunk cost — this was a pre-existing bug unrelated to the
+          task, discovered only because the user tested in ComfyUI and hit the error. No test caught
+          this because tests use small tensors where the difference is negligible. (2) Codex review
+          switched git branches (gh pr checkout + git checkout main) while ComfyUI was running from
+          the same worktree — could have caused the user to run stale code if timing was different.
+          The Codex skill should either use a temp clone or warn about branch switching in shared
+          worktrees. (3) CI test job was cancelled by GitHub Actions for unknown reasons, requiring
+          manual rerun. (4) The estimate_peak_ram docstring was stale after the formula change —
+          easy to miss when changing formulas."
+      - step_index: 2
+        status: completed
+        started_at: 2026-02-19T21:38:32.041Z
+        completed_at: 2026-02-19T21:38:32.041Z
     initiated_by: "@claude"
