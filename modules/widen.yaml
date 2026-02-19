@@ -980,6 +980,13 @@ features:
         given: GPU evaluation completes and results are in merged_state
         when: save_model=True and save path is about to be written
         then: base_state is freed before save; state dict re-acquired fresh for save only
+      - id: ac-14
+        given: The incremental cache stores merged_state tensors that are already resident in process memory
+          (moved, not copied)
+        when: Cache write evaluates whether to evict
+        then: The eviction threshold accounts for the fact that cache storage is a pointer transfer not a
+          new allocation — eviction triggers only when MemAvailable is below a safety margin for the
+          next execution new allocations, not a multiple of the already-resident cache size
     depends_on: []
     implements: []
     relates_to: []
