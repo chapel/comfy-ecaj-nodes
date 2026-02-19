@@ -5693,7 +5693,11 @@
       supersedes: null
   todos: []
   automation: eligible
-- title: Fix incremental cache eviction and preflight for large models
+- _ulid: 01KHVSQJ44FYASZW21V875Q8TZ
+  slugs:
+    - fix-cache-eviction-large-models
+  title: Fix incremental cache eviction and preflight for large models
+  type: bug
   description: >-
     Two related bugs prevent incremental block recompute from working on large models (Z-Image ~11
     GB merged state).
@@ -5725,21 +5729,18 @@
     ACs: @memory-management ac-14, @incremental-block-recompute ac-19
 
     Files: nodes/exit.py (lines 786-810, 550-661), lib/gpu_ops.py
-  type: bug
   spec_ref: "@memory-management"
   meta_ref: null
   plan_ref: null
-  priority: 1
-  slugs:
-    - fix-cache-eviction-large-models
-  tags: []
-  depends_on: []
-  automation: eligible
-  _ulid: 01KHVSQJ44FYASZW21V875Q8TZ
-  status: pending
+  status: in_progress
   blocked_by: []
+  depends_on: []
   context: []
+  priority: 1
+  tags: []
   vcs_refs: []
   created_at: 2026-02-19T20:33:44.068Z
   notes: []
   todos: []
+  automation: eligible
+  started_at: 2026-02-19T20:39:25.615Z
