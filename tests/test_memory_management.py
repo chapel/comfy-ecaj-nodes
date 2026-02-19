@@ -1317,7 +1317,7 @@ class TestCacheEvictionUnderPressure:
             t_factor=1.0,
         )
 
-        # Return very low RAM so cache_bytes * 2 > avail
+        # Return very low RAM (below 512 MB safety margin)
         with patch("nodes.exit.get_available_ram_bytes", return_value=1):
             _run_exit_node(recipe, mock_model_patcher, keys)
 
@@ -1339,6 +1339,122 @@ class TestCacheEvictionUnderPressure:
             _run_exit_node(recipe, mock_model_patcher, keys)
 
         assert len(_incremental_cache) == 1, "Cache should have one entry with sufficient RAM"
+
+
+# =============================================================================
+# AC-14: Cache eviction uses safety margin, not cache-size multiple
+# =============================================================================
+
+
+class TestCacheEvictionSafetyMargin:
+    """AC: @memory-management ac-14
+
+    Given: The incremental cache stores merged_state tensors already resident
+           in process memory (pointer transfer, not new allocation)
+    When: Cache write evaluates whether to evict
+    Then: Eviction triggers only when MemAvailable is below a safety margin
+          for next execution new allocations, not a multiple of cache size
+    """
+
+    def setup_method(self):
+        _incremental_cache.clear()
+
+    def teardown_method(self):
+        _incremental_cache.clear()
+
+    # AC: @memory-management ac-14
+    def test_large_cache_stored_when_avail_above_margin(self, mock_model_patcher):
+        """11 GB cache should be stored when avail > 512 MB safety margin.
+
+        Regression: old threshold (cache_bytes * 2) required 22 GB free for an
+        11 GB model, even though storing is a pointer transfer.
+        """
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # 1 GB avail — above 512 MB margin but well below old 2x threshold
+        # for any non-trivial model
+        with patch("nodes.exit.get_available_ram_bytes", return_value=1 * 1024**3):
+            _run_exit_node(recipe, mock_model_patcher, keys)
+
+        assert len(_incremental_cache) == 1, (
+            "Cache should be stored when avail (1 GB) > safety margin (512 MB)"
+        )
+
+    # AC: @memory-management ac-14
+    def test_cache_evicted_when_avail_below_margin(self, mock_model_patcher):
+        """Cache should be evicted when avail < 512 MB safety margin."""
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        # 256 MB avail — below 512 MB margin
+        with patch(
+            "nodes.exit.get_available_ram_bytes",
+            return_value=256 * 1024**2,
+        ):
+            _run_exit_node(recipe, mock_model_patcher, keys)
+
+        assert len(_incremental_cache) == 0, (
+            "Cache should be evicted when avail (256 MB) < safety margin (512 MB)"
+        )
+
+    # AC: @memory-management ac-14
+    def test_eviction_logs_diagnostic_info(self, mock_model_patcher, caplog):
+        """Cache eviction should log available RAM and safety margin."""
+        import logging
+
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        with caplog.at_level(logging.INFO, logger="ecaj.exit"):
+            with patch(
+                "nodes.exit.get_available_ram_bytes",
+                return_value=100 * 1024**2,
+            ):
+                _run_exit_node(recipe, mock_model_patcher, keys)
+
+        assert any("Cache eviction" in r.message for r in caplog.records), (
+            "Should log cache eviction decision"
+        )
+
+    # AC: @memory-management ac-14
+    def test_cache_store_logs_size_info(self, mock_model_patcher, caplog):
+        """Cache storage should log merged_state size and available RAM."""
+        import logging
+
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        recipe = RecipeMerge(
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+
+        with caplog.at_level(logging.INFO, logger="ecaj.exit"):
+            with patch(
+                "nodes.exit.get_available_ram_bytes",
+                return_value=100 * 1024**3,
+            ):
+                _run_exit_node(recipe, mock_model_patcher, keys)
+
+        assert any("Cache stored" in r.message for r in caplog.records), (
+            "Should log cache storage with size info"
+        )
 
 
 # =============================================================================
