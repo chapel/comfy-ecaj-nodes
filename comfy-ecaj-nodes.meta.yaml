@@ -1143,5 +1143,14 @@ observations:
     author: "@claude"
     resolved: false
     resolution: null
+  - _ulid: 01KHVXFXM201E0TZD01HH336JY
+    type: success
+    content: "Diagnostic logging for live debugging: inserting targeted logger.info calls at decision
+      points (cache lookup, cache write) and restarting the service quickly identified a user config
+      issue (enable_cache=False) that would have been very hard to diagnose remotely otherwise."
+    created_at: 2026-02-19T21:39:28.002Z
+    author: "@claude"
+    resolved: false
+    resolution: null
 skills: []
 includes: []
