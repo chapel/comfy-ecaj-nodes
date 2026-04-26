@@ -1,24 +1,626 @@
-kynetic_meta: "1.0"
 agents:
   - _ulid: 01KH4D20YRV8MXAEMAC70AKQQZ
-    id: claude
-    name: Claude Code Agent
     description: Primary development agent for this project.
     capabilities:
       - code
       - test
       - refactor
       - review
+    conventions: []
+    id: claude
+    name: Claude Code Agent
     tools:
       - kspec
       - git
       - uv
-    conventions: []
+conventions:
+  - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
+    domain: commits
+    examples: []
+    rules:
+      - Use conventional commit format (feat, fix, docs, refactor, test, chore)
+      - Include Task trailer when completing task work
+      - Include Spec trailer when implementing spec item
+      - Keep subject line under 72 characters
+  - _ulid: 01KH4D54RSWVY7TE2E8RBV892W
+    domain: notes
+    examples: []
+    rules:
+      - Add notes during work, not just at end
+      - Include context for decisions made
+      - Reference related commits, PRs, or issues
+  - _ulid: 01KH509WYHJKSQ1XXE7FYDATA1
+    domain: testing
+    examples: []
+    rules:
+      - Every implementation task must include tests covering its spec ACs
+      - "Tests must be annotated with # AC: @spec-ref ac-N comments linking to the spec AC they
+        cover"
+      - The local-review workflow checks for AC annotation coverage before PR
+      - Tests must not require a running ComfyUI instance or GPU
+includes: []
+kynetic_meta: "1.0"
+observations:
+  - _ulid: 01KH5140KRDP91DHZCZ3Z2G0XZ
+    type: success
+    content: "Parallel subagent research during spec-plan-design: Launching a general-purpose subagent
+      for ComfyUI testing research while continuing main conversation was efficient and produced
+      comprehensive findings without blocking the planning flow."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-11T00:20:20.216Z
+  - _ulid: 01KH5142AKZ0J43JTZ4PZ8BPXY
+    type: success
+    content: "kspec batch for bulk operations: Using atomic batch to mark 21 tasks eligible and wire 18
+      dependency links saved significant time. Atomic rollback on typo was correct behavior and
+      caught the error cleanly."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-11T00:20:21.971Z
+  - _ulid: 01KH5HAKP98WMBZXARWR21BD4N
+    type: friction
+    content: "pytest vs ComfyUI __init__.py: Root __init__.py with relative imports (from .nodes.x)
+      breaks pytest Package collector. Fix requires three-part solution: (1) try/except ImportError
+      in __init__.py, (2) collect_ignore = ['__init__.py'] in root conftest.py, (3)
+      --import-mode=importlib in pytest config. Took 6 iterations to discover this pattern."
+    author: "@claude"
+    resolution: "Resolved by PR #29: relative imports + _UnifiedFinder conftest.py. 491 tests pass, 0
+      deprecation warnings, ComfyUI loads correctly."
+    resolved: true
+    resolved_at: 2026-02-11T17:12:25.427Z
+    resolved_by: "@claude"
+    created_at: 2026-02-11T05:03:33.577Z
+  - _ulid: 01KH6V1DD255YA5H8QMGBHDP4B
+    type: success
+    content: "Detailed handoff documents with root cause analysis: The fix/relative-imports handoff
+      correctly identified the dual module identity problem, listed option space (A/B/C), and
+      pinpointed the broken _SubpackageFinder in conftest.py. This saved significant debugging time
+      on a complex Python import system issue. Pattern: when handing off complex debugging tasks,
+      include specific root cause hypothesis and concrete file-level pointers."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-11T17:12:32.418Z
+  - _ulid: 01KH6Y5YY3XCP36WXH9PZ2TK88
+    type: success
+    content: Parallel codex + claude review on the same PR catches issues from different angles and
+      builds confidence in diagnosis. Codex found the same key prefix bug independently.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-11T18:07:27.171Z
+  - _ulid: 01KH6Y61A4GBSDFYSKK5HRX26R
+    type: friction
+    content: Unit tests with mocks can validate the wrong behavior when the mock reproduces a production
+      bug. Key prefix mismatch was invisible because MockModelPatcher had the same inconsistency as
+      real code. Live runtime testing was the only way to catch it.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-11T18:07:29.604Z
+  - _ulid: 01KH71QQWF7YPS5BVN3MNKB401
+    type: success
+    content: "Reference implementation comparison is highly effective for debugging correctness issues.
+      When output is wrong, diff the code path against the known-good reference (merge-router) step
+      by step — traces through real framework code (ComfyUI calculate_weight) rather than mocks.
+      Found two bugs in one session this way: tuple format and alpha reading."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-11T19:09:35.503Z
+  - _ulid: 01KH7F8SGESVV3N6CK38EPRRFV
+    type: friction
+    content: "Ported grouping criteria not verified against downstream consumers: OpSignature included
+      affecting_sets (from merge-router port) but the evaluation pipeline never consumed it — the
+      loader already filters by set_id. This caused 200+ tiny groups instead of ~10. Pattern: when
+      porting algorithms, trace each grouping/filtering criterion through the full pipeline to
+      verify it is actually used, not just structurally mirrored from the source."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-11T23:06:05.710Z
+  - _ulid: 01KH7MPS72Z8R7PBZJZ1DECGJ9
+    type: friction
+    content: Tasks can get stuck in pending_review between sessions when PR merges but task complete is
+      never called. Session start should check for pending_review tasks and prompt completion.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-12T00:41:07.042Z
+  - _ulid: 01KH7MQ085CVEG86MGGV082JT3
+    type: success
+    content: Parallel subagent evaluation of all pending tasks against codebase state — quickly
+      identified 2 already-complete, 2 partial, and 6 genuinely pending tasks in one pass
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-12T00:41:14.245Z
+  - _ulid: 01KH89KAN9WEDS2WSA6R37NS9M
+    type: success
+    content: "Parallel 3-agent research pattern for audit tasks: launch mock-impl, real-API, and
+      usage-pattern agents simultaneously. One round produced comprehensive audit with no follow-up
+      needed. Good for any comparison/divergence analysis."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-12T06:46:13.929Z
+  - _ulid: 01KH8CFD570MKM3SG96WSX33W1
+    type: success
+    content: Explore subagent (very thorough) for multi-module context gathering — one round-trip to
+      build comprehensive mental model spanning batch_groups, recipe_eval, gpu_ops, and test
+      patterns. Saved many sequential reads on the E2E multi-set task.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-12T07:36:31.143Z
+  - _ulid: 01KH9NXRHCM2E593FM3PPZX5ND
+    type: success
+    content: "Parallel 4-agent deep dive for performance analysis: GPU ops, recipe walking, merge-router
+      comparison, LoRA loading. Produced comprehensive view in ~90s. Interactive triage with
+      AskUserQuestion per item (create/research/inbox/skip) kept user aligned and prevented 3 wasted
+      tasks through research-before-acting."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-12T19:40:53.165Z
+  - _ulid: 01KH9NXZRX3PEXBXCRE60K11V7
+    type: friction
+    content: Subagent research quality unreliable for quantitative claims - ranking agent said <0.5% of
+      merge time, background benchmark said 48.7%, correct benchmark with realistic shapes showed
+      1.9% on GPU. Three different numbers, only the manual benchmark was right. Need to validate
+      perf claims with real measurements.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-12T19:41:00.573Z
+  - _ulid: 01KH9YAW290Y1NJBEWD428TQCZ
+    type: success
+    content: "Parallel codex + pr-review catches complementary issues: codex found VRAM regression
+      (register liveness), pr-review caught style/annotation gaps. Both completed in ~3min."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-12T22:07:51.369Z
+  - _ulid: 01KHA138MCR7XFAA3329WXREQ8
+    type: success
+    content: spec-plan manual path is efficient for single-AC additions — avoids import document
+      overhead while still going through design workflow
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-12T22:56:07.820Z
+  - _ulid: 01KHA7KF2BVABEKJ348XBHSCTE
+    type: friction
+    content: "kspec batch doesn't support forward references between commands. Tasks created in a batch
+      can't be referenced by task notes or depends-on in the same batch. Workaround: split into 2
+      batches (create entities first, annotate second). Encountered when creating specs+tasks+notes
+      for individual-block-control and layer-type-filter-impl."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-13T00:49:50.156Z
+  - _ulid: 01KHA99ENF8QWX6EP9VHZBY2P7
+    type: success
+    content: Batching multiple small cleanup tasks into a single PR reduces overhead (branch creation,
+      CI runs, review cycles) without sacrificing clarity
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-13T01:19:19.215Z
+  - _ulid: 01KHA99MSXF44V3BPCP15G7MRM
+    type: success
+    content: Subagent PR review caught a missed AC-in-docstring that manual editing overlooked —
+      validates the implement→review→fix→merge pattern for annotation-heavy mechanical changes
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-13T01:19:25.502Z
+  - _ulid: 01KHAKZCM2XNSM29G1V1VTA3V5
+    type: friction
+    content: Committed to main before creating feature branch — required soft-reset, recommit,
+      force-push, and main reset to fix. Now documented in MEMORY.md as 'branch before commit'
+      principle.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-13T04:26:03.778Z
+  - _ulid: 01KHAKZEH6RG6FP8V2MSZDP64Y
+    type: friction
+    content: AC annotation placement inconsistency between test classes (before-def vs
+      after-def/before-docstring). Standardized to before-def in MEMORY.md and fixed the 5 tests
+      from this session.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-13T04:26:05.735Z
+  - _ulid: 01KHAKZGT91FWYHSXF1DZ9FE02
+    type: success
+    content: Background subagent for PR review works well — launched pr-review while staying available,
+      review came back with useful style observation that led to convention improvement.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-13T04:26:08.073Z
+  - _ulid: 01KHCJHDS03M89PT92DP1WV1PR
+    type: success
+    content: "Subagent plan review for standalone-ness catches real blockers: After writing a spec plan,
+      launching a Plan agent to review the document against actual codebase files found 5
+      implementation blockers (wrong file locations, missing isinstance dispatch points across 6+
+      files, unspecified function signature changes, performance implications of all-key processing,
+      architecture detection on un-normalized keys). Pattern: give the reviewer read access to the
+      plan AND the actual code it references, ask it to verify file paths, function names, and
+      interface assumptions."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-13T22:39:26.497Z
+  - _ulid: 01KHCXXSJRS54J8QTRBVZ8X1C3
+    type: success
+    content: "Tensor raw bytes without numpy: use bytes(tensor.untyped_storage())[:n] instead of
+      tensor.numpy().tobytes(). numpy may not be installed in all environments (ComfyUI bundles
+      torch but not always numpy). Pattern used in lib/persistence.py compute_base_identity."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-14T01:58:26.137Z
+  - _ulid: 01KHDNHK4E7S29P2T0B02ABQVS
+    type: success
+    content: "Parallel plan review (holistic agent + Codex) catches more issues than either alone.
+      Holistic review found 7 gaps and 6 issues, Codex independently confirmed 3 MUST-FIX items.
+      Pattern: launch both in parallel, consolidate findings, then update plan before ExitPlanMode."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-14T08:51:12.142Z
+  - _ulid: 01KHG39TG1KSM8V6Q9ZXCG6PW0
+    type: friction
+    content: Block config node tests have kwargs boilerplate — every test method in
+      test_per_block_control.py independently constructs full kwargs dicts. Adding new sliders
+      requires 15+ individual edits across the file. Missed some test methods on first pass
+      (klein_4b, boundary_values) causing iterative failures. A shared fixture or helper that
+      generates full kwargs from INPUT_TYPES would eliminate this.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-15T07:30:06.465Z
+  - _ulid: 01KHH4E8EXCDM521MKYNYYVJEH
+    type: success
+    content: "Plans with exact file paths, line numbers, and before/after code snippets make
+      implementation mechanical — zero debugging cycles across multi-file changes. Session proved: 5
+      files changed, all 870 tests green on first run, no iteration needed."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-15T17:09:14.846Z
+  - _ulid: 01KHHGS7XN71RE650P1SPJ392B
+    type: success
+    content: "One-at-a-time AskUserQuestion during spec-plan design phase produces clear,
+      non-backtracking decisions. This session: 5 design questions (merge algorithm, LoRA sharing,
+      block config org, loader scope, type safety) each with 2-3 concrete options and descriptions.
+      User chose decisively each time, no revisiting. Better than batching multiple questions or
+      open-ended discussion."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-15T20:44:57.653Z
+  - _ulid: 01KHHJMPQV3DQE61NRTZR46HWJ
+    type: success
+    content: Parallel spec+task fetch then kspec batch for automation triage — fetching all specs/tasks
+      in parallel, reviewing as a batch, then using kspec batch --commands to mark all eligible
+      atomically is the most efficient triage pattern.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-15T21:17:26.139Z
+  - _ulid: 01KHHJMRQ4NJEY0YEFQJ805PS6
+    type: success
+    content: Spike investigations driven by specific task-note questions — having 4 concrete questions
+      in the spike task notes focused the source code investigation and prevented scope creep.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-15T21:17:28.165Z
+  - _ulid: 01KHHVVH9KAC2G0CGR4GXKZT0Q
+    type: friction
+    content: "make_eval_fn closure duplicated across exit nodes (exit.py + clip_exit.py) — identical
+      parameter threading pattern means any new parameter to execute_plan requires editing both
+      closures identically. Hit when adding domain parameter: both needed dom added to closure args
+      and domain=dom to execute_plan call."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-15T23:58:27.123Z
+  - _ulid: 01KHHXY941NB9143A3KHGJQMR6
+    type: friction
+    content: "Codex review leaves working tree on wrong branch — runs gh pr checkout but does not
+      restore original branch. Requires manual git checkout after codex review completes. Fix:
+      save/restore branch in codex skill, or use detached worktree."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-16T00:34:54.209Z
+  - _ulid: 01KHHXYAT9XAJ5BHZAZ87NT42Z
+    type: success
+    content: Analysis-first approach with Explore agent for memory/performance bugs — spawning a
+      thorough codebase analysis before proposing fixes corrected wrong assumptions from the initial
+      issue report (e.g., .cpu().to() is a no-op, not a copy). Prevented wasted effort on
+      non-issues.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-16T00:34:55.945Z
+  - _ulid: 01KHQDPFN8DTV30E8P9V7ADVQM
+    type: friction
+    content: PR review skills (codex, subagent) attempt APPROVE/REQUEST_CHANGES event on own PRs, get
+      HTTP 422 from GitHub, then fall back to COMMENT. Wastes API calls and time. Should detect
+      author == authenticated user and default to COMMENT event upfront.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-18T03:46:28.136Z
+  - _ulid: 01KHQKRHH93DR3YTM1SA3GJ82Z
+    type: success
+    content: "Post-import review agent catches structural issues (missing task deps, AC ordering,
+      missing test guidance) before implementation starts. Distinct from plan review which catches
+      spec gaps. Three-layer review: dual plan review (holistic + codex) -> import -> post-import
+      review of artifacts in kspec."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-18T05:32:27.049Z
+  - _ulid: 01KHQKRQDJAJAJJFP2CDG1X7DQ
+    type: friction
+    content: Session checkpoint hook fires repeatedly on .claude/plans/ working artifacts during
+      spec-plan-import workflow. Plan files are intentionally uncommitted (they are import inputs,
+      not source code). This session had 4 interruptions for the same file. Hook should either
+      exclude .claude/plans/ or the import workflow should delete the plan file immediately after
+      successful import.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-18T05:32:33.074Z
+  - _ulid: 01KHQP42FMAHTTJDFT7F7ZDVJ7
+    type: success
+    content: "Parallel codex + pr-review pattern works well — both complete in ~90s, consistent
+      verdicts, no merge conflicts. Key: instruct pr-review agent 'review only, no merge'."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-18T06:13:42.004Z
+  - _ulid: 01KHVXFNSANCJGHKA333R35WH7
+    type: success
+    content: "Parallel reviewers (pr-review + codex) catch complementary issues: pr-review validates
+      architecture/flow/AC coverage, codex catches test quality gaps (e.g., regression test using
+      tiny tensors that pass under both old and new logic). Running both in parallel adds ~2 min and
+      caught a real defect in PR #86."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-19T21:39:19.979Z
+  - _ulid: 01KHVXFXM201E0TZD01HH336JY
+    type: success
+    content: "Diagnostic logging for live debugging: inserting targeted logger.info calls at decision
+      points (cache lookup, cache write) and restarting the service quickly identified a user config
+      issue (enable_cache=False) that would have been very hard to diagnose remotely otherwise."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-02-19T21:39:28.002Z
+skills:
+  - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
+    description: Get help with kspec commands and workflows
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: help
+    name: Kspec Help
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9ATCYGMFWHQJGMA9KSC
+    description: Capture and act on systemic patterns — friction, successes, questions, and ideas. The
+      feedback loop that drives process improvement.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: observe
+    name: Observations
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9B84SRK4E2EFMPMK8B7
+    description: Structured reflection at the end of work sessions. Identifies learnings, friction
+      points, and improvements for system evolution.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: reflect
+    name: Session Reflection
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9BNF2CK6VNZEEWZ9M7Q
+    description: Triage inbox items systematically. Records decisions with audit trail, then executes
+      actions. Supports inbox, observations, and automation eligibility triage.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: triage
+    name: Triage
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9C7DE0ESP7KNABZYEQE
+    description: Process inbox items using the record-act pattern. Categorize, promote to spec/task,
+      merge duplicates, defer, or delete stale items with full audit trail.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: triage-inbox
+    name: Inbox Triage
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9CP5EGS5S71DWHPCC5E
+    description: Assess and prepare tasks for automation eligibility. Verify spec coverage, acceptance
+      criteria, and task readiness for automated agents.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: triage-automation
+    name: Automation Triage
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9D6PNZ4PJ3XFAXJZP09
+    description: Create and maintain specification items — modules, features, requirements, acceptance
+      criteria, and traits. The source of truth for what to build.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: writing-specs
+    name: Writing Specs
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9DKBSWA8D4E6V6GKFD2
+    description: Translate approved plans into specs and tasks. Import structured documents or create
+      incrementally. Plans persist as durable artifacts with audit trail.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: plan
+    name: Plan to Spec
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9E11TH3M9R94QH838J0
+    description: Structured task lifecycle — start, work, note, submit, complete. AC annotations, fix
+      cycle handling via review records, scope management, and quality checks.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: task-work
+    name: Task Work
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9ECDPGEGETSCD0PT0DW
+    description: How to review work and use kspec review records. Covers both reviewer and worker
+      perspectives — creating reviews, structuring findings, AC coverage verification, review
+      principles, and the full review record interface.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: review
+    name: Review
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9ERGXRE7VPNY8RY9TV8
+    description: Merge approved work into an integration branch. Local-first git merge with gates based
+      on kspec review disposition — approved status, passing checks, and resolved blocker threads.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: merge
+    name: Merge
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9F46SCV2ME4J8RA9D0M
+    description: Review a plan document for quality, completeness, and readiness. Checks spec quality,
+      task standalone-ness, dependency ordering, and alignment with existing specs.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: review-plan
+    name: Plan Review
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
+  - _ulid: 01KQ62Q9FHFNNKCTHF196R7KVB
+    description: Formalize repeatable patterns into trackable kspec workflows. Design steps, choose
+      triggers, create loop variants, and integrate with skills.
+    origin: core
+    depends_on: []
+    tags:
+      - core
+    _type: skill
+    allowed_tools: []
+    id: create-workflow
+    name: Create Workflow
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 0.13.0
 workflows:
   - _ulid: 01KH4D2G8XEYKRQNNZR9HC6S8A
-    id: task-work-session
-    trigger: manual
     description: Core pattern for working on a task. Full lifecycle from start through PR merge.
+    id: task-work-session
     steps:
       - type: check
         content: |-
@@ -54,11 +656,11 @@ workflows:
         content: |-
           Create PR.
           Use: /pr skill or gh pr create
+    trigger: manual
   - _ulid: 01KH4D2XWDYBF7V5FW6GA497JC
-    id: session-reflect
-    trigger: session-end
     description: Structured reflection after work sessions. Surfaces learnings, identifies friction, and
       captures improvements.
+    id: session-reflect
     steps:
       - type: action
         content: |-
@@ -90,11 +692,11 @@ workflows:
           - Friction patterns: kspec meta observe friction
           - Success patterns: kspec meta observe success
           - Open questions: kspec meta question add
+    trigger: session-end
   - _ulid: 01KH4D3C8G9G78XHVVJXB0B874
-    id: pr-review-merge
-    trigger: pr-merge
     description: Quality gate for reviewing and merging PRs. Ensures all CI passes, reviews addressed,
       and threads resolved before merge.
+    id: pr-review-merge
     steps:
       - type: check
         content: All CI checks complete (none pending or running)
@@ -129,10 +731,10 @@ workflows:
         content: |-
           Merge the PR.
           Use: gh pr merge (prefer merge commit to preserve trailers)
+    trigger: pr-merge
   - _ulid: 01KH4D3QHJSWS40QETS1K5ER2N
-    id: inbox-triage
-    trigger: session-start
     description: Systematic processing of inbox items into specs and tasks.
+    id: inbox-triage
     steps:
       - type: action
         content: |-
@@ -160,11 +762,11 @@ workflows:
           1. Check if spec covers the change
           2. Create or update spec with AC if needed
           3. Derive task or promote inbox item
+    trigger: session-start
   - _ulid: 01KH4D44TWNR22J821DBRS9YPV
-    id: local-review
-    trigger: manual
     description: Quality enforcement for pre-PR review. Verifies AC coverage with annotations, test
       quality, and test isolation.
+    id: local-review
     steps:
       - type: action
         content: |-
@@ -192,11 +794,11 @@ workflows:
           Report findings.
           List all MUST-FIX issues that block PR creation.
           Non-blocking suggestions can be noted separately.
+    trigger: manual
   - _ulid: 01KH4D4MGKTBM16W1NFT9TMQJS
-    id: pr-review-loop
-    trigger: loop-pr-review
     description: PR review subagent workflow for loop mode. Runs local review, verifies AC coverage and
       spec alignment, fixes issues, waits for CI, and merges with quality gates.
+    id: pr-review-loop
     steps:
       - type: action
         content: |-
@@ -241,12 +843,12 @@ workflows:
         content: |-
           Mark task completed with PR reference.
           Use: kspec task complete @task --reason "Merged in PR #N"
+    trigger: loop-pr-review
   - _ulid: 01KH4W1R540NJ1MYZ1XAM9D7KR
-    id: spec-plan-design
-    trigger: manual
     description: Research and design phase for plan-to-spec translation. Explore codebase, clarify
       requirements, design approach, review for completeness and spec gaps. Concludes with choosing
       import or manual execution path.
+    id: spec-plan-design
     steps:
       - type: action
         content: >-
@@ -262,9 +864,9 @@ workflows:
 
           Focus on what already exists to avoid duplication. Use parallel searches for efficiency.
         inputs:
-          - name: feature_description
+          - type: string
             description: What you are planning to build
-            type: string
+            name: feature_description
       - type: action
         content: >-
           Clarify requirements with the user.
@@ -310,12 +912,12 @@ workflows:
         options:
           - Import path - write structured plan document and auto-generate (3+ specs, batch creation)
           - Manual path - create specs incrementally with kspec commands (1-2 specs, quick additions)
-  - _ulid: 01KH4W2EVRR14Z55XSGY646P3C
-    id: spec-plan-import
     trigger: manual
+  - _ulid: 01KH4W2EVRR14Z55XSGY646P3C
     description: Execute plan via structured document import - write document, choose module, preview,
       import, review traits, validate, start work. Follows @spec-plan-design. Import auto-creates
       plan record with status active.
+    id: spec-plan-import
     steps:
       - type: action
         content: >-
@@ -327,9 +929,9 @@ workflows:
 
           ## Tasks with derive_from_specs flag, ## Implementation Notes (plain text).
         inputs:
-          - name: plan_file_path
+          - type: string
             description: Path to the markdown plan file
-            type: string
+            name: plan_file_path
       - type: action
         content: >-
           Choose target module.
@@ -344,9 +946,9 @@ workflows:
 
           Note the generated reference for the next step.
         inputs:
-          - name: module_ref
+          - type: ref
             description: Reference to the target module
-            type: ref
+            name: module_ref
       - type: action
         content: |-
           Preview with dry-run.
@@ -403,12 +1005,12 @@ workflows:
           Pick first task from: kspec plan get @plan --json (derived_tasks).
           Use: kspec task start @task
           Then follow /task-work for task lifecycle.
-  - _ulid: 01KH4W30QQFDJS6WF58B47PB0J
-    id: spec-plan-manual
     trigger: manual
+  - _ulid: 01KH4W30QQFDJS6WF58B47PB0J
     description: Execute plan via incremental spec creation - create plan record, find parent, create
       specs with AC, review traits, derive tasks with plan linking, validate, start work. Follows
       @spec-plan-design.
+    id: spec-plan-manual
     steps:
       - type: action
         content: >-
@@ -421,9 +1023,9 @@ workflows:
 
           Status approved because you are committing to the work.
         inputs:
-          - name: plan_ref
+          - type: ref
             description: The created plan reference
-            type: ref
+            name: plan_ref
       - type: action
         content: >-
           Find parent and create spec items.
@@ -441,9 +1043,9 @@ workflows:
 
           Repeat for each spec.
         inputs:
-          - name: parent_ref
+          - type: ref
             description: Reference to the parent item
-            type: ref
+            name: parent_ref
       - type: action
         content: >-
           Add acceptance criteria.
@@ -509,10 +1111,10 @@ workflows:
           Start implementation.
           Use: kspec task start @first-task
           Then follow /task-work for task lifecycle.
+    trigger: manual
   - _ulid: 01KH53VJMS1TPSTYMWCPHJZMTR
-    id: session-start
-    trigger: session-start
     description: Get context at the beginning of a work session.
+    id: session-start
     steps:
       - type: action
         content: Run kspec session start to get context
@@ -523,10 +1125,10 @@ workflows:
         content: Review ready tasks and inbox items
       - type: action
         content: Start work on chosen task via kspec task start
+    trigger: session-start
   - _ulid: 01KH53VMGSZYW2QG2PQW7PWN99
-    id: task-lifecycle
-    trigger: task-complete
     description: Complete a task properly with notes and cleanup.
+    id: task-lifecycle
     steps:
       - type: action
         content: Add completion note describing what was done
@@ -537,18 +1139,18 @@ workflows:
         on_fail: Commit changes with descriptive message
       - type: action
         content: Review if task unblocked other work
+    trigger: task-complete
   - _ulid: 01KH53VPSMRZ2H3B3A4F2YXWD0
-    id: codebase-audit
-    trigger: pre-release
     description: "Comprehensive codebase audit for release readiness. Five-phase workflow: parallel
       exploration (docs, code, config, tests, specs), compilation by severity, interactive triage,
       execution, and summary."
+    id: codebase-audit
     steps: []
+    trigger: pre-release
   - _ulid: 01KH53VRVYAGYWHA6SMMSZP251
-    id: spec-first
-    trigger: behavior-change
     description: "Check spec coverage before implementing changes. Core principle: If changing behavior
       and spec doesn't cover it, update the spec first."
+    id: spec-first
     steps:
       - type: check
         content: Does the spec cover this change?
@@ -565,11 +1167,11 @@ workflows:
         content: Derive task from spec via kspec derive @spec-item
       - type: action
         content: Implement the change
+    trigger: behavior-change
   - _ulid: 01KH53W0D7GT6C50PGEP07SPEV
-    id: create-workflow
-    trigger: manual
     description: Meta-workflow for creating new workflows. Ensures consistent structure and matching
       skill integration.
+    id: create-workflow
     steps:
       - type: action
         content: |-
@@ -605,11 +1207,11 @@ workflows:
           Verify inputs/notes are captured correctly
       - type: check
         content: Commit changes to both main (skill) and shadow (workflow) branches
+    trigger: manual
   - _ulid: 01KH53WBNQFWW4PVZEQTPSSM67
-    id: session-reflect-loop
-    trigger: loop-iteration-end
     description: Autonomous reflection for loop mode. High-confidence captures only. MUST search
       existing before capturing. No user interaction.
+    id: session-reflect-loop
     steps:
       - type: action
         content: |-
@@ -655,12 +1257,12 @@ workflows:
 
           Only capture items that passed the evaluation in step 3.
           Be selective - lower volume, higher quality.
+    trigger: loop-iteration-end
   - _ulid: 01KH53X8R9V2QX5FKMZYMA5ABV
-    id: task-work-loop
-    trigger: manual
     description: "Loop variant of task-work-session for autonomous agents. Auto-filters to
       automation-eligible tasks, auto-resolves decisions. Task selection: in_progress > unblocking >
       priority. Still verifies work needed. PR review handled externally by ralph."
+    id: task-work-loop
     steps:
       - type: action
         content: |-
@@ -679,6 +1281,8 @@ workflows:
           3. Highest priority ready task (lowest number = higher priority)
 
           Note: pending_review tasks are handled externally by ralph spawning PR review subagents.
+        execution:
+          mode: silent
         options:
           - in_progress task exists -> continue that task
           - Ready task unblocks others -> select that task
@@ -687,8 +1291,6 @@ workflows:
             automatically)
           - kspec tasks ready --eligible shows all blocked -> stop responding (ralph exits
             automatically)
-        execution:
-          mode: silent
       - type: check
         content: |-
           Verify work is needed - but VALIDATE, do not trust notes.
@@ -704,11 +1306,11 @@ workflows:
           - Notes say already done (verify yourself)
           - Tests exist but skip in CI (that is a gap to fix)
           - Someone said it was implemented (run the tests)
+        execution:
+          mode: silent
         on_fail: |-
           Only if tests PASS and ACs are COVERED:
           Mark task complete with Already implemented reason and EXIT
-        execution:
-          mode: silent
       - type: action
         content: |-
           Start selected task (if not already in_progress).
@@ -734,11 +1336,11 @@ workflows:
           - No TODO/FIXME - no placeholder comments
 
           If DoD criteria exist and are not met, fix the gaps first.
+        execution:
+          mode: silent
         on_fail: |-
           Do not proceed with DoD violations.
           Either fix the gaps or escalate to user if scope is unclear.
-        execution:
-          mode: silent
       - type: action
         content: |-
           Commit changes with Task: @task trailer.
@@ -759,398 +1361,4 @@ workflows:
           After PR created, EXIT - ralph handles PR review via separate subagent.
         execution:
           mode: silent
-conventions:
-  - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
-    domain: commits
-    rules:
-      - Use conventional commit format (feat, fix, docs, refactor, test, chore)
-      - Include Task trailer when completing task work
-      - Include Spec trailer when implementing spec item
-      - Keep subject line under 72 characters
-    examples: []
-  - _ulid: 01KH4D54RSWVY7TE2E8RBV892W
-    domain: notes
-    rules:
-      - Add notes during work, not just at end
-      - Include context for decisions made
-      - Reference related commits, PRs, or issues
-    examples: []
-  - _ulid: 01KH509WYHJKSQ1XXE7FYDATA1
-    domain: testing
-    rules:
-      - Every implementation task must include tests covering its spec ACs
-      - "Tests must be annotated with # AC: @spec-ref ac-N comments linking to the spec AC they
-        cover"
-      - The local-review workflow checks for AC annotation coverage before PR
-      - Tests must not require a running ComfyUI instance or GPU
-    examples: []
-observations:
-  - _ulid: 01KH5140KRDP91DHZCZ3Z2G0XZ
-    type: success
-    content: "Parallel subagent research during spec-plan-design: Launching a general-purpose subagent
-      for ComfyUI testing research while continuing main conversation was efficient and produced
-      comprehensive findings without blocking the planning flow."
-    created_at: 2026-02-11T00:20:20.216Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH5142AKZ0J43JTZ4PZ8BPXY
-    type: success
-    content: "kspec batch for bulk operations: Using atomic batch to mark 21 tasks eligible and wire 18
-      dependency links saved significant time. Atomic rollback on typo was correct behavior and
-      caught the error cleanly."
-    created_at: 2026-02-11T00:20:21.971Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH5HAKP98WMBZXARWR21BD4N
-    type: friction
-    content: "pytest vs ComfyUI __init__.py: Root __init__.py with relative imports (from .nodes.x)
-      breaks pytest Package collector. Fix requires three-part solution: (1) try/except ImportError
-      in __init__.py, (2) collect_ignore = ['__init__.py'] in root conftest.py, (3)
-      --import-mode=importlib in pytest config. Took 6 iterations to discover this pattern."
-    created_at: 2026-02-11T05:03:33.577Z
-    author: "@claude"
-    resolved: true
-    resolution: "Resolved by PR #29: relative imports + _UnifiedFinder conftest.py. 491 tests pass, 0
-      deprecation warnings, ComfyUI loads correctly."
-    resolved_at: 2026-02-11T17:12:25.427Z
-    resolved_by: "@claude"
-  - _ulid: 01KH6V1DD255YA5H8QMGBHDP4B
-    type: success
-    content: "Detailed handoff documents with root cause analysis: The fix/relative-imports handoff
-      correctly identified the dual module identity problem, listed option space (A/B/C), and
-      pinpointed the broken _SubpackageFinder in conftest.py. This saved significant debugging time
-      on a complex Python import system issue. Pattern: when handing off complex debugging tasks,
-      include specific root cause hypothesis and concrete file-level pointers."
-    created_at: 2026-02-11T17:12:32.418Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH6Y5YY3XCP36WXH9PZ2TK88
-    type: success
-    content: Parallel codex + claude review on the same PR catches issues from different angles and
-      builds confidence in diagnosis. Codex found the same key prefix bug independently.
-    created_at: 2026-02-11T18:07:27.171Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH6Y61A4GBSDFYSKK5HRX26R
-    type: friction
-    content: Unit tests with mocks can validate the wrong behavior when the mock reproduces a production
-      bug. Key prefix mismatch was invisible because MockModelPatcher had the same inconsistency as
-      real code. Live runtime testing was the only way to catch it.
-    created_at: 2026-02-11T18:07:29.604Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH71QQWF7YPS5BVN3MNKB401
-    type: success
-    content: "Reference implementation comparison is highly effective for debugging correctness issues.
-      When output is wrong, diff the code path against the known-good reference (merge-router) step
-      by step — traces through real framework code (ComfyUI calculate_weight) rather than mocks.
-      Found two bugs in one session this way: tuple format and alpha reading."
-    created_at: 2026-02-11T19:09:35.503Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH7F8SGESVV3N6CK38EPRRFV
-    type: friction
-    content: "Ported grouping criteria not verified against downstream consumers: OpSignature included
-      affecting_sets (from merge-router port) but the evaluation pipeline never consumed it — the
-      loader already filters by set_id. This caused 200+ tiny groups instead of ~10. Pattern: when
-      porting algorithms, trace each grouping/filtering criterion through the full pipeline to
-      verify it is actually used, not just structurally mirrored from the source."
-    created_at: 2026-02-11T23:06:05.710Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH7MPS72Z8R7PBZJZ1DECGJ9
-    type: friction
-    content: Tasks can get stuck in pending_review between sessions when PR merges but task complete is
-      never called. Session start should check for pending_review tasks and prompt completion.
-    created_at: 2026-02-12T00:41:07.042Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH7MQ085CVEG86MGGV082JT3
-    type: success
-    content: Parallel subagent evaluation of all pending tasks against codebase state — quickly
-      identified 2 already-complete, 2 partial, and 6 genuinely pending tasks in one pass
-    created_at: 2026-02-12T00:41:14.245Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH89KAN9WEDS2WSA6R37NS9M
-    type: success
-    content: "Parallel 3-agent research pattern for audit tasks: launch mock-impl, real-API, and
-      usage-pattern agents simultaneously. One round produced comprehensive audit with no follow-up
-      needed. Good for any comparison/divergence analysis."
-    created_at: 2026-02-12T06:46:13.929Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH8CFD570MKM3SG96WSX33W1
-    type: success
-    content: Explore subagent (very thorough) for multi-module context gathering — one round-trip to
-      build comprehensive mental model spanning batch_groups, recipe_eval, gpu_ops, and test
-      patterns. Saved many sequential reads on the E2E multi-set task.
-    created_at: 2026-02-12T07:36:31.143Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH9NXRHCM2E593FM3PPZX5ND
-    type: success
-    content: "Parallel 4-agent deep dive for performance analysis: GPU ops, recipe walking, merge-router
-      comparison, LoRA loading. Produced comprehensive view in ~90s. Interactive triage with
-      AskUserQuestion per item (create/research/inbox/skip) kept user aligned and prevented 3 wasted
-      tasks through research-before-acting."
-    created_at: 2026-02-12T19:40:53.165Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH9NXZRX3PEXBXCRE60K11V7
-    type: friction
-    content: Subagent research quality unreliable for quantitative claims - ranking agent said <0.5% of
-      merge time, background benchmark said 48.7%, correct benchmark with realistic shapes showed
-      1.9% on GPU. Three different numbers, only the manual benchmark was right. Need to validate
-      perf claims with real measurements.
-    created_at: 2026-02-12T19:41:00.573Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KH9YAW290Y1NJBEWD428TQCZ
-    type: success
-    content: "Parallel codex + pr-review catches complementary issues: codex found VRAM regression
-      (register liveness), pr-review caught style/annotation gaps. Both completed in ~3min."
-    created_at: 2026-02-12T22:07:51.369Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHA138MCR7XFAA3329WXREQ8
-    type: success
-    content: spec-plan manual path is efficient for single-AC additions — avoids import document
-      overhead while still going through design workflow
-    created_at: 2026-02-12T22:56:07.820Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHA7KF2BVABEKJ348XBHSCTE
-    type: friction
-    content: "kspec batch doesn't support forward references between commands. Tasks created in a batch
-      can't be referenced by task notes or depends-on in the same batch. Workaround: split into 2
-      batches (create entities first, annotate second). Encountered when creating specs+tasks+notes
-      for individual-block-control and layer-type-filter-impl."
-    created_at: 2026-02-13T00:49:50.156Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHA99ENF8QWX6EP9VHZBY2P7
-    type: success
-    content: Batching multiple small cleanup tasks into a single PR reduces overhead (branch creation,
-      CI runs, review cycles) without sacrificing clarity
-    created_at: 2026-02-13T01:19:19.215Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHA99MSXF44V3BPCP15G7MRM
-    type: success
-    content: Subagent PR review caught a missed AC-in-docstring that manual editing overlooked —
-      validates the implement→review→fix→merge pattern for annotation-heavy mechanical changes
-    created_at: 2026-02-13T01:19:25.502Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHAKZCM2XNSM29G1V1VTA3V5
-    type: friction
-    content: Committed to main before creating feature branch — required soft-reset, recommit,
-      force-push, and main reset to fix. Now documented in MEMORY.md as 'branch before commit'
-      principle.
-    created_at: 2026-02-13T04:26:03.778Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHAKZEH6RG6FP8V2MSZDP64Y
-    type: friction
-    content: AC annotation placement inconsistency between test classes (before-def vs
-      after-def/before-docstring). Standardized to before-def in MEMORY.md and fixed the 5 tests
-      from this session.
-    created_at: 2026-02-13T04:26:05.735Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHAKZGT91FWYHSXF1DZ9FE02
-    type: success
-    content: Background subagent for PR review works well — launched pr-review while staying available,
-      review came back with useful style observation that led to convention improvement.
-    created_at: 2026-02-13T04:26:08.073Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHCJHDS03M89PT92DP1WV1PR
-    type: success
-    content: "Subagent plan review for standalone-ness catches real blockers: After writing a spec plan,
-      launching a Plan agent to review the document against actual codebase files found 5
-      implementation blockers (wrong file locations, missing isinstance dispatch points across 6+
-      files, unspecified function signature changes, performance implications of all-key processing,
-      architecture detection on un-normalized keys). Pattern: give the reviewer read access to the
-      plan AND the actual code it references, ask it to verify file paths, function names, and
-      interface assumptions."
-    created_at: 2026-02-13T22:39:26.497Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHCXXSJRS54J8QTRBVZ8X1C3
-    type: success
-    content: "Tensor raw bytes without numpy: use bytes(tensor.untyped_storage())[:n] instead of
-      tensor.numpy().tobytes(). numpy may not be installed in all environments (ComfyUI bundles
-      torch but not always numpy). Pattern used in lib/persistence.py compute_base_identity."
-    created_at: 2026-02-14T01:58:26.137Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHDNHK4E7S29P2T0B02ABQVS
-    type: success
-    content: "Parallel plan review (holistic agent + Codex) catches more issues than either alone.
-      Holistic review found 7 gaps and 6 issues, Codex independently confirmed 3 MUST-FIX items.
-      Pattern: launch both in parallel, consolidate findings, then update plan before ExitPlanMode."
-    created_at: 2026-02-14T08:51:12.142Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHG39TG1KSM8V6Q9ZXCG6PW0
-    type: friction
-    content: Block config node tests have kwargs boilerplate — every test method in
-      test_per_block_control.py independently constructs full kwargs dicts. Adding new sliders
-      requires 15+ individual edits across the file. Missed some test methods on first pass
-      (klein_4b, boundary_values) causing iterative failures. A shared fixture or helper that
-      generates full kwargs from INPUT_TYPES would eliminate this.
-    created_at: 2026-02-15T07:30:06.465Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHH4E8EXCDM521MKYNYYVJEH
-    type: success
-    content: "Plans with exact file paths, line numbers, and before/after code snippets make
-      implementation mechanical — zero debugging cycles across multi-file changes. Session proved: 5
-      files changed, all 870 tests green on first run, no iteration needed."
-    created_at: 2026-02-15T17:09:14.846Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHHGS7XN71RE650P1SPJ392B
-    type: success
-    content: "One-at-a-time AskUserQuestion during spec-plan design phase produces clear,
-      non-backtracking decisions. This session: 5 design questions (merge algorithm, LoRA sharing,
-      block config org, loader scope, type safety) each with 2-3 concrete options and descriptions.
-      User chose decisively each time, no revisiting. Better than batching multiple questions or
-      open-ended discussion."
-    created_at: 2026-02-15T20:44:57.653Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHHJMPQV3DQE61NRTZR46HWJ
-    type: success
-    content: Parallel spec+task fetch then kspec batch for automation triage — fetching all specs/tasks
-      in parallel, reviewing as a batch, then using kspec batch --commands to mark all eligible
-      atomically is the most efficient triage pattern.
-    created_at: 2026-02-15T21:17:26.139Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHHJMRQ4NJEY0YEFQJ805PS6
-    type: success
-    content: Spike investigations driven by specific task-note questions — having 4 concrete questions
-      in the spike task notes focused the source code investigation and prevented scope creep.
-    created_at: 2026-02-15T21:17:28.165Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHHVVH9KAC2G0CGR4GXKZT0Q
-    type: friction
-    content: "make_eval_fn closure duplicated across exit nodes (exit.py + clip_exit.py) — identical
-      parameter threading pattern means any new parameter to execute_plan requires editing both
-      closures identically. Hit when adding domain parameter: both needed dom added to closure args
-      and domain=dom to execute_plan call."
-    created_at: 2026-02-15T23:58:27.123Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHHXY941NB9143A3KHGJQMR6
-    type: friction
-    content: "Codex review leaves working tree on wrong branch — runs gh pr checkout but does not
-      restore original branch. Requires manual git checkout after codex review completes. Fix:
-      save/restore branch in codex skill, or use detached worktree."
-    created_at: 2026-02-16T00:34:54.209Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHHXYAT9XAJ5BHZAZ87NT42Z
-    type: success
-    content: Analysis-first approach with Explore agent for memory/performance bugs — spawning a
-      thorough codebase analysis before proposing fixes corrected wrong assumptions from the initial
-      issue report (e.g., .cpu().to() is a no-op, not a copy). Prevented wasted effort on
-      non-issues.
-    created_at: 2026-02-16T00:34:55.945Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHQDPFN8DTV30E8P9V7ADVQM
-    type: friction
-    content: PR review skills (codex, subagent) attempt APPROVE/REQUEST_CHANGES event on own PRs, get
-      HTTP 422 from GitHub, then fall back to COMMENT. Wastes API calls and time. Should detect
-      author == authenticated user and default to COMMENT event upfront.
-    created_at: 2026-02-18T03:46:28.136Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHQKRHH93DR3YTM1SA3GJ82Z
-    type: success
-    content: "Post-import review agent catches structural issues (missing task deps, AC ordering,
-      missing test guidance) before implementation starts. Distinct from plan review which catches
-      spec gaps. Three-layer review: dual plan review (holistic + codex) -> import -> post-import
-      review of artifacts in kspec."
-    created_at: 2026-02-18T05:32:27.049Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHQKRQDJAJAJJFP2CDG1X7DQ
-    type: friction
-    content: Session checkpoint hook fires repeatedly on .claude/plans/ working artifacts during
-      spec-plan-import workflow. Plan files are intentionally uncommitted (they are import inputs,
-      not source code). This session had 4 interruptions for the same file. Hook should either
-      exclude .claude/plans/ or the import workflow should delete the plan file immediately after
-      successful import.
-    created_at: 2026-02-18T05:32:33.074Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHQP42FMAHTTJDFT7F7ZDVJ7
-    type: success
-    content: "Parallel codex + pr-review pattern works well — both complete in ~90s, consistent
-      verdicts, no merge conflicts. Key: instruct pr-review agent 'review only, no merge'."
-    created_at: 2026-02-18T06:13:42.004Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHVXFNSANCJGHKA333R35WH7
-    type: success
-    content: "Parallel reviewers (pr-review + codex) catch complementary issues: pr-review validates
-      architecture/flow/AC coverage, codex catches test quality gaps (e.g., regression test using
-      tiny tensors that pass under both old and new logic). Running both in parallel adds ~2 min and
-      caught a real defect in PR #86."
-    created_at: 2026-02-19T21:39:19.979Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-  - _ulid: 01KHVXFXM201E0TZD01HH336JY
-    type: success
-    content: "Diagnostic logging for live debugging: inserting targeted logger.info calls at decision
-      points (cache lookup, cache write) and restarting the service quickly identified a user config
-      issue (enable_cache=False) that would have been very hard to diagnose remotely otherwise."
-    created_at: 2026-02-19T21:39:28.002Z
-    author: "@claude"
-    resolved: false
-    resolution: null
-skills: []
-includes: []
+    trigger: manual
