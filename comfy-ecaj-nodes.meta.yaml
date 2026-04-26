@@ -99,6 +99,7 @@ agents:
       authentication requirements.
     tags:
       - scaffold-default
+    adapter: codex-acp
     auto_approve: true
     capabilities:
       - review
