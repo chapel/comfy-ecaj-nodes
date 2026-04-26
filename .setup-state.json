@@ -1,0 +1,40 @@
+{
+  "defaultsSeeded": true,
+  "defaultsSeededAt": "2026-04-26T23:41:46.678Z",
+  "scaffoldedItems": [
+    {
+      "type": "agent",
+      "id": "task-worker",
+      "_ulid": "01KQ62QA7EH5FKK0XF73RDP9WG"
+    },
+    {
+      "type": "agent",
+      "id": "pr-reviewer",
+      "_ulid": "01KQ62QA7V9KRZRSW49GV56HVB"
+    },
+    {
+      "type": "agent",
+      "id": "primary-dev",
+      "_ulid": "01KQ62QA8BG9JGCWK5Q8TK4QYR"
+    },
+    {
+      "type": "agent",
+      "id": "plan-reviewer",
+      "_ulid": "01KQ62QA8SGZG5QGTEY53C1JJQ"
+    },
+    {
+      "type": "convention",
+      "id": "commits"
+    },
+    {
+      "type": "convention",
+      "id": "architecture",
+      "_ulid": "01KQ62QA95D4NEBSBRKEEPX57P"
+    },
+    {
+      "type": "convention",
+      "id": "testing"
+    }
+  ],
+  "lastKnownVersion": "0.13.0"
+}

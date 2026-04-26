@@ -13,6 +13,108 @@ agents:
       - kspec
       - git
       - uv
+  - _ulid: 01KQ62QA7EH5FKK0XF73RDP9WG
+    description: Autonomous task worker. Picks up automation-eligible ready and needs_work tasks.
+    tags:
+      - scaffold-default
+    auto_approve: true
+    capabilities:
+      - code
+      - test
+      - refactor
+    concurrency:
+      max_concurrent: 1
+    conventions: []
+    dispatch:
+      - filter:
+          automation: eligible
+        on: task.in_progress
+      - filter:
+          automation: eligible
+        on: task.ready
+      - filter:
+          automation: eligible
+        on: task.needs_work
+    id: task-worker
+    name: Task Worker
+    skills:
+      - task-work
+    tools:
+      - kspec
+      - git
+      - npm
+  - _ulid: 01KQ62QA7V9KRZRSW49GV56HVB
+    description: Automated code reviewer. Reviews pending_review tasks from a detached snapshot and
+      merges via the supported merge helper when quality gates pass.
+    tags:
+      - scaffold-default
+    auto_approve: true
+    capabilities:
+      - review
+    concurrency:
+      max_concurrent: 1
+    conventions: []
+    dispatch:
+      - on: task.pending_review
+    id: pr-reviewer
+    name: PR Reviewer
+    skills:
+      - pr-review
+    tools:
+      - kspec
+      - git
+      - gh
+  - _ulid: 01KQ62QA8BG9JGCWK5Q8TK4QYR
+    description: General-purpose development agent for code, testing, refactoring, and code review tasks.
+    tags:
+      - scaffold-default
+    auto_approve: true
+    capabilities:
+      - code
+      - test
+      - refactor
+      - review
+    concurrency:
+      max_concurrent: 1
+    conventions: []
+    dispatch: []
+    id: primary-dev
+    name: Primary Development Agent
+    skills:
+      - task-work
+    tools:
+      - kspec
+      - git
+      - npm
+  - _ulid: 01KQ62QA8SGZG5QGTEY53C1JJQ
+    description: |-
+      Reviews plans for quality, completeness, and spec alignment.
+      Has review capability and plan-focused skills attached.
+
+      Adapter guidance: This agent uses the default adapter configured
+      for your project. If authentication fails with the default adapter,
+      you can switch adapters using:
+        kspec meta set agents --update plan-reviewer --adapter <adapter-name>
+      Run `kspec agent adapters` to list available adapters and their
+      authentication requirements.
+    tags:
+      - scaffold-default
+    auto_approve: true
+    capabilities:
+      - review
+    concurrency:
+      max_concurrent: 1
+    conventions: []
+    dispatch: []
+    id: plan-reviewer
+    name: Plan Reviewer
+    skills:
+      - review-plan
+      - writing-specs
+      - plan
+    tools:
+      - kspec
+      - git
 conventions:
   - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
     domain: commits
@@ -38,6 +140,21 @@ conventions:
         cover"
       - The local-review workflow checks for AC annotation coverage before PR
       - Tests must not require a running ComfyUI instance or GPU
+  - _ulid: 01KQ62QA95D4NEBSBRKEEPX57P
+    domain: architecture
+    examples: []
+    rules:
+      - "PLACEHOLDER: Replace this rule with your project's architectural constraints and patterns"
+hooks:
+  - _ulid: 01KQ62QAAESYP4ZTGSDZ1FNJ4F
+    action:
+      type: session_prompt
+      prompt: Run session reflection using /kspec:reflect
+      skills:
+        - reflect
+    enabled: true
+    name: default-session-reflect
+    on: session.idle
 includes: []
 kynetic_meta: "1.0"
 observations:
