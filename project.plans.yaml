@@ -3827,3 +3827,342 @@ plans:
     created_at: 2026-04-26T22:50:36.045Z
     completed_at: null
     notes: []
+  - _ulid: 01KQ5ZSQ13857R9CGT36JXYK91
+    slugs:
+      - plan-disk-backed-patch-output-plan
+    title: Disk-Backed Patch Output Plan
+    content: |
+      # Disk-Backed Patch Output Plan
+
+      ## Specs
+
+      ```yaml
+      - title: Disk-Backed Patch Output
+        slug: disk-backed-patch-output
+        type: feature
+        tags: [persistence, memory]
+        description: |
+          The Exit node can return a patched MODEL whose merged weight payload is
+          stored in a disk artifact instead of retained as in-memory patch tensors.
+        acceptance_criteria:
+          - id: ac-return-patched-model
+            given: |
+              A merge recipe produces affected diffusion model weights.
+            when: |
+              The Exit node runs in disk-backed patch mode.
+            then: |
+              The returned MODEL carries patches that reference a saved patch artifact
+              for the affected keys.
+          - id: ac-no-resident-patch-payload
+            given: |
+              The disk-backed patch MODEL has been returned.
+            when: |
+              The patch list is inspected before ComfyUI applies the patches.
+            then: |
+              The patch list does not retain the full merged tensors as its persistent
+              in-memory payload.
+          - id: ac-downstream-merge-equivalence
+            given: |
+              The same recipe is executed with in-memory set patches and with
+              disk-backed patches.
+            when: |
+              ComfyUI applies the patches for affected keys.
+            then: |
+              The resulting patched weights are equivalent for every affected key.
+
+      - title: Disk Patch Artifact Lifecycle
+        slug: disk-patch-artifact-lifecycle
+        type: requirement
+        tags: [persistence, cache]
+        description: |
+          Disk-backed patch artifacts remain valid for as long as returned patch
+          objects may need them and are reused only when they match the current recipe.
+        acceptance_criteria:
+          - id: ac-artifact-reuse
+            given: |
+              A disk patch artifact matches the current recipe identity.
+            when: |
+              The Exit node runs in disk-backed patch mode.
+            then: |
+              The existing patch artifact is reused without recomputing affected
+              tensors.
+          - id: ac-artifact-missing-error
+            given: |
+              A returned disk-backed patch object references an artifact that is no
+              longer available.
+            when: |
+              ComfyUI attempts to apply that patch.
+            then: |
+              Patch application fails with guidance identifying the missing artifact.
+          - id: ac-artifact-mode-is-distinct
+            given: |
+              A saved artifact exists for a different output mode or artifact kind.
+            when: |
+              Disk-backed patch mode checks the cache.
+            then: |
+              The artifact is not accepted as a disk-backed patch cache hit.
+
+      - title: Streaming Affected Patch Materialization
+        slug: streaming-affected-patch-materialization
+        type: requirement
+        tags: [persistence, memory]
+        description: |
+          Affected patch artifact creation does not require retaining all affected
+          merged tensors in process memory at the same time.
+        acceptance_criteria:
+          - id: ac-affected-results-streamed
+            given: |
+              A merge produces affected weights across multiple evaluation chunks.
+            when: |
+              Disk-backed patch mode writes the affected patch artifact.
+            then: |
+              Each affected weight is written to the artifact sink before later chunks
+              are evaluated.
+          - id: ac-only-affected-keys-stored
+            given: |
+              A merge recipe affects a subset of the base model keys.
+            when: |
+              Disk-backed patch mode finalizes the patch artifact.
+            then: |
+              The artifact contains affected keys only.
+      ```
+
+      ## Tasks
+
+      derive_from_specs: false
+
+      ```yaml
+      - title: Reuse merge result sink foundation for affected patch output
+        slug: task-disk-patch-result-sink-foundation
+        priority: 1
+        tags: [persistence, memory]
+        spec_ref: "@streaming-affected-patch-materialization"
+        depends_on: []
+        description: |
+          What: Add or reuse the merge result sink and sink-writing chunk evaluation
+          foundation needed to stream affected tensors to disk.
+
+          Why: Disk-backed patches only reduce memory if affected tensors are written
+          as they are produced instead of first accumulating merged_state in memory.
+
+          How:
+          - If the full saved model plan has already introduced lib/result_sink.py and
+            chunked_evaluation_to_sink, reuse those components.
+          - Otherwise create lib/result_sink.py with a MergeResultSink interface and
+            InMemoryResultSink fallback.
+          - Add chunked_evaluation_to_sink in lib/gpu_ops.py or lib/streaming_eval.py.
+          - Ensure the new path preserves OOM backoff, CPU output dtype, and cleanup
+            semantics from the existing chunked_evaluation implementation.
+
+          Testing:
+          - Compare sink-written outputs against chunked_evaluation outputs for small
+            tensors.
+          - Add an OOM retry test that verifies the sink receives every affected key.
+
+          Covers: @streaming-affected-patch-materialization ac-affected-results-streamed.
+
+      - title: Implement affected-key safetensors sink
+        slug: task-disk-patch-affected-sink
+        priority: 1
+        tags: [persistence, storage]
+        spec_ref: "@streaming-affected-patch-materialization"
+        depends_on:
+          - "@task-disk-patch-result-sink-foundation"
+        description: |
+          What: Implement a sink that writes only affected merged tensors to a
+          safetensors patch artifact.
+
+          Why: Disk-backed patch output should avoid both full checkpoint disk usage
+          and in-memory patch tensor retention.
+
+          How:
+          - Add AffectedSafetensorsSink in lib/result_sink.py or lib/persistence.py.
+          - Build TensorSpec metadata for keys_to_process using key_shapes and
+            storage_dtype from nodes/exit.py.
+          - Use the random-access safetensors writer if it exists; otherwise implement
+            the minimal affected-key writer with the same header-first, write-by-key,
+            finalize, and abort semantics.
+          - Ensure only keys_to_process are present in the artifact.
+          - Store metadata including recipe hash, artifact kind disk_patch, and the
+            affected key list.
+
+          Testing:
+          - Write a patch artifact with a subset of fake base keys and assert safe_open
+            sees only that subset.
+          - Assert finalize fails if an affected key was never written.
+          - Assert wrong shape/dtype writes fail with clear errors.
+
+          Covers: @streaming-affected-patch-materialization ac-only-affected-keys-stored,
+            ac-affected-results-streamed.
+
+      - title: Add disk-backed patch adapter
+        slug: task-disk-patch-adapter
+        priority: 1
+        tags: [patching, persistence]
+        spec_ref: "@disk-backed-patch-output"
+        depends_on:
+          - "@task-disk-patch-affected-sink"
+        description: |
+          What: Implement a ComfyUI patch adapter that loads an affected tensor from a
+          safetensors patch artifact only when ComfyUI applies that key's patch.
+
+          Why: The returned MODEL must behave like the current patched clone without
+          retaining every merged tensor in the patch list.
+
+          How:
+          - Create lib/disk_backed_patch.py.
+          - Define EcajDiskSetPatch extending comfy.weight_adapter.base.WeightAdapterBase
+            when ComfyUI is available. Provide a small fallback base for unit tests
+            without importing ComfyUI.
+          - Constructor fields: artifact path, key, expected shape, expected dtype.
+          - calculate_shape(key) returns the expected shape.
+          - calculate_weight(weight, key, strength, strength_model, offset, function,
+            intermediate_dtype, original_weight) opens the safetensors artifact,
+            loads the key, validates shape, transfers it to weight.device/weight.dtype,
+            copies it into weight, and returns weight.
+          - If the artifact path is missing or the key is absent, raise RuntimeError
+            with the path and key in the message.
+          - Start with a simple open-per-application implementation. Add a file-handle
+            cache only if profiling shows open overhead is significant.
+
+          Testing:
+          - Unit-test calculate_shape.
+          - Unit-test calculate_weight replaces an input weight with a tensor loaded
+            from a temporary safetensors artifact.
+          - Unit-test missing artifact and missing key errors include actionable path
+            and key guidance.
+
+          Covers: @disk-backed-patch-output ac-return-patched-model,
+            ac-downstream-merge-equivalence; @disk-patch-artifact-lifecycle
+            ac-artifact-missing-error.
+
+      - title: Install disk-backed patches from Exit
+        slug: task-disk-patch-exit-installation
+        priority: 2
+        tags: [exit-node, patching]
+        spec_ref: "@disk-backed-patch-output"
+        depends_on:
+          - "@task-disk-patch-adapter"
+        description: |
+          What: Add an Exit installation path that creates a cloned ModelPatcher with
+          EcajDiskSetPatch objects instead of in-memory set patch tensors.
+
+          Why: This preserves the current Exit contract of returning MODEL while
+          moving the merged payload out of process memory.
+
+          How:
+          - Modify nodes/exit.py.
+          - Add install_disk_backed_patches(model_patcher, artifact_path, key_specs).
+          - For each affected key, create an EcajDiskSetPatch and add it to the clone
+            via cloned.add_patches(patches, strength_patch=1.0).
+          - Ensure patches are adapter objects, not ("set", (tensor,)) tuples.
+          - Add an output mode option such as disk_backed_patches while preserving the
+            current in_memory_patches default.
+          - In disk_backed_patches mode, use AffectedSafetensorsSink and
+            chunked_evaluation_to_sink, finalize the artifact, then return the cloned
+            patcher from install_disk_backed_patches.
+
+          Testing:
+          - Unit-test that disk_backed_patches mode does not call
+            install_merged_patches.
+          - Unit-test that the clone receives adapter patch objects for every affected
+            key.
+          - Unit-test that the patch list does not retain the full merged tensor as an
+            in-memory tuple payload.
+
+          Covers: @disk-backed-patch-output ac-return-patched-model,
+            ac-no-resident-patch-payload.
+
+      - title: Implement disk patch cache semantics
+        slug: task-disk-patch-cache-semantics
+        priority: 2
+        tags: [persistence, cache]
+        spec_ref: "@disk-patch-artifact-lifecycle"
+        depends_on:
+          - "@task-disk-patch-exit-installation"
+        description: |
+          What: Extend persistence metadata and cache checks for disk-backed patch
+          artifacts.
+
+          Why: Disk-backed patch mode must reuse matching artifacts without accepting
+          full model artifacts or old affected-key save files as equivalent cache hits.
+
+          How:
+          - Modify lib/persistence.py metadata helpers to include an artifact kind such
+            as disk_patch.
+          - Update check_cache or add check_cache_for_kind(save_path, recipe_hash,
+            artifact_kind).
+          - Store affected key specs needed to recreate EcajDiskSetPatch objects on
+            cache hit: key list, shape, dtype, and artifact kind.
+          - In nodes/exit.py cache-hit branch for disk_backed_patches mode, skip GPU
+            merge and call install_disk_backed_patches using metadata-derived specs.
+          - Reject artifacts whose recipe hash matches but artifact kind differs.
+
+          Testing:
+          - Cache hit with matching disk_patch kind installs adapters and skips merge.
+          - Matching recipe hash with full_model kind is rejected for disk-backed patch
+            mode.
+          - Missing shape/dtype metadata raises a clear cache incompatibility error or
+            forces recompute, whichever behavior is chosen and documented in code.
+
+          Covers: @disk-patch-artifact-lifecycle ac-artifact-reuse,
+            ac-artifact-mode-is-distinct.
+
+      - title: Validate disk-backed patch equivalence and lifecycle
+        slug: task-disk-patch-equivalence-validation
+        priority: 3
+        tags: [testing, validation]
+        spec_ref: "@disk-backed-patch-output"
+        depends_on:
+          - "@task-disk-patch-cache-semantics"
+        description: |
+          What: Add end-to-end-style tests for disk-backed patch output against the
+          existing in-memory set patch path.
+
+          Why: Disk-backed patches are only acceptable if downstream patch application
+          produces the same weights and failure modes are understandable.
+
+          How:
+          - Build a small fake base model state with multiple affected and unaffected
+            keys.
+          - Run the in-memory patch installation path and record expected affected
+            weights after patch application.
+          - Run disk-backed patch mode using a temporary artifact and apply each
+            EcajDiskSetPatch to corresponding fake weights.
+          - Compare affected results for equality and confirm unaffected keys are not
+            present in the patch artifact.
+          - Add a test that deletes the patch artifact after the MODEL is returned and
+            confirms applying the adapter raises a RuntimeError naming the missing
+            artifact.
+
+          Testing:
+          - Run pytest for disk-backed patch, persistence, and exit tests.
+          - Existing in_memory_patches tests should continue to pass unchanged.
+
+          Covers: @disk-backed-patch-output ac-downstream-merge-equivalence;
+            @disk-patch-artifact-lifecycle ac-artifact-missing-error.
+      ```
+
+      ## Implementation Notes
+
+      This plan is the best fit for preserving the current WIDEN Exit contract while
+      removing the full in-memory patch payload. It stores only affected keys, so it
+      should usually use less disk than a full saved model. The cost is custom Comfy
+      patch integration: EcajDiskSetPatch must behave correctly inside Comfy's
+      calculate_weight path and must be tested with Dynamic VRAM enabled before this
+      becomes the default for large models.
+
+      If the full saved model plan has already implemented the sink and random-access
+      safetensors writer, this plan should reuse those pieces rather than duplicate
+      them. If this plan is implemented first, it should create the shared foundation
+      with generic names so the full saved model path can reuse it later.
+    status: draft
+    approved_at: null
+    branch: null
+    derived_specs: []
+    derived_tasks: []
+    module_ref: null
+    source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/disk-backed-patch-output.md
+    created_at: 2026-04-26T22:50:39.523Z
+    completed_at: null
+    notes: []
