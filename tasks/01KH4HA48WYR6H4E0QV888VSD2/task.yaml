@@ -1,0 +1,26 @@
+_ulid: 01KH4HA48WYR6H4E0QV888VSD2
+slugs:
+  - implement-merge-per-block-t-factor
+title: Implement Merge Per-Block T-Factor
+type: task
+spec_ref: "@merge-block-config"
+plan_ref: "@plan-widen-merge-feature-specs"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #20. Implemented per-block t_factor support for merge operations with
+  SDXL and Z-Image block classification. AC-1: BLOCK_CONFIG connected to Merge applies per-block
+  t_factor overrides. AC-2: No BLOCK_CONFIG means global t_factor (backwards compatible). 35 tests
+  in test_merge_block_config.py cover block classification and t_factor grouping."
+depends_on:
+  - "@implement-per-block-control"
+  - "@implement-merge-node"
+  - "@implement-exit-node"
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-10T19:44:03.356Z
+started_at: 2026-02-11T04:27:40.314Z
+completed_at: 2026-02-11T04:38:33.183Z
+todos: []
+automation: eligible

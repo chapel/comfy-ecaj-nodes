@@ -1,0 +1,7 @@
+notes:
+  - _ulid: 01KH7WXQDFP70HYGF1V9HBBG2H
+    content: Created nodes/block_config.py with make_block_config_node factory. SDXL (63→29 lines) and
+      Z-Image (66→30 lines) are now pure data + factory call. 503 tests pass, ruff clean.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T03:04:43.183Z

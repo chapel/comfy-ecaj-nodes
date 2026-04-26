@@ -1,0 +1,24 @@
+_ulid: 01KHHE6K9T79NA624RARW0D7TA
+slugs:
+  - implement-sdxl-clip-block-config
+title: Implement SDXL CLIP Block Config
+type: task
+spec_ref: "@sdxl-clip-block-config"
+plan_ref: "@plan-model-loader-split-clip-merging"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #74. Implemented SDXL CLIP block config with per-block strength control
+  for text encoders: CLIP-L (12 blocks CL00-CL11) and CLIP-G (32 blocks CG00-CG31) plus structural
+  keys. Added classify_key_sdxl_clip() and domain-aware dispatch in
+  classify_key/classify_layer_type. All 10 ACs covered by 41 tests."
+depends_on:
+  - "@implement-recipe-domain-field"
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-15T19:59:49.562Z
+started_at: 2026-02-15T22:05:32.432Z
+completed_at: 2026-02-15T22:13:13.540Z
+todos: []
+automation: eligible

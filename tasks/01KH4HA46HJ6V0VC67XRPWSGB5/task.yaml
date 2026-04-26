@@ -1,0 +1,30 @@
+_ulid: 01KH4HA46HJ6V0VC67XRPWSGB5
+slugs:
+  - implement-exit-node
+title: Implement Exit Node
+type: task
+spec_ref: "@exit-node"
+plan_ref: "@plan-widen-merge-feature-specs"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #14. Implemented WIDENExitNode.execute() orchestrating the complete
+  recipe tree evaluation with _validate_recipe_tree() for tree structure validation. All 8 ACs
+  covered: returns MODEL with set patches (AC-1), validates tree with position-aware errors (AC-2),
+  compose targets call merge_weights (AC-3), single LoRA targets call filter_delta (AC-4), chained
+  merges evaluate inner first (AC-5), single-branch compose uses filter_delta (AC-6), downstream
+  LoRA patches apply additively (AC-7), patch tensors match base model dtype (AC-8). 22 tests added
+  in test_exit_node.py, 291 total tests passing."
+depends_on:
+  - "@implement-exit-recipe-analysis"
+  - "@implement-exit-batched-evaluation"
+  - "@implement-exit-patch-installation"
+  - "@implement-comfyui-packaging"
+context: []
+priority: 2
+tags: []
+vcs_refs: []
+created_at: 2026-02-10T19:44:03.281Z
+started_at: 2026-02-11T03:43:27.316Z
+completed_at: 2026-02-11T03:52:01.713Z
+todos: []
+automation: eligible

@@ -1,0 +1,26 @@
+_ulid: 01KH4HA493AA51NFWN2NGQA6GA
+slugs:
+  - implement-lora-per-block-strength
+title: Implement LoRA Per-Block Strength
+type: task
+spec_ref: "@lora-block-config"
+plan_ref: "@plan-widen-merge-feature-specs"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #21. Implemented LoRA per-block strength scaling:
+  _apply_per_block_lora_strength helper in lib/executor.py scales LoRA deltas by BlockConfig
+  overrides. AC-1: BLOCK_CONFIG with per-block strengths scales LoRA deltas per-key. AC-2: No
+  block_config means global strength applies uniformly. 14 tests in test_lora_block_strength.py."
+depends_on:
+  - "@implement-per-block-control"
+  - "@implement-lora-node"
+  - "@implement-exit-node"
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-10T19:44:03.363Z
+started_at: 2026-02-11T04:39:41.971Z
+completed_at: 2026-02-11T04:45:26.430Z
+todos: []
+automation: eligible

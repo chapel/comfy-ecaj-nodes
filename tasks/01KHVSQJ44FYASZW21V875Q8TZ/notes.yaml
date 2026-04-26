@@ -1,0 +1,20 @@
+notes:
+  - _ulid: 01KHVTB0CV1AXNB5XAJ1Z9D3FJ
+    content: "Fixed both bugs: (1) Changed cache eviction threshold from cache_bytes*2 to fixed 512 MB
+      safety margin — since cache storage is a pointer transfer, not a new allocation, the old
+      threshold falsely evicted large model caches. (2) Bug 2 (inflated preflight) was a consequence
+      of Bug 1 — when cache survives, incremental path reduces batch_groups and preflight uses
+      subset bytes. Added diagnostic logging for cache eviction/storage decisions. 5 new tests: 4
+      for ac-14 (safety margin threshold, logging), 1 for ac-19 (regression: cache survives →
+      incremental preflight uses subset)."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-19T20:44:21.276Z
+  - _ulid: 01KHVWANA2AQ0TFRN2CJDNFAFT
+    content: User testing revealed enable_cache=False in their workflow, which explains why incremental
+      recompute wasn't activating. Not a code bug — user config. Also fixed a separate pre-existing
+      preflight overestimate (compute_dtype vs storage_dtype for chunk bytes, and phantom pin_memory
+      2x cost).
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-19T21:19:07.074Z

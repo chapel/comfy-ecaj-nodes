@@ -1,0 +1,35 @@
+_ulid: 01KH5KNGFJNFN8ZFD5FTA6NZG8
+slugs:
+  - split-executor
+title: Split executor.py into focused modules
+type: task
+description: "STRUCTURAL: lib/executor.py is 883 lines mixing 4 distinct concerns. evaluate_recipe
+  alone is ~230 lines with nested closures. Codex confirmed coupling hides correctness bugs. SPLIT
+  INTO: 1) lib/batch_groups.py (OpSignature, compile_batch_groups), 2) lib/gpu_ops.py (DeltaSpec,
+  apply_lora_batch_gpu, chunked_evaluation, compute_batch_size, chunked), 3) lib/per_block.py
+  (per-block control functions), 4) lib/recipe_eval.py (evaluate_recipe with EvalContext dataclass
+  and helpers), 5) lib/executor.py as facade/re-export. MIGRATION ORDER: data types first, pure
+  helpers, gpu ops, per-block, recipe_eval last. ADDITIONAL FIXES: deduplicate apply_lora_batch_gpu
+  (4 paths to 2), fix QKV to use DeltaSpec.offset, fix type contract for _eval_node, guard
+  torch.cuda.empty_cache, fix backbone override. DEPENDS ON fix-lora-set-scoping completing first."
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #25. Split executor.py into batch_groups.py, gpu_ops.py, per_block.py,
+  recipe_eval.py with facade. Deduplicated matmul (4 paths to 2 via _compute_deltas), fixed QKV
+  offset to use DeltaSpec.offset, decomposed evaluate_recipe from 230-line closure into 6
+  module-level functions with EvalContext, guarded all torch.cuda.empty_cache() calls. 490 tests
+  passing, ruff clean, CI green."
+depends_on: []
+context: []
+priority: 2
+tags:
+  - refactor
+  - review-finding
+vcs_refs: []
+created_at: 2026-02-11T05:44:27.890Z
+started_at: 2026-02-11T06:32:44.737Z
+completed_at: 2026-02-11T06:32:54.264Z
+todos: []

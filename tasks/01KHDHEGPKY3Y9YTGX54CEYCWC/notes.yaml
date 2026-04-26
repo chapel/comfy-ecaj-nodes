@@ -1,0 +1,27 @@
+notes:
+  - _ulid: 01KHDHEGPK45VJ5WB2HH51A4JM
+    content: |
+      Create lib/lora/qwen.py implementing QwenLoader (subclass LoRALoader).
+      Handle 3 LoRA formats -- diffusers, A1111/kohya, LyCORIS -- with
+      compound name preservation from merge-router reference
+      (qwen_merge.py lines 254-283). No QKV fusion needed (separate
+      to_q/to_k/to_v). Standard up/down DeltaSpec production.
+      Register in LOADER_REGISTRY in lib/lora/__init__.py.
+
+      Update tests/test_lora_loaders.py: replace ValueError assertion for
+      get_loader("qwen") with real loader tests. Add new tests with
+      synthetic safetensors LoRA files for each format.
+      Covers ac-4, ac-5, ac-6.
+    author: "@claude"
+    created_at: 2026-02-14T07:39:37.043Z
+  - _ulid: 01KHDJD446WM0Q3XQ2MS0244Y3
+    content: "Implementation complete. Created lib/lora/qwen.py with QwenLoader class supporting 3 LoRA
+      formats: diffusers (transformer.transformer_blocks.N.*.lora_A/B), A1111/kohya
+      (lora_unet_transformer_blocks_N_*.lora_up/down), and LyCORIS
+      (lycoris_transformer_blocks_N_*.lora_down/up). Key features: compound name preservation
+      (_normalize_lycoris_key, _normalize_kohya_key), no QKV fusion (separate to_q/to_k/to_v),
+      standard DeltaSpec production. Registered in LOADER_REGISTRY. Added 11 tests covering all 3
+      ACs (ac-4, ac-5, ac-6). 741 tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T07:56:19.974Z

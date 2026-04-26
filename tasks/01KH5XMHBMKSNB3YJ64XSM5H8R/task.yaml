@@ -1,0 +1,22 @@
+_ulid: 01KH5XMHBMKSNB3YJ64XSM5H8R
+slugs: []
+title: "Per-block performance: cache classify_key and use indexed assignment"
+type: task
+description: "Bundle two perf items: (1) Cache classify_key results per (arch, key) within a batch
+  to avoid repeated classification loops in per_block.py. (2) Replace per-index writeback loops in
+  per-block merge/filter with indexed assignment (result[indices] = sub_result)."
+spec_ref: null
+status: completed
+blocked_by: []
+closed_reason: null
+depends_on: []
+context: []
+priority: 4
+tags:
+  - performance
+  - review-finding
+vcs_refs: []
+created_at: 2026-02-11T08:38:41.780Z
+started_at: 2026-02-12T00:21:36.566Z
+completed_at: 2026-02-12T00:28:59.239Z
+todos: []

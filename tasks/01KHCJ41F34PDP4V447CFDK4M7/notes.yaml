@@ -1,0 +1,28 @@
+notes:
+  - _ulid: 01KHCJ41F39ZSQPM36KT3FY13F
+    content: |
+      Implementation notes:
+
+      Add to lib/recipe.py alongside existing dataclasses. Pattern follows
+      RecipeLoRA but simpler -- single path+strength instead of tuple of
+      LoRA dicts. No MappingProxyType needed (only scalar fields). Update
+      __all__ and RecipeNode type alias to include RecipeModel.
+
+      The path field stores the checkpoint filename (resolved to full path
+      at Exit time via folder_paths, same as LoRA path resolution).
+      block_config enables per-block strength control, reusing existing
+      BlockConfig type.
+
+      Files: lib/recipe.py.
+    author: "@claude"
+    created_at: 2026-02-13T22:32:07.907Z
+  - _ulid: 01KHCZ897NB4E8J2E4FDY16QD9
+    content: "Implementation complete. Added RecipeModel frozen dataclass with path (str), strength
+      (float, default 1.0), and block_config (BlockConfig or None). Updated RecipeNode type alias
+      and __all__ exports. Added 17 tests covering all 6 ACs: frozen immutability (ac-1), field
+      structure (ac-2), RecipeCompose.with_branch compatibility (ac-3), RecipeMerge target
+      compatibility (ac-4), RecipeNode inclusion (ac-5), no GPU tensors (ac-6). All 613 tests pass,
+      ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T02:21:38.421Z

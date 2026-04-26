@@ -1,0 +1,44 @@
+notes:
+  - _ulid: 01KH4HA486XCQMBVVXJ4R3TJHM
+    content: |
+      Implementation notes:
+
+      Memory management is woven throughout lib/executor.py. Key patterns to port
+      from merge-router scripts/lora_chain_merge.py: (1) Per-chunk cleanup: after
+      transferring results to CPU, explicitly del base_batch and gpu intermediates
+      then gc.collect() and torch.cuda.empty_cache(). (2) Per-group cleanup: between
+      OpSignature groups, call gc.collect() + torch.cuda.empty_cache(). (3) Loader
+      cleanup: after evaluation completes, call loader.cleanup() for each loader
+      (which calls clear_delta_cache() and drops cached LoRA state). (4) Final
+      cleanup: ensure returned merged_state dict contains only CPU tensors. The
+      merge-router source has ~8 explicit gc.collect/empty_cache calls -- identify
+      each and port the pattern. For AC-5 testing: use torch.cuda.max_memory_allocated()
+      before/after chunk and compare to compute_batch_size prediction. This is a
+      cross-cutting concern -- its ACs affect implementation in lib/executor.py
+      primarily, also nodes/exit.py (loader cleanup after execute completes) and
+      lib/lora/base.py (cleanup interface).
+      Files: lib/executor.py (primary), nodes/exit.py (loader teardown),
+      lib/lora/base.py (cleanup interface).
+    author: "@claude"
+    created_at: 2026-02-10T19:44:03.334Z
+  - _ulid: 01KH4J4HP1J0TQVSKK15FKXETY
+    content: "NF-7 restructured: This task is now a HARDENING PASS that runs AFTER exit-node integration
+      works. It is no longer a prerequisite for exit-node. First get the pipeline working with basic
+      cleanup, then this task adds comprehensive memory management:
+      gc.collect()/torch.cuda.empty_cache() calls per-chunk and per-group, loader.cleanup()
+      teardown, GPU tensor leak verification. This task reviews lib/executor.py and nodes/exit.py to
+      add the ~8 cleanup points from merge-router's pattern."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-10T19:58:29.057Z
+  - _ulid: 01KH5EBDACFVETM2W1E5VQJE72
+    content: Implemented GPU memory management with all 5 ACs covered. Added gc.collect() and
+      torch.cuda.empty_cache() calls per-chunk in lib/executor.py:chunked_evaluation (AC-1) and
+      between OpSignature groups in nodes/exit.py:execute (AC-2). Verified existing loader cleanup
+      pattern frees delta caches (AC-3). Verified install_merged_patches ensures CPU-only patches
+      with correct dtype (AC-4). compute_batch_size already provides conservative batch sizing
+      within VRAM bounds (AC-5). Created tests/test_memory_management.py with 20 tests covering all
+      ACs. 352 total tests pass, ruff clean.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-11T04:11:34.092Z

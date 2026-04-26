@@ -1,0 +1,24 @@
+_ulid: 01KH4HA46729EXG3GT8QCW2F44
+slugs:
+  - implement-lora-node
+title: Implement LoRA Node
+type: task
+spec_ref: "@lora-node"
+plan_ref: "@plan-widen-merge-feature-specs"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #6. Implemented LoRA node with folder_paths dropdown, RecipeLoRA output
+  with path/strength tuples, prev chaining for LoRA sets, and zero-strength preservation. All 5 ACs
+  have test coverage (12 tests total)."
+depends_on:
+  - "@implement-testing-infrastructure"
+  - "@implement-comfyui-packaging"
+context: []
+priority: 2
+tags: []
+vcs_refs: []
+created_at: 2026-02-10T19:44:03.271Z
+started_at: 2026-02-11T02:49:57.336Z
+completed_at: 2026-02-11T02:54:03.844Z
+todos: []
+automation: eligible

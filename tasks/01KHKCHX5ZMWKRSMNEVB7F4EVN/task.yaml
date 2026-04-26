@@ -1,0 +1,22 @@
+_ulid: 01KHKCHX5ZMWKRSMNEVB7F4EVN
+slugs: []
+title: Consolidate MockWIDEN into shared test fixture
+type: task
+description: 10 duplicate MockWIDEN definitions across 5 test files (test_executor, test_exit_node,
+  test_lora_block_strength, test_lora_set_scoping, test_full_model_execution). Unify into a single
+  shared class in conftest.py or tests/helpers.py. Two variants (passthrough + call-recording) can
+  be one class. Reduces maintenance burden when WIDEN interface changes.
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 3
+tags:
+  - testing
+  - cleanup
+vcs_refs: []
+created_at: 2026-02-16T14:09:31.832Z
+todos: []

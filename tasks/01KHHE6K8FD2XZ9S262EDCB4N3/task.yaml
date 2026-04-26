@@ -1,0 +1,23 @@
+_ulid: 01KHHE6K8FD2XZ9S262EDCB4N3
+slugs:
+  - implement-clip-graph-nodes
+title: Implement CLIP Graph Nodes
+type: task
+spec_ref: "@clip-graph-nodes"
+plan_ref: "@plan-model-loader-split-clip-merging"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #73. Implemented WIDEN_CLIP-typed graph nodes (LoRA, Compose, Merge,
+  Model Input) for CLIP pipeline type safety. All 8 ACs covered with 30 tests. Nodes delegate to
+  original WIDEN implementations for logic reuse."
+depends_on:
+  - "@implement-recipe-domain-field"
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-15T19:59:49.519Z
+started_at: 2026-02-15T21:58:47.311Z
+completed_at: 2026-02-15T22:05:01.281Z
+todos: []
+automation: eligible

@@ -1,0 +1,29 @@
+notes:
+  - _ulid: 01KH4H1VQF30CM22CSZ4A997WD
+    content: |
+      Implementation notes:
+
+      Skeleton exists in __init__.py (5 WIDEN mappings) and pyproject.toml.
+      Validate NODE_CLASS_MAPPINGS pattern works with ComfyUI node discovery.
+      CATEGORY must use lowercase ecaj/ prefix with sub-categories per capability
+      area (e.g., ecaj/merge for WIDEN nodes). Existing stubs use ECAJ/merge --
+      update all to lowercase ecaj/merge. For the task: review ComfyUI's
+      nodes_core.py loading path, verify pyproject.toml [tool.comfy] fields match
+      registry requirements (PublisherId, DisplayName, Icon), ensure requirements.txt
+      lists only dependencies ComfyUI doesn't already provide (torch and safetensors
+      are provided by ComfyUI -- check if we need them at all), update CATEGORY on
+      all 5 existing node stubs from ECAJ/merge to ecaj/merge.
+      Files: __init__.py, pyproject.toml, requirements.txt, nodes/entry.py,
+      nodes/lora.py, nodes/compose.py, nodes/merge.py, nodes/exit.py.
+    author: "@claude"
+    created_at: 2026-02-10T19:39:32.463Z
+  - _ulid: 01KH55Y8QK84TTHF6Y531RSKMR
+    content: "Fixed CATEGORY casing ECAJ/merge -> ecaj/merge in all 5 node stubs. Updated
+      pyproject.toml: empty runtime deps, dev deps (pytest/ruff/torch), pytest config with importlib
+      mode, ruff config (line-length=99, py310, isort+pyflakes+pyupgrade). Made requirements.txt
+      comment-only. Added setuptools package discovery for flat layout. Made __init__.py safe to
+      import outside ComfyUI (try/except for relative imports). Added root conftest.py with
+      collect_ignore."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-11T01:44:34.803Z

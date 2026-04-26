@@ -1,0 +1,38 @@
+notes:
+  - _ulid: 01KHDHEGN0K0DA5TXDDN194GND
+    content: |
+      Enable Qwen detection in nodes/entry.py (add "qwen" to
+      _SUPPORTED_ARCHITECTURES). Add classify_key_qwen() in
+      lib/block_classify.py mapping transformer_blocks.N to TB00-TB59
+      with dynamic index discovery (regex, not hardcoded 60).
+      Add Qwen layer type patterns (attention/feed_forward/norm).
+      Register in _CLASSIFIERS and _LAYER_TYPE_PATTERNS.
+      Update __all__ in block_classify.py to export new functions.
+
+      BREAKING TESTS to update:
+      - tests/test_entry.py: test_qwen_detected_but_unsupported (line 189)
+        must become test_qwen_detected_and_supported.
+      - tests/test_layer_type_classify.py: assertions that qwen returns
+        None must become positive classification tests.
+      - tests/test_merge_block_config.py: assertion that
+        get_block_classifier("qwen") is None must test real classifier.
+      - tests/test_lora_loaders.py: assertion that get_loader("qwen")
+        raises ValueError must test real loader (covered by lora task).
+
+      New tests in: tests/test_entry.py, tests/test_layer_type_classify.py,
+      tests/test_merge_block_config.py.
+      Covers ac-1, ac-2, ac-3.
+    author: "@claude"
+    created_at: 2026-02-14T07:39:36.992Z
+  - _ulid: 01KHDHS71VWWC2PX8GXVFV5KS6
+    content: "Implementation complete. Added classify_key_qwen() to lib/block_classify.py mapping
+      transformer_blocks.N to TB00+ with dynamic index discovery (regex, no upper bound). Added Qwen
+      layer type patterns (_QWEN_LAYER_PATTERNS) for attention/feed_forward/norm classification.
+      Registered in _CLASSIFIERS and _LAYER_TYPE_PATTERNS. Updated __all__. Added 'qwen' to
+      _SUPPORTED_ARCHITECTURES in nodes/entry.py. Updated tests: test_qwen_detected_but_unsupported
+      → test_qwen_detected_and_supported, removed qwen from unsupported arch test. Added
+      TestBlockClassifyQwen (3 tests), test_returns_qwen_classifier, TestLayerTypeClassifyQwen (10
+      tests). All 729 tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T07:45:27.611Z

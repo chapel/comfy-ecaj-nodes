@@ -1,0 +1,45 @@
+notes:
+  - _ulid: 01KH4HA47BCY6NJ4SPY12G85HM
+    content: |
+      Implementation notes:
+
+      Port from ~/Projects/merge-router/src/core/widen.py. Key classes/functions
+      to port: WIDEN class with filter_delta(), merge_weights(),
+      filter_delta_batched(), merge_weights_batched(), _disentangle(),
+      _rank_importance(), _calibrate(). Also port WIDENConfig dataclass with
+      fields: n_models, t_factor, s_calibration, ranking_strategy,
+      sparsity_method, calibration_mode, dtype. Port supporting modules:
+      lib/divergence.py from src/core/divergence.py (divergence metrics),
+      lib/ranking.py from src/core/ranking.py (ranking mechanisms),
+      lib/numerical_config.py from src/core/numerical_config.py (eps values
+      per dtype). Strip: any CLI imports, config file parsing, logging setup
+      (use stdlib logging). Keep: all torch operations, numerical stability
+      handling (upcast to fp32 for computation, downcast result back), batched
+      variants operating on [B, *shape] tensors. Fallback behavior (AC-8, AC-9)
+      from merge-router lines ~905-928 in scripts/lora_chain_merge.py -- wrap
+      batched WIDEN calls in try/except, on non-OOM error fall back to passthrough
+      (filter_delta) or averaging (merge_weights), log warning via logging.warning().
+      Test by creating small synthetic tensors (e.g., 8x8 float32) and verifying
+      filter_delta zeros low-importance entries, merge_weights routes correctly.
+      Compare against merge-router by running both on same input and checking allclose.
+      Files: lib/widen.py, lib/divergence.py, lib/ranking.py, lib/numerical_config.py.
+    author: "@claude"
+    created_at: 2026-02-10T19:44:03.307Z
+  - _ulid: 01KH4J2PAHPASF7QZ33EHV4RNX
+    content: "NF-2 fix: Also port lib/sparsity.py from src/core/sparsity.py (sparsemax, entmax). This
+      was listed in design doc S5 as required core algorithm but was missing from the files list.
+      WIDENConfig.sparsity_method references it."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-10T19:57:28.274Z
+  - _ulid: 01KH594A77M5WRDPVMXZMD506W
+    content: "Implemented WIDEN core algorithm port from merge-router. Created 5 modules:
+      numerical_config.py (epsilon handling), sparsity.py (sparsemax/entmax), ranking.py (importance
+      ranking), divergence.py (direction divergence), widen.py (main algorithm). Added 32 tests
+      covering all 9 ACs: filter_delta zeros low-importance (AC-1), merge_weights routes via softmax
+      (AC-2), batched variants match per-key (AC-3), no ComfyUI imports (AC-4), deterministic
+      behavior (AC-5), fp16/bf16 use fp32 (AC-6), default config values (AC-7), filter_delta_batched
+      fallback (AC-8), merge_weights_batched fallback (AC-9). All 90 tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-11T02:40:18.663Z

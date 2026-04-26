@@ -1,0 +1,20 @@
+_ulid: 01KH9FB3QJHEZX2ERZZBN26S3S
+slugs: []
+title: Wrap evaluate_recipe and merge_weights_batched in torch.inference_mode()
+type: task
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: Added inference_mode decorator to evaluate_recipe, removed redundant no_grad blocks in widen.py
+depends_on: []
+context: []
+priority: 2
+tags:
+  - perf
+vcs_refs: []
+created_at: 2026-02-12T17:45:50.577Z
+started_at: 2026-02-12T19:14:30.573Z
+completed_at: 2026-02-12T19:16:14.508Z
+todos: []

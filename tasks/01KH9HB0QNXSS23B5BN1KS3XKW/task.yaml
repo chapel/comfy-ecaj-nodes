@@ -1,0 +1,20 @@
+_ulid: 01KH9HB0QNXSS23B5BN1KS3XKW
+slugs: []
+title: Reduce unnecessary .clone() calls in WIDEN hot paths
+type: task
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "6 redundant .clone() calls eliminated, merged in PR #40"
+depends_on: []
+context: []
+priority: 2
+tags:
+  - perf
+vcs_refs: []
+created_at: 2026-02-12T18:20:44.661Z
+started_at: 2026-02-12T19:43:59.976Z
+completed_at: 2026-02-12T19:56:33.726Z
+todos: []

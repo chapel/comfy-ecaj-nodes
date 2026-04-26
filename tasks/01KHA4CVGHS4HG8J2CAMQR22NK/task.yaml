@@ -1,0 +1,28 @@
+_ulid: 01KHA4CVGHS4HG8J2CAMQR22NK
+slugs:
+  - fill-ac-annotations
+title: Fill missing AC annotations in tests
+type: task
+description: "Two issues: (1) All 16 tests in test_lora_block_strength.py cover @lora-block-config
+  ac-1 and ac-2 behavior but have zero AC annotations. (2) TestRecipeFrozen in test_recipe.py tests
+  @recipe-system ac-1 (frozen dataclass mutation raises error) but is misattributed to
+  @testing-infrastructure ac-3. Also: two annotation styles exist (# AC: @slug ac-N comments vs
+  docstring style) — standardize on comment style."
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Fixed AC annotations in 3 files: added # AC comments to test_lora_block_strength.py
+  (14 tests), corrected wrong refs in test_recipe.py (3 classes), converted hybrid docstring format
+  in test_compile_plan.py (13 tests). 67 tests pass, ruff clean."
+depends_on: []
+context: []
+priority: 3
+tags:
+  - annotations
+vcs_refs: []
+created_at: 2026-02-12T23:53:47.793Z
+started_at: 2026-02-13T00:58:54.141Z
+completed_at: 2026-02-13T01:01:47.213Z
+todos: []

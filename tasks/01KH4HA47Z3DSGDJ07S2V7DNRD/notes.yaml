@@ -1,0 +1,33 @@
+notes:
+  - _ulid: 01KH4HA47ZYK7SM6X6WGWT9GZ8
+    content: |
+      Implementation notes:
+
+      Port from ~/Projects/merge-router/scripts/zimage_lora_merge.py. Key function:
+      _parse_lora_key(key) which maps Diffusers LoRA key names to S3-DiT base model
+      keys and identifies QKV components. Z-Image base model uses fused
+      attention.qkv.weight (11520x3840 = 3x3840) but LoRAs have separate
+      to_q/to_k/to_v. The loader must: (1) Parse each LoRA key to identify
+      target parameter and QKV component. (2) For QKV keys, create DeltaSpecs
+      with kind=qkv and offset=(0, q_start, q_len) indicating which third of
+      the fused weight this LoRA targets. The offset tuple is (dimension=0,
+      start, length) where start is 0/3840/7680 for q/k/v respectively and
+      length is 3840. (3) Handle non-QKV keys (FFN, norm, etc.) as standard
+      LoRA. Also handle LoKr weights if present -- these have lokr_w1, lokr_w2
+      instead of lora_up/lora_down, use kind=lokr. The Diffusers key mapping
+      handles patterns like transformer_blocks.0.attn.to_q -> layers.0.attention.qkv
+      (with offset for q portion).
+      Files: lib/lora/zimage.py.
+    author: "@claude"
+    created_at: 2026-02-10T19:44:03.327Z
+  - _ulid: 01KH5DZ7M8RZ57Y5JBMC9ZQPD4
+    content: "Implemented Z-Image LoRA Loader with complete @zimage-loader AC coverage. Added
+      DeltaSpec.offset field for QKV slice indexing (AC-3). Enhanced _parse_zimage_lora_key() to
+      handle Diffusers key patterns including transformer./diffusion_model. prefixes, LyCORIS format
+      with lycoris_ prefix, and to_out.0→out mapping (AC-2). QKV keys now fuse into single
+      qkv.weight with proper offset tuples: q=(0,3840), k=(3840,3840), v=(7680,3840) (AC-1). Added
+      _normalize_lycoris_key() for underscore→dot conversion preserving compound names. Created
+      tests/test_zimage_loader.py with 20 tests covering all 3 ACs. All 332 tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-11T04:04:55.048Z

@@ -1,0 +1,24 @@
+_ulid: 01KH4HA4733VECXNH5H4M4AA2B
+slugs:
+  - implement-exit-patch-installation
+title: Implement Exit Patch Installation
+type: task
+spec_ref: "@exit-patch-install"
+plan_ref: "@plan-widen-merge-feature-specs"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #9. Implemented install_merged_patches() helper with ModelPatcher
+  cloning, diffusion_model. key prefixing, CPU transfer, and base dtype matching. Added IS_CHANGED
+  classmethod using SHA-256 hash of LoRA file (path, mtime, size) tuples for cache invalidation. All
+  6 acceptance criteria covered by 26 tests."
+depends_on:
+  - "@implement-testing-infrastructure"
+context: []
+priority: 2
+tags: []
+vcs_refs: []
+created_at: 2026-02-10T19:44:03.299Z
+started_at: 2026-02-11T03:05:39.107Z
+completed_at: 2026-02-11T03:10:24.420Z
+todos: []
+automation: eligible

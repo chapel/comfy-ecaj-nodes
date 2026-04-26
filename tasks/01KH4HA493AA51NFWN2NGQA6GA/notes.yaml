@@ -1,0 +1,45 @@
+notes:
+  - _ulid: 01KH4HA49389ZJ52761QNKPQ3X
+    content: |
+      Implementation notes:
+
+      LoRA node gains optional block_strength input of type BLOCK_CONFIG in
+      INPUT_TYPES. When present, stored in RecipeLoRA.block_config. At Exit time
+      during batched LoRA apply phase (_apply_lora_set_batched_gpu), for each
+      parameter key in batch: (1) classify key into block group, (2) look up
+      override strength in BlockConfig, (3) multiply LoRA delta by per-block
+      strength instead of global strength. This scales LoRA contribution before
+      WIDEN sees it. During DeltaSpec processing, scale each spec effective
+      strength by per-block override. Since batching groups keys by OpSignature
+      (same shape + affecting sets), and per-block strength varies by key, need
+      to apply scaling per-key within batch -- either as diagonal scaling matrix
+      or by splitting batch by block group.
+      Files: nodes/lora.py (add input), lib/executor.py (per-block scaling
+      in LoRA apply).
+    author: "@claude"
+    created_at: 2026-02-10T19:44:03.363Z
+  - _ulid: 01KH4J41ABBBKTGH8J7ZTBNFB0
+    content: "NF-8 design decision resolved: Apply per-block strength as a per-key scaling vector within
+      the batch. After computing the LoRA delta for the full batch via torch.bmm, multiply each
+      key's delta by its per-block strength scalar. The scaling vector is constructed during recipe
+      analysis by classifying each key to a block group via lib/block_classify.py and looking up the
+      BlockConfig override. This avoids splitting the batch and preserves the bmm optimization.
+      Implementation: after _apply_lora_set_batched_gpu() returns the delta batch [B, *shape],
+      compute a strength vector [B, 1, 1] from per-key block classifications, then multiply:
+      delta_batch *= strength_vector."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-10T19:58:12.299Z
+  - _ulid: 01KH5G40CSQ73M9YT2NH470Z17
+    content: "Implemented per-block strength scaling for LoRA deltas. Created
+      _apply_per_block_lora_strength helper in lib/executor.py that computes delta = lora_applied -
+      base, scales each key's delta by its BlockConfig override, and returns base + scaled_delta.
+      Modified _apply_lora_set in evaluate_recipe to call this helper when RecipeLoRA.block_config
+      is present and arch is known. AC-1: BLOCK_CONFIG with per-block strengths scales LoRA deltas
+      (strength 0.5 halves delta, strength 2.0 doubles it, strength 0.0 removes the LoRA effect).
+      AC-2: No block_config means global strength applies uniformly (helper not called). 14 tests in
+      test_lora_block_strength.py covering strength scaling, different blocks, zero/amplified
+      strengths, negative deltas, 4D conv2d shapes. 445 total tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-11T04:42:28.634Z

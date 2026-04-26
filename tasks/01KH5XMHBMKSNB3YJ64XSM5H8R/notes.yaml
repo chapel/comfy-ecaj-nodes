@@ -1,0 +1,9 @@
+notes:
+  - _ulid: 01KH7JMSP6Y234TMCPBBTW7QRZ
+    content: "Partial: classify_key_sdxl/classify_key_zimage already have @lru_cache(4096). Remaining:
+      (1) wrapper classify_key(key, arch) is not cached, (2) two per-index write-back loops in
+      _apply_widen_filter_per_block and _apply_widen_merge_per_block (per_block.py) should use
+      indexed tensor assignment instead of Python loops."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T00:05:04.838Z

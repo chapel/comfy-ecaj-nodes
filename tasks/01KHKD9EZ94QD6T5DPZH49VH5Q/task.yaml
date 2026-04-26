@@ -1,0 +1,23 @@
+_ulid: 01KHKD9EZ94QD6T5DPZH49VH5Q
+slugs: []
+title: Fix memory pressure during save checkpoint - base_state lifetime too long
+type: task
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Already implemented and merged in PR #82 (commit e730e51). base_state freed after
+  GPU eval, metadata extracted upfront for batch_groups/preflight, state dict re-acquired fresh only
+  for save. ac-13 added and covered. All 43 memory management tests + 52 executor tests pass."
+depends_on: []
+context: []
+priority: 1
+tags:
+  - bug
+  - memory
+vcs_refs: []
+created_at: 2026-02-16T14:22:23.721Z
+started_at: 2026-02-18T05:59:39.311Z
+completed_at: 2026-02-18T05:59:42.208Z
+todos: []

@@ -1,0 +1,30 @@
+notes:
+  - _ulid: 01KHHE6K5T1RMCMHK95DFZQ1EY
+    content: |
+      Implementation notes:
+
+      Create nodes/clip_entry.py. ComfyUI CLIP objects have a
+      .cond_stage_model or .patcher attribute. Investigate the exact API
+      to access state dict keys. Detect SDXL by presence of clip_l and
+      clip_g key prefixes. Set domain="clip" on RecipeBase.
+    author: "@claude"
+    created_at: 2026-02-15T19:59:49.434Z
+  - _ulid: 01KHHJ6ERVKYJ7AQS5G96D2KP2
+    content: "Spike findings (@investigate-clip-api): CLIP uses ModelPatcher internally. Access state
+      dict keys via clip.patcher.model_state_dict().keys() — zero GPU cost, returns CPU tensors. For
+      SDXL arch detection: check for both 'clip_l.' and 'clip_g.' prefixes in state dict keys. Key
+      format: clip_l.transformer.text_model.encoder.layers.{0-11}.* and
+      clip_g.transformer.text_model.encoder.layers.{0-31}.*"
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-15T21:09:39.227Z
+  - _ulid: 01KHHMTA74FP86M37H2NK2YWER
+    content: "Implemented CLIP Entry node: (1) Created nodes/clip_entry.py with WIDENCLIPEntryNode that
+      wraps ComfyUI CLIP in RecipeBase with domain='clip', (2) detect_clip_architecture() detects
+      SDXL via clip_l+clip_g key prefixes using clip.patcher.model_state_dict() (zero GPU), (3)
+      Non-SDXL raises UnsupportedCLIPArchitectureError with clear message, (4) Registered node as
+      WIDENCLIPEntry with display name 'WIDEN CLIP Entry', (5) 15 tests covering all 7 ACs. 939
+      tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-15T21:55:27.076Z

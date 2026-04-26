@@ -1,0 +1,25 @@
+_ulid: 01KHA4D4KZQ3MBABRZ033Q4DGZ
+slugs:
+  - test-comfy-registry
+title: Add test for comfyui-packaging ac-3 registry metadata
+type: task
+description: "@comfyui-packaging ac-3 says: pyproject.toml [tool.comfy] metadata displays as ECAJ
+  Nodes with publisher ecaj. No test validates this. Add a test that reads pyproject.toml and
+  asserts PublisherId=ecaj and DisplayName=ECAJ Nodes. Simple toml parsing assertion — prevents
+  accidental metadata breakage before registry publishing."
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Added 3 tests for [tool.comfy] metadata in test_packaging.py. PR #46."
+depends_on: []
+context: []
+priority: 3
+tags:
+  - testing
+vcs_refs: []
+created_at: 2026-02-12T23:53:57.119Z
+started_at: 2026-02-13T05:08:06.570Z
+completed_at: 2026-02-13T05:09:17.859Z
+todos: []

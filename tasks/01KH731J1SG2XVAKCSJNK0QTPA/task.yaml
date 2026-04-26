@@ -1,0 +1,22 @@
+_ulid: 01KH731J1SG2XVAKCSJNK0QTPA
+slugs: []
+title: Fix device mismatch in chunked_evaluation torch.stack
+type: bug
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #32. Added .cpu() normalization before torch.stack in
+  chunked_evaluation to handle mixed CPU/CUDA tensors from model_state_dict()."
+depends_on: []
+context: []
+priority: 1
+tags:
+  - runtime
+  - correctness
+vcs_refs: []
+created_at: 2026-02-11T19:32:25.782Z
+started_at: 2026-02-11T19:33:55.036Z
+completed_at: 2026-02-11T20:08:52.629Z
+todos: []

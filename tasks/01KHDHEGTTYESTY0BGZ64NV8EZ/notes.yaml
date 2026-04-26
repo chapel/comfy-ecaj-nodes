@@ -1,0 +1,36 @@
+notes:
+  - _ulid: 01KHDHEGTTV23EK1E4EGA7G4P8
+    content: |
+      Enable Flux detection in nodes/entry.py (add "flux" to
+      _SUPPORTED_ARCHITECTURES). Add classify_key_flux() in
+      lib/block_classify.py mapping double_blocks.N to DB0N and
+      single_blocks.N to SB0N with dynamic index discovery.
+      Add Flux layer type patterns. Register in _CLASSIFIERS and
+      _LAYER_TYPE_PATTERNS. Update __all__ exports.
+
+      BREAKING TESTS to update:
+      - tests/test_entry.py: test_flux_detected_but_unsupported (line 174)
+        must become test_flux_detected_and_supported.
+      - tests/test_layer_type_classify.py: assertions that flux returns
+        None must become positive classification tests.
+      - tests/test_merge_block_config.py: assertion that
+        get_block_classifier("flux") is None must test real classifier.
+
+      New tests in: tests/test_entry.py, tests/test_layer_type_classify.py,
+      tests/test_merge_block_config.py.
+      Covers ac-1, ac-2, ac-3.
+    author: "@claude"
+    created_at: 2026-02-14T07:39:37.178Z
+  - _ulid: 01KHDKCMAJR3YSC52FH04574AN
+    content: "Implementation complete. Added classify_key_flux() to lib/block_classify.py mapping
+      double_blocks.N to DB0N and single_blocks.N to SB0N with dynamic index discovery (no upper
+      bound). Added Flux layer type patterns (_FLUX_LAYER_PATTERNS) for attention (img_attn,
+      txt_attn, qkv, proj, query_norm, key_norm), feed_forward (img_mlp, txt_mlp, linear2), and norm
+      (img_mod, txt_mod, modulation). Registered in _CLASSIFIERS and _LAYER_TYPE_PATTERNS. Added
+      'flux' to _SUPPORTED_ARCHITECTURES in nodes/entry.py. Updated tests:
+      test_flux_detected_but_unsupported → test_flux_detected_and_supported, added
+      TestBlockClassifyFlux (5 tests) and TestLayerTypeClassifyFlux (12 tests), updated
+      test_returns_flux_classifier. 777 tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T08:13:32.370Z

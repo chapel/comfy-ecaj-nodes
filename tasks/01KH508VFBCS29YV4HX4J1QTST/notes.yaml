@@ -1,0 +1,18 @@
+notes:
+  - _ulid: 01KH508VFBT2H54M5F3RHDF08Z
+    content: |
+      Implementation notes:
+
+      Follow ComfyUI's test-unit.yml pattern: install CPU-only torch via
+      --index-url https://download.pytorch.org/whl/cpu, install project deps,
+      run pytest. Add ruff for linting. Single ubuntu-latest runner to start
+      (extend to matrix later). Add pyproject.toml [tool.ruff] config.
+      Files: .github/workflows/test.yml, pyproject.toml (ruff + pytest config)
+    author: "@claude"
+    created_at: 2026-02-11T00:05:30.219Z
+  - _ulid: 01KH58198P2XYEND6VHT87WAE3
+    content: "Added .github/workflows/ci.yml with two jobs: lint (ruff via astral-sh/ruff-action) and
+      test (pytest with CPU torch via uv). Triggers on push to main and all PRs."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-11T02:21:10.806Z

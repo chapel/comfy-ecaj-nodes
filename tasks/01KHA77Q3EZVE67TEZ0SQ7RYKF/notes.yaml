@@ -1,0 +1,142 @@
+notes:
+  - _ulid: 01KHA7ANS0RW3QBZ4TAKK3W5QP
+    content: >-
+      ## Implementation Details
+
+
+      ### lib/block_classify.py — Change classifier return values
+
+
+      `classify_key_sdxl` (lines 26-78):
+
+      - Replace range grouping with individual names
+
+      - `input_blocks.N` → `f"IN{N:02d}"` for N=0..8 (was: "IN00-02", "IN03-05", "IN06-08")
+
+      - `middle_block` → "MID" (unchanged — already single block)
+
+      - `output_blocks.N` → `f"OUT{N:02d}"` for N=0..8 (was: "OUT00-02", "OUT03-05", "OUT06-08")
+
+      - The if/elif range checks simplify to one range check + f-string
+
+
+      `classify_key_zimage` (lines 82-131):
+
+      - `layers.N` or `blocks.N` → `f"L{N:02d}"` for N=0..29 (was: "L00-04" through "L25-29")
+
+      - Change `noise_refiner` from prefix match to regex: `re.match(r"noise_refiner\.(\d+)\.",
+      key)` → `f"NOISE_REF{N}"`. Refiners are nn.ModuleList so state dict keys have numbered
+      sub-modules. Confirmed by LyCORIS normalizer in lib/lora/zimage.py:92. No fallback for
+      unmatchable refiner keys — return None.
+
+      - Same pattern for `context_refiner` → `f"CTX_REF{N}"`
+
+
+      ### nodes/block_config_sdxl.py — Replace _SDXL_BLOCKS (7 → 19)
+
+      ```python
+
+      _SDXL_BLOCKS = (
+          *((f"IN{i:02d}", f"IN{i:02d}") for i in range(9)),
+          ("MID", "MID"),
+          *((f"OUT{i:02d}", f"OUT{i:02d}") for i in range(9)),
+      )
+
+      ```
+
+
+      ### nodes/block_config_zimage.py — Replace _ZIMAGE_BLOCKS (8 → 34)
+
+      ```python
+
+      _ZIMAGE_BLOCKS = tuple(
+          [(f"L{i:02d}", f"L{i:02d}") for i in range(30)]
+          + [("NOISE_REF0", "NOISE_REF0"), ("NOISE_REF1", "NOISE_REF1"),
+             ("CTX_REF0", "CTX_REF0"), ("CTX_REF1", "CTX_REF1")]
+      )
+
+      ```
+
+
+      ### No changes needed to
+
+      lib/per_block.py, lib/recipe.py, lib/recipe_eval.py, nodes/block_config.py,
+      lib/batch_groups.py — all generic, keyed by string names.
+
+
+      ### Also update (cosmetic)
+
+      - lib/recipe.py line 29: docstring example "(('IN00-02', 0.5), ...)" → "(('IN00', 0.5), ...)"
+
+      - tests/conftest.py lines 30-36: _ZIMAGE_KEYS needs refiner keys with sub-block numbers
+      (diffusion_model.noise_refiner.0.weight not diffusion_model.noise_refiner.weight)
+
+
+      ### Test updates
+
+      - tests/test_merge_block_config.py: classifier assertions, t_factor grouping keys, refiner
+      sub-block numbers
+
+      - tests/test_per_block_control.py: expected block names (7→19 SDXL, 8→34 Z-Image), slider
+      counts, config overrides. Lines: 43, 48-51, 102, 105, 120-121, 130, 134-145, 198-202
+
+      - tests/test_lora_block_strength.py: BlockConfig override keys in all fixtures, Z-Image test
+      keys
+
+      - tests/test_block_config.py: cosmetic override key examples
+
+      - Files confirmed clean: test_exit_recipe_analysis.py, test_exit_node.py, test_executor.py,
+      test_compile_plan.py
+
+
+      ### File-touch checklist
+
+      - [ ] lib/block_classify.py
+
+      - [ ] lib/recipe.py (docstring)
+
+      - [ ] nodes/block_config_sdxl.py
+
+      - [ ] nodes/block_config_zimage.py
+
+      - [ ] tests/conftest.py
+
+      - [ ] tests/test_merge_block_config.py
+
+      - [ ] tests/test_per_block_control.py
+
+      - [ ] tests/test_lora_block_strength.py
+
+      - [ ] tests/test_block_config.py
+
+      - [ ] tests/test_entry.py (if needed)
+
+
+      ### Verification
+
+      pytest -v && ruff check
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-13T00:45:02.112Z
+  - _ulid: 01KHCYZ5TN9N58KX92M2DY4YAR
+    content: |-
+      Implementation complete. Refactored from grouped blocks to individual blocks:
+
+      SDXL: 7 grouped sliders → 19 individual sliders (IN00-IN08, MID, OUT00-OUT08)
+      Z-Image: 8 grouped sliders → 34 individual sliders (L00-L29, NOISE_REF0-1, CTX_REF0-1)
+
+      Files modified:
+      - lib/block_classify.py: Updated both classifiers
+      - lib/recipe.py: Updated docstring example
+      - nodes/block_config_sdxl.py: Updated _SDXL_BLOCKS tuple
+      - nodes/block_config_zimage.py: Updated _ZIMAGE_BLOCKS tuple
+      - tests/conftest.py: Updated _ZIMAGE_KEYS with numbered refiner submodules
+      - tests/test_per_block_control.py: Updated expected block names and counts
+      - tests/test_merge_block_config.py: Updated all block name references
+      - tests/test_lora_block_strength.py: Updated block config overrides
+      - tests/test_block_config.py: Updated example block names
+
+      All 600 tests pass, ruff clean.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T02:16:40.021Z

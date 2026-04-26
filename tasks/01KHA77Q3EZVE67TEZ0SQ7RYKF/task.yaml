@@ -1,0 +1,29 @@
+_ulid: 01KHA77Q3EZVE67TEZ0SQ7RYKF
+slugs:
+  - individual-block-control
+title: Refactor block config from grouped to individual blocks
+type: task
+description: "Refactor block classification and config nodes from grouped block ranges to individual
+  blocks. SDXL goes from 7 grouped entries to 19 individual blocks. Z-Image goes from 8 grouped
+  entries to 34 individual blocks. Breaking change: saved workflows referencing old grouped input
+  names will break (acceptable for pre-release). See task notes for full implementation details."
+spec_ref: "@per-block-control"
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #49. Refactored block config from grouped to individual blocks: SDXL
+  7→19 sliders (IN00-IN08, MID, OUT00-OUT08), Z-Image 8→34 sliders (L00-L29, NOISE_REF0-1,
+  CTX_REF0-1). All 5 ACs covered with tests, CI passing."
+depends_on: []
+context: []
+priority: 3
+tags:
+  - refactor
+  - blocks
+vcs_refs: []
+created_at: 2026-02-13T00:43:25.166Z
+started_at: 2026-02-14T02:09:57.814Z
+completed_at: 2026-02-14T02:19:17.185Z
+todos: []
+automation: eligible

@@ -1,0 +1,25 @@
+_ulid: 01KH4HA46X4V9RHXW26VP36FD9
+slugs:
+  - implement-exit-batched-evaluation
+title: Implement Exit Batched Evaluation
+type: task
+spec_ref: "@exit-batched-eval"
+plan_ref: "@plan-widen-merge-feature-specs"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #13. Implemented evaluate_recipe() tree walker in lib/executor.py with
+  full AC coverage: RecipeCompose→merge_weights_batched (AC-1), RecipeLoRA→filter_delta_batched
+  (AC-2), chained RecipeMerge→recursive evaluation (AC-3), results stay on GPU (AC-4), backbone
+  override passed to WIDEN (AC-5). 13 tests added covering all 5 ACs."
+depends_on:
+  - "@implement-batched-pipeline-executor"
+  - "@implement-exit-recipe-analysis"
+context: []
+priority: 2
+tags: []
+vcs_refs: []
+created_at: 2026-02-10T19:44:03.293Z
+started_at: 2026-02-11T03:36:17.464Z
+completed_at: 2026-02-11T03:42:23.167Z
+todos: []
+automation: eligible

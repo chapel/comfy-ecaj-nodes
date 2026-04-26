@@ -1,0 +1,26 @@
+notes:
+  - _ulid: 01KHQGTT73607RV2FVRTKB41M5
+    content: |
+      Implementation notes:
+
+      Extend _CacheEntry with loader_bytes field (int). Populated from measured
+      loader.loaded_bytes + sum of model_loader.loaded_bytes after loading.
+      Available for future preflight improvements (e.g., pre-load estimation)
+      and diagnostic logging. When cache is read on incremental hit, the stored
+      loader_bytes is logged alongside the recompute plan.
+    author: "@claude"
+    created_at: 2026-02-18T04:41:15.747Z
+  - _ulid: 01KHQJGBF6ARSE3JY44CNG4QX1
+    content: "Test guidance: Add tests to tests/test_incremental_recompute.py. Test _CacheEntry
+      loader_bytes field population and logging. AC annotation: # AC: @cache-loader-metadata ac-N"
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-18T05:10:30.118Z
+  - _ulid: 01KHQNM8T1NTDAKJG6Y9DSFKG2
+    content: "Implementation complete: Added loader_bytes field to _CacheEntry (default 0). Measured
+      from loader.loaded_bytes + sum(model_loader.loaded_bytes) before cache lookup. Logged on
+      incremental cache hits. Preflight check confirmed to not reference loader_bytes (AC-4 by
+      design). 4 tests added to TestCacheLoaderMetadata."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-18T06:05:04.193Z

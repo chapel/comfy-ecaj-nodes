@@ -1,0 +1,26 @@
+_ulid: 01KHDHEGN0BWGH3XGZWXX31TPX
+slugs:
+  - qwen-detect-classify
+title: Implement Qwen detection and block classification
+type: task
+plan_ref: "@plan-qwen-and-flux-2-klein-architecture-support"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #55. Implemented Qwen architecture detection and block/layer-type
+  classification. Added classify_key_qwen() mapping transformer_blocks.N to TB00+ with dynamic index
+  discovery, Qwen layer type patterns for attention/feed_forward/norm classification (including
+  img_mod/txt_mod), and registered in _CLASSIFIERS/_LAYER_TYPE_PATTERNS. Added 'qwen' to
+  _SUPPORTED_ARCHITECTURES. All AC coverage verified: ac-1 (detection), ac-2 (block classification),
+  ac-3 (layer type classification). 730 tests pass."
+depends_on: []
+context: []
+priority: 2
+tags:
+  - qwen
+  - classification
+vcs_refs: []
+created_at: 2026-02-14T07:39:36.992Z
+started_at: 2026-02-14T07:42:14.482Z
+completed_at: 2026-02-14T07:51:19.582Z
+todos: []
+automation: eligible

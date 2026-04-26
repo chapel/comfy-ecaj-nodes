@@ -1,0 +1,48 @@
+notes:
+  - _ulid: 01KHCJ41HR7FBHA9CWXYDCFKNF
+    content: |
+      Implementation notes:
+
+      New file lib/model_loader.py. Uses safetensors.safe_open(path,
+      framework="pt", device="cpu") context manager.
+
+      Key normalization pipeline (runs once at open time):
+      1. Read all keys from safe_open metadata (no tensor loading).
+      2. Normalize: strip architecture-specific prefixes to canonical form.
+         - SDXL files: strip "model.diffusion_model." prefix.
+         - Z-Image files: strip "model.diffusion_model." or similar prefix.
+         - Reference merge-router src/models/ for format-specific patterns.
+      3. Filter: keep only diffusion model keys (drop VAE "first_stage_model."
+         and text encoder "conditioner." / "cond_stage_model." keys).
+      4. Build forward map: file_key -> base_model_key (normalized).
+      5. Build reverse map: base_model_key -> file_key (for lookups).
+
+      Architecture detection: run architecture patterns on NORMALIZED keys
+      (post prefix-stripping), so the same _ARCH_PATTERNS from nodes/entry.py
+      work. Detection must happen AFTER normalization, not before, since
+      patterns expect state_dict-format keys (e.g., "diffusion_model.input_blocks"
+      not "model.diffusion_model.input_blocks").
+
+      get_weights(keys) calls f.get_tensor(reverse_map[key]) per key, returns
+      list of tensors. Streaming means per-batch disk I/O but avoids full model
+      in memory. The safe_open handle is kept open for the duration of execution
+      (closed in cleanup()).
+
+      Note: safetensors safe_open uses memory-mapping on supported platforms,
+      but actual behavior may vary. The key guarantee is that tensors are not
+      allocated in Python memory until get_tensor() is called.
+
+      Files: lib/model_loader.py, reference lib/lora/base.py for interface
+      pattern, reference merge-router src/models/ for key normalization.
+    author: "@claude"
+    created_at: 2026-02-13T22:32:07.992Z
+  - _ulid: 01KHD0EW24HXWXCA3QXH21PNN1
+    content: "Implementation complete. Created lib/model_loader.py with ModelLoader class using
+      safe_open() for memory-mapped access. Key features: key normalization (strips
+      model.diffusion_model. and transformer. prefixes), excludes VAE/text encoder keys,
+      architecture detection from normalized keys, get_weights() for batch tensor retrieval,
+      cleanup() for resource release, UnsupportedFormatError for non-safetensors files. 27 tests
+      covering all 9 ACs. Full suite passes, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T02:42:42.884Z

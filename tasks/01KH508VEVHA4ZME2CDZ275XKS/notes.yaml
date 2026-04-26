@@ -1,0 +1,30 @@
+notes:
+  - _ulid: 01KH508VEVQ633FW8E9Y3NX9TP
+    content: |
+      Implementation notes:
+
+      Create tests/test_graph.py with helper functions that instantiate node
+      classes and call their FUNCTION methods directly to build recipe trees.
+      The mock executor is a lightweight tree walker (separate from the real
+      executor) that returns an operation plan (list of {op: filter_delta|merge_weights,
+      keys: ...}) without touching GPU. This validates the Exit node's recipe
+      analysis logic independently.
+      Files: tests/test_graph.py, tests/helpers/graph_builder.py
+    author: "@claude"
+    created_at: 2026-02-11T00:05:30.203Z
+  - _ulid: 01KH7JMW5CWSAW4X7Y54GS8D6E
+    content: "Partial: Individual node tests, executor evaluation order tests, validation error tests,
+      and recipe_full fixture all exist. Missing: test_graph.py integration test that chains node
+      classes together. AC-1 (Entry→LoRA→Merge as integration pipeline) and AC-6 (hyphoria workflow
+      pattern built through nodes) are the main gaps. AC-5 (invalid graph errors) is well covered
+      already."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T00:05:07.372Z
+  - _ulid: 01KH8CT296VAMFEVMYQF26M54E
+    content: "Implemented tests/test_graph.py with 17 tests covering all 6 ACs. Mock executor
+      (plan_operations) walks recipe tree recording OpRecords. Helper functions build graphs through
+      node FUNCTION methods. Full suite: 525 passed, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T07:42:20.455Z

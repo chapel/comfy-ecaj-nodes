@@ -1,0 +1,19 @@
+notes:
+  - _ulid: 01KH9KJ13R6X9WXNY18JN5R9E6
+    content: "Implementation notes: recipe_eval.py:evaluate_recipe() recursively traverses the recipe
+      tree (via _eval_node) for every batch chunk. The tree structure is identical across chunks —
+      only the tensor data changes. With batch_size=8 and 1000 params → ~125 redundant tree walks.
+      Approach: compile recipe tree into a flat list of operations (e.g. [ApplyLoraSet(set_id,
+      strength), Filter(t_factor), Compose(method), Merge(method)]) during analysis phase. Then
+      execute the plan per-chunk without recursion. This also opens the door to plan-level
+      optimizations (e.g. fusing consecutive filter+merge). Medium effort — requires new data
+      structures and refactoring the eval dispatch."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T18:59:31.576Z
+  - _ulid: 01KHA1SA9DMYVMP3VX5E6NP5YX
+    content: "Already merged in PR #41 (commit a41df47). compile_plan()/execute_plan() with
+      register-based dispatch, 356-line test suite."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T23:08:10.414Z

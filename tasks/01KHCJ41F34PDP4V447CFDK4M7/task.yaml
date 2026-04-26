@@ -1,0 +1,22 @@
+_ulid: 01KHCJ41F34PDP4V447CFDK4M7
+slugs:
+  - implement-full-model-recipe-type
+title: Implement Full Model Recipe Type
+type: task
+spec_ref: "@full-model-recipe"
+plan_ref: "@plan-full-model-merging-widen-on-full-checkpoints"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #50. Added RecipeModel frozen dataclass to lib/recipe.py with path
+  (str), strength (float, default 1.0), and block_config (BlockConfig | None) fields. Updated
+  RecipeNode type alias. All 6 ACs covered by 17 tests."
+depends_on: []
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-13T22:32:07.907Z
+started_at: 2026-02-14T02:19:54.593Z
+completed_at: 2026-02-14T02:23:52.069Z
+todos: []
+automation: eligible

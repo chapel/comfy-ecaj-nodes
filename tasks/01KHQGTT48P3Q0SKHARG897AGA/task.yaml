@@ -1,0 +1,21 @@
+_ulid: 01KHQGTT48P3Q0SKHARG897AGA
+slugs:
+  - implement-accurate-ram-preflight-estimation
+title: Implement Accurate RAM Preflight Estimation
+type: task
+spec_ref: "@accurate-ram-preflight"
+plan_ref: "@plan-fix-incremental-recompute-memory-estimation"
+status: completed
+blocked_by: []
+closed_reason: "Merged PR #85. All 7 ACs covered, both reviewers approved, Codex findings addressed."
+depends_on:
+  - "@implement-cache-loader-metadata"
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-18T04:41:15.656Z
+started_at: 2026-02-18T06:16:26.895Z
+completed_at: 2026-02-18T06:41:08.576Z
+todos: []
+automation: eligible

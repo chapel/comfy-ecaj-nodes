@@ -1,0 +1,23 @@
+_ulid: 01KHCQWYAEA21JA0ZB7FB9100T
+slugs: []
+title: Fix AC annotation style in test_graph.py
+type: task
+description: "test_graph.py has 5 docstring-only AC annotations (AC: @node-graph-testing ac-N
+  without # prefix) that should be converted to standard # AC: comment style"
+spec_ref: "@node-graph-testing"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #48. Moved 17 AC annotations from docstring format to standard
+  before-def comment format in test_graph.py. All 6 ACs (@node-graph-testing ac-1 through ac-6) have
+  full test coverage."
+depends_on: []
+context: []
+priority: 3
+tags:
+  - annotations
+vcs_refs: []
+created_at: 2026-02-14T00:13:06.763Z
+started_at: 2026-02-14T02:06:04.625Z
+completed_at: 2026-02-14T02:09:31.349Z
+todos: []
+automation: eligible

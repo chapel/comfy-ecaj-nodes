@@ -1,0 +1,22 @@
+_ulid: 01KHFZ61S4KB9FVNDAQRGVBRE6
+slugs:
+  - task-incremental-block-recomputation
+title: "Implement: Incremental Block Recomputation"
+type: task
+spec_ref: "@incremental-block-recompute"
+derivation: auto
+status: completed
+blocked_by: []
+closed_reason: "Implemented incremental block recomputation: structural fingerprint in
+  persistence.py, change detection in block_classify.py, LRU-1 cache in exit.py. 41 tests covering
+  all 16 ACs, 862 total tests pass, ruff clean."
+depends_on:
+  - "@implement-exit-node"
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-15T06:18:08.548Z
+started_at: 2026-02-15T06:29:28.315Z
+completed_at: 2026-02-15T06:29:30.940Z
+todos: []

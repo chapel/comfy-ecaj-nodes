@@ -1,0 +1,25 @@
+_ulid: 01KHC3H8DFA4RN9DA0K5DW8ZDW
+slugs: []
+title: Add full model merging support
+type: spike
+description: "The architecture should technically be capable of full model merging (not just
+  LoRA-based WIDEN), but this needs explicit specs, acceptance criteria, and validation. Requires
+  design/spec work: define merge strategies for full models, spec out the merge pipeline, write
+  AC-annotated tests, and validate against known merge results."
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: null
+depends_on: []
+context: []
+priority: 3
+tags:
+  - design
+  - spec
+vcs_refs: []
+created_at: 2026-02-13T18:17:12.357Z
+started_at: 2026-02-13T22:32:24.232Z
+completed_at: 2026-02-13T22:32:26.896Z
+todos: []

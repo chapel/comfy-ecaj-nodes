@@ -1,0 +1,185 @@
+notes:
+  - _ulid: 01KHA7AP8GK10K6PZS4K3SBZ8Z
+    content: >-
+      ## Implementation Details
+
+
+      ### lib/block_classify.py — Add classify_layer_type
+
+      ```python
+
+      @functools.lru_cache(maxsize=4096)
+
+      def classify_layer_type(key: str, arch: str) -> str | None:
+
+      ```
+
+      - Strip prefixes (diffusion_model., transformer.)
+
+      - Pattern matching on key segments (order matters — more specific first):
+        - SDXL attention: attn1, attn2, to_q, to_k, to_v, proj_in, proj_out (within blocks)
+        - Z-Image attention: attn.qkv, attn.out, q_norm, k_norm
+        - Feed-forward: ff., mlp., fc1, fc2, .w1., .w2., .w3., feed_forward
+        - Norm: norm, ln, rms
+        - adaLN_modulation → None (conditioning projection, NOT norm)
+        - Return None for: time_embed, label_emb, final_layer, embedders, unclassifiable
+      - Add to __all__
+
+      - Precedence: attention > feed_forward > norm
+
+
+      ### nodes/block_config.py — Extend make_block_config_node
+
+      ```python
+
+      def make_block_config_node(arch, block_groups, docstring, layer_types=None):
+
+      ```
+
+      - When layer_types provided, add FLOAT inputs in INPUT_TYPES (same SLIDER_CONFIG)
+
+      - create_config partitions kwargs into block vs layer-type by checking membership
+
+      - Returns BlockConfig(arch=arch, block_overrides=..., layer_type_overrides=...)
+
+
+      ### nodes/block_config_sdxl.py + block_config_zimage.py
+
+      ```python
+
+      _LAYER_TYPES = (("attention", "attention"), ("feed_forward", "feed_forward"), ("norm",
+      "norm"))
+
+      ```
+
+      Pass as layer_types=_LAYER_TYPES to make_block_config_node.
+
+
+      ### lib/per_block.py — Consume layer_type_overrides multiplicatively
+
+
+      _apply_per_block_lora_strength (lines 25-94):
+
+      - Import classify_layer_type
+
+      - Build layer_type_overrides dict alongside block_overrides
+
+      - Per-key: effective = block_s * layer_s
+
+      - Update early-exit has_overrides check
+
+
+      _get_block_t_factors (lines 97-141):
+
+      - Same pattern: effective_t = block_t * layer_t
+
+      - block overrides are absolute t_factor values; layer_type overrides are multipliers
+
+      - layer_type at 1.0 = no change, 0.5 = halve, 2.0 = double
+
+
+      ### No changes needed to
+
+      lib/recipe.py (field exists), lib/recipe_eval.py, lib/gpu_ops.py, lib/batch_groups.py
+
+
+      ### New tests — tests/test_layer_type_classify.py
+
+      - SDXL: input_blocks.3.1.transformer_blocks.0.attn1.to_q.weight → "attention"
+
+      - SDXL: input_blocks.4.1.transformer_blocks.0.ff.net.0.proj.weight → "feed_forward"
+
+      - SDXL: input_blocks.4.0.in_layers.0.weight → "norm" (if contains norm)
+
+      - Z-Image: layers.5.attn.qkv.weight → "attention"
+
+      - Z-Image: layers.5.feed_forward.w1.weight → "feed_forward"
+
+      - Z-Image: layers.5.adaLN_modulation.1.weight → None
+
+      - Unmatched → None; with/without prefixes
+
+
+      ### Extend test_per_block_control.py
+
+      - 3 layer_type sliders (attention, feed_forward, norm)
+
+      - create_config stores layer_type_overrides
+
+      - Total inputs = block_sliders + 3
+
+
+      ### Extend test_lora_block_strength.py
+
+      - block=0.5, attention=0.7 → effective 0.35
+
+      - attention=0.5 only → 0.5 for attention keys, 1.0 for others
+
+      - Both at 1.0 → no effect
+
+      - layer_type=0.0 → disable that type
+
+
+      ### Extend test_merge_block_config.py
+
+      - t_factor with layer_type_overrides grouping
+
+      - block t=0.8, attention=0.5 → effective 0.4
+
+
+      ### Key decisions
+
+      - adaLN_modulation → None (SiLU + Linear conditioning projection)
+
+      - q_norm/k_norm → "attention" (precedence: attention > feed_forward > norm)
+
+      - proj_in/proj_out in blocks → "attention"
+
+      - Unsupported arch or arch=None → None (no error)
+
+      - Negative sliders allowed (ComfyUI permits). No clamping.
+
+      - Zero slider: 0.0 * anything = 0.0 (valid: disable LoRA or passthrough t_factor)
+
+
+      ### File-touch checklist
+
+      - [ ] lib/block_classify.py — add classify_layer_type, update __all__
+
+      - [ ] lib/per_block.py — modify both functions
+
+      - [ ] nodes/block_config.py — extend factory
+
+      - [ ] nodes/block_config_sdxl.py — pass _LAYER_TYPES
+
+      - [ ] nodes/block_config_zimage.py — pass _LAYER_TYPES
+
+      - [ ] tests/test_layer_type_classify.py (new)
+
+      - [ ] tests/test_per_block_control.py
+
+      - [ ] tests/test_lora_block_strength.py
+
+      - [ ] tests/test_merge_block_config.py
+
+
+      ### Verification
+
+      pytest -v && ruff check
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-13T00:45:02.608Z
+  - _ulid: 01KHCZTZMJ4EB3HC6D8J3DGWKJ
+    content: "Implementation complete. Added classify_layer_type function to lib/block_classify.py with
+      architecture-specific patterns (SDXL: attn1/attn2/to_q/to_k/to_v/proj_in/proj_out → attention,
+      ff. → feed_forward, norm → norm; Z-Image: attn.qkv/attn.out/q_norm/k_norm → attention,
+      feed_forward/mlp/w1/w2/w3/fc1/fc2 → feed_forward, norm/ln/rms → norm). Extended
+      make_block_config_node to accept layer_types parameter. Updated SDXL and Z-Image block config
+      nodes with attention/feed_forward/norm sliders. Modified _apply_per_block_lora_strength and
+      _get_block_t_factors to apply layer_type_overrides multiplicatively with block overrides. All
+      8 ACs covered: ac-1 (classification), ac-2 (LoRA multiplicative), ac-3 (t_factor
+      multiplicative), ac-4 (backwards compatible), ac-5 (UI sliders), ac-6 (None for unmatched),
+      ac-7 (precedence), ac-8 (None for unknown arch). 654 tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T02:31:51.186Z

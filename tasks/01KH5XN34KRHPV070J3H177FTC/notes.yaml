@@ -1,0 +1,9 @@
+notes:
+  - _ulid: 01KHA269D8GD9GBV6BXG2QKYMM
+    content: Closing as won't-fix. The fallbacks are spec'd behavior (AC-8, AC-9 on widen-core).
+      Codebase is stable with 525+ tests, and the batched parity bug that these could have masked
+      was already caught and fixed. If strict mode is ever needed for debugging, it's a trivial
+      2-line change.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T23:15:15.497Z

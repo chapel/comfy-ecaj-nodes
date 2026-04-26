@@ -1,0 +1,31 @@
+notes:
+  - _ulid: 01KH4HA48WEV45JBSVZ5N8XDQ1
+    content: |
+      Implementation notes:
+
+      Merge node gains optional block_t_factor input of type BLOCK_CONFIG in
+      INPUT_TYPES. When present, stored in RecipeMerge.block_config. At Exit
+      evaluation time, for each parameter key, executor: (1) classifies key into
+      block group using architecture-specific patterns (e.g., for SDXL
+      input_blocks.3. -> IN03-05), (2) looks up block group in
+      BlockConfig.block_overrides, (3) uses override value as t_factor instead
+      of global RecipeMerge.t_factor. If key block group not in overrides, falls
+      back to global t_factor. Block classification function should live in
+      lib/block_classify.py with one function per arch.
+      Files: nodes/merge.py (add input), lib/executor.py (use block config
+      during eval), lib/block_classify.py (key-to-block mapping).
+    author: "@claude"
+    created_at: 2026-02-10T19:44:03.356Z
+  - _ulid: 01KH5FKM4X09R0C9SF93YTXJPZ
+    content: "Implemented per-block t_factor support for merge operations. Created lib/block_classify.py
+      with SDXL and Z-Image key classification (classify_key_sdxl, classify_key_zimage). Updated
+      lib/executor.py with _get_block_t_factors helper that groups keys by their effective t_factor,
+      and _apply_widen_filter_per_block/_apply_widen_merge_per_block functions that process each
+      t_factor group with appropriate WIDEN instance. Updated nodes/exit.py to pass arch and
+      widen_config to evaluate_recipe. AC-1: when block_config is present, per-block t_factor
+      overrides are applied. AC-2: when block_config is None, global t_factor applies to all blocks.
+      35 tests in test_merge_block_config.py covering block classification and t_factor grouping.
+      431 total tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-11T04:33:31.805Z

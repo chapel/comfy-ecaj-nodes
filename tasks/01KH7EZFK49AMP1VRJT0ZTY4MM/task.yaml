@@ -1,0 +1,26 @@
+_ulid: 01KH7EZFK49AMP1VRJT0ZTY4MM
+slugs: []
+title: "E2E test: multi-set recipe evaluation with shape-only grouping"
+type: task
+description: "Add integration/E2E test that exercises multi-set recipe evaluation where same-shape
+  keys are affected by different LoRA sets and processed in one OpSignature group. Verifies no
+  cross-set leakage when grouping by shape only (without affecting_sets). Should use MockLoRALoader
+  with per-set filtering and assert final merged tensors match expected per-set behavior. Guards
+  against regressions from the OpSignature simplification in PR #34."
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "5 E2E tests for multi-set recipe evaluation with shape-only grouping. PR #37 merged."
+depends_on: []
+context: []
+priority: 2
+tags:
+  - testing
+  - performance
+vcs_refs: []
+created_at: 2026-02-11T23:01:00.641Z
+started_at: 2026-02-12T07:18:03.551Z
+completed_at: 2026-02-12T07:35:25.297Z
+todos: []

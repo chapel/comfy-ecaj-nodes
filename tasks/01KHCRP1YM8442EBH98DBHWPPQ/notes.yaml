@@ -1,0 +1,260 @@
+notes:
+  - _ulid: 01KHCRP1YMEMWB6TAH6W9W1YAD
+    content: >-
+      Implementation notes (auto-generated from spec):
+
+
+      Opt-in save/cache for merged model output. When enabled, the exit node saves the fully-merged
+      model as safetensors adjacent to the base model directory. On subsequent runs, if the cached
+      file metadata matches the current recipe configuration, the node loads directly from disk
+      instead of recomputing the GPU merge pipeline. The saved file is a complete standalone model
+      loadable by ComfyUI standard model loader. New inputs: save_model (boolean toggle, default
+      off) and model_name (string filename).
+
+
+
+      Acceptance Criteria:
+
+      - ac-1: Given save_model toggle is disabled (default), when exit node executes, then behavior
+      is unchanged from baseline — no file I/O
+
+      - ac-2: Given save_model enabled and model_name provided, when exit node completes GPU merge,
+      then fully-merged state dict saved as safetensors adjacent to base model using model_name
+
+      - ac-3: Given cached safetensors exists at expected path, when exit node executes with
+      save_model enabled and metadata matches current config, then model loaded from disk and GPU
+      merge pipeline skipped entirely
+
+      - ac-4: Given cached file exists but metadata does not match, when exit node executes with
+      save_model enabled, then GPU merge pipeline runs and cached file is overwritten with new
+      results
+
+      - ac-5: Given save_model enabled and model_name is empty or not provided, when exit node
+      validates inputs, then raises clear error requesting a model name
+
+      - ac-6: Given a saved safetensors file, when examined for metadata, then header contains
+      recipe identity hash, LoRA file stats (paths + mtime + size), base model identity, and
+      per-block config
+
+      - ac-7: Given LoRA files on disk have changed (different mtime or size), when exit node checks
+      cache validity, then cache is invalidated and merge recomputes
+
+      - ac-8: Given saved safetensors from exit node, when loaded by ComfyUI standard model loader,
+      then functions as a complete standalone model
+
+      - ac-9: Given file with model_name already exists but lacks ecaj metadata in safetensors
+      header, when exit node attempts save or cache-check, then raises error indicating file was not
+      created by this node and suggests a different model_name
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T00:26:49.684Z
+  - _ulid: 01KHCS6Z5HQM6ANZGZCDWJ90K5
+    content: >-
+      ## Implementation Notes
+
+
+      ### Files to Modify
+
+
+      1. **lib/recipe.py** — Add model_path: str | None field to RecipeBase (frozen dataclass). This
+      threads the checkpoint filename from Entry node for save directory resolution and base model
+      identity hashing.
+
+
+      2. **nodes/entry.py** — Set model_path on RecipeBase when creating the recipe tree. ComfyUI
+      provides the checkpoint name as a node input string; pass it through.
+
+
+      3. **nodes/exit.py** — Primary changes:
+         - Add save_model (BOOLEAN, default False) and model_name (STRING) to INPUT_TYPES
+         - Add cache-check at start of execute() (before GPU work)
+         - Add save step after merged_state is computed (before install_merged_patches)
+         - Use folder_paths.get_folder_paths('checkpoints') to resolve base model directory from model_path
+
+      4. **lib/persistence.py** (new) — Separation of concerns:
+         - compute_persistence_hash(recipe_tree) -> str (full config identity)
+         - save_merged_model(path, state_dict, metadata) -> None (atomic write)
+         - load_cached_model(path, expected_hash) -> dict | None
+         - validate_model_name(name) -> str (sanitization)
+
+      ### Recipe Identity Hash
+
+
+      The existing _compute_recipe_hash in nodes/exit.py only covers LoRA file paths+stats for
+      IS_CHANGED. The persistence hash must be a SEPARATE, more comprehensive function covering:
+
+      - LoRA paths + mtime + size (existing)
+
+      - LoRA strengths per entry
+
+      - t_factor values at each merge level
+
+      - block_config overrides (serialized)
+
+      - Recipe tree topology (structural identity)
+
+      - Base model identity (checkpoint filename or content hash)
+
+
+      Approach: Serialize the frozen recipe tree deterministically, replacing model_patcher refs
+      with model_path string, then SHA-256 the repr. Frozen dataclasses make this natural.
+
+
+      ### Safetensors Metadata Keys
+
+
+      All keys prefixed with __ecaj_ to avoid collision:
+
+      - __ecaj_version__: '1'
+
+      - __ecaj_recipe_hash__: '<sha256 hex>'
+
+      - __ecaj_lora_stats__: JSON array of [path, mtime, size]
+
+      - __ecaj_base_model__: checkpoint filename string
+
+      - __ecaj_block_config__: JSON serialized config (or 'null')
+
+      - __ecaj_t_factors__: JSON array of t_factor values
+
+
+      Note: safetensors metadata values must be strings. Use json.dumps().
+
+      The hash alone is used for cache validation (fast path). Individual fields are for
+      introspection/debugging.
+
+
+      ### Save/Load Flow in execute()
+
+
+      SAVE PATH (after GPU merge, before install_merged_patches):
+
+      1. Validate model_name: non-empty, no path separators, no '..' (AC-5, AC-11)
+
+      2. Append .safetensors if missing (AC-12)
+
+      3. Resolve save_path via folder_paths from model_path directory
+
+      4. Build full state_dict: start from base model state_dict, overlay merged keys
+
+      5. Compute metadata with persistence hash
+
+      6. Atomic write: write to save_path.tmp, then os.rename() (AC-10)
+
+
+      CACHE CHECK (at start of execute(), after validation):
+
+      1. Resolve expected path from model_name + base model directory
+
+      2. If file doesn't exist -> proceed to GPU merge
+
+      3. If file exists -> read safetensors header metadata only (fast, no tensor load)
+
+      4. If no __ecaj_version__ key -> raise error (AC-9, not our file)
+
+      5. If __ecaj_recipe_hash__ matches -> load tensors, skip GPU pipeline (AC-3)
+
+      6. If hash mismatch -> proceed to GPU merge, will overwrite (AC-4)
+
+
+      ### Gotchas
+
+
+      1. Cache hit still needs install_merged_patches() — the cache replaces GPU merge (phases 1-2),
+      NOT patch installation (phase 3). Loaded state_dict feeds into install_merged_patches like
+      normal.
+
+
+      2. _unpatch_loaded_clones() MUST still run even on cache hit — base model state could be
+      corrupted from prior run patches.
+
+
+      3. storage_dtype must match between cached file and base model. Save in storage_dtype, verify
+      on load.
+
+
+      4. The existing finally block calls loader.cleanup(). On cache-hit path, loader may not be
+      initialized. Restructure try/finally or guard with hasattr/None check.
+
+
+      5. ProgressBar on cache hit: show single step 'loaded from cache' instead of batch group
+      progress.
+
+
+      6. Full state dict for AC-8: must save ALL base model keys (2-7GB for SDXL), not just
+      WIDEN-affected keys. Read full base state_dict, overlay merged keys, write complete model.
+      Memory implication: need full state_dict in RAM during save.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T00:36:03.889Z
+  - _ulid: 01KHCSEZN608XBYKMKF92JT1SX
+    content: >-
+      ## Updated: Recipe-in-Metadata Approach
+
+
+      Embed the full serialized recipe tree in safetensors metadata rather than storing individual
+      fields. The hash is derived FROM the serialized recipe, not computed separately.
+
+
+      ### Safetensors Metadata Keys (revised)
+
+
+      - __ecaj_version__: '1'
+
+      - __ecaj_recipe__: JSON-serialized frozen recipe tree (model_patcher replaced with model_path
+      string, all other fields preserved — strengths, t_factors, block_config, tree structure)
+
+      - __ecaj_recipe_hash__: sha256(__ecaj_recipe__) — fast comparison key
+
+
+      ### Cache Validation Flow (revised)
+
+
+      1. Read header metadata (fast, no tensor load)
+
+      2. Compare __ecaj_recipe_hash__ against hash of current serialized recipe (fast path)
+
+      3. On hash match → cache hit, load tensors
+
+      4. On mismatch → recompute
+
+
+      The recipe serialization is deterministic because the tree is frozen dataclasses with tuples.
+      Replace model_patcher with model_path, serialize with json.dumps(sort_keys=True) or
+      deterministic repr().
+
+
+      Benefits: single source of truth, no separate fields to sync, full recipe is inspectable in
+      metadata for debugging, and LoRA file stats (mtime/size) are naturally included since they're
+      part of the recipe tree walk during serialization.
+
+
+      Previous note about individual __ecaj_lora_stats__, __ecaj_base_model__,
+      __ecaj_block_config__, __ecaj_t_factors__ fields is SUPERSEDED — these are replaced by the
+      single __ecaj_recipe__ field.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T00:40:26.534Z
+  - _ulid: 01KHCSMXHHRXF2W77HZGXVZE5B
+    content: >-
+      ## Workflow Embedding
+
+
+      New input: save_workflow (BOOLEAN, default True). When enabled, embed the ComfyUI workflow
+      JSON in safetensors metadata.
+
+
+      Access the workflow via HIDDEN inputs in INPUT_TYPES:
+        'hidden': {'prompt': 'PROMPT', 'extra_pnginfo': 'EXTRA_PNGINFO'}
+
+      EXTRA_PNGINFO contains the workflow dict. Serialize with json.dumps() into metadata key
+      __ecaj_workflow__. This mirrors how ComfyUI embeds workflow in PNG images via the SaveImage
+      node.
+
+
+      Note: workflow is NOT included in the recipe hash — it's purely informational metadata for
+      reproducibility. Changing the workflow JSON (e.g. rearranging nodes) should not invalidate the
+      cache.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T00:43:40.978Z

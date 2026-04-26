@@ -1,0 +1,23 @@
+_ulid: 01KHHE6K4Q1A06V0PX9PZ8E0JX
+slugs:
+  - implement-clip-merging-pipeline
+title: Implement CLIP Merging Pipeline
+type: task
+spec_ref: "@clip-merge-pipeline"
+plan_ref: "@plan-model-loader-split-clip-merging"
+status: completed
+blocked_by: []
+closed_reason: null
+depends_on:
+  - "@implement-clip-entry-node"
+  - "@implement-clip-exit-node"
+  - "@implement-clip-graph-nodes"
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-15T19:59:49.399Z
+started_at: 2026-02-17T05:30:18.448Z
+completed_at: 2026-02-17T05:30:21.262Z
+todos: []
+automation: eligible

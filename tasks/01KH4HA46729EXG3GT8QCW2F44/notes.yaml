@@ -1,0 +1,28 @@
+notes:
+  - _ulid: 01KH4HA467XDAB7ACFJRB2MXSN
+    content: |
+      Implementation notes:
+
+      Stub in nodes/lora.py. The lora_name input must change from STRING type
+      to use folder_paths.get_filename_list(loras) -- the ComfyUI pattern is:
+      import folder_paths then lora_name: (folder_paths.get_filename_list(loras),)
+      as a combo input. Full file path resolved at Exit time via
+      folder_paths.get_full_path(loras, lora_name). The prev input receives a
+      RecipeLoRA from a previous LoRA node -- extract its .loras tuple and
+      concatenate: new_loras = prev.loras + (dict(path=lora_name, strength=strength),).
+      If prev is None, create single-element tuple. For the task: update
+      INPUT_TYPES to use folder_paths combo, implement add_lora() method,
+      handle prev chaining with tuple concatenation. Edge case: prev might
+      be None (optional input).
+      Files: nodes/lora.py.
+    author: "@claude"
+    created_at: 2026-02-10T19:44:03.271Z
+  - _ulid: 01KH59SQ5H65P189F8PK584N2V
+    content: "Implemented LoRA node with folder_paths dropdown (deferred import for testability).
+      add_lora() returns RecipeLoRA with proper prev chaining for LoRA sets. Added 12 tests covering
+      all 5 ACs: AC-1 (returns RecipeLoRA with path/strength), AC-2 (chaining via prev), AC-3
+      (folder_paths dropdown), AC-4 (no prev = single-element), AC-5 (zero strength preserved).
+      Updated conftest.py mock for folder_paths.get_filename_list. All 119 tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-11T02:52:00.050Z

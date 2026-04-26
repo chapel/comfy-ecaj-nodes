@@ -1,0 +1,11 @@
+notes:
+  - _ulid: 01KHA4DCFB9KXEPMY6CGH2B1EN
+    content: "Outdated areas: OpSignature dropped affecting_sets field, executor.py split into 4 modules
+      (batch_groups/gpu_ops/per_block/recipe_eval + facade), recursive eval replaced by
+      compile-then-execute, project tree missing
+      analysis.py/block_classify.py/sparsity.py/block_config nodes, input naming changed from
+      block_strength/block_t_factor to generic block_config, set patch format uses tuple wrapping.
+      Specs capture the actual system accurately."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T23:54:05.163Z

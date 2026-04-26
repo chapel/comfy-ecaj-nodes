@@ -1,0 +1,30 @@
+_ulid: 01KHA77QE33PJTTXZCP29H88DS
+slugs:
+  - layer-type-filter-impl
+title: Add layer-type filtering to block config
+type: task
+description: Add classify_layer_type function and wire up BlockConfig.layer_type_overrides. Adds
+  attention/feed_forward/norm sliders to block config nodes. Effective strength = block_strength *
+  layer_type_strength (multiplicative). See task notes for full implementation details.
+spec_ref: "@layer-type-filter"
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #51. Added layer-type filtering with classify_layer_type function
+  supporting SDXL and Z-Image architectures. Layer types (attention, feed_forward, norm) apply
+  multiplicatively with block overrides for both LoRA strength and WIDEN t_factor. UI sliders added
+  to block config nodes. All 8 ACs covered with 897 lines of implementation and tests."
+depends_on:
+  - "@individual-block-control"
+context: []
+priority: 3
+tags:
+  - feature
+  - blocks
+vcs_refs: []
+created_at: 2026-02-13T00:43:25.507Z
+started_at: 2026-02-14T02:24:23.423Z
+completed_at: 2026-02-14T02:35:14.566Z
+todos: []
+automation: eligible

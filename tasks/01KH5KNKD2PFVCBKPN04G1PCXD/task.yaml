@@ -1,0 +1,31 @@
+_ulid: 01KH5KNKD2PFVCBKPN04G1PCXD
+slugs:
+  - unify-scalar-batched
+title: Unify scalar/batched codepaths in widen.py and divergence.py
+type: task
+description: "STRUCTURAL: ~200 lines of duplicated scalar/batched code in widen.py plus dim dispatch
+  duplication in both widen.py and divergence.py. Already caused the flat/non-flat parity bug. PAIRS
+  TO UNIFY: filter_delta/batched, merge_weights/batched, _merge_1d_params/batched,
+  _build_importance_masks/batched, WeightDisentangler 8 methods. APPROACH: Make batched canonical,
+  scalar becomes unsqueeze(0)->batched->squeeze(0). DIMENSION DISPATCH: reshape-to-canonical,
+  flatten non-output axes. DIVERGENCE.PY: same treatment, prefer reshape() over view(). ALSO FIX:
+  remove unused WIDENConfig.n_models, add stable=True to exact_rank, normalize soft_rank to [0,1].
+  DEPENDS ON fix-batched-parity completing first."
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #27. Unified scalar/batched codepaths (-180 lines), generic dimension
+  dispatch, removed n_models, fixed exact_rank stable sort, normalized soft_rank."
+depends_on: []
+context: []
+priority: 2
+tags:
+  - refactor
+  - review-finding
+vcs_refs: []
+created_at: 2026-02-11T05:44:30.882Z
+started_at: 2026-02-11T07:29:50.494Z
+completed_at: 2026-02-11T07:29:53.129Z
+todos: []

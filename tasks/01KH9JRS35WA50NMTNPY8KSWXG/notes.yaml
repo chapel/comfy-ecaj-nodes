@@ -1,0 +1,19 @@
+notes:
+  - _ulid: 01KH9JS0HPS7E2PT0XMRKMFTJ1
+    content: "Implementation notes: exit.py:431-433 runs gc.collect() + torch.cuda.empty_cache() after
+      every OpSignature group. SDXL has 50+ groups = 50+ GC passes + GPU sync barriers. Options: (1)
+      Move to end-of-evaluation only. (2) Run every N groups (e.g. every 10). (3) Only run when free
+      VRAM drops below threshold. Must be careful — this cleanup exists to prevent OOM on low-VRAM
+      GPUs. The OOM backoff in gpu_ops.py should handle pressure anyway, so aggressive pre-emptive
+      cleanup may be unnecessary. Test on 8GB GPU to validate."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T18:45:51.798Z
+  - _ulid: 01KH9MMCS9HAHMN12GZ7Z0Y0MR
+    content: "Done: Moved gc.collect() + empty_cache() out of the per-group loop to after all groups
+      complete. Updated @memory-management ac-2 spec to match. Updated test docstrings/names. OOM
+      backoff in chunked_evaluation already handles per-group memory pressure. 525 tests pass, ruff
+      clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T19:18:17.642Z

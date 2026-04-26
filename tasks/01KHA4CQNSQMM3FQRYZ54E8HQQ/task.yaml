@@ -1,0 +1,24 @@
+_ulid: 01KHA4CQNSQMM3FQRYZ54E8HQQ
+slugs:
+  - delete-design-doc
+title: Delete docs/design.md
+type: task
+description: Design doc is 1077 lines and outdated in several areas (OpSignature fields, executor
+  structure, project tree, recipe evaluation algorithm). Specs are now the source of truth. Remove
+  docs/design.md and the docs/ directory if empty.
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: Deleted docs/design.md, removed references from AGENTS.md, removed empty docs/ directory
+depends_on: []
+context: []
+priority: 3
+tags:
+  - cleanup
+vcs_refs: []
+created_at: 2026-02-12T23:53:43.861Z
+started_at: 2026-02-13T00:57:51.449Z
+completed_at: 2026-02-13T00:58:35.578Z
+todos: []

@@ -1,0 +1,20 @@
+_ulid: 01KHQGTT5RK2RZH2YMX78CAS0F
+slugs:
+  - implement-loader-memory-measurement
+title: Implement Loader Memory Measurement
+type: task
+spec_ref: "@loader-memory-measurement"
+plan_ref: "@plan-fix-incremental-recompute-memory-estimation"
+status: completed
+blocked_by: []
+closed_reason: "Merged PR #83. All 7 ACs covered, 14 tests, both reviewers approved."
+depends_on: []
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-18T04:41:15.704Z
+started_at: 2026-02-18T05:34:07.062Z
+completed_at: 2026-02-18T05:53:43.883Z
+todos: []
+automation: eligible

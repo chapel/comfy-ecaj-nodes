@@ -1,0 +1,25 @@
+_ulid: 01KHHE6K5SF2WQ0M5X30JG1TA5
+slugs:
+  - implement-clip-entry-node
+title: Implement CLIP Entry Node
+type: task
+spec_ref: "@clip-entry-node"
+plan_ref: "@plan-model-loader-split-clip-merging"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #72. Implemented WIDENCLIPEntryNode that wraps ComfyUI CLIP in
+  RecipeBase with domain='clip'. Architecture detection via clip.patcher.model_state_dict() keys
+  (zero GPU). SDXL detected from clip_l+clip_g prefixes; non-SDXL raises
+  UnsupportedCLIPArchitectureError. All 7 ACs verified with 15 tests."
+depends_on:
+  - "@implement-recipe-domain-field"
+  - "@investigate-clip-api"
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-15T19:59:49.433Z
+started_at: 2026-02-15T21:53:08.503Z
+completed_at: 2026-02-15T21:57:45.365Z
+todos: []
+automation: eligible

@@ -1,0 +1,17 @@
+notes:
+  - _ulid: 01KHA4DMNJTGYNCCDMPR8FG8QR
+    content: "Design doc section 7 planned examples/ directory. Workflow JSONs are exported from ComfyUI
+      — save a workflow in the UI, export as JSON/API format. Good candidates: (1)
+      basic-widen-merge: Entry→LoRA→LoRA→Compose→Merge→Exit with 2 models, (2) multi-lora-compose:
+      chaining multiple LoRA nodes with different strengths, (3) per-block-control: block config
+      SDXL node wired into Merge for per-block t_factor. These double as smoke tests for the node
+      graph."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T23:54:13.555Z
+  - _ulid: 01KHCY7F8CZRFMB14ESNKRAGDG
+    content: "Automation status set to manual_only: Workflow JSONs must be built in ComfyUI UI and
+      exported — inherently manual"
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-14T02:03:43.244Z

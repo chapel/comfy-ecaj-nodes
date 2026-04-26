@@ -1,0 +1,23 @@
+_ulid: 01KHA4CY23BXDVEDX2AV5VP4WT
+slugs:
+  - create-examples
+title: Create example ComfyUI workflow JSONs
+type: task
+description: "The project structure planned an examples/ directory but it was never created. Add
+  example workflow JSON files that users can import into ComfyUI. Candidates: basic 2-model WIDEN
+  merge, multi-LoRA compose with chaining, per-block control with block config nodes. These serve as
+  both documentation and quick-start templates."
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 4
+tags:
+  - docs
+vcs_refs: []
+created_at: 2026-02-12T23:53:50.403Z
+todos: []
+automation: manual_only

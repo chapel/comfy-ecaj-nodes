@@ -1,0 +1,32 @@
+notes:
+  - _ulid: 01KH4HA48EJA9E7AFC4E38BA13
+    content: |
+      Implementation notes:
+
+      Adds BLOCK_CONFIG custom ComfyUI type. Architecture-specific config nodes
+      go in nodes/block_config_sdxl.py, nodes/block_config_zimage.py. Each
+      exposes sliders for its architecture block groups: SDXL has input_blocks
+      (groups of 3: IN00-02, IN03-05, IN06-08), middle_block, output_blocks
+      (groups of 3). Z-Image has layers (groups of 5: L00-04, L05-09, ... L25-29),
+      noise_refiner, context_refiner. Each slider FLOAT range 0.0-2.0, step 0.05.
+      ComfyUI allows typing values outside slider range so -1.0 is accessible.
+      The node produces a BlockConfig dataclass (in lib/recipe.py). Backwards
+      compatibility: when block_config fields on RecipeMerge/RecipeLoRA are None,
+      executor uses global t_factor/strength -- no special casing needed.
+      Files: nodes/block_config_sdxl.py, nodes/block_config_zimage.py,
+      lib/recipe.py (BlockConfig dataclass).
+    author: "@claude"
+    created_at: 2026-02-10T19:44:03.342Z
+  - _ulid: 01KH5F1XF19NQV15D8DXRJG8V1
+    content: "Implemented per-block control feature with BLOCK_CONFIG custom ComfyUI type. Created
+      WIDENBlockConfigSDXLNode (7 block group sliders: IN00-02, IN03-05, IN06-08, MID, OUT00-02,
+      OUT03-05, OUT06-08) and WIDENBlockConfigZImageNode (8 block group sliders: L00-04 through
+      L25-29, noise_refiner, context_refiner). Each slider is FLOAT 0.0-2.0 step 0.05. Added
+      BLOCK_CONFIG optional input to WIDENLoRANode and WIDENMergeNode for fan-out support. AC-1:
+      when block_config is None, behavior identical to pre-block-control. AC-2:
+      architecture-specific nodes expose sliders. AC-3: BLOCK_CONFIG fans out correctly (same
+      instance shared). 22 tests in test_per_block_control.py covering all 3 ACs. 396 total tests
+      pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-11T04:23:51.522Z

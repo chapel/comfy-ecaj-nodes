@@ -1,0 +1,60 @@
+_ulid: 01KH5KJ21MWX1JS1QCN873N9KZ
+slugs:
+  - harden-validation
+title: Harden validation, error handling, and API contracts across codebase
+type: task
+description: >-
+  Multiple small validation/error handling issues that collectively create a fragile system.
+
+
+  NODES LAYER:
+
+  1. nodes/lora.py:46 - Silently accepts invalid prev types, starts new set. Raise TypeError.
+
+  2. nodes/lora.py:35, nodes/merge.py:34 - Accept BlockConfig without arch validation. Add check.
+
+  3. __init__.py:3-14 - Broad ImportError catch hides real failures. Narrow to expected modules.
+
+
+  LIBRARY LAYER:
+
+  4. lib/analysis.py:102-122 - _collect_lora_sets no else guard for unknown node types. Add
+  ValueError.
+
+  5. lib/analysis.py:202-214 - Redundant FileNotFoundError catch/re-raise. Remove.
+
+  6. lib/recipe.py:44 - RecipeLoRA.loras has mutable dicts in frozen dataclass. Use frozen entries.
+
+  7. lib/numerical_config.py:154-175 - safe_norm shape inconsistency with keepdim=False. Fix.
+
+  8. lib/lora/zimage.py:48-100 - Compound-name normalization order risk. Sort longest-first.
+
+  9. lib/lora/sdxl.py:225, lib/lora/zimage.py:292 - affected_keys returns internal set. Return copy.
+
+
+  SPARSITY:
+
+  10. lib/sparsity.py:135-209 - EntmaxFunction backward incorrect. If inference-only, add no_grad
+  guard. If gradients needed, implement correct VJP.
+
+
+  VERIFICATION: Invalid prev raises TypeError, mismatched arch raises at boundary, unknown nodes
+  raise ValueError, frozen recipes can't be mutated externally, all tests pass
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #28. 10 validation/hardening fixes across nodes, lib, and sparsity. 491
+  tests passing."
+depends_on: []
+context: []
+priority: 3
+tags:
+  - hardening
+  - review-finding
+vcs_refs: []
+created_at: 2026-02-11T05:42:34.804Z
+started_at: 2026-02-11T07:41:30.424Z
+completed_at: 2026-02-11T07:41:42.683Z
+todos: []

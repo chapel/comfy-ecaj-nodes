@@ -1,9 +1,11 @@
-kynetic: "1.0"
-project:
-  name: Comfy ECAJ Nodes
-  version: 0.1.0
-  status: draft
 includes:
   - modules/main.yaml
   - modules/foundation.yaml
   - modules/widen.yaml
+kynetic: "1.1"
+project:
+  status: draft
+  name: Comfy ECAJ Nodes
+  version: 0.1.0
+task_storage:
+  format: split

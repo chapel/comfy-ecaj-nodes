@@ -1,0 +1,21 @@
+notes:
+  - _ulid: 01KHA4DS7A72P7ZRSJHHSB99EM
+    content: "Context: _unpatch_loaded_clones was added to fix task 01KH7550 (LoRA double-application on
+      subsequent generations). The bug: ComfyUI's clone() shares underlying storage, and 'set'
+      patches from the first generation remain applied in-place on the shared model. Without
+      explicit unpatching, the second generation starts from already-patched weights and applies
+      LoRA again. The function calls unpatch_model()/unpatch_model_clones() on all loaded clones to
+      restore clean base weights. Suggested AC: 'Given an exit node executing after a previous
+      generation, When base weights are extracted, Then they reflect the original unpatched model
+      state regardless of prior set patches.'"
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-12T23:54:18.218Z
+  - _ulid: 01KHAK8CK7MTTBD2G5RSD0N6BG
+    content: "Added ac-7 to @exit-patch-install: 'Given previous generation left set patches on a loaded
+      clone, When patch installation begins, Then loaded clones sharing the base model are fully
+      unloaded first so model_state_dict() returns original unpatched weights.' Annotated all 5
+      TestUnpatchLoadedClones tests. All pass, lint clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-02-13T04:13:30.087Z

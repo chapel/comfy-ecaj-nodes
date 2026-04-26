@@ -1,0 +1,28 @@
+_ulid: 01KH7550XP2PN0929WXXFFXPYD
+slugs: []
+title: Fix LoRA double-application on subsequent generations
+type: bug
+description: "First generation with WIDEN Exit node works correctly. Subsequent generations (after
+  changing a value like LoRA strength) look wrong — LoRA appears double-applied. Suspected root
+  cause: model_state_dict() on the original model_patcher returns patched-in-place weights left by
+  the previous run's clone. Need to verify against real ComfyUI ModelPatcher source and implement
+  fix."
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: Fix confirmed working in real ComfyUI. _unpatch_loaded_clones() forces any loaded
+  clone to fully unload via model_unload() before reading model_state_dict(), restoring clean base
+  weights. Zero memory overhead. 497 tests pass.
+depends_on: []
+context: []
+priority: 1
+tags:
+  - runtime
+  - correctness
+vcs_refs: []
+created_at: 2026-02-11T20:09:16.470Z
+started_at: 2026-02-11T20:12:05.190Z
+completed_at: 2026-02-11T20:35:39.491Z
+todos: []

@@ -1,0 +1,19 @@
+_ulid: 01KHVXCYM37Y434ER5891GB1VB
+slugs: []
+title: Fix stale docstring in estimate_peak_ram
+type: bug
+description: "The docstring in lib/gpu_ops.py estimate_peak_ram (line 80) still says 'pin_memory:
+  temporary 2x cost for one chunk at a time' but the code now uses 1x chunk cost (changed in PR
+  #86). Update the docstring bullet to match the actual behavior."
+spec_ref: "@accurate-ram-preflight"
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 4
+tags: []
+vcs_refs: []
+created_at: 2026-02-19T21:37:50.723Z
+todos: []

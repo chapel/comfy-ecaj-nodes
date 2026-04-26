@@ -1,0 +1,22 @@
+_ulid: 01KH5XMW1P2P2PKWR4NFHT7W1H
+slugs: []
+title: "DRY block config nodes: extract shared slider schema and packing helper"
+type: task
+description: block_config_sdxl.py and block_config_zimage.py repeat slider schema and packing logic.
+  As new architectures are added (Flux, Qwen, etc.), this duplication multiplies. Extract shared
+  helper/factory now.
+spec_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Factory extracted, AC annotations and __name__ added, PR #36 merged"
+depends_on: []
+context: []
+priority: 4
+tags:
+  - refactor
+  - review-finding
+vcs_refs: []
+created_at: 2026-02-11T08:38:52.726Z
+started_at: 2026-02-12T03:03:45.825Z
+completed_at: 2026-02-12T05:08:26.479Z
+todos: []

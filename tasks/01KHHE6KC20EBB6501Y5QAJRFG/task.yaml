@@ -1,0 +1,24 @@
+_ulid: 01KHHE6KC20EBB6501Y5QAJRFG
+slugs:
+  - implement-clip-model-loader
+title: Implement CLIP Model Loader
+type: task
+spec_ref: "@clip-model-loader"
+plan_ref: "@plan-model-loader-split-clip-merging"
+status: completed
+blocked_by: []
+closed_reason: "Merged in PR #76. Implemented CLIPModelLoader: streaming loader for text encoder
+  weights from SDXL checkpoints. Maps conditioner.embedders.0.* to clip_l.* and embedders.1.* to
+  clip_g.*. Validates embedder structure, raises CLIPKeyMappingError for unexpected indices. Uses
+  safetensors safe_open() for memory-efficient access. All 7 ACs covered with 35 tests."
+depends_on:
+  - "@implement-recipe-domain-field"
+context: []
+priority: 3
+tags: []
+vcs_refs: []
+created_at: 2026-02-15T19:59:49.634Z
+started_at: 2026-02-15T22:22:29.898Z
+completed_at: 2026-02-15T22:28:45.949Z
+todos: []
+automation: eligible

@@ -1,0 +1,23 @@
+_ulid: 01KHGYM2DQ2CAVNSHBD1KC6GCW
+slugs:
+  - rework-t-factor-semantics
+title: "Rework t_factor semantics: 0=base-only, remove negative values"
+type: task
+spec_ref: "@widen-core"
+meta_ref: null
+plan_ref: null
+status: completed
+blocked_by: []
+closed_reason: "Implemented t_factor rework: 0=base-only, removed negative values. 4 spec ACs
+  updated/added, code in widen.py + merge.py, tests updated. 870 tests pass, ruff clean."
+depends_on: []
+context: []
+priority: 2
+tags:
+  - ux
+  - breaking-change
+vcs_refs: []
+created_at: 2026-02-15T15:27:33.813Z
+started_at: 2026-02-15T15:29:48.288Z
+completed_at: 2026-02-15T15:29:51.070Z
+todos: []
