@@ -3535,67 +3535,108 @@ plans:
       - title: Full Saved Model Output
         slug: full-saved-model-output
         type: feature
-        tags: [persistence, memory]
+        tags: [persistence, memory, comfy]
         description: |
-          The Exit node can produce a complete saved diffusion model artifact and
-          return a MODEL loaded from that artifact for downstream ComfyUI execution.
+          The Exit node can produce a complete saved diffusion model artifact for a
+          merge recipe and return a MODEL that behaves like a normally loaded ComfyUI
+          diffusion model for downstream execution.
         acceptance_criteria:
           - id: ac-complete-artifact
             given: |
               A valid merge recipe affects some or all diffusion model weights.
             when: |
-              The Exit node saves the result in full saved model mode.
+              The Exit node produces a full saved model output for that recipe.
             then: |
-              The saved artifact contains every diffusion model weight required to
-              load the merged model without the original in-memory patch set.
+              The saved artifact contains every diffusion model weight required for the
+              merged model to be loaded without relying on the original in-memory patch
+              payload.
           - id: ac-return-loaded-model
             given: |
               A full saved model artifact is produced or reused for the current recipe.
             when: |
               The Exit node returns its MODEL output.
             then: |
-              The returned MODEL is loaded through ComfyUI's normal diffusion model
-              loading path for that artifact.
+              Downstream nodes receive a MODEL representing the saved merged artifact,
+              not a clone whose merged result is carried as the original patch payload.
           - id: ac-cache-reuses-artifact
             given: |
               A saved full model artifact matches the current recipe identity.
             when: |
               The Exit node executes in full saved model mode.
             then: |
-              Existing artifact content is reused without recomputing merged weights.
+              The existing artifact is reused without recomputing the merged weights.
 
       - title: Streaming Full Model Materialization
         slug: streaming-full-model-materialization
         type: requirement
         tags: [persistence, memory]
         description: |
-          Full model materialization does not retain all merged tensors in process
-          memory while writing the artifact.
+          Full model materialization keeps merge outputs bounded while creating the
+          complete saved artifact.
         acceptance_criteria:
-          - id: ac-stream-merged-results
+          - id: ac-affected-results-released
             given: |
-              A merge produces affected weights over multiple evaluation chunks.
+              A merge produces affected weights across multiple groups of model keys.
             when: |
-              Full saved model mode writes affected weights.
+              Full saved model mode records affected weights for the artifact.
             then: |
-              Each affected weight is written to the artifact sink before later chunks
-              are evaluated.
-          - id: ac-base-weight-streaming
+              Each affected weight can be recorded and released before all later groups
+              have been evaluated.
+          - id: ac-base-weight-bounded-copying
             given: |
               The saved artifact must include base weights that are not affected by the
               merge recipe.
             when: |
-              Full saved model mode writes the artifact.
+              Full saved model mode creates the artifact.
             then: |
-              Unaffected base weights are written without first materializing a second
-              full model-sized dictionary of tensors.
-          - id: ac-temporary-artifact-safety
+              The operation does not require a second full model-sized in-memory copy
+              of all base weights at once.
+          - id: ac-incomplete-write-not-reused
             given: |
-              A write fails before the full saved artifact is complete.
+              Artifact creation fails before the full saved model is complete.
             when: |
               The Exit node handles the failure.
             then: |
-              No partial artifact is exposed as the saved model for later cache hits.
+              No incomplete artifact is accepted as a successful cache hit on a later
+              execution.
+
+      - title: Comfy Memory Manager Compatibility
+        slug: comfy-memory-manager-compatibility
+        type: requirement
+        tags: [comfy, memory, compatibility]
+        description: |
+          Full saved model output remains compatible with ComfyUI's current model
+          memory lifecycle, including dynamic memory management when ComfyUI enables
+          it.
+        acceptance_criteria:
+          - id: ac-no-dynamic-vram-opt-out
+            given: |
+              ComfyUI is running with its dynamic model memory management enabled.
+            when: |
+              A workflow uses full saved model output.
+            then: |
+              The workflow can run without requiring users to disable ComfyUI's dynamic
+              memory management.
+          - id: ac-comfy-owns-returned-model-memory
+            given: |
+              The Exit node has returned a MODEL from a full saved model artifact.
+            when: |
+              ComfyUI loads, unloads, partially loads, or prioritizes models for a
+              workflow.
+            then: |
+              The returned MODEL participates in ComfyUI's normal model memory
+              lifecycle rather than relying on separate permanently resident merge
+              tensors.
+          - id: ac-measured-memory-behavior
+            given: |
+              The same representative merge workflow is run with the current patch
+              output and with full saved model output.
+            when: |
+              memory behavior is measured under ComfyUI with dynamic memory management
+              enabled.
+            then: |
+              The measurements show whether full saved model output removes the current
+              persistent patch payload and whether any new memory peak is introduced.
       ```
 
       ## Tasks
@@ -3603,36 +3644,86 @@ plans:
       derive_from_specs: false
 
       ```yaml
-      - title: Introduce merge result sink abstraction
+      - title: Validate Comfy loading and Dynamic VRAM behavior for saved merged artifacts
+        slug: task-full-model-dynamic-vram-spike
+        priority: 1
+        tags: [research, comfy, memory]
+        spec_ref: "@comfy-memory-manager-compatibility"
+        depends_on: []
+        description: |
+          What: Prove how a saved merged diffusion artifact behaves when ComfyUI loads
+          it with Dynamic VRAM enabled, and record the supported loading path for the
+          implementation tasks.
+
+          Why: Dynamic VRAM applies to model weights that ComfyUI owns through its
+          model loading and model patcher lifecycle. This output option is only useful
+          if the returned merged MODEL becomes a normal Comfy-managed model and does
+          not leave the original merged patch tensors resident outside that lifecycle.
+
+          How:
+          - Create or reuse a small representative merged safetensors artifact from
+            the project test fixtures or a local ComfyUI development install.
+          - In a ComfyUI environment with Dynamic VRAM enabled, load the artifact using
+            the same public diffusion-model loading path used by regular model nodes.
+          - Confirm that the loaded object is a Comfy MODEL/ModelPatcher suitable for
+            downstream nodes and not a manually patched clone carrying the old set
+            patch payload.
+          - Capture whether the active ModelPatcher class is the dynamic patcher when
+            Dynamic VRAM is enabled and the regular patcher when it is disabled or not
+            supported.
+          - Measure peak process RAM and GPU memory for the current in-memory patch
+            output versus the saved-artifact output on the same representative merge.
+          - Document any Comfy version, PyTorch/CUDA, hardware, or platform conditions
+            that make Dynamic VRAM unavailable so later tasks preserve graceful
+            fallback behavior.
+
+          Testing:
+          - Add a developer-facing test or script under tests/ or scripts/ that can be
+            run against a local ComfyUI checkout to verify the loading path and print
+            the observed patcher class and memory measurements.
+          - The script should succeed when Dynamic VRAM is unavailable by explicitly
+            reporting the fallback, not by requiring the feature.
+
+          Covers: @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out,
+            ac-comfy-owns-returned-model-memory, ac-measured-memory-behavior.
+
+      - title: Introduce a bounded merge result sink
         slug: task-full-model-result-sink-interface
         priority: 1
         tags: [persistence, memory]
         spec_ref: "@streaming-full-model-materialization"
         depends_on: []
         description: |
-          What: Introduce an internal sink interface so merge evaluation can emit
-          results incrementally instead of always accumulating merged_state in memory.
+          What: Introduce an internal sink interface so merge evaluation can hand off
+          each completed affected tensor without requiring the whole affected result
+          set to stay resident in one dictionary.
 
-          Why: Full saved model output cannot reduce RAM until the GPU loop can stream
-          each completed tensor to an artifact writer and drop the tensor reference.
+          Why: The current Exit implementation builds merged_state and then installs or
+          saves it. Full saved model output cannot reduce memory until merge
+          evaluation can emit each completed tensor to a consumer that may immediately
+          persist it and release references.
 
           How:
-          - Create lib/result_sink.py.
-          - Define a small protocol/class with write_tensor(key, tensor), finalize(),
-            and abort() methods.
-          - Add InMemoryResultSink that preserves current behavior for existing tests
-            and in_memory_patches mode.
-          - Keep the sink pure Python/PyTorch with no ComfyUI imports.
-          - Update type hints in nodes/exit.py only after tests cover the new sink.
+          - Inspect the current merge execution path in nodes/exit.py and
+            lib/gpu_ops.py.
+          - Add a pure Python/PyTorch result sink abstraction with write_tensor(key,
+            tensor), finalize(), and abort() behavior.
+          - Provide an in-memory sink that preserves current in_memory_patches behavior
+            and lets existing callers continue receiving a dict of affected tensors.
+          - Keep the sink layer free of ComfyUI imports so it can be unit-tested
+            without a running ComfyUI instance.
+          - Ensure abort paths release temporary resources and preserve existing error
+            propagation.
 
           Testing:
-          - Add tests/test_result_sink.py covering InMemoryResultSink stores CPU tensor
-            references without cloning when dtype/device already match.
-          - Run the focused result sink tests.
+          - Add focused unit tests for the in-memory sink.
+          - Assert the sink records the exact affected keys and tensors passed to it.
+          - Assert abort/finalize behavior is deterministic and safe to call from
+            error paths.
 
-          Covers: @streaming-full-model-materialization ac-stream-merged-results.
+          Covers: @streaming-full-model-materialization ac-affected-results-released.
 
-      - title: Add streaming chunk evaluation to sink
+      - title: Add sink-writing chunk evaluation
         slug: task-full-model-chunked-evaluation-to-sink
         priority: 1
         tags: [executor, memory]
@@ -3640,138 +3731,156 @@ plans:
         depends_on:
           - "@task-full-model-result-sink-interface"
         description: |
-          What: Add a sink-writing variant of the chunked evaluation loop used by
-          WIDENExitNode.
+          What: Add a sink-writing variant of the chunked evaluation loop used by the
+          Exit node.
 
-          Why: The current chunked_evaluation returns a dict, which forces affected
-          tensors to remain resident until patch installation or saving. A sink-writing
-          path allows later artifact writers to reduce peak RAM.
+          Why: The existing chunked evaluation returns a dict, which keeps all affected
+          CPU tensors alive until later install or save work completes. A sink-writing
+          path allows full saved model output to bound affected-result memory while
+          preserving the current computation semantics.
 
           How:
-          - Modify lib/gpu_ops.py or create lib/streaming_eval.py.
-          - Implement chunked_evaluation_to_sink with the same inputs as
-            chunked_evaluation plus sink.
-          - After merged_gpu is transferred to CPU/storage dtype, call
-            sink.write_tensor(key, merged_cpu[i]) for each key.
-          - Preserve OOM backoff behavior, cleanup behavior, dtype conversion, and CPU
-            output guarantees from chunked_evaluation.
-          - Keep the existing chunked_evaluation function as a wrapper using
-            InMemoryResultSink to avoid disrupting tests all at once.
+          - Modify lib/gpu_ops.py or add a focused streaming evaluation module.
+          - Implement a function with the same merge evaluation inputs as the current
+            chunked evaluation path plus a result sink.
+          - For every successfully evaluated key, convert the result to the base-model
+            storage dtype on CPU, pass it to the sink, and then release local chunk
+            references before later chunks are evaluated.
+          - Preserve current GPU out-of-memory retry behavior, system memory error
+            handling, dtype conversion, CPU output guarantees, and cleanup behavior.
+          - Keep the existing dict-returning function as a compatibility wrapper over
+            the in-memory sink or otherwise prove existing behavior remains unchanged.
 
           Testing:
-          - Add tests that compare chunked_evaluation and chunked_evaluation_to_sink on
-            the same small tensors.
-          - Add an OOM retry test mirroring existing memory tests and assert sink output
-            is complete after retry.
+          - Compare dict-returning evaluation and sink-writing evaluation on identical
+            small fake tensors.
+          - Add a retry-path test showing the sink receives exactly the completed keys
+            after an out-of-memory retry succeeds.
+          - Run the existing executor and Exit tests to prove current patch output is
+            unchanged.
 
-          Covers: @streaming-full-model-materialization ac-stream-merged-results.
+          Covers: @streaming-full-model-materialization ac-affected-results-released.
 
-      - title: Implement random-access safetensors artifact writer
-        slug: task-full-model-random-access-writer
+      - title: Implement an incremental safetensors artifact writer
+        slug: task-full-model-incremental-writer
         priority: 1
         tags: [persistence, storage]
         spec_ref: "@streaming-full-model-materialization"
         depends_on: []
         description: |
-          What: Implement a safetensors writer that can write tensors incrementally to
-          predetermined offsets in a temporary file and atomically publish the result.
+          What: Implement a safetensors artifact writer that can publish a complete
+          file only after every required tensor has been written successfully.
 
-          Why: Safetensors stores its header before tensor data. True streaming needs a
-          writer that precomputes shape/dtype/offset metadata, writes the header, then
-          writes tensor bytes as tensors become available.
+          Why: Full saved model output needs a complete model artifact, but a simple
+          all-at-once save can create a second model-sized memory spike. The writer
+          needs to accept tensors incrementally while preserving safetensors validity
+          and cache safety.
 
           How:
-          - Modify lib/streaming_save.py or add lib/random_access_safetensors.py.
-          - Add a TensorSpec dataclass with shape, dtype, and nbytes.
-          - Build the safetensors header from sorted TensorSpec entries and metadata.
-          - Write to a temp file in the destination directory.
-          - Provide write_tensor(key, tensor) that validates shape and dtype, seeks to
-            the key's data offset, and writes bytes for that tensor only.
-          - Track written keys; finalize() fails if any required key was not written.
-          - finalize() fsyncs and atomically replaces the destination path.
-          - abort() removes the temp file.
+          - Extend the existing streaming save support or add a new persistence helper
+            for predetermined tensor metadata and incremental writes.
+          - Precompute each required tensor's name, shape, dtype, and byte length from
+            base model metadata and the selected storage dtype.
+          - Write to a temporary file in the destination directory and publish the
+            final file atomically only after all required tensors have been written.
+          - Validate every write against the expected key, shape, dtype, and byte size.
+          - Track missing or duplicate keys and fail before publishing if the artifact
+            would be incomplete or inconsistent.
+          - Remove temporary files on abort or failure.
 
           Testing:
-          - Round-trip a file with multiple dtypes through safetensors.safe_open.
-          - Assert missing-key finalize fails and leaves no published artifact.
-          - Assert wrong shape/dtype writes fail with clear errors.
+          - Round-trip artifacts with multiple keys and dtypes through safetensors.
+          - Assert missing-key, duplicate-key, wrong-shape, and wrong-dtype cases fail
+            with clear errors and do not publish a cacheable artifact.
+          - Assert a failure leaves no completed artifact at the destination path.
 
-          Covers: @streaming-full-model-materialization ac-temporary-artifact-safety.
+          Covers: @streaming-full-model-materialization ac-incomplete-write-not-reused.
 
-      - title: Implement full checkpoint sink
-        slug: task-full-model-checkpoint-sink
+      - title: Implement full checkpoint materialization
+        slug: task-full-model-checkpoint-materialization
         priority: 2
         tags: [persistence, memory]
         spec_ref: "@streaming-full-model-materialization"
         depends_on:
           - "@task-full-model-result-sink-interface"
-          - "@task-full-model-random-access-writer"
+          - "@task-full-model-incremental-writer"
         description: |
-          What: Add a FullCheckpointSafetensorsSink that writes a complete model file
-          while receiving affected tensors from merge evaluation.
+          What: Add the materialization path that creates a complete merged diffusion
+          artifact while receiving affected tensors from merge evaluation.
 
-          Why: Full saved model mode needs an artifact that Comfy can load as a normal
-          diffusion model while avoiding a second full model-sized in-memory dict.
+          Why: The full saved model option must include both affected merged weights
+          and unaffected base weights without constructing a second complete state dict
+          in memory.
 
           How:
-          - Create FullCheckpointSafetensorsSink in lib/result_sink.py or a companion
-            persistence module.
-          - Constructor inputs: destination path, base_state or a base tensor provider,
-            affected key set, metadata, and storage dtype.
-          - Build TensorSpec entries for every key in the base model state dict.
-          - At initialization, write all unaffected base weights directly to the random
-            access writer, or write them in a deterministic pre-pass before GPU merge.
-          - During GPU evaluation, write affected merged tensors through write_tensor.
-          - Ensure affected keys overwrite only their own predefined offsets.
-          - Ensure finalize publishes only after all required keys are written.
+          - Build the artifact's required key list from the base model state dict.
+          - Record unaffected base weights directly to the artifact writer in a bounded
+            pass that does not also retain a duplicate full-model dictionary.
+          - For affected keys, write merged tensors through the result sink as merge
+            evaluation produces them.
+          - Ensure affected keys replace only their corresponding base entries in the
+            final artifact.
+          - Finalize the artifact only after all affected and unaffected keys have been
+            recorded.
+          - On errors, abort the writer and leave any previous valid cache artifact
+            untouched.
 
           Testing:
-          - Use small fake base_state with both affected and unaffected keys.
-          - Write affected keys through the sink and finalize.
-          - Load with safe_open and assert unaffected keys equal base tensors while
-            affected keys equal merged tensors.
-          - Assert the sink does not expose a merged_state dict.
+          - Use a fake base model state with affected and unaffected keys.
+          - Load the resulting safetensors artifact and assert unaffected keys equal
+            the base tensors while affected keys equal the merged tensors.
+          - Assert materialization does not expose or require a full merged_state dict.
+          - Assert a write failure leaves no partially published artifact.
 
-          Covers: @streaming-full-model-materialization ac-base-weight-streaming,
-            ac-stream-merged-results, ac-temporary-artifact-safety.
+          Covers: @streaming-full-model-materialization ac-base-weight-bounded-copying,
+            ac-affected-results-released, ac-incomplete-write-not-reused.
 
-      - title: Integrate full saved model mode into Exit
+      - title: Integrate full saved model output into Exit
         slug: task-full-model-exit-integration
         priority: 2
-        tags: [exit-node, persistence]
+        tags: [exit-node, persistence, comfy]
         spec_ref: "@full-saved-model-output"
         depends_on:
+          - "@task-full-model-dynamic-vram-spike"
           - "@task-full-model-chunked-evaluation-to-sink"
-          - "@task-full-model-checkpoint-sink"
+          - "@task-full-model-checkpoint-materialization"
         description: |
-          What: Add a production full saved model output mode to WIDENExitNode.
+          What: Add a user-selectable full saved model output mode to the Exit node.
 
-          Why: Users need a mode that produces a reusable Comfy-loadable model and does
-          not retain affected patch tensors as the returned MODEL representation.
+          Why: Users need an option that returns a reusable Comfy-loadable merged model
+          and does not keep the merged result as the original in-memory set patch
+          payload.
 
           How:
-          - Modify nodes/exit.py INPUT_TYPES to expose an output mode or return mode
-            that includes full_saved_model.
-          - Require a valid model_name for full_saved_model.
-          - Use FullCheckpointSafetensorsSink instead of InMemoryResultSink when this
+          - Modify nodes/exit.py to expose an output mode that includes full saved
+            model output while preserving the current in-memory patch output as the
+            default behavior.
+          - Validate that the mode has a usable output artifact name or path before
+            any expensive merge work begins.
+          - On a cache hit for the current recipe and full-model artifact kind, load
+            the saved artifact as a Comfy MODEL and skip GPU merge work.
+          - On a cache miss, run merge evaluation through the sink-writing path,
+            materialize the complete artifact, then load the artifact as a Comfy MODEL
+            through the supported loading path identified by the research task.
+          - Do not call the current in-memory patch installation path when this output
             mode is active.
-          - Route each OpSignature group's evaluation through chunked_evaluation_to_sink.
-          - After sink.finalize(), call comfy.sd.load_diffusion_model(save_path) and
-            return the loaded MODEL.
-          - On cache hit, call comfy.sd.load_diffusion_model(save_path) directly.
-          - Preserve current in_memory_patches behavior as the default.
+          - Preserve existing save/cache flags or migrate them in a backwards-compatible
+            way so existing workflows continue to use their prior output mode.
 
           Testing:
-          - Unit-test that full_saved_model mode uses the full checkpoint sink and does
-            not call install_merged_patches.
-          - Monkeypatch comfy.sd.load_diffusion_model and assert it receives save_path
-            after successful finalize and on cache hit.
-          - Test validation errors for missing model_name.
+          - Unit-test that full saved model mode uses the full checkpoint
+            materialization path and does not call the current in-memory patch
+            installer.
+          - Monkeypatch the Comfy loading path and assert it receives the completed
+            artifact path after successful materialization and on cache hit.
+          - Test validation errors for missing or invalid artifact names.
+          - Run existing in-memory patch output tests unchanged.
 
           Covers: @full-saved-model-output ac-complete-artifact,
-            ac-return-loaded-model, ac-cache-reuses-artifact.
+            ac-return-loaded-model, ac-cache-reuses-artifact;
+            @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory.
 
-      - title: Update persistence metadata and cache behavior for full saved models
+      - title: Add mode-aware persistence metadata and cache checks
         slug: task-full-model-cache-metadata
         priority: 2
         tags: [persistence, cache]
@@ -3779,54 +3888,100 @@ plans:
         depends_on:
           - "@task-full-model-exit-integration"
         description: |
-          What: Extend persistence metadata so full saved model artifacts can be safely
-          distinguished from affected-key patch artifacts and from older in-memory
-          patch cache files.
+          What: Extend persistence metadata so full saved model artifacts are safely
+          distinguished from other ecaj artifacts and from older saved files.
 
-          Why: Cache hits must only reuse artifacts whose shape and mode match the
-          current output behavior.
+          Why: A matching recipe hash is not enough once multiple output modes can
+          write artifacts. Cache hits must only reuse artifacts whose kind and required
+          metadata match the active output behavior.
 
           How:
-          - Modify lib/persistence.py build_metadata or add a mode-aware metadata
-            builder.
-          - Include an ecaj artifact kind such as full_model.
-          - Update check_cache to verify recipe hash and artifact kind when a kind is
-            required by the caller.
-          - Ensure existing metadata tests cover old files without the new artifact
-            kind and reject them for full_saved_model mode.
+          - Update metadata construction and cache checks in lib/persistence.py to
+            include and verify an artifact kind for full saved model outputs.
+          - Reject or recompute when an artifact has the right recipe hash but the
+            wrong artifact kind, missing kind, or incompatible metadata schema.
+          - Preserve protection against overwriting non-ecaj safetensors files.
+          - Include enough metadata for later diagnostics, such as affected keys and
+            the saved recipe identity.
+          - Ensure older ecaj files without an artifact kind do not become silent cache
+            hits for full saved model output.
 
           Testing:
-          - Add cache metadata tests for matching mode, mismatched mode, and missing
-            mode.
-          - Run the persistence test slice.
+          - Add persistence tests for matching kind, mismatched kind, missing kind, and
+            non-ecaj files.
+          - Assert cache hits skip merge work only for compatible full saved model
+            artifacts.
+          - Run the persistence test slice and existing save/cache tests.
 
           Covers: @full-saved-model-output ac-cache-reuses-artifact.
+
+      - title: Validate full saved model memory behavior end to end
+        slug: task-full-model-memory-validation
+        priority: 3
+        tags: [testing, validation, memory]
+        spec_ref: "@comfy-memory-manager-compatibility"
+        depends_on:
+          - "@task-full-model-cache-metadata"
+        description: |
+          What: Add end-to-end-style validation showing full saved model output's
+          memory and behavioral impact compared with current in-memory patch output.
+
+          Why: The main reason to implement this option is to reduce persistent merge
+          payload memory and let Comfy own the returned model's weight lifecycle. The
+          plan should not be considered complete until that claim is measured.
+
+          How:
+          - Build a representative fake or local workflow that exercises multiple
+            affected and unaffected diffusion model keys.
+          - Run the workflow with current in-memory patch output and with full saved
+            model output.
+          - Assert downstream patch/application results are equivalent for affected
+            keys.
+          - Capture process RAM, GPU memory, and whether the returned model is managed
+            by Comfy's normal model lifecycle in both Dynamic VRAM and fallback modes
+            when the local environment supports them.
+          - Document expected tradeoffs: full saved model output can use more disk and
+            may add an artifact load step, but should remove the persistent in-memory
+            patch payload for the returned MODEL.
+
+          Testing:
+          - Add automated assertions for output equivalence and cache reuse.
+          - Add a manual or optional integration script for Dynamic VRAM memory
+            measurement, skipped with a clear reason when ComfyUI or compatible
+            hardware is not available.
+          - Run pytest for persistence, executor, and Exit tests.
+
+          Covers: @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out,
+            ac-comfy-owns-returned-model-memory, ac-measured-memory-behavior.
       ```
 
       ## Implementation Notes
 
-      This plan is the production version of the saved-model direction. It should come
-      after the proof of concept confirms that Comfy can load WIDEN's saved diffusion
-      artifacts through comfy.sd.load_diffusion_model. The central tradeoff is disk
-      usage: this mode writes a complete standalone model artifact, which maximizes
-      Comfy compatibility and reuse but may be expensive when users only need a
-      transient in-graph MODEL.
+      This option is the strongest candidate for actually using ComfyUI's Dynamic
+      VRAM system because the merged result becomes a normal saved diffusion artifact
+      loaded through Comfy's own model loading path. Dynamic VRAM is implemented by
+      Comfy/aimdo around Comfy-managed model weights and ModelPatcher lifecycle; it is
+      not a general-purpose allocator for arbitrary tensors held by custom nodes.
 
-      The key design risk is avoiding a hidden full-model RAM spike. A simple
-      implementation that creates a full save_state dict plus merged_state is not this
-      plan's target; that behavior belongs only to the proof of concept. The full
-      saved model implementation should use a sink and random-access safetensors
-      writer so affected tensors can be written and released as they are produced.
+      The tradeoff is disk usage and an extra artifact load path. The plan therefore
+      keeps the full saved model path explicit instead of replacing the current patch
+      output by default. The proof point for promotion is measured behavior under a
+      current ComfyUI build with Dynamic VRAM enabled: the returned model should no
+      longer depend on the original in-memory set patch payload, and any new load-time
+      or write-time peak should be visible in the validation output.
     status: draft
     approved_at: null
-    branch: null
     derived_specs: []
     derived_tasks: []
     module_ref: null
     source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/full-saved-model-output.md
     created_at: 2026-04-26T22:50:36.045Z
     completed_at: null
-    notes: []
+    notes:
+      - _ulid: 01KQ63B11ST3FJNH2VY69FQJ18
+        content: Harden specs/tasks for Dynamic VRAM investigation and plan best practices
+        author: Jacob Chapel
+        created_at: 2026-04-26T23:52:32.569Z
   - _ulid: 01KQ5ZSQ13857R9CGT36JXYK91
     slugs:
       - plan-disk-backed-patch-output-plan
