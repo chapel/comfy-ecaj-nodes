@@ -4015,6 +4015,12 @@ reviews:
         payload:
           thread_ulid: 01KQ810Q4W2A0FFC2B7RHK3MG5
         timestamp: 2026-04-27T18:05:12.666Z
+      - _ulid: 01KQ81VWZ3MPP9X922TD6K5WAW
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ8113VT6G7D7QWXZSH5N5NY
+        timestamp: 2026-04-27T18:05:17.155Z
     examined_commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
     external_links: []
     lifecycle_state: closed
@@ -4078,6 +4084,15 @@ reviews:
               hits still return a patch-backed clone rather than a model loaded from the complete
               artifact."
             created_at: 2026-04-27T17:50:39.482Z
+          - _ulid: 01KQ81VWXXEW7YZK5ZW5F9NH1Y
+            author: "@claude"
+            body: "Fixed: _load_model_from_artifact now loads ALL keys from the artifact using safe_open and
+              f.keys(), not just the affected keys listed in metadata. All keys (base + affected)
+              are installed as set patches on the cloned ModelPatcher, so the returned model's
+              weights come entirely from the saved artifact. Added a test that creates an artifact
+              with distinctive values (20.0) for all keys and verifies the returned model's patches
+              contain those values, not the original base values."
+            created_at: 2026-04-27T18:05:17.117Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -4088,5 +4103,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T17:50:51.644Z
     created_at: 2026-04-27T17:45:43.925Z
-    updated_at: 2026-04-27T18:05:12.619Z
+    updated_at: 2026-04-27T18:05:17.117Z
     notes: []
