@@ -254,15 +254,14 @@ class TestFullModeSucceedsWithoutDictPath:
     def test_full_mode_succeeds_when_inmemory_sink_construction_fails(
         self, mock_model_patcher, tmp_path
     ):
-        """Full mode does not instantiate an in-memory result sink for newly
-        evaluated full-mode tensors. We monkeypatch dict() to raise when
-        called during evaluation (simulating in-memory result accumulation
-        failing) and verify full mode still succeeds because it streams to
-        MaterializationSink via write_fn instead of accumulating results.
+        """Full mode succeeds even when in-memory result sink construction
+        (dict-returning chunked_evaluation) is monkeypatched to fail.
 
-        Concretely: we monkeypatch evaluate_affected_group (the dict-returning
-        full-mode entry point) to raise, AND we verify that no in-memory
-        merged_state dict is stored in _incremental_cache.
+        This proves full mode never constructs an in-memory result dict to
+        accumulate affected tensors — it streams directly to the
+        MaterializationSink.  We also wrap MaterializationSink to confirm
+        that the actual sink constructor IS called (showing the streaming
+        sink replaces the in-memory sink path).
         """
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -280,10 +279,8 @@ class TestFullModeSucceedsWithoutDictPath:
 
         _incremental_cache.clear()
 
-        # Monkeypatch both dict-returning paths to blow up:
-        # 1) chunked_evaluation (patch mode path)
-        # 2) evaluate_affected_group (dict-returning full-mode path)
-        # Full mode should still succeed because it uses streaming_evaluation_to_sink.
+        # Monkeypatch the dict-returning evaluation path to fail.  Full mode
+        # must succeed because it uses streaming_evaluation_to_sink instead.
         def dict_eval_bomb(**kwargs):
             raise RuntimeError("in-memory result accumulation must not be used")
 
@@ -292,14 +289,25 @@ class TestFullModeSucceedsWithoutDictPath:
             for k in keys:
                 write_fn(k, affected_tensors[k])
 
+        # Track that the MaterializationSink (the streaming sink) is actually
+        # constructed and used — this is the replacement for the in-memory
+        # result dict, and it must succeed when the dict-returning path fails.
+        sink_constructed = []
+        original_sink = MaterializationSink
+
+        class TrackingSink(original_sink):
+            def __init__(self):
+                sink_constructed.append(True)
+                super().__init__()
+
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
             patch("nodes.exit.chunked_evaluation", side_effect=dict_eval_bomb),
-            patch("lib.gpu_ops.evaluate_affected_group", side_effect=dict_eval_bomb),
             patch("nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval),
+            patch("nodes.exit.MaterializationSink", TrackingSink),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="sink_test.safetensors"),
@@ -310,6 +318,11 @@ class TestFullModeSucceedsWithoutDictPath:
         ):
             node = WIDENExitNode()
             (result,) = node.execute(merge, save_model=True, model_name="sink_test")
+
+        # MaterializationSink (streaming sink) was constructed
+        assert len(sink_constructed) > 0, (
+            "MaterializationSink was never constructed — full mode must use the streaming sink"
+        )
 
         # Full mode must NOT leave tensor payload in _incremental_cache
         assert len(_incremental_cache) == 0
@@ -709,11 +722,34 @@ class TestFailureAbortsMaterialization:
         # No full-mode tensor payload in cache
         assert len(_incremental_cache) == 0
 
-        # Even if someone manually creates a partial artifact, it must not
-        # be accepted as a cache hit (keys are incomplete).
-        # This is already covered by TestIncompleteArtifactRejected, but
-        # double-check the behavioral chain here.
-        assert not os.path.exists(save_path)
+        # --- Later-run cache validation ---
+        # Simulate a partial artifact surviving at save_path (e.g., abort
+        # raced with rename, or temp file was manually moved).  The partial
+        # artifact has only group 1's keys, not all 4 keys the model needs.
+        # check_full_model_cache must reject it as a cache hit.
+        partial_tensors = {k: torch.randn(4, 4) for k in group1_keys}
+        save_file(
+            partial_tensors,
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "test_hash",
+                "__ecaj_affected_keys__": json.dumps(group1_keys),
+                "__ecaj_output_mode__": "full",
+            },
+        )
+        # The partial artifact is missing group2_keys and has wrong shapes
+        # for a full model.  check_full_model_cache must reject it when
+        # given the full expected manifest.
+        full_manifest = {}
+        for k in group1_keys:
+            full_manifest[k] = (torch.float32, (4, 4))
+        for k in group2_keys:
+            full_manifest[k] = (torch.float32, (8, 8))
+        assert check_full_model_cache(
+            save_path, "test_hash", expected_manifest=full_manifest,
+        ) is False, "Partial artifact must not be accepted as a full-model cache hit"
 
     # AC: @streaming-full-model-materialization ac-failed-materialization-releases-resident-payload
     def test_failure_leaves_no_full_mode_tensor_in_cache(
@@ -775,7 +811,14 @@ class TestFinalizeFailure:
     def test_finalize_failure_does_not_create_artifact(
         self, mock_model_patcher, tmp_path
     ):
-        """If finalize fails, no artifact file should exist at save_path."""
+        """If finalize fails, the node's error handling must abort the sink
+        and leave no reusable artifact or full-mode cache payload.
+
+        The FailingFinalizeSink raises WITHOUT calling self.abort() — the
+        node's except handler (sink.abort()) is the only cleanup path.  If
+        the node's error handling is removed, this test would leave a temp
+        file or partial artifact on disk.
+        """
         import os
 
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
@@ -800,8 +843,11 @@ class TestFinalizeFailure:
 
         class FailingFinalizeSink(original_sink):
             def finalize(self, save_path):
-                self.abort()
+                # Raise WITHOUT self-cleanup.  The node's except path must
+                # call sink.abort() to clean up the temp file.
                 raise OSError("Simulated finalize failure")
+
+        _incremental_cache.clear()
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
@@ -821,7 +867,21 @@ class TestFinalizeFailure:
             with pytest.raises(OSError, match="Simulated finalize failure"):
                 WIDENExitNode().execute(merge, save_model=True, model_name="finalize_fail")
 
-        assert not os.path.exists(save_path)
+        # No artifact at save_path — the node's abort cleaned up
+        assert not os.path.exists(save_path), (
+            "Finalize failure must not leave artifact at save_path"
+        )
+
+        # No full-mode tensor payload in cache
+        assert len(_incremental_cache) == 0, (
+            "Finalize failure must not leave tensor payload in _incremental_cache"
+        )
+
+        # No temp files left behind in the directory
+        temp_files = [f for f in os.listdir(tmp_path) if f.startswith(".ecaj_tmp_")]
+        assert len(temp_files) == 0, (
+            f"Temp files left behind after finalize failure: {temp_files}"
+        )
 
 
 # ===========================================================================
@@ -1154,11 +1214,13 @@ class TestNoResidentPayload:
     def test_full_artifact_not_treated_as_patch_tensor_payload(
         self, mock_model_patcher, tmp_path
     ):
-        """A full-model artifact is not treated as a patch-mode tensor
-        payload. After full mode, _incremental_cache has no tensor payload
-        entry. If a user runs patch mode next, it must not find a full-mode
-        artifact as a patch-mode cache hit (different modes use different
-        cache paths)."""
+        """A full-model artifact is not treated as a patch-mode tensor payload.
+
+        Phase 1: Run full mode — _incremental_cache must be empty afterward.
+        Phase 2: Run patch mode — patch mode must compute fresh results
+        (not reuse the full-mode artifact as a tensor payload) and populate
+        _incremental_cache with its own tensor payload.
+        """
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -1167,23 +1229,56 @@ class TestNoResidentPayload:
 
         _incremental_cache.clear()
 
+        # Phase 1: full mode
         (result,), mocks = _run_full_mode(merge, mock_model_patcher, keys, tmp_path)
 
-        # Full mode must NOT populate _incremental_cache (the patch-mode
-        # tensor payload store)
+        # Full mode must NOT populate _incremental_cache
         assert len(_incremental_cache) == 0, (
             "Full mode must not leave tensor payload in _incremental_cache"
         )
 
-        # The artifact file at save_path is a "full" artifact — it must not
-        # be accepted as a patch-mode cache hit by check_cache (the patch path).
-        # check_full_model_cache requires output_mode=="full", but the regular
-        # patch-mode check_cache path would not match either.
+        # The artifact is marked as full mode
         save_path = mocks["save_path"]
-        # Verify the artifact is marked as full mode
         with safe_open(save_path, framework="pt") as f:
             meta = f.metadata()
             assert meta["__ecaj_output_mode__"] == "full"
+
+        # Phase 2: patch mode — must compute fresh, not reuse full artifact
+        mock_analyze, mock_model_analysis, _, dummy_plan = _make_full_mode_mocks(
+            mock_model_patcher, keys, recipe=merge,
+        )
+        patch_merged = {k: torch.randn(4, 4) for k in keys}
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        chunked_eval_called = []
+
+        def patch_chunked_eval(**kwargs):
+            chunked_eval_called.append(True)
+            return patch_merged
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation", side_effect=patch_chunked_eval),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit.ProgressBar", None),
+        ):
+            node = WIDENExitNode()
+            (patch_result,) = node.execute(merge, save_model=False)
+
+        # Patch mode must have called chunked_evaluation (its own eval path)
+        assert len(chunked_eval_called) > 0, (
+            "Patch mode must use chunked_evaluation, not the full-mode artifact"
+        )
+
+        # Patch mode DOES populate _incremental_cache (its tensor payload)
+        assert len(_incremental_cache) == 1, (
+            "Patch mode must populate _incremental_cache with tensor payload"
+        )
 
 
 # ===========================================================================
@@ -1312,6 +1407,8 @@ class TestComfyMemoryCompatibility:
 
         Installs a mock comfy.model_management module with the given
         vram_state and tracks whether any mode-changing API was called.
+
+        Returns (result, mode_change_calls, mm, save_path).
         """
         import sys
         import types
@@ -1341,12 +1438,14 @@ class TestComfyMemoryCompatibility:
             # Simulate cleanup APIs being unavailable
             pass  # no free_memory/get_torch_device/soft_empty_cache
 
+        _incremental_cache.clear()
+
         # Install mock module
         old_mm = sys.modules.get("comfy.model_management")
         sys.modules["comfy.model_management"] = mm
 
         try:
-            (result,), _ = _run_full_mode(
+            (result,), mocks = _run_full_mode(
                 merge, mock_model_patcher, keys, tmp_path,
                 model_name=model_name,
             )
@@ -1357,30 +1456,52 @@ class TestComfyMemoryCompatibility:
             else:
                 sys.modules.pop("comfy.model_management", None)
 
-        return result, mode_change_calls, mm
+        return result, mode_change_calls, mm, mocks["save_path"]
+
+    def _assert_streaming_behavior(self, result, save_path):
+        """Common assertions proving full mode streamed to artifact and left
+        no resident payload — shared across all memory-mode tests."""
+        import os
+
+        # Result is a loaded model from the artifact
+        assert result is not None
+
+        # Artifact was written to disk (streaming succeeded)
+        assert os.path.exists(save_path), (
+            "Full-mode artifact must exist after streaming"
+        )
+        with safe_open(save_path, framework="pt") as f:
+            meta = f.metadata()
+            assert meta["__ecaj_output_mode__"] == "full"
+
+        # No full-mode resident payload in _incremental_cache
+        assert len(_incremental_cache) == 0, (
+            "Full mode must not leave tensor payload in _incremental_cache"
+        )
 
     # AC: @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out
     def test_full_mode_with_dynamic_vram(self, mock_model_patcher, tmp_path):
-        """Full mode succeeds when Dynamic VRAM is the active memory mode.
-        The exit node must not call set_vram_state to opt out."""
-        result, mode_change_calls, mm = self._run_with_vram_state(
+        """Full mode streams affected tensors and leaves no resident payload
+        when Dynamic VRAM is the active memory mode.  The exit node must not
+        call set_vram_state to opt out."""
+        result, mode_change_calls, mm, save_path = self._run_with_vram_state(
             mock_model_patcher, tmp_path, "dvram",
-            vram_state_value="NORMAL_VRAM",  # Simulates dynamic VRAM enabled
+            vram_state_value="NORMAL_VRAM",
         )
-        assert result is not None
-        # Must not have called set_vram_state (no opt-out)
+        self._assert_streaming_behavior(result, save_path)
         assert len(mode_change_calls) == 0, (
             f"Full mode must not change VRAM state. Calls: {mode_change_calls}"
         )
 
     # AC: @comfy-memory-manager-compatibility ac-non-dynamic-memory-mode-supported
     def test_full_mode_without_dynamic_vram(self, mock_model_patcher, tmp_path):
-        """Full mode succeeds when Dynamic VRAM is NOT active (e.g. HIGH_VRAM)."""
-        result, mode_change_calls, mm = self._run_with_vram_state(
+        """Full mode streams and leaves no resident payload when Dynamic VRAM
+        is NOT active (e.g. HIGH_VRAM)."""
+        result, mode_change_calls, mm, save_path = self._run_with_vram_state(
             mock_model_patcher, tmp_path, "no_dvram",
-            vram_state_value="HIGH_VRAM",  # Non-dynamic mode
+            vram_state_value="HIGH_VRAM",
         )
-        assert result is not None
+        self._assert_streaming_behavior(result, save_path)
         assert len(mode_change_calls) == 0, (
             f"Full mode must not change VRAM state. Calls: {mode_change_calls}"
         )
@@ -1389,19 +1510,16 @@ class TestComfyMemoryCompatibility:
     def test_full_mode_does_not_mutate_memory_mode(
         self, mock_model_patcher, tmp_path
     ):
-        """Full mode does not call any API to change the ComfyUI memory mode.
-        The vram_state before and after execution must be identical, and
-        set_vram_state must not have been called."""
-        result, mode_change_calls, mm = self._run_with_vram_state(
+        """Full mode streams, leaves no resident payload, and does not mutate
+        the ComfyUI memory mode.  vram_state before and after must match."""
+        result, mode_change_calls, mm, save_path = self._run_with_vram_state(
             mock_model_patcher, tmp_path, "mode_check",
             vram_state_value="LOW_VRAM",
         )
-        assert result is not None
-        # No mode-changing API was called
+        self._assert_streaming_behavior(result, save_path)
         assert len(mode_change_calls) == 0, (
             f"set_vram_state was called: {mode_change_calls}"
         )
-        # vram_state is unchanged
         assert mm.vram_state == "LOW_VRAM", (
             f"vram_state was mutated from LOW_VRAM to {mm.vram_state}"
         )
@@ -1410,14 +1528,14 @@ class TestComfyMemoryCompatibility:
     def test_full_mode_comfy_cleanup_unavailable(
         self, mock_model_patcher, tmp_path
     ):
-        """Full mode succeeds when Comfy memory-management cleanup APIs
-        (free_memory, get_torch_device, soft_empty_cache) are unavailable."""
-        result, mode_change_calls, mm = self._run_with_vram_state(
+        """Full mode streams, leaves no resident payload, and succeeds when
+        Comfy memory-management cleanup APIs are unavailable."""
+        result, mode_change_calls, mm, save_path = self._run_with_vram_state(
             mock_model_patcher, tmp_path, "no_comfy_cleanup",
             vram_state_value="NORMAL_VRAM",
             cleanup_available=False,
         )
-        assert result is not None
+        self._assert_streaming_behavior(result, save_path)
 
 
 # ===========================================================================
@@ -1426,13 +1544,14 @@ class TestComfyMemoryCompatibility:
 
 
 class TestMaterializationSink:
-    """Unit tests for MaterializationSink.
+    """Unit tests for the MaterializationSink helper.
 
-    AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
-    AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    These are helper-only tests that verify the sink API in isolation.
+    Product-path streaming AC coverage lives on runtime tests that execute
+    the full saved model mode through WIDENExitNode (see TestFullModeEventOrder,
+    TestFailureAbortsMaterialization, TestFinalizeFailure, etc.).
     """
 
-    # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
     def test_round_trip(self, tmp_path):
         """Sink produces a valid safetensors file loadable by safe_open."""
         tensors = {
@@ -1454,7 +1573,6 @@ class TestMaterializationSink:
                 loaded = f.get_tensor(k)
                 assert torch.allclose(v, loaded)
 
-    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
     def test_abort_removes_temp_file(self, tmp_path):
         """Abort should remove the temp file."""
         import os
@@ -1530,8 +1648,6 @@ class TestMaterializationSink:
         with pytest.raises(RuntimeError, match="wrote 1/2 tensors"):
             sink.finalize(save_path)
 
-    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
-    # AC: @full-saved-model-output ac-complete-artifact
     def test_write_tensor_rejects_dtype_mismatch(self, tmp_path):
         """write_tensor rejects a tensor with the wrong dtype."""
         manifest = {"x": (torch.float32, (2,))}
@@ -1545,8 +1661,6 @@ class TestMaterializationSink:
 
         sink.abort()
 
-    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
-    # AC: @full-saved-model-output ac-complete-artifact
     def test_write_tensor_rejects_shape_mismatch(self, tmp_path):
         """write_tensor rejects a tensor with the wrong shape."""
         manifest = {"x": (torch.float32, (2,))}
@@ -1560,8 +1674,6 @@ class TestMaterializationSink:
 
         sink.abort()
 
-    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
-    # AC: @full-saved-model-output ac-complete-artifact
     def test_write_tensor_rejects_wrong_sized_tensor(self, tmp_path):
         """write_tensor rejects a tensor whose element count differs from manifest
         even if it happens to have same total bytes (e.g. different dimensions)."""

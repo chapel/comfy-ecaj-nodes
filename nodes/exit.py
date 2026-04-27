@@ -333,6 +333,12 @@ def _load_model_from_artifact(
     # Clone the model patcher so patches are independent.
     cloned = model_patcher.clone()  # type: ignore[attr-defined]
 
+    # Clear any inherited patches from the source ModelPatcher (e.g., LoRA
+    # or control patches).  Full mode returns the saved artifact model —
+    # inherited patch-resident tensors must not remain attached.
+    if hasattr(cloned, "patches"):
+        cloned.patches = {}  # type: ignore[attr-defined]
+
     # Deep-copy the underlying model so the clone owns its own weight
     # storage — the original model_patcher is not affected.
     cloned.model = deepcopy(cloned.model)  # type: ignore[attr-defined]
@@ -555,6 +561,7 @@ class WIDENExitNode:
         AC: @full-saved-model-output ac-complete-artifact
         """
         model_patcher = widen.model_patcher
+        _unpatch_loaded_clones(model_patcher)
         base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
         storage_dtype = next(iter(base_state.values())).dtype
 
@@ -828,7 +835,7 @@ class WIDENExitNode:
                     batch_size=batch_size,
                     device=device,
                     dtype=compute_dtype,
-                    storage_dtype=storage_dtype,
+                    storage_dtype=None,
                     write_fn=sink.write_tensor,
                 )
 

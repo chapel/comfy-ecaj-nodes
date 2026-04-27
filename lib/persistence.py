@@ -442,7 +442,6 @@ def check_full_model_cache(
     if not os.path.exists(save_path):
         return False
 
-    import torch
     from safetensors import safe_open
 
     # AC: @exit-model-persistence ac-9
@@ -502,17 +501,10 @@ def check_full_model_cache(
             return False
 
         # Map safetensors dtype strings to torch dtypes for comparison.
-        _ST_DTYPE_MAP = {
-            "F16": torch.float16,
-            "BF16": torch.bfloat16,
-            "F32": torch.float32,
-            "F64": torch.float64,
-            "I8": torch.int8,
-            "I16": torch.int16,
-            "I32": torch.int32,
-            "I64": torch.int64,
-            "U8": torch.uint8,
-        }
+        # Reuse the canonical map from streaming_save (which covers all
+        # dtypes the writer supports, including BOOL, C64, float8, U16/U32/U64).
+        from .streaming_save import _DTYPE_MAP as _WRITER_DTYPE_MAP
+        _ST_DTYPE_MAP = {v: k for k, v in _WRITER_DTYPE_MAP.items()}
 
         for key, (expected_dtype, expected_shape) in expected_manifest.items():
             if key not in artifact_specs:

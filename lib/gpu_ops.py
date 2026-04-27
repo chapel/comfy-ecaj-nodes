@@ -614,11 +614,12 @@ def streaming_evaluation_to_sink(
             merged_gpu = eval_fn(chunk_keys, base_gpu)
             del base_gpu
 
-            merged_cpu = merged_gpu.to("cpu", dtype=storage_dtype)
+            merged_cpu = merged_gpu.cpu()
             del merged_gpu
 
             for i, key in enumerate(chunk_keys):
-                write_fn(key, merged_cpu[i])
+                key_dtype = base_tensors[key].dtype if storage_dtype is None else storage_dtype
+                write_fn(key, merged_cpu[i].to(dtype=key_dtype))
 
             # Release the chunk's CPU tensor immediately so the previous
             # group's results are not resident while the next chunk is built.
@@ -637,7 +638,8 @@ def streaming_evaluation_to_sink(
                     merged_gpu = eval_fn([key], base_gpu)
                     del base_gpu
 
-                    merged_cpu = merged_gpu.to("cpu", dtype=storage_dtype)
+                    key_dtype = base_tensors[key].dtype if storage_dtype is None else storage_dtype
+                    merged_cpu = merged_gpu.to("cpu", dtype=key_dtype)
                     del merged_gpu
 
                     write_fn(key, merged_cpu[0])
