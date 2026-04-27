@@ -3228,7 +3228,7 @@ runs:
     started_at: 2026-04-27T05:41:56.917Z
     completed_at: 2026-04-27T05:43:07.298Z
   - _ulid: 01KQ6QEDHZ7H26BJ5FY6D43MSB
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -3289,7 +3289,22 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T05:45:22.726Z
-        completed_at: 2026-04-27T05:45:22.726Z
+        completed_at: 2026-04-27T05:46:00.788Z
+        notes: >-
+          BLOCKED by worktree guard — cannot run kspec meta observe or kspec batch from this
+          session. This is itself an instance of friction point 2. Items to capture when possible:
+
+
+          1. friction: kspec review get truncates thread bodies — fix cycle agents must read raw
+          YAML
+
+          2. friction: worktree guard blocks kspec write commands in dispatch worker worktrees
+
+          3. success: review-to-fix feedback loop — reviewer evidence became test strategy
+
+
+          These should be captured manually or by a session running from the main repo.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:43:55.199Z
+    completed_at: 2026-04-27T05:46:00.790Z
