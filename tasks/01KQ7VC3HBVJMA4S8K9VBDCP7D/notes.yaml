@@ -157,3 +157,28 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T17:22:20.749Z
+  - _ulid: 01KQ80EKFZSA5PSWF775KDEXQ0
+    content: >-
+      Fix cycle 1: addressed all 4 review blockers.
+
+
+      1. Streaming per-group: restructured GPU loop to evaluate groups lazily during sorted-key
+      iteration, writing to MaterializationSink per-group. Groups freed after their keys are
+      written.
+
+      2. Separate eval entry point: created evaluate_affected_group (full mode) separate from
+      chunked_evaluation (patch mode). Test monkeypatches chunked_evaluation to raise — full mode
+      still succeeds.
+
+      3. Multi-group event order test: two OpSignatures (4x4 + 8x8), asserts group 1 writes complete
+      before group 2 evaluation begins.
+
+      4. Hardened check_full_model_cache: validates __ecaj_affected_keys__ metadata exists and is
+      valid JSON list. Two new tests for missing/malformed affected keys.
+
+
+      All 1224 tests pass (30 streaming + 1194 existing). All 6 spec ACs re-verified against
+      implementation.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T17:40:32.896Z
