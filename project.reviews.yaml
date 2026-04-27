@@ -805,9 +805,25 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-27T05:08:31.299Z
+      - _ulid: 01KQ6NDXBP4H1R08R1R6VBCDHA
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-27T05:08:41.462Z
+      - _ulid: 01KQ6NDXBPF5DHWCFD99M7NKBZ
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-27T05:08:41.462Z
     examined_commit: 928a645109063ee7b3d34b6f60568b0585dcede5
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -837,7 +853,14 @@ reviews:
               error, or otherwise make finalize refuse after such an error."
             created_at: 2026-04-27T05:08:12.722Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-27T05:08:41.462Z
     created_at: 2026-04-27T05:06:25.274Z
-    updated_at: 2026-04-27T05:08:31.287Z
+    updated_at: 2026-04-27T05:08:41.462Z
     notes: []

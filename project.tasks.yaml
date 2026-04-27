@@ -1872,7 +1872,7 @@
   type: task
   spec_ref: "@streaming-full-model-materialization"
   plan_ref: "@plan-full-saved-model-output-plan"
-  status: pending_review
+  status: needs_work
   blocked_by: []
   depends_on:
     - "@task-full-model-saved-artifact-reload-spike"
@@ -1881,7 +1881,7 @@
     - persistence
     - storage
   review_ref: "@01KQ6N9RBTWF13YQC21293X9JS"
-  notes_count: 1
+  notes_count: 2
   todos_count: 0
   created_at: 2026-04-27T04:04:27.744Z
   started_at: 2026-04-27T04:58:28.606Z
