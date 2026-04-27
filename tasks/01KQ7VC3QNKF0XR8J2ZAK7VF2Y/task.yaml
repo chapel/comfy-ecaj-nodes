@@ -1,0 +1,77 @@
+_ulid: 01KQ7VC3QNKF0XR8J2ZAK7VF2Y
+slugs:
+  - task-full-model-real-comfy-memory-validation-manual-run
+title: Manual real-Comfy memory-mode validation run
+type: task
+description: >-
+  Manually run the guarded real-Comfy memory validation harness in a known ComfyUI environment and
+  attach the generated report as evidence, or explicitly defer the manual run with a reason.
+
+
+  Why:
+
+  Real ComfyUI memory-mode evidence must be collected only when a human intentionally chooses the
+  ComfyUI installation, fixture inputs, and timing. This task records that directed manual
+  validation without allowing automated dispatch or default CI to run real ComfyUI workflows.
+
+
+  What:
+
+  - A human operator selects the ComfyUI installation, deterministic fixture/model inputs, and
+  output report path.
+
+  - The operator explicitly enables the harness guards and runs the command documented by the
+  harness task.
+
+  - The run compares patch output, first full saved model output, and full saved model artifact
+  cache reuse in the selected ComfyUI memory-management mode.
+
+  - The generated report is attached as kspec evidence without editing out failures.
+
+  - If the run is intentionally deferred, record the reason and keep measured real-Comfy memory
+  evidence unsatisfied/deferred rather than treating the harness alone as evidence.
+
+
+  How:
+
+  - Use the manual harness command from @task-full-model-real-comfy-memory-harness with
+  COMFY_ECAJ_REAL_MEMORY_VALIDATION=1, the explicit run flag, explicit ComfyUI root/path, explicit
+  fixture/model inputs, and explicit report output path.
+
+  - Review the report for memory mode, returned model behavior, artifact reuse behavior, whether
+  affected payloads remained resident, and any invariant failures.
+
+  - Convert failures into follow-up tasks instead of ignoring them.
+
+
+  Testing / evidence:
+
+  - This is a manual validation task and must not be automation-eligible.
+
+  - Evidence is the generated report and any notes explaining whether Dynamic VRAM, non-Dynamic
+  memory mode, or both were validated.
+
+  - If deferred, evidence is the explicit deferral note and reason.
+
+
+  Covers:
+
+  @comfy-memory-manager-compatibility ac-measured-memory-report and
+  ac-memory-validation-fails-on-mode-opt-out, when the manual run is performed.
+spec_ref: "@comfy-memory-manager-compatibility"
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-full-model-real-comfy-memory-harness"
+context: []
+priority: 3
+tags:
+  - full-model
+  - memory
+  - validation
+  - manual
+vcs_refs: []
+created_at: 2026-04-27T16:11:48.341Z
+todos: []

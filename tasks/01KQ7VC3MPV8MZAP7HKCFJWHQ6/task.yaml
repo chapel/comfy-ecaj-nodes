@@ -1,0 +1,102 @@
+_ulid: 01KQ7VC3MPV8MZAP7HKCFJWHQ6
+slugs:
+  - task-full-model-real-comfy-memory-harness
+title: Add guarded manual real-Comfy memory-mode validation harness
+type: task
+description: >-
+  Add a guarded manual validation harness for real ComfyUI memory-mode runs without performing any
+  real ComfyUI validation during automated task execution.
+
+
+  Why:
+
+  Unit tests with fakes can validate full saved model control flow, cache behavior, and
+  mode-preservation invariants, but they cannot provide evidence from ComfyUI's real memory
+  lifecycle. The project needs a repeatable manual harness for maintainers, while guaranteeing that
+  normal tests, CI, and automated dispatch never surprise the user by importing, mutating, or
+  running a real ComfyUI installation.
+
+
+  What:
+
+  - Add a manual harness, for example scripts/manual/real_comfy_memory_validation.py, outside
+  default test discovery or otherwise guarded so default test commands cannot execute real ComfyUI
+  validation.
+
+  - The harness must require every explicit opt-in input before doing ComfyUI-specific work:
+  COMFY_ECAJ_REAL_MEMORY_VALIDATION=1, an explicit run flag such as --run-real-comfy-memory, an
+  explicit ComfyUI root/path, explicit deterministic fixture/model inputs, and an explicit report
+  output path.
+
+  - The harness must refuse before importing ComfyUI modules, modifying sys.path for a target
+  ComfyUI installation, mutating a ComfyUI installation, or starting any ComfyUI process unless all
+  guards are present.
+
+  - The harness must never auto-discover a random ComfyUI install and must never launch a ComfyUI
+  server implicitly.
+
+  - When intentionally run, the harness reports the active memory mode, patch-mode behavior, first
+  full saved model materialization behavior, full artifact cache-hit behavior, RAM/GPU observations
+  when available, returned-model behavior, artifact reuse behavior, and whether affected weight
+  payloads remained resident in Exit-managed cache state.
+
+  - This task adds the harness and automated guard/report tests only. It must not run real ComfyUI
+  validation.
+
+
+  How:
+
+  - Implement argument and environment validation before any ComfyUI import or target path mutation.
+
+  - Prefer a pure-Python report-building layer that can be unit-tested with fake data.
+
+  - Keep real environment interaction behind the explicit guard checks.
+
+  - Document the exact manual command shape in project docs or the script help output.
+
+
+  Testing:
+
+  - Running the harness with no environment variable refuses before importing ComfyUI or modifying
+  the target environment.
+
+  - Running without the explicit run flag refuses before importing ComfyUI or modifying the target
+  environment.
+
+  - Running without explicit ComfyUI root, fixture/model inputs, or report output refuses before
+  importing ComfyUI or modifying the target environment.
+
+  - Guard failure does not import comfy, does not mutate sys.path for a target ComfyUI install, does
+  not start a process, and does not touch a random ComfyUI install.
+
+  - Report formatting works with fake data.
+
+  - Refusal/skip reports include clear reasons.
+
+  - Default project test commands do not perform real ComfyUI validation.
+
+
+  Covers:
+
+  @manual-comfy-memory-validation ac-explicit-opt-in-required,
+  ac-refuses-before-comfy-work-without-opt-in, ac-report-identifies-memory-mode.
+
+  Supports @comfy-memory-manager-compatibility ac-measured-memory-report by providing the guarded
+  mechanism; it does not by itself provide real ComfyUI measurement evidence.
+spec_ref: "@manual-comfy-memory-validation"
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-full-model-streaming-artifact-cache"
+context: []
+priority: 2
+tags:
+  - full-model
+  - memory
+  - validation
+  - manual-harness
+vcs_refs: []
+created_at: 2026-04-27T16:11:48.246Z
+todos: []

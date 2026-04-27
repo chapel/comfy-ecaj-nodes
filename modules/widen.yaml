@@ -304,7 +304,7 @@ features:
           diffusion model for downstream execution.
         status:
           maturity: draft
-          implementation: implemented
+          implementation: in_progress
         depends_on: []
         implements: []
         relates_to:
@@ -339,6 +339,20 @@ features:
               The existing artifact is reused without recomputing the merged weights.
             when: |
               The Exit node executes in full saved model mode.
+          - given: |-
+              A valid full saved model workflow selects a recipe that does not change any
+              diffusion model weights.
+            id: ac-no-op-produces-full-artifact
+            then: |-
+              downstream nodes receive a MODEL loaded from a complete saved model artifact
+              for the selected recipe.
+            when: the Exit node produces full saved model output for that recipe.
+          - given: A saved full model artifact matches the current recipe identity.
+            id: ac-cache-reuse-is-artifact-backed
+            then: |-
+              the reused result comes from the saved artifact rather than from a
+              process-resident affected weight payload.
+            when: the Exit node reuses cached full saved model output.
         tags:
           - persistence
           - memory
@@ -350,12 +364,14 @@ features:
               - streaming-full-model-materialization
             title: Streaming Full Model Materialization
             type: requirement
-            description: |
+            description: |-
               Full model materialization keeps merge output memory bounded while creating
-              the complete saved artifact.
+              the complete saved artifact. Completed affected weight groups can be handed
+              off to artifact materialization without turning full saved model output into
+              a process-resident affected-weight cache.
             status:
               maturity: draft
-              implementation: implemented
+              implementation: in_progress
             depends_on: []
             implements: []
             relates_to:
@@ -388,6 +404,29 @@ features:
                   execution.
                 when: |
                   The Exit node handles the failure.
+              - given: |-
+                  Full saved model output is materializing affected weights for a merge recipe
+                  with multiple affected groups.
+                id: ac-direct-artifact-handoff
+                then: |-
+                  the completed group's affected tensors are handed to saved-artifact
+                  materialization before evaluation of later affected groups begins, without
+                  first accumulating a full all-groups affected-weight result in process memory.
+                when: an affected weight group has completed evaluation.
+              - given: Full saved model output has completed for a merge recipe.
+                id: ac-full-cache-avoids-resident-payload
+                then: |-
+                  the reusable full-model cache does not require the recipe's affected weight
+                  payload to remain resident in process memory.
+                when: the result is made reusable for a later full saved model execution.
+              - given: |-
+                  Full saved model output fails after some affected weights have been produced
+                  for artifact materialization.
+                id: ac-failed-materialization-releases-resident-payload
+                then: |-
+                  partial affected weight payloads from that failed full saved model output
+                  are not retained as a reusable full-model cache.
+                when: the failure is reported to the workflow.
             tags:
               - persistence
               - memory
@@ -398,13 +437,13 @@ features:
               - comfy-memory-manager-compatibility
             title: Comfy Memory Manager Compatibility
             type: requirement
-            description: |
-              Full saved model output remains compatible with ComfyUI's current model
-              memory lifecycle, including dynamic memory management when ComfyUI enables
-              it.
+            description: |-
+              Full saved model output remains compatible with ComfyUI's model memory
+              lifecycle across supported memory-management modes, including when Dynamic
+              VRAM is enabled and when it is not active.
             status:
               maturity: draft
-              implementation: implemented
+              implementation: in_progress
             depends_on: []
             implements: []
             relates_to:
@@ -430,24 +469,84 @@ features:
                 when: |
                   ComfyUI loads, unloads, partially loads, or prioritizes models for a
                   workflow.
-              - given: |
-                  The same representative merge workflow is run with the current patch
-                  output and with full saved model output.
-                id: ac-measured-memory-behavior
-                then: |
-                  The validation output reports the active ComfyUI memory mode, peak RAM,
-                  peak GPU memory, returned-model behavior, and whether merged affected
-                  weights remain persistently resident after the Exit node returns; the
-                  validation fails if full saved model output requires disabling ComfyUI's
-                  dynamic memory management or requires all merged affected weights to
-                  remain resident solely because the Exit node returned.
-                when: |
-                  memory behavior is measured under ComfyUI with dynamic memory management
-                  enabled.
+              - given: |-
+                  A representative merge workflow is run in an explicitly selected ComfyUI
+                  memory-management mode.
+                id: ac-measured-memory-report
+                then: |-
+                  The validation output reports the active memory mode, memory observations
+                  when available, returned-model behavior, artifact reuse behavior, and whether
+                  merged affected weights remain persistently resident after the Exit node returns.
+                when: |-
+                  memory behavior is measured for patch output, first full saved model output,
+                  and full saved model artifact reuse.
+              - given: |-
+                  ComfyUI is running in a supported memory-management mode where Dynamic VRAM
+                  is not active.
+                id: ac-non-dynamic-memory-mode-supported
+                then: |-
+                  The workflow can produce and return the full saved model output without
+                  requiring Dynamic VRAM to be enabled.
+                when: A workflow uses full saved model output.
+              - given: ComfyUI has an active memory-management mode for the workflow.
+                id: ac-memory-mode-preserved
+                then: |-
+                  The workflow does not require users or the node to change that memory mode
+                  in order to produce the full saved model output.
+                when: A workflow uses full saved model output.
+              - given: |-
+                  A validation run is measuring full saved model output under an explicitly
+                  selected ComfyUI memory-management mode.
+                id: ac-memory-validation-fails-on-mode-opt-out
+                then: |-
+                  The validation reports the run as failed rather than treating the mode change
+                  as a successful compatibility result.
+                when: |-
+                  full saved model output can only complete by changing or disabling that
+                  selected memory mode.
             tags:
               - comfy
               - memory
               - compatibility
+            requirements:
+              - _ulid: 01KQ7VC30QXXHGEK2509F53SQY
+                slugs:
+                  - manual-comfy-memory-validation
+                title: Manual Comfy Memory Validation
+                type: requirement
+                description: |-
+                  Real ComfyUI memory validation is an explicitly directed maintainer action.
+                  It is not part of normal automated test execution and cannot run against a
+                  ComfyUI installation unless the operator provides explicit opt-in inputs.
+                depends_on: []
+                implements: []
+                relates_to: []
+                tests: []
+                traits: []
+                acceptance_criteria:
+                  - given: The real ComfyUI memory validation harness is available in the project.
+                    id: ac-explicit-opt-in-required
+                    then: real ComfyUI memory validation is not executed.
+                    when: normal automated tests, CI, or automated task dispatch run.
+                  - given: |-
+                      A user invokes the real ComfyUI memory validation harness without all required
+                      opt-in inputs.
+                    id: ac-refuses-before-comfy-work-without-opt-in
+                    then: |-
+                      it refuses before importing ComfyUI modules, mutating a ComfyUI installation,
+                      or starting any ComfyUI process.
+                    when: the harness evaluates whether it can run.
+                  - given: A user intentionally runs real ComfyUI memory validation.
+                    id: ac-report-identifies-memory-mode
+                    then: the report identifies the memory-management mode that was actually validated.
+                    when: the validation report is produced.
+                tags:
+                  - comfy
+                  - memory
+                  - validation
+                  - manual
+                created: 2026-04-27T16:11:47.607Z
+                notes: []
             created: 2026-04-27T04:04:27.630Z
             notes: []
         created: 2026-04-27T04:04:27.562Z

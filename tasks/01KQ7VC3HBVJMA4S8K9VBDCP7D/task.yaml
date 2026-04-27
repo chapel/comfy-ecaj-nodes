@@ -1,0 +1,150 @@
+_ulid: 01KQ7VC3HBVJMA4S8K9VBDCP7D
+slugs:
+  - task-full-model-streaming-artifact-cache
+title: Stream full saved model materialization and make full-mode cache artifact-backed
+type: task
+description: >-
+  Implement true streaming materialization for full saved model output mode and make full-mode cache
+  reuse artifact-backed instead of process-resident tensor-payload-backed.
+
+
+  Why:
+
+  Full saved model output exists to produce a complete saved model artifact while reducing process
+  memory pressure. If the Exit node evaluates all affected tensors into an in-memory result before
+  materializing the artifact, the artifact may be functionally correct but the memory-management
+  requirement is not met. Full saved model mode also must not leave affected tensors resident as a
+  reusable in-process cache payload after success or failure.
+
+
+  What:
+
+  - Preserve in-memory patch output mode behavior: dict-returning evaluation, merged_state,
+  set-patch installation, and patch-mode incremental tensor cache behavior remain valid for patch
+  mode.
+
+  - Split WIDENExitNode execution by output mode so full saved model mode uses the artifact
+  materialization path directly.
+
+  - In full saved model mode, create the checkpoint materialization sink, write unaffected base
+  weights through materialization, stream newly evaluated affected tensors into the materialization
+  sink, finalize atomically, and return the MODEL loaded from the saved artifact.
+
+  - Full saved model mode must use full artifact metadata/cache validation for reuse. It must not
+  read, write, or retain process-resident affected tensor payloads as its full-model cache
+  mechanism.
+
+  - Full saved model mode must work when Dynamic VRAM is enabled, when Dynamic VRAM is not active,
+  and when Comfy memory-management cleanup APIs are unavailable. It must not require changing the
+  active ComfyUI memory mode.
+
+  - Full saved model mode must handle no-op recipes as full saved model output: a valid recipe that
+  changes no diffusion weights still returns a MODEL loaded from a complete saved artifact or valid
+  full artifact cache hit.
+
+  - Preserve progress updates, dtype conversion, OOM/backoff behavior, loader cleanup,
+  abort/finalize behavior, and existing patch-mode behavior.
+
+  - Remove or relocate misleading streaming AC annotations from helper-only in-memory sink tests;
+  product-path streaming AC coverage must point to runtime tests that execute full saved model mode.
+
+
+  How:
+
+  - Route patch mode through the existing dict/in-memory result path.
+
+  - Route full saved model mode through chunked_evaluation_to_sink(..., sink=materialization_sink)
+  or equivalent runtime behavior that hands completed affected tensors directly to artifact
+  materialization.
+
+  - Do not use the dict-returning chunked_evaluation path for newly evaluated full-mode affected
+  tensors.
+
+  - Do not instantiate an in-memory result sink for newly evaluated full-mode tensors.
+
+  - Do not update merged_state with newly evaluated full-mode affected tensors.
+
+  - Do not create a full-mode _incremental_cache tensor-payload entry after success or failure.
+  Patch mode remains the owner of patch tensor cache behavior.
+
+  - If cache is disabled, preserve the existing semantics that evict in-memory cache entries.
+
+  - Treat incomplete, invalid, or wrong-mode artifacts as non-reusable for full saved model cache
+  hits.
+
+
+  Testing:
+
+  Committed tests must be runtime/behavior tests, not static or source-scanning tests. Do not use
+  grep/regex over source files, inspect.getsource, AST scans, or string-absence assertions as
+  regression tests.
+
+
+  Required dynamic tests:
+
+  - Full mode succeeds when the dict-returning evaluation path is monkeypatched to fail.
+
+  - Full mode succeeds when in-memory result sink construction is monkeypatched to fail.
+
+  - Patch mode still returns a patched model and preserves patch-mode incremental cache behavior.
+
+  - Full mode with multiple affected groups records runtime event order: base weights written, first
+  group affected tensors handed to materialization, later group affected tensors handed to
+  materialization, artifact finalized, saved model loaded.
+
+  - Failure after partial streaming aborts materialization, does not load the saved model, does not
+  accept a partial artifact as a later cache hit, and does not leave a full-mode tensor payload in
+  process cache.
+
+  - Finalize failure cleans up and does not create a reusable artifact/cache payload.
+
+  - Full artifact cache hit returns the loaded saved model without recomputing affected tensors.
+
+  - Incomplete, invalid, or wrong-mode artifacts are not accepted as full-model cache hits.
+
+  - Patch artifacts are not accepted as full-model artifact cache hits, and full-model artifacts are
+  not treated as patch-mode tensor payloads.
+
+  - Full mode leaves no full-mode affected tensor payload after success or failure.
+
+  - A pre-populated patch-mode tensor cache sentinel is not read or reused by full mode.
+
+  - enable_cache=False evicts in-memory cache entries.
+
+  - No-op full mode returns a loaded saved artifact for both a RecipeBase-only recipe and a merge
+  recipe that produces no affected diffusion keys.
+
+  - Full mode streams and avoids resident full-mode tensor payloads with Dynamic VRAM enabled, with
+  Dynamic VRAM inactive, and with Comfy memory-management cleanup APIs unavailable.
+
+  - Full mode does not mutate the active ComfyUI memory mode.
+
+
+  Covers:
+
+  @streaming-full-model-materialization ac-affected-results-released,
+  ac-base-weight-bounded-copying, ac-incomplete-write-not-reused, ac-direct-artifact-handoff,
+  ac-full-cache-avoids-resident-payload, ac-failed-materialization-releases-resident-payload.
+
+  @full-saved-model-output ac-complete-artifact, ac-return-loaded-model, ac-cache-reuses-artifact,
+  ac-no-op-produces-full-artifact, ac-cache-reuse-is-artifact-backed.
+
+  @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out,
+  ac-non-dynamic-memory-mode-supported, ac-memory-mode-preserved,
+  ac-comfy-owns-returned-model-memory.
+spec_ref: "@streaming-full-model-materialization"
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - full-model
+  - memory
+  - streaming
+  - cache
+vcs_refs: []
+created_at: 2026-04-27T16:11:48.139Z
+todos: []
