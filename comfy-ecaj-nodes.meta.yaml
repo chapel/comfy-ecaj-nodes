@@ -18,6 +18,8 @@ agents:
     tags:
       - scaffold-default
     auto_approve: true
+    budget:
+      timeout_minutes: 60
     capabilities:
       - code
       - test
