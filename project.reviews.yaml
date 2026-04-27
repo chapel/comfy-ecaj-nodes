@@ -2015,6 +2015,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T06:23:15.570Z
+      - _ulid: 01KQ6TAMQQB3V2XMV6SZGYMT8C
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ6SNXD3D0XMZ4PF8533D7J6
+        timestamp: 2026-04-27T06:34:17.207Z
     examined_commit: a6411d9558cd70c099f14a8ea61d0a1b39fb6ff9
     external_links: []
     lifecycle_state: closed
@@ -2046,6 +2052,16 @@ reviews:
               RuntimeError: Duplicate key 'a': already written; the existing partial recompute test
               masks this by replacing CheckpointMaterializationSink with MagicMock."
             created_at: 2026-04-27T06:22:57.955Z
+          - _ulid: 01KQ6TAMQ4Z18824PK1C78HD7P
+            author: "@claude"
+            body: "Fixed: The pre-write loop at nodes/exit.py:701 now builds a recompute_set from batch_groups
+              values and skips any merged_state key that will be recomputed during evaluation. This
+              prevents the duplicate key write that IncrementalSafetensorsWriter correctly rejects.
+              Also replaced the MagicMock-based test with a real CheckpointMaterializationSink that
+              exercises a true partial recompute scenario: only IN-block keys are recomputed while
+              MID/OUT keys come from cache. The test reads back the resulting safetensors artifact
+              and verifies both cached and recomputed values are correct."
+            created_at: 2026-04-27T06:34:17.183Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -2056,5 +2072,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T06:23:15.567Z
     created_at: 2026-04-27T06:19:25.143Z
-    updated_at: 2026-04-27T06:23:15.570Z
+    updated_at: 2026-04-27T06:34:17.183Z
     notes: []
