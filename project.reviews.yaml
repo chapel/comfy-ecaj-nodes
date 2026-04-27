@@ -4487,6 +4487,19 @@ reviews:
         runner: kspec
         created_at: 2026-04-27T18:34:52.702Z
         completed_at: 2026-04-27T18:34:52.702Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found runtime AC annotations for streaming-full-model-materialization,
+          full-saved-model-output, and comfy-memory-manager-compatibility in
+          tests/test_full_model_streaming.py; source-scanning shortcut scan found no
+          implementation-source assertions in the new streaming tests
+        name: AC annotation scan
+        required: false
+        runner: rg
+        created_at: 2026-04-27T18:34:53.113Z
+        completed_at: 2026-04-27T18:34:53.113Z
     events:
       - _ulid: 01KQ8391G9ZCB2H963AM5C9T2P
         actor: Jacob Chapel
@@ -4548,6 +4561,13 @@ reviews:
         payload:
           thread_ulid: 01KQ83H6P15FC9YM2Y8JNMFXAE
         timestamp: 2026-04-27T18:34:52.959Z
+      - _ulid: 01KQ83J3BEE6S4E9KHSAFG4ZWK
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation scan
+        timestamp: 2026-04-27T18:34:53.166Z
     examined_commit: d95ffd207b96388e10cd4db492db1ac601a5dcaa
     external_links: []
     lifecycle_state: open
@@ -4623,5 +4643,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T18:29:56.361Z
-    updated_at: 2026-04-27T18:34:52.907Z
+    updated_at: 2026-04-27T18:34:53.113Z
     notes: []
