@@ -4306,7 +4306,7 @@ runs:
     started_at: 2026-04-27T18:06:47.619Z
     completed_at: 2026-04-27T18:08:17.218Z
   - _ulid: 01KQ82BP7AQZDCCFSXR2ES7DSN
-    status: active
+    status: completed
     current_step: 5
     initiated_by: Jacob Chapel
     step_results:
@@ -4354,7 +4354,11 @@ runs:
       - status: completed
         step_index: 5
         started_at: 2026-04-27T18:15:30.465Z
-        completed_at: 2026-04-27T18:15:30.465Z
+        completed_at: 2026-04-27T18:15:38.566Z
+        notes: "Capture: No new inbox items, tasks, questions, or observations were created. The review
+          findings are captured as blocker threads on @01KQ822F, and the broader reflection points
+          were already covered by existing observations discovered during search."
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-04-27T18:13:54.539Z
+    completed_at: 2026-04-27T18:15:38.566Z
