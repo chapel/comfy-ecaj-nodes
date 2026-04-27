@@ -43,3 +43,10 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-27T07:48:03.472Z
+  - _ulid: 01KQ6Z75KGF12E4NGWSX3E1B1J
+    content: Reviewer applied mechanical ruff import-format fix and pushed 9ecafd1 to
+      dispatch/task/task-full-model-exit-integration/01kq6hra; re-running verification on refreshed
+      head.
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-04-27T07:59:46.288Z
