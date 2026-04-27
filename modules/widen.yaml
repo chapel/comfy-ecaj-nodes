@@ -1076,10 +1076,12 @@ features:
       - memory-management
     title: Memory Management
     type: feature
-    description: |
-      GPU memory lifecycle during and after merge execution. Covers per-chunk
-      tensor cleanup, between-group GC cycles, loader resource teardown, and
-      ensuring all final patches are CPU-only.
+    description: GPU memory lifecycle during and after merge execution. Covers per-chunk tensor cleanup,
+      between-group GC cycles, loader resource teardown, and ensuring all final patches are
+      CPU-only. Save-related memory ACs (streaming writes, GPU offload after save, base_state
+      release before save) apply to the in-memory patch output mode's opt-in save path. Full saved
+      model output mode has its own memory profile specified in
+      @streaming-full-model-materialization and @comfy-memory-manager-compatibility.
     status:
       maturity: draft
       implementation: implemented
