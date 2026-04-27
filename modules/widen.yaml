@@ -385,7 +385,9 @@ features:
                   execution.
                 when: |
                   The Exit node handles the failure.
-            tags: []
+            tags:
+              - persistence
+              - memory
             created: 2026-04-27T04:04:27.599Z
             notes: []
           - _ulid: 01KQ6HR9VECV6Q34JSTCRGWCDB
