@@ -3403,9 +3403,22 @@ runs:
     completed_at: 2026-04-27T06:20:51.471Z
   - _ulid: 01KQ6SQKRWB1TWC6XV98QH91GC
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T06:23:53.628Z
+        completed_at: 2026-04-27T06:24:23.098Z
+        notes: "Meaningful session confirmed: completed a fix-cycle review, created review @01KQ6SFD,
+          recorded checks and one blocker, and transitioned task @01KQ6HR9ZR2NS2QC19B6QGS6C9 to
+          needs_work. Success: reading the integration path and probing the real
+          CheckpointMaterializationSink exposed a duplicate-write bug that MagicMock-based tests
+          missed, even though full pytest passed."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T06:24:23.098Z
+        completed_at: 2026-04-27T06:24:23.098Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:23:53.628Z
