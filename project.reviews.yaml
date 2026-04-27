@@ -2508,6 +2508,12 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ6WE43506T3ZWK0CY5NHV0C
         timestamp: 2026-04-27T07:11:08.416Z
+      - _ulid: 01KQ6WET9CE5YDABTFSA74XZNA
+        actor: Jacob Chapel
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ6WE43506T3ZWK0CY5NHV0C
+        timestamp: 2026-04-27T07:11:31.116Z
     examined_commit: 06e5f1805a9317da1aab45538f7a3257d6fee4a1
     external_links: []
     lifecycle_state: open
@@ -2539,8 +2545,16 @@ reviews:
               metadata schema and to require the metadata needed by the active full saved model
               behavior."
             created_at: 2026-04-27T07:11:08.389Z
+          - _ulid: 01KQ6WET8KXDG5K2S428V3E6H6
+            author: Jacob Chapel
+            body: "Clarification: the affected identifiers are check_cache, __ecaj_version__,
+              __ecaj_version__=999, check_cache(path, expected_hash, artifact_kind=full_model),
+              __ecaj_affected_keys__, and cached_metadata[__ecaj_affected_keys__]. The repro shows
+              unknown-version-cache-hit True 999 and missing-affected-cache-hit True with only
+              artifact_kind, recipe_hash, and version metadata."
+            created_at: 2026-04-27T07:11:31.091Z
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T07:08:47.193Z
-    updated_at: 2026-04-27T07:11:08.389Z
+    updated_at: 2026-04-27T07:11:31.091Z
     notes: []
