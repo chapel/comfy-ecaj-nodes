@@ -1574,6 +1574,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ6Q8VFGQECD81EXMPZXNAP6
         timestamp: 2026-04-27T05:40:52.868Z
+      - _ulid: 01KQ6Q8VKNV8RTN830MHTQKCVH
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ6Q8VJZE2MKAGJMTKNSAVRY
+        timestamp: 2026-04-27T05:40:52.981Z
     examined_commit: 5332f72534f55032b658110039b7ae55fc29b89b
     external_links: []
     lifecycle_state: open
@@ -1622,7 +1629,22 @@ reviews:
               materialization path."
             created_at: 2026-04-27T05:40:52.849Z
         kind: blocker
+      - _ulid: 01KQ6Q8VJZE2MKAGJMTKNSAVRY
+        anchor:
+          type: code
+          commit: 5332f72534f55032b658110039b7ae55fc29b89b
+          line_end: 458
+          line_start: 458
+          path: tests/test_checkpoint_materialization.py
+          side: head
+        entries:
+          - _ulid: 01KQ6Q8VK0X85D7EFNPA8B6RTS
+            author: Jacob Chapel
+            body: "MUST-FIX: ruff check . fails on this line with F541 because this is an f-string without
+              placeholders. Remove the f prefix or otherwise satisfy the configured lint gate."
+            created_at: 2026-04-27T05:40:52.960Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T05:38:20.302Z
-    updated_at: 2026-04-27T05:40:52.849Z
+    updated_at: 2026-04-27T05:40:52.960Z
     notes: []
