@@ -540,7 +540,7 @@ features:
             then: |
               each key is prefixed with diffusion_model. to match ModelPatcher namespace
             when: add_patches is called
-          - given: merged tensors
+          - given: merged tensors in in-memory patch output mode
             id: ac-3
             then: all tensors are on CPU (transferred from GPU during this phase)
             when: stored as patches
