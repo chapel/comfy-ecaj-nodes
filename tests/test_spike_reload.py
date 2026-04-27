@@ -15,7 +15,6 @@ from __future__ import annotations
 import sys
 from types import ModuleType
 
-import pytest
 import torch
 from safetensors import safe_open
 
@@ -151,8 +150,12 @@ class TestLoadSavedModel:
         )
 
         result = load_saved_model(artifact_path)
-        assert hasattr(result, "load_device"), "Should have load_device for ComfyUI memory management"
-        assert hasattr(result, "offload_device"), "Should have offload_device for ComfyUI memory management"
+        assert hasattr(
+            result, "load_device"
+        ), "Should have load_device for ComfyUI memory management"
+        assert hasattr(
+            result, "offload_device"
+        ), "Should have offload_device for ComfyUI memory management"
 
 
 class TestWeightParity:
