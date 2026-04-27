@@ -107,3 +107,43 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-27T17:08:39.234Z
+  - _ulid: 01KQ7YZAAQM9Z184916V6JP2G1
+    content: >-
+      Implementation complete. Resumed from prior agent timeout. Key work:
+
+      - MaterializationSink: incremental safetensors writer in lib/streaming_save.py
+
+      - check_full_model_cache: artifact-backed full-model cache validation in lib/persistence.py
+
+      - build_metadata: now includes output_mode parameter for cache mode isolation
+
+      - _execute_full_saved_model: streaming full model execution in nodes/exit.py
+
+      - _execute_full_model_noop: handles RecipeBase in full mode
+
+      - _load_model_from_artifact: loads model from saved artifact
+
+      - 28 tests in tests/test_full_model_streaming.py covering all 6 ACs
+
+      - Fixed 3 pre-existing tests that used old atomic_save path
+
+      - Full suite: 1222 passed, 0 failed
+
+
+      AC coverage:
+
+      - ac-affected-results-released: TestFullModeEventOrder
+
+      - ac-base-weight-bounded-copying: TestMaterializationSink
+
+      - ac-incomplete-write-not-reused: TestFailureAbortsMaterialization, TestFinalizeFailure,
+      TestMaterializationSink
+
+      - ac-direct-artifact-handoff: TestFullModeSucceedsWithoutDictPath, TestFullModeEventOrder
+
+      - ac-full-cache-avoids-resident-payload: TestNoResidentPayload
+
+      - ac-failed-materialization-releases-resident-payload: TestFailureAbortsMaterialization
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T17:14:43.416Z
