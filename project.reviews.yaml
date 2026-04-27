@@ -2313,9 +2313,25 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
         timestamp: 2026-04-27T06:53:55.072Z
+      - _ulid: 01KQ6VETPNTV3MTYRV0JX6AY5E
+        actor: jacob.chapel@gmail.com
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-27T06:54:02.965Z
+      - _ulid: 01KQ6VETPNQ4JPDDTD98KS8RVZ
+        actor: jacob.chapel@gmail.com
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-27T06:54:02.965Z
     examined_commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -2361,7 +2377,14 @@ reviews:
               contains it."
             created_at: 2026-04-27T06:53:55.041Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: jacob.chapel@gmail.com
+        role: reviewer
+        created_at: 2026-04-27T06:54:02.964Z
     created_at: 2026-04-27T06:52:06.368Z
-    updated_at: 2026-04-27T06:53:55.041Z
+    updated_at: 2026-04-27T06:54:02.965Z
     notes: []
