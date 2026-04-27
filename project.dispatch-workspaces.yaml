@@ -386,7 +386,7 @@ workspaces:
         head: a561fbe0865113b8f5d80344acaae3485e17f40b
         last_seen_at: 2026-04-27T05:28:05.138Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-chunked-evaluation-to-sink-01kq6hr9
-  - active_role: worker
+  - active_role: null
     base_branch_point: aec6500edd480deb37eccf7315272c8e025722a9
     bootstrap:
       status: succeeded
@@ -428,12 +428,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T05:35:43.076Z
+      updated_at: 2026-04-27T05:37:49.265Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T05:35:43.076Z
+      updated_at: 2026-04-27T05:37:49.265Z
     integration:
       status: pending
       detail: null
@@ -441,17 +441,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: aec6500edd480deb37eccf7315272c8e025722a9
-      updated_at: 2026-04-27T05:35:43.076Z
-    lifecycle_state: active
+      updated_at: 2026-04-27T05:37:49.265Z
+    lifecycle_state: ready
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HR9ZR2NS2QC19B6QGS6C9"
     task_slug: task-full-model-checkpoint-materialization
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T05:28:06.502Z
-      last_reconciled_at: 2026-04-27T05:35:43.076Z
+      last_reconciled_at: 2026-04-27T05:37:49.265Z
       created_at: 2026-04-27T05:28:06.067Z
-      updated_at: 2026-04-27T05:35:43.076Z
+      updated_at: 2026-04-27T05:37:49.265Z
     workspace_id: dispatch-workspace-01KQ6HR9ZR2NS2QC19B6QGS6C9
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
