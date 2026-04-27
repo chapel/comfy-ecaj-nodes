@@ -4,37 +4,37 @@ inbox:
       for each recipe type. Should be a protocol method on RecipeNode so new recipe types implement
       their own serialization. Prevents silent skips and keeps persistence.py decoupled from recipe
       type enumeration.
-    created_at: 2026-02-14T01:55:53.531Z
     tags: []
     added_by: "@claude"
+    created_at: 2026-02-14T01:55:53.531Z
   - _ulid: 01KHCXS7ED85GAES5ZKBR57VGH
     text: compute_lora_stats._walk() silently ignores unknown recipe node types — should raise
       ValueError like serialize_recipe does. Related to serialization-as-trait refactor.
-    created_at: 2026-02-14T01:55:56.494Z
     tags: []
     added_by: "@claude"
+    created_at: 2026-02-14T01:55:56.494Z
   - _ulid: 01KHCXS9BEK6AA3X8SJ0MDD80X
     text: load_affected_keys should wrap safetensors errors with helpful message pointing to cached file
       corruption — tells users to delete and re-run.
-    created_at: 2026-02-14T01:55:58.446Z
     tags: []
     added_by: "@claude"
+    created_at: 2026-02-14T01:55:58.446Z
   - _ulid: 01KHDNHH9F37V5DVNPT9EFVANC
     text: kspec plan import should wire depends_on from task YAML — currently ignores the field,
       requiring manual kspec batch to set dependencies after import. Encountered when importing
       Qwen/Flux plan with 4 dependent tasks.
-    created_at: 2026-02-14T08:51:10.255Z
     tags:
       - reflection
       - kspec
     added_by: "@claude"
+    created_at: 2026-02-14T08:51:10.255Z
   - _ulid: 01KHDX4RQKGYKACV8GK2FWE8W0
     text: Add test for composed strength + block_config on OpApplyModel (strength != 1.0 AND
       block_config both active)
-    created_at: 2026-02-14T11:04:00.499Z
     tags:
       - test
     added_by: "@claude"
+    created_at: 2026-02-14T11:04:00.499Z
   - _ulid: 01KHFVFMZ01C494TS3KEJVCAVS
     text: "v2: Auto per-block LoRA importance analysis for targeted merging — compute Frobenius norm of
       B@A per block at recipe build time to auto-populate per-block strengths. Could extend to SVD
@@ -42,63 +42,73 @@ inbox:
       for multi-LoRA conflict prediction. Natural hook point: existing per_block.py infrastructure.
       See FreeFuse (spatial segmentation, different problem), LoRA Inspector, resize_lora, LoRA
       Power-Merger, Task Singular Vectors paper for prior art."
-    created_at: 2026-02-15T05:13:28.800Z
     tags: []
     added_by: "@claude"
+    created_at: 2026-02-15T05:13:28.800Z
   - _ulid: 01KHG2ZKRCDWGZQJ84N4BTNCKT
     text: "Missing AC-10 test for incremental-block-recompute — no test covers save_model=True
       partial-recompute path with saved-state + metadata behavior. Flagged by codex review on PR
       #66."
-    created_at: 2026-02-15T07:24:31.884Z
     tags: []
     added_by: "@claude"
+    created_at: 2026-02-15T07:24:31.884Z
   - _ulid: 01KHG2ZPSX22HDP87E878QB6W7
     text: "Incremental recompute cache-hit tests lack bit-identical output assertions — AC-2 requires
       bit-identical output vs full recompute, but tests only check that chunked_evaluation is not
       called, never comparing output tensors. Flagged by codex review on PR #66."
-    created_at: 2026-02-15T07:24:35.005Z
     tags: []
     added_by: "@claude"
+    created_at: 2026-02-15T07:24:35.005Z
   - _ulid: 01KHG3A2XWDWJBFPRMW5JNTQT5
     text: Add test helper fixture for block config node kwargs — generate full kwargs from
       node.INPUT_TYPES() with defaults, so tests only need to override specific values. Would
       prevent the 15+ manual edits needed when adding new sliders (as happened with structural keys
       fix).
-    created_at: 2026-02-15T07:30:15.101Z
     tags:
       - reflection
       - test
     added_by: "@claude"
+    created_at: 2026-02-15T07:30:15.101Z
   - _ulid: 01KHHGS4V8NZ0CXA71SW9JGGJQ
     text: kspec plan import puts manual task description field into notes instead of task description —
       task shows no Description section, only notes. Means manual tasks from plan import are less
       self-documenting than spec-derived tasks. Related to 01KHDNHH (depends_on gap) — both are plan
       import fidelity issues.
-    created_at: 2026-02-15T20:44:54.504Z
     tags:
       - reflection
       - kspec
     added_by: "@claude"
+    created_at: 2026-02-15T20:44:54.504Z
   - _ulid: 01KHHVR8FE095R6JEWN02N4DNF
     text: AC-5 encode/conditioning behavioral test gap — @clip-exit-node ac-5 tests validate mock
       patcher/clone/add_patches but don't exercise encode_from_tokens() → conditioning path. Needs
       high-fidelity CLIP stub with encode method to prove downstream text encoding works.
-    created_at: 2026-02-15T23:56:39.791Z
     tags: []
     added_by: "@claude"
+    created_at: 2026-02-15T23:56:39.791Z
   - _ulid: 01KHQKRSPTDP78QNQPB61326KD
     text: kspec item ac reorder command — currently requires remove+re-add with --force to fix
       non-sequential AC IDs from plan import. Should support 'kspec item ac reorder @ref ac-1 ac-2
       ac-3 ac-4' to reorder without data loss risk.
-    created_at: 2026-02-18T05:32:35.418Z
     tags:
       - reflection
       - kspec
     added_by: "@claude"
+    created_at: 2026-02-18T05:32:35.418Z
   - _ulid: 01KHQMZ3CJSG3QGG793ED5K9G1
     text: Add loaded_bytes test for LoKr tensor counting when LoKr storage is introduced. AC-3 of
       @loader-memory-measurement mentions LoKr component tensors but current loaders don't store
       LoKr tensors separately — when they do, add an explicit known-size byte-accounting test.
-    created_at: 2026-02-18T05:53:30.514Z
     tags: []
     added_by: "@claude"
+    created_at: 2026-02-18T05:53:30.514Z
+  - _ulid: 01KQ6MFMP160G2V2RHVETX4X22
+    text: "Consider supporting reviewer-fix updates for task-subject reviews: either allow kspec review
+      refresh to update the examined commit for task reviews, or document/provide a command for the
+      fresh-review-after-reviewer-fix workflow."
+    tags:
+      - reflection
+      - kspec
+      - review
+    added_by: Jacob Chapel
+    created_at: 2026-04-27T04:52:09.537Z

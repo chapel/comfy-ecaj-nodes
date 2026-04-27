@@ -556,6 +556,16 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T04:29:50.940Z
+  - _ulid: 01KQ6MFMMCF8AQB90AV5QVWS75
+    type: friction
+    content: Task-subject review records cannot be refreshed after a reviewer fix commit. In this
+      review, kspec review refresh rejected the task review because refresh only supports code
+      subjects, so a fresh review record was needed just to align the approved review with the
+      pushed PR head.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T04:52:09.484Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
