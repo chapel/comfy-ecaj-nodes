@@ -1143,7 +1143,7 @@ features:
         id: ac-12
         then: the cache entry is evicted instead of stored
         when: cache write is attempted
-      - given: GPU evaluation completes and results are in merged_state
+      - given: GPU evaluation completes and results are in merged_state in in-memory patch output mode
         id: ac-13
         then: base_state is freed before save; state dict re-acquired fresh for save only
         when: save_model=True and save path is about to be written
