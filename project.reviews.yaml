@@ -1508,6 +1508,16 @@ reviews:
         runner: ruff
         created_at: 2026-04-27T05:40:33.219Z
         completed_at: 2026-04-27T05:40:33.219Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "pytest -q: all tests passed (progress reached 100%)"
+        name: pytest full suite
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T05:40:33.325Z
+        completed_at: 2026-04-27T05:40:33.325Z
     events:
       - _ulid: 01KQ6Q46GE8XXRQERXNK9V02S8
         actor: Jacob Chapel
@@ -1543,6 +1553,13 @@ reviews:
           status: fail
           name: ruff
         timestamp: 2026-04-27T05:40:33.237Z
+      - _ulid: 01KQ6Q88DZS2Q3S30BGDJQ0VKG
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest full suite
+        timestamp: 2026-04-27T05:40:33.343Z
     examined_commit: 5332f72534f55032b658110039b7ae55fc29b89b
     external_links: []
     lifecycle_state: open
@@ -1555,5 +1572,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:38:20.302Z
-    updated_at: 2026-04-27T05:40:33.219Z
+    updated_at: 2026-04-27T05:40:33.325Z
     notes: []
