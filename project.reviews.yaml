@@ -1388,6 +1388,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ6PQAD4D3SYJA1B4N5714W0
         timestamp: 2026-04-27T05:31:18.325Z
+      - _ulid: 01KQ6PQAGTN6NE8YB37QBRD256
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ6PQAG9MTZBPT93X8Z8MP0Z
+        timestamp: 2026-04-27T05:31:18.426Z
     examined_commit: a561fbe0865113b8f5d80344acaae3485e17f40b
     external_links: []
     lifecycle_state: open
@@ -1417,7 +1424,26 @@ reviews:
               task requirement to release local chunk references before later chunks are evaluated."
             created_at: 2026-04-27T05:31:18.308Z
         kind: blocker
+      - _ulid: 01KQ6PQAG9MTZBPT93X8Z8MP0Z
+        anchor:
+          type: code
+          commit: a561fbe0865113b8f5d80344acaae3485e17f40b
+          line_end: 459
+          line_start: 459
+          path: lib/gpu_ops.py
+          side: head
+        entries:
+          - _ulid: 01KQ6PQAGAEDCSFVFAXFX7GQ67
+            author: Jacob Chapel
+            body: "MUST-FIX: the OOM retry path has the same retained local reference after each single-key
+              write. Evidence: forcing the batch OOM path and inspecting the caller frame showed
+              merged_cpu from key 'a' still present when key 'b' evaluation started. Impact: the
+              fallback path does not release completed local result tensors before later retry keys
+              are evaluated, which weakens the bounded-memory guarantee the sink-writing path is
+              meant to provide."
+            created_at: 2026-04-27T05:31:18.410Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T05:28:31.773Z
-    updated_at: 2026-04-27T05:31:18.308Z
+    updated_at: 2026-04-27T05:31:18.410Z
     notes: []
