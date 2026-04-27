@@ -864,6 +864,18 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T19:41:14.297Z
+  - _ulid: 01KQ88W5VDCNZARYHTAA8S0CRM
+    type: friction
+    content: "Duplicate dtype maps across modules: check_full_model_cache in persistence.py maintained a
+      hard-coded safetensors-to-torch dtype map that was a strict subset of
+      streaming_save._DTYPE_MAP. Missing dtypes (BOOL, C64, float8, U16/U32/U64) caused silent cache
+      rejection for valid artifacts. Fix: import and reverse the canonical _DTYPE_MAP. Pattern: when
+      two modules map the same domain (safetensors dtype strings <-> torch dtypes), a single
+      authoritative map should exist with all consumers importing from it."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T20:07:46.285Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
