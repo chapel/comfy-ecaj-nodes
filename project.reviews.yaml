@@ -2347,6 +2347,12 @@ reviews:
         payload:
           thread_ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
         timestamp: 2026-04-27T07:06:59.283Z
+      - _ulid: 01KQ6W6PJEV9KVMNXB44GE7ZN4
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
+        timestamp: 2026-04-27T07:07:05.166Z
     examined_commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
     external_links: []
     lifecycle_state: closed
@@ -2411,6 +2417,8 @@ reviews:
               __ecaj_artifact_kind__='full_model'."
             created_at: 2026-04-27T07:06:59.255Z
         kind: blocker
+        resolved_at: 2026-04-27T07:07:05.144Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -2420,5 +2428,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T06:54:02.964Z
     created_at: 2026-04-27T06:52:06.368Z
-    updated_at: 2026-04-27T07:06:59.255Z
+    updated_at: 2026-04-27T07:07:05.144Z
     notes: []
