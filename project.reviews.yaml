@@ -2021,6 +2021,12 @@ reviews:
         payload:
           thread_ulid: 01KQ6SNXD3D0XMZ4PF8533D7J6
         timestamp: 2026-04-27T06:34:17.207Z
+      - _ulid: 01KQ6TAT5ZP6Z0D4WT5M1H4415
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ6SNXD3D0XMZ4PF8533D7J6
+        timestamp: 2026-04-27T06:34:22.783Z
     examined_commit: a6411d9558cd70c099f14a8ea61d0a1b39fb6ff9
     external_links: []
     lifecycle_state: closed
@@ -2063,6 +2069,8 @@ reviews:
               and verifies both cached and recomputed values are correct."
             created_at: 2026-04-27T06:34:17.183Z
         kind: blocker
+        resolved_at: 2026-04-27T06:34:22.762Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -2072,5 +2080,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T06:23:15.567Z
     created_at: 2026-04-27T06:19:25.143Z
-    updated_at: 2026-04-27T06:34:17.183Z
+    updated_at: 2026-04-27T06:34:22.762Z
     notes: []
