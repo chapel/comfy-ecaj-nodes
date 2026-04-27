@@ -4043,9 +4043,21 @@ runs:
     completed_at: 2026-04-27T08:38:17.718Z
   - _ulid: 01KQ7Z2BBS987HFX2HA2G1MKWV
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T17:16:22.777Z
+        completed_at: 2026-04-27T17:17:09.598Z
+        notes: "What worked well: (1) Resuming from prior agent's branch — code was well-structured and ~90%
+          complete. (2) Systematic AC-by-AC coverage check caught a missing annotation. (3) Full
+          test suite run caught 3 regressions from new streaming path, all fixable by updating mock
+          targets."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T17:17:09.598Z
+        completed_at: 2026-04-27T17:17:09.598Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T17:16:22.777Z
