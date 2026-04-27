@@ -8,6 +8,7 @@ or run real ComfyUI validation.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys  # noqa: I001
 
@@ -359,3 +360,85 @@ class TestDefaultDiscoveryExclusion:
         """Invoking main() without proper guards returns 1 (refusal)."""
         exit_code = harness.main(argv=[])
         assert exit_code == 1
+
+
+# ===========================================================================
+# AC: @manual-comfy-memory-validation ac-refuses-before-comfy-work-without-opt-in
+# run_validation rejects nonexistent model_path before doing ComfyUI work
+# ===========================================================================
+
+
+class TestRunValidationModelPathValidation:
+    """run_validation refuses to proceed with a nonexistent model_path."""
+
+    # AC: @manual-comfy-memory-validation ac-refuses-before-comfy-work-without-opt-in
+    def test_nonexistent_model_path_returns_error(self):
+        """run_validation reports an error when model_path does not exist."""
+        report = harness.run_validation(
+            comfy_root="/fake/comfy",
+            model_path="/nonexistent/model.safetensors",
+            report_output="/fake/report.json",
+        )
+        assert len(report.errors) > 0
+        assert any("does not exist" in e for e in report.errors)
+        # Should not have proceeded to populate behavior fields
+        assert report.memory_mode == "unknown"
+        assert report.patch_mode_behavior == ""
+
+    # AC: @manual-comfy-memory-validation ac-refuses-before-comfy-work-without-opt-in
+    def test_nonexistent_model_path_does_not_import_comfy(self):
+        """run_validation with bad model_path does not import comfy."""
+        original_modules = set(sys.modules.keys())
+        harness.run_validation(
+            comfy_root="/fake/comfy",
+            model_path="/nonexistent/model.safetensors",
+            report_output="/fake/report.json",
+        )
+        new_modules = set(sys.modules.keys()) - original_modules
+        comfy_modules = {m for m in new_modules if m.startswith("comfy")}
+        assert not comfy_modules, (
+            f"Nonexistent model_path imported comfy modules: {comfy_modules}"
+        )
+
+
+# ===========================================================================
+# Import path ordering — project root before ComfyUI root
+# ===========================================================================
+
+
+class TestSetupImportPaths:
+    """_setup_import_paths places project root before ComfyUI root."""
+
+    def test_project_root_before_comfy_root(self):
+        """After _setup_import_paths, project root precedes comfy root."""
+        saved_path = sys.path[:]
+        try:
+            comfy_root = "/tmp/fake-comfy-root-for-test"
+            harness._setup_import_paths(comfy_root)
+            project_root = harness._resolve_project_root()
+            proj_idx = sys.path.index(project_root)
+            comfy_idx = sys.path.index(comfy_root)
+            assert proj_idx < comfy_idx, (
+                f"Project root at index {proj_idx} should precede "
+                f"ComfyUI root at index {comfy_idx}"
+            )
+        finally:
+            sys.path[:] = saved_path
+
+    def test_setup_import_paths_is_idempotent(self):
+        """Calling _setup_import_paths twice does not duplicate entries."""
+        saved_path = sys.path[:]
+        try:
+            comfy_root = "/tmp/fake-comfy-root-for-test"
+            harness._setup_import_paths(comfy_root)
+            harness._setup_import_paths(comfy_root)
+            project_root = harness._resolve_project_root()
+            assert sys.path.count(project_root) == 1
+            assert sys.path.count(comfy_root) == 1
+        finally:
+            sys.path[:] = saved_path
+
+    def test_resolve_project_root_is_ancestor_of_scripts(self):
+        """_resolve_project_root returns the directory containing scripts/."""
+        project_root = harness._resolve_project_root()
+        assert os.path.isdir(os.path.join(project_root, "scripts", "manual"))

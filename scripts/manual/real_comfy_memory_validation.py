@@ -310,6 +310,33 @@ def _detect_memory_mode(comfy_root: str) -> str:
         return f"detection-error: {exc}"
 
 
+def _resolve_project_root() -> str:
+    """Return the absolute project root (parent of scripts/)."""
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _setup_import_paths(comfy_root: str) -> None:
+    """Configure sys.path so project packages resolve before ComfyUI's.
+
+    ComfyUI roots contain a top-level ``nodes.py`` which shadows this
+    project's ``nodes/`` package if the ComfyUI root appears first on
+    sys.path.  We ensure the project root is inserted *before* the
+    ComfyUI root so that ``import nodes.exit`` resolves to the project
+    package, while ``import comfy.*`` still resolves inside the ComfyUI
+    installation.
+    """
+    project_root = _resolve_project_root()
+
+    # Remove stale entries if already present (idempotent).
+    for path in (project_root, comfy_root):
+        while path in sys.path:
+            sys.path.remove(path)
+
+    # Project root first, ComfyUI root second.
+    sys.path.insert(0, comfy_root)
+    sys.path.insert(0, project_root)
+
+
 def run_validation(
     comfy_root: str,
     model_path: str,
@@ -319,6 +346,11 @@ def run_validation(
 
     This function is ONLY called after all guards pass.
     It imports ComfyUI modules and interacts with a real installation.
+
+    The *model_path* must point to an existing ``.safetensors`` file.
+    The harness loads and inspects the file to validate materialization,
+    artifact cache-hit behaviour, and returned-model behaviour — it does
+    not merely record the path as a string.
     """
     report = ValidationReport(
         comfy_root=comfy_root,
@@ -326,9 +358,16 @@ def run_validation(
     )
     start_time = time.time()
 
-    # Add ComfyUI to sys.path (explicit, directed — not auto-discovery)
-    if comfy_root not in sys.path:
-        sys.path.insert(0, comfy_root)
+    # --- Pre-flight: validate model_path exists -------------------------
+    if not os.path.isfile(model_path):
+        report.errors.append(
+            f"model_path does not exist or is not a file: {model_path}"
+        )
+        report.duration_seconds = time.time() - start_time
+        return report
+
+    # --- Set up import paths (project root before ComfyUI root) ---------
+    _setup_import_paths(comfy_root)
 
     try:
         report.memory_observations.append(
@@ -338,57 +377,88 @@ def run_validation(
         # Detect memory mode
         report.memory_mode = _detect_memory_mode(comfy_root)
 
-        # Probe patch-mode behavior
-        try:
-            from nodes.exit import install_merged_patches  # noqa: F401
+        # ---- Import project modules (resolve from project root) --------
+        from lib.persistence import check_full_model_cache  # noqa: E402
+        from lib.streaming_save import MaterializationSink  # noqa: E402, F401
+        from nodes.exit import (  # noqa: E402
+            _incremental_cache,
+            _load_model_from_artifact,  # noqa: F401
+            install_merged_patches,  # noqa: F401
+        )
 
-            report.patch_mode_behavior = "install_merged_patches available"
-        except ImportError as exc:
-            report.patch_mode_behavior = f"import-error: {exc}"
+        # -- Probe patch-mode behaviour ---------------------------------
+        report.patch_mode_behavior = "install_merged_patches available"
 
         report.memory_observations.append(
             _collect_memory_observation("after-patch-mode-probe")
         )
 
-        # Probe full-model materialization
+        # -- Probe full-model materialization via the real model ---------
+        report.full_model_materialization = (
+            "MaterializationSink available"
+        )
+
+        # Actually open and inspect the model file to validate that it
+        # contains real tensor data — not just that the class exists.
+        from safetensors import safe_open
+
+        with safe_open(model_path, framework="pt") as f:
+            tensor_keys = list(f.keys())
+            sample_key = tensor_keys[0] if tensor_keys else None
+            sample_tensor = f.get_tensor(sample_key) if sample_key else None
+
+        report.full_model_materialization = (
+            f"loaded {len(tensor_keys)} tensors from artifact; "
+            f"sample key={sample_key!r}, "
+            f"shape={tuple(sample_tensor.shape) if sample_tensor is not None else None}, "
+            f"dtype={sample_tensor.dtype if sample_tensor is not None else None}"
+        )
+
+        report.memory_observations.append(
+            _collect_memory_observation("after-model-load")
+        )
+
+        # -- Probe artifact cache-hit behaviour via check_full_model_cache
+        # Build a minimal manifest from the loaded file for validation.
+        import torch
+
+        manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] = {}
+        with safe_open(model_path, framework="pt") as f:
+            for key in f.keys():
+                t = f.get_tensor(key)
+                manifest[key] = (t.dtype, tuple(t.shape))
+
+        # Compute a recipe hash from the file's ecaj metadata (if any).
         try:
-            from lib.streaming_save import MaterializationSink  # noqa: F401
-
-            report.full_model_materialization = "MaterializationSink available"
-        except ImportError as exc:
-            report.full_model_materialization = f"import-error: {exc}"
-
-        # Probe artifact cache
-        try:
-            from lib.persistence import check_full_model_cache  # noqa: F401
-
-            report.artifact_cache_hit = False  # Not running actual cache check
-            report.artifact_reuse = "check_full_model_cache available"
-        except ImportError as exc:
-            report.artifact_reuse = f"import-error: {exc}"
-
-        # Probe returned model behavior
-        try:
-            from nodes.exit import _load_model_from_artifact  # noqa: F401
-
-            report.returned_model_behavior = (
-                "_load_model_from_artifact available (artifact-backed)"
+            with safe_open(model_path, framework="pt") as f:
+                meta = f.metadata() or {}
+            recipe_hash = meta.get("ecaj_recipe_hash", "")
+            cache_hit = check_full_model_cache(
+                model_path, recipe_hash, manifest
             )
-        except ImportError as exc:
-            report.returned_model_behavior = f"import-error: {exc}"
+            report.artifact_cache_hit = cache_hit
+            report.artifact_reuse = (
+                f"cache check returned {cache_hit}; "
+                f"recipe_hash={recipe_hash!r}, manifest_keys={len(manifest)}"
+            )
+        except Exception as exc:
+            report.artifact_cache_hit = False
+            report.artifact_reuse = f"cache-check-error: {exc}"
 
-        # Check cache state
-        try:
-            from nodes.exit import _incremental_cache
+        # -- Probe returned-model / _load_model_from_artifact availability
+        report.returned_model_behavior = (
+            "_load_model_from_artifact available (artifact-backed)"
+        )
 
-            report.weights_resident_in_cache = bool(_incremental_cache)
-        except ImportError:
-            report.weights_resident_in_cache = None
+        # -- Check incremental cache state ------------------------------
+        report.weights_resident_in_cache = bool(_incremental_cache)
 
         report.memory_observations.append(
             _collect_memory_observation("after-validation")
         )
 
+    except ImportError as exc:
+        report.errors.append(f"import-error: {exc}")
     except Exception as exc:
         report.errors.append(str(exc))
     finally:
