@@ -1423,6 +1423,12 @@ reviews:
         payload:
           thread_ulid: 01KQ6PQAD4D3SYJA1B4N5714W0
         timestamp: 2026-04-27T05:42:32.322Z
+      - _ulid: 01KQ6QBZMJ1HG8T01VA00WPYBX
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ6PQAG9MTZBPT93X8Z8MP0Z
+        timestamp: 2026-04-27T05:42:35.410Z
     examined_commit: a561fbe0865113b8f5d80344acaae3485e17f40b
     external_links: []
     lifecycle_state: closed
@@ -1481,6 +1487,15 @@ reviews:
               are evaluated, which weakens the bounded-memory guarantee the sink-writing path is
               meant to provide."
             created_at: 2026-04-27T05:31:18.410Z
+          - _ulid: 01KQ6QBZKV01W7D93X4EXK9RC8
+            author: "@claude"
+            body: "Fixed: Added 'del merged_cpu' after 'sink.write_tensor(key, merged_cpu[0])' in the OOM retry
+              path (line 461). Each single-key result tensor is now released before the next retry
+              key begins evaluation. Added a behavioral test
+              (test_merged_cpu_released_between_oom_retry_keys) that forces the OOM fallback path
+              and uses frame inspection to verify merged_cpu is not present when subsequent retry
+              keys evaluate."
+            created_at: 2026-04-27T05:42:35.387Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -1491,7 +1506,7 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T05:31:25.134Z
     created_at: 2026-04-27T05:28:31.773Z
-    updated_at: 2026-04-27T05:42:32.297Z
+    updated_at: 2026-04-27T05:42:35.387Z
     notes: []
   - _ulid: 01KQ6Q46GE0H8A23SM9MB808FR
     slugs: []
