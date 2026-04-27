@@ -4856,6 +4856,12 @@ reviews:
         payload:
           thread_ulid: 01KQ84JVQDPV1W13HKK5GX1NTJ
         timestamp: 2026-04-27T19:02:04.796Z
+      - _ulid: 01KQ853YZQFN5AN4451480ACPC
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ84JVZWD8D55J2WP0NT1XMM
+        timestamp: 2026-04-27T19:02:07.095Z
     examined_commit: 16f875cb81b657dddc42ca05650f29290a091f90
     external_links: []
     lifecycle_state: closed
@@ -5965,6 +5971,13 @@ reviews:
               unused, there are line-length violations, and  is assigned but never used. These are
               CI-blocking lint failures in the changed execution path.
             created_at: 2026-04-27T18:52:46.973Z
+          - _ulid: 01KQ853YXXBJZ0VXV499AZNG1K
+            author: "@claude"
+            body: "Fixed: removed unused imports (evaluate_affected_group, atomic_save, check_cache), fixed
+              import sort order (recipe before streaming_save), removed unused key_byte_sizes
+              variable, wrapped long AC annotation lines. Updated tests that patched the removed
+              symbols."
+            created_at: 2026-04-27T19:02:07.037Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -5975,5 +5988,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T18:53:04.371Z
     created_at: 2026-04-27T18:49:41.222Z
-    updated_at: 2026-04-27T19:02:04.740Z
+    updated_at: 2026-04-27T19:02:07.037Z
     notes: []
