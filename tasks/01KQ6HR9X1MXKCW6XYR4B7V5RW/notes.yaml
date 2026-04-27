@@ -1,1 +1,58 @@
-notes: []
+notes:
+  - _ulid: 01KQ6KJ5Y0AZ9T90T5E77M9WTY
+    content: >-
+      Approach: Spike proves saved-artifact reload viability via these paths:
+
+
+      1. SAVE PATH: Use existing atomic_save (full base_state + merged overlay) to create a
+      representative safetensors artifact. This is already implemented — the spike just needs to
+      load it back.
+
+
+      2. LOAD PATH: Use comfy.sd.load_diffusion_model(artifact_path) — this is ComfyUI's standard
+      API that returns a ModelPatcher. It:
+         - Loads state dict via comfy.utils.load_torch_file
+         - Detects model config from state dict keys
+         - Creates the model architecture
+         - Loads weights into the model
+         - Returns ModelPatcher(model, load_device, offload_device)
+
+      3. PARITY: Compare model_patcher.model_state_dict() from the loaded artifact against the
+      affected keys from current in-memory merge. Assert torch.allclose for affected weights.
+
+
+      4. CACHE-HIT: When check_cache matches and the full-model artifact exists, call
+      load_diffusion_model instead of install_merged_patches. Skip GPU merge entirely.
+
+
+      5. MEMORY MODE: The loaded ModelPatcher is a normal Comfy model — it participates in ComfyUI's
+      model management (Dynamic VRAM offloading, etc.) because it has load_device/offload_device
+      set. Record whether comfy.model_management.DISABLE_SMART_MEMORY is False (Dynamic VRAM
+      active).
+
+
+      Test plan:
+
+      - Monkeypatch comfy.sd.load_diffusion_model in tests
+
+      - AC @comfy-memory-manager-compatibility: all 3 ACs gate-tested (not final coverage)
+
+      - Parity test: save via atomic_save, load via monkeypatched loader, compare affected weights
+
+      - Cache-hit test: assert loader called on cache hit, GPU eval skipped
+
+      - Memory mode test: assert returned model has load_device/offload_device attributes and record
+      DISABLE_SMART_MEMORY state
+
+
+      Edge cases:
+
+      - Saved artifact key prefixes: comfy.sd.load_diffusion_model_state_dict strips
+      unet_prefix_from_state_dict. Our save uses diffusion_model. prefix — this should be handled by
+      the prefix stripping.
+
+      - Architecture detection: The saved artifact must have keys that model_detection can
+      recognize.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T04:36:04.160Z
