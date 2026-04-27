@@ -468,7 +468,7 @@ workspaces:
         head: 1662a4d339355ba800fbca2d66845b9e6afc91fd
         last_seen_at: 2026-04-27T06:38:23.001Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-checkpoint-materialization-01kq6hr9
-  - active_role: worker
+  - active_role: null
     base_branch_point: e7d490dec277d3e3c1562d9674a48329fda3386e
     bootstrap:
       status: succeeded
@@ -511,12 +511,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T07:39:03.026Z
+      updated_at: 2026-04-27T07:41:02.342Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T07:39:03.026Z
+      updated_at: 2026-04-27T07:41:02.342Z
     integration:
       status: pending
       detail: null
@@ -524,17 +524,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: e7d490dec277d3e3c1562d9674a48329fda3386e
-      updated_at: 2026-04-27T07:39:03.026Z
-    lifecycle_state: active
+      updated_at: 2026-04-27T07:41:02.342Z
+    lifecycle_state: ready
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HRA0DXES7K03VX0RCDXQ2"
     task_slug: task-full-model-cache-metadata
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T07:34:00.897Z
-      last_reconciled_at: 2026-04-27T07:39:03.026Z
+      last_reconciled_at: 2026-04-27T07:41:02.342Z
       created_at: 2026-04-27T06:42:44.573Z
-      updated_at: 2026-04-27T07:39:03.026Z
+      updated_at: 2026-04-27T07:41:02.342Z
     workspace_id: dispatch-workspace-01KQ6HRA0DXES7K03VX0RCDXQ2
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
