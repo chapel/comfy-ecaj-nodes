@@ -8625,6 +8625,18 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T21:43:57.713Z
         completed_at: 2026-04-27T21:43:57.713Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: With ambient comfy importable on PYTHONPATH and --comfy-root pointing to a directory
+          without comfy/__init__.py, run_validation returned an error, memory_mode remained unknown,
+          sys.path was unchanged, and no comfy modules were loaded.
+        name: ambient Comfy root isolation probe
+        required: true
+        runner: python
+        created_at: 2026-04-27T21:43:57.962Z
+        completed_at: 2026-04-27T21:43:57.962Z
     events:
       - _ulid: 01KQ8E5PBEV7SD8EDSRNFAPJDY
         actor: Jacob Chapel
@@ -8674,6 +8686,13 @@ reviews:
           status: fail
           name: full pytest
         timestamp: 2026-04-27T21:43:57.786Z
+      - _ulid: 01KQ8ECAAKQW66PS2CQYZ6RKQB
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ambient Comfy root isolation probe
+        timestamp: 2026-04-27T21:43:58.036Z
     examined_commit: cf1d6f0b2b24c05d0411a5a727a2a72e72fb8675
     external_links: []
     lifecycle_state: open
@@ -8686,5 +8705,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T21:40:20.974Z
-    updated_at: 2026-04-27T21:43:57.713Z
+    updated_at: 2026-04-27T21:43:57.962Z
     notes: []
