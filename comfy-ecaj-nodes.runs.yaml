@@ -4532,7 +4532,7 @@ runs:
     completed_at: 2026-04-27T18:54:59.204Z
   - _ulid: 01KQ85655C4GAV7VQT3V6BKCRC
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4576,7 +4576,31 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T19:04:02.972Z
-        completed_at: 2026-04-27T19:04:02.972Z
+        completed_at: 2026-04-27T19:04:13.731Z
+        notes: >-
+          Evaluation:
+
+
+          1. Monkeypatch-breaks-on-import-removal friction — SKIP. Not a new pattern, and the
+          existing observation 01KH6Y61 ('Unit tests with mocks can validate the wrong behavior')
+          already covers the general category of mock-based test brittleness. The specific
+          import-coupling variant is a known consequence.
+
+
+          2. Ruff-not-run-before-submission friction — CAPTURE as observation. This is systemic: the
+          worker agent completed 5 fix cycles on this task, and cycle 5 was entirely avoidable lint
+          errors. The pattern is that the agent runs tests but not linting before submission. This
+          is a concrete, repeatable friction point that the review workflow catches but could be
+          caught earlier.
+
+
+          3. Fix cycle thread workflow success — SKIP. The review reply/resolve flow already has an
+          existing success observation (01KQ80PS covers review checks with concrete evidence). The
+          thread workflow is standard kspec behavior, not a novel success worth separate tracking.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T19:04:13.731Z
+        completed_at: 2026-04-27T19:04:13.731Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:03:18.956Z
