@@ -6110,6 +6110,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ85GX50N1CYZB785RA1VR23
         timestamp: 2026-04-27T19:09:11.257Z
+      - _ulid: 01KQ85GXD4XEGAV0PZK1ZK136F
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ85GXB7T83SSB04N8GXTBYB
+        timestamp: 2026-04-27T19:09:11.460Z
     examined_commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
     external_links: []
     lifecycle_state: open
@@ -6139,7 +6146,27 @@ reviews:
               overwritten instead of raising."
             created_at: 2026-04-27T19:09:11.201Z
         kind: blocker
+      - _ulid: 01KQ85GXB7T83SSB04N8GXTBYB
+        anchor:
+          type: code
+          commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
+          line_end: 475
+          line_start: 469
+          path: lib/persistence.py
+          side: head
+        entries:
+          - _ulid: 01KQ85GXB7R9A1M4YYCVSDBJ7M
+            author: Jacob Chapel
+            body: "MUST-FIX: full-mode cache validation only compares the artifact key set. An artifact with the
+              expected key names but wrong tensor shapes or dtypes is accepted as a reusable
+              full-model cache hit, even though the task requires invalid artifacts to be
+              non-reusable and @full-saved-model-output ac-complete-artifact requires the complete
+              artifact to contain the required model weights with correct tensor specs. I verified
+              check_full_model_cache returns True for a safetensors file containing key 'a' with
+              shape (3, 3) when the base manifest would require a different shape."
+            created_at: 2026-04-27T19:09:11.399Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:04:59.921Z
-    updated_at: 2026-04-27T19:09:11.201Z
+    updated_at: 2026-04-27T19:09:11.399Z
     notes: []
