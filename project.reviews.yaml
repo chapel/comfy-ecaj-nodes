@@ -4228,6 +4228,13 @@ reviews:
           status: pass
           name: streaming tests
         timestamp: 2026-04-27T18:12:31.870Z
+      - _ulid: 01KQ829YBFVQPKQM5QEH37GMCS
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ829Y9WRGZWQJ4DAQW403S1
+        timestamp: 2026-04-27T18:12:57.327Z
     examined_commit: 2564ca6e52b64b52693022dda5479761d0c66018
     external_links: []
     lifecycle_state: open
@@ -4237,8 +4244,29 @@ reviews:
       content_hash: ""
       ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ829Y9WRGZWQJ4DAQW403S1
+        anchor:
+          type: code
+          commit: 2564ca6e52b64b52693022dda5479761d0c66018
+          line_end: 337
+          line_start: 331
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQ829Y9XYKAHD5V8SGNW4XV2
+            author: Jacob Chapel
+            body: "MUST-FIX: full saved model mode still materializes the entire artifact into process-resident
+              patch tensors instead of returning a MODEL loaded through Comfy's model loading
+              lifecycle. _load_model_from_artifact reads every safetensors key into full_state, then
+              install_merged_patches stores those tensors as set patches on a clone. The submitted
+              test at tests/test_full_model_streaming.py:727-783 confirms every key is retained in
+              result.patches. Impact: the returned MODEL is not actually Comfy-owned loaded-artifact
+              memory, and all full-model weights remain resident solely because Exit returned,
+              violating ac-return-loaded-model and ac-comfy-owns-returned-model-memory."
+            created_at: 2026-04-27T18:12:57.277Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T18:08:52.979Z
-    updated_at: 2026-04-27T18:12:31.824Z
+    updated_at: 2026-04-27T18:12:57.277Z
     notes: []
