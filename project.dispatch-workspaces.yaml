@@ -434,12 +434,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T06:38:22.207Z
+      updated_at: 2026-04-27T06:38:23.001Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T06:38:22.207Z
+      updated_at: 2026-04-27T06:38:23.001Z
     integration:
       status: pending
       detail: null
@@ -447,24 +447,29 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: aec6500edd480deb37eccf7315272c8e025722a9
-      updated_at: 2026-04-27T06:38:22.207Z
-    lifecycle_state: ready
+      updated_at: 2026-04-27T06:38:23.001Z
+    lifecycle_state: integrating
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HR9ZR2NS2QC19B6QGS6C9"
     task_slug: task-full-model-checkpoint-materialization
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T06:25:43.473Z
-      last_reconciled_at: 2026-04-27T06:38:22.207Z
+      last_reconciled_at: 2026-04-27T06:38:23.001Z
       created_at: 2026-04-27T05:28:06.067Z
-      updated_at: 2026-04-27T06:38:22.207Z
+      updated_at: 2026-04-27T06:38:23.001Z
     workspace_id: dispatch-workspace-01KQ6HR9ZR2NS2QC19B6QGS6C9
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 1662a4d339355ba800fbca2d66845b9e6afc91fd
+        last_seen_at: 2026-04-27T06:38:23.001Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-checkpoint-materialization-01kq6hr9-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-full-model-checkpoint-materialization/01kq6hr9
-        head: a6411d9558cd70c099f14a8ea61d0a1b39fb6ff9
-        last_seen_at: 2026-04-27T06:25:43.016Z
+        head: 1662a4d339355ba800fbca2d66845b9e6afc91fd
+        last_seen_at: 2026-04-27T06:38:23.001Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-checkpoint-materialization-01kq6hr9
