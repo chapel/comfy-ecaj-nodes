@@ -5306,7 +5306,7 @@ runs:
     completed_at: 2026-04-27T20:59:46.289Z
   - _ulid: 01KQ8CBSB58PZCHR2ZDSKVBYEX
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5316,7 +5316,33 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T21:09:03.089Z
-        completed_at: 2026-04-27T21:09:03.089Z
+        completed_at: 2026-04-27T21:10:02.823Z
+        notes: >-
+          Session: fix cycle 3 for @task-full-model-real-comfy-memory-harness. Single blocker
+          addressed.
+
+
+          Friction (already tracked):
+
+          - kspec review get truncates thread bodies — had to grep raw YAML to read full blocker.
+          Already tracked as @01KQ82107.
+
+          - Pre-existing test_incremental_recompute failures from low RAM — already tracked as inbox
+          01KQ6YWG.
+
+
+          Success:
+
+          - Review blocker feedback was specific and actionable (cited evidence from the fake probe
+          run, named the exact functions not exercised). Made the fix straightforward.
+
+
+          No new untracked friction points identified. Session was clean — one blocker, clear fix,
+          standard commit/push/submit flow.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T21:10:02.823Z
+        completed_at: 2026-04-27T21:10:02.823Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T21:08:43.493Z
