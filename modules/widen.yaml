@@ -531,7 +531,7 @@ features:
         tests: []
         traits: []
         acceptance_criteria:
-          - given: merged tensors from batched evaluation
+          - given: merged tensors from batched evaluation in in-memory patch output mode
             id: ac-1
             then: original ModelPatcher is cloned via clone() and merged weights added as set patches
             when: patch installation runs
