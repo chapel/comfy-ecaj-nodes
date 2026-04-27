@@ -1306,6 +1306,16 @@ reviews:
         runner: ruff
         created_at: 2026-04-27T05:31:00.888Z
         completed_at: 2026-04-27T05:31:00.888Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "pytest -v: exit 0; 1236 passed in 8.25s"
+        name: pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T05:31:01.012Z
+        completed_at: 2026-04-27T05:31:01.012Z
     events:
       - _ulid: 01KQ6PJ7RX8HAFZTE9E2HEZREA
         actor: Jacob Chapel
@@ -1327,6 +1337,13 @@ reviews:
           status: pass
           name: ruff check
         timestamp: 2026-04-27T05:31:00.910Z
+      - _ulid: 01KQ6PPSH5R1J65XCA9VXNCV15
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest
+        timestamp: 2026-04-27T05:31:01.029Z
     examined_commit: a561fbe0865113b8f5d80344acaae3485e17f40b
     external_links: []
     lifecycle_state: open
@@ -1339,5 +1356,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:28:31.773Z
-    updated_at: 2026-04-27T05:31:00.888Z
+    updated_at: 2026-04-27T05:31:01.012Z
     notes: []
