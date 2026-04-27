@@ -6914,6 +6914,12 @@ reviews:
         payload:
           thread_ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
         timestamp: 2026-04-27T20:04:23.843Z
+      - _ulid: 01KQ88P2H7H78YVJ2CYQ4Y321B
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
+        timestamp: 2026-04-27T20:04:26.279Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: closed
@@ -7085,6 +7091,8 @@ reviews:
               proving the later-run cache validation path catches incomplete artifacts."
             created_at: 2026-04-27T20:04:23.771Z
         kind: blocker
+        resolved_at: 2026-04-27T20:04:26.208Z
+        resolved_by: "@claude"
       - _ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
         anchor:
           type: code
@@ -7168,5 +7176,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:49:13.956Z
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T20:04:23.771Z
+    updated_at: 2026-04-27T20:04:26.208Z
     notes: []
