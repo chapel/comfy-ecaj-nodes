@@ -1,1 +1,46 @@
-notes: []
+notes:
+  - _ulid: 01KQ6P2H1JXN9FFG90HBF06Z4C
+    content: >-
+      Approach: Add chunked_evaluation_to_sink() in lib/gpu_ops.py that accepts a MergeResultSink
+      parameter and writes each evaluated key directly to the sink, releasing local chunk references
+      before proceeding to the next chunk. Same signature as chunked_evaluation minus return (writes
+      to sink instead), plus sink parameter.
+
+
+      Key design decisions:
+
+      1. New function chunked_evaluation_to_sink() in gpu_ops.py alongside existing
+      chunked_evaluation()
+
+      2. Preserve ALL existing behavior: OOM retry, MemoryError handling, dtype conversion, CPU
+      output, pinned memory gating
+
+      3. Write each key to sink immediately after CPU conversion (not after whole chunk) - this
+      allows earliest possible release
+
+      4. Refactor chunked_evaluation() to use InMemorySink + chunked_evaluation_to_sink()
+      internally, proving behavioral equivalence
+
+      5. Re-export from lib/executor.py
+
+
+      Edge cases:
+
+      - OOM retry path: sink receives only completed keys (partial chunk keys from before OOM are
+      already written, retry keys added individually)
+
+      - Sink abort on any exception (caller responsibility, matching existing exit.py pattern)
+
+      - MemoryError/RuntimeError handling preserved identically
+
+
+      Test plan:
+
+      - Parity test: dict-returning vs sink-writing on same small fake tensors
+
+      - OOM retry test: sink receives exactly completed keys after retry succeeds
+
+      - Existing executor + Exit tests unchanged (regression)
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T05:19:56.978Z
