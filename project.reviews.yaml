@@ -1735,3 +1735,29 @@ reviews:
     created_at: 2026-04-27T05:38:20.302Z
     updated_at: 2026-04-27T05:41:12.002Z
     notes: []
+  - _ulid: 01KQ6QR9EC9HHNV0B5RYQY4YK6
+    slugs: []
+    title: Review add sink-writing chunk evaluation (cycle 2)
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ6QR9EBH5WEXP2TX09YBH2R
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T05:49:18.668Z
+    examined_commit: 7aa32f955955f3f5dded79e6972a7e8162b65eaa
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ6HR9YAB7181HKX6YSBX650"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T05:49:18.668Z
+    updated_at: null
+    notes: []
