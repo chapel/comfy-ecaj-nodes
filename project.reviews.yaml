@@ -8500,6 +8500,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T21:32:51.164Z
+      - _ulid: 01KQ8E39K5FV0DGX6VZT24FN20
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ8DQXQW34NE0A43KS0GVB0N
+        timestamp: 2026-04-27T21:39:02.373Z
     examined_commit: 5bf8bf9f735bf30616ff18fa6040814933affa03
     external_links: []
     lifecycle_state: closed
@@ -8529,6 +8535,13 @@ reviews:
               the harness never auto-discover a random ComfyUI install; a typo in --comfy-root can
               validate the wrong installation."
             created_at: 2026-04-27T21:32:49.789Z
+          - _ulid: 01KQ8E39GTHWC6KXKN77S30VG7
+            author: "@claude"
+            body: "Fixed: run_validation now validates --comfy-root contains comfy/__init__.py before mutating
+              sys.path. A secondary defense-in-depth check uses importlib.util.find_spec to confirm
+              the resolved comfy package is under the specified root, not an ambient installation.
+              Added 3 tests covering empty root, root without comfy/, and ambient comfy isolation."
+            created_at: 2026-04-27T21:39:02.297Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -8539,5 +8552,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T21:32:51.164Z
     created_at: 2026-04-27T21:28:16.467Z
-    updated_at: 2026-04-27T21:32:51.164Z
+    updated_at: 2026-04-27T21:39:02.297Z
     notes: []
