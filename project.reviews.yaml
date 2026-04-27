@@ -1913,6 +1913,18 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T06:22:39.755Z
         completed_at: 2026-04-27T06:22:39.755Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Actual CheckpointMaterializationSink rejects duplicate affected writes: RuntimeError
+          Duplicate key 'a': already written. nodes/exit.py prewrites all cached merged_state
+          entries, then writes recomputed group_results again."
+        name: partial recompute materialization probe
+        required: true
+        runner: python
+        created_at: 2026-04-27T06:22:47.349Z
+        completed_at: 2026-04-27T06:22:47.349Z
     events:
       - _ulid: 01KQ6SFDJQNMCW0A77GJ3JRVGF
         actor: Jacob Chapel
@@ -1955,6 +1967,13 @@ reviews:
           status: pass
           name: targeted materialization tests
         timestamp: 2026-04-27T06:22:39.774Z
+      - _ulid: 01KQ6SNK2BTR2QT9S14TTFESTH
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: partial recompute materialization probe
+        timestamp: 2026-04-27T06:22:47.371Z
     examined_commit: a6411d9558cd70c099f14a8ea61d0a1b39fb6ff9
     external_links: []
     lifecycle_state: open
@@ -1967,5 +1986,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T06:19:25.143Z
-    updated_at: 2026-04-27T06:22:39.755Z
+    updated_at: 2026-04-27T06:22:47.349Z
     notes: []
