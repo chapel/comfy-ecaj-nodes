@@ -1,148 +1,145 @@
 kynetic_runs: "1.0"
 runs:
   - _ulid: 01KH4W39GTC4929DAWPENZ207A
-    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: completed
     current_step: 4
-    total_steps: 5
-    started_at: 2026-02-10T22:52:33.690Z
-    completed_at: 2026-02-11T00:04:51.381Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
-        started_at: 2026-02-10T22:52:33.690Z
-        completed_at: 2026-02-10T22:53:08.633Z
+      - status: completed
         inputs:
           feature_description: "Testing strategy for comfy-ecaj-nodes: unit tests for pure lib code, node
             testing via mock entry/exit for graph validation, and CI pipeline"
-      - step_index: 1
-        status: completed
+        step_index: 0
+        started_at: 2026-02-10T22:52:33.690Z
+        completed_at: 2026-02-10T22:53:08.633Z
+      - status: completed
+        step_index: 1
         started_at: 2026-02-10T22:53:08.633Z
         completed_at: 2026-02-11T00:03:33.565Z
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T00:03:33.565Z
         completed_at: 2026-02-11T00:04:20.833Z
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T00:04:20.833Z
         completed_at: 2026-02-11T00:04:36.847Z
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-11T00:04:36.847Z
         completed_at: 2026-02-11T00:04:51.381Z
         notes: Import path chosen - 3 new specs (comfyui-mocking, node-graph-testing, ci-pipeline) plus
           restructured parent
-    initiated_by: "@claude"
+    total_steps: 5
+    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
+    started_at: 2026-02-10T22:52:33.690Z
+    completed_at: 2026-02-11T00:04:51.381Z
   - _ulid: 01KH507SWV0N6P4XDYGWX6JE1X
-    workflow_ref: "@01KH4W2EVRR14Z55XSGY646P3C"
     status: completed
     current_step: 7
-    total_steps: 8
-    started_at: 2026-02-11T00:04:55.835Z
-    completed_at: 2026-02-11T00:06:27.398Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
-        started_at: 2026-02-11T00:04:55.835Z
-        completed_at: 2026-02-11T00:05:01.128Z
+      - status: completed
         inputs:
           plan_file_path: /home/chapel/Projects/comfy-ecaj-nodes/.claude/plans/testing-strategy.md
-      - step_index: 1
-        status: completed
-        started_at: 2026-02-11T00:05:01.128Z
-        completed_at: 2026-02-11T00:05:05.702Z
+        step_index: 0
+        started_at: 2026-02-11T00:04:55.835Z
+        completed_at: 2026-02-11T00:05:01.128Z
+      - status: completed
         inputs:
           module_ref: "@foundation"
-      - step_index: 2
-        status: completed
+        step_index: 1
+        started_at: 2026-02-11T00:05:01.128Z
+        completed_at: 2026-02-11T00:05:05.702Z
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T00:05:05.702Z
         completed_at: 2026-02-11T00:05:21.539Z
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T00:05:21.539Z
         completed_at: 2026-02-11T00:05:26.353Z
         notes: "Dry-run passes: 3 new specs, 1 updated, 3 tasks. Using --update to restructure parent."
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-11T00:05:26.353Z
         completed_at: 2026-02-11T00:06:08.897Z
         notes: Imported with --update. 3 specs created, parent updated, 3 tasks derived.
-      - step_index: 5
-        status: skipped
+      - status: skipped
+        step_index: 5
         started_at: 2026-02-11T00:06:08.897Z
         completed_at: 2026-02-11T00:06:14.590Z
         notes: No traits applicable - project has no trait definitions (CLI traits dont apply to ComfyUI
           node pack)
-      - step_index: 6
-        status: completed
+      - status: completed
+        step_index: 6
         started_at: 2026-02-11T00:06:14.590Z
         completed_at: 2026-02-11T00:06:22.667Z
         notes: Validation passes. Completeness warnings expected - no implementation yet.
-      - step_index: 7
-        status: skipped
+      - status: skipped
+        step_index: 7
         started_at: 2026-02-11T00:06:22.667Z
         completed_at: 2026-02-11T00:06:27.398Z
         notes: Deferring implementation start - plan and specs created, dependencies wired, convention
           established.
-    initiated_by: "@claude"
+    total_steps: 8
+    workflow_ref: "@01KH4W2EVRR14Z55XSGY646P3C"
+    started_at: 2026-02-11T00:04:55.835Z
+    completed_at: 2026-02-11T00:06:27.398Z
   - _ulid: 01KH50QDZKY91JSHEXR5BGW4V2
-    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-11T00:13:27.923Z
-    completed_at: 2026-02-11T00:20:49.888Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T00:13:27.923Z
         completed_at: 2026-02-11T00:13:39.329Z
         notes: "Successes: parallel subagent research, kspec batch for bulk ops, structured AskUserQuestion
           flow, dependency graph design validated by tasks ready"
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T00:13:39.329Z
         completed_at: 2026-02-11T00:13:52.771Z
         notes: "Friction: (1) spec-plan workflows not ported to new projects, (2) plan import --update
           doesnt update ACs, (3) assess automation --all doesnt show saved status, (4) depends vs
           depends_on JSON field confusion, (5) long slug typos causing atomic batch rollback"
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T00:13:52.771Z
         completed_at: 2026-02-11T00:14:05.181Z
         notes: Searched specs, tasks, inbox - none of the friction points are tracked. Points 2-4 are
           kynetic-spec upstream issues. Points 1 and 5 are local/process.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T00:14:05.181Z
         completed_at: 2026-02-11T00:14:14.589Z
         notes: "Proposals: (1) local memory note for long slugs, (2) upstream: assess should show saved
           automation status, (3) upstream: plan import --update should update ACs"
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-11T00:14:14.589Z
         completed_at: 2026-02-11T00:20:15.412Z
         notes: "User decisions: (1) Add general principle to memory about verifying refs before using them,
           not a slug list. (2) Capture kspec issues in kspec project, not here."
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-11T00:20:15.412Z
         completed_at: 2026-02-11T00:20:49.888Z
         notes: "Captured: 2 success observations (subagent research, batch ops), 1 memory update (verify
           refs before using), 2 kspec upstream inbox items (assess display, plan import --update
           ACs)"
-    initiated_by: "@claude"
+    total_steps: 6
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-11T00:13:27.923Z
+    completed_at: 2026-02-11T00:20:49.888Z
   - _ulid: 01KH59H5TH8FPPZEM8VW6W4W5M
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T02:47:20.145Z
-    completed_at: 2026-02-11T02:47:53.320Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T02:47:20.145Z
         completed_at: 2026-02-11T02:47:28.517Z
         notes: "Session: Implemented Entry Node (task 01KH4HA463). What worked well: (1) MockModelPatcher
@@ -151,253 +148,253 @@ runs:
           specificity (Z-Image before generic layers) was clean approach. (3) Task/spec structure
           gave clear ACs to implement against. Friction: None significant - straightforward
           implementation task."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T02:47:28.517Z
         completed_at: 2026-02-11T02:47:43.094Z
         notes: Searched existing state. No high-confidence friction points to capture from this session - it
           was a straightforward implementation task. The MockModelPatcher with configurable keys
           parameter is already a success pattern that's part of the testing infrastructure
           (completed task). No new observations to add.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T02:47:43.094Z
         completed_at: 2026-02-11T02:47:48.567Z
         notes: No items to capture. Session was smooth - straightforward implementation with clear ACs, good
           test fixtures, no systemic friction encountered.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T02:47:48.567Z
         completed_at: 2026-02-11T02:47:53.319Z
         notes: No items to capture - nothing passed the high-confidence threshold. Reflection complete.
-    initiated_by: "@claude"
-  - _ulid: 01KH5AD4B7MSMT0VFW7Y9BTE17
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T02:47:20.145Z
+    completed_at: 2026-02-11T02:47:53.320Z
+  - _ulid: 01KH5AD4B7MSMT0VFW7Y9BTE17
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T03:02:36.135Z
-    completed_at: 2026-02-11T03:03:10.515Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T03:02:36.135Z
         completed_at: 2026-02-11T03:02:53.123Z
         notes: Session reviewed. Implementation was straightforward - clear spec, good existing patterns to
           follow. Minor one-off issue (tried wrong CLI command) was user error, not systemic. No
           high-confidence friction to capture.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T03:02:53.123Z
         completed_at: 2026-02-11T03:03:02.167Z
         notes: Searched existing state. 2 success observations already captured, inbox empty. This session
           had no high-confidence friction - implementation was clean, spec was clear, existing
           patterns were reusable. The one minor issue (wrong CLI command) was user error, not
           systemic.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T03:03:02.167Z
         completed_at: 2026-02-11T03:03:06.532Z
         notes: No items to capture. Session was clean - clear spec, good patterns, straightforward
           implementation. No systemic friction encountered.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T03:03:06.532Z
         completed_at: 2026-02-11T03:03:10.515Z
         notes: No items to capture - session was friction-free. Workflow complete.
-    initiated_by: "@claude"
-  - _ulid: 01KH5BNDWR3FVJVC9N859E9DMQ
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T03:02:36.135Z
+    completed_at: 2026-02-11T03:03:10.515Z
+  - _ulid: 01KH5BNDWR3FVJVC9N859E9DMQ
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T03:24:36.632Z
-    completed_at: 2026-02-11T03:25:19.842Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T03:24:36.632Z
         completed_at: 2026-02-11T03:25:01.182Z
         notes: "Session reviewed. Task: implement LoRA loaders. Completed successfully with 21 tests, PR #11
           created. Minor friction adding safetensors/numpy to dev deps but this is normal
           development work, already resolved. No high-confidence systemic issues to capture."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T03:25:01.182Z
         completed_at: 2026-02-11T03:25:10.648Z
         notes: Searched existing state. Found 2 success observations already captured. No high-confidence
           friction points identified from this session - implementation followed established
           patterns smoothly. Minor dep additions were normal development, not systemic.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T03:25:10.648Z
         completed_at: 2026-02-11T03:25:15.653Z
         notes: No items to capture. Session went smoothly with established patterns. Skipping capture step.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T03:25:15.653Z
         completed_at: 2026-02-11T03:25:19.841Z
         notes: No items to capture. Reflection complete with no new observations needed.
-    initiated_by: "@claude"
-  - _ulid: 01KH5C5FPDXW05CK16KV4WC5M0
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T03:24:36.632Z
+    completed_at: 2026-02-11T03:25:19.842Z
+  - _ulid: 01KH5C5FPDXW05CK16KV4WC5M0
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T03:33:22.765Z
-    completed_at: 2026-02-11T03:34:12.390Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T03:33:22.765Z
         completed_at: 2026-02-11T03:33:49.510Z
         notes: Session review complete. Exit Recipe Analysis implemented cleanly. Minor friction with pure
           module requirement was already covered by existing test - just needed to understand the
           test scans all imports including runtime. No new items to capture.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T03:33:49.510Z
         completed_at: 2026-02-11T03:34:01.087Z
         notes: "No high-confidence friction identified. The session went smoothly: implemented
           lib/analysis.py with all 6 ACs, wrote 22 tests, all 258 tests pass. The only minor issue
           (pure module requirement) is already enforced by existing tests and is working as
           designed."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T03:34:01.087Z
         completed_at: 2026-02-11T03:34:06.426Z
         notes: No items to capture. Session was clean with no systemic friction. Existing observations cover
           parallel subagent research and kspec batch operations - neither applies to this session.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T03:34:06.426Z
         completed_at: 2026-02-11T03:34:12.390Z
         notes: Nothing to capture. Session completed successfully with no new friction patterns or notable
           successes beyond the existing documented patterns.
-    initiated_by: "@claude"
-  - _ulid: 01KH5D396JH2GG66S81ENC3XHK
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T03:33:22.765Z
+    completed_at: 2026-02-11T03:34:12.390Z
+  - _ulid: 01KH5D396JH2GG66S81ENC3XHK
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T03:49:39.154Z
-    completed_at: 2026-02-11T03:50:33.776Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T03:49:39.154Z
         completed_at: 2026-02-11T03:50:12.646Z
         notes: "Session review complete. Exit Node implementation went smoothly. Existing infrastructure
           (analysis.py, executor.py, widen.py) was well-designed. Only minor friction: one outdated
           test needed update (one-time issue, not worth capturing)."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T03:50:12.646Z
         completed_at: 2026-02-11T03:50:22.550Z
         notes: Searched existing state. No high-confidence friction patterns identified. Session was smooth
           - implementation followed existing patterns well. Only one-off issue was an outdated test
           stub that needed updating (not systemic).
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T03:50:22.550Z
         completed_at: 2026-02-11T03:50:28.529Z
         notes: No items to capture. Session completed smoothly without significant friction. Existing
           infrastructure and clear specs enabled efficient implementation.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T03:50:28.529Z
         completed_at: 2026-02-11T03:50:33.776Z
         notes: No items to capture - session was smooth with no high-confidence friction patterns.
           Reflection complete.
-    initiated_by: "@claude"
-  - _ulid: 01KH5EDPB9PEV4EEC2G9JWMJQ1
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T03:49:39.154Z
+    completed_at: 2026-02-11T03:50:33.776Z
+  - _ulid: 01KH5EDPB9PEV4EEC2G9JWMJQ1
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T04:12:48.874Z
-    completed_at: 2026-02-11T04:13:38.165Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T04:12:48.874Z
         completed_at: 2026-02-11T04:13:18.271Z
         notes: Session review complete. Clean implementation of memory management task. No novel friction
           patterns - branch cherry-pick was one-off session state issue. Existing spec/task coverage
           is complete.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T04:13:18.271Z
         completed_at: 2026-02-11T04:13:26.992Z
         notes: Searched existing state. 2 success observations already captured. Inbox empty. No
           high-confidence friction in this iteration - memory management was clean implementation
           following established patterns. Branch cherry-pick was one-off session state issue, not
           systemic.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T04:13:26.992Z
         completed_at: 2026-02-11T04:13:33.030Z
         notes: No items to capture. This iteration was clean implementation with no novel patterns. Existing
           observations cover parallel subagent research and kspec batch operations - neither applies
           to this memory management work.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T04:13:33.030Z
         completed_at: 2026-02-11T04:13:38.165Z
         notes: No items to capture. Reflection complete with no new observations - this was a
           straightforward implementation iteration.
-    initiated_by: "@claude"
-  - _ulid: 01KH5F3GNYCK56TJBSJ1SC79CN
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T04:12:48.874Z
+    completed_at: 2026-02-11T04:13:38.165Z
+  - _ulid: 01KH5F3GNYCK56TJBSJ1SC79CN
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T04:24:43.967Z
-    completed_at: 2026-02-11T04:25:24.240Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T04:24:43.967Z
         completed_at: 2026-02-11T04:25:02.887Z
         notes: Session reviewed. Per-block control implementation was straightforward - clear spec, existing
           patterns to follow, BlockConfig type already implemented. No friction points identified.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T04:25:02.887Z
         completed_at: 2026-02-11T04:25:14.216Z
         notes: No high-confidence friction points identified. Implementation was straightforward - clear
           spec, existing patterns, no workarounds needed. Searched observations and inbox - no
           duplicates to avoid.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T04:25:14.216Z
         completed_at: 2026-02-11T04:25:19.463Z
         notes: No items to capture. Session was a clean implementation with no friction. Existing success
           observations from earlier in this session cover the relevant patterns.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T04:25:19.463Z
         completed_at: 2026-02-11T04:25:24.240Z
         notes: Nothing to capture - no high-confidence items identified. Clean implementation session.
-    initiated_by: "@claude"
-  - _ulid: 01KH5H8TC16JAX5FENDQ4MY7C9
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T04:24:43.967Z
+    completed_at: 2026-02-11T04:25:24.240Z
+  - _ulid: 01KH5H8TC16JAX5FENDQ4MY7C9
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T05:02:34.882Z
-    completed_at: 2026-02-11T05:04:04.077Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T05:02:34.882Z
         completed_at: 2026-02-11T05:03:02.355Z
         notes: "Reviewed session. Worked well: parallel reads, kspec lifecycle, subagent PR review caught AC
           gap. Friction: (1) pytest vs ComfyUI __init__.py took 6 attempts - non-obvious fix
           pattern, (2) torch missing from dev deps in plan, (3) no venv existed. Searched
           specs/tasks/inbox - none tracked."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T05:03:02.355Z
         completed_at: 2026-02-11T05:03:18.092Z
         notes: "High-confidence items: (1) SUCCESS: Subagent PR review caught real AC gap
@@ -406,73 +403,73 @@ runs:
           required try/except + collect_ignore + importlib mode. This is systemic - every ComfyUI
           node pack with relative imports in __init__.py will hit this. Worth capturing the solution
           pattern in memory. Low-confidence (skip): torch/venv issues were plan gaps, not systemic."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T05:03:18.092Z
         completed_at: 2026-02-11T05:03:40.259Z
         notes: Captured 1 friction observation (pytest vs ComfyUI __init__.py pattern). Skipped PR review
           success (already covered by existing workflows). Skipped torch/venv issues (one-off plan
           gaps, not systemic).
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T05:03:40.259Z
         completed_at: 2026-02-11T05:04:04.077Z
         notes: Captured friction observation for pytest/ComfyUI __init__.py conflict. Updated MEMORY.md with
           pytest compatibility pattern and implementation status. No other items to capture.
-    initiated_by: "@claude"
-  - _ulid: 01KH6TZD6XQ04T47G2JSZRW79X
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T05:02:34.882Z
+    completed_at: 2026-02-11T05:04:04.077Z
+  - _ulid: 01KH6TZD6XQ04T47G2JSZRW79X
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T17:11:26.685Z
-    completed_at: 2026-02-11T17:12:43.744Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T17:11:26.685Z
         completed_at: 2026-02-11T17:11:44.115Z
         notes: "Session reviewed: Fixed relative imports + UnifiedFinder. Key friction: Python
           _init_module_attrs silently replacing module identity, multiple iterations to find correct
           approach. Success: detailed handoff doc, systematic id() debugging."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T17:11:44.115Z
         completed_at: 2026-02-11T17:12:07.966Z
         notes: "Identified: (1) Existing friction 01KH5HAK now resolved by this session. (2) Success:
           detailed handoff docs with root cause analysis. (3) Skipping one-off Python import
           machinery friction (not systemic)."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T17:12:07.966Z
         completed_at: 2026-02-11T17:12:38.205Z
         notes: Resolved friction 01KH5HAK (pytest vs ComfyUI). Captured success 01KH6V1D (detailed handoff
           docs). Skipped one-off Python import friction (not systemic).
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T17:12:38.205Z
         completed_at: 2026-02-11T17:12:43.744Z
         notes: "All items captured in step 3: resolved 01KH5HAK, created success 01KH6V1D. No additional
           items needed."
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T17:11:26.685Z
+    completed_at: 2026-02-11T17:12:43.744Z
   - _ulid: 01KH6XZN55CA7GCFSXZ3V46Z11
-    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-11T18:04:00.549Z
-    completed_at: 2026-02-11T18:07:36.071Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T18:04:00.549Z
         completed_at: 2026-02-11T18:04:14.705Z
         notes: "What worked: parallel codex+claude review, debug prints for live diagnosis, user runtime
           testing essential. Friction: (1) mock reproduced the key prefix bug so tests passed while
           runtime failed, (2) silent except ImportError wasted time, (3) stacked bugs made diagnosis
           harder"
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T18:04:14.705Z
         completed_at: 2026-02-11T18:04:23.313Z
         notes: "Friction: (1) MockModelPatcher designed with same prefix inconsistency as production code -
@@ -481,8 +478,8 @@ runs:
           No runtime/ComfyUI smoke test exists - all tests are unit-level with mocks, so entire
           execution pipeline was untested with real data. (3) Codex review of pre-fix code was
           useful but would have been more useful reviewing the PR diff specifically."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T18:04:23.313Z
         completed_at: 2026-02-11T18:04:40.477Z
         notes: "Searched: (1) 'integration test' - @node-graph-testing exists but is about ComfyUI
@@ -491,8 +488,8 @@ runs:
           consistency. The MockModelPatcher prefix inconsistency is a new finding. (3) 'runtime
           smoke' - not tracked. (4) corrupted model output - already in inbox as 01KH6X7H. Two
           untracked items: mock prefix audit and runtime smoke test need."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T18:04:40.477Z
         completed_at: 2026-02-11T18:04:47.860Z
         notes: "Proposals: (1) Audit MockModelPatcher key consistency - verify that model_state_dict() and
@@ -500,65 +497,65 @@ runs:
           code expects. Small scope - one-time review of conftest.py mock. (2) The runtime
           corruption issue (01KH6X7H) will inherently drive the need for better end-to-end
           validation, so no separate item needed for that."
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-11T18:04:47.860Z
         completed_at: 2026-02-11T18:07:20.149Z
         notes: Captured mock audit as inbox 01KH6Y5J. User approved.
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-11T18:07:20.149Z
         completed_at: 2026-02-11T18:07:36.071Z
         notes: "Captured: inbox 01KH6Y5J (mock audit), success observation 01KH6Y5Y (parallel review),
           friction observation 01KH6Y61 (mock-validated bugs). Reflection complete."
-    initiated_by: "@claude"
+    total_steps: 6
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-11T18:04:00.549Z
+    completed_at: 2026-02-11T18:07:36.071Z
   - _ulid: 01KH71PG6HTG4P4KD9FTTZ30RE
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T19:08:54.865Z
-    completed_at: 2026-02-11T19:10:03.839Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T19:08:54.865Z
         completed_at: 2026-02-11T19:09:42.359Z
         notes: Reviewed session. One success pattern captured (reference comparison debugging). Mock
           divergence already tracked. No new friction items — inbox/task confusion was one-off,
           speculation was one-off.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T19:09:42.359Z
         completed_at: 2026-02-11T19:09:50.423Z
         notes: "Friction: (1) inbox-vs-task confusion — one-off, not systemic. (2) mock divergence from
           production — already tracked at 01KH6Y5J and observation 01KH6Y61. (3) speculated about
           precision cause without reading code — one-off. Success: reference comparison debugging
           highly effective — captured as observation 01KH71QQ. No new untracked items to capture."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T19:09:50.423Z
         completed_at: 2026-02-11T19:09:57.761Z
         notes: "All items evaluated. Mock divergence: SKIP (existing 01KH6Y5J + 01KH6Y61). Inbox/task
           confusion: SKIP (one-off). Speculation: SKIP (one-off). Reference comparison success:
           ALREADY CAPTURED (01KH71QQ). No remaining items to capture."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T19:09:57.761Z
         completed_at: 2026-02-11T19:10:03.839Z
         notes: All captures complete. One success pattern captured (01KH71QQ). All friction items either
           already tracked or one-off. Session reflection done.
-    initiated_by: "@claude"
-  - _ulid: 01KH7F6VQK1E14CE6A9KBNCKVR
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T19:08:54.865Z
+    completed_at: 2026-02-11T19:10:03.839Z
+  - _ulid: 01KH7F6VQK1E14CE6A9KBNCKVR
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-11T23:05:02.452Z
-    completed_at: 2026-02-11T23:06:16.935Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-11T23:05:02.452Z
         completed_at: 2026-02-11T23:05:27.500Z
         notes: >-
@@ -599,8 +596,8 @@ runs:
           was only identified when the user asked "are you ensuring larger batches go through."
           Could have been caught earlier during initial bottleneck analysis if we'd traced through
           the eval pipeline to see whether affecting_sets was actually used.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-11T23:05:27.500Z
         completed_at: 2026-02-11T23:05:57.570Z
         notes: >-
@@ -630,8 +627,8 @@ runs:
           suggestions, Codex caught spec/implementation divergence. Both approved correctness
           independently. This is the second session confirming this pattern (01KH6Y5Y already
           captures it).
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-11T23:05:57.570Z
         completed_at: 2026-02-11T23:06:11.515Z
         notes: >-
@@ -646,23 +643,23 @@ runs:
           01KH6Y61
 
           4. monkeypatch raising=False → SKIP, one-off
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-11T23:06:11.515Z
         completed_at: 2026-02-11T23:06:16.935Z
         notes: All captures complete. 1 friction observation captured (01KH7F8S). 3 items skipped (already
           tracked or one-off). Session reflection complete.
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-11T23:05:02.452Z
+    completed_at: 2026-02-11T23:06:16.935Z
   - _ulid: 01KH88JYJ0Y8EEVWNE53KA96G9
-    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-12T06:28:32.960Z
-    completed_at: 2026-02-12T06:46:18.823Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-12T06:28:32.960Z
         completed_at: 2026-02-12T06:28:42.490Z
         notes: >-
@@ -679,8 +676,8 @@ runs:
 
           4. Subagent PR review with --no-merge flag — clean separation of review and merge
           decisions
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-12T06:28:42.490Z
         completed_at: 2026-02-12T06:28:52.350Z
         notes: >-
@@ -696,8 +693,8 @@ runs:
 
           3. Branch management after PR merge — was on refactor branch after merge, had to checkout
           main before committing the next task's changes. Easy to forget.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-12T06:28:52.350Z
         completed_at: 2026-02-12T06:29:08.144Z
         notes: >-
@@ -710,8 +707,8 @@ runs:
           capturing.
 
           3. Branch management after merge — NOT tracked. One-off operational issue, not systemic.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-12T06:29:08.144Z
         completed_at: 2026-02-12T06:29:14.261Z
         notes: >-
@@ -720,28 +717,28 @@ runs:
           1. task complete --force should bypass submit requirement for non-code tasks (audits,
           research, docs-only). Scope: small (kspec CLI change). Already tried --force and it didn't
           work. Would eliminate the submit→complete ceremony for tasks that have no PR.
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-12T06:29:14.261Z
         completed_at: 2026-02-12T06:46:07.810Z
         notes: Step 5 - User declined capturing the task lifecycle friction. No items to capture.
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-12T06:46:07.810Z
         completed_at: 2026-02-12T06:46:18.823Z
         notes: Step 6 - Captured one success observation (parallel agent audit pattern). No friction or
           inbox items to capture per user decision.
-    initiated_by: "@claude"
-  - _ulid: 01KH8CDTJX4M0SAN024QCCZW9M
+    total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-12T06:28:32.960Z
+    completed_at: 2026-02-12T06:46:18.823Z
+  - _ulid: 01KH8CDTJX4M0SAN024QCCZW9M
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-12T07:35:39.357Z
-    completed_at: 2026-02-12T07:36:35.659Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-12T07:35:39.357Z
         completed_at: 2026-02-12T07:35:56.714Z
         notes: "What worked: (1) Explore subagent for parallel codebase context gathering — got
@@ -749,209 +746,209 @@ runs:
           shot. (2) Test design correct on first attempt — identified need for
           SetAwareMockLoRALoader + rank-1 deltas for exact factorization. (3) Clean linear workflow:
           task start → implement → test → PR → review → merge → complete with no blockers."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-12T07:35:56.714Z
         completed_at: 2026-02-12T07:36:04.264Z
         notes: Minimal friction this session. Task was well-scoped, codebase context gathered efficiently
           via Explore agent, implementation was straightforward. No repeated workarounds or missing
           tools.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-12T07:36:04.264Z
         completed_at: 2026-02-12T07:36:12.953Z
         notes: No friction points to check. Searched MockLoRALoader — only existing coverage is the
           just-completed task. Nothing new to propose.
-      - step_index: 3
-        status: skipped
+      - status: skipped
+        step_index: 3
         started_at: 2026-02-12T07:36:12.953Z
         completed_at: 2026-02-12T07:36:17.513Z
         notes: No untracked friction to propose improvements for. Clean session.
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-12T07:36:17.513Z
         completed_at: 2026-02-12T07:36:24.919Z
         notes: "Presented to user. One success pattern: Explore agent for multi-module context gathering. No
           friction items to discuss."
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-12T07:36:24.919Z
         completed_at: 2026-02-12T07:36:35.658Z
         notes: "Captured one success observation (01KH8CFD): Explore subagent for multi-module context. No
           friction items to capture. Clean session."
-    initiated_by: "@claude"
-  - _ulid: 01KH9NKY44QW5Q1YBJ0FNBX5VY
+    total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-12T07:35:39.357Z
+    completed_at: 2026-02-12T07:36:35.659Z
+  - _ulid: 01KH9NKY44QW5Q1YBJ0FNBX5VY
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-12T19:35:31.205Z
-    completed_at: 2026-02-12T19:41:06.699Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-12T19:35:31.205Z
         completed_at: 2026-02-12T19:35:47.189Z
         notes: "What worked: (1) Parallel 4-agent deep dive for perf analysis - comprehensive in 90s. (2)
           Interactive AskUserQuestion triage per item kept alignment, let user redirect. (3)
           Research-before-acting prevented 3 wasted tasks. (4) Benchmark with realistic shapes
           corrected misleading initial numbers."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-12T19:35:47.189Z
         completed_at: 2026-02-12T19:35:59.129Z
         notes: "Friction: (1) Subagent research conclusions unreliable - ranking agent said <0.5% but real
           answer was 1.9% GPU / 48.7% CPU with wrong shapes. Confident wrong conclusions. (2) Used
           inbox add when user wanted task add - had to be corrected. (3) kspec task complete
           requires submit first - two-step ceremony for one action."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-12T19:35:59.129Z
         completed_at: 2026-02-12T19:36:11.242Z
         notes: "Searched: (1) 'subagent' - 5 hits, all about successful parallel use, none about
           quality/reliability of conclusions. (2) 'research quality' - no hits. (3) 'submit
           complete' - no hits. (4) 'inbox task' - no hits. All three friction points are untracked."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-12T19:36:11.242Z
         completed_at: 2026-02-12T19:36:22.682Z
         notes: "Proposals: (1) Add MEMORY.md principle: verify subagent quantitative claims with benchmarks,
           don't trust performance estimates without real data. Small scope. (2) Memory note: map
           AskUserQuestion options directly to kspec commands. Small scope. (3) kspec submit+complete
           friction - medium scope kspec CLI improvement."
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-12T19:36:22.682Z
         completed_at: 2026-02-12T19:40:28.338Z
         notes: "User approved: (1) MEMORY.md principle about subagent quantitative claims. (2) MEMORY.md
           note about action-to-command mapping. User skipped: (3) submit+complete friction."
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-12T19:40:28.338Z
         completed_at: 2026-02-12T19:41:06.699Z
         notes: "Captured: (1) Two MEMORY.md principles added (subagent verification, action-to-command
           mapping). (2) Updated test count 491->525. (3) Success observation about parallel
           deep-dive + interactive triage. (4) Friction observation about subagent quantitative
           reliability."
-    initiated_by: "@claude"
+    total_steps: 6
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-12T19:35:31.205Z
+    completed_at: 2026-02-12T19:41:06.699Z
   - _ulid: 01KH9Y9V7ZJQTN96W73KJRGPF8
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-12T22:07:17.759Z
-    completed_at: 2026-02-12T22:08:13.314Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-12T22:07:17.759Z
         completed_at: 2026-02-12T22:07:56.777Z
         notes: Session reviewed. One success pattern captured (parallel reviewers). Friction points were
           one-off or already documented in MEMORY.md. No high-confidence systemic issues to capture.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-12T22:07:56.777Z
         completed_at: 2026-02-12T22:08:02.732Z
         notes: Already searched and captured one success (parallel reviewers, observation 01KH9YAW). No
           systemic friction to capture — EvalPlan field addition was one-off, TYPE_CHECKING pattern
           is already documented in MEMORY.md.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-12T22:08:02.732Z
         completed_at: 2026-02-12T22:08:08.186Z
         notes: One item captured (success observation 01KH9YAW). All other potential items either already
           tracked or below confidence threshold.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-12T22:08:08.186Z
         completed_at: 2026-02-12T22:08:13.314Z
         notes: All items already captured. Success observation 01KH9YAW is the only output. Session
           complete.
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-12T22:07:17.759Z
+    completed_at: 2026-02-12T22:08:13.314Z
   - _ulid: 01KH9Z9FWKJ53AWQP103WS0MBH
-    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: completed
     current_step: 4
-    total_steps: 5
-    started_at: 2026-02-12T22:24:34.707Z
-    completed_at: 2026-02-12T22:28:38.696Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
-        started_at: 2026-02-12T22:24:34.707Z
-        completed_at: 2026-02-12T22:24:50.114Z
+      - status: completed
         inputs:
           feature_description: Add progress tracking to the WIDEN exit node using comfy.utils.ProgressBar.
             Report per-batch-group progress during GPU evaluation, with potential for finer
             per-chunk granularity.
-      - step_index: 1
-        status: completed
+        step_index: 0
+        started_at: 2026-02-12T22:24:34.707Z
+        completed_at: 2026-02-12T22:24:50.114Z
+      - status: completed
+        step_index: 1
         started_at: 2026-02-12T22:24:50.114Z
         completed_at: 2026-02-12T22:28:11.626Z
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-12T22:28:11.626Z
         completed_at: 2026-02-12T22:28:30.018Z
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-12T22:28:30.018Z
         completed_at: 2026-02-12T22:28:34.191Z
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-12T22:28:34.191Z
         completed_at: 2026-02-12T22:28:38.696Z
-    initiated_by: "@claude"
+    total_steps: 5
+    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
+    started_at: 2026-02-12T22:24:34.707Z
+    completed_at: 2026-02-12T22:28:38.696Z
   - _ulid: 01KHA04RGQNX9ZFDJV2XYW96YS
-    workflow_ref: "@01KH4D2G8XEYKRQNNZR9HC6S8A"
     status: completed
     current_step: 7
-    total_steps: 8
-    started_at: 2026-02-12T22:39:28.279Z
-    completed_at: 2026-02-12T22:41:58.612Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-12T22:39:28.279Z
         completed_at: 2026-02-12T22:39:32.480Z
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-12T22:39:32.480Z
         completed_at: 2026-02-12T22:39:36.659Z
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-12T22:39:36.659Z
         completed_at: 2026-02-12T22:39:45.854Z
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-12T22:39:45.854Z
         completed_at: 2026-02-12T22:39:53.997Z
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-12T22:39:53.997Z
         completed_at: 2026-02-12T22:41:13.533Z
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-12T22:41:13.533Z
         completed_at: 2026-02-12T22:41:29.700Z
-      - step_index: 6
-        status: completed
+      - status: completed
+        step_index: 6
         started_at: 2026-02-12T22:41:29.700Z
         completed_at: 2026-02-12T22:41:38.082Z
-      - step_index: 7
-        status: completed
+      - status: completed
+        step_index: 7
         started_at: 2026-02-12T22:41:38.082Z
         completed_at: 2026-02-12T22:41:58.612Z
-    initiated_by: "@claude"
+    total_steps: 8
+    workflow_ref: "@01KH4D2G8XEYKRQNNZR9HC6S8A"
+    started_at: 2026-02-12T22:39:28.279Z
+    completed_at: 2026-02-12T22:41:58.612Z
   - _ulid: 01KHA10X66V1GYFGCN7TC91MAT
-    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-12T22:54:50.567Z
-    completed_at: 2026-02-12T22:56:18.079Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-12T22:54:50.567Z
         completed_at: 2026-02-12T22:54:59.652Z
         notes: "1. spec-plan-design workflow provided good structure — research → clarify → design → review
@@ -961,8 +958,8 @@ runs:
           pattern was already established in the codebase (exit.py line 106), making the ProgressBar
           guard a natural fit. 5. Task-work workflow kept lifecycle clean: start → note → commit →
           submit → PR → merge → complete."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-12T22:54:59.652Z
         completed_at: 2026-02-12T22:55:07.753Z
         notes: 1. Self-approval blocked on PR review — the pr-review agent tried gh pr review --approve but
@@ -972,14 +969,14 @@ runs:
           names aren't obvious until the error message shows them. Minor friction but repeated
           across steps. 3. No pytest in PATH — had to use .venv/bin/pytest instead of python -m
           pytest. Small but recurrent.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-12T22:55:07.753Z
         completed_at: 2026-02-12T22:55:17.241Z
         notes: Searched all three friction points against specs, tasks, and inbox. None are currently
           tracked. All three are untracked candidates.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-12T22:55:17.241Z
         completed_at: 2026-02-12T22:55:24.932Z
         notes: "Proposals: 1. PR self-approval workaround — The pr-review skill should detect single-account
@@ -988,30 +985,30 @@ runs:
           not a systemic issue. Using .venv/bin/pytest is fine. 3. Workflow input discovery — This
           is a kspec UX issue. Could be improved by showing required inputs in the step description.
           Scope: medium (kspec CLI change). Not in our scope to fix here."
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-12T22:55:24.932Z
         completed_at: 2026-02-12T22:56:13.088Z
         notes: "Captured: inbox item for pr-review self-approval detection, success observation for manual
           path efficiency. Skipped pytest PATH (env detail) and workflow input discovery (kspec CLI
           scope)."
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-12T22:56:13.088Z
         completed_at: 2026-02-12T22:56:18.079Z
         notes: "All items captured in step 5. Inbox: 01KHA133 (pr-review self-approval). Observation:
           01KHA138 (manual path efficiency)."
-    initiated_by: "@claude"
+    total_steps: 6
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-12T22:54:50.567Z
+    completed_at: 2026-02-12T22:56:18.079Z
   - _ulid: 01KHA7HDS5AJK7YASWFZ58PM79
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-13T00:48:43.301Z
-    completed_at: 2026-02-13T00:49:55.178Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-13T00:48:43.301Z
         completed_at: 2026-02-13T00:49:05.288Z
         notes: >-
@@ -1051,8 +1048,8 @@ runs:
           4. **Spike vs task confusion** — `kspec item get @layer-type-filtering` returned the
           spike, but `kspec item delete` said 'this is a task, use task cancel'. The item/task
           boundary is not clear from the get output.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-13T00:49:05.288Z
         completed_at: 2026-02-13T00:49:37.512Z
         notes: >-
@@ -1083,8 +1080,8 @@ runs:
           - Batch JSON format discovery: one-off learning curve, now in memory
 
           - Spike vs task type confusion: one-off
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-13T00:49:37.512Z
         completed_at: 2026-02-13T00:49:43.994Z
         notes: >-
@@ -1102,67 +1099,67 @@ runs:
 
 
           ### All other items: SKIP (low confidence / one-off as noted in step 2)
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-13T00:49:43.994Z
         completed_at: 2026-02-13T00:49:55.178Z
         notes: "Captured 1 friction observation (01KHA7KF): kspec batch forward reference limitation. All
           other items skipped per low-confidence criteria."
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-13T00:48:43.301Z
+    completed_at: 2026-02-13T00:49:55.178Z
   - _ulid: 01KHA98V7DZD5JR4J3XWCY3PZ8
-    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-13T01:18:59.310Z
-    completed_at: 2026-02-13T01:19:55.076Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-13T01:18:59.310Z
         completed_at: 2026-02-13T01:19:31.026Z
         notes: "Clean session, two cleanup tasks batched into PR #43. Captured 2 success observations. No
           systemic friction — the AC annotation work was tedious but one-time. test_graph.py
           follow-up already inboxed."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-13T01:19:31.026Z
         completed_at: 2026-02-13T01:19:36.490Z
         notes: No significant friction. The AC annotation edits were mechanical (14 individual edits) but
           that's inherent to the task, not a process issue. No workarounds needed, no repeated
           manual steps, no context loss.
-      - step_index: 2
-        status: skipped
+      - status: skipped
+        step_index: 2
         started_at: 2026-02-13T01:19:36.490Z
         completed_at: 2026-02-13T01:19:41.240Z
         notes: No friction points to check coverage for.
-      - step_index: 3
-        status: skipped
+      - status: skipped
+        step_index: 3
         started_at: 2026-02-13T01:19:41.240Z
         completed_at: 2026-02-13T01:19:46.088Z
         notes: No untracked friction to propose improvements for.
-      - step_index: 4
-        status: skipped
+      - status: skipped
+        step_index: 4
         started_at: 2026-02-13T01:19:46.088Z
         completed_at: 2026-02-13T01:19:50.205Z
         notes: No improvements to discuss — clean session.
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-13T01:19:50.205Z
         completed_at: 2026-02-13T01:19:55.076Z
         notes: Captured 2 success observations (batching cleanup tasks, subagent review catching misses). No
           friction to capture. test_graph.py follow-up already inboxed as 01KHA976.
-    initiated_by: "@claude"
-  - _ulid: 01KHAKSTM667M65DRWPC4F9SD1
+    total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-13T01:18:59.310Z
+    completed_at: 2026-02-13T01:19:55.076Z
+  - _ulid: 01KHAKSTM667M65DRWPC4F9SD1
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-13T04:23:01.510Z
-    completed_at: 2026-02-13T04:26:13.617Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-13T04:23:01.510Z
         completed_at: 2026-02-13T04:23:09.447Z
         notes: >-
@@ -1175,8 +1172,8 @@ runs:
 
           3. Memory note about pr-review no-merge paid off - correctly instructed subagent to review
           only, avoided accidental merge.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-13T04:23:09.447Z
         completed_at: 2026-02-13T04:23:18.268Z
         notes: >-
@@ -1192,8 +1189,8 @@ runs:
           3. kspec command discovery friction - had to try `kspec status` (doesn't exist), then
           `kspec tasks` (needs subcommand), then `kspec tasks next`. Also `kspec ac add` vs `kspec
           item ac add`. Multiple failed attempts to find the right command shape.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-13T04:23:18.268Z
         completed_at: 2026-02-13T04:23:33.847Z
         notes: >-
@@ -1207,8 +1204,8 @@ runs:
 
           Friction 3 (kspec command discovery): Not tracked. This is kspec UX friction, not
           project-specific.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-13T04:23:33.847Z
         completed_at: 2026-02-13T04:23:42.304Z
         notes: >-
@@ -1225,30 +1222,30 @@ runs:
 
           Proposal 3: Skip kspec command discovery — this is upstream kspec UX, not something to
           track in this project.
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-13T04:23:42.304Z
         completed_at: 2026-02-13T04:25:14.407Z
         notes: "User approved both: (1) Add branch-first principle to MEMORY.md, (2) Standardize AC
           placement to before-def + fix the 5 tests."
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-13T04:25:14.407Z
         completed_at: 2026-02-13T04:26:13.616Z
         notes: "Captured: (1) MEMORY.md updated with branch-before-commit principle and AC placement
           convention, (2) Fixed 5 tests to use before-def placement, (3) Recorded 2 friction
           observations and 1 success observation."
-    initiated_by: "@claude"
+    total_steps: 6
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-13T04:23:01.510Z
+    completed_at: 2026-02-13T04:26:13.617Z
   - _ulid: 01KHCJE8CBEV5HGGPZFNKDNZPQ
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-13T22:37:42.668Z
-    completed_at: 2026-02-13T22:39:32.529Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-13T22:37:42.668Z
         completed_at: 2026-02-13T22:38:05.205Z
         notes: "Reviewed session. Successes: parallel explore agents, AskUserQuestion for scoping, subagent
@@ -1256,8 +1253,8 @@ runs:
           (task add positional vs --title, task lifecycle ceremony), plan import not creating
           structural deps, item set --depends-on one-at-a-time, plan review iteration from
           insufficient upfront scoping."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-13T22:38:05.205Z
         completed_at: 2026-02-13T22:39:09.097Z
         notes: >-
@@ -1289,8 +1286,8 @@ runs:
 
           - kspec CLI arg discovery (--title vs positional): One-off learning, captured in MEMORY.md
           already.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-13T22:39:09.097Z
         completed_at: 2026-02-13T22:39:15.789Z
         notes: >-
@@ -1303,8 +1300,8 @@ runs:
 
           2. SUCCESS: Subagent plan review for standalone-ness → CAPTURE as success observation
           (concrete pattern with measurable value — 5 blockers caught).
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-13T22:39:15.789Z
         completed_at: 2026-02-13T22:39:32.529Z
         notes: >-
@@ -1315,271 +1312,271 @@ runs:
 
           2. Observation 01KHCJHD: Subagent plan review for standalone-ness catches real blockers
           (success pattern)
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-13T22:37:42.668Z
+    completed_at: 2026-02-13T22:39:32.529Z
   - _ulid: 01KHCR1B71ZACV1GXQM9KNZ2EB
-    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: active
     current_step: 0
-    total_steps: 5
-    started_at: 2026-02-14T00:15:31.041Z
-    step_results: []
     initiated_by: "@claude"
+    step_results: []
+    total_steps: 5
+    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
+    started_at: 2026-02-14T00:15:31.041Z
   - _ulid: 01KHCXWNVQ5E348Q3DX4PCJQ4C
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-14T01:57:49.559Z
-    completed_at: 2026-02-14T01:58:48.234Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-14T01:57:49.559Z
         completed_at: 2026-02-14T01:58:31.655Z
         notes: Reviewed session. One success pattern captured (numpy-free tensor bytes). Parallel reviewer
           pattern already tracked. Other friction was one-off (codex empty output, missing deps,
           mock setup).
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-14T01:58:31.655Z
         completed_at: 2026-02-14T01:58:37.493Z
         notes: Already reviewed and searched in step 1. One item captured (tensor bytes pattern). No
           additional high-confidence items — codex empty output was one-off, dep installation is
           environment-specific, mock setup was a learning moment for this specific code.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-14T01:58:37.493Z
         completed_at: 2026-02-14T01:58:43.215Z
         notes: One item already captured in step 1 (observation 01KHCXXS — tensor bytes without numpy). No
           additional items to evaluate. All other friction was one-off.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-14T01:58:43.215Z
         completed_at: 2026-02-14T01:58:48.234Z
         notes: All items already captured. Observation 01KHCXXS (numpy-free tensor bytes) was the only
           high-confidence item. Session complete.
-    initiated_by: "@claude"
-  - _ulid: 01KHD17718NJRC51W398YFZP1F
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-14T01:57:49.559Z
+    completed_at: 2026-02-14T01:58:48.234Z
+  - _ulid: 01KHD17718NJRC51W398YFZP1F
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-14T02:56:00.552Z
-    completed_at: 2026-02-14T02:56:46.528Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-14T02:56:00.552Z
         completed_at: 2026-02-14T02:56:25.225Z
         notes: "Session review complete. Implemented full model execution covering 13 ACs. Main friction:
           adding RecipeModel to all isinstance dispatch points (already tracked in inbox 01KHCXS4
           about serialization-as-trait pattern). Success: detailed task notes provided excellent
           implementation guidance."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-14T02:56:25.225Z
         completed_at: 2026-02-14T02:56:35.457Z
         notes: Searched existing state. Found main friction point (isinstance dispatch proliferation)
           already tracked in inbox 01KHCXS4 and 01KHCXS7. No new high-confidence friction identified
           - task was well-specified with detailed implementation notes.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-14T02:56:35.457Z
         completed_at: 2026-02-14T02:56:41.732Z
         notes: "Evaluation complete. All friction already tracked (01KHCXS4, 01KHCXS7). One potential
           success pattern: detailed implementation notes in task spec (file paths, function names,
           changes needed) dramatically reduced friction. Already semi-covered by existing success
           observation 01KH71QQ about reference implementation comparison. No new captures needed."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-14T02:56:41.732Z
         completed_at: 2026-02-14T02:56:46.528Z
         notes: No new items to capture. All friction already tracked in inbox (01KHCXS4, 01KHCXS7). Session
           was smooth - well-specified task with detailed implementation notes. Reflection complete.
-    initiated_by: "@claude"
-  - _ulid: 01KHD196E5Z9K2PK2CFH6R163K
-    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
-    status: active
-    current_step: 0
-    total_steps: 10
-    started_at: 2026-02-14T02:57:05.477Z
-    step_results: []
-    initiated_by: "@claude"
-  - _ulid: 01KHDJRK64X6JCVVAH3ERD3KKN
-    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
-    status: active
-    current_step: 0
-    total_steps: 10
-    started_at: 2026-02-14T08:02:35.844Z
-    step_results: []
-    initiated_by: "@claude"
-  - _ulid: 01KHDK1Q5AK7WGJMNZWMPKHFN0
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-14T02:56:00.552Z
+    completed_at: 2026-02-14T02:56:46.528Z
+  - _ulid: 01KHD196E5Z9K2PK2CFH6R163K
+    status: active
+    current_step: 0
+    initiated_by: "@claude"
+    step_results: []
+    total_steps: 10
+    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
+    started_at: 2026-02-14T02:57:05.477Z
+  - _ulid: 01KHDJRK64X6JCVVAH3ERD3KKN
+    status: active
+    current_step: 0
+    initiated_by: "@claude"
+    step_results: []
+    total_steps: 10
+    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
+    started_at: 2026-02-14T08:02:35.844Z
+  - _ulid: 01KHDK1Q5AK7WGJMNZWMPKHFN0
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-14T08:07:34.826Z
-    completed_at: 2026-02-14T08:08:21.812Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-14T08:07:34.826Z
         completed_at: 2026-02-14T08:07:59.567Z
         notes: "Session reviewed: Implemented Qwen block config node. Clean implementation following
           established make_block_config_node factory pattern. No friction - task notes were clear,
           dependencies satisfied, existing implementations provided templates. No new patterns to
           capture."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-14T08:07:59.567Z
         completed_at: 2026-02-14T08:08:10.442Z
         notes: "No high-confidence items to capture. Session was clean: task well-scoped, factory pattern
           mature, dependencies satisfied. No friction encountered, no new success patterns to
           document."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-14T08:08:10.442Z
         completed_at: 2026-02-14T08:08:15.496Z
         notes: No items to evaluate. No friction or unique success patterns identified - all patterns were
           established and working correctly.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-14T08:08:15.496Z
         completed_at: 2026-02-14T08:08:21.812Z
         notes: No items to capture. Reflection complete - clean session with established patterns.
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-14T08:07:34.826Z
+    completed_at: 2026-02-14T08:08:21.812Z
   - _ulid: 01KHDK3Y1NZT4N7TGJ10TTXGKY
-    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
     status: active
     current_step: 0
-    total_steps: 10
-    started_at: 2026-02-14T08:08:47.413Z
-    step_results: []
     initiated_by: "@claude"
+    step_results: []
+    total_steps: 10
+    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
+    started_at: 2026-02-14T08:08:47.413Z
   - _ulid: 01KHDKYT1GCCX8B0230898QYXP
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-14T08:23:28.048Z
-    completed_at: 2026-02-14T08:24:31.415Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-14T08:23:28.048Z
         completed_at: 2026-02-14T08:24:06.048Z
         notes: Session reviewed. Implemented Flux Klein LoRA loader following established Z-Image/Qwen
           patterns. No friction - task notes were clear, patterns well-established.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-14T08:24:06.048Z
         completed_at: 2026-02-14T08:24:21.508Z
         notes: No high-confidence friction or success patterns to capture. Session was clean - task notes
           accurate, patterns well-established, implementation straightforward following Z-Image/Qwen
           templates.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-14T08:24:21.508Z
         completed_at: 2026-02-14T08:24:26.862Z
         notes: "No items to capture. All potential observations are either: (1) one-off issues (line length
           fix), (2) already covered by existing patterns/specs (lora-loaders spec), or (3) too vague
           to be actionable."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-14T08:24:26.862Z
         completed_at: 2026-02-14T08:24:31.414Z
         notes: No items captured. Session was smooth with no systemic friction. Existing patterns and
           documentation were sufficient.
-    initiated_by: "@claude"
-  - _ulid: 01KHDM9G075MZGJX4PGT7GNA12
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-14T08:23:28.048Z
+    completed_at: 2026-02-14T08:24:31.415Z
+  - _ulid: 01KHDM9G075MZGJX4PGT7GNA12
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-14T08:29:18.215Z
-    completed_at: 2026-02-14T08:30:05.034Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-14T08:29:18.215Z
         completed_at: 2026-02-14T08:29:41.076Z
         notes: "Session was clean. Task 01KHDHEGW (Flux model loader) completed: added Flux detection to
           _ARCH_PATTERNS matching double_blocks pattern, added 9 tests. PR #61 created. No friction
           encountered - clear AC, existing patterns to follow."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-14T08:29:41.076Z
         completed_at: 2026-02-14T08:29:53.629Z
         notes: No high-confidence friction or success patterns from this iteration. Clean task with clear AC
           (ac-8), established patterns to follow (Qwen/SDXL/Z-Image detection), and straightforward
           implementation. Nothing new to capture - existing observations and inbox items remain
           relevant.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-14T08:29:53.629Z
         completed_at: 2026-02-14T08:29:59.735Z
         notes: No items to capture. Iteration was clean with no friction. All existing observations and
           inbox items remain relevant and nothing new discovered.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-14T08:29:59.735Z
         completed_at: 2026-02-14T08:30:05.034Z
         notes: No items to capture. Clean iteration with well-defined task, clear AC, and established
           patterns.
-    initiated_by: "@claude"
-  - _ulid: 01KHDNG8W0NSA9XY3VV1VST9EG
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-14T08:29:18.215Z
+    completed_at: 2026-02-14T08:30:05.034Z
+  - _ulid: 01KHDNG8W0NSA9XY3VV1VST9EG
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-14T08:50:28.865Z
-    completed_at: 2026-02-14T08:51:33.539Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-14T08:50:28.865Z
         completed_at: 2026-02-14T08:51:17.716Z
         notes: "Reviewed session: automation triage, ralph loop, spec planning. 1 friction (plan import
           ignores depends_on), 1 success (parallel plan review). Both captured."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-14T08:51:17.716Z
         completed_at: 2026-02-14T08:51:23.747Z
         notes: "Already identified and captured items: (1) inbox: plan import ignores depends_on field (high
           confidence, systemic), (2) observation: parallel plan review pattern (success, verified).
           Skipped 2 low-confidence items (task lifecycle error was user error, assess --all display
           is by design)."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-14T08:51:23.747Z
         completed_at: 2026-02-14T08:51:28.626Z
         notes: Both items already captured in step 2. inbox:01KHDNHH (plan import depends_on),
           observation:01KHDNHK (parallel review). No duplicates found.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-14T08:51:28.626Z
         completed_at: 2026-02-14T08:51:33.539Z
         notes: All items already captured during step 2 (captured early for efficiency). inbox:01KHDNHH and
           observation:01KHDNHK. Reflection complete.
-    initiated_by: "@claude"
-  - _ulid: 01KHF0VSVJWBGFEQ47AADMEKSN
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-14T08:50:28.865Z
+    completed_at: 2026-02-14T08:51:33.539Z
+  - _ulid: 01KHF0VSVJWBGFEQ47AADMEKSN
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-14T21:28:15.474Z
-    completed_at: 2026-02-14T21:29:01.151Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-14T21:28:15.474Z
         completed_at: 2026-02-14T21:28:43.890Z
         notes: "Session reviewed. Key success: spec-first approach enforced (ac-14/ac-15 added before code).
           Key learning already captured in MEMORY.md ('Spec before code' principle). No
           high-confidence friction items to capture — both issues were one-off (pass placeholder,
           function naming)."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-14T21:28:43.890Z
         completed_at: 2026-02-14T21:28:50.388Z
         notes: "Searched existing state. Identified items: (1) Friction: 'pass placeholder' in OpApplyModel
@@ -1587,30 +1584,30 @@ runs:
           naming is LoRA-specific but used generically — minor, skip. (3) Success: spec-first
           enforcement caught two gaps (ac-14, ac-15) — already in MEMORY.md. No high-confidence
           systemic items to capture."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-14T21:28:50.388Z
         completed_at: 2026-02-14T21:28:56.171Z
         notes: No items to capture. All identified patterns were either one-off (fixed in session) or
           already tracked (MEMORY.md). Nothing meets high-confidence + systemic + untracked
           threshold.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-14T21:28:56.171Z
         completed_at: 2026-02-14T21:29:01.151Z
         notes: Nothing to capture — all items were filtered out in step 3. Clean session with no untracked
           systemic friction.
-    initiated_by: "@claude"
-  - _ulid: 01KHG0ETW1PGTRMD041WN6KZJ6
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-14T21:28:15.474Z
+    completed_at: 2026-02-14T21:29:01.151Z
+  - _ulid: 01KHG0ETW1PGTRMD041WN6KZJ6
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-15T06:40:24.961Z
-    completed_at: 2026-02-15T06:41:35.552Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-15T06:40:24.961Z
         completed_at: 2026-02-15T06:40:46.047Z
         notes: >-
@@ -1647,8 +1644,8 @@ runs:
           4. Full cache hit path was doing a redundant clone back to cache — caught by PR reviewer
           but could have been caught during implementation with more careful analysis of the data
           flow.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-15T06:40:46.047Z
         completed_at: 2026-02-15T06:41:23.051Z
         notes: >-
@@ -1688,130 +1685,127 @@ runs:
 
           CONCLUSION: All friction points and successes from this session are already covered by
           existing observations. Nothing new to capture.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-15T06:41:23.051Z
         completed_at: 2026-02-15T06:41:28.500Z
         notes: All items evaluated in step 2. Every friction point and success pattern from this session is
           already tracked in existing observations. Nothing new to capture. Clean session — no novel
           process issues encountered.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-15T06:41:28.500Z
         completed_at: 2026-02-15T06:41:35.552Z
         notes: Nothing to capture. All friction and success patterns from this session are already tracked
           in existing observations (01KH6Y61, 01KH6Y5Y, 01KH9YAW, 01KHCJHD, 01KHDNHK, 01KHAKZC).
           Session was clean — established patterns worked as expected.
-    initiated_by: "@claude"
-  - _ulid: 01KHG37HNSSF87B1EGR5MRSN14
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-15T06:40:24.961Z
+    completed_at: 2026-02-15T06:41:35.552Z
+  - _ulid: 01KHG37HNSSF87B1EGR5MRSN14
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-15T07:28:51.898Z
-    completed_at: 2026-02-15T07:30:20.370Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-15T07:28:51.898Z
         completed_at: 2026-02-15T07:29:26.227Z
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-15T07:29:26.227Z
         completed_at: 2026-02-15T07:29:42.374Z
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-15T07:29:42.374Z
         completed_at: 2026-02-15T07:29:47.086Z
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-15T07:29:47.086Z
         completed_at: 2026-02-15T07:30:20.370Z
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-15T07:28:51.898Z
+    completed_at: 2026-02-15T07:30:20.370Z
   - _ulid: 01KHGY5GGAZQ34FGMHRF8AZQ19
-    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: completed
     current_step: 4
-    total_steps: 5
-    started_at: 2026-02-15T15:19:36.714Z
-    completed_at: 2026-02-15T15:21:32.764Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
-        started_at: 2026-02-15T15:19:36.714Z
-        completed_at: 2026-02-15T15:19:58.729Z
+      - status: completed
         inputs:
           feature_description: Rework t_factor semantics across widen-core, merge-node, per-block-control, and
             block-config specs. Change from t<0 meaning passthrough/averaging to t=0 meaning
             base-only (no widen effect) and t>0 meaning selectivity (higher = stricter importance
             filtering). Remove negative t_factor support. Update UI slider ranges. Ensure block
             config 0.0 means skip-widen-for-block.
-      - step_index: 1
-        status: completed
+        step_index: 0
+        started_at: 2026-02-15T15:19:36.714Z
+        completed_at: 2026-02-15T15:19:58.729Z
+      - status: completed
+        step_index: 1
         started_at: 2026-02-15T15:19:58.729Z
         completed_at: 2026-02-15T15:20:30.494Z
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-15T15:20:30.494Z
         completed_at: 2026-02-15T15:21:23.681Z
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-15T15:21:23.681Z
         completed_at: 2026-02-15T15:21:27.947Z
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-15T15:21:27.947Z
         completed_at: 2026-02-15T15:21:32.764Z
-    initiated_by: "@claude"
+    total_steps: 5
+    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
+    started_at: 2026-02-15T15:19:36.714Z
+    completed_at: 2026-02-15T15:21:32.764Z
   - _ulid: 01KHH4CGPGYPTQBGP0ZVDQJWYK
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-15T17:08:17.744Z
-    completed_at: 2026-02-15T17:09:25.008Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-15T17:08:17.744Z
         completed_at: 2026-02-15T17:08:54.108Z
         notes: "Reviewed session. What worked: detailed plan with exact line numbers made implementation
           mechanical (all 5 files changed on first pass, 870 tests green). Subagent PR review caught
           2 real minor issues. Branch-before-commit pattern worked. Friction: minor (kspec ac get
           doesn't exist, task lifecycle ceremony). All low-confidence or already tracked."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-15T17:08:54.108Z
         completed_at: 2026-02-15T17:09:08.943Z
         notes: "One high-confidence success: Plans with exact line numbers and before/after snippets make
           implementation mechanical (zero debugging cycles). Not tracked anywhere. All friction
           points were low-confidence/one-off (kspec ac get missing, task lifecycle ceremony). Skip
           those."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-15T17:09:08.943Z
         completed_at: 2026-02-15T17:09:20.296Z
         notes: "Captured 1 success observation (01KHH4E8): detailed plans with line numbers eliminate
           debugging. Skipped all friction (low-confidence/one-off)."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-15T17:09:20.296Z
         completed_at: 2026-02-15T17:09:25.007Z
         notes: Already captured in step 3. 1 success observation (01KHH4E8). No friction or inbox items to
           add — all friction was low-confidence. Session complete.
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-15T17:08:17.744Z
+    completed_at: 2026-02-15T17:09:25.008Z
   - _ulid: 01KHH5H9690QNBZKT9JP4YZSF3
-    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: completed
     current_step: 4
-    total_steps: 5
-    started_at: 2026-02-15T17:28:22.473Z
-    completed_at: 2026-02-15T17:32:14.838Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
-        started_at: 2026-02-15T17:28:22.473Z
-        completed_at: 2026-02-15T17:28:41.179Z
+      - status: completed
         inputs:
           feature_description: "Two enhancements: (1) Model Loader Split - rename current checkpoint-based
             model input node as Checkpoint Input, add new Diffusion Model Input node reading from
@@ -1820,33 +1814,36 @@ runs:
             CLIPEntry/CLIPExit/CLIPLoRA/CLIPCompose/CLIPMerge/CLIPModelInput/CLIPBlockConfig nodes,
             full WIDEN algorithm on text encoder weights, new SDXL CLIP block config (CLIP-L 12
             blocks + CLIP-G 32 blocks), CLIP LoRA loader in lib/lora/, shared recipe dataclasses."
-      - step_index: 1
-        status: completed
+        step_index: 0
+        started_at: 2026-02-15T17:28:22.473Z
+        completed_at: 2026-02-15T17:28:41.179Z
+      - status: completed
+        step_index: 1
         started_at: 2026-02-15T17:28:41.179Z
         completed_at: 2026-02-15T17:29:39.248Z
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-15T17:29:39.248Z
         completed_at: 2026-02-15T17:32:03.635Z
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-15T17:32:03.635Z
         completed_at: 2026-02-15T17:32:08.009Z
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-15T17:32:08.009Z
         completed_at: 2026-02-15T17:32:14.838Z
-    initiated_by: "@claude"
+    total_steps: 5
+    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
+    started_at: 2026-02-15T17:28:22.473Z
+    completed_at: 2026-02-15T17:32:14.838Z
   - _ulid: 01KHHGPXCWG732X3A3092JVEAH
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-15T20:43:41.340Z
-    completed_at: 2026-02-15T20:45:04.886Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-15T20:43:41.340Z
         completed_at: 2026-02-15T20:43:55.008Z
         notes: "Session: spec-plan for two enhancements (model loader split + CLIP merging). WHAT WORKED
@@ -1862,8 +1859,8 @@ runs:
           — investigate-clip-api had description in YAML but task showed no description field, only
           notes. (3) The umbrella/integration task pattern (parent depends on children) feels like a
           recurring need that could be formalized."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-15T20:43:55.008Z
         completed_at: 2026-02-15T20:44:38.363Z
         notes: "HIGH CONFIDENCE ITEMS: (1) FRICTION - Manual task descriptions in plan YAML are imported as
@@ -1879,8 +1876,8 @@ runs:
           but that was pre-import; this is specifically post-import review which is a distinct
           checkpoint. ALREADY TRACKED (skip): Plan import missing depends_on (inbox 01KHDNHH).
           Parallel holistic+Codex review (observation 01KHDNHK)."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-15T20:44:38.363Z
         completed_at: 2026-02-15T20:44:46.556Z
         notes: "CAPTURE: (1) inbox - plan import manual task description field loss, (2) observation success
@@ -1888,31 +1885,31 @@ runs:
           already covered by existing observation 01KHCJHD (close enough, both are about subagent
           review catching task quality issues). SKIP: plan import depends_on — already inbox
           01KHDNHH. SKIP: parallel review — already observation 01KHDNHK."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-15T20:44:46.556Z
         completed_at: 2026-02-15T20:45:04.886Z
         notes: "Captured 2 items: inbox 01KHHGS4 (plan import description loss), observation 01KHHGS7
           (one-at-a-time design questions). Skipped 3 items already tracked."
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-15T20:43:41.340Z
+    completed_at: 2026-02-15T20:45:04.886Z
   - _ulid: 01KHHJ7JVZMDX6MYVMM0JP2QVH
-    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-15T21:10:16.192Z
-    completed_at: 2026-02-15T21:17:34.292Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-15T21:10:16.192Z
         completed_at: 2026-02-15T21:10:31.651Z
         notes: "What worked: (1) Parallel fetch of specs+tasks then batch-mark with kspec batch — efficient
           triage pattern. (2) Spike investigation driven by specific task-note questions — focused
           and fast. (3) Manual review caught spike tag that automated criteria missed (type was task
           but tag was spike)."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-15T21:10:31.651Z
         completed_at: 2026-02-15T21:10:43.526Z
         notes: "Friction: (1) 'kspec tasks assess automation --all' shows criteria recommendation not stored
@@ -1920,53 +1917,53 @@ runs:
           tags — @investigate-clip-api tagged spike but type:task passed not_spike check. (3) Minor:
           'kspec task set --status' rejected, must use lifecycle commands (start/complete/etc) —
           clear error message though."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-15T21:10:43.526Z
         completed_at: 2026-02-15T21:10:57.059Z
         notes: "Searched specs, tasks, and inbox. Neither friction point is tracked: (1) No coverage for
           automation assess showing stored status vs recommendation. (2) No coverage for spike tag
           detection in automation assessment. Both are candidates for capture."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-15T21:10:57.059Z
         completed_at: 2026-02-15T21:11:09.452Z
         notes: "Two proposed improvements: (A) assess --all should show stored automation status alongside
           recommendation — enables verification of batch operations. Small scope. (B) Spike
           detection should check tags too, not just type field — prevents false positives in --auto
           mode. Small scope."
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-15T21:11:09.452Z
         completed_at: 2026-02-15T21:17:19.791Z
         notes: User approved Improvement A — added to kynetic-spec inbox (01KHHJMA) tagged
           kspec-cli+reflection. User skipped Improvement B (spike tag detection) — rare edge case.
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-15T21:17:19.791Z
         completed_at: 2026-02-15T21:17:34.291Z
         notes: "Captured: (1) inbox item in kynetic-spec for assess --all status display. (2) Two success
           observations: batch triage pattern and question-driven spike investigations. Skipped spike
           tag friction (user declined)."
-    initiated_by: "@claude"
+    total_steps: 6
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-15T21:10:16.192Z
+    completed_at: 2026-02-15T21:17:34.292Z
   - _ulid: 01KHHP90RP3256T8PWZ1PN868R
-    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
     status: active
     current_step: 0
-    total_steps: 10
-    started_at: 2026-02-15T22:20:57.495Z
-    step_results: []
     initiated_by: "@claude"
+    step_results: []
+    total_steps: 10
+    workflow_ref: "@01KH4D4MGKTBM16W1NFT9TMQJS"
+    started_at: 2026-02-15T22:20:57.495Z
   - _ulid: 01KHHQ76P2ESW3MD93XCWX9WVD
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-15T22:37:26.594Z
-    completed_at: 2026-02-15T22:38:31.660Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-15T22:37:26.594Z
         completed_at: 2026-02-15T22:37:40.685Z
         notes: "Session reviewed: Implemented CLIP Exit node successfully. Single task completed in this
@@ -1976,8 +1973,8 @@ runs:
           per_block.py _get_block_t_factors already supports domain parameter but the plan executor
           doesn't pass it through yet. No major friction - implementation followed existing patterns
           well."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-15T22:37:40.685Z
         completed_at: 2026-02-15T22:38:16.707Z
         notes: "Searched existing: (1) compile_batch_groups/compile_plan domain parameter gap is NOT tracked
@@ -1988,8 +1985,8 @@ runs:
           _apply_per_block_lora_strength, but this is only needed if CLIP block configs with
           per-block t_factors are used, which is not the current use case. LOW confidence - only one
           occurrence, not blocking."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-15T22:38:16.707Z
         completed_at: 2026-02-15T22:38:24.073Z
         notes: "Evaluation: (1) Domain parameter gap in execute_plan - LOW confidence, one-off, hypothetical
@@ -1998,8 +1995,8 @@ runs:
           implementation complete with all tasks merged. The existing domain dispatch infrastructure
           at the loader level was sufficient for v1 CLIP merging. No high-confidence items to
           capture."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-15T22:38:24.073Z
         completed_at: 2026-02-15T22:38:31.660Z
         notes: No items to capture. Session completed successfully with no significant friction. The CLIP
@@ -2007,17 +2004,17 @@ runs:
           were already addressed by previous tasks in the plan (recipe-domain-field,
           sdxl-clip-lora-loader, clip-model-loader). This is the final iteration of the automation
           session - all CLIP pipeline tasks are now complete or pending review.
-    initiated_by: "@claude"
-  - _ulid: 01KHHVSTC9TY10AN4R6BKPWCZD
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-15T22:37:26.594Z
+    completed_at: 2026-02-15T22:38:31.660Z
+  - _ulid: 01KHHVSTC9TY10AN4R6BKPWCZD
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-15T23:57:30.890Z
-    completed_at: 2026-02-15T23:58:31.749Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-15T23:57:30.890Z
         completed_at: 2026-02-15T23:57:47.897Z
         notes: >-
@@ -2055,8 +2052,8 @@ runs:
           3. **make_eval_fn closure pattern duplicated** — Both exit nodes (diffusion + CLIP) have
           nearly identical `make_eval_fn` closures with the same parameter threading pattern. When
           domain needed to be added, both had to be updated identically.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-15T23:57:47.897Z
         completed_at: 2026-02-15T23:58:12.720Z
         notes: >-
@@ -2093,8 +2090,8 @@ runs:
           - AC-5 encode test gap → already captured as inbox 01KHHVR8 (just added)
 
           - Mock test quality friction → already observation 01KH6Y61
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-15T23:58:12.720Z
         completed_at: 2026-02-15T23:58:20.285Z
         notes: |-
@@ -2109,23 +2106,23 @@ runs:
 
           3. AC-5 encode test gap → SKIP, already inbox 01KHHVR8
           4. Mock test quality → SKIP, already observation 01KH6Y61
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-15T23:58:20.285Z
         completed_at: 2026-02-15T23:58:31.747Z
         notes: "Captured 1 friction observation (01KHHVVH: make_eval_fn duplication). Skipped 3 items
           already tracked. Session complete."
-    initiated_by: "@claude"
-  - _ulid: 01KHHXX27DBEJQH7BX82HHM9J6
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-15T23:57:30.890Z
+    completed_at: 2026-02-15T23:58:31.749Z
+  - _ulid: 01KHHXX27DBEJQH7BX82HHM9J6
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-16T00:34:14.382Z
-    completed_at: 2026-02-16T00:35:07.722Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-16T00:34:14.382Z
         completed_at: 2026-02-16T00:34:33.867Z
         notes: >-
@@ -2162,8 +2159,8 @@ runs:
           2. **pr-review agent hit disk space issue** — The agent gh pr review command failed with
           no space left on device for the heredoc body, had to fall back to writing a temp file.
           This is a /tmp tmpfs issue, not a skill issue, but it caused a retry.
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-16T00:34:33.867Z
         completed_at: 2026-02-16T00:34:48.791Z
         notes: >-
@@ -2188,8 +2185,8 @@ runs:
           Both the user's initial suggestions and the issue description had some correct and some
           incorrect claims. The deep analysis corrected course (e.g., .cpu().to() is actually a
           no-op, not a copy).
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-16T00:34:48.791Z
         completed_at: 2026-02-16T00:35:02.372Z
         notes: >-
@@ -2206,8 +2203,8 @@ runs:
 
           - /tmp disk space issue with pr-review heredoc — one-off, not systemic (tmpfs was full
           from test safetensor files)
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-16T00:35:02.372Z
         completed_at: 2026-02-16T00:35:07.722Z
         notes: |-
@@ -2216,17 +2213,17 @@ runs:
           - @01KHHXYA (success: analysis-first approach)
 
           No additional items to capture. Reflection complete.
-    initiated_by: "@claude"
-  - _ulid: 01KHKC8VK31RTD9H4NGS4TH5S4
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-16T00:34:14.382Z
+    completed_at: 2026-02-16T00:35:07.722Z
+  - _ulid: 01KHKC8VK31RTD9H4NGS4TH5S4
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-16T14:04:35.299Z
-    completed_at: 2026-02-16T14:05:27.847Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-16T14:04:35.299Z
         completed_at: 2026-02-16T14:04:51.225Z
         notes: "Session review: (1) What worked: Explore agent found the root cause efficiently in one pass.
@@ -2237,8 +2234,8 @@ runs:
           pattern - when WIDEN interface changes, mocks are scattered everywhere. Also, MagicMock
           auto-creating attributes caused a subtle test failure that required understanding Mock
           internals."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-16T14:04:51.225Z
         completed_at: 2026-02-16T14:05:11.044Z
         notes: "Friction identified: Scattered MockWIDEN definitions (9 across 5 files). Already partially
@@ -2248,99 +2245,96 @@ runs:
           efficient. (2) Parallel review pattern caught complementary issues. (3) Spec-before-code
           discipline caught the AC gap. All successes are already documented patterns in MEMORY.md.
           No new high-confidence items to capture."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-16T14:05:11.044Z
         completed_at: 2026-02-16T14:05:22.485Z
         notes: "Decision: No items to capture. All friction was low-confidence (scattered mocks = one-off,
           already partially covered by @fix-test-quality). All successes are already documented
           patterns. Clean session with no new systemic insights."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-16T14:05:22.485Z
         completed_at: 2026-02-16T14:05:27.847Z
         notes: Nothing to capture — all items were either already tracked or low-confidence. Session was
           clean.
-    initiated_by: "@claude"
-  - _ulid: 01KHN0MTC5977F2CPVRYXZWB47
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-16T14:04:35.299Z
+    completed_at: 2026-02-16T14:05:27.847Z
+  - _ulid: 01KHN0MTC5977F2CPVRYXZWB47
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-17T05:19:53.222Z
-    completed_at: 2026-02-17T05:20:41.670Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-17T05:19:53.222Z
         completed_at: 2026-02-17T05:20:23.309Z
         notes: "Short session: addressed PR #81 review feedback (rename base_state_bytes, add regression
           tests). Friction: incremental_cache leaking between tests (fixed with autouse fixture) and
           compute_batch_size VRAM non-determinism (fixed by patching). Both one-off, not systemic."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-17T05:20:23.309Z
         completed_at: 2026-02-17T05:20:33.091Z
         notes: No new high-confidence items. Both friction points (cache leaking, VRAM non-determinism) were
           one-off and resolved. Existing observation 01KH6Y61 covers the mock-test-quality pattern.
           Nothing to capture.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-17T05:20:33.091Z
         completed_at: 2026-02-17T05:20:37.674Z
         notes: Nothing to capture — all friction was one-off and resolved in-session.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-17T05:20:37.674Z
         completed_at: 2026-02-17T05:20:41.670Z
         notes: No items to capture. Clean session.
-    initiated_by: "@claude"
-  - _ulid: 01KHQDM1JFD87C57Y8P42ZKJFG
+    total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-17T05:19:53.222Z
+    completed_at: 2026-02-17T05:20:41.670Z
+  - _ulid: 01KHQDM1JFD87C57Y8P42ZKJFG
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-18T03:45:08.175Z
-    completed_at: 2026-02-18T03:46:45.677Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-18T03:45:08.175Z
         completed_at: 2026-02-18T03:45:52.135Z
         notes: "Reviewed session: plan-to-implement was smooth, parallel reviews worked well,
           spec-before-code followed. One friction: reviewers fail APPROVE/REQUEST_CHANGES on own PR
           then retry as COMMENT."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-18T03:45:52.135Z
         completed_at: 2026-02-18T03:46:17.956Z
         notes: "Searched observations, inbox, tasks. Parallel review success already tracked (01KH6Y5Y,
           01KH9YAW). One untracked friction: reviewers attempt APPROVE/REQUEST_CHANGES on own PR,
           get HTTP 422, waste time retrying as COMMENT."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-18T03:46:17.956Z
         completed_at: 2026-02-18T03:46:33.853Z
         notes: "Captured 1 friction (01KHQDPF): own-PR review event failure. Skipped parallel review success
           (already tracked). No other high-confidence items."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-18T03:46:33.853Z
         completed_at: 2026-02-18T03:46:45.677Z
         notes: Already captured in step 3. 1 friction observation (01KHQDPF). Clean session overall.
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-18T03:45:08.175Z
+    completed_at: 2026-02-18T03:46:45.677Z
   - _ulid: 01KHQFQ26HPYJMMR41V5VNKWQP
-    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
     status: completed
     current_step: 4
-    total_steps: 5
-    started_at: 2026-02-18T04:21:44.273Z
-    completed_at: 2026-02-18T04:33:35.556Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
-        started_at: 2026-02-18T04:21:44.273Z
-        completed_at: 2026-02-18T04:22:02.657Z
+      - status: completed
         inputs:
           feature_description: "Fix incremental recompute memory estimation: replace heuristic-based
             loader_overhead formula (10% * merged_state_bytes * n_models) with measured actual
@@ -2348,33 +2342,36 @@ runs:
             cached merged_state tensors already in MemAvailable during incremental runs. Affects
             estimate_peak_ram(), check_ram_preflight(), exit.py, clip_exit.py, _CacheEntry, and
             loader base classes."
-      - step_index: 1
-        status: completed
+        step_index: 0
+        started_at: 2026-02-18T04:21:44.273Z
+        completed_at: 2026-02-18T04:22:02.657Z
+      - status: completed
+        step_index: 1
         started_at: 2026-02-18T04:22:02.657Z
         completed_at: 2026-02-18T04:25:54.035Z
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-18T04:25:54.035Z
         completed_at: 2026-02-18T04:25:58.373Z
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-18T04:25:58.373Z
         completed_at: 2026-02-18T04:33:30.750Z
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-18T04:33:30.750Z
         completed_at: 2026-02-18T04:33:35.556Z
-    initiated_by: "@claude"
+    total_steps: 5
+    workflow_ref: "@01KH4W1R540NJ1MYZ1XAM9D7KR"
+    started_at: 2026-02-18T04:21:44.273Z
+    completed_at: 2026-02-18T04:33:35.556Z
   - _ulid: 01KHQKQ30MWMY1731XRZV4CCNW
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-18T05:31:39.412Z
-    completed_at: 2026-02-18T05:32:40.486Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-18T05:31:39.412Z
         completed_at: 2026-02-18T05:31:51.570Z
         notes: "Session: Deep dive memory estimation bug -> spec plan -> import -> review. What worked: (1)
@@ -2388,8 +2385,8 @@ runs:
           dance with --force flag - no native reorder command. (3) Plan file in .claude/plans
           triggered session checkpoint hook repeatedly since it was untracked - 4 interruptions for
           a working artifact that was intentionally uncommitted."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-18T05:31:51.570Z
         completed_at: 2026-02-18T05:32:13.458Z
         notes: "High-confidence items after search: SUCCESS: (1) Post-import review agent pattern - caught
@@ -2402,8 +2399,8 @@ runs:
           lacks reorder command - required remove+re-add with --force. Not tracked. Repeatable
           whenever plan YAML produces non-sequential AC IDs. SKIP: kspec CLI flag discovery
           (--depends-on vs --add-blocked-by) is one-off learning, not systemic. Already known now."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-18T05:32:13.458Z
         completed_at: 2026-02-18T05:32:19.637Z
         notes: "Evaluation: 3 items to process. (1) SUCCESS: Post-import review agent pattern - unique, not
@@ -2411,23 +2408,24 @@ runs:
           Session checkpoint hook on .claude/plans/ - unique, not tracked. CAPTURE as friction. (3)
           FRICTION: kspec ac reorder missing - unique, not tracked. CAPTURE to inbox (actionable
           improvement)."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-18T05:32:19.637Z
         completed_at: 2026-02-18T05:32:40.486Z
         notes: "Captured 3 items: success observation 01KHQKRH (post-import review pattern), friction
           observation 01KHQKRQ (checkpoint hook on plan files), inbox item 01KHQKRS (ac reorder
           command). Session reflection complete."
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-18T05:31:39.412Z
+    completed_at: 2026-02-18T05:32:40.486Z
   - _ulid: 01KHQN6QA71XXGAAEP5ZYTZFF8
-    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: active
     current_step: 4
-    total_steps: 6
-    started_at: 2026-02-18T05:57:40.295Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-18T05:57:40.295Z
         completed_at: 2026-02-18T05:57:54.697Z
         notes: "What worked well: (1) Explore subagent for initial codebase survey was efficient — got
@@ -2437,8 +2435,8 @@ runs:
           followed correctly — no cleanup needed. (4) Caught the MockLoader abstract method breakage
           during test run and fixed both instances (test_lora_loaders.py and
           test_recipe_domain_field.py) before commit."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-18T05:57:54.697Z
         completed_at: 2026-02-18T05:58:02.085Z
         notes: "Friction points: (1) gh pr merge --squash failed because repo doesn't allow squash merges —
@@ -2447,83 +2445,82 @@ runs:
           both had to fall back to COMMENT. No real friction, just noise in output. (3) No friction
           in the implementation itself — task was well-scoped with clear ACs and implementation
           notes."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-18T05:58:02.085Z
         completed_at: 2026-02-18T05:58:12.352Z
         notes: Searched 'squash merge' and 'merge strategy' — not tracked. The squash merge failure is a
           minor friction (retry with --merge works), but it's a known repo setting that could be in
           MEMORY.md to avoid the retry. The self-approval GitHub limitation is a platform
           constraint, not actionable.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-18T05:58:12.352Z
         completed_at: 2026-02-18T05:58:18.951Z
         notes: "One improvement: Add 'repo uses merge commits only (no squash)' to MEMORY.md so PR merge
           commands use --merge directly. Scope: tiny (one line in memory). No other untracked
           friction worth capturing."
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-18T05:58:18.951Z
         completed_at: 2026-02-18T05:58:18.951Z
-    initiated_by: "@claude"
-  - _ulid: 01KHQP1AKSYFG09E5ZZZCMVRD5
+    total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-18T05:57:40.295Z
+  - _ulid: 01KHQP1AKSYFG09E5ZZZCMVRD5
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-18T06:12:12.025Z
-    completed_at: 2026-02-18T06:13:46.969Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-18T06:12:12.025Z
         completed_at: 2026-02-18T06:12:31.870Z
         notes: "What worked: fast verification of done tasks, clean implementation cycle, parallel reviews.
           Friction: logger name mismatch (ecaj.exit vs nodes.exit), task complete requires
           start+submit cycle for already-done work."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-18T06:12:31.870Z
         completed_at: 2026-02-18T06:12:38.115Z
         notes: "Friction 1: Logger name mismatch - nodes/exit.py uses logger('ecaj.exit') not 'nodes.exit'.
           Easy to get wrong when writing caplog tests. Friction 2: kspec task complete --force
           didn't bypass the start/submit requirement for already-completed work."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-18T06:12:38.115Z
         completed_at: 2026-02-18T06:12:48.194Z
         notes: Searched 'logger name' and 'task complete force' — neither tracked. Logger name is a
           memory-worthy pattern. Task complete --force is a kspec UX issue (out of scope for this
           project).
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-18T06:12:48.194Z
         completed_at: 2026-02-18T06:12:54.134Z
         notes: "Proposal: Add logger name convention to MEMORY.md — 'Logger names use ecaj.* prefix (e.g.
           ecaj.exit, ecaj.clip_exit), not module paths. Use this in caplog tests.' Small scope,
           prevents recurring test failures."
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-18T06:12:54.134Z
         completed_at: 2026-02-18T06:13:35.003Z
         notes: "User approved: added logger naming convention to MEMORY.md."
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-18T06:13:35.003Z
         completed_at: 2026-02-18T06:13:46.969Z
         notes: "Captured: logger convention to MEMORY.md, parallel review success pattern as observation."
-    initiated_by: "@claude"
+    total_steps: 6
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-18T06:12:12.025Z
+    completed_at: 2026-02-18T06:13:46.969Z
   - _ulid: 01KHQQVEXBPBXF3D5ZZAXFKK59
-    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     status: completed
     current_step: 3
-    total_steps: 4
-    started_at: 2026-02-18T06:43:56.972Z
-    completed_at: 2026-02-18T06:44:42.991Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-18T06:43:56.972Z
         completed_at: 2026-02-18T06:44:16.876Z
         notes: |-
@@ -2536,8 +2533,8 @@ runs:
           ## Friction Points
           1. FakeLoader missing loaded_bytes — one-off, not systemic
           2. Codex shell escaping issues — Codex-side, not actionable here
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-18T06:44:16.876Z
         completed_at: 2026-02-18T06:44:29.993Z
         notes: |-
@@ -2549,26 +2546,27 @@ runs:
           - 01KHQP42 covers parallel codex + pr-review pattern
 
           Nothing new to capture this session.
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-18T06:44:29.993Z
         completed_at: 2026-02-18T06:44:35.653Z
         notes: All items either one-off or already tracked (01KHQP42). Nothing to capture.
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-18T06:44:35.653Z
         completed_at: 2026-02-18T06:44:42.991Z
         notes: No items to capture — all friction was one-off or already tracked. Clean session.
-    initiated_by: "@claude"
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-02-18T06:43:56.972Z
+    completed_at: 2026-02-18T06:44:42.991Z
   - _ulid: 01KHVXDCCQ6JSWQGRHV2DTDCH4
-    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     status: completed
     current_step: 5
-    total_steps: 6
-    started_at: 2026-02-19T21:38:04.823Z
+    initiated_by: "@claude"
     step_results:
-      - step_index: 0
-        status: completed
+      - status: completed
+        step_index: 0
         started_at: 2026-02-19T21:38:04.823Z
         completed_at: 2026-02-19T21:38:21.306Z
         notes: "What worked well: (1) Parallel reviewers (pr-review + codex) caught a real test quality
@@ -2578,8 +2576,8 @@ runs:
           enable_cache=False as the root cause of the user's incremental recompute not activating.
           (3) Spec gap check subagent after merge confirmed no gaps — validated all 14 ACs. (4) The
           task-work skill workflow kept lifecycle clean."
-      - step_index: 1
-        status: completed
+      - status: completed
+        step_index: 1
         started_at: 2026-02-19T21:38:21.306Z
         completed_at: 2026-02-19T21:38:32.041Z
         notes: "Friction points: (1) Preflight estimate used wrong dtype (compute_dtype fp32 vs
@@ -2592,33 +2590,43 @@ runs:
           worktrees. (3) CI test job was cancelled by GitHub Actions for unknown reasons, requiring
           manual rerun. (4) The estimate_peak_ram docstring was stale after the formula change —
           easy to miss when changing formulas."
-      - step_index: 2
-        status: completed
+      - status: completed
+        step_index: 2
         started_at: 2026-02-19T21:38:32.041Z
         completed_at: 2026-02-19T21:38:49.526Z
         notes: "Search results: (1) Codex branch switching — ALREADY TRACKED as observation 01KHHXY9. Skip.
           (2) dtype preflight bug — not tracked, but already fixed in this PR. No ongoing friction.
           Skip. (3) Stale docstring — ALREADY TRACKED as task 01KHVXCY (created this session). Skip.
           (4) CI cancellation — one-off GitHub Actions issue, not systemic. Skip."
-      - step_index: 3
-        status: completed
+      - status: completed
+        step_index: 3
         started_at: 2026-02-19T21:38:49.526Z
         completed_at: 2026-02-19T21:38:55.846Z
         notes: "No new untracked friction to propose. All friction points are either: already tracked (codex
           branch switching observation, stale docstring task), already fixed (dtype preflight bug in
           this PR), or one-off (CI cancellation). No new proposals needed."
-      - step_index: 4
-        status: completed
+      - status: completed
+        step_index: 4
         started_at: 2026-02-19T21:38:55.846Z
         completed_at: 2026-02-19T21:39:12.706Z
         notes: "No new items to discuss — all friction points already covered. One success pattern worth
           capturing: parallel reviewer workflow (pr-review + codex) catching distinct issues at
           different levels (pr-review: architecture/flow, codex: test quality/regression validity)."
-      - step_index: 5
-        status: completed
+      - status: completed
+        step_index: 5
         started_at: 2026-02-19T21:39:12.706Z
         completed_at: 2026-02-19T21:39:33.854Z
         notes: "Captured 2 success observations: parallel reviewers pattern and diagnostic logging for live
           debugging. No friction items needed — all already tracked or resolved."
-    initiated_by: "@claude"
+    total_steps: 6
+    workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
+    started_at: 2026-02-19T21:38:04.823Z
     completed_at: 2026-02-19T21:39:33.854Z
+  - _ulid: 01KQ6JRWRMGM86WBYZSNDT50P5
+    status: active
+    current_step: 0
+    initiated_by: "@claude"
+    step_results: []
+    total_steps: 4
+    workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
+    started_at: 2026-04-27T04:22:15.572Z
