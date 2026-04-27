@@ -3567,6 +3567,19 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T17:21:15.920Z
         completed_at: 2026-04-27T17:21:15.920Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found AC annotations for @streaming-full-model-materialization,
+          @full-saved-model-output, and @comfy-memory-manager-compatibility in
+          tests/test_full_model_streaming.py; review found two annotations/tests do not prove the
+          required behavior and recorded blockers.
+        name: AC annotation grep
+        required: true
+        runner: rg
+        created_at: 2026-04-27T17:21:23.751Z
+        completed_at: 2026-04-27T17:21:23.751Z
     events:
       - _ulid: 01KQ7Z2XTD01GE88Q74D7SCQ4V
         actor: Jacob Chapel
@@ -3595,6 +3608,13 @@ reviews:
           status: pass
           name: focused pytest
         timestamp: 2026-04-27T17:21:15.964Z
+      - _ulid: 01KQ7ZBHAFYZD24QBFBYYQH2E8
+        actor: codex
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation grep
+        timestamp: 2026-04-27T17:21:23.791Z
     examined_commit: e368231141abc45a6dce0314c147a15369756c00
     external_links: []
     lifecycle_state: open
@@ -3607,5 +3627,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T17:16:41.678Z
-    updated_at: 2026-04-27T17:21:15.920Z
+    updated_at: 2026-04-27T17:21:23.751Z
     notes: []
