@@ -4000,9 +4000,22 @@ runs:
     completed_at: 2026-04-27T08:29:13.544Z
   - _ulid: 01KQ71ATFQDY1J1Z1KCS71YM6W
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T08:36:43.128Z
+        completed_at: 2026-04-27T08:37:17.179Z
+        notes: "Session had meaningful work: completed @task-full-model-memory-validation, merged PR #95,
+          and made reviewer cleanup commit 03b862f. What worked: checking GitHub PR status after
+          kspec approval caught a failing lint gate before merge. Friction candidates identified for
+          search: detached PR merge with --delete-branch in a detached reviewer snapshot, and
+          task-subject review records not being refreshable after reviewer-pushed fixes."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T08:37:17.179Z
+        completed_at: 2026-04-27T08:37:17.179Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T08:36:43.128Z
