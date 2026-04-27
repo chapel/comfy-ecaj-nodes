@@ -1,1 +1,42 @@
-notes: []
+notes:
+  - _ulid: 01KQ6TY84V499KD8HZ43JGGPP9
+    content: >-
+      Approach: 
+
+      - Add optional artifact_kind param to build_metadata() — when present, stores
+      __ecaj_artifact_kind__ in metadata.
+
+      - Add optional artifact_kind param to check_cache() — when present, requires matching kind in
+      cached metadata. Missing kind or mismatched kind → return None (cache miss, no ValueError).
+      Non-ecaj files still raise ValueError.
+
+      - Artifact kind is a simple string like 'full_model' or 'patch_output'. Existing ecaj files
+      without kind remain valid cache hits when check_cache is called without artifact_kind
+      (backward compat for in-memory patch output).
+
+      - When check_cache is called WITH artifact_kind, files missing __ecaj_artifact_kind__ are
+      treated as cache misses (not errors) — legacy files won't silently match.
+
+      - Include diagnostic metadata: __ecaj_artifact_kind__ for kind, existing
+      __ecaj_affected_keys__ already has affected keys, __ecaj_recipe_hash__ already has recipe
+      identity.
+
+      - Schema version stays at '1' since this is additive (old readers won't break).
+
+
+      Edge cases:
+
+      - Legacy ecaj file + check_cache(kind=None) → cache hit if hash matches (backward compat)
+
+      - Legacy ecaj file + check_cache(kind='full_model') → cache miss (kind missing)
+
+      - New file kind='full_model' + check_cache(kind='patch_output') → cache miss (kind mismatch)
+
+      - Non-ecaj file → ValueError preserved regardless of kind param
+
+
+      Test plan: 6+ tests covering matching kind, mismatched kind, missing kind (legacy), non-ecaj,
+      backward compat (no kind requested).
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T06:44:59.675Z
