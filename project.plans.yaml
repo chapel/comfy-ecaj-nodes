@@ -1192,7 +1192,7 @@ plans:
       Additionally, a project convention should be established requiring AC-annotated
       test coverage (# AC: @spec ac-N) for every implementation task. This is enforced
       by the local-review workflow which checks for AC annotations in test files.
-    status: active
+    status: completed
     approved_at: null
     derived_specs:
       - "@comfyui-mocking"
