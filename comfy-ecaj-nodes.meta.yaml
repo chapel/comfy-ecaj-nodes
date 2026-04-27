@@ -876,6 +876,17 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T20:07:46.285Z
+  - _ulid: 01KQ89T6RPKTSV9R96FGHT0H9X
+    type: success
+    content: "Tasks with explicit Testing sections in description (specific test scenarios,
+      guard-failure behavior, report-with-fakes behavior) enable autonomous single-pass completion
+      without fix cycles. @task-full-model-real-comfy-memory-harness completed cleanly: 24 tests,
+      all ACs covered, lint clean, full suite green, PR created — zero review iterations needed at
+      implementation time."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T20:24:10.262Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
