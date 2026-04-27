@@ -3043,6 +3043,12 @@ reviews:
         payload:
           thread_ulid: 01KQ708YF30XR83QRPTAPX267B
         timestamp: 2026-04-27T08:26:07.401Z
+      - _ulid: 01KQ70QKEZKGEYK047VB9ZBRCE
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ708YF30XR83QRPTAPX267B
+        timestamp: 2026-04-27T08:26:13.343Z
     examined_commit: afa071697a2de53c89279a71551e917536fb468c
     external_links: []
     lifecycle_state: closed
@@ -3083,6 +3089,8 @@ reviews:
               sourced from process measurements."
             created_at: 2026-04-27T08:26:07.358Z
         kind: blocker
+        resolved_at: 2026-04-27T08:26:13.310Z
+        resolved_by: "@claude"
       - _ulid: 01KQ708YKWJBA8QRGNMZ4KTVM9
         anchor:
           type: code
@@ -3111,5 +3119,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T08:18:32.674Z
     created_at: 2026-04-27T08:15:52.375Z
-    updated_at: 2026-04-27T08:26:07.358Z
+    updated_at: 2026-04-27T08:26:13.310Z
     notes: []
