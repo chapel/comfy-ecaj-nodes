@@ -535,7 +535,7 @@ features:
             id: ac-1
             then: original ModelPatcher is cloned via clone() and merged weights added as set patches
             when: patch installation runs
-          - given: set patches to install
+          - given: set patches to install in in-memory patch output mode
             id: ac-2
             then: |
               each key is prefixed with diffusion_model. to match ModelPatcher namespace
