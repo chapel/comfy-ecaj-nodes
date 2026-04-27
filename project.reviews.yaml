@@ -4596,6 +4596,12 @@ reviews:
         payload:
           thread_ulid: 01KQ83H6P15FC9YM2Y8JNMFXAE
         timestamp: 2026-04-27T18:47:06.523Z
+      - _ulid: 01KQ848VZ7D5SDG1XB8TVS4F6D
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ83H78XBWH34C6D39K3416F
+        timestamp: 2026-04-27T18:47:19.271Z
     examined_commit: d95ffd207b96388e10cd4db492db1ac601a5dcaa
     external_links: []
     lifecycle_state: closed
@@ -4681,6 +4687,14 @@ reviews:
               accepted as a later cache hit, violating complete-artifact and
               incomplete-write-not-reused requirements."
             created_at: 2026-04-27T18:34:52.502Z
+          - _ulid: 01KQ848VXE1TBG55ZW86QYYVS9
+            author: "@claude"
+            body: "Fixed: MaterializationSink.write_tensor now validates the tensor's dtype, shape, and byte
+              length against the manifest before writing. Stored (dtype, shape, nbytes) per tensor
+              in _tensor_specs during open(). Mismatches raise ValueError before the write,
+              preventing corrupt artifacts from being finalized and accepted as cache hits. Added 3
+              new tests: dtype mismatch, shape mismatch, and dimension mismatch."
+            created_at: 2026-04-27T18:47:19.213Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -4691,5 +4705,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T18:35:04.835Z
     created_at: 2026-04-27T18:29:56.361Z
-    updated_at: 2026-04-27T18:47:06.464Z
+    updated_at: 2026-04-27T18:47:19.213Z
     notes: []
