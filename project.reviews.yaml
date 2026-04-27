@@ -2961,6 +2961,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T08:17:55.706Z
         completed_at: 2026-04-27T08:17:55.706Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: pytest -q tests/test_persistence.py tests/test_executor.py tests/test_exit_node.py passed
+          all collected tests.
+        name: pytest persistence executor exit
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T08:17:55.860Z
+        completed_at: 2026-04-27T08:17:55.860Z
     events:
       - _ulid: 01KQ704N1JHTYRRDWYP18F65HC
         actor: Jacob Chapel
@@ -2989,6 +3000,13 @@ reviews:
           status: pass
           name: pytest full model memory validation
         timestamp: 2026-04-27T08:17:55.737Z
+      - _ulid: 01KQ708DNJ4D5V87QA6HN0SEX5
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest persistence executor exit
+        timestamp: 2026-04-27T08:17:55.891Z
     examined_commit: afa071697a2de53c89279a71551e917536fb468c
     external_links: []
     lifecycle_state: open
@@ -3001,5 +3019,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T08:15:52.375Z
-    updated_at: 2026-04-27T08:17:55.706Z
+    updated_at: 2026-04-27T08:17:55.860Z
     notes: []
