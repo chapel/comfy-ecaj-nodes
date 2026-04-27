@@ -525,6 +525,16 @@ reviews:
         runner: ruff
         created_at: 2026-04-27T05:00:13.668Z
         completed_at: 2026-04-27T05:00:13.668Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_result_sink.py: 15 passed in 0.21s"
+        name: pytest result sink
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T05:00:13.739Z
+        completed_at: 2026-04-27T05:00:13.739Z
     events:
       - _ulid: 01KQ6MTXW3PKGKW5GSW5QK9ARB
         actor: Jacob Chapel
@@ -553,6 +563,13 @@ reviews:
           status: pass
           name: ruff changed files
         timestamp: 2026-04-27T05:00:13.679Z
+      - _ulid: 01KQ6MYDHNDGVH7154FJ40JZJM
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest result sink
+        timestamp: 2026-04-27T05:00:13.750Z
     examined_commit: e20213ae9f1e52182c6fa5b7fad587feaf949e93
     external_links: []
     lifecycle_state: open
@@ -565,5 +582,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T04:58:19.395Z
-    updated_at: 2026-04-27T05:00:13.668Z
+    updated_at: 2026-04-27T05:00:13.739Z
     notes: []
