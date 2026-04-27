@@ -6944,6 +6944,12 @@ reviews:
         payload:
           thread_ulid: 01KQ87S730XR5W5MSNKNXHYBMA
         timestamp: 2026-04-27T20:04:55.266Z
+      - _ulid: 01KQ88Q7Y2YQ9SMCANGN485FQB
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ87SGCVE7ZZQEMH0S891BJK
+        timestamp: 2026-04-27T20:05:04.578Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: closed
@@ -7190,6 +7196,14 @@ reviews:
               missing cleanup APIs. Add assertions that would catch fallback to dict accumulation or
               _incremental_cache payloads in each memory-mode scenario.
             created_at: 2026-04-27T19:48:50.203Z
+          - _ulid: 01KQ88Q7W28AEXVR6PZ3XSRFHF
+            author: "@claude"
+            body: "Fixed: Added _assert_streaming_behavior() helper that all 4 memory-mode tests call. It
+              verifies: artifact exists on disk, output_mode is full, _incremental_cache is empty
+              (no resident payload). Each test now clears _incremental_cache before running and
+              asserts streaming behavior afterward — catching fallback to dict accumulation or cache
+              payloads in each memory scenario."
+            created_at: 2026-04-27T20:05:04.514Z
         kind: blocker
       - _ulid: 01KQ87STDJGQ7TNCEVWACG6736
         anchor:
@@ -7218,5 +7232,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:49:13.956Z
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T20:04:55.197Z
+    updated_at: 2026-04-27T20:05:04.514Z
     notes: []
