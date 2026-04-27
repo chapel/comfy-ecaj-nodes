@@ -4771,7 +4771,7 @@ runs:
     completed_at: 2026-04-27T19:30:12.302Z
   - _ulid: 01KQ87927YM9K204SMBT5JE33P
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4794,7 +4794,38 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T19:40:18.507Z
-        completed_at: 2026-04-27T19:40:18.507Z
+        completed_at: 2026-04-27T19:40:45.111Z
+        notes: >-
+          High-confidence observations:
+
+
+          FRICTION 1: This task has been through 8 fix cycles. The review blockers in cycles 5-8
+          were increasingly about test rigor (behavioral probes, not just structural coverage)
+          rather than production code bugs. This suggests the initial implementation and tests
+          satisfied the ACs structurally but lacked the behavioral depth reviewers expect. Pattern:
+          writing tests that 'check the box' on AC coverage but don't behaviorally prove the
+          property leads to repeated fix cycles.
+
+          - Already partially tracked by observation 01KQ815T ('Full-mode streaming tests can pass
+          while missin...'). This is a stronger instance of the same pattern.
+
+
+          FRICTION 2: kspec review get truncates thread body text, requiring manual YAML reading to
+          see full thread content. Already tracked (observation 01KQ82107). No new capture needed.
+
+
+          SUCCESS 1: Reading all 7 review threads completely before starting ANY fixes allowed a
+          single-pass resolution. Already tracked pattern (observation 01KQ6SHR). No new capture
+          needed.
+
+
+          SUCCESS 2: The task description's 'Required dynamic tests' section was extremely helpful —
+          it explicitly listed what behavioral probes must exist. This removed ambiguity about
+          reviewer expectations. Worth noting as a spec-quality success.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T19:40:45.111Z
+        completed_at: 2026-04-27T19:40:45.111Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:39:51.422Z
