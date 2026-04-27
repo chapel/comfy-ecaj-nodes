@@ -39,6 +39,23 @@ __all__ = [
 # Current metadata schema version
 _ECAJ_VERSION = "1"
 
+# Metadata schema versions that this code can safely interpret.
+# A cached file whose __ecaj_version__ is not in this set is treated as a
+# cache miss — the file may have been written by a newer ecaj release whose
+# metadata layout is incompatible.
+_COMPATIBLE_VERSIONS: frozenset[str] = frozenset({"1"})
+
+# Required metadata keys per artifact kind.  When check_cache is called with
+# an artifact_kind, the cached file must contain every key listed here for
+# that kind; missing any of them makes the file an incompatible cache miss
+# rather than a usable hit.
+_REQUIRED_METADATA_BY_KIND: dict[str, tuple[str, ...]] = {
+    "full_model": (
+        "__ecaj_affected_keys__",
+        "__ecaj_recipe__",
+    ),
+}
+
 
 def validate_model_name(name: str) -> str:
     """Validate and normalize a model filename.
@@ -313,11 +330,16 @@ def check_cache(
     Reads safetensors header only (cheap). Returns metadata on hash match,
     None on mismatch or missing file. Raises on non-ecaj files.
 
+    Validates schema compatibility: files whose ``__ecaj_version__`` is not
+    in ``_COMPATIBLE_VERSIONS`` are treated as cache misses.
+
     When *artifact_kind* is provided, the cached file must also contain a
-    matching ``__ecaj_artifact_kind__`` entry.  A file with the right hash
-    but a missing or mismatched kind is treated as a cache miss (returns
-    ``None``), not an error — this prevents older ecaj files from becoming
-    silent cache hits for a different output mode.
+    matching ``__ecaj_artifact_kind__`` entry and all metadata keys listed
+    in ``_REQUIRED_METADATA_BY_KIND`` for that kind.  A file with the right
+    hash but a missing/mismatched kind or missing required metadata is
+    treated as a cache miss (returns ``None``), not an error — this prevents
+    older or incomplete ecaj files from becoming silent cache hits for a
+    different output mode.
 
     Args:
         save_path: Path to the safetensors file
@@ -347,6 +369,12 @@ def check_cache(
             f"Choose a different model_name."
         )
 
+    # Reject incompatible schema versions — a valid ecaj file from a
+    # different version cannot be trusted to contain the fields the
+    # caller expects.  Treated as a cache miss, not an error.
+    if metadata.get("__ecaj_version__") not in _COMPATIBLE_VERSIONS:
+        return None
+
     stored_hash = metadata.get("__ecaj_recipe_hash__", "")
     if stored_hash != expected_hash:
         return None
@@ -356,6 +384,12 @@ def check_cache(
     if artifact_kind is not None:
         stored_kind = metadata.get("__ecaj_artifact_kind__")
         if stored_kind != artifact_kind:
+            return None
+        # Require metadata fields that the cache-hit path depends on.
+        # A file with the right kind but missing required fields is
+        # incompatible — treat as cache miss to force recompute.
+        required = _REQUIRED_METADATA_BY_KIND.get(artifact_kind, ())
+        if any(key not in metadata for key in required):
             return None
 
     return metadata
