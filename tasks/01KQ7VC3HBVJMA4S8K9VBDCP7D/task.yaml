@@ -135,7 +135,7 @@ description: >-
 spec_ref: "@streaming-full-model-materialization"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -150,8 +150,8 @@ review_ref: "@01KQ8597RH0PC27E1PRHGP1N32"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-full-model-streaming-artifact-cache/01kq7vc3
-  captured_at: 2026-04-27T19:02:38.991Z
-  commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
+  captured_at: 2026-04-27T19:17:49.652Z
+  commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-full-model-streaming-artifact-cache/01kq7vc3
@@ -519,8 +519,35 @@ history:
         previous: 2026-04-27T19:02:33.835Z
     command: task-start
     timestamp: 2026-04-27T19:17:43.305Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-full-model-streaming-artifact-cache/01kq7vc3
+          captured_at: 2026-04-27T19:17:49.652Z
+          commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-full-model-streaming-artifact-cache/01kq7vc3
+        previous:
+          review_url: null
+          branch: dispatch/task/task-full-model-streaming-artifact-cache/01kq7vc3
+          captured_at: 2026-04-27T19:02:38.991Z
+          commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-full-model-streaming-artifact-cache/01kq7vc3
+      submitted_at:
+        new: 2026-04-27T19:17:49.664Z
+        previous: 2026-04-27T19:02:39.000Z
+    command: task-submit
+    timestamp: 2026-04-27T19:17:49.664Z
 created_at: 2026-04-27T16:11:48.139Z
 started_at: 2026-04-27T19:17:43.305Z
-submitted_at: 2026-04-27T19:02:39.000Z
+submitted_at: 2026-04-27T19:17:49.664Z
 todos: []
 automation: eligible
