@@ -396,6 +396,16 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T04:48:34.528Z
         completed_at: 2026-04-27T04:48:34.528Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "PR #88 checks passed on 037927f: lint pass, test pass."
+        name: github ci
+        required: true
+        runner: gh
+        created_at: 2026-04-27T04:49:07.928Z
+        completed_at: 2026-04-27T04:49:07.928Z
     events:
       - _ulid: 01KQ6M86EMXMKS0PD209YSFYY6
         actor: Jacob Chapel
@@ -461,6 +471,13 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T04:48:42.001Z
+      - _ulid: 01KQ6MA3B2Q66SNFRA8W6DHTZN
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: github ci
+        timestamp: 2026-04-27T04:49:07.938Z
     examined_commit: 037927fada7da9d3508cc2724002b5dc8e07e2b7
     external_links: []
     lifecycle_state: closed
@@ -480,5 +497,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T04:48:42.000Z
     created_at: 2026-04-27T04:48:05.588Z
-    updated_at: 2026-04-27T04:48:42.001Z
+    updated_at: 2026-04-27T04:49:07.928Z
     notes: []
