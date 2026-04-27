@@ -3162,6 +3162,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T08:31:55.824Z
         completed_at: 2026-04-27T08:31:55.824Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found behavioral test annotations for all three @comfy-memory-manager-compatibility
+          ACs; no source-scanning tests found in the new module
+        name: AC annotation coverage
+        required: true
+        runner: rg
+        created_at: 2026-04-27T08:31:55.975Z
+        completed_at: 2026-04-27T08:31:55.975Z
     events:
       - _ulid: 01KQ70YD8ESPXHWA143ENDK9RD
         actor: Jacob Chapel
@@ -3183,6 +3194,13 @@ reviews:
           status: pass
           name: pytest persistence executor exit
         timestamp: 2026-04-27T08:31:55.857Z
+      - _ulid: 01KQ71223741BW9B81YMVWRA1P
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation coverage
+        timestamp: 2026-04-27T08:31:56.007Z
     examined_commit: 23c45827b15d5d06151bb0f95786edc09f678cbb
     external_links: []
     lifecycle_state: open
@@ -3195,5 +3213,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T08:29:56.366Z
-    updated_at: 2026-04-27T08:31:55.824Z
+    updated_at: 2026-04-27T08:31:55.975Z
     notes: []
