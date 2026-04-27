@@ -6133,6 +6133,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T19:09:19.638Z
+      - _ulid: 01KQ85ZHRBJZ6J78Q5HVRBZPP9
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ85GX50N1CYZB785RA1VR23
+        timestamp: 2026-04-27T19:17:11.051Z
     examined_commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
     external_links: []
     lifecycle_state: closed
@@ -6161,6 +6167,16 @@ reviews:
               verified with a runtime probe that a pre-existing non-safetensors file at save_path is
               overwritten instead of raising."
             created_at: 2026-04-27T19:09:11.201Z
+          - _ulid: 01KQ85ZHPMCRD03V6MEX47V34K
+            author: "@claude"
+            body: "Fixed: check_full_model_cache now raises ValueError for corrupt or non-ecaj files at
+              save_path, matching check_cache (patch mode) behavior. When safe_open fails
+              (corrupt/non-safetensors file), raises ValueError instead of returning False. When
+              metadata is missing __ecaj_version__, also raises ValueError. Added 4 runtime tests:
+              non-safetensors file raises, valid safetensors without ecaj raises, None metadata
+              raises, and a full-mode runtime probe confirming non-ecaj file blocks execution and
+              preserves the original file."
+            created_at: 2026-04-27T19:17:10.996Z
         kind: blocker
       - _ulid: 01KQ85GXB7T83SSB04N8GXTBYB
         anchor:
@@ -6191,5 +6207,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:09:19.638Z
     created_at: 2026-04-27T19:04:59.921Z
-    updated_at: 2026-04-27T19:09:19.638Z
+    updated_at: 2026-04-27T19:17:10.996Z
     notes: []
