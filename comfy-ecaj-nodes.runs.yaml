@@ -4129,7 +4129,7 @@ runs:
     started_at: 2026-04-27T17:23:17.615Z
     completed_at: 2026-04-27T17:24:57.940Z
   - _ulid: 01KQ80J62A73MJENGC97C5D584
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -4192,7 +4192,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T17:44:50.511Z
-        completed_at: 2026-04-27T17:44:50.511Z
+        completed_at: 2026-04-27T17:45:08.275Z
+        notes: "Captured 1 item: success observation @01KQ80PS about review probes with concrete evidence
+          enabling single-pass fix cycles. All other items were either already tracked or not
+          systemic enough to capture."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T17:42:30.218Z
+    completed_at: 2026-04-27T17:45:08.275Z
