@@ -52,6 +52,8 @@ agents:
       - scaffold-default
     adapter: codex-acp
     auto_approve: true
+    budget:
+      timeout_minutes: 60
     capabilities:
       - review
     concurrency:
