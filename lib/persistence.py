@@ -300,17 +300,30 @@ def compute_recipe_hash(serialized: str) -> str:
     return hashlib.sha256(serialized.encode()).hexdigest()
 
 
-def check_cache(save_path: str, expected_hash: str) -> dict | None:
-    """Check if a cached model matches the expected recipe hash.
+def check_cache(
+    save_path: str,
+    expected_hash: str,
+    artifact_kind: str | None = None,
+) -> dict | None:
+    """Check if a cached model matches the expected recipe hash and artifact kind.
 
     AC: @exit-model-persistence ac-3, ac-4, ac-9
+    AC: @full-saved-model-output ac-cache-reuses-artifact
 
     Reads safetensors header only (cheap). Returns metadata on hash match,
     None on mismatch or missing file. Raises on non-ecaj files.
 
+    When *artifact_kind* is provided, the cached file must also contain a
+    matching ``__ecaj_artifact_kind__`` entry.  A file with the right hash
+    but a missing or mismatched kind is treated as a cache miss (returns
+    ``None``), not an error — this prevents older ecaj files from becoming
+    silent cache hits for a different output mode.
+
     Args:
         save_path: Path to the safetensors file
         expected_hash: Expected recipe hash
+        artifact_kind: When set, require the cached metadata to contain
+            this exact ``__ecaj_artifact_kind__`` value.
 
     Returns:
         Metadata dict on cache hit, None on miss/mismatch
@@ -337,6 +350,13 @@ def check_cache(save_path: str, expected_hash: str) -> dict | None:
     stored_hash = metadata.get("__ecaj_recipe_hash__", "")
     if stored_hash != expected_hash:
         return None
+
+    # When an artifact kind is requested, the stored kind must match exactly.
+    # Missing kind in the file → cache miss (legacy file, not an error).
+    if artifact_kind is not None:
+        stored_kind = metadata.get("__ecaj_artifact_kind__")
+        if stored_kind != artifact_kind:
+            return None
 
     return metadata
 
@@ -372,16 +392,22 @@ def build_metadata(
     recipe_hash: str,
     affected_keys: list[str],
     workflow_json: str | None = None,
+    artifact_kind: str | None = None,
 ) -> dict[str, str]:
     """Assemble safetensors metadata dict.
 
     AC: @exit-model-persistence ac-6, ac-13, ac-14
+    AC: @full-saved-model-output ac-cache-reuses-artifact
 
     Args:
         serialized: Deterministic JSON recipe
         recipe_hash: SHA-256 of serialized
         affected_keys: Sorted list of keys that were merged (not base-only)
         workflow_json: Optional workflow JSON string
+        artifact_kind: Optional artifact kind string (e.g. ``"full_model"``).
+            When present, stored as ``__ecaj_artifact_kind__`` so cache
+            checks can distinguish artifacts produced by different output
+            modes.
 
     Returns:
         Metadata dict with string values (safetensors requirement)
@@ -394,6 +420,8 @@ def build_metadata(
     }
     if workflow_json is not None:
         metadata["__ecaj_workflow__"] = workflow_json
+    if artifact_kind is not None:
+        metadata["__ecaj_artifact_kind__"] = artifact_kind
     return metadata
 
 
