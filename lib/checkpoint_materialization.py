@@ -107,6 +107,8 @@ class CheckpointMaterializationSink(MergeResultSink):
                 continue
             converted = tensor.to(self._storage_dtype)
             self._writer.write_tensor(key, converted)
+        # Release reference to base_state so the caller's dict can be freed.
+        self._base_state = {}
 
     def write_tensor(self, key: str, tensor: torch.Tensor) -> None:
         """Record a completed affected tensor.

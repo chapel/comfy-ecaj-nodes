@@ -20,6 +20,7 @@ from ..lib.analysis import (
     walk_to_base,
 )
 from ..lib.block_classify import compute_changed_blocks, filter_changed_keys
+from ..lib.checkpoint_materialization import CheckpointMaterializationSink
 from ..lib.executor import (
     check_ram_preflight,
     chunked_evaluation,
@@ -30,7 +31,6 @@ from ..lib.executor import (
     get_available_ram_bytes,
 )
 from ..lib.persistence import (
-    atomic_save,
     build_metadata,
     check_cache,
     collect_block_configs,
@@ -667,10 +667,45 @@ class WIDENExitNode:
             # Phase 2: Batched GPU evaluation per group
             # (skipped entirely on full cache hit)
             # AC: @streaming-full-model-materialization ac-affected-results-released
-            # Use InMemorySink to collect affected tensors during evaluation.
-            # The sink allows merge evaluation to hand off each completed
-            # tensor without requiring all results to stay in one dict.
+            # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+            # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+            # When save_model is enabled, use CheckpointMaterializationSink
+            # to write the artifact incrementally — base weights first, then
+            # affected tensors as merge evaluation produces them. This avoids
+            # re-acquiring the full state dict and building a second model-sized
+            # dict in memory. When save_model is disabled, use InMemorySink.
             _log_memory("before-gpu-eval")
+
+            # Set up materialization sink when saving the full model.
+            # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+            mat_sink = None
+            if save_model and save_path is not None:
+                workflow_json = (
+                    json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
+                )
+                save_metadata = build_metadata(
+                    serialized, recipe_hash, sorted(keys_to_process), workflow_json
+                )
+                mat_sink = CheckpointMaterializationSink(
+                    base_state=base_state,
+                    affected_keys=keys_to_process,
+                    dest_path=save_path,
+                    storage_dtype=storage_dtype,
+                    metadata=save_metadata,
+                )
+                try:
+                    mat_sink.write_base_weights()
+                except BaseException:
+                    mat_sink.abort()
+                    raise
+                # Write any pre-cached affected tensors from incremental hit.
+                try:
+                    for key, tensor in merged_state.items():
+                        mat_sink.write_tensor(key, tensor)
+                except BaseException:
+                    mat_sink.abort()
+                    raise
+
             if batch_groups:
                 pbar_count = len(batch_groups)
                 pbar = ProgressBar(pbar_count) if ProgressBar is not None else None
@@ -732,6 +767,10 @@ class WIDENExitNode:
 
                         for key, tensor in group_results.items():
                             sink.write_tensor(key, tensor)
+                            # AC: @streaming-full-model-materialization
+                            #   ac-affected-results-released
+                            if mat_sink is not None:
+                                mat_sink.write_tensor(key, tensor)
 
                         # AC-9: Update progress after each batch group
                         if pbar is not None:
@@ -740,7 +779,20 @@ class WIDENExitNode:
                     merged_state.update(sink.finalize())
                 except BaseException:
                     sink.abort()
+                    if mat_sink is not None:
+                        mat_sink.abort()
+                        mat_sink = None
                     raise
+
+            # Finalize the materialization sink (atomic publish).
+            # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+            if mat_sink is not None:
+                try:
+                    mat_sink.finalize()
+                except BaseException:
+                    mat_sink.abort()
+                    raise
+                _log_memory("after-save")
 
             # AC: @memory-management ac-2
             # Cleanup after all groups complete (OOM backoff handles per-group pressure)
@@ -751,32 +803,7 @@ class WIDENExitNode:
 
             # AC: @memory-management ac-13
             # Free base_state after GPU eval completes — no longer needed.
-            # Re-acquired fresh below only if save_model requires it.
             del base_state
-
-            # --- Persistence: save after GPU, before cache write ---
-            _log_memory("before-save")
-            # AC: @incremental-block-recompute ac-10
-            # Moved before cache write so base_state can be freed early.
-            if save_model and save_path is not None:
-                # AC: @memory-management ac-13
-                # Re-acquire state dict fresh for save only.
-                save_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
-                # AC: @memory-management ac-6
-                # Overlay merged keys into save_state by reference (no copy).
-                # merged_state tensors are already CPU + storage_dtype from
-                # chunked_evaluation, so no conversion needed.
-                for key, tensor in merged_state.items():
-                    save_state[key] = tensor
-                workflow_json = (
-                    json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
-                )
-                metadata = build_metadata(
-                    serialized, recipe_hash, sorted(merged_state.keys()), workflow_json
-                )
-                atomic_save(save_state, save_path, metadata)
-                del save_state
-                _log_memory("after-save")
 
             # AC: @memory-management ac-8
             # After save completes, offload GPU models and clear VRAM cache.

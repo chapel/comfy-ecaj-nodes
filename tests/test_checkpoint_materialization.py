@@ -455,7 +455,7 @@ class TestIncompleteWriteNotReused:
             for key in original_data:
                 loaded = f.get_tensor(key)
                 assert torch.equal(loaded, original_data[key]), (
-                    f"Existing artifact should be untouched after failed write"
+                    "Existing artifact should be untouched after failed write"
                 )
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused

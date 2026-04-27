@@ -819,7 +819,7 @@ class TestSaveModelOff:
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation", return_value={}),
             patch("nodes.exit.validate_model_name") as mock_validate,
-            patch("nodes.exit.atomic_save") as mock_save,
+            patch("nodes.exit.CheckpointMaterializationSink") as mock_mat_sink,
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -835,7 +835,7 @@ class TestSaveModelOff:
 
             # Persistence functions should NOT be called
             mock_validate.assert_not_called()
-            mock_save.assert_not_called()
+            mock_mat_sink.assert_not_called()
 
 
 # =============================================================================
@@ -917,6 +917,9 @@ class TestSaveModelCacheMiss:
 
         node = WIDENExitNode()
 
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.return_value = {}
+
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
@@ -929,7 +932,10 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation") as mock_chunked,
-            patch("nodes.exit.atomic_save") as mock_save,
+            patch(
+                "nodes.exit.CheckpointMaterializationSink",
+                return_value=mock_mat_instance,
+            ) as mock_mat_cls,
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -948,8 +954,9 @@ class TestSaveModelCacheMiss:
 
             # analyze_recipe SHOULD have been called
             mock_analyze.assert_called_once()
-            # atomic_save SHOULD have been called
-            mock_save.assert_called_once()
+            # Materialization sink SHOULD have been created and finalized
+            mock_mat_cls.assert_called_once()
+            mock_mat_instance.finalize.assert_called_once()
 
     # AC: @exit-model-persistence ac-4
     def test_overwrites_stale_cache(self, mock_model_patcher, tmp_path):
@@ -963,6 +970,9 @@ class TestSaveModelCacheMiss:
 
         node = WIDENExitNode()
 
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.return_value = {}
+
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
@@ -975,7 +985,10 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation") as mock_chunked,
-            patch("nodes.exit.atomic_save") as mock_save,
+            patch(
+                "nodes.exit.CheckpointMaterializationSink",
+                return_value=mock_mat_instance,
+            ) as mock_mat_cls,
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -992,7 +1005,8 @@ class TestSaveModelCacheMiss:
                 merge, save_model=True, model_name="model"
             )
 
-            mock_save.assert_called_once()
+            mock_mat_cls.assert_called_once()
+            mock_mat_instance.finalize.assert_called_once()
 
 
 # =============================================================================

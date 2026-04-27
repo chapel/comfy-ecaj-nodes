@@ -1113,7 +1113,8 @@ class TestExitNodeIncrementalCache:
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         new_results = {k: torch.randn(4, 4) for k in keys}
-        atomic_save_mock = MagicMock()
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.return_value = {}
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
@@ -1140,21 +1141,25 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.check_cache", return_value=None),
             patch("nodes.exit.build_metadata",
                   return_value={"__ecaj_version__": "1"}),
-            patch("nodes.exit.atomic_save", atomic_save_mock),
+            patch("nodes.exit.CheckpointMaterializationSink",
+                  return_value=mock_mat_instance),
         ):
             node = WIDENExitNode()
             node.execute(
                 recipe, save_model=True, model_name="test",
             )
 
-        # atomic_save should have been called
-        atomic_save_mock.assert_called_once()
-        saved_state = atomic_save_mock.call_args[0][0]
-
-        # Saved state should contain ALL keys (complete merged state)
+        # Materialization sink should have been finalized
+        mock_mat_instance.finalize.assert_called_once()
+        # write_base_weights should have been called
+        mock_mat_instance.write_base_weights.assert_called_once()
+        # write_tensor should have been called for each affected key
+        written_keys = {
+            call.args[0] for call in mock_mat_instance.write_tensor.call_args_list
+        }
         for k in keys:
-            assert k in saved_state, (
-                f"Key {k} missing from saved state"
+            assert k in written_keys, (
+                f"Key {k} missing from materialization sink writes"
             )
 
 
