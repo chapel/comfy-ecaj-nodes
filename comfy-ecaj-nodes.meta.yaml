@@ -804,6 +804,20 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T18:08:04.342Z
+  - _ulid: 01KQ8383W5CNGGN9MGTQMR6MS9
+    type: friction
+    content: "MockModelPatcher.clone() shares _state_dict by reference — code that deep-copies .model
+      but doesn't copy _state_dict will silently mutate the original patcher. Real ComfyUI
+      ModelPatcher.clone() shares the .model object, but model_state_dict() reads from
+      model.state_dict() (method-based), not a separate dict. The mock diverges: _state_dict is the
+      backing store and is shared by reference. This caused a mutation bug in
+      _load_model_from_artifact when updating artifact weights — required explicit
+      dict(cloned._state_dict) to decouple. Any future code that modifies a clone's weights must
+      know about this mock/real divergence."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T18:29:26.021Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
