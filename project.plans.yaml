@@ -3297,7 +3297,7 @@ plans:
       - `pin_memory` gating (`ac-9`) — unchanged, already correct
 
       - Cache eviction under memory pressure (`ac-12`) — unchanged
-    status: active
+    status: completed
     approved_at: null
     derived_specs:
       - "@accurate-ram-preflight"
