@@ -2819,6 +2819,16 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T08:02:33.054Z
         completed_at: 2026-04-27T08:02:33.054Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "PR #94 checks on pushed head 9ecafd1: lint pass, test pass."
+        name: GitHub CI
+        required: true
+        runner: gh-actions
+        created_at: 2026-04-27T08:02:35.302Z
+        completed_at: 2026-04-27T08:02:35.302Z
     events:
       - _ulid: 01KQ6Z98HNP7AEG5PAB0J56Z7V
         actor: Jacob Chapel
@@ -2861,6 +2871,13 @@ reviews:
           status: pass
           name: pytest full suite chunked
         timestamp: 2026-04-27T08:02:33.085Z
+      - _ulid: 01KQ6ZCAP3FWWJDMGG2RM7MEFX
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: GitHub CI
+        timestamp: 2026-04-27T08:02:35.331Z
     examined_commit: 00fdbaf75fd9bd92904e11505fb9258da72dd38e
     external_links: []
     lifecycle_state: open
@@ -2873,5 +2890,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T08:00:54.837Z
-    updated_at: 2026-04-27T08:02:33.054Z
+    updated_at: 2026-04-27T08:02:35.302Z
     notes: []
