@@ -612,9 +612,11 @@ features:
             then: fully-merged state dict (all base model keys with affected keys replaced) saved as safetensors
               in the base model directory using model_name
             when: exit node completes GPU merge
-          - given: cached safetensors exists at expected path
+          - given: cached safetensors exists at expected path and save_model is enabled
             id: ac-3
-            then: model loaded from disk and GPU merge pipeline skipped entirely
+            then: merged state is loaded from disk and GPU merge pipeline is skipped; subsequent output behavior
+              follows the active output mode (set-patch installation for in-memory patch mode, or
+              loaded MODEL return for full saved model mode)
             when: exit node executes with save_model enabled and metadata matches current config
           - given: cached file exists but metadata does not match
             id: ac-4
