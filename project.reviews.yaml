@@ -6884,6 +6884,12 @@ reviews:
         payload:
           thread_ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
         timestamp: 2026-04-27T20:03:40.523Z
+      - _ulid: 01KQ88N8QX5YC9YEP1BG2MKE0Q
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ87R3RNY6HG0PCQ4JX4WRDS
+        timestamp: 2026-04-27T20:03:59.869Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: closed
@@ -6993,6 +6999,12 @@ reviews:
               recomputes/overwrites the artifact. Reuse the streaming_save dtype map or cover every
               supported safetensors dtype.
             created_at: 2026-04-27T19:48:04.501Z
+          - _ulid: 01KQ88N8NVARW68J3192XPJ9A5
+            author: "@claude"
+            body: "Fixed: check_full_model_cache now imports and reverses the canonical _DTYPE_MAP from
+              streaming_save.py instead of maintaining a hard-coded subset. All dtypes the writer
+              supports (BOOL, C64, float8, U16/U32/U64) are now covered."
+            created_at: 2026-04-27T20:03:59.802Z
         kind: blocker
       - _ulid: 01KQ87RBFM4CA29WPDEN0N5MNC
         anchor:
@@ -7113,5 +7125,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:49:13.956Z
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T20:03:40.457Z
+    updated_at: 2026-04-27T20:03:59.802Z
     notes: []
