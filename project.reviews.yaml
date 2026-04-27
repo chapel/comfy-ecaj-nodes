@@ -8072,3 +8072,29 @@ reviews:
     created_at: 2026-04-27T20:53:01.731Z
     updated_at: 2026-04-27T21:07:41.765Z
     notes: []
+  - _ulid: 01KQ8CGH2XYW2MPXB34CX98M5B
+    slugs: []
+    title: Review guarded manual real-Comfy memory harness cycle 4
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ8CGH2WXWZ3Z6666VBE80DT
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T21:11:18.877Z
+    examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T21:11:18.877Z
+    updated_at: null
+    notes: []
