@@ -3778,7 +3778,7 @@ runs:
     completed_at: 2026-04-27T07:40:55.607Z
   - _ulid: 01KQ6YCRV4MYNNFVN6B082P8SK
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3792,7 +3792,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T07:46:29.535Z
-        completed_at: 2026-04-27T07:46:29.535Z
+        completed_at: 2026-04-27T07:46:38.751Z
+        notes: "Friction points: GitHub same-account PR approval failed even though kspec review approval
+          was the actual gate; this is already covered by observation @01KQ6K6S. kspec validate's
+          default nonzero exit on warnings required --warnings-ok and explicit evidence wording;
+          also already covered by @01KQ6K6S. workflow show requiring a run ref and showing limited
+          step detail is covered by @01KQ6N3MY."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T07:46:38.751Z
+        completed_at: 2026-04-27T07:46:38.751Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-04-27T07:45:21.252Z
