@@ -4610,7 +4610,7 @@ runs:
     completed_at: 2026-04-27T19:04:29.292Z
   - _ulid: 01KQ85J9KBN5R50QYTCZPPFG6W
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -4623,7 +4623,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T19:10:12.452Z
-        completed_at: 2026-04-27T19:10:12.452Z
+        completed_at: 2026-04-27T19:10:49.927Z
+        notes: "Identified two candidate reflections: (1) small behavioral probes were effective for finding
+          cache-validation bugs after the normal test suite passed; already covered by observation
+          @01KQ815T9. (2) full-mode streaming/cache tests can pass while missing adversarial
+          invalid-artifact cases; already covered generally by observation @01KQ815TA, while the
+          specific defects are tracked as blocker threads on review @01KQ8597. No new
+          high-confidence untracked item identified."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T19:10:49.927Z
+        completed_at: 2026-04-27T19:10:49.927Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:09:56.716Z
