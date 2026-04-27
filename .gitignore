@@ -2,6 +2,7 @@
 __pycache__/
 *.egg-info/
 uv.lock
+.hypothesis/
 
 # >>> kspec managed
 .kspec/
