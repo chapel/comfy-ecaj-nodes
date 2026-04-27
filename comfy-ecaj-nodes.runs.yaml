@@ -2699,7 +2699,7 @@ runs:
     completed_at: 2026-04-27T04:23:37.410Z
   - _ulid: 01KQ6K4BN7EWSQY2TQ4Y8PC5SP
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -2713,7 +2713,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T04:29:05.912Z
-        completed_at: 2026-04-27T04:29:05.912Z
+        completed_at: 2026-04-27T04:29:34.416Z
+        notes: "Identified one concrete friction candidate from this session: GitHub rejected same-account
+          PR approval while kspec review approval remained valid. Baseline search showed this is
+          already tracked by observation @01KHQDPF, so no duplicate capture. Identified one
+          non-duplicated success pattern: recording local pytest, kspec validate, and GitHub PR CI
+          as kspec review checks made the merge gate explicit and auditable."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T04:29:34.416Z
+        completed_at: 2026-04-27T04:29:34.416Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T04:28:31.272Z
