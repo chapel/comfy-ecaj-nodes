@@ -96,3 +96,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T06:23:15.707Z
+  - _ulid: 01KQ6TB3AP5FD9GE2G04ASP4M7
+    content: "Fix cycle 2: resolved partial recompute duplicate key blocker. The pre-write loop now
+      skips keys that batch_groups will recompute, preventing IncrementalSafetensorsWriter duplicate
+      key rejection. Replaced MagicMock test with real CheckpointMaterializationSink exercising true
+      partial recompute (IN-block keys recomputed, MID/OUT from cache). Artifact verified via
+      safetensors.torch.load_file. All checks pass: ruff clean, full pytest pass, kspec validate
+      pass."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T06:34:32.151Z
