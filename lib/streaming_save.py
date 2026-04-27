@@ -169,6 +169,7 @@ class MaterializationSink:
         self._file = None
         self._tmp_path: str | None = None
         self._tensor_offsets: dict[str, int] | None = None
+        self._tensor_specs: dict[str, tuple[torch.dtype, tuple[int, ...], int]] | None = None
         self._written: set[str] | None = None
         self._total_count: int = 0
         self._data_start: int = 0
@@ -197,9 +198,10 @@ class MaterializationSink:
 
         sorted_names = sorted(manifest.keys())
 
-        # Compute header and record per-tensor byte offsets
+        # Compute header and record per-tensor byte offsets and expected specs
         header_info: dict[str, dict] = {}
         tensor_offsets: dict[str, int] = {}
+        tensor_specs: dict[str, tuple[torch.dtype, tuple[int, ...], int]] = {}
         current_offset = 0
         for name in sorted_names:
             dt, shape = manifest[name]
@@ -215,6 +217,7 @@ class MaterializationSink:
                 "data_offsets": [current_offset, current_offset + nbytes],
             }
             tensor_offsets[name] = current_offset
+            tensor_specs[name] = (dt, shape, nbytes)
             current_offset += nbytes
 
         total_data_bytes = current_offset
@@ -241,6 +244,7 @@ class MaterializationSink:
             self._file.write(b"\x00")
 
         self._tensor_offsets = tensor_offsets
+        self._tensor_specs = tensor_specs
         self._written = set()
         self._total_count = len(sorted_names)
 
@@ -250,6 +254,11 @@ class MaterializationSink:
         Can be called in any order — the header defines each tensor's byte
         position.  The tensor can be released after this call returns.
 
+        Validates the tensor's dtype, shape, and byte length against the
+        manifest before writing.  A mismatch is rejected immediately so
+        that corrupt or incomplete artifacts cannot be finalized and later
+        accepted as valid cache hits.
+
         Args:
             name: Tensor name (must be a key from the manifest).
             tensor: The tensor data to write.
@@ -257,6 +266,8 @@ class MaterializationSink:
         Raises:
             RuntimeError: If sink not open, already finalized/aborted, or
                 name is not in the manifest / already written.
+            ValueError: If the tensor's dtype, shape, or byte length does
+                not match the manifest.
         """
         if self._file is None or self._tensor_offsets is None or self._written is None:
             raise RuntimeError("MaterializationSink not open")
@@ -269,6 +280,26 @@ class MaterializationSink:
         if name in self._written:
             raise RuntimeError(
                 f"write_tensor called twice for tensor: {name!r}"
+            )
+
+        # Validate tensor against manifest expectations.
+        assert self._tensor_specs is not None
+        expected_dtype, expected_shape, expected_nbytes = self._tensor_specs[name]
+        if tensor.dtype != expected_dtype:
+            raise ValueError(
+                f"write_tensor {name!r}: dtype mismatch — "
+                f"expected {expected_dtype}, got {tensor.dtype}"
+            )
+        if tuple(tensor.shape) != expected_shape:
+            raise ValueError(
+                f"write_tensor {name!r}: shape mismatch — "
+                f"expected {expected_shape}, got {tuple(tensor.shape)}"
+            )
+        actual_nbytes = tensor.nelement() * tensor.element_size()
+        if actual_nbytes != expected_nbytes:
+            raise ValueError(
+                f"write_tensor {name!r}: byte length mismatch — "
+                f"expected {expected_nbytes}, got {actual_nbytes}"
             )
 
         offset = self._data_start + self._tensor_offsets[name]

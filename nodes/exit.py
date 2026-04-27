@@ -29,6 +29,7 @@ from ..lib.executor import (
     evaluate_affected_group,
     execute_plan,
     get_available_ram_bytes,
+    streaming_evaluation_to_sink,
 )
 from ..lib.persistence import (
     atomic_save,
@@ -803,16 +804,20 @@ class WIDENExitNode:
             pbar_count = len(batch_groups) if batch_groups else 0
             pbar = ProgressBar(pbar_count) if ProgressBar is not None and pbar_count else None
 
-            # Evaluate and write one group at a time.  The group's results are
-            # written to the sink immediately after evaluation and freed before
-            # the next group is evaluated.
+            # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+            # AC: @streaming-full-model-materialization ac-affected-results-released
+            # Evaluate and stream one group at a time.  Within each group,
+            # streaming_evaluation_to_sink hands every completed chunk's
+            # tensors to sink.write_tensor immediately — no dict accumulates
+            # the full group's results.  Each tensor can be freed as soon as
+            # write_tensor returns.
             for sig, group_keys in batch_groups.items():
                 n_models = len(set_affected) + len(model_loaders)
                 batch_size = compute_batch_size(
                     sig.shape, n_models, compute_dtype,
                 )
                 group_base = {k: base_state[k] for k in group_keys}
-                group_results = evaluate_affected_group(
+                streaming_evaluation_to_sink(
                     keys=group_keys,
                     base_tensors=group_base,
                     eval_fn=eval_fn,
@@ -820,16 +825,10 @@ class WIDENExitNode:
                     device=device,
                     dtype=compute_dtype,
                     storage_dtype=storage_dtype,
+                    write_fn=sink.write_tensor,
                 )
 
-                # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
-                # Hand completed group tensors to materialization immediately.
-                for key in group_keys:
-                    sink.write_tensor(key, group_results[key])
-
-                # AC: @streaming-full-model-materialization ac-affected-results-released
-                # Free this group's results before evaluating the next group.
-                del group_results
+                # Free this group's base tensors before evaluating next group.
                 del group_base
                 gc.collect()
                 if torch.cuda.is_available():

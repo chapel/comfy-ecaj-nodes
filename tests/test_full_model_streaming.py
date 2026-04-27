@@ -83,7 +83,13 @@ def _run_full_mode(recipe, mock_model_patcher, keys, tmp_path,
                    *, model_name="test_model", enable_cache=True,
                    extra_patches=None, chunked_eval_override=None,
                    save_workflow=True, extra_pnginfo=None):
-    """Run WIDENExitNode.execute() in full saved model mode with mocking."""
+    """Run WIDENExitNode.execute() in full saved model mode with mocking.
+
+    Full mode now uses streaming_evaluation_to_sink (which calls write_fn
+    per-key) instead of evaluate_affected_group (which returns a dict).
+    This helper patches streaming_evaluation_to_sink with a side_effect
+    that generates tensors and calls write_fn for each key.
+    """
     mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
         mock_model_patcher, keys, recipe=recipe,
     )
@@ -97,12 +103,18 @@ def _run_full_mode(recipe, mock_model_patcher, keys, tmp_path,
 
     sig = OpSignature(shape=(4, 4), ndim=2)
 
+    def streaming_eval_side_effect(**kwargs):
+        called_keys = kwargs.get("keys", [])
+        write_fn = kwargs.get("write_fn")
+        for k in called_keys:
+            if k in merged:
+                write_fn(k, merged[k])
+
     patches = {
         "nodes.exit.analyze_recipe": mock_analyze,
         "nodes.exit.analyze_recipe_models": mock_model_analysis,
         "nodes.exit.compile_plan": dummy_plan,
         "nodes.exit.compile_batch_groups": {sig: keys} if keys else {},
-        "nodes.exit.evaluate_affected_group": merged,
         "nodes.exit.compute_base_identity": "base_id",
         "nodes.exit.compute_lora_stats": {},
         "nodes.exit.validate_model_name": f"{model_name}.safetensors",
@@ -132,6 +144,13 @@ def _run_full_mode(recipe, mock_model_patcher, keys, tmp_path,
         else:
             p = patch(target, return_value=value)
         ctx_managers.append((target, p))
+
+    # Patch streaming_evaluation_to_sink with side_effect
+    streaming_patch = patch(
+        "nodes.exit.streaming_evaluation_to_sink",
+        side_effect=streaming_eval_side_effect,
+    )
+    ctx_managers.append(("nodes.exit.streaming_evaluation_to_sink", streaming_patch))
 
     entered = []
     try:
@@ -175,12 +194,14 @@ class TestFullModeSucceedsWithoutDictPath:
     def test_full_mode_succeeds_when_dict_eval_patched_to_fail(
         self, mock_model_patcher, tmp_path
     ):
-        """Full mode does not use the dict-returning chunked_evaluation path
-        for newly evaluated affected tensors — it uses evaluate_affected_group.
+        """Full mode does not use the dict-returning chunked_evaluation or
+        evaluate_affected_group paths for newly evaluated affected tensors —
+        it uses streaming_evaluation_to_sink which streams each tensor
+        directly to the sink via write_fn.
 
-        We monkeypatch chunked_evaluation to raise RuntimeError, then verify
-        full mode still succeeds because it calls evaluate_affected_group
-        instead of chunked_evaluation.
+        We monkeypatch both chunked_evaluation and evaluate_affected_group
+        to raise RuntimeError, then verify full mode still succeeds because
+        it calls streaming_evaluation_to_sink instead.
         """
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -196,10 +217,18 @@ class TestFullModeSucceedsWithoutDictPath:
         affected_tensors = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        # Monkeypatch the dict-returning chunked_evaluation to fail.
-        # Full mode must succeed because it uses evaluate_affected_group.
+        # Monkeypatch the dict-returning paths to fail.
+        # Full mode must succeed because it uses streaming_evaluation_to_sink.
         def chunked_eval_bomb(**kwargs):
             raise RuntimeError("chunked_evaluation must not be called in full mode")
+
+        def eval_group_bomb(**kwargs):
+            raise RuntimeError("evaluate_affected_group must not be called in full mode")
+
+        def streaming_eval(*, keys, base_tensors, eval_fn, batch_size,
+                           device, dtype, storage_dtype, write_fn):
+            for k in keys:
+                write_fn(k, affected_tensors[k])
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
@@ -207,7 +236,8 @@ class TestFullModeSucceedsWithoutDictPath:
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
             patch("nodes.exit.chunked_evaluation", side_effect=chunked_eval_bomb),
-            patch("nodes.exit.evaluate_affected_group", return_value=affected_tensors),
+            patch("nodes.exit.evaluate_affected_group", side_effect=eval_group_bomb),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="test.safetensors"),
@@ -424,14 +454,19 @@ class TestFullModeEventOrder:
         sig2 = OpSignature(shape=(8, 8), ndim=2)
         batch_groups = {sig1: group1_keys, sig2: group2_keys}
 
-        def recording_eval(**kwargs):
+        def recording_streaming_eval(**kwargs):
+            """Mock streaming_evaluation_to_sink that records events and
+            calls write_fn for each key — simulating per-tensor streaming."""
             called_keys = kwargs.get("keys", [])
+            write_fn = kwargs.get("write_fn")
             if set(called_keys) <= set(group1_keys):
                 events.append("eval:g1")
-                return group1_results
+                for k in called_keys:
+                    write_fn(k, group1_results[k])
             elif set(called_keys) <= set(group2_keys):
                 events.append("eval:g2")
-                return group2_results
+                for k in called_keys:
+                    write_fn(k, group2_results[k])
             else:
                 raise RuntimeError(f"Unexpected keys: {called_keys}")
 
@@ -456,7 +491,7 @@ class TestFullModeEventOrder:
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value=batch_groups),
-            patch("nodes.exit.evaluate_affected_group", side_effect=recording_eval),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=recording_streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="event_order.safetensors"),
@@ -533,7 +568,7 @@ class TestFailureAbortsMaterialization:
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        def failing_eval(**kwargs):
+        def failing_streaming_eval(**kwargs):
             raise RuntimeError("Simulated evaluation failure")
 
         mock_sink = MagicMock()
@@ -543,7 +578,7 @@ class TestFailureAbortsMaterialization:
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.evaluate_affected_group", side_effect=failing_eval),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=failing_streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="partial.safetensors"),
@@ -582,7 +617,7 @@ class TestFailureAbortsMaterialization:
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        def failing_group_eval(**kwargs):
+        def failing_streaming_eval(**kwargs):
             raise RuntimeError("fail")
 
         with (
@@ -590,7 +625,7 @@ class TestFailureAbortsMaterialization:
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.evaluate_affected_group", side_effect=failing_group_eval),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=failing_streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="fail.safetensors"),
@@ -637,6 +672,11 @@ class TestFinalizeFailure:
         merged = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
 
+        def streaming_eval(*, keys, base_tensors, eval_fn, batch_size,
+                           device, dtype, storage_dtype, write_fn):
+            for k in keys:
+                write_fn(k, merged[k])
+
         original_sink = MaterializationSink
 
         class FailingFinalizeSink(original_sink):
@@ -649,7 +689,7 @@ class TestFinalizeFailure:
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.evaluate_affected_group", return_value=merged),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="finalize_fail.safetensors"),
@@ -1276,6 +1316,53 @@ class TestMaterializationSink:
 
         with pytest.raises(RuntimeError, match="wrote 1/2 tensors"):
             sink.finalize(save_path)
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_write_tensor_rejects_dtype_mismatch(self, tmp_path):
+        """write_tensor rejects a tensor with the wrong dtype."""
+        manifest = {"x": (torch.float32, (2,))}
+        save_path = str(tmp_path / "dtype_mismatch.safetensors")
+
+        sink = MaterializationSink()
+        sink.open(manifest, save_path)
+
+        with pytest.raises(ValueError, match="dtype mismatch"):
+            sink.write_tensor("x", torch.ones(2, dtype=torch.float16))
+
+        sink.abort()
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_write_tensor_rejects_shape_mismatch(self, tmp_path):
+        """write_tensor rejects a tensor with the wrong shape."""
+        manifest = {"x": (torch.float32, (2,))}
+        save_path = str(tmp_path / "shape_mismatch.safetensors")
+
+        sink = MaterializationSink()
+        sink.open(manifest, save_path)
+
+        with pytest.raises(ValueError, match="shape mismatch"):
+            sink.write_tensor("x", torch.ones(3, dtype=torch.float32))
+
+        sink.abort()
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_write_tensor_rejects_wrong_sized_tensor(self, tmp_path):
+        """write_tensor rejects a tensor whose element count differs from manifest
+        even if it happens to have same total bytes (e.g. different dimensions)."""
+        manifest = {"x": (torch.float32, (2, 3))}
+        save_path = str(tmp_path / "size_mismatch.safetensors")
+
+        sink = MaterializationSink()
+        sink.open(manifest, save_path)
+
+        # Same dtype but different shape (3, 2) instead of (2, 3)
+        with pytest.raises(ValueError, match="shape mismatch"):
+            sink.write_tensor("x", torch.ones(3, 2, dtype=torch.float32))
+
+        sink.abort()
 
 
 # ===========================================================================

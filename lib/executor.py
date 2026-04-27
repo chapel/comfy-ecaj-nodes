@@ -29,6 +29,7 @@ from .gpu_ops import (
     estimate_peak_ram,
     evaluate_affected_group,
     get_available_ram_bytes,
+    streaming_evaluation_to_sink,
 )
 from .per_block import (
     _apply_per_block_lora_strength,

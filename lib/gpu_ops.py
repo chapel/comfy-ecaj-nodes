@@ -559,3 +559,122 @@ def evaluate_affected_group(
     return _chunked_eval_impl(
         keys, base_tensors, eval_fn, batch_size, device, dtype, storage_dtype,
     )
+
+
+def streaming_evaluation_to_sink(
+    keys: list[str],
+    base_tensors: dict[str, torch.Tensor],
+    eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
+    batch_size: int,
+    device: str,
+    dtype: torch.dtype,
+    storage_dtype: torch.dtype,
+    write_fn: Callable[[str, torch.Tensor], None],
+) -> None:
+    """Evaluate keys in chunks and stream each result to *write_fn* immediately.
+
+    AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+
+    Unlike :func:`evaluate_affected_group` (which accumulates all results
+    in a dict and returns them), this function hands every completed tensor
+    to *write_fn* as soon as the chunk is done.  The caller's *write_fn*
+    writes the tensor to the ``MaterializationSink`` (or equivalent) so
+    that the tensor can be freed before the next chunk is evaluated.
+
+    This satisfies the task requirement that newly evaluated full-mode
+    affected tensors are streamed directly to artifact materialization
+    and never accumulated in a dict-returning evaluation path.
+
+    Args:
+        keys: List of parameter keys to evaluate.
+        base_tensors: Dict of key -> CPU tensor for base weights.
+        eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu.
+        batch_size: Initial batch size for chunking.
+        device: GPU device string.
+        dtype: Computation dtype (fp32 for numerical stability).
+        storage_dtype: Output dtype (matches base model).
+        write_fn: Callback ``(key, cpu_tensor) -> None`` that hands the
+            completed tensor to artifact materialization.
+    """
+    avail_ram = get_available_ram_bytes() if device != "cpu" else 0
+
+    for chunk_keys in chunked(keys, batch_size):
+        try:
+            base_stack = torch.stack([base_tensors[k].cpu() for k in chunk_keys])
+            tensor_bytes = base_stack.nelement() * base_stack.element_size()
+            if device != "cpu" and base_stack.numel() > 65536:
+                if avail_ram > tensor_bytes * 3:
+                    base_gpu = base_stack.pin_memory().to(device, dtype=dtype)
+                else:
+                    base_gpu = base_stack.to(device, dtype=dtype)
+            else:
+                base_gpu = base_stack.to(device, dtype=dtype)
+            del base_stack
+
+            merged_gpu = eval_fn(chunk_keys, base_gpu)
+            del base_gpu
+
+            merged_cpu = merged_gpu.to("cpu", dtype=storage_dtype)
+            del merged_gpu
+
+            for i, key in enumerate(chunk_keys):
+                write_fn(key, merged_cpu[i])
+
+        except torch.cuda.OutOfMemoryError:
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
+            for key in chunk_keys:
+                try:
+                    base_tensor = base_tensors[key].unsqueeze(0)
+                    base_gpu = base_tensor.to(device, dtype=dtype)
+
+                    merged_gpu = eval_fn([key], base_gpu)
+                    del base_gpu
+
+                    merged_cpu = merged_gpu.to("cpu", dtype=storage_dtype)
+                    del merged_gpu
+
+                    write_fn(key, merged_cpu[0])
+
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+
+                except torch.cuda.OutOfMemoryError:
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                    raise
+                except (MemoryError, RuntimeError) as inner_e:
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                    if isinstance(inner_e, MemoryError) or (
+                        isinstance(inner_e, RuntimeError)
+                        and ("not enough memory" in str(inner_e).lower()
+                             or "out of memory" in str(inner_e).lower())
+                    ):
+                        raise RuntimeError(
+                            f"System memory exhausted during single-key retry for '{key}'"
+                        ) from inner_e
+                    raise
+
+        except MemoryError as e:
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            raise RuntimeError(
+                "System memory exhausted during chunked evaluation"
+            ) from e
+
+        except RuntimeError as e:
+            if "not enough memory" in str(e).lower() or "out of memory" in str(e).lower():
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                raise RuntimeError(
+                    "System memory exhausted during chunked evaluation"
+                ) from e
+            raise
