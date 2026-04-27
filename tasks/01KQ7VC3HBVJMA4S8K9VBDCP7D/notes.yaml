@@ -213,3 +213,32 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T18:13:09.413Z
+  - _ulid: 01KQ834VZBNYBHYJ9D5HTRG43A
+    content: >-
+      Fix cycle 3: addressed all 3 review blockers.
+
+
+      1. Comfy-owned artifact memory (blocker 1): Rewrote _load_model_from_artifact to deep-copy the
+      model and load artifact weights into the model's own state dict instead of set patches.
+      Returned model has zero patches — weights are model-owned, Comfy-managed. Updated 2 existing
+      tests, added 2 new tests (TestLoadedModelNoResidentPatches).
+
+
+      2. RecipeBase noop cache eviction (blocker 2): Added _incremental_cache.clear() to
+      _execute_full_model_noop when enable_cache=False. Added TestNoopEnableCacheFalseEvicts test.
+
+
+      3. Artifact completeness (blocker 3): Extended check_full_model_cache with expected_keys
+      parameter that validates artifact tensor keys match the model manifest. Both call sites now
+      pass expected_keys. Added TestIncompleteArtifactRejected with 3 tests.
+
+
+      Also fixed pre-existing test_exit_node.py::test_cache_hit_skips_analyze which created a
+      single-key artifact — updated to include all model keys and verify model_state_dict instead of
+      patches.
+
+
+      All 1233 tests pass (6 new). All 6 spec ACs re-verified against implementation.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T18:27:39.627Z
