@@ -4828,9 +4828,25 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ84JVZWD8D55J2WP0NT1XMM
         timestamp: 2026-04-27T18:52:47.043Z
+      - _ulid: 01KQ84KCZK23T124A8F97TP4GJ
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-27T18:53:04.372Z
+      - _ulid: 01KQ84KCZM1Q9CMEJKNFYR5VP2
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-27T18:53:04.372Z
     examined_commit: 16f875cb81b657dddc42ca05650f29290a091f90
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -5928,7 +5944,14 @@ reviews:
               CI-blocking lint failures in the changed execution path.
             created_at: 2026-04-27T18:52:46.973Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-27T18:53:04.371Z
     created_at: 2026-04-27T18:49:41.222Z
-    updated_at: 2026-04-27T18:52:46.973Z
+    updated_at: 2026-04-27T18:53:04.372Z
     notes: []

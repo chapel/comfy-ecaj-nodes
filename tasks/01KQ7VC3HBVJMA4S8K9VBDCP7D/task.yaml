@@ -135,7 +135,7 @@ description: >-
 spec_ref: "@streaming-full-model-materialization"
 meta_ref: null
 plan_ref: null
-status: pending_review
+status: needs_work
 blocked_by: []
 depends_on: []
 context: []
@@ -155,7 +155,7 @@ submission_linkage:
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-full-model-streaming-artifact-cache/01kq7vc3
-session_id: 01KQ83NWGHJAB0E0S27GC7TDY4
+session_id: null
 history:
   - author: Jacob Chapel
     changes:
@@ -439,6 +439,16 @@ history:
         previous: "@01KQ8391G947MAS3022HKBY4WD"
     command: review-link
     timestamp: 2026-04-27T18:49:41.477Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: needs_work
+        previous: pending_review
+      session_id:
+        new: null
+        previous: 01KQ83NWGHJAB0E0S27GC7TDY4
+    command: review-verdict-needs-work
+    timestamp: 2026-04-27T18:53:04.539Z
 created_at: 2026-04-27T16:11:48.139Z
 started_at: 2026-04-27T18:48:21.793Z
 submitted_at: 2026-04-27T18:48:28.411Z
