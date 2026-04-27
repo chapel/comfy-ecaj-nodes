@@ -3189,7 +3189,7 @@ runs:
     completed_at: 2026-04-27T05:37:12.593Z
   - _ulid: 01KQ6QAT1NZQA3GXE5FXSHNZX0
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3212,7 +3212,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T05:42:47.923Z
-        completed_at: 2026-04-27T05:42:47.923Z
+        completed_at: 2026-04-27T05:42:59.640Z
+        notes: "Decision: skip captures. The strongest success is already covered by @01KQ6N3MV (code-first
+          review plus spec-alignment checks) and reinforced by @01KH6Y61 (unit tests/mocks can
+          validate wrong behavior). The workflow CLI friction is already covered by @01KQ6N3MY. No
+          unique high-confidence untracked item remains."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T05:42:59.640Z
+        completed_at: 2026-04-27T05:42:59.640Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:41:56.917Z
