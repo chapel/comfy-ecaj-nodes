@@ -1763,6 +1763,17 @@ reviews:
         runner: rg
         created_at: 2026-04-27T05:50:52.837Z
         completed_at: 2026-04-27T05:50:52.837Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: kspec validate --warnings-ok -> schema/references/skills OK; pre-existing
+          alignment/completeness warnings only
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T05:50:52.942Z
+        completed_at: 2026-04-27T05:50:52.942Z
     events:
       - _ulid: 01KQ6QR9EBH5WEXP2TX09YBH2R
         actor: Jacob Chapel
@@ -1791,6 +1802,13 @@ reviews:
           status: pass
           name: AC annotation scan
         timestamp: 2026-04-27T05:50:52.857Z
+      - _ulid: 01KQ6QV5H11Z7BTVMDH4K4PJGB
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-27T05:50:52.961Z
     examined_commit: 7aa32f955955f3f5dded79e6972a7e8162b65eaa
     external_links: []
     lifecycle_state: open
@@ -1803,5 +1821,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:49:18.668Z
-    updated_at: 2026-04-27T05:50:52.837Z
+    updated_at: 2026-04-27T05:50:52.942Z
     notes: []
