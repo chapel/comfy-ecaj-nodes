@@ -3445,9 +3445,30 @@ runs:
     completed_at: 2026-04-27T06:24:53.622Z
   - _ulid: 01KQ6TDDDE7JQ6RZ4YMH31NDJ1
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T06:35:48.014Z
+        completed_at: 2026-04-27T06:36:26.049Z
+        notes: >-
+          What worked well:
+
+          1. Review thread content was detailed and specific — the blocker described the exact
+          failure mode (duplicate key write), the evidence (RuntimeError from
+          IncrementalSafetensorsWriter), and the root cause (MagicMock masking the issue). This made
+          diagnosis immediate.
+
+          2. The fix was surgical — a 6-line production code change (build recompute_set, skip
+          matching keys in pre-write loop). Small diff, clear intent.
+
+          3. Replacing the MagicMock test with a real CheckpointMaterializationSink that reads back
+          the safetensors artifact provides much stronger coverage than the mock-based assertions.
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T06:36:26.049Z
+        completed_at: 2026-04-27T06:36:26.049Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:35:48.014Z
