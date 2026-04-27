@@ -1567,6 +1567,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ6Q8VCEGAY38FWGYD0Z3M9T
         timestamp: 2026-04-27T05:40:52.769Z
+      - _ulid: 01KQ6Q8VG4788PYAP97Z45ZFEW
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ6Q8VFGQECD81EXMPZXNAP6
+        timestamp: 2026-04-27T05:40:52.868Z
     examined_commit: 5332f72534f55032b658110039b7ae55fc29b89b
     external_links: []
     lifecycle_state: open
@@ -1595,7 +1602,27 @@ reviews:
               Exit node path under review."
             created_at: 2026-04-27T05:40:52.750Z
         kind: blocker
+      - _ulid: 01KQ6Q8VFGQECD81EXMPZXNAP6
+        anchor:
+          type: code
+          commit: 5332f72534f55032b658110039b7ae55fc29b89b
+          line_end: 777
+          line_start: 761
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQ6Q8VFH2FRGX23ZN27QR27X
+            author: Jacob Chapel
+            body: "MUST-FIX: The save_model path still re-acquires model_patcher.model_state_dict(), overlays
+              merged_state into that full dict, and passes the full state to atomic_save. This is
+              the old full-dict materialization behavior, so full saved model mode still requires a
+              full base state dict plus accumulated merged_state rather than streaming unaffected
+              base weights through the incremental writer. This violates
+              ac-base-weight-bounded-copying and the task requirement to implement the
+              materialization path."
+            created_at: 2026-04-27T05:40:52.849Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T05:38:20.302Z
-    updated_at: 2026-04-27T05:40:52.750Z
+    updated_at: 2026-04-27T05:40:52.849Z
     notes: []
