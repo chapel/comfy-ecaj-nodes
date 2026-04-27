@@ -4130,7 +4130,7 @@ runs:
     completed_at: 2026-04-27T17:24:57.940Z
   - _ulid: 01KQ80J62A73MJENGC97C5D584
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4143,7 +4143,36 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T17:42:59.784Z
-        completed_at: 2026-04-27T17:42:59.784Z
+        completed_at: 2026-04-27T17:44:36.551Z
+        notes: >-
+          High-confidence observations from this fix cycle session:
+
+
+          SUCCESS 1: Review thread reply+resolve workflow was smooth — reading all 4 blocker threads
+          from the YAML, addressing each, then reply+resolve in batch worked efficiently.
+
+
+          SUCCESS 2: The review's streaming event probe check (which failed) directly guided the
+          implementation fix — the probe's event log ['open', 'eval:g1', 'eval:g2', 'write:g1', ...]
+          made the accumulation bug obvious.
+
+
+          FRICTION 1: kspec review get still truncates thread bodies (already tracked as
+          @01KQ6SHQZ). Had to read the raw YAML to see full thread content. Confirmed this is still
+          an active friction point.
+
+
+          FRICTION 2: When full mode tests patched chunked_evaluation but full mode now uses
+          evaluate_affected_group, all full-mode tests needed updating. The _run_full_mode helper
+          centralized most patches, but 3 inline tests also needed manual updates. Not necessarily a
+          systemic issue — this is expected when changing a function boundary.
+
+
+          No new untracked items to capture — the review truncation friction is already tracked.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T17:44:36.551Z
+        completed_at: 2026-04-27T17:44:36.551Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T17:42:30.218Z
