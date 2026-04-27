@@ -2227,3 +2227,29 @@ reviews:
     created_at: 2026-04-27T06:38:59.569Z
     updated_at: 2026-04-27T06:41:43.204Z
     notes: []
+  - _ulid: 01KQ6VB8V01WCG3MAC8ZGPZ412
+    slugs: []
+    title: Review task-full-model-cache-metadata
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ6VB8TZTQ99J5WEWSVKC25G
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T06:52:06.367Z
+    examined_commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ6HRA0DXES7K03VX0RCDXQ2"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T06:52:06.368Z
+    updated_at: null
+    notes: []
