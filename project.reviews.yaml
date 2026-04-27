@@ -8590,6 +8590,18 @@ reviews:
         runner: rg
         created_at: 2026-04-27T21:43:39.857Z
         completed_at: 2026-04-27T21:43:39.857Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Validation passed with existing repo warnings accepted via --warnings-ok:
+          schema/references OK; 4 alignment warnings and 12 completeness warnings are pre-existing
+          project metadata."
+        name: kspec validate --warnings-ok
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T21:43:40.109Z
+        completed_at: 2026-04-27T21:43:40.109Z
     events:
       - _ulid: 01KQ8E5PBEV7SD8EDSRNFAPJDY
         actor: Jacob Chapel
@@ -8618,6 +8630,13 @@ reviews:
           status: pass
           name: AC annotations
         timestamp: 2026-04-27T21:43:39.930Z
+      - _ulid: 01KQ8EBRWV94HQVB5B1R8M2PAH
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate --warnings-ok
+        timestamp: 2026-04-27T21:43:40.187Z
     examined_commit: cf1d6f0b2b24c05d0411a5a727a2a72e72fb8675
     external_links: []
     lifecycle_state: open
@@ -8630,5 +8649,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T21:40:20.974Z
-    updated_at: 2026-04-27T21:43:39.857Z
+    updated_at: 2026-04-27T21:43:40.109Z
     notes: []
