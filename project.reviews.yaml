@@ -3662,9 +3662,25 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ7ZD04R3QK2EM511ZDE8CNT
         timestamp: 2026-04-27T17:22:11.771Z
+      - _ulid: 01KQ7ZD8SBYHQERQJB7RXCYZ7Q
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-27T17:22:20.587Z
+      - _ulid: 01KQ7ZD8SB4GGF6914D1EBTGNM
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-27T17:22:20.587Z
     examined_commit: e368231141abc45a6dce0314c147a15369756c00
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -3750,7 +3766,14 @@ reviews:
               check_full_model_cache(path, hash) returned True."
             created_at: 2026-04-27T17:22:11.736Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-27T17:22:20.587Z
     created_at: 2026-04-27T17:16:41.678Z
-    updated_at: 2026-04-27T17:22:11.736Z
+    updated_at: 2026-04-27T17:22:20.587Z
     notes: []
