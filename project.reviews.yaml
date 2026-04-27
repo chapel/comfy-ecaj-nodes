@@ -4844,6 +4844,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T18:53:04.372Z
+      - _ulid: 01KQ853TFG83HEEZYMC369V4Q2
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ84JVFZEYT66T3GA8XKVH89
+        timestamp: 2026-04-27T19:02:02.480Z
     examined_commit: 16f875cb81b657dddc42ca05650f29290a091f90
     external_links: []
     lifecycle_state: closed
@@ -5216,6 +5222,11 @@ reviews:
               exported in . This breaks the lint gate for the submitted snapshot; either export it
               intentionally or remove the unused import.
             created_at: 2026-04-27T18:52:46.463Z
+          - _ulid: 01KQ853TDPR9ZGH2RS3E602VXE
+            author: "@claude"
+            body: "Fixed: added streaming_evaluation_to_sink to __all__ in lib/executor.py so ruff recognizes it
+              as a deliberate re-export."
+            created_at: 2026-04-27T19:02:02.418Z
         kind: blocker
       - _ulid: 01KQ84JVQDPV1W13HKK5GX1NTJ
         anchor:
@@ -5953,5 +5964,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T18:53:04.371Z
     created_at: 2026-04-27T18:49:41.222Z
-    updated_at: 2026-04-27T18:53:04.372Z
+    updated_at: 2026-04-27T19:02:02.418Z
     notes: []
