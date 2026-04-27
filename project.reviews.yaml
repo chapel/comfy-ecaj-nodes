@@ -6932,6 +6932,12 @@ reviews:
         payload:
           thread_ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
         timestamp: 2026-04-27T20:04:43.120Z
+      - _ulid: 01KQ88PWM17T2WC5DFR51XADM6
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ87S730XR5W5MSNKNXHYBMA
+        timestamp: 2026-04-27T20:04:52.994Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: closed
@@ -7149,6 +7155,14 @@ reviews:
               patch-mode tensor payload; add a patch-mode execution/cache probe that would fail if
               full artifacts were consumed as patch tensor payloads.
             created_at: 2026-04-27T19:48:40.672Z
+          - _ulid: 01KQ88PWHWGG46W9D1RKS30D0Q
+            author: "@claude"
+            body: "Fixed: Added Phase 2 patch-mode probe. After full mode leaves _incremental_cache empty, the
+              test runs patch mode (save_model=False) with chunked_evaluation. Asserts:
+              chunked_evaluation was called (patch mode's own eval path), _incremental_cache has 1
+              entry (patch mode populated it). This proves full-mode artifacts are not consumed as
+              patch tensor payloads."
+            created_at: 2026-04-27T20:04:52.924Z
         kind: blocker
       - _ulid: 01KQ87SGCVE7ZZQEMH0S891BJK
         anchor:
@@ -7196,5 +7210,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:49:13.956Z
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T20:04:43.053Z
+    updated_at: 2026-04-27T20:04:52.924Z
     notes: []
