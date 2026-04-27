@@ -6409,6 +6409,12 @@ reviews:
         payload:
           thread_ulid: 01KQ86HH1ZKCDGBK5GRK79R6NM
         timestamp: 2026-04-27T19:38:10.731Z
+      - _ulid: 01KQ8762KMBCFND9A15NPEX6SX
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ86HW55FPVWDCQ11B7SJBJD
+        timestamp: 2026-04-27T19:38:13.492Z
     examined_commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
     external_links: []
     lifecycle_state: closed
@@ -6486,6 +6492,13 @@ reviews:
               required order. Also move ac-base-weight-bounded-copying coverage off helper-only sink
               tests and onto this product-path runtime behavior."
             created_at: 2026-04-27T19:27:11.526Z
+          - _ulid: 01KQ8762HCCQR5TT9JFRHMM00K
+            author: "@claude"
+            body: "Fixed: Event-order test now includes base_only key, asserts it was written
+              (write:base:base_only event), asserts base writes precede group 1 evaluation
+              (base_write_idx < eval_g1_idx), and carries ac-base-weight-bounded-copying
+              annotation."
+            created_at: 2026-04-27T19:38:13.419Z
         kind: blocker
       - _ulid: 01KQ86J5D1RG81P09MNW95AZ4S
         anchor:
@@ -6568,5 +6581,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:27:58.014Z
     created_at: 2026-04-27T19:19:54.224Z
-    updated_at: 2026-04-27T19:38:10.666Z
+    updated_at: 2026-04-27T19:38:13.419Z
     notes: []
