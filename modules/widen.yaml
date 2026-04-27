@@ -272,7 +272,7 @@ features:
         id: ac-6
         then: it treats it as filter_delta not merge_weights (single-branch passthrough)
         when: Exit evaluates the merge step
-      - given: the Exit node output MODEL
+      - given: the Exit node output MODEL in in-memory patch output mode
         id: ac-7
         then: the additional LoRA patches apply additively on top of the set patches
         when: a downstream ComfyUI LoRA node applies additional patches
