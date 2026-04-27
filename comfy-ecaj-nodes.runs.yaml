@@ -4980,7 +4980,7 @@ runs:
     completed_at: 2026-04-27T20:07:53.051Z
   - _ulid: 01KQ8998E83X6FV1XFBZ719JYN
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -5005,7 +5005,16 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T20:15:42.453Z
-        completed_at: 2026-04-27T20:15:42.453Z
+        completed_at: 2026-04-27T20:16:17.774Z
+        notes: "Coverage checked with kspec search for: pull_request merge, detached reviewer merge,
+          warnings-ok, and kspec validate warnings. No existing spec/task/inbox item appears to
+          cover the PR publication-mode merge guidance gap. Existing success observation @01KQ6K6S
+          already covers the useful merge-gate evidence pattern, including local pytest, kspec
+          validate --warnings-ok, and GitHub CI, so do not duplicate that success."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T20:16:17.774Z
+        completed_at: 2026-04-27T20:16:17.774Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-04-27T20:14:54.920Z
