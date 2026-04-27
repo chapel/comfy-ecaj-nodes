@@ -187,3 +187,24 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T17:50:51.795Z
+  - _ulid: 01KQ81WE1E5V96HEX5DAWXS683
+    content: >-
+      Fix cycle 2: addressed both review blockers.
+
+
+      1. Interleaved streaming (blocker 1): Restructured MaterializationSink to support
+      random-access writes via seek to pre-computed byte offsets. Streaming loop now writes all base
+      weights first, then evaluates and writes groups one at a time. Each group is fully written and
+      freed before the next is evaluated, regardless of key interleaving in sorted order. Test
+      updated with interleaved keys (a/z vs b/c).
+
+
+      2. Artifact loading (blocker 2): _load_model_from_artifact now loads ALL keys from the
+      artifact (not just affected keys) via safe_open/f.keys(). The returned model's weights come
+      entirely from the saved artifact. Added probe test verifying full artifact loading.
+
+
+      All 1227 tests pass. All 6 spec ACs re-verified against implementation.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T18:05:34.638Z
