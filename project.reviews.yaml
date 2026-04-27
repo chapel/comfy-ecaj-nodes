@@ -1,0 +1,28 @@
+kynetic_reviews: "1.0"
+reviews:
+  - _ulid: 01KQ6ASZ7A1YQBKSJ6H757RT96
+    slugs: []
+    title: "Plan review: Full Saved Model Output Plan final narrow pass"
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ6ASZ7AXT323W7SCDVWJ8K5
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T02:03:02.250Z
+    examined_commit: null
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: plan
+      content_hash: ""
+      ref: "@plan-full-saved-model-output-plan"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T02:03:02.250Z
+    updated_at: null
+    notes: []
