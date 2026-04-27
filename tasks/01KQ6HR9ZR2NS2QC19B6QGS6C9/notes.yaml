@@ -1,1 +1,48 @@
-notes: []
+notes:
+  - _ulid: 01KQ6PQ4BMS062T24WNX2T82XN
+    content: >-
+      Approach: Implement CheckpointMaterializationSink(MergeResultSink) that wraps
+      IncrementalSafetensorsWriter.
+
+
+      Key design:
+
+      1. Constructor takes base_state dict (full model), affected_keys set, dest_path,
+      storage_dtype, and optional metadata.
+
+      2. On init: build manifest from base_state (all keys, shapes, storage_dtype).
+
+      3. write_base_weights(): bounded pass over base_state, writing only unaffected keys (key not
+      in affected_keys) one at a time to the writer. Each tensor reference released after write — no
+      duplicate full-model dict.
+
+      4. write_tensor(key, tensor): writes affected keys via writer (called by merge eval sink
+      protocol).
+
+      5. finalize(): delegates to writer.finalize() — only succeeds if ALL keys written (base +
+      affected).
+
+      6. abort(): delegates to writer.abort() — cleans up temp file, preserves existing artifact.
+
+
+      Edge cases:
+
+      - Affected key also in base_state: write_base_weights skips it, write_tensor fills it.
+
+      - Error during base weight write: abort writer, raise.
+
+      - Error during affected tensor write: writer auto-poisons, abort.
+
+      - Missing affected keys at finalize: writer raises with missing keys.
+
+
+      Test plan: 3 ACs x multiple tests each:
+
+      - ac-base-weight-bounded-copying: verify base weights in artifact without full dict copy
+
+      - ac-affected-results-released: verify affected tensors written incrementally, not held
+
+      - ac-incomplete-write-not-reused: verify partial write leaves no artifact
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T05:31:12.116Z
