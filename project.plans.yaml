@@ -4060,8 +4060,8 @@ plans:
       set patch payload, and any new load-time or write-time peak should be visible in
 
       the validation output.
-    status: draft
-    approved_at: null
+    status: approved
+    approved_at: 2026-04-27T04:04:17.161Z
     branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     derived_specs: []
     derived_tasks: []
