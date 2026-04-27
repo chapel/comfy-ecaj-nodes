@@ -4724,7 +4724,7 @@ runs:
     completed_at: 2026-04-27T19:19:15.843Z
   - _ulid: 01KQ86N3MQHPA2B08JNPTXXRJM
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -4739,7 +4739,19 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T19:29:16.613Z
-        completed_at: 2026-04-27T19:29:16.613Z
+        completed_at: 2026-04-27T19:29:43.690Z
+        notes: "High-confidence reflection items after baseline/search: (1) friction: verification
+          environment ambiguity -- in this workspace, uv run pytest resolved to a global mise
+          pytest/Python with torch available, while uv run python used the local .venv without
+          torch, causing direct behavioral probes to fail under one command but tests to pass under
+          another. Searches for 'uv pytest torch environment', 'uv run python', 'python -m pytest',
+          and 'test environment torch' found no tracking. (2) success candidate: focused parallel
+          review probes found distinct runtime/test-coverage blockers, but baseline observations
+          already contain multiple parallel-review/subagent success patterns, so do not duplicate."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T19:29:43.690Z
+        completed_at: 2026-04-27T19:29:43.690Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:28:57.495Z
