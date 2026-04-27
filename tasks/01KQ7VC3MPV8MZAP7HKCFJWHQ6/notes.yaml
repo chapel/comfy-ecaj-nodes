@@ -1,1 +1,28 @@
-notes: []
+notes:
+  - _ulid: 01KQ89DJGDGB764FVBJF2BDJ9B
+    content: >-
+      Approach: Creating scripts/manual/real_comfy_memory_validation.py with:
+
+      1. Guard layer: validates COMFY_ECAJ_REAL_MEMORY_VALIDATION=1 env var, --run-real-comfy-memory
+      flag, --comfy-root, --model-path, --report-output args — all checked BEFORE any ComfyUI import
+      or sys.path mutation.
+
+      2. Report layer: pure-Python ValidationReport dataclass with format_report() — testable with
+      fake data, reports memory mode, patch behavior, materialization, cache hits, RAM/GPU
+      observations.
+
+      3. Real validation runner: only executes when all guards pass, imports ComfyUI, probes memory
+      mode, exercises full/patch modes, builds report.
+
+      Tests go in tests/test_real_comfy_memory_harness.py covering:
+
+      - Guard refusal for missing env var, missing flag, missing paths (no ComfyUI import occurs)
+
+      - Report formatting with fake data includes memory mode
+
+      - Default pytest discovery does NOT run real ComfyUI validation
+
+      Edge cases: partial guards (some but not all present) still refuse.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T20:17:16.301Z
