@@ -114,11 +114,11 @@ workspaces:
     canonical_branch: dispatch/task/task-full-model-saved-artifact-reload-spike/01kq6hr9
     canonical_branch_head: def6c3b845f69c4ffcba5bf03782cdf16f901381
     cleanup:
-      status: scheduled
-      detail: integrated-into-base-branch
+      status: blocked
+      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
-      reason: integrated-into-base-branch
-      updated_at: 2026-04-27T04:49:42.082Z
+      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
+      updated_at: 2026-04-27T04:49:42.540Z
     health:
       status: healthy
       issues: []
@@ -132,7 +132,7 @@ workspaces:
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: 8c484b755ac67ed27d6506832e8f0dbc6252fd53
       updated_at: 2026-04-27T04:49:42.082Z
-    lifecycle_state: closing
+    lifecycle_state: cleanup_blocked
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HR9X1MXKCW6XYR4B7V5RW"
     task_slug: task-full-model-saved-artifact-reload-spike
@@ -141,7 +141,7 @@ workspaces:
       last_active_at: 2026-04-27T04:43:43.070Z
       last_reconciled_at: 2026-04-27T04:49:42.082Z
       created_at: 2026-04-27T04:28:43.433Z
-      updated_at: 2026-04-27T04:49:42.082Z
+      updated_at: 2026-04-27T04:49:42.540Z
     workspace_id: dispatch-workspace-01KQ6HR9X1MXKCW6XYR4B7V5RW
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
