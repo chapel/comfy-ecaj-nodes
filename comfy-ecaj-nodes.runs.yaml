@@ -3650,7 +3650,7 @@ runs:
     completed_at: 2026-04-27T06:49:18.216Z
   - _ulid: 01KQ6VFZTQB80788C18AHDXK77
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3665,7 +3665,19 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T06:55:00.918Z
-        completed_at: 2026-04-27T06:55:00.918Z
+        completed_at: 2026-04-27T06:55:28.096Z
+        notes: "High-confidence success: code-first review plus Exit-node integration reading caught an
+          API-helper-only implementation gap; already covered by existing success observations
+          @01KQ6N3M and @01KQ6TG9, so no duplicate capture. High-confidence friction: the task notes
+          show an automated review invocation failed with '[AGENT-FAIL] Internal error: Prompt is
+          too long'; searches for 'review prompt too long', 'prompt length', 'Internal error Prompt
+          is too long', and 'long context' found no existing tracking. Existing observation
+          @01KH6Y61 covers the related test-quality pattern where mocks validate wrong behavior, so
+          no duplicate capture there."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T06:55:28.096Z
+        completed_at: 2026-04-27T06:55:28.096Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:54:40.983Z
