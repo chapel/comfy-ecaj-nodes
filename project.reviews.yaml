@@ -4602,6 +4602,12 @@ reviews:
         payload:
           thread_ulid: 01KQ83H78XBWH34C6D39K3416F
         timestamp: 2026-04-27T18:47:19.271Z
+      - _ulid: 01KQ8491QMEW3RCBSX9CY0NH8X
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ83H78XBWH34C6D39K3416F
+        timestamp: 2026-04-27T18:47:25.172Z
     examined_commit: d95ffd207b96388e10cd4db492db1ac601a5dcaa
     external_links: []
     lifecycle_state: closed
@@ -4696,6 +4702,8 @@ reviews:
               new tests: dtype mismatch, shape mismatch, and dimension mismatch."
             created_at: 2026-04-27T18:47:19.213Z
         kind: blocker
+        resolved_at: 2026-04-27T18:47:25.111Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -4705,5 +4713,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T18:35:04.835Z
     created_at: 2026-04-27T18:29:56.361Z
-    updated_at: 2026-04-27T18:47:19.213Z
+    updated_at: 2026-04-27T18:47:25.111Z
     notes: []
