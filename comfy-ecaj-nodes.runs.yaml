@@ -3016,9 +3016,22 @@ runs:
     completed_at: 2026-04-27T05:17:46.905Z
   - _ulid: 01KQ6PC0AF94XWTR98DGH22PFB
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T05:25:07.535Z
+        completed_at: 2026-04-27T05:25:23.574Z
+        notes: "Session completed task @task-full-model-chunked-evaluation-to-sink. What worked well: (1)
+          Tests-first approach — wrote 14 tests before implementing, all passed on first run. (2)
+          Refactoring chunked_evaluation as wrapper over chunked_evaluation_to_sink cleanly proved
+          behavioral equivalence through all 1236 existing tests. (3) TYPE_CHECKING import pattern
+          for MergeResultSink avoided circular imports while keeping type safety."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T05:25:23.574Z
+        completed_at: 2026-04-27T05:25:23.574Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:25:07.535Z
