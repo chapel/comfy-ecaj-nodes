@@ -4190,6 +4190,17 @@ reviews:
         runner: python
         created_at: 2026-04-27T18:12:57.786Z
         completed_at: 2026-04-27T18:12:57.786Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Probe created a full-mode safetensors artifact with matching hash but only one tensor;
+          check_full_model_cache returned True, so incomplete full artifacts can be reused.
+        name: incomplete artifact cache probe
+        required: true
+        runner: python
+        created_at: 2026-04-27T18:12:57.989Z
+        completed_at: 2026-04-27T18:12:57.989Z
     events:
       - _ulid: 01KQ822FQKTDX179J2MGPCR9NQ
         actor: Jacob Chapel
@@ -4267,6 +4278,13 @@ reviews:
           status: fail
           name: no-op enable_cache false probe
         timestamp: 2026-04-27T18:12:57.835Z
+      - _ulid: 01KQ829Z1H66Z9MJ2AH9P75V2S
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: incomplete artifact cache probe
+        timestamp: 2026-04-27T18:12:58.034Z
     examined_commit: 2564ca6e52b64b52693022dda5479761d0c66018
     external_links: []
     lifecycle_state: open
@@ -4339,5 +4357,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T18:08:52.979Z
-    updated_at: 2026-04-27T18:12:57.786Z
+    updated_at: 2026-04-27T18:12:57.989Z
     notes: []
