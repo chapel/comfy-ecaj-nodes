@@ -1,1 +1,38 @@
-notes: []
+notes:
+  - _ulid: 01KQ6ZMRRSQX1F5WHY7S7BAXYT
+    content: >-
+      Approach: Create test_full_model_memory_validation.py covering all 3 ACs.
+
+
+      AC coverage plan:
+
+      - ac-no-dynamic-vram-opt-out: Test that full saved model mode works with dynamic VRAM enabled
+      (mock DISABLE_SMART_MEMORY=False), verify no opt-out required
+
+      - ac-comfy-owns-returned-model-memory: Test that returned MODEL from full_saved_model uses
+      load_saved_model path (ComfyUI owns lifecycle), verify patches mode retains in-memory patches
+      (control), compare both modes for output equivalence on affected keys
+
+      - ac-measured-memory-behavior: Build comparative validation that runs both output modes on
+      same recipe, reports memory mode, RSS/VRAM, model lifecycle behavior, and asserts full_model
+      mode does NOT require persistent in-memory patch payload
+
+
+      Test approach:
+
+      - Representative fake workflow with multiple affected and unaffected keys
+
+      - Run with both OUTPUT_MODE_PATCHES and OUTPUT_MODE_FULL_MODEL
+
+      - Assert affected weight equivalence between modes
+
+      - Verify returned model properties differ (patches clone vs loaded model)
+
+      - Memory measurement via _log_memory and mocked torch.cuda
+
+      - Dynamic VRAM compatibility via detect_memory_mode mock
+
+      - Optional integration script skipped with clear reason when ComfyUI unavailable
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T08:07:11.898Z
