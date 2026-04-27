@@ -230,7 +230,7 @@ workspaces:
         head: e20213ae9f1e52182c6fa5b7fad587feaf949e93
         last_seen_at: 2026-04-27T05:05:56.574Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-result-sink-interface-01kq6hr9
-  - active_role: null
+  - active_role: reviewer
     base_branch_point: 068e946741d4b24ca47346d5d9fea9768abc237d
     bootstrap:
       status: succeeded
@@ -277,7 +277,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T05:05:57.761Z
+      updated_at: 2026-04-27T05:05:58.680Z
     integration:
       status: pending
       detail: null
@@ -292,10 +292,10 @@ workspaces:
     task_slug: task-full-model-incremental-writer
     timestamps:
       closed_at: null
-      last_active_at: 2026-04-27T04:58:00.759Z
-      last_reconciled_at: 2026-04-27T05:05:57.761Z
+      last_active_at: 2026-04-27T05:05:58.680Z
+      last_reconciled_at: 2026-04-27T05:05:58.680Z
       created_at: 2026-04-27T04:57:59.995Z
-      updated_at: 2026-04-27T05:05:58.248Z
+      updated_at: 2026-04-27T05:05:58.680Z
     workspace_id: dispatch-workspace-01KQ6HR9Z0V4T5BGMVVK515D2X
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
