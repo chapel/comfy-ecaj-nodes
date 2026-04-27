@@ -3557,7 +3557,8 @@ plans:
               The Exit node returns its MODEL output.
             then: |
               Downstream nodes receive a MODEL representing the saved merged artifact,
-              not a clone whose merged result is carried as the original patch payload.
+              and the result remains usable after temporary merge outputs have been
+              released by the Exit node.
           - id: ac-cache-reuses-artifact
             given: |
               A saved full model artifact matches the current recipe identity.
@@ -3569,10 +3570,11 @@ plans:
       - title: Streaming Full Model Materialization
         slug: streaming-full-model-materialization
         type: requirement
+        parent: "@full-saved-model-output"
         tags: [persistence, memory]
         description: |
-          Full model materialization keeps merge outputs bounded while creating the
-          complete saved artifact.
+          Full model materialization keeps merge output memory bounded while creating
+          the complete saved artifact.
         acceptance_criteria:
           - id: ac-affected-results-released
             given: |
@@ -3580,8 +3582,8 @@ plans:
             when: |
               Full saved model mode records affected weights for the artifact.
             then: |
-              Each affected weight can be recorded and released before all later groups
-              have been evaluated.
+              The operation can complete without requiring all affected weights to
+              remain resident until every later group has been evaluated.
           - id: ac-base-weight-bounded-copying
             given: |
               The saved artifact must include base weights that are not affected by the
@@ -3603,6 +3605,7 @@ plans:
       - title: Comfy Memory Manager Compatibility
         slug: comfy-memory-manager-compatibility
         type: requirement
+        parent: "@full-saved-model-output"
         tags: [comfy, memory, compatibility]
         description: |
           Full saved model output remains compatible with ComfyUI's current model
@@ -3624,9 +3627,9 @@ plans:
               ComfyUI loads, unloads, partially loads, or prioritizes models for a
               workflow.
             then: |
-              The returned MODEL participates in ComfyUI's normal model memory
-              lifecycle rather than relying on separate permanently resident merge
-              tensors.
+              The returned MODEL remains compatible with ComfyUI's model memory
+              lifecycle and does not require all merged affected weights to remain
+              resident solely because the Exit node returned.
           - id: ac-measured-memory-behavior
             given: |
               The same representative merge workflow is run with the current patch
@@ -3635,8 +3638,9 @@ plans:
               memory behavior is measured under ComfyUI with dynamic memory management
               enabled.
             then: |
-              The measurements show whether full saved model output removes the current
-              persistent patch payload and whether any new memory peak is introduced.
+              The validation output reports the active ComfyUI memory mode, peak RAM,
+              peak GPU memory, returned-model behavior, and whether merged affected
+              weights remain persistently resident after the Exit node returns.
       ```
 
       ## Tasks
@@ -3644,6 +3648,43 @@ plans:
       derive_from_specs: false
 
       ```yaml
+      - title: Update Exit output-mode specs for full saved model behavior
+        slug: task-full-model-update-existing-specs
+        priority: 1
+        tags: [specs, exit-node, persistence]
+        spec_ref: "@full-saved-model-output"
+        depends_on: []
+        description: |
+          What: Update existing project specs so the current set-patch Exit behavior is
+          scoped as the default in-memory output mode and full saved model output is a
+          distinct supported output behavior.
+
+          Why: Existing specs such as @exit-node, @exit-patch-install,
+          @exit-model-persistence, and @memory-management predate multiple output
+          modes. They currently describe the Exit result as set patches and saved
+          artifacts as persistence/cache support, which can conflict with returning a
+          Comfy-loadable saved MODEL.
+
+          How:
+          - Review existing specs for Exit return behavior, patch installation,
+            persistence, cache hits, and memory management.
+          - Scope existing set-patch acceptance criteria to the in-memory patch output
+            mode instead of making them universal Exit behavior.
+          - Extend or refine saved-model persistence specs so a full saved model output
+            can return a MODEL loaded from the saved artifact.
+          - Add relationships from new full saved model requirements to existing
+            persistence and memory-management specs where supported by kspec.
+          - Keep spec wording behavioral: describe user-visible output mode behavior,
+            reloadability, cache reuse, and memory observations rather than internal
+            writer or patcher classes.
+
+          Testing:
+          - Run kspec validation or plan import checks after the spec edits.
+          - Confirm the resulting specs do not contain contradictory requirements for
+            the same Exit output mode.
+
+          Covers: @full-saved-model-output ac-return-loaded-model;
+            @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory.
       - title: Validate Comfy loading and Dynamic VRAM behavior for saved merged artifacts
         slug: task-full-model-dynamic-vram-spike
         priority: 1
@@ -3686,7 +3727,6 @@ plans:
 
           Covers: @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out,
             ac-comfy-owns-returned-model-memory, ac-measured-memory-behavior.
-
       - title: Introduce a bounded merge result sink
         slug: task-full-model-result-sink-interface
         priority: 1
@@ -3722,7 +3762,6 @@ plans:
             error paths.
 
           Covers: @streaming-full-model-materialization ac-affected-results-released.
-
       - title: Add sink-writing chunk evaluation
         slug: task-full-model-chunked-evaluation-to-sink
         priority: 1
@@ -3760,7 +3799,6 @@ plans:
             unchanged.
 
           Covers: @streaming-full-model-materialization ac-affected-results-released.
-
       - title: Implement an incremental safetensors artifact writer
         slug: task-full-model-incremental-writer
         priority: 1
@@ -3795,7 +3833,6 @@ plans:
           - Assert a failure leaves no completed artifact at the destination path.
 
           Covers: @streaming-full-model-materialization ac-incomplete-write-not-reused.
-
       - title: Implement full checkpoint materialization
         slug: task-full-model-checkpoint-materialization
         priority: 2
@@ -3834,7 +3871,40 @@ plans:
 
           Covers: @streaming-full-model-materialization ac-base-weight-bounded-copying,
             ac-affected-results-released, ac-incomplete-write-not-reused.
+      - title: Add mode-aware persistence metadata and cache checks
+        slug: task-full-model-cache-metadata
+        priority: 2
+        tags: [persistence, cache]
+        spec_ref: "@full-saved-model-output"
+        depends_on:
+          - "@task-full-model-checkpoint-materialization"
+        description: |
+          What: Extend persistence metadata so full saved model artifacts are safely
+          distinguished from other ecaj artifacts and from older saved files.
 
+          Why: A matching recipe hash is not enough once multiple output modes can
+          write artifacts. Cache hits must only reuse artifacts whose kind and required
+          metadata match the active output behavior.
+
+          How:
+          - Update metadata construction and cache checks in lib/persistence.py to
+            include and verify an artifact kind for full saved model outputs.
+          - Reject or recompute when an artifact has the right recipe hash but the
+            wrong artifact kind, missing kind, or incompatible metadata schema.
+          - Preserve protection against overwriting non-ecaj safetensors files.
+          - Include enough metadata for later diagnostics, such as affected keys and
+            the saved recipe identity.
+          - Ensure older ecaj files without an artifact kind do not become silent cache
+            hits for full saved model output.
+
+          Testing:
+          - Add persistence tests for matching kind, mismatched kind, missing kind, and
+            non-ecaj files.
+          - Assert cache hits skip merge work only for compatible full saved model
+            artifacts.
+          - Run the persistence test slice and existing save/cache tests.
+
+          Covers: @full-saved-model-output ac-cache-reuses-artifact.
       - title: Integrate full saved model output into Exit
         slug: task-full-model-exit-integration
         priority: 2
@@ -3844,6 +3914,7 @@ plans:
           - "@task-full-model-dynamic-vram-spike"
           - "@task-full-model-chunked-evaluation-to-sink"
           - "@task-full-model-checkpoint-materialization"
+          - "@task-full-model-cache-metadata"
         description: |
           What: Add a user-selectable full saved model output mode to the Exit node.
 
@@ -3879,49 +3950,13 @@ plans:
           Covers: @full-saved-model-output ac-complete-artifact,
             ac-return-loaded-model, ac-cache-reuses-artifact;
             @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory.
-
-      - title: Add mode-aware persistence metadata and cache checks
-        slug: task-full-model-cache-metadata
-        priority: 2
-        tags: [persistence, cache]
-        spec_ref: "@full-saved-model-output"
-        depends_on:
-          - "@task-full-model-exit-integration"
-        description: |
-          What: Extend persistence metadata so full saved model artifacts are safely
-          distinguished from other ecaj artifacts and from older saved files.
-
-          Why: A matching recipe hash is not enough once multiple output modes can
-          write artifacts. Cache hits must only reuse artifacts whose kind and required
-          metadata match the active output behavior.
-
-          How:
-          - Update metadata construction and cache checks in lib/persistence.py to
-            include and verify an artifact kind for full saved model outputs.
-          - Reject or recompute when an artifact has the right recipe hash but the
-            wrong artifact kind, missing kind, or incompatible metadata schema.
-          - Preserve protection against overwriting non-ecaj safetensors files.
-          - Include enough metadata for later diagnostics, such as affected keys and
-            the saved recipe identity.
-          - Ensure older ecaj files without an artifact kind do not become silent cache
-            hits for full saved model output.
-
-          Testing:
-          - Add persistence tests for matching kind, mismatched kind, missing kind, and
-            non-ecaj files.
-          - Assert cache hits skip merge work only for compatible full saved model
-            artifacts.
-          - Run the persistence test slice and existing save/cache tests.
-
-          Covers: @full-saved-model-output ac-cache-reuses-artifact.
-
       - title: Validate full saved model memory behavior end to end
         slug: task-full-model-memory-validation
         priority: 3
         tags: [testing, validation, memory]
         spec_ref: "@comfy-memory-manager-compatibility"
         depends_on:
-          - "@task-full-model-cache-metadata"
+          - "@task-full-model-exit-integration"
         description: |
           What: Add end-to-end-style validation showing full saved model output's
           memory and behavioral impact compared with current in-memory patch output.
@@ -3982,6 +4017,11 @@ plans:
         content: Harden specs/tasks for Dynamic VRAM investigation and plan best practices
         author: Jacob Chapel
         created_at: 2026-04-26T23:52:32.569Z
+      - _ulid: 01KQ63RYS42WGVN3WMPR1F67EW
+        content: "Address plan-reviewer findings: parent hierarchy, behavioral specs, standalone spec-update
+          tasks, cache ordering"
+        author: Jacob Chapel
+        created_at: 2026-04-27T00:00:08.996Z
   - _ulid: 01KQ5ZSQ13857R9CGT36JXYK91
     slugs:
       - plan-disk-backed-patch-output-plan
