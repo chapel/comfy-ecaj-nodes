@@ -6374,6 +6374,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ86JPE01K61V2N51WS52KKA
         timestamp: 2026-04-27T19:27:38.501Z
+      - _ulid: 01KQ86K32E8WZE5M2V24KPJV36
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ86K30APNMAYKEWY0JFC3AF
+        timestamp: 2026-04-27T19:27:51.374Z
     examined_commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
     external_links: []
     lifecycle_state: open
@@ -6492,7 +6499,25 @@ reviews:
               inactive, cleanup APIs unavailable, and active memory mode not mutated."
             created_at: 2026-04-27T19:27:38.433Z
         kind: blocker
+      - _ulid: 01KQ86K30APNMAYKEWY0JFC3AF
+        anchor:
+          type: code
+          commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
+          line_end: 622
+          line_start: 617
+          path: lib/gpu_ops.py
+          side: head
+        entries:
+          - _ulid: 01KQ86K30BBBECAAPZ13SWF5ZD
+            author: Jacob Chapel
+            body: "MUST-FIX: streaming_evaluation_to_sink writes each tensor to the sink but keeps the full
+              merged_cpu chunk live after the write loop, so the previous completed affected chunk
+              remains resident while the next chunk is built/evaluated. Explicitly release
+              merged_cpu after write_fn completes, and do the same for the single-key OOM path, to
+              preserve the streaming memory bound."
+            created_at: 2026-04-27T19:27:51.307Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:19:54.224Z
-    updated_at: 2026-04-27T19:27:38.433Z
+    updated_at: 2026-04-27T19:27:51.307Z
     notes: []
