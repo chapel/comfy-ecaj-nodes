@@ -4532,7 +4532,7 @@ runs:
     completed_at: 2026-04-27T18:54:59.204Z
   - _ulid: 01KQ85655C4GAV7VQT3V6BKCRC
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4548,7 +4548,35 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T19:03:36.009Z
-        completed_at: 2026-04-27T19:03:36.009Z
+        completed_at: 2026-04-27T19:04:02.972Z
+        notes: >-
+          High-confidence friction points:
+
+
+          1. FRICTION: Removing unused imports from production code breaks test monkeypatches that
+          target those imports. This is the 2nd time this pattern appeared in this task's fix cycles
+          — when ruff flags an unused import and the fix removes it, any test that does
+          patch('nodes.exit.<removed_symbol>') breaks with AttributeError. The underlying issue:
+          tests couple to import-level names rather than the module where the function is defined.
+          NOT a new pattern — this is a known consequence of the monkeypatch-at-import-site
+          convention. No new tracking needed.
+
+
+          2. FRICTION: Fix cycle 5 was entirely ruff lint errors — no behavioral issues. 5 fix
+          cycles total on this task, and cycles 5 was purely mechanical lint cleanup. This suggests
+          running ruff as a pre-commit check before submission would catch these earlier. Searched:
+          @ci-pipeline exists but covers GitHub Actions, not local pre-commit hooks. However, the
+          review workflow already runs ruff as a check — the issue is that the worker agent didn't
+          run ruff before submitting. This is agent behavior, not tooling gap.
+
+
+          3. SUCCESS: The review thread reply+resolve+note+submit workflow was clean and
+          well-documented. All 3 threads addressed in one pass, task note summarized changes,
+          resubmission worked first try.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T19:04:02.972Z
+        completed_at: 2026-04-27T19:04:02.972Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:03:18.956Z
