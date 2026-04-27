@@ -2972,7 +2972,7 @@ runs:
     completed_at: 2026-04-27T05:03:28.849Z
   - _ulid: 01KQ6NWYEVTM5WQHXN0APM7N5C
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -2998,7 +2998,16 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T05:17:29.027Z
-        completed_at: 2026-04-27T05:17:29.027Z
+        completed_at: 2026-04-27T05:17:39.252Z
+        notes: "Decision: skip capture for all potential items. Success pattern duplicates existing
+          @01KQ6K6S dispatch review merge gate observation. Reflection workflow inspection friction
+          duplicates existing @01KQ6N3M observation. The fact that InMemorySink still materializes a
+          dict is covered by pending task @task-full-model-chunked-evaluation-to-sink, so no new
+          inbox item is needed."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T05:17:39.252Z
+        completed_at: 2026-04-27T05:17:39.252Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:16:54.107Z
