@@ -587,6 +587,13 @@ reviews:
           status: pass
           name: pytest full suite
         timestamp: 2026-04-27T05:00:13.873Z
+      - _ulid: 01KQ6MYYHX0J8Z15830YQZW35D
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ6MYYHJ013M6TX9XF4KY08G
+        timestamp: 2026-04-27T05:00:31.165Z
     examined_commit: e20213ae9f1e52182c6fa5b7fad587feaf949e93
     external_links: []
     lifecycle_state: open
@@ -596,8 +603,30 @@ reviews:
       content_hash: ""
       ref: "@01KQ6HR9XP4F7PGP4ZDYNSEPFG"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ6MYYHJ013M6TX9XF4KY08G
+        anchor:
+          type: code
+          commit: e20213ae9f1e52182c6fa5b7fad587feaf949e93
+          line_end: 724
+          line_start: 714
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQ6MYYHJ6YPV2FN6JY3MAQYM
+            author: Jacob Chapel
+            body: "MUST-FIX: The new MergeResultSink is never used by the merge execution path. Exit still calls
+              chunked_evaluation(), receives a per-group dict, and merges every group into
+              merged_state; the save path later iterates merged_state only after all groups have
+              completed. That means full saved model mode still requires all affected weights to
+              remain resident until later groups finish, so @streaming-full-model-materialization
+              ac-affected-results-released is not satisfied despite the new unit tests. Wire
+              evaluation/persistence through a sink (with InMemorySink preserving existing patch
+              behavior) and add a behavioral test proving completed group tensors are handed to the
+              sink without accumulating all affected results before later groups are evaluated."
+            created_at: 2026-04-27T05:00:31.154Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T04:58:19.395Z
-    updated_at: 2026-04-27T05:00:13.864Z
+    updated_at: 2026-04-27T05:00:31.154Z
     notes: []
