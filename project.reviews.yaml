@@ -4518,6 +4518,12 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ83H78XBWH34C6D39K3416F
         timestamp: 2026-04-27T18:34:24.462Z
+      - _ulid: 01KQ83J2RCDP5R84HGXVT320MY
+        actor: Jacob Chapel
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ83H78XBWH34C6D39K3416F
+        timestamp: 2026-04-27T18:34:52.556Z
     examined_commit: d95ffd207b96388e10cd4db492db1ac601a5dcaa
     external_links: []
     lifecycle_state: open
@@ -4568,8 +4574,19 @@ reviews:
               requirements. Reject dtype/shape/nbytes mismatches before marking a tensor written,
               and extend cache validation to expected tensor signatures if possible."
             created_at: 2026-04-27T18:34:24.414Z
+          - _ulid: 01KQ83J2PR86NPZN4T7QP3C7MV
+            author: Jacob Chapel
+            body: "Corrected detail after shell quoting stripped inline code: MaterializationSink.write_tensor
+              does not validate the tensor against the manifest expected dtype, shape, or byte
+              length before marking the key written. Runtime probe: a manifest declaring x as
+              float32[2] accepted a one-element tensor, finalized successfully, loaded back as
+              tensor([123., 0.]), and check_full_model_cache with expected_keys={x} returned True.
+              This can produce a syntactically valid but incomplete or corrupt full artifact that is
+              accepted as a later cache hit, violating complete-artifact and
+              incomplete-write-not-reused requirements."
+            created_at: 2026-04-27T18:34:52.502Z
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T18:29:56.361Z
-    updated_at: 2026-04-27T18:34:24.414Z
+    updated_at: 2026-04-27T18:34:52.502Z
     notes: []
