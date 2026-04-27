@@ -522,6 +522,11 @@ features:
           - exit-patch-install
         title: Exit Patch Installation
         type: requirement
+        description: Patch installation behavior for the in-memory patch output mode (the default Exit
+          output mode). Merged tensors from batched evaluation are installed as set patches on a
+          ModelPatcher clone. This spec does not apply to other output modes such as full saved
+          model output, which return a MODEL loaded from a saved artifact instead of installing set
+          patches.
         status:
           maturity: draft
           implementation: implemented
