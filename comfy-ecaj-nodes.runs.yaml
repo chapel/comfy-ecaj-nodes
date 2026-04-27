@@ -3016,7 +3016,7 @@ runs:
     completed_at: 2026-04-27T05:17:46.905Z
   - _ulid: 01KQ6PC0AF94XWTR98DGH22PFB
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -3054,7 +3054,23 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T05:25:40.035Z
-        completed_at: 2026-04-27T05:25:40.035Z
+        completed_at: 2026-04-27T05:25:55.488Z
+        notes: >-
+          Evaluation:
+
+
+          1. SUCCESS 'Autonomous dispatch task-work' — SKIP, already tracked as @01KQ6MS6 (same
+          pattern observed again, confirming it).
+
+
+          2. SUCCESS 'Wrapper-over-core refactoring pattern' — SKIP for now. Only one instance (this
+          session). If the same pattern proves useful in checkpoint-materialization or
+          exit-integration tasks, it becomes systemic and worth capturing then. Capturing a
+          single-use pattern is premature.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T05:25:55.488Z
+        completed_at: 2026-04-27T05:25:55.488Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:25:07.535Z
