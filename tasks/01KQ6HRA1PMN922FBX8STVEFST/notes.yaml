@@ -76,3 +76,9 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-27T08:26:50.934Z
+  - _ulid: 01KQ715R6SVJ80HE40TQZ79STM
+    content: "Reviewer fix: removed unused baseline variables that caused PR #95 lint failure. Re-ran
+      ruff, focused pytest, and kspec validate on 03b862f before merge."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-04-27T08:33:56.953Z
