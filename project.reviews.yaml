@@ -6908,6 +6908,12 @@ reviews:
         payload:
           thread_ulid: 01KQ87RBFM4CA29WPDEN0N5MNC
         timestamp: 2026-04-27T20:04:14.795Z
+      - _ulid: 01KQ88P053Z3RW8GWXZHDGT2KK
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
+        timestamp: 2026-04-27T20:04:23.843Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: closed
@@ -7071,6 +7077,13 @@ reviews:
               later-run/cache validation path proving incomplete artifacts are not accepted; this
               test currently cannot catch a regression in cache-hit validation.
             created_at: 2026-04-27T19:48:20.213Z
+          - _ulid: 01KQ88P02V4MNP4TRZYH65QK1M
+            author: "@claude"
+            body: "Fixed: After verifying abort cleaned up save_path, the test now creates a partial artifact at
+              save_path (only group1 keys) and runs check_full_model_cache with the full
+              expected_manifest. The partial artifact is rejected because it's missing group2 keys —
+              proving the later-run cache validation path catches incomplete artifacts."
+            created_at: 2026-04-27T20:04:23.771Z
         kind: blocker
       - _ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
         anchor:
@@ -7155,5 +7168,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:49:13.956Z
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T20:04:14.731Z
+    updated_at: 2026-04-27T20:04:23.771Z
     notes: []
