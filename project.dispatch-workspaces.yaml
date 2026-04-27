@@ -789,8 +789,8 @@ workspaces:
       failureMessage: null
       invalidationReasons:
         - canonical-branch-head-changed
-      lastRole: reviewer
-      lastRunAt: 2026-04-27T21:27:46.856Z
+      lastRole: worker
+      lastRunAt: 2026-04-27T21:34:53.267Z
       roleStates:
         reviewer:
           status: succeeded
@@ -803,12 +803,12 @@ workspaces:
           steps: []
         worker:
           status: succeeded
-          canonicalBranchHead: bc595d85033c2b23ff040c97d038437aa987ba13
+          canonicalBranchHead: 5bf8bf9f735bf30616ff18fa6040814933affa03
           configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
           failureMessage: null
           invalidationReasons:
             - canonical-branch-head-changed
-          lastRunAt: 2026-04-27T21:18:32.698Z
+          lastRunAt: 2026-04-27T21:34:53.267Z
           steps: []
       steps: []
     branch_provenance:
@@ -848,7 +848,7 @@ workspaces:
       last_active_at: 2026-04-27T21:27:47.165Z
       last_reconciled_at: 2026-04-27T21:34:53.100Z
       created_at: 2026-04-27T20:14:14.652Z
-      updated_at: 2026-04-27T21:34:53.100Z
+      updated_at: 2026-04-27T21:34:53.267Z
     workspace_id: dispatch-workspace-01KQ7VC3MPV8MZAP7HKCFJWHQ6
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
