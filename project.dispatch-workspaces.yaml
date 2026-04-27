@@ -508,11 +508,11 @@ workspaces:
     canonical_branch: dispatch/task/task-full-model-cache-metadata/01kq6hra
     canonical_branch_head: 0dcfeeb44ea7938c1905ddd085700eb1ccbb2068
     cleanup:
-      status: scheduled
-      detail: integrated-into-base-branch
+      status: blocked
+      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
-      reason: integrated-into-base-branch
-      updated_at: 2026-04-27T07:45:01.984Z
+      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
+      updated_at: 2026-04-27T07:45:02.271Z
     health:
       status: healthy
       issues: []
@@ -526,7 +526,7 @@ workspaces:
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: e7d490dec277d3e3c1562d9674a48329fda3386e
       updated_at: 2026-04-27T07:45:01.984Z
-    lifecycle_state: closing
+    lifecycle_state: cleanup_blocked
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HRA0DXES7K03VX0RCDXQ2"
     task_slug: task-full-model-cache-metadata
@@ -535,7 +535,7 @@ workspaces:
       last_active_at: 2026-04-27T07:41:04.302Z
       last_reconciled_at: 2026-04-27T07:45:01.984Z
       created_at: 2026-04-27T06:42:44.573Z
-      updated_at: 2026-04-27T07:45:01.984Z
+      updated_at: 2026-04-27T07:45:02.271Z
     workspace_id: dispatch-workspace-01KQ6HRA0DXES7K03VX0RCDXQ2
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
