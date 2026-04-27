@@ -622,7 +622,7 @@ workspaces:
         head: 00fdbaf75fd9bd92904e11505fb9258da72dd38e
         last_seen_at: 2026-04-27T07:55:25.702Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-exit-integration-01kq6hra
-  - active_role: reviewer
+  - active_role: null
     base_branch_point: a2c92314f76a1e672ce48f1b8fdca6dbf7e870f7
     bootstrap:
       status: succeeded
@@ -688,9 +688,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T08:29:25.982Z
-      last_reconciled_at: 2026-04-27T08:37:02.133Z
+      last_reconciled_at: 2026-04-27T08:38:45.300Z
       created_at: 2026-04-27T08:04:03.047Z
-      updated_at: 2026-04-27T08:37:02.398Z
+      updated_at: 2026-04-27T08:38:45.300Z
     workspace_id: dispatch-workspace-01KQ6HRA1PMN922FBX8STVEFST
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
