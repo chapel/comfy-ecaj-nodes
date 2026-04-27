@@ -3641,6 +3641,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ7ZC44GSWEREFTGHK1SV7R5
         timestamp: 2026-04-27T17:21:43.100Z
+      - _ulid: 01KQ7ZCCK7Y2HCGTPFE5SNYF0P
+        actor: codex
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ7ZCCJ16XM39HK9QHVJP135
+        timestamp: 2026-04-27T17:21:51.719Z
     examined_commit: e368231141abc45a6dce0314c147a15369756c00
     external_links: []
     lifecycle_state: open
@@ -3671,7 +3678,26 @@ reviews:
               'finalize']."
             created_at: 2026-04-27T17:21:43.056Z
         kind: blocker
+      - _ulid: 01KQ7ZCCJ16XM39HK9QHVJP135
+        anchor:
+          type: code
+          commit: e368231141abc45a6dce0314c147a15369756c00
+          line_end: 207
+          line_start: 173
+          path: tests/test_full_model_streaming.py
+          side: head
+        entries:
+          - _ulid: 01KQ7ZCCJ1ZE8FWC2MASJ80YY1
+            author: codex
+            body: "MUST-FIX: this test is named/described as monkeypatching the dict-returning evaluation path
+              to fail, but it patches nodes.exit.chunked_evaluation to return affected_tensors. The
+              task explicitly requires a dynamic test where full mode succeeds when the
+              dict-returning evaluation path is monkeypatched to fail. As written, the test passes
+              while production still calls chunked_evaluation in full mode, so it gives false AC
+              coverage."
+            created_at: 2026-04-27T17:21:51.681Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T17:16:41.678Z
-    updated_at: 2026-04-27T17:21:43.056Z
+    updated_at: 2026-04-27T17:21:51.681Z
     notes: []
