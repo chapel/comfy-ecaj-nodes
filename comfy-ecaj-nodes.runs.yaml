@@ -4650,7 +4650,7 @@ runs:
     started_at: 2026-04-27T19:09:56.716Z
     completed_at: 2026-04-27T19:11:05.198Z
   - _ulid: 01KQ861V9C10QM3YTE1W0Y03FV
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -4714,7 +4714,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T19:19:08.856Z
-        completed_at: 2026-04-27T19:19:08.856Z
+        completed_at: 2026-04-27T19:19:15.842Z
+        notes: "No new items to capture — all friction was either already tracked or resolved inline.
+          Session was clean: single fix cycle, both blockers addressed in one pass, all 1244 tests
+          passing."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:18:26.348Z
+    completed_at: 2026-04-27T19:19:15.843Z
