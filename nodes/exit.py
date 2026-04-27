@@ -40,7 +40,6 @@ from ..lib.persistence import (
     compute_lora_stats,
     compute_recipe_hash,
     compute_structural_fingerprint,
-    load_affected_keys,
     serialize_recipe,
     validate_model_name,
 )
@@ -308,13 +307,16 @@ def _load_model_from_artifact(
     model_patcher: object,
     storage_dtype: torch.dtype,
 ) -> object:
-    """Load a full saved model artifact and return a patched ModelPatcher.
+    """Load a full saved model from the artifact and return a ModelPatcher.
 
     AC: @full-saved-model-output ac-return-loaded-model
+    AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
     AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
 
-    Loads affected keys from the artifact and installs them as set patches
-    on a cloned ModelPatcher.
+    Loads ALL keys from the artifact (both base and affected) and installs
+    them as set patches on a cloned ModelPatcher.  The returned model's
+    weights come entirely from the saved artifact, not from the original
+    base model's in-memory state.
 
     Args:
         save_path: Path to the full saved model artifact.
@@ -322,16 +324,17 @@ def _load_model_from_artifact(
         storage_dtype: Base model storage dtype.
 
     Returns:
-        Cloned ModelPatcher with artifact weights as set patches.
+        Cloned ModelPatcher with all weights loaded from the artifact.
     """
     from safetensors import safe_open
 
-    with safe_open(save_path, framework="pt") as f:
-        metadata = f.metadata()
+    # Load every key from the artifact — the artifact is the complete model.
+    full_state: dict[str, torch.Tensor] = {}
+    with safe_open(save_path, framework="pt", device="cpu") as f:
+        for key in f.keys():
+            full_state[key] = f.get_tensor(key)
 
-    affected = json.loads(metadata["__ecaj_affected_keys__"])
-    merged_state = load_affected_keys(save_path, affected)
-    return install_merged_patches(model_patcher, merged_state, storage_dtype)
+    return install_merged_patches(model_patcher, full_state, storage_dtype)
 
 
 def _resolve_checkpoints_path(model_name: str) -> str:
@@ -701,24 +704,24 @@ class WIDENExitNode:
             # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
             # AC: @streaming-full-model-materialization ac-affected-results-released
             # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
-            # Evaluate affected groups and stream results into the sink per-group.
-            # Tensors are written in sorted-name order (required by safetensors).
-            # Each group is evaluated lazily as its first key is encountered in
-            # the sorted iteration, then written to the sink immediately.
-            # Group results are freed once all keys in that group have been written.
+            # Write base weights first, then evaluate and write groups one at a
+            # time.  The sink supports random-access writes (seek to pre-computed
+            # offsets), so groups can be written in evaluation order regardless of
+            # how their keys interleave in sorted name order.  Only one group's
+            # results are ever resident — each is freed before the next is
+            # evaluated.
             _log_memory("before-gpu-eval-full")
 
-            # Build a mapping from each affected key to its batch group's OpSignature
-            key_to_group: dict[str, OpSignature] = {}
-            for sig, group_keys in batch_groups.items():
-                for k in group_keys:
-                    key_to_group[k] = sig
+            # Build a set of all affected keys for O(1) lookup
+            affected_key_set_lookup: set[str] = set()
+            for group_keys in batch_groups.values():
+                affected_key_set_lookup.update(group_keys)
 
-            # Evaluated group results, keyed by OpSignature.
-            # Only one group's results are held at a time — each group is freed
-            # after all its keys have been written to the sink.
-            evaluated_groups: dict[OpSignature, dict[str, torch.Tensor]] = {}
-            evaluated_group_remaining: dict[OpSignature, int] = {}
+            # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+            # Write unaffected base weights to sink (one at a time, no full copy)
+            for key in manifest:
+                if key not in affected_key_set_lookup:
+                    sink.write_tensor(key, base_state[key])
 
             def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
                 def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
@@ -745,53 +748,40 @@ class WIDENExitNode:
             pbar_count = len(batch_groups) if batch_groups else 0
             pbar = ProgressBar(pbar_count) if ProgressBar is not None and pbar_count else None
 
-            sorted_all_keys = sorted(manifest.keys())
-            for key in sorted_all_keys:
-                if key not in key_to_group:
-                    # Unaffected base weight — write directly from base_state
-                    sink.write_tensor(key, base_state[key])
-                    continue
+            # Evaluate and write one group at a time.  The group's results are
+            # written to the sink immediately after evaluation and freed before
+            # the next group is evaluated.
+            for sig, group_keys in batch_groups.items():
+                n_models = len(set_affected) + len(model_loaders)
+                batch_size = compute_batch_size(
+                    sig.shape, n_models, compute_dtype,
+                )
+                group_base = {k: base_state[k] for k in group_keys}
+                group_results = evaluate_affected_group(
+                    keys=group_keys,
+                    base_tensors=group_base,
+                    eval_fn=eval_fn,
+                    batch_size=batch_size,
+                    device=device,
+                    dtype=compute_dtype,
+                    storage_dtype=storage_dtype,
+                )
 
-                sig = key_to_group[key]
+                # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+                # Hand completed group tensors to materialization immediately.
+                for key in group_keys:
+                    sink.write_tensor(key, group_results[key])
 
-                # Lazily evaluate this group when we encounter its first key
-                if sig not in evaluated_groups:
-                    group_keys = batch_groups[sig]
-                    n_models = len(set_affected) + len(model_loaders)
-                    batch_size = compute_batch_size(
-                        sig.shape, n_models, compute_dtype,
-                    )
-                    group_base = {k: base_state[k] for k in group_keys}
-                    group_results = evaluate_affected_group(
-                        keys=group_keys,
-                        base_tensors=group_base,
-                        eval_fn=eval_fn,
-                        batch_size=batch_size,
-                        device=device,
-                        dtype=compute_dtype,
-                        storage_dtype=storage_dtype,
-                    )
-                    # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
-                    # Hand completed group tensors to materialization immediately.
-                    evaluated_groups[sig] = group_results
-                    evaluated_group_remaining[sig] = len(group_keys)
-
-                    if pbar is not None:
-                        pbar.update(1)
-
-                # Write this affected key's tensor to the sink
-                sink.write_tensor(key, evaluated_groups[sig][key])
                 # AC: @streaming-full-model-materialization ac-affected-results-released
-                del evaluated_groups[sig][key]
-                evaluated_group_remaining[sig] -= 1
+                # Free this group's results before evaluating the next group.
+                del group_results
+                del group_base
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
 
-                # Free group results once all its keys have been written
-                if evaluated_group_remaining[sig] == 0:
-                    del evaluated_groups[sig]
-                    del evaluated_group_remaining[sig]
-                    gc.collect()
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
+                if pbar is not None:
+                    pbar.update(1)
 
             _log_memory("after-streaming-full")
 

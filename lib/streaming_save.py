@@ -150,11 +150,17 @@ class MaterializationSink:
     AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
     AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
 
-    The sink writes a safetensors file incrementally:
-    1. open() — compute and write the header from a manifest of all keys
-    2. write_tensor(name, tensor) — write one tensor's data (must be in sorted-name order)
+    The sink writes a safetensors file incrementally using random-access writes:
+    1. open() — compute and write the header, pre-allocate the data region
+    2. write_tensor(name, tensor) — seek to the tensor's offset and write (any order)
     3. finalize(save_path) — fsync and atomically replace save_path
     4. abort() — delete the temp file on failure
+
+    Tensors can be written in any order (not just sorted-name order) because
+    the header pre-computes byte offsets for every tensor. This allows
+    group-at-a-time evaluation: evaluate a group, write all its keys, free
+    the group, then evaluate the next group — even when groups' keys are
+    interleaved in sorted name order.
 
     Tensors can be released after write_tensor returns — they are not retained.
     """
@@ -162,8 +168,10 @@ class MaterializationSink:
     def __init__(self) -> None:
         self._file = None
         self._tmp_path: str | None = None
-        self._sorted_names: list[str] | None = None
-        self._write_index: int = 0
+        self._tensor_offsets: dict[str, int] | None = None
+        self._written: set[str] | None = None
+        self._total_count: int = 0
+        self._data_start: int = 0
         self._finalized: bool = False
         self._aborted: bool = False
 
@@ -187,12 +195,13 @@ class MaterializationSink:
             directory, f".ecaj_tmp_{suffix}_{os.path.basename(save_path)}"
         )
 
-        self._sorted_names = sorted(manifest.keys())
+        sorted_names = sorted(manifest.keys())
 
-        # Compute header
+        # Compute header and record per-tensor byte offsets
         header_info: dict[str, dict] = {}
+        tensor_offsets: dict[str, int] = {}
         current_offset = 0
-        for name in self._sorted_names:
+        for name in sorted_names:
             dt, shape = manifest[name]
             dtype_str = _DTYPE_MAP[dt]
             elem_size = torch.tensor([], dtype=dt).element_size()
@@ -205,7 +214,10 @@ class MaterializationSink:
                 "shape": list(shape),
                 "data_offsets": [current_offset, current_offset + nbytes],
             }
+            tensor_offsets[name] = current_offset
             current_offset += nbytes
+
+        total_data_bytes = current_offset
 
         # Build padded header
         combined: dict = {}
@@ -219,32 +231,50 @@ class MaterializationSink:
         self._file = open(self._tmp_path, "wb")
         self._file.write(struct.pack("<Q", len(padded)))
         self._file.write(padded)
-        self._write_index = 0
+
+        # Record where the data region starts (after header)
+        self._data_start = 8 + len(padded)
+
+        # Pre-allocate file to full size so seek-based writes land correctly
+        if total_data_bytes > 0:
+            self._file.seek(self._data_start + total_data_bytes - 1)
+            self._file.write(b"\x00")
+
+        self._tensor_offsets = tensor_offsets
+        self._written = set()
+        self._total_count = len(sorted_names)
 
     def write_tensor(self, name: str, tensor: torch.Tensor) -> None:
-        """Write a single tensor's data to the file.
+        """Write a single tensor's data to the file at its pre-computed offset.
 
-        Must be called in sorted-name order matching the manifest.
-        The tensor can be released after this call returns.
+        Can be called in any order — the header defines each tensor's byte
+        position.  The tensor can be released after this call returns.
 
         Args:
-            name: Tensor name (must match the next expected name in sorted order).
+            name: Tensor name (must be a key from the manifest).
             tensor: The tensor data to write.
 
         Raises:
-            RuntimeError: If called out of order or after finalize/abort.
+            RuntimeError: If sink not open, already finalized/aborted, or
+                name is not in the manifest / already written.
         """
-        if self._file is None or self._sorted_names is None:
+        if self._file is None or self._tensor_offsets is None or self._written is None:
             raise RuntimeError("MaterializationSink not open")
         if self._finalized or self._aborted:
             raise RuntimeError("MaterializationSink already finalized or aborted")
-        expected = self._sorted_names[self._write_index]
-        if name != expected:
+        if name not in self._tensor_offsets:
             raise RuntimeError(
-                f"write_tensor called out of order: expected {expected!r}, got {name!r}"
+                f"write_tensor called with unknown tensor name: {name!r}"
             )
+        if name in self._written:
+            raise RuntimeError(
+                f"write_tensor called twice for tensor: {name!r}"
+            )
+
+        offset = self._data_start + self._tensor_offsets[name]
+        self._file.seek(offset)
         self._file.write(_tensor_bytes(tensor))
-        self._write_index += 1
+        self._written.add(name)
 
     def finalize(self, save_path: str) -> None:
         """Flush, fsync, and atomically replace save_path with the completed file.
@@ -257,13 +287,13 @@ class MaterializationSink:
         Raises:
             RuntimeError: If not all tensors were written, or already finalized.
         """
-        if self._file is None or self._sorted_names is None:
+        if self._file is None or self._written is None:
             raise RuntimeError("MaterializationSink not open")
         if self._finalized or self._aborted:
             raise RuntimeError("MaterializationSink already finalized or aborted")
-        if self._write_index != len(self._sorted_names):
+        if len(self._written) != self._total_count:
             raise RuntimeError(
-                f"Cannot finalize: wrote {self._write_index}/{len(self._sorted_names)} tensors"
+                f"Cannot finalize: wrote {len(self._written)}/{self._total_count} tensors"
             )
 
         self._file.flush()

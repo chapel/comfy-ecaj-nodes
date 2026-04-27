@@ -6,6 +6,7 @@ AC coverage for:
   @comfy-memory-manager-compatibility
 """
 
+import json
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -347,9 +348,10 @@ class TestPatchModePreserved:
 class TestFullModeEventOrder:
     """Full mode with multiple affected groups records correct runtime event order.
 
-    Uses two affected groups with different tensor shapes (4x4 and 8x8) to
-    verify that group 1's affected tensors are written to the sink before
-    group 2 is evaluated.
+    Uses two affected groups with INTERLEAVED key names to verify that
+    each group is fully evaluated and written to the sink before the next
+    group is evaluated — even when the groups' keys would interleave in
+    sorted name order.
 
     AC: @streaming-full-model-materialization ac-direct-artifact-handoff
     AC: @streaming-full-model-materialization ac-affected-results-released
@@ -357,31 +359,25 @@ class TestFullModeEventOrder:
 
     # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
     # AC: @streaming-full-model-materialization ac-affected-results-released
-    def test_event_order_base_then_affected_then_finalize(
+    def test_event_order_interleaved_keys(
         self, tmp_path
     ):
-        """Full mode event order with two affected groups:
-        base weights written, group 1 evaluated + handed to materialization,
-        group 2 evaluated + handed to materialization, artifact finalized,
-        saved model loaded.
+        """Full mode event order with two affected groups whose keys interleave
+        in sorted name order.
 
-        Critically: group 1 writes happen BEFORE group 2 evaluation.
+        Group 1 (4x4): keys "a" and "z"
+        Group 2 (8x8): keys "b" and "c"
+        Sorted order: a, b, c, z  (interleaved!)
+
+        The streaming loop must evaluate group 1, write BOTH of its keys
+        (a and z), free group 1, THEN evaluate group 2 and write its keys.
+        Group 1's 'z' result must NOT remain resident while group 2 is
+        evaluated.
         """
-        # Create a model patcher with mixed-shape keys to produce two groups.
-        # Group 1 (4x4): input/middle keys
-        # Group 2 (8x8): output keys
-        group1_keys = [
-            "diffusion_model.input_blocks.0.0.weight",
-            "diffusion_model.middle_block.0.weight",
-        ]
-        group2_keys = [
-            "diffusion_model.output_blocks.0.0.weight",
-            "diffusion_model.output_blocks.1.0.weight",
-        ]
-        # Add a base-only key (not affected) to test base weight interleaving
-        base_only_key = "diffusion_model.base_only.weight"
+        group1_keys = ["a", "z"]
+        group2_keys = ["b", "c"]
+        base_only_key = "base_only"
         all_keys = group1_keys + group2_keys
-        affected_keys = set(all_keys)
 
         state_dict = {}
         for k in group1_keys:
@@ -400,7 +396,6 @@ class TestFullModeEventOrder:
         import uuid
         mock_patcher.patches_uuid = uuid.uuid4()
 
-        # Make clone() return a proper clone-like object
         def _clone():
             c = MockModelPatcher.__new__(MockModelPatcher)
             c._state_dict = mock_patcher._state_dict
@@ -422,7 +417,6 @@ class TestFullModeEventOrder:
             mock_patcher, all_keys, recipe=merge,
         )
 
-        # Pre-build per-group results
         group1_results = {k: torch.randn(4, 4) for k in group1_keys}
         group2_results = {k: torch.randn(8, 8) for k in group2_keys}
 
@@ -432,7 +426,6 @@ class TestFullModeEventOrder:
 
         def recording_eval(**kwargs):
             called_keys = kwargs.get("keys", [])
-            # Determine which group based on keys
             if set(called_keys) <= set(group1_keys):
                 events.append("eval:g1")
                 return group1_results
@@ -483,9 +476,10 @@ class TestFullModeEventOrder:
         assert "finalize" in events
         assert "saved_model_loaded" in events
 
-        # Group 1 writes must happen BEFORE group 2 evaluation.
-        # This is the critical streaming assertion — group 1 results are
-        # handed to materialization before group 2 starts evaluating.
+        # Group 1 writes must ALL happen BEFORE group 2 evaluation.
+        # This is the critical streaming assertion — even though group 1 key
+        # "z" sorts after group 2 keys "b"/"c", group 1's results must be
+        # fully written and freed before group 2 evaluation begins.
         g1_write_events = [e for e in events if e.startswith("write:g1:")]
         g2_write_events = [e for e in events if e.startswith("write:g2:")]
         assert len(g1_write_events) == len(group1_keys)
@@ -682,6 +676,7 @@ class TestFullArtifactCacheHit:
 
     AC: @full-saved-model-output ac-cache-reuses-artifact
     AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    AC: @full-saved-model-output ac-return-loaded-model
     """
 
     # AC: @full-saved-model-output ac-cache-reuses-artifact
@@ -691,18 +686,25 @@ class TestFullArtifactCacheHit:
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        key = "diffusion_model.input_blocks.0.0.weight"
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        affected_key = keys[0]
         save_path = str(tmp_path / "cached.safetensors")
 
-        # Create artifact with full-mode metadata
+        # Create a full artifact with ALL model keys (affected + unaffected).
+        # Use distinct values so we can verify the returned model loads from
+        # the artifact, not the original base.
+        artifact_tensors = {}
+        for k in keys:
+            artifact_tensors[k] = torch.ones(4, 4) * 42.0
+
         save_file(
-            {key: torch.randn(4, 4)},
+            artifact_tensors,
             save_path,
             metadata={
                 "__ecaj_version__": "1",
                 "__ecaj_recipe__": "{}",
                 "__ecaj_recipe_hash__": "match",
-                "__ecaj_affected_keys__": f'["{key}"]',
+                "__ecaj_affected_keys__": json.dumps([affected_key]),
                 "__ecaj_output_mode__": "full",
             },
         )
@@ -723,7 +725,64 @@ class TestFullArtifactCacheHit:
             mock_analyze.assert_not_called()
 
         assert result is not mock_model_patcher
-        assert key in result.patches
+        # All keys (affected AND unaffected) must be loaded from the artifact
+        # as set patches — the returned model is fully artifact-backed.
+        for k in keys:
+            assert k in result.patches
+
+    # AC: @full-saved-model-output ac-return-loaded-model
+    # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    def test_artifact_load_returns_full_model_weights(self, mock_model_patcher, tmp_path):
+        """_load_model_from_artifact loads ALL keys from the artifact, not just
+        affected keys.  The returned model's weights come entirely from the
+        saved artifact.
+
+        A runtime probe: create an artifact with an unaffected key b=20.0 and
+        the original base b=2.0.  The returned model must have b=20.0
+        (from the artifact), not b=2.0 (from the original base).
+        """
+        from nodes.exit import _load_model_from_artifact
+
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        affected_key = keys[0]
+        unaffected_key = keys[1]
+        save_path = str(tmp_path / "full_artifact.safetensors")
+
+        # Build artifact with distinctive values
+        artifact_tensors = {}
+        for k in keys:
+            artifact_tensors[k] = torch.ones(4, 4) * 20.0
+
+        save_file(
+            artifact_tensors,
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "match",
+                "__ecaj_affected_keys__": json.dumps([affected_key]),
+                "__ecaj_output_mode__": "full",
+            },
+        )
+
+        result = _load_model_from_artifact(
+            save_path, mock_model_patcher, torch.float32,
+        )
+
+        # Result must have patches for ALL keys, not just affected
+        assert affected_key in result.patches
+        assert unaffected_key in result.patches
+
+        # The patches must contain the artifact's values (20.0), not the
+        # original base values.  Extract the set-patch tensor.
+        for k in keys:
+            patch_entries = result.patches[k]
+            # Entry format: (strength_patch, ("set", (tensor,)), strength_model, None, None)
+            strength_patch, (kind, (tensor,)), strength_model, _, _ = patch_entries[-1]
+            assert kind == "set"
+            assert torch.allclose(tensor, torch.ones(4, 4) * 20.0), (
+                f"Key {k} should have artifact value 20.0, got {tensor[0, 0].item()}"
+            )
 
 
 # ===========================================================================
@@ -1149,19 +1208,49 @@ class TestMaterializationSink:
         assert not os.path.exists(tmp_path_before)
         assert not os.path.exists(save_path)
 
-    def test_write_out_of_order_raises(self, tmp_path):
-        """Writing tensors out of sorted order should raise RuntimeError."""
+    def test_write_out_of_order_succeeds(self, tmp_path):
+        """Sink supports random-access writes — any order is valid."""
         manifest = {
             "a": (torch.float32, (4, 4)),
             "b": (torch.float32, (4, 4)),
         }
+        tensors = {"a": torch.randn(4, 4), "b": torch.randn(4, 4)}
         save_path = str(tmp_path / "order_test.safetensors")
 
         sink = MaterializationSink()
         sink.open(manifest, save_path)
+        # Write b before a — out of sorted order
+        sink.write_tensor("b", tensors["b"])
+        sink.write_tensor("a", tensors["a"])
+        sink.finalize(save_path)
 
-        with pytest.raises(RuntimeError, match="out of order"):
-            sink.write_tensor("b", torch.randn(4, 4))
+        with safe_open(save_path, framework="pt") as f:
+            for k, v in tensors.items():
+                loaded = f.get_tensor(k)
+                assert torch.allclose(v, loaded)
+
+    def test_write_unknown_tensor_raises(self, tmp_path):
+        """Writing a tensor not in the manifest should raise RuntimeError."""
+        manifest = {"a": (torch.float32, (4, 4))}
+        save_path = str(tmp_path / "unknown_test.safetensors")
+
+        sink = MaterializationSink()
+        sink.open(manifest, save_path)
+
+        with pytest.raises(RuntimeError, match="unknown tensor name"):
+            sink.write_tensor("z", torch.randn(4, 4))
+
+    def test_write_duplicate_tensor_raises(self, tmp_path):
+        """Writing the same tensor twice should raise RuntimeError."""
+        manifest = {"a": (torch.float32, (4, 4))}
+        save_path = str(tmp_path / "dup_test.safetensors")
+
+        sink = MaterializationSink()
+        sink.open(manifest, save_path)
+        sink.write_tensor("a", torch.randn(4, 4))
+
+        with pytest.raises(RuntimeError, match="called twice"):
+            sink.write_tensor("a", torch.randn(4, 4))
 
     def test_finalize_without_all_tensors_raises(self, tmp_path):
         """Finalize without writing all tensors should raise RuntimeError."""
