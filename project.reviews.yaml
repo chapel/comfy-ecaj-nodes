@@ -16,6 +16,17 @@ reviews:
         required: true
         created_at: 2026-04-27T02:03:18.568Z
         completed_at: 2026-04-27T02:03:18.568Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: kspec plan import plans/full-saved-model-output.md --dry-run completed successfully with
+          no changes made.
+        name: Plan import dry-run
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T02:03:18.581Z
+        completed_at: 2026-04-27T02:03:18.581Z
     events:
       - _ulid: 01KQ6ASZ7AXT323W7SCDVWJ8K5
         actor: Jacob Chapel
@@ -30,6 +41,13 @@ reviews:
           status: pass
           name: Prior blocker recheck
         timestamp: 2026-04-27T02:03:18.571Z
+      - _ulid: 01KQ6ATF5RXY0WG2CYNCX208DR
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Plan import dry-run
+        timestamp: 2026-04-27T02:03:18.584Z
     examined_commit: null
     external_links: []
     lifecycle_state: draft
@@ -42,5 +60,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T02:03:02.250Z
-    updated_at: 2026-04-27T02:03:18.568Z
+    updated_at: 2026-04-27T02:03:18.581Z
     notes: []
