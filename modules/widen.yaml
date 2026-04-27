@@ -276,7 +276,8 @@ features:
         id: ac-7
         then: the additional LoRA patches apply additively on top of the set patches
         when: a downstream ComfyUI LoRA node applies additional patches
-      - given: the base ModelPatcher uses bf16 weights
+      - given: the base ModelPatcher uses bf16 weights and the Exit node is using in-memory patch output
+          mode
         id: ac-8
         then: patch tensors match the base model storage dtype
         when: set patches are installed
