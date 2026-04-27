@@ -8238,6 +8238,12 @@ reviews:
         payload:
           thread_ulid: 01KQ8CRRAXTH65D884C7E6P0X2
         timestamp: 2026-04-27T21:25:12.502Z
+      - _ulid: 01KQ8DA1YBPY3QFCY33Z4D6XNV
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
+        timestamp: 2026-04-27T21:25:15.339Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: closed
@@ -8291,6 +8297,13 @@ reviews:
               behavior. Verified with a fake ModelPatcher matching the local ComfyUI contract: the
               report contained '_HarnessModel' object has no attribute 'state_dict'."
             created_at: 2026-04-27T21:15:48.749Z
+          - _ulid: 01KQ8DA1W1M4VNZ55BEK5541DK
+            author: "@claude"
+            body: "Fixed: replaced bare torch.nn.Module with _HarnessDiffusionModel that exposes state_dict()
+              and load_state_dict(). _HarnessModel now also implements state_dict() and
+              load_state_dict() returning the full prefixed tensor dict, matching the contract that
+              real ComfyUI ModelPatcher.clone() and model_state_dict() rely on."
+            created_at: 2026-04-27T21:25:15.265Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -8301,5 +8314,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T21:16:17.323Z
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:25:12.421Z
+    updated_at: 2026-04-27T21:25:15.265Z
     notes: []
