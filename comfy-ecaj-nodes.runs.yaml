@@ -4088,7 +4088,7 @@ runs:
     completed_at: 2026-04-27T17:18:38.364Z
   - _ulid: 01KQ7ZF0FFMTKV0AYB6T59GX3E
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -4102,7 +4102,18 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T17:23:48.998Z
-        completed_at: 2026-04-27T17:23:48.998Z
+        completed_at: 2026-04-27T17:24:09.960Z
+        notes: "Identified one high-confidence friction point: ad-hoc behavioral probes for node modules are
+          cumbersome because direct python imports of nodes.exit fail package-relative imports,
+          while uv run python did not expose torch in this environment; the working probe required
+          manually loading the repository package with importlib. Identified one success pattern:
+          event-order runtime probes catch false AC coverage after tests pass, but this is already
+          covered by existing observations such as frame-inspection/evidence-probe review successes,
+          so no duplicate success capture."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T17:24:09.960Z
+        completed_at: 2026-04-27T17:24:09.960Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T17:23:17.615Z
