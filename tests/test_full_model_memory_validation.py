@@ -539,7 +539,16 @@ class TestMeasuredMemoryBehavior:
     # AC: @comfy-memory-manager-compatibility ac-measured-memory-behavior
     def test_comparative_validation_reports_memory_behavior(self, tmp_path, monkeypatch):
         """Run the same recipe with both output modes and validate the memory
-        behavior report covers all required fields."""
+        behavior report covers all required fields.
+
+        The AC requires that the validation output reports:
+        - active ComfyUI memory mode
+        - peak RAM and peak GPU memory
+        - returned-model behavior
+        - whether merged affected weights remain persistently resident
+        """
+        import resource
+
         # Configure Dynamic VRAM as active
         mm = ModuleType("comfy.model_management")
         mm.DISABLE_SMART_MEMORY = False
@@ -557,7 +566,7 @@ class TestMeasuredMemoryBehavior:
         memory_mode = detect_memory_mode()
         assert memory_mode["dynamic_vram_active"] is True
 
-        # --- Run patches mode (control) ---
+        # --- Run patches mode (control) with RSS measurement ---
         from lib.batch_groups import OpSignature
         from lib.recipe_eval import EvalPlan
 
@@ -583,6 +592,9 @@ class TestMeasuredMemoryBehavior:
 
         node = WIDENExitNode()
 
+        # Measure peak RSS around patches mode execution
+        rss_before_patches = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
@@ -596,16 +608,25 @@ class TestMeasuredMemoryBehavior:
         ):
             (patches_result,) = node.execute(recipe, output_mode=OUTPUT_MODE_PATCHES)
 
-        # --- Run full saved model mode ---
-        fake_loaded = MagicMock()
+        rss_after_patches = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
+        # --- Run full saved model mode with RSS measurement ---
+        # Use a real MockModelPatcher loaded from artifact to observe memory behavior
+        fake_loaded = MockModelPatcher(keys=_ALL_KEYS)
         fake_loaded.load_device = "cuda"
         fake_loaded.offload_device = "cpu"
-        fake_loaded.patches = {}  # No in-memory patches
+        # Real loaded model has NO set patches — weights are on disk
+        assert len(fake_loaded.patches) == 0
 
         full_model_patches = _make_exit_patches(patcher, recipe, merged, save_path)
         full_model_patches["nodes.exit.load_saved_model"] = fake_loaded
 
         _incremental_cache.clear()  # Reset between runs
+
+        rss_before_full = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        gpu_before_full = (
+            torch.cuda.memory_allocated() if torch.cuda.is_available() else 0
+        )
 
         def run_full():
             return node.execute(
@@ -616,20 +637,58 @@ class TestMeasuredMemoryBehavior:
 
         (full_result,) = _run_with_patches(full_model_patches, run_full)
 
-        # --- Build validation report ---
+        rss_after_full = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        gpu_after_full = (
+            torch.cuda.memory_allocated() if torch.cuda.is_available() else 0
+        )
+
+        # --- Observe returned model state (not hardcoded) ---
+        # Patches mode: inspect whether patches dict contains set patches
+        patches_has_set_patches = len(patches_result.patches) > 0
+        patches_affected_resident = any(
+            any(
+                isinstance(entry[1], tuple) and entry[1][0] == "set"
+                for entry in entries
+            )
+            for entries in patches_result.patches.values()
+        )
+
+        # Full model mode: inspect returned model for in-memory patch payload
+        full_has_set_patches = len(getattr(full_result, "patches", {})) > 0
+        full_affected_resident = any(
+            any(
+                isinstance(entry[1], tuple) and entry[1][0] == "set"
+                for entry in entries
+            )
+            for entries in getattr(full_result, "patches", {}).values()
+        ) if full_has_set_patches else False
+
+        # --- Build validation report from observed measurements ---
+        # Convert ru_maxrss (KB on Linux) to MB
+        peak_rss_patches_mb = rss_after_patches // 1024
+        peak_rss_full_mb = rss_after_full // 1024
+        peak_gpu_full_mb = gpu_after_full // (1024 * 1024) if gpu_after_full else 0
+
         report = {
             "memory_mode": memory_mode["mode_name"],
             "dynamic_vram_active": memory_mode["dynamic_vram_active"],
+            "peak_rss_mb": {
+                "patches_mode": peak_rss_patches_mb,
+                "full_model_mode": peak_rss_full_mb,
+            },
+            "peak_gpu_mb": peak_gpu_full_mb
+            if torch.cuda.is_available()
+            else "cuda_unavailable",
             "patches_mode": {
                 "returned_model_type": "patched_clone",
-                "has_set_patches": len(patches_result.patches) > 0,
-                "affected_weights_resident": True,
+                "has_set_patches": patches_has_set_patches,
+                "affected_weights_resident": patches_affected_resident,
                 "model_is_clone_of_base": patches_result.is_clone(patcher),
             },
             "full_model_mode": {
                 "returned_model_type": "comfy_loaded_model",
-                "has_set_patches": len(getattr(full_result, "patches", {})) == 0,
-                "affected_weights_resident": False,
+                "has_set_patches": full_has_set_patches,
+                "affected_weights_resident": full_affected_resident,
                 "model_loaded_via_comfy": hasattr(full_result, "load_device"),
             },
         }
@@ -639,13 +698,18 @@ class TestMeasuredMemoryBehavior:
         # Report covers required fields
         assert report["memory_mode"] == "dynamic_vram"
         assert report["dynamic_vram_active"] is True
+        assert "peak_rss_mb" in report
+        assert "peak_gpu_mb" in report
+        assert isinstance(report["peak_rss_mb"]["patches_mode"], int)
+        assert isinstance(report["peak_rss_mb"]["full_model_mode"], int)
 
-        # Patches mode: affected weights ARE resident (in-memory payload)
+        # Patches mode: affected weights ARE resident (in-memory set patches)
         assert report["patches_mode"]["has_set_patches"] is True
         assert report["patches_mode"]["affected_weights_resident"] is True
 
         # Full model mode: affected weights are NOT persistently resident
-        assert report["full_model_mode"]["has_set_patches"] is True
+        # (observed from returned model's patches dict, not hardcoded)
+        assert report["full_model_mode"]["has_set_patches"] is False
         assert report["full_model_mode"]["affected_weights_resident"] is False
         assert report["full_model_mode"]["model_loaded_via_comfy"] is True
 
@@ -720,16 +784,24 @@ class TestMeasuredMemoryBehavior:
         """Affected weights produced by both output modes should be equivalent.
 
         Patches mode stores merged tensors as set patches. Full saved model
-        mode writes them to disk and loads via Comfy. Both should produce
-        the same affected weight values for the same recipe.
+        mode writes them to disk via CheckpointMaterializationSink and the
+        artifact is loaded back. Both should produce the same affected weight
+        values for the same recipe.
+
+        This test runs BOTH output modes end-to-end and reads the artifact
+        from disk to verify equivalence, so a bug in CheckpointMaterializationSink,
+        load_saved_model, or artifact writing would be caught.
         """
+        from safetensors import safe_open
+
+        from lib.batch_groups import OpSignature
+        from lib.checkpoint_materialization import CheckpointMaterializationSink
+        from lib.recipe_eval import EvalPlan
+
         patcher = _make_patcher()
         recipe = _make_recipe(patcher)
         merged = _merged_tensors_for(_AFFECTED_KEYS)
-
-        # --- Patches mode: extract set patch tensors ---
-        from lib.batch_groups import OpSignature
-        from lib.recipe_eval import EvalPlan
+        save_path = tmp_path / "model.safetensors"
 
         sig = OpSignature(shape=(4, 4), ndim=2)
         affected_set = set(merged.keys())
@@ -753,6 +825,7 @@ class TestMeasuredMemoryBehavior:
 
         node = WIDENExitNode()
 
+        # --- Run patches mode: extract set patch tensors ---
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
@@ -776,16 +849,89 @@ class TestMeasuredMemoryBehavior:
                 if isinstance(patch_value, tuple) and patch_value[0] == "set":
                     patches_tensors[key] = patch_value[1][0]
 
-        # --- Full saved model mode: simulate what gets written to artifact ---
-        # The merged tensors that would be written are the same `merged` dict
-        for key in _AFFECTED_KEYS:
-            assert key in merged
-            if key in patches_tensors:
-                # Both modes used the same eval output, so values should match
+        assert len(patches_tensors) == len(_AFFECTED_KEYS), (
+            "Patches mode should have set patches for all affected keys"
+        )
+
+        # --- Run full saved model mode: writes artifact via CheckpointMaterializationSink ---
+        # Use the real CheckpointMaterializationSink (not mocked) so the artifact
+        # is actually written to disk. Only mock load_saved_model to return a
+        # MockModelPatcher loaded from the artifact we just wrote.
+        _incremental_cache.clear()
+
+        def load_from_written_artifact(path):
+            """Simulate comfy.sd.load_diffusion_model by reading the artifact."""
+            loaded_patcher = MockModelPatcher(keys=_ALL_KEYS)
+            with safe_open(path, framework="pt", device="cpu") as f:
+                for key in f.keys():
+                    loaded_patcher._state_dict[key] = f.get_tensor(key)
+            loaded_patcher.model = type(loaded_patcher.model)(loaded_patcher._state_dict)
+            loaded_patcher.load_device = "cuda"
+            loaded_patcher.offload_device = "cpu"
+            return loaded_patcher
+
+        # Use the real CheckpointMaterializationSink but mock other pipeline stages
+        real_mat_sink_cls = CheckpointMaterializationSink
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=str(save_path)),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_cache", return_value=None),
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: list(affected_set)}),
+            patch("nodes.exit.chunked_evaluation", return_value=merged),
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.CheckpointMaterializationSink", real_mat_sink_cls),
+            patch("nodes.exit.build_metadata", return_value={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_affected_keys__": json.dumps(sorted(merged.keys())),
+                "__ecaj_artifact_kind__": "full_model",
+            }),
+            patch("nodes.exit.load_saved_model", side_effect=load_from_written_artifact),
+        ):
+            (full_result,) = node.execute(
+                recipe,
+                output_mode=OUTPUT_MODE_FULL_MODEL,
+                model_name="model",
+            )
+
+        # --- Verify the artifact was written to disk ---
+        assert save_path.exists(), "Full model mode should write an artifact to disk"
+
+        # --- Read artifact from disk and compare affected weights ---
+        with safe_open(str(save_path), framework="pt", device="cpu") as f:
+            for key in _AFFECTED_KEYS:
+                artifact_tensor = f.get_tensor(key)
+                assert key in patches_tensors, (
+                    f"Patches mode should have produced a set patch for {key}"
+                )
                 assert torch.allclose(
-                    patches_tensors[key],
-                    merged[key].to(dtype=patches_tensors[key].dtype),
-                ), f"Affected weight {key} differs between modes"
+                    artifact_tensor,
+                    patches_tensors[key].to(dtype=artifact_tensor.dtype),
+                ), (
+                    f"Affected weight {key} differs between artifact on disk "
+                    f"(full model mode) and set patches (patches mode)"
+                )
+
+        # --- Also verify via the loaded model returned by full_model mode ---
+        for key in _AFFECTED_KEYS:
+            loaded_tensor = full_result._state_dict[key]
+            assert torch.allclose(
+                loaded_tensor,
+                patches_tensors[key].to(dtype=loaded_tensor.dtype),
+            ), (
+                f"Affected weight {key} differs between loaded model "
+                f"(full model mode return) and set patches (patches mode)"
+            )
 
     # AC: @comfy-memory-manager-compatibility ac-measured-memory-behavior
     def test_memory_logging_captures_rss_and_vram(self, tmp_path, caplog):
@@ -983,20 +1129,30 @@ class TestOptionalIntegrationScript:
     # AC: @comfy-memory-manager-compatibility ac-measured-memory-behavior
     def test_full_validation_report_shape(self, monkeypatch):
         """The full validation report contains all required fields regardless
-        of environment availability."""
+        of environment availability. RSS is measured from process state."""
+        import resource
+
         mm = ModuleType("comfy.model_management")
         mm.DISABLE_SMART_MEMORY = False
         monkeypatch.setitem(sys.modules, "comfy.model_management", mm)
 
         mode = detect_memory_mode()
 
+        # Measure actual peak RSS from process
+        peak_rss_kb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        peak_rss_mb = peak_rss_kb // 1024
+
+        # Measure actual GPU memory if available
+        if torch.cuda.is_available():
+            peak_gpu_mb = torch.cuda.memory_allocated() // (1024 * 1024)
+        else:
+            peak_gpu_mb = "cuda_unavailable"
+
         report = {
             "comfy_memory_mode": mode["mode_name"],
             "dynamic_vram_active": mode["dynamic_vram_active"],
-            "peak_rss_mb": "measured_at_runtime",
-            "peak_gpu_mb": "measured_at_runtime"
-            if torch.cuda.is_available()
-            else "cuda_unavailable",
+            "peak_rss_mb": peak_rss_mb,
+            "peak_gpu_mb": peak_gpu_mb,
             "returned_model_behavior": {
                 "patches_mode": "patched_clone_with_set_patches",
                 "full_model_mode": "comfy_loaded_from_artifact",
@@ -1016,6 +1172,10 @@ class TestOptionalIntegrationScript:
         assert "returned_model_behavior" in report
         assert "affected_weights_persistent" in report
         assert "requires_dynamic_vram_disabled" in report
+
+        # Peak RSS is a real measurement (not a placeholder)
+        assert isinstance(report["peak_rss_mb"], int)
+        assert report["peak_rss_mb"] > 0
 
         # Validation assertions
         assert report["requires_dynamic_vram_disabled"] is False
