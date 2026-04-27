@@ -743,6 +743,18 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T17:18:18.023Z
+  - _ulid: 01KQ7ZHHHRQCGY2A92RV7RM2E9
+    type: friction
+    content: "Ad-hoc behavioral review probes for package modules are still cumbersome outside pytest:
+      direct python imports of nodes.exit hit package-relative import errors, and the working probe
+      required manually loading the repository package with importlib before patching module
+      objects. Existing @01KH5HAK covered pytest collection/ComfyUI import setup, but not this
+      review-probe path."
+    author: codex
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KQ7ZF0"
+    created_at: 2026-04-27T17:24:40.632Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
