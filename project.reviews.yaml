@@ -1750,6 +1750,19 @@ reviews:
         runner: ruff
         created_at: 2026-04-27T05:50:52.701Z
         completed_at: 2026-04-27T05:50:52.701Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found behavioral AC annotations for @streaming-full-model-materialization
+          ac-affected-results-released in tests/test_chunked_evaluation_to_sink.py;
+          source-scanning/placeholder scan found no assert True, pass-only,
+          read_text/open/Path/getsource patterns
+        name: AC annotation scan
+        required: true
+        runner: rg
+        created_at: 2026-04-27T05:50:52.837Z
+        completed_at: 2026-04-27T05:50:52.837Z
     events:
       - _ulid: 01KQ6QR9EBH5WEXP2TX09YBH2R
         actor: Jacob Chapel
@@ -1771,6 +1784,13 @@ reviews:
           status: pass
           name: ruff check
         timestamp: 2026-04-27T05:50:52.724Z
+      - _ulid: 01KQ6QV5DSYN05DP2MDRY32S23
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation scan
+        timestamp: 2026-04-27T05:50:52.857Z
     examined_commit: 7aa32f955955f3f5dded79e6972a7e8162b65eaa
     external_links: []
     lifecycle_state: open
@@ -1783,5 +1803,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:49:18.668Z
-    updated_at: 2026-04-27T05:50:52.701Z
+    updated_at: 2026-04-27T05:50:52.837Z
     notes: []
