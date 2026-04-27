@@ -4770,7 +4770,7 @@ runs:
     started_at: 2026-04-27T19:28:57.495Z
     completed_at: 2026-04-27T19:30:12.302Z
   - _ulid: 01KQ87927YM9K204SMBT5JE33P
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -4857,7 +4857,16 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T19:40:58.058Z
-        completed_at: 2026-04-27T19:40:58.058Z
+        completed_at: 2026-04-27T19:41:22.333Z
+        notes: |-
+          Captured 2 items:
+          1. Friction: behavioral test depth causing extended fix cycles (related to 01KQ815T)
+          2. Success: explicit 'Required dynamic tests' section in task specs reduces ambiguity
+
+          Skipped 2 items (already tracked):
+          - Review thread truncation (01KQ82107)
+          - Read all threads first pattern (01KQ6SHR)
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:39:51.422Z
+    completed_at: 2026-04-27T19:41:22.333Z
