@@ -2934,3 +2934,29 @@ reviews:
     created_at: 2026-04-27T08:00:54.837Z
     updated_at: 2026-04-27T08:02:54.257Z
     notes: []
+  - _ulid: 01KQ704N1Q137JQ4KTN495BHS1
+    slugs: []
+    title: Review full model memory validation
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ704N1JHTYRRDWYP18F65HC
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T08:15:52.370Z
+    examined_commit: afa071697a2de53c89279a71551e917536fb468c
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ6HRA1PMN922FBX8STVEFST"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T08:15:52.375Z
+    updated_at: null
+    notes: []
