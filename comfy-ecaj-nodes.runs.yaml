@@ -5370,7 +5370,7 @@ runs:
     started_at: 2026-04-27T21:08:43.493Z
     completed_at: 2026-04-27T21:10:20.692Z
   - _ulid: 01KQ8CTY0K136VKNQ7Z67Q6M84
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -5402,10 +5402,14 @@ runs:
           failure: it is high-signal as check evidence for this review, but as process friction it
           overlaps existing full-suite fragility tracking (@01KQ6ZJF) and this single run is not
           enough to justify a separate item."
-      - status: completed
+      - status: skipped
         step_index: 3
         started_at: 2026-04-27T21:18:09.876Z
-        completed_at: 2026-04-27T21:18:09.876Z
+        completed_at: 2026-04-27T21:18:17.090Z
+        notes: No new items captured. High-confidence findings were already covered by existing
+          observations, and the remaining low-RAM full-suite issue was kept as review check evidence
+          rather than promoted to new process tracking.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T21:16:59.796Z
+    completed_at: 2026-04-27T21:18:17.090Z
