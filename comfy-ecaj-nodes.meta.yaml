@@ -783,6 +783,27 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T17:53:13.543Z
+  - _ulid: 01KQ821066AEDEJZX0HYX122RW
+    type: success
+    content: "Random-access MaterializationSink resolved interleaved group streaming: safetensors header
+      pre-computes byte offsets for every tensor, so the data region can be written in any order via
+      seek. This decoupled write order from evaluation order, enabling true group-at-a-time
+      processing where each group is fully written and freed before the next is evaluated —
+      regardless of how group keys interleave in sorted name order."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T18:08:04.294Z
+  - _ulid: 01KQ82107PY8PY8RMES38YZXDD
+    type: friction
+    content: kspec review get truncates thread body text in the summary line (shows ~80 chars + ...).
+      Agents must grep raw YAML to read full blocker descriptions. The CLI should show full thread
+      body or offer an expand option. Every fix-cycle agent hits this — review threads are the
+      primary input for fix cycles.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T18:08:04.342Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
