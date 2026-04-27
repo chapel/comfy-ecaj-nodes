@@ -6811,6 +6811,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
         timestamp: 2026-04-27T19:48:29.897Z
+      - _ulid: 01KQ87S7541FWGXTYZF369PJ5Q
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ87S730XR5W5MSNKNXHYBMA
+        timestamp: 2026-04-27T19:48:40.740Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: open
@@ -6952,7 +6959,25 @@ reviews:
               payload.
             created_at: 2026-04-27T19:48:29.835Z
         kind: blocker
+      - _ulid: 01KQ87S730XR5W5MSNKNXHYBMA
+        anchor:
+          type: code
+          commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+          line_end: 1186
+          line_start: 1154
+          path: tests/test_full_model_streaming.py
+          side: head
+        entries:
+          - _ulid: 01KQ87S730G9NYTGPFGNQRJD7J
+            author: Jacob Chapel
+            body: This cross-mode isolation test never exercises patch mode or the patch cache path. It only
+              checks that full mode leaves _incremental_cache empty and that the artifact metadata
+              says output_mode=full. That does not prove a full-model artifact is not treated as a
+              patch-mode tensor payload; add a patch-mode execution/cache probe that would fail if
+              full artifacts were consumed as patch tensor payloads.
+            created_at: 2026-04-27T19:48:40.672Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T19:48:29.835Z
+    updated_at: 2026-04-27T19:48:40.672Z
     notes: []
