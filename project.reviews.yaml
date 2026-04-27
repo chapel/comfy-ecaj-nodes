@@ -3014,6 +3014,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ708YF30XR83QRPTAPX267B
         timestamp: 2026-04-27T08:18:13.122Z
+      - _ulid: 01KQ708YMQ48Q8C2639YGNPJAQ
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ708YKWJBA8QRGNMZ4KTVM9
+        timestamp: 2026-04-27T08:18:13.271Z
     examined_commit: afa071697a2de53c89279a71551e917536fb468c
     external_links: []
     lifecycle_state: open
@@ -3045,7 +3052,26 @@ reviews:
               real RSS/VRAM peak comparison."
             created_at: 2026-04-27T08:18:13.092Z
         kind: blocker
+      - _ulid: 01KQ708YKWJBA8QRGNMZ4KTVM9
+        anchor:
+          type: code
+          commit: afa071697a2de53c89279a71551e917536fb468c
+          line_end: 788
+          line_start: 779
+          path: tests/test_full_model_memory_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQ708YKWJMVEDFQEYKEE9H5P
+            author: Jacob Chapel
+            body: "MUST-FIX: The affected-weight equivalence test does not run the full saved model output or
+              inspect the saved/loaded artifact. It compares the patches-mode set patch tensors to
+              the same injected merged dict used to stub chunked_evaluation, so a bug in
+              CheckpointMaterializationSink, load_saved_model, or full-model artifact contents would
+              not fail this test. The task explicitly calls for running both output modes and
+              asserting downstream/application equivalence for affected keys."
+            created_at: 2026-04-27T08:18:13.244Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T08:15:52.375Z
-    updated_at: 2026-04-27T08:18:13.092Z
+    updated_at: 2026-04-27T08:18:13.244Z
     notes: []
