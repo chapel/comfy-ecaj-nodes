@@ -4148,6 +4148,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T18:12:31.200Z
         completed_at: 2026-04-27T18:12:31.200Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: kspec validate --warnings-ok passed; schema/references OK, existing alignment/completeness
+          warnings reported.
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T18:12:31.402Z
+        completed_at: 2026-04-27T18:12:31.402Z
     events:
       - _ulid: 01KQ822FQKTDX179J2MGPCR9NQ
         actor: Jacob Chapel
@@ -4176,6 +4187,13 @@ reviews:
           status: pass
           name: full pytest
         timestamp: 2026-04-27T18:12:31.241Z
+      - _ulid: 01KQ82952PMVZ1RPW256JMWMM6
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-27T18:12:31.447Z
     examined_commit: 2564ca6e52b64b52693022dda5479761d0c66018
     external_links: []
     lifecycle_state: open
@@ -4188,5 +4206,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T18:08:52.979Z
-    updated_at: 2026-04-27T18:12:31.200Z
+    updated_at: 2026-04-27T18:12:31.402Z
     notes: []
