@@ -3080,7 +3080,7 @@ runs:
     completed_at: 2026-04-27T05:26:03.431Z
   - _ulid: 01KQ6PS888HJD0RPA1RJEFCF4W
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3104,7 +3104,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T05:33:11.637Z
-        completed_at: 2026-04-27T05:33:11.637Z
+        completed_at: 2026-04-27T05:33:24.047Z
+        notes: "Decision: capture one unique high-confidence success observation about frame-inspection
+          probes for memory-lifetime reviews. Skip new friction capture because the only workflow
+          friction encountered is already covered by observation 01KQ6N3MY, and the retained
+          merged_cpu defect is already tracked by blocker threads on review @01KQ6PJ7."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T05:33:24.047Z
+        completed_at: 2026-04-27T05:33:24.047Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:32:21.640Z
