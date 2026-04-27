@@ -8099,6 +8099,17 @@ reviews:
         runner: rg
         created_at: 2026-04-27T21:15:49.046Z
         completed_at: 2026-04-27T21:15:49.046Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "python -m ruff check scripts/manual/real_comfy_memory_validation.py
+          tests/test_real_comfy_memory_harness.py: All checks passed."
+        name: ruff changed files
+        required: true
+        runner: ruff
+        created_at: 2026-04-27T21:16:07.723Z
+        completed_at: 2026-04-27T21:16:07.723Z
     events:
       - _ulid: 01KQ8CGH2WXWZ3Z6666VBE80DT
         actor: Jacob Chapel
@@ -8141,6 +8152,13 @@ reviews:
           status: pass
           name: AC annotations
         timestamp: 2026-04-27T21:15:49.116Z
+      - _ulid: 01KQ8CSB7EBM6CWDZXX395NCGB
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff changed files
+        timestamp: 2026-04-27T21:16:07.790Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: open
@@ -8190,5 +8208,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:15:49.046Z
+    updated_at: 2026-04-27T21:16:07.723Z
     notes: []
