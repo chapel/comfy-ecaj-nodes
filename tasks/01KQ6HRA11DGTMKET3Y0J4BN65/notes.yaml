@@ -1,1 +1,45 @@
-notes: []
+notes:
+  - _ulid: 01KQ6YHQ8GTJ3WK5J0ZFVSJ5F9
+    content: >-
+      Approach:
+
+      1. Add output_mode parameter to INPUT_TYPES (choices: 'In-Memory Patches' (default), 'Full
+      Saved Model')
+
+      2. Add output_mode to IS_CHANGED to differentiate cache keys
+
+      3. When output_mode='Full Saved Model':
+         a. Validate model_name early (before GPU work) — reuse existing validate_model_name
+         b. On cache hit: load via spike_reload.load_saved_model instead of install_merged_patches
+         c. On cache miss: use sink-writing path (already wired), then load via load_saved_model
+         d. Do NOT call install_merged_patches — return the loaded model directly
+      4. When output_mode='In-Memory Patches' (default): existing behavior unchanged
+
+      5. Preserve save_model/enable_cache flags — they work independently of output_mode
+
+
+      ACs covered:
+
+      - ac-complete-artifact: materialization sink produces complete artifact (already wired)
+
+      - ac-return-loaded-model: load_saved_model returns Comfy-managed MODEL
+
+      - ac-cache-reuses-artifact: check_cache with artifact_kind='full_model' + load_saved_model
+
+      - ac-comfy-owns-returned-model-memory: load_saved_model uses comfy.sd.load_diffusion_model
+
+
+      Test plan: 4 spec ACs × 1+ test each, plus trait AC
+
+      - Full saved model mode uses materialization + load, not install_merged_patches
+
+      - Cache hit loads artifact via load_saved_model
+
+      - Cache miss materializes then loads
+
+      - Validation errors for missing/invalid model_name
+
+      - Existing in-memory tests unchanged
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T07:48:03.472Z
