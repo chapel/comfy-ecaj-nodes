@@ -677,7 +677,17 @@ reviews:
     slugs: []
     title: Review incremental safetensors artifact writer
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "pytest -q tests/test_incremental_writer.py: 15 passed"
+        name: focused incremental writer tests
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T05:08:12.520Z
+        completed_at: 2026-04-27T05:08:12.520Z
     events:
       - _ulid: 01KQ6N9RBSF5VCS91PPSSEXEK5
         actor: Jacob Chapel
@@ -692,6 +702,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T05:06:54.075Z
+      - _ulid: 01KQ6ND13VK7XG1BP5RYAA3RDN
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: focused incremental writer tests
+        timestamp: 2026-04-27T05:08:12.540Z
     examined_commit: 928a645109063ee7b3d34b6f60568b0585dcede5
     external_links: []
     lifecycle_state: open
@@ -704,5 +721,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:06:25.274Z
-    updated_at: 2026-04-27T05:06:54.064Z
+    updated_at: 2026-04-27T05:08:12.520Z
     notes: []
