@@ -2853,9 +2853,20 @@ runs:
     completed_at: 2026-04-27T04:52:42.138Z
   - _ulid: 01KQ6MQ01CYPSZHEVNEFEK7J3M
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T04:56:10.540Z
+        completed_at: 2026-04-27T04:56:36.467Z
+        notes: "Gate check: Session completed task @task-full-model-result-sink-interface — added
+          lib/result_sink.py and tests/test_result_sink.py, 1 commit (e20213a), PR #89 created.
+          Meaningful session with code changes."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T04:56:36.467Z
+        completed_at: 2026-04-27T04:56:36.467Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T04:56:10.540Z
