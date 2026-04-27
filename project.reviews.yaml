@@ -8566,7 +8566,18 @@ reviews:
     slugs: []
     title: Review guarded manual real-Comfy memory harness cycle 6
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: ruff check scripts/manual/real_comfy_memory_validation.py
+          tests/test_real_comfy_memory_harness.py -> All checks passed.
+        name: ruff changed files
+        required: true
+        runner: ruff
+        created_at: 2026-04-27T21:43:39.556Z
+        completed_at: 2026-04-27T21:43:39.556Z
     events:
       - _ulid: 01KQ8E5PBEV7SD8EDSRNFAPJDY
         actor: Jacob Chapel
@@ -8581,6 +8592,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T21:40:32.388Z
+      - _ulid: 01KQ8EBRBF71294JS32JK6C721
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff changed files
+        timestamp: 2026-04-27T21:43:39.631Z
     examined_commit: cf1d6f0b2b24c05d0411a5a727a2a72e72fb8675
     external_links: []
     lifecycle_state: open
@@ -8593,5 +8611,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T21:40:20.974Z
-    updated_at: 2026-04-27T21:40:32.309Z
+    updated_at: 2026-04-27T21:43:39.556Z
     notes: []
