@@ -6762,6 +6762,13 @@ reviews:
           status: pass
           name: ruff
         timestamp: 2026-04-27T19:47:14.087Z
+      - _ulid: 01KQ87Q76TXZEZ4PGC83YPG4FV
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ87Q74PH1WEZHRD220JWPZR
+        timestamp: 2026-04-27T19:47:35.258Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: open
@@ -6771,8 +6778,27 @@ reviews:
       content_hash: ""
       ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ87Q74PH1WEZHRD220JWPZR
+        anchor:
+          type: code
+          commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+          line_end: 833
+          line_start: 824
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQ87Q74QNC1PV6HZ743CPRPQ
+            author: Jacob Chapel
+            body: Full-mode streaming uses one global storage_dtype for every affected tensor even though the
+              artifact manifest preserves per-key dtypes. I reproduced a mixed float32/float16 base
+              where the float16 affected key is cast to float32 before sink.write_tensor, which
+              raises a dtype mismatch and aborts materialization. This violates full saved model
+              output for mixed-dtype/quantized artifacts; stream each key using its manifest/base
+              dtype instead of the first tensor's dtype.
+            created_at: 2026-04-27T19:47:35.191Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T19:47:14.025Z
+    updated_at: 2026-04-27T19:47:35.191Z
     notes: []
