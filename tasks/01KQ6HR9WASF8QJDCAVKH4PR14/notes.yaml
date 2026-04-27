@@ -1,1 +1,36 @@
-notes: []
+notes:
+  - _ulid: 01KQ6J5ZV4V3P9ZHN6BAQH2GD5
+    content: >-
+      Approach: Review and update four existing specs to scope set-patch behavior as the in-memory
+      output mode and ensure compatibility with full saved model output mode.
+
+
+      Specs to update:
+
+      1. @exit-node — ac-1 universally describes 'set patches' as the return. Scope to in-memory
+      patch output mode.
+
+      2. @exit-patch-install — All ACs describe set-patch installation. Scope to in-memory patch
+      output mode.
+
+      3. @exit-model-persistence — Currently describes save as opt-in cache support producing full
+      model file. Needs refinement so full saved model output can also produce an artifact but with
+      a distinct purpose (returned MODEL vs cache-only).
+
+      4. @memory-management — ac-7/ac-8/ac-13 are save_model specific. Need scoping so they don't
+      conflict with full saved model materialization's different memory profile.
+
+
+      Additionally:
+
+      - Add relationships from @full-saved-model-output to relevant existing specs.
+
+      - Ensure @full-saved-model-output has parent set to @exit-node.
+
+      - Keep spec wording behavioral, not implementation-specific.
+
+
+      Test plan: Run kspec validate after changes, verify no contradictions.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T04:11:56.132Z
