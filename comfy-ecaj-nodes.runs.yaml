@@ -4651,7 +4651,7 @@ runs:
     completed_at: 2026-04-27T19:11:05.198Z
   - _ulid: 01KQ861V9C10QM3YTE1W0Y03FV
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4667,7 +4667,36 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T19:18:42.111Z
-        completed_at: 2026-04-27T19:18:42.111Z
+        completed_at: 2026-04-27T19:19:01.883Z
+        notes: >-
+          High-confidence observations from this session:
+
+
+          FRICTION 1: kspec review get still truncates thread bodies — had to grep the YAML file
+          manually to read the full blocker descriptions. Already tracked as observation 01KQ8210
+          (friction). No new capture needed.
+
+
+          FRICTION 2 (NEW, high confidence): check_full_model_cache's original design (returning
+          False for all non-match cases) created an AC-9 regression that was invisible to existing
+          tests. The pattern: when a new function mimics an existing function's responsibility
+          (cache validation + file safety) but uses a different error model (bool vs exception), the
+          safety guarantees silently disappear. This is systemic — any future cache-check variant
+          that returns False instead of raising for non-ecaj files will have the same bug. However,
+          this is specific to this one function and now fixed. Not worth a separate tracking item.
+
+
+          SUCCESS 1: Reviewer's runtime probe evidence ("I verified with a runtime probe that...")
+          made fix cycles efficient — no ambiguity about what was wrong. Already tracked as
+          observation 01KQ815T (success about runtime probes).
+
+
+          No new items to capture — both friction points are either already tracked or now fixed
+          inline.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T19:19:01.883Z
+        completed_at: 2026-04-27T19:19:01.883Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:18:26.348Z
