@@ -86,7 +86,7 @@ description: >-
 spec_ref: "@manual-comfy-memory-validation"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-full-model-streaming-artifact-cache"
@@ -102,8 +102,8 @@ review_ref: "@01KQ8APQQ91Z2BWHX4K5HPH7X1"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
-  captured_at: 2026-04-27T20:36:36.544Z
-  commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
+  captured_at: 2026-04-27T20:52:13.192Z
+  commit: e8da6173778d6762451b3acb794f838f376da6c2
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
@@ -243,8 +243,35 @@ history:
         previous: 2026-04-27T20:36:31.336Z
     command: task-start
     timestamp: 2026-04-27T20:52:08.585Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
+          captured_at: 2026-04-27T20:52:13.192Z
+          commit: e8da6173778d6762451b3acb794f838f376da6c2
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
+        previous:
+          review_url: null
+          branch: dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
+          captured_at: 2026-04-27T20:36:36.544Z
+          commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
+      submitted_at:
+        new: 2026-04-27T20:52:13.199Z
+        previous: 2026-04-27T20:36:36.549Z
+    command: task-submit
+    timestamp: 2026-04-27T20:52:13.199Z
 created_at: 2026-04-27T16:11:48.246Z
 started_at: 2026-04-27T20:52:08.585Z
-submitted_at: 2026-04-27T20:36:36.549Z
+submitted_at: 2026-04-27T20:52:13.199Z
 todos: []
 automation: eligible
