@@ -218,7 +218,18 @@ reviews:
     slugs: []
     title: Review saved-artifact reload spike
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "kspec validate --warnings-ok passed: schema OK, references OK, skills OK; only
+          pre-existing alignment/completeness warnings reported."
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T04:45:46.061Z
+        completed_at: 2026-04-27T04:45:46.061Z
     events:
       - _ulid: 01KQ6M155KGPXYR76D05JC95RX
         actor: Jacob Chapel
@@ -233,6 +244,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T04:44:36.345Z
+      - _ulid: 01KQ6M3Y6PXKFA8553E9QN4ZY2
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-27T04:45:46.070Z
     examined_commit: def6c3b845f69c4ffcba5bf03782cdf16f901381
     external_links: []
     lifecycle_state: open
@@ -245,5 +263,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T04:44:14.905Z
-    updated_at: 2026-04-27T04:44:36.338Z
+    updated_at: 2026-04-27T04:45:46.061Z
     notes: []
