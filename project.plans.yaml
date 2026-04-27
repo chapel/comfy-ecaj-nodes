@@ -102,7 +102,7 @@ plans:
 
       Foundation specs are project-level infrastructure. They should be completed
       before WIDEN feature work begins, as they establish patterns all nodes follow.
-    status: active
+    status: completed
     approved_at: null
     derived_specs:
       - "@comfyui-packaging"
