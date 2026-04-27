@@ -36,8 +36,11 @@ description: |
 spec_ref: "@streaming-full-model-materialization"
 plan_ref: "@plan-full-saved-model-output-plan"
 origin: derived
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Approved in review @01KQ6QR9 and merged PR #91 into
+  plan/plan-full-saved-model-output-plan/01kq5zsk at 0aa1bb136e84. Added sink-writing chunk
+  evaluation with CPU/storage dtype handoff, OOM retry parity, and compatibility wrapper coverage."
 depends_on:
   - "@task-full-model-result-sink-interface"
 context: []
@@ -161,8 +164,25 @@ history:
         previous: "@01KQ6PJ7RXZYM77RSZRENKH9AT"
     command: review-link
     timestamp: 2026-04-27T05:49:18.840Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Approved in review @01KQ6QR9 and merged PR #91 into
+          plan/plan-full-saved-model-output-plan/01kq5zsk at 0aa1bb136e84. Added sink-writing chunk
+          evaluation with CPU/storage dtype handoff, OOM retry parity, and compatibility wrapper
+          coverage."
+        previous: null
+      completed_at:
+        new: 2026-04-27T05:52:06.019Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-04-27T05:52:06.029Z
 created_at: 2026-04-27T04:04:27.722Z
 started_at: 2026-04-27T05:39:16.136Z
 submitted_at: 2026-04-27T05:43:14.586Z
+completed_at: 2026-04-27T05:52:06.019Z
 todos: []
 automation: eligible
