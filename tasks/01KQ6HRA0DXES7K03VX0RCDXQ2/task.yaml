@@ -33,7 +33,7 @@ description: |
 spec_ref: "@full-saved-model-output"
 plan_ref: "@plan-full-saved-model-output-plan"
 origin: derived
-status: needs_work
+status: in_progress
 blocked_by: []
 depends_on:
   - "@task-full-model-checkpoint-materialization"
@@ -52,7 +52,7 @@ submission_linkage:
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-full-model-cache-metadata/01kq6hra
-session_id: null
+session_id: 01KQ6WVMXC6HK7KKVNTXGEM7QT
 history:
   - author: Jacob Chapel
     changes:
@@ -168,8 +168,21 @@ history:
         previous: 01KQ6VVZ0CM06RD4C4APVW2RCN
     command: review-verdict-needs-work
     timestamp: 2026-04-27T07:11:41.664Z
+  - author: "@claude"
+    changes:
+      status:
+        new: in_progress
+        previous: needs_work
+      session_id:
+        new: 01KQ6WVMXC6HK7KKVNTXGEM7QT
+        previous: null
+      started_at:
+        new: 2026-04-27T07:22:23.699Z
+        previous: 2026-04-27T07:07:30.717Z
+    command: task-start
+    timestamp: 2026-04-27T07:22:23.702Z
 created_at: 2026-04-27T04:04:27.789Z
-started_at: 2026-04-27T07:07:30.717Z
+started_at: 2026-04-27T07:22:23.699Z
 submitted_at: 2026-04-27T07:07:35.984Z
 todos: []
 automation: eligible
