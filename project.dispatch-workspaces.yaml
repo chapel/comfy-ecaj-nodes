@@ -816,18 +816,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
-    canonical_branch_head: 15d140f495cf3b7c221ded7f709022f645a34721
+    canonical_branch_head: afea787efe1c0a926a94ac97b416789f3af80b50
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T20:14:14.652Z
+      updated_at: 2026-04-27T20:23:12.889Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T20:14:15.191Z
+      updated_at: 2026-04-27T20:23:12.889Z
     integration:
       status: pending
       detail: null
@@ -835,7 +835,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 15d140f495cf3b7c221ded7f709022f645a34721
-      updated_at: 2026-04-27T20:14:14.652Z
+      updated_at: 2026-04-27T20:23:12.889Z
     lifecycle_state: active
     resolved_base_branch: dev
     task_ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
@@ -843,9 +843,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T20:14:15.191Z
-      last_reconciled_at: 2026-04-27T20:14:15.191Z
+      last_reconciled_at: 2026-04-27T20:23:12.889Z
       created_at: 2026-04-27T20:14:14.652Z
-      updated_at: 2026-04-27T20:14:15.191Z
+      updated_at: 2026-04-27T20:23:12.889Z
     workspace_id: dispatch-workspace-01KQ7VC3MPV8MZAP7HKCFJWHQ6
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
