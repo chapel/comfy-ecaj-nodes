@@ -6029,6 +6029,17 @@ reviews:
         runner: ruff
         created_at: 2026-04-27T19:08:55.488Z
         completed_at: 2026-04-27T19:08:55.488Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "kspec validate: schema/references OK, but command exited 6 due existing
+          alignment/completeness warnings"
+        name: kspec validate
+        required: false
+        runner: kspec
+        created_at: 2026-04-27T19:08:55.693Z
+        completed_at: 2026-04-27T19:08:55.693Z
     events:
       - _ulid: 01KQ8597RGNVZCF32M3A6376SA
         actor: Jacob Chapel
@@ -6050,6 +6061,13 @@ reviews:
           status: pass
           name: ruff check
         timestamp: 2026-04-27T19:08:55.547Z
+      - _ulid: 01KQ85GE234FDGD71BT7S1F3J1
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: kspec validate
+        timestamp: 2026-04-27T19:08:55.747Z
     examined_commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
     external_links: []
     lifecycle_state: open
@@ -6062,5 +6080,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T19:04:59.921Z
-    updated_at: 2026-04-27T19:08:55.488Z
+    updated_at: 2026-04-27T19:08:55.693Z
     notes: []
