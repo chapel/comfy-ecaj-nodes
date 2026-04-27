@@ -339,7 +339,10 @@ features:
               The existing artifact is reused without recomputing the merged weights.
             when: |
               The Exit node executes in full saved model mode.
-        tags: []
+        tags:
+          - persistence
+          - memory
+          - comfy
         parent: "@exit-node"
         requirements:
           - _ulid: 01KQ6HR9TFYCFSNF14ZZ01QHNJ
