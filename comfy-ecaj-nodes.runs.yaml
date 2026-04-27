@@ -3080,9 +3080,20 @@ runs:
     completed_at: 2026-04-27T05:26:03.431Z
   - _ulid: 01KQ6PS888HJD0RPA1RJEFCF4W
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T05:32:21.640Z
+        completed_at: 2026-04-27T05:32:51.067Z
+        notes: "Meaningful session activity confirmed: review @01KQ6PJ7 opened and closed, checks recorded,
+          and task @01KQ6HR9YAB7181HKX6YSBX650 transitioned to needs_work after request_changes
+          verdict. No code edits were made in the detached review snapshot."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T05:32:51.067Z
+        completed_at: 2026-04-27T05:32:51.067Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:32:21.640Z
