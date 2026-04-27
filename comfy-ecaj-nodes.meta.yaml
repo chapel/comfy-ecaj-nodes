@@ -48,6 +48,7 @@ agents:
       merges via the supported merge helper when quality gates pass.
     tags:
       - scaffold-default
+    adapter: codex-acp
     auto_approve: true
     capabilities:
       - review
