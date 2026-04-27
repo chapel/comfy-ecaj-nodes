@@ -1,5 +1,14 @@
-.kspec/
 .venv/
 __pycache__/
 *.egg-info/
 uv.lock
+
+# >>> kspec managed
+.kspec/
+.kspec-sessions/
+plans/
+.kspec-worktrees/
+.kspec-dispatch-workspace.json
+.kspec-dispatch-shadow-mutation
+.kspec-dispatch-shadow-mutation.lock/
+# <<< kspec managed
