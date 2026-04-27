@@ -630,6 +630,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T05:00:41.096Z
+      - _ulid: 01KQ6NGPYBDS57JS9BWGN6DCXD
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ6MYYHJ013M6TX9XF4KY08G
+        timestamp: 2026-04-27T05:10:13.195Z
     examined_commit: e20213ae9f1e52182c6fa5b7fad587feaf949e93
     external_links: []
     lifecycle_state: closed
@@ -661,6 +667,13 @@ reviews:
               behavior) and add a behavioral test proving completed group tensors are handed to the
               sink without accumulating all affected results before later groups are evaluated."
             created_at: 2026-04-27T05:00:31.154Z
+          - _ulid: 01KQ6NGPXZXK5ND3WX4X57V6FT
+            author: "@claude"
+            body: "Fixed: Wired InMemorySink into the GPU evaluation loop in WIDENExitNode. The sink is created
+              before the batch_groups loop, each group's results are written via write_tensor(), and
+              finalized into merged_state after all groups complete. On error, sink.abort() releases
+              tensor references. Import added, ruff clean, all 1222 tests pass."
+            created_at: 2026-04-27T05:10:13.181Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -671,7 +684,7 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T05:00:41.095Z
     created_at: 2026-04-27T04:58:19.395Z
-    updated_at: 2026-04-27T05:00:41.096Z
+    updated_at: 2026-04-27T05:10:13.181Z
     notes: []
   - _ulid: 01KQ6N9RBTWF13YQC21293X9JS
     slugs: []
