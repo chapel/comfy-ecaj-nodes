@@ -7643,6 +7643,19 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T20:43:08.604Z
         completed_at: 2026-04-27T20:43:08.604Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Fake ComfyUI root plus safetensors artifact passed guards, but run_validation returned
+          errors=[import-error: attempted relative import beyond top-level package]. Separate
+          cache-key probe showed canonical __ecaj_recipe_hash__ artifacts are reported false when
+          the harness reads ecaj_recipe_hash."
+        name: manual harness Comfy-shaped root probe
+        required: true
+        runner: python
+        created_at: 2026-04-27T20:43:15.123Z
+        completed_at: 2026-04-27T20:43:15.123Z
     events:
       - _ulid: 01KQ8APQQ9F639YBW0BWBXPTTN
         actor: Jacob Chapel
@@ -7705,6 +7718,13 @@ reviews:
           status: pass
           name: full pytest
         timestamp: 2026-04-27T20:43:08.677Z
+      - _ulid: 01KQ8AX4VMEMSFB8HWRZ64C793
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: manual harness Comfy-shaped root probe
+        timestamp: 2026-04-27T20:43:15.189Z
     examined_commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
     external_links: []
     lifecycle_state: open
@@ -7764,5 +7784,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T20:39:45.129Z
-    updated_at: 2026-04-27T20:43:08.604Z
+    updated_at: 2026-04-27T20:43:15.123Z
     notes: []
