@@ -105,3 +105,29 @@ reviews:
     created_at: 2026-04-27T02:03:02.250Z
     updated_at: 2026-04-27T02:03:30.383Z
     notes: []
+  - _ulid: 01KQ6JYCYN2WHWGXW0BK73DAQQ
+    slugs: []
+    title: Review task-full-model-update-existing-specs
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ6JYCYMCFZ50ZR0F47J1Q9T
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T04:25:15.989Z
+    examined_commit: b1a3ef80ad93ded4cd5c5a820b9ec2e10a76b0bb
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ6HR9WASF8QJDCAVKH4PR14"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T04:25:15.989Z
+    updated_at: null
+    notes: []
