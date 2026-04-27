@@ -3121,9 +3121,31 @@ runs:
     completed_at: 2026-04-27T05:33:31.087Z
   - _ulid: 01KQ6PZJ5TFXTSCYM7Q2A5C2VX
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T05:35:48.410Z
+        completed_at: 2026-04-27T05:36:20.883Z
+        notes: >-
+          What worked well:
+
+          1. Dependency chain was well-ordered — result sink and incremental writer were complete
+          and tested before this task started, making implementation straightforward.
+
+          2. The MergeResultSink ABC + IncrementalSafetensorsWriter composition pattern was clean —
+          the CheckpointMaterializationSink is essentially a thin adapter between the two.
+
+          3. Writing tests first from ACs identified the exact behavioral surface: 3 ACs mapped to
+          18 focused tests.
+
+          4. The codebase exploration phase (reading both dependency implementations fully)
+          prevented misunderstanding the API surface.
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T05:36:20.883Z
+        completed_at: 2026-04-27T05:36:20.883Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:35:48.410Z
