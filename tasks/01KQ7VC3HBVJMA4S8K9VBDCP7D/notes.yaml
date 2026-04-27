@@ -274,3 +274,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T18:53:04.538Z
+  - _ulid: 01KQ854H14KHMZFHS7B9TD3T1Q
+    content: "Fix cycle 5: addressed all 3 ruff blocker threads plus all 14 ruff errors. Added
+      streaming_evaluation_to_sink to lib/executor.py __all__. Removed unused imports
+      (evaluate_affected_group, atomic_save, check_cache) from nodes/exit.py. Fixed import sort
+      order, removed unused variables (key_byte_sizes, unaffected_key, save_path,
+      mode_change_calls), wrapped long lines. Updated test patches in test_exit_node.py and
+      test_full_model_streaming.py for removed symbols. All ruff checks pass, all tests pass."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T19:02:25.572Z
