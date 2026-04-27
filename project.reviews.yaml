@@ -7632,6 +7632,17 @@ reviews:
         runner: ruff
         created_at: 2026-04-27T20:43:02.252Z
         completed_at: 2026-04-27T20:43:02.252Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: python -m pytest -q passed; awaiter reported exit code 0 and completion through 100
+          percent with no failures or errors.
+        name: full pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T20:43:08.604Z
+        completed_at: 2026-04-27T20:43:08.604Z
     events:
       - _ulid: 01KQ8APQQ9F639YBW0BWBXPTTN
         actor: Jacob Chapel
@@ -7687,6 +7698,13 @@ reviews:
           status: pass
           name: ruff changed files
         timestamp: 2026-04-27T20:43:02.330Z
+      - _ulid: 01KQ8AWYG5DTK15HMZVGC2RDDG
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: full pytest
+        timestamp: 2026-04-27T20:43:08.677Z
     examined_commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
     external_links: []
     lifecycle_state: open
@@ -7746,5 +7764,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T20:39:45.129Z
-    updated_at: 2026-04-27T20:43:02.252Z
+    updated_at: 2026-04-27T20:43:08.604Z
     notes: []
