@@ -117,3 +117,10 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-27T04:41:48.063Z
+  - _ulid: 01KQ6MB2F2PV2EJVM1745RCSY7
+    content: "Reviewer applied lint-only fix in commit 037927f (removed unused pytest import and wrapped
+      two long assertions), reran local gates, verified GitHub CI passed, and merged PR #88 to
+      plan/plan-full-saved-model-output-plan/01kq5zsk."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-04-27T04:49:39.811Z
