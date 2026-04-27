@@ -6433,6 +6433,12 @@ reviews:
         payload:
           thread_ulid: 01KQ86JPE01K61V2N51WS52KKA
         timestamp: 2026-04-27T19:38:25.524Z
+      - _ulid: 01KQ876GPJVRT52F8C1XC3G47C
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ86K30APNMAYKEWY0JFC3AF
+        timestamp: 2026-04-27T19:38:27.923Z
     examined_commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
     external_links: []
     lifecycle_state: closed
@@ -6611,6 +6617,12 @@ reviews:
               merged_cpu after write_fn completes, and do the same for the single-key OOM path, to
               preserve the streaming memory bound."
             created_at: 2026-04-27T19:27:51.307Z
+          - _ulid: 01KQ876GMKPPK2HNWFKE90EQYT
+            author: "@claude"
+            body: "Fixed: streaming_evaluation_to_sink now explicitly del merged_cpu after the write_fn loop
+              completes (both normal and OOM-retry paths), so previous chunk results are freed
+              before the next chunk is built/evaluated."
+            created_at: 2026-04-27T19:38:27.859Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -6621,5 +6633,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:27:58.014Z
     created_at: 2026-04-27T19:19:54.224Z
-    updated_at: 2026-04-27T19:38:25.464Z
+    updated_at: 2026-04-27T19:38:27.859Z
     notes: []
