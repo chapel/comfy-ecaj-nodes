@@ -1120,7 +1120,7 @@ features:
         id: ac-7
         then: tensors are streamed to disk one at a time (peak memory is +1 tensor, not +full model)
         when: writing checkpoint
-      - given: save_model=True
+      - given: save_model=True in in-memory patch output mode
         id: ac-8
         then: GPU models are offloaded and VRAM cache cleared
         when: save completes
