@@ -6776,6 +6776,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ87QF5S42BXN0J3F5622DEC
         timestamp: 2026-04-27T19:47:43.486Z
+      - _ulid: 01KQ87QRVY8R30117M7W1AEXWC
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
+        timestamp: 2026-04-27T19:47:53.342Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: open
@@ -6825,7 +6832,25 @@ reviews:
               returning.
             created_at: 2026-04-27T19:47:43.417Z
         kind: blocker
+      - _ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
+        anchor:
+          type: code
+          commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+          line_end: 559
+          line_start: 557
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQ87QRSYHRT9KB5Z4B4RMXQA
+            author: Jacob Chapel
+            body: The RecipeBase full-mode no-op path reads model_state_dict() without first calling
+              _unpatch_loaded_clones. Merge full mode does this before reading base_state, because
+              loaded clones can cause model_state_dict() to include patched values. A
+              RecipeBase-only full save after a patched clone is loaded can therefore materialize
+              polluted patch weights as the complete 'base' artifact.
+            created_at: 2026-04-27T19:47:53.278Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T19:47:43.417Z
+    updated_at: 2026-04-27T19:47:53.278Z
     notes: []
