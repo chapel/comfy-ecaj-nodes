@@ -6872,6 +6872,12 @@ reviews:
         payload:
           thread_ulid: 01KQ87QF5S42BXN0J3F5622DEC
         timestamp: 2026-04-27T20:03:29.885Z
+      - _ulid: 01KQ88MKRBGGZ3Y59TY6VCPT7S
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
+        timestamp: 2026-04-27T20:03:38.379Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: closed
@@ -6954,6 +6960,12 @@ reviews:
               RecipeBase-only full save after a patched clone is loaded can therefore materialize
               polluted patch weights as the complete 'base' artifact.
             created_at: 2026-04-27T19:47:53.278Z
+          - _ulid: 01KQ88MKP399RZE887J3VXK0GH
+            author: "@claude"
+            body: "Fixed: _execute_full_model_noop now calls _unpatch_loaded_clones(model_patcher) before
+              reading model_state_dict(), matching the merge full-mode path. Patched clone weights
+              cannot pollute the base artifact."
+            created_at: 2026-04-27T20:03:38.306Z
         kind: blocker
       - _ulid: 01KQ87R3RNY6HG0PCQ4JX4WRDS
         anchor:
@@ -7093,5 +7105,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:49:13.956Z
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T20:03:29.818Z
+    updated_at: 2026-04-27T20:03:38.306Z
     notes: []
