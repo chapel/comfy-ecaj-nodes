@@ -36,7 +36,7 @@ description: |
 spec_ref: "@streaming-full-model-materialization"
 plan_ref: "@plan-full-saved-model-output-plan"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-full-model-result-sink-interface"
@@ -47,6 +47,14 @@ tags:
   - persistence
   - memory
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-full-model-checkpoint-materialization/01kq6hr9
+  captured_at: 2026-04-27T05:35:02.512Z
+  commit: 5332f72534f55032b658110039b7ae55fc29b89b
+  remote: origin
+  remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+  upstream_ref: refs/heads/dispatch/task/task-full-model-checkpoint-materialization/01kq6hr9
 session_id: 01KQ6PHF23K8PR7D3T4FM53XBG
 history:
   - author: Jacob Chapel
@@ -69,7 +77,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-04-27T05:28:28.576Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-full-model-checkpoint-materialization/01kq6hr9
+          captured_at: 2026-04-27T05:35:02.512Z
+          commit: 5332f72534f55032b658110039b7ae55fc29b89b
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-full-model-checkpoint-materialization/01kq6hr9
+        previous: null
+      submitted_at:
+        new: 2026-04-27T05:35:02.519Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-04-27T05:35:02.519Z
 created_at: 2026-04-27T04:04:27.768Z
 started_at: 2026-04-27T05:28:28.575Z
+submitted_at: 2026-04-27T05:35:02.519Z
 todos: []
 automation: eligible
