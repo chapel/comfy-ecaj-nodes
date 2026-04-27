@@ -700,6 +700,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T05:08:12.621Z
         completed_at: 2026-04-27T05:08:12.621Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Direct script caught duplicate, wrong_shape, wrong_dtype, and unexpected-key RuntimeError,
+          then successfully finalized each scenario; dest existed after finalize.
+        name: validation-error publish repro
+        required: true
+        runner: python
+        created_at: 2026-04-27T05:08:12.823Z
+        completed_at: 2026-04-27T05:08:12.823Z
     events:
       - _ulid: 01KQ6N9RBSF5VCS91PPSSEXEK5
         actor: Jacob Chapel
@@ -735,6 +746,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ6ND19H7CTP9R33978Z7HQS
         timestamp: 2026-04-27T05:08:12.733Z
+      - _ulid: 01KQ6ND1D3WEP80KCP7B5VW8BA
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: validation-error publish repro
+        timestamp: 2026-04-27T05:08:12.836Z
     examined_commit: 928a645109063ee7b3d34b6f60568b0585dcede5
     external_links: []
     lifecycle_state: open
@@ -769,5 +787,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T05:06:25.274Z
-    updated_at: 2026-04-27T05:08:12.722Z
+    updated_at: 2026-04-27T05:08:12.823Z
     notes: []
