@@ -3871,7 +3871,19 @@ reviews:
     slugs: []
     title: Review full model streaming artifact cache fix cycle
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Runtime probe with group1 keys a/z and group2 keys b/c produced events: eval:g1,
+          write:g1:a, eval:g2, write:g2:b, write:g2:c, write:g1:z. Later group evaluation begins
+          before the first group is fully written."
+        name: interleaved streaming probe
+        required: true
+        runner: python
+        created_at: 2026-04-27T17:50:03.272Z
+        completed_at: 2026-04-27T17:50:03.272Z
     events:
       - _ulid: 01KQ80R37MDD6ZDPGAB73XR9J3
         actor: Jacob Chapel
@@ -3886,6 +3898,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T17:45:50.034Z
+      - _ulid: 01KQ8100HFW61TZWQQP8K57FQS
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: interleaved streaming probe
+        timestamp: 2026-04-27T17:50:03.312Z
     examined_commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
     external_links: []
     lifecycle_state: open
@@ -3898,5 +3917,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T17:45:43.925Z
-    updated_at: 2026-04-27T17:45:49.986Z
+    updated_at: 2026-04-27T17:50:03.272Z
     notes: []
