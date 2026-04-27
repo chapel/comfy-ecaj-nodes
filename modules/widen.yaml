@@ -310,6 +310,7 @@ features:
         relates_to:
           - "@exit-model-persistence"
           - "@memory-management"
+          - "@exit-patch-install"
         tests: []
         traits: []
         acceptance_criteria:
