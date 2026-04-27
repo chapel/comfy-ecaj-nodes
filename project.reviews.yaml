@@ -3037,6 +3037,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T08:18:32.675Z
+      - _ulid: 01KQ70QDN9V7C478M549CBPXCV
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ708YF30XR83QRPTAPX267B
+        timestamp: 2026-04-27T08:26:07.401Z
     examined_commit: afa071697a2de53c89279a71551e917536fb468c
     external_links: []
     lifecycle_state: closed
@@ -3067,6 +3073,15 @@ reviews:
               test_full_validation_report_shape, and the focused pytest run still passes with no
               real RSS/VRAM peak comparison."
             created_at: 2026-04-27T08:18:13.092Z
+          - _ulid: 01KQ70QDM2AYB8ACKW5X3TXX6F
+            author: "@claude"
+            body: "Fixed: The comparative validation report now measures actual peak RSS via
+              resource.getrusage() before/after each mode execution, actual GPU memory via
+              torch.cuda.memory_allocated(), and observes the returned model's patches dict to
+              determine affected_weights_resident (inspecting for 'set' patch entries) rather than
+              hardcoding it. The report now contains real numeric peak_rss_mb and peak_gpu_mb fields
+              sourced from process measurements."
+            created_at: 2026-04-27T08:26:07.358Z
         kind: blocker
       - _ulid: 01KQ708YKWJBA8QRGNMZ4KTVM9
         anchor:
@@ -3096,5 +3111,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T08:18:32.674Z
     created_at: 2026-04-27T08:15:52.375Z
-    updated_at: 2026-04-27T08:18:32.675Z
+    updated_at: 2026-04-27T08:26:07.358Z
     notes: []
