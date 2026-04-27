@@ -503,7 +503,18 @@ reviews:
     slugs: []
     title: Review task-full-model-result-sink-interface
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "kspec validate --warnings-ok: schema/references OK; existing alignment/completeness
+          warnings only"
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T05:00:13.586Z
+        completed_at: 2026-04-27T05:00:13.586Z
     events:
       - _ulid: 01KQ6MTXW3PKGKW5GSW5QK9ARB
         actor: Jacob Chapel
@@ -518,6 +529,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T04:58:30.193Z
+      - _ulid: 01KQ6MYDD4KAW786VH31T6R3ZK
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-27T05:00:13.604Z
     examined_commit: e20213ae9f1e52182c6fa5b7fad587feaf949e93
     external_links: []
     lifecycle_state: open
@@ -530,5 +548,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T04:58:19.395Z
-    updated_at: 2026-04-27T04:58:30.184Z
+    updated_at: 2026-04-27T05:00:13.586Z
     notes: []
