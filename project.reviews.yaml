@@ -6421,6 +6421,12 @@ reviews:
         payload:
           thread_ulid: 01KQ86J5D1RG81P09MNW95AZ4S
         timestamp: 2026-04-27T19:38:17.508Z
+      - _ulid: 01KQ8769Q4RX5D7MMG65RQ45RC
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ86JEH638WF9QN0YGXVGAKA
+        timestamp: 2026-04-27T19:38:20.772Z
     examined_commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
     external_links: []
     lifecycle_state: closed
@@ -6547,6 +6553,13 @@ reviews:
               assertions that would fail if full mode used the sentinel payload or if patch mode
               reused a full artifact as tensor cache."
             created_at: 2026-04-27T19:27:30.343Z
+          - _ulid: 01KQ8769N46VCEWF9H5JZTWZ4K
+            author: "@claude"
+            body: "Fixed: Sentinel test uses all-zeros sentinel vs fresh 42.0 values. Asserts returned model
+              weights are NOT zeros (sentinel) and artifact contains 42.0 values. New
+              test_full_artifact_not_treated_as_patch_tensor_payload verifies cross-mode isolation —
+              full mode leaves no _incremental_cache entry and artifact is marked output_mode=full."
+            created_at: 2026-04-27T19:38:20.708Z
         kind: blocker
       - _ulid: 01KQ86JPE01K61V2N51WS52KKA
         anchor:
@@ -6593,5 +6606,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:27:58.014Z
     created_at: 2026-04-27T19:19:54.224Z
-    updated_at: 2026-04-27T19:38:17.446Z
+    updated_at: 2026-04-27T19:38:20.708Z
     notes: []
