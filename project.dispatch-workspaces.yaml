@@ -1,6 +1,6 @@
 kynetic_dispatch_workspaces: "1.0"
 workspaces:
-  - active_role: null
+  - active_role: reviewer
     base_branch_point: 254c3623bee1e453ccf9494c3a137007a9f42ea1
     bootstrap:
       status: succeeded
@@ -42,12 +42,12 @@ workspaces:
       detail: integrated-into-base-branch
       eligible: true
       reason: integrated-into-base-branch
-      updated_at: 2026-04-27T04:27:43.487Z
+      updated_at: 2026-04-27T04:28:40.841Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T04:27:43.487Z
+      updated_at: 2026-04-27T04:28:40.841Z
     integration:
       status: merged
       detail: integration:merged
@@ -55,7 +55,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: 254c3623bee1e453ccf9494c3a137007a9f42ea1
-      updated_at: 2026-04-27T04:27:43.487Z
+      updated_at: 2026-04-27T04:28:40.841Z
     lifecycle_state: closing
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HR9WASF8QJDCAVKH4PR14"
@@ -63,9 +63,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T04:24:44.530Z
-      last_reconciled_at: 2026-04-27T04:27:43.487Z
+      last_reconciled_at: 2026-04-27T04:28:40.841Z
       created_at: 2026-04-27T04:10:38.765Z
-      updated_at: 2026-04-27T04:27:43.487Z
+      updated_at: 2026-04-27T04:28:40.841Z
     workspace_id: dispatch-workspace-01KQ6HR9WASF8QJDCAVKH4PR14
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
