@@ -2814,7 +2814,7 @@ runs:
     completed_at: 2026-04-27T04:32:39.131Z
   - _ulid: 01KQ6MCRXJ92W4HDVE13NFCXWS
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -2827,7 +2827,15 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T04:51:44.996Z
-        completed_at: 2026-04-27T04:51:44.996Z
+        completed_at: 2026-04-27T04:52:18.361Z
+        notes: "Identified one high-confidence friction item after baseline search: task-subject reviews
+          cannot be refreshed after a reviewer fix commit, so approving the pushed PR head required
+          creating a fresh review. Existing success @01KQ6K6S already covers the dispatch review
+          merge gate pattern, so I did not duplicate it."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T04:52:18.361Z
+        completed_at: 2026-04-27T04:52:18.361Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T04:50:35.570Z
