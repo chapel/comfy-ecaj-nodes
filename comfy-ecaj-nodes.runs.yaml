@@ -3444,7 +3444,7 @@ runs:
     started_at: 2026-04-27T06:23:53.628Z
     completed_at: 2026-04-27T06:24:53.622Z
   - _ulid: 01KQ6TDDDE7JQ6RZ4YMH31NDJ1
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -3527,7 +3527,25 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T06:37:10.539Z
-        completed_at: 2026-04-27T06:37:10.539Z
+        completed_at: 2026-04-27T06:37:30.576Z
+        notes: >-
+          Captured 1 item:
+
+          - Success observation 01KQ6TG9: Detailed review threads with evidence enable single-pass
+          fix cycles.
+
+
+          Skipped (already tracked):
+
+          - Truncated thread bodies (01KQ6SHQ)
+
+          - MagicMock masking behavior (01KH6Y61)
+
+
+          Skipped (one-off):
+
+          - Surgical fix with stronger test — not systemic enough to track.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:35:48.014Z
+    completed_at: 2026-04-27T06:37:30.577Z
