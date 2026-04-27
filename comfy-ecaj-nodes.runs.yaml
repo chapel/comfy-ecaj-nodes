@@ -4307,7 +4307,7 @@ runs:
     completed_at: 2026-04-27T18:08:17.218Z
   - _ulid: 01KQ82BP7AQZDCCFSXR2ES7DSN
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -4321,7 +4321,15 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T18:14:54.543Z
-        completed_at: 2026-04-27T18:14:54.543Z
+        completed_at: 2026-04-27T18:15:02.009Z
+        notes: "Friction points: Ad-hoc runtime probes outside pytest need manual import bootstrapping for
+          this package's relative-import aliasing and Comfy stubs. The review also showed that green
+          task tests can still miss product-level invariants when mocks validate local patch
+          contents rather than true Comfy-loaded model behavior."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T18:15:02.009Z
+        completed_at: 2026-04-27T18:15:02.009Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-04-27T18:13:54.539Z
