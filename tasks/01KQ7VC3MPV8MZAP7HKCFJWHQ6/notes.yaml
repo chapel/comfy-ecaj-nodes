@@ -31,3 +31,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T20:27:22.981Z
+  - _ulid: 01KQ8AGFJF2XZH9HSA07MSB6R5
+    content: "Fix cycle 1: addressed both review blockers. (1) Added _setup_import_paths() to insert
+      project root before ComfyUI root on sys.path, preventing nodes.py shadowing. (2)
+      run_validation now validates model_path exists, opens the file via safetensors.safe_open to
+      read real tensor data, builds manifest for check_full_model_cache, and reports actual
+      cache-hit results. Added 5 new tests covering path ordering, idempotency, and nonexistent
+      model_path rejection. All 1275 tests pass, lint clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T20:36:20.176Z
