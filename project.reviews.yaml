@@ -889,7 +889,18 @@ reviews:
     slugs: []
     title: Review task-full-model-result-sink-interface fix cycle
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "python -m ruff check lib/result_sink.py nodes/exit.py tests/test_result_sink.py: All
+          checks passed"
+        name: ruff changed files
+        required: true
+        runner: ruff
+        created_at: 2026-04-27T05:14:39.929Z
+        completed_at: 2026-04-27T05:14:39.929Z
     events:
       - _ulid: 01KQ6NN8D5PQHVJE220WG63JS7
         actor: Jacob Chapel
@@ -904,6 +915,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T05:13:05.877Z
+      - _ulid: 01KQ6NRVE9HG6TDY0WJT000KDT
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff changed files
+        timestamp: 2026-04-27T05:14:39.946Z
     examined_commit: 41033cd9a31e8404dfbc9fc6a3c709e6a7900be4
     external_links: []
     lifecycle_state: open
@@ -916,5 +934,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:12:42.149Z
-    updated_at: 2026-04-27T05:13:05.864Z
+    updated_at: 2026-04-27T05:14:39.929Z
     notes: []
