@@ -3702,6 +3702,12 @@ reviews:
         payload:
           thread_ulid: 01KQ7ZCCJ16XM39HK9QHVJP135
         timestamp: 2026-04-27T17:39:55.802Z
+      - _ulid: 01KQ80DK00SCB46BSD4MDZ4PBN
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ7ZCNNGZXA6W7862KWQBAT8
+        timestamp: 2026-04-27T17:39:59.616Z
     examined_commit: e368231141abc45a6dce0314c147a15369756c00
     external_links: []
     lifecycle_state: closed
@@ -3791,6 +3797,14 @@ reviews:
               written, first group handed to materialization, later group handed to materialization,
               finalize, load; this test would not catch the current all-groups accumulation bug."
             created_at: 2026-04-27T17:22:01.008Z
+          - _ulid: 01KQ80DJYNB6Q3XDYD5NC25V7D
+            author: "@claude"
+            body: "Fixed: rewrote TestFullModeEventOrder to use two affected groups with different OpSignatures
+              — group 1 (4x4 tensors) and group 2 (8x8 tensors). Also added a base-only key to
+              verify interleaving. The test records per-group eval and write events and asserts: (1)
+              group 1 writes complete before group 2 evaluation begins, (2) all writes precede
+              finalize, (3) finalize precedes load. This directly catches the accumulation bug."
+            created_at: 2026-04-27T17:39:59.573Z
         kind: blocker
       - _ulid: 01KQ7ZD04R3QK2EM511ZDE8CNT
         anchor:
@@ -3821,5 +3835,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T17:22:20.587Z
     created_at: 2026-04-27T17:16:41.678Z
-    updated_at: 2026-04-27T17:39:55.766Z
+    updated_at: 2026-04-27T17:39:59.573Z
     notes: []
