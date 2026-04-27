@@ -133,3 +133,13 @@ inbox:
       - review
     added_by: Jacob Chapel
     created_at: 2026-04-27T06:55:40.501Z
+  - _ulid: 01KQ6YWGXCAV7M56HC4B3DFG4R
+    text: "Pre-existing test failure: test_incremental_preflight_survives_large_model_cache fails
+      because Run 1 does not mock check_ram_preflight. The test was added in commit be0e63c and only
+      patches get_available_ram_bytes at nodes.exit level, not in lib.gpu_ops where
+      check_ram_preflight reads it."
+    tags:
+      - testing
+      - bug
+    added_by: "@claude"
+    created_at: 2026-04-27T07:53:57.420Z
