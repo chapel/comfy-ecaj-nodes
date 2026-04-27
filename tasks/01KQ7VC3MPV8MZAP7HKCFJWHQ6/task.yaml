@@ -86,8 +86,11 @@ description: >-
 spec_ref: "@manual-comfy-memory-validation"
 meta_ref: null
 plan_ref: null
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Approved in review @01KQ8E5P and merged PR #97 into dev at
+  51fbb8659c850c20e7f260ad1dde71794fb31422. Added guarded manual real-Comfy memory validation
+  harness with guard/report tests; CI lint and test passed."
 depends_on:
   - "@task-full-model-streaming-artifact-cache"
 context: []
@@ -448,8 +451,24 @@ history:
         previous: "@01KQ8DFJTKPAGR1BQCEANHJ5KZ"
     command: review-link
     timestamp: 2026-04-27T21:40:21.249Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Approved in review @01KQ8E5P and merged PR #97 into dev at
+          51fbb8659c850c20e7f260ad1dde71794fb31422. Added guarded manual real-Comfy memory
+          validation harness with guard/report tests; CI lint and test passed."
+        previous: null
+      completed_at:
+        new: 2026-04-27T21:44:54.274Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-04-27T21:44:54.288Z
 created_at: 2026-04-27T16:11:48.246Z
 started_at: 2026-04-27T21:36:07.913Z
 submitted_at: 2026-04-27T21:39:25.256Z
+completed_at: 2026-04-27T21:44:54.274Z
 todos: []
 automation: eligible
