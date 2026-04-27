@@ -7614,6 +7614,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T20:39:54.229Z
+      - _ulid: 01KQ8AVBCE30KYH4SJPPM84QVZ
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ8AVBA034PQE3Z5075T5R9P
+        timestamp: 2026-04-27T20:42:16.334Z
     examined_commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
     external_links: []
     lifecycle_state: open
@@ -7623,8 +7630,26 @@ reviews:
       content_hash: ""
       ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ8AVBA034PQE3Z5075T5R9P
+        anchor:
+          type: code
+          commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
+          line_end: 387
+          line_start: 383
+          path: scripts/manual/real_comfy_memory_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQ8AVBA1TFEXQKBN3E5KEQVB
+            author: Jacob Chapel
+            body: "MUST-FIX: the guarded intentional-run path imports  as a top-level package, but  uses
+              relative imports (), so this fails outside ComfyUI's package context. I verified with
+              a fake Comfy-shaped root plus a safetensors model: after all guards passed,  returned
+              , leaving patch/full behavior fields empty. Impact: the manual harness cannot complete
+              the real validation path that this task adds."
+            created_at: 2026-04-27T20:42:16.257Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T20:39:45.129Z
-    updated_at: 2026-04-27T20:39:54.158Z
+    updated_at: 2026-04-27T20:42:16.257Z
     notes: []
