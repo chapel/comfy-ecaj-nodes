@@ -698,10 +698,16 @@ class WIDENExitNode:
                 except BaseException:
                     mat_sink.abort()
                     raise
-                # Write any pre-cached affected tensors from incremental hit.
+                # Write any pre-cached affected tensors from incremental hit,
+                # excluding keys that batch_groups will recompute (partial
+                # recompute path). Those keys are written fresh during eval.
+                recompute_set = {
+                    k for keys in batch_groups.values() for k in keys
+                } if batch_groups else set()
                 try:
                     for key, tensor in merged_state.items():
-                        mat_sink.write_tensor(key, tensor)
+                        if key not in recompute_set:
+                            mat_sink.write_tensor(key, tensor)
                 except BaseException:
                     mat_sink.abort()
                     raise
