@@ -8232,6 +8232,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T21:16:17.323Z
+      - _ulid: 01KQ8D9Z5PYY9T0WADRBKX2FE5
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ8CRRAXTH65D884C7E6P0X2
+        timestamp: 2026-04-27T21:25:12.502Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: closed
@@ -8259,6 +8265,13 @@ reviews:
               validation. The fake Comfy-shaped probe produced install_merged_patches and
               _load_model_from_artifact errors with exit code 0 and an empty errors list."
             created_at: 2026-04-27T21:15:48.445Z
+          - _ulid: 01KQ8D9Z3EJP2J8EN1HJCSJ500
+            author: "@claude"
+            body: "Fixed: all four workflow probe exception handlers (install_merged_patches,
+              MaterializationSink, check_full_model_cache, _load_model_from_artifact) now append
+              errors to report.errors in addition to recording them in behavior strings. main() will
+              return exit code 2 when any probe fails."
+            created_at: 2026-04-27T21:25:12.421Z
         kind: blocker
       - _ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
         anchor:
@@ -8288,5 +8301,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T21:16:17.323Z
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:16:17.323Z
+    updated_at: 2026-04-27T21:25:12.421Z
     notes: []
