@@ -3986,6 +3986,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ810Q4W2A0FFC2B7RHK3MG5
         timestamp: 2026-04-27T17:50:26.501Z
+      - _ulid: 01KQ8113X9540M1TTQ9HYEBJ5K
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ8113VT6G7D7QWXZSH5N5NY
+        timestamp: 2026-04-27T17:50:39.529Z
     examined_commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
     external_links: []
     lifecycle_state: open
@@ -4018,7 +4025,29 @@ reviews:
               non-interleaved key names."
             created_at: 2026-04-27T17:50:26.461Z
         kind: blocker
+      - _ulid: 01KQ8113VT6G7D7QWXZSH5N5NY
+        anchor:
+          type: code
+          commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
+          line_end: 334
+          line_start: 306
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQ8113VT26SRA87G975CZKE7
+            author: Jacob Chapel
+            body: "MUST-FIX: _load_model_from_artifact does not load or return a MODEL backed by the full saved
+              artifact. It reads only __ecaj_affected_keys__, loads those tensors, and installs them
+              as set patches on a clone of the original model_patcher. A runtime probe with an
+              artifact containing unaffected key b=20 and the original base b=2 returned a model
+              whose b base was still 2, with only the affected key installed as a patch. This misses
+              the task requirement and @full-saved-model-output
+              ac-return-loaded-model/ac-cache-reuse-is-artifact-backed: full-mode success and cache
+              hits still return a patch-backed clone rather than a model loaded from the complete
+              artifact."
+            created_at: 2026-04-27T17:50:39.482Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T17:45:43.925Z
-    updated_at: 2026-04-27T17:50:26.461Z
+    updated_at: 2026-04-27T17:50:39.482Z
     notes: []
