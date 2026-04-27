@@ -3007,6 +3007,13 @@ reviews:
           status: pass
           name: pytest persistence executor exit
         timestamp: 2026-04-27T08:17:55.891Z
+      - _ulid: 01KQ708YG2SKJ8HC7FRPRHAVN6
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ708YF30XR83QRPTAPX267B
+        timestamp: 2026-04-27T08:18:13.122Z
     examined_commit: afa071697a2de53c89279a71551e917536fb468c
     external_links: []
     lifecycle_state: open
@@ -3016,8 +3023,29 @@ reviews:
       content_hash: ""
       ref: "@01KQ6HRA1PMN922FBX8STVEFST"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ708YF30XR83QRPTAPX267B
+        anchor:
+          type: code
+          commit: afa071697a2de53c89279a71551e917536fb468c
+          line_end: 635
+          line_start: 620
+          path: tests/test_full_model_memory_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQ708YF499BB7G12RVW6QNYG
+            author: Jacob Chapel
+            body: "MUST-FIX: This does not satisfy ac-measured-memory-behavior. The AC requires validation
+              output from a comparative run to report peak RAM, peak GPU memory, returned-model
+              behavior, and post-return residency. This report is built from literals and omits
+              peak_rss/peak_gpu entirely; it also hard-codes full_model
+              affected_weights_resident=False instead of observing process/cache/model state after
+              Exit returns. Evidence: the only peak fields in this file are placeholder strings in
+              test_full_validation_report_shape, and the focused pytest run still passes with no
+              real RSS/VRAM peak comparison."
+            created_at: 2026-04-27T08:18:13.092Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T08:15:52.375Z
-    updated_at: 2026-04-27T08:17:55.860Z
+    updated_at: 2026-04-27T08:18:13.092Z
     notes: []
