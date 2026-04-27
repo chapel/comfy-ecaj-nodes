@@ -101,7 +101,7 @@ def _run_full_mode(recipe, mock_model_patcher, keys, tmp_path,
         "nodes.exit.analyze_recipe_models": mock_model_analysis,
         "nodes.exit.compile_plan": dummy_plan,
         "nodes.exit.compile_batch_groups": {sig: keys} if keys else {},
-        "nodes.exit.chunked_evaluation": merged,
+        "nodes.exit.evaluate_affected_group": merged,
         "nodes.exit.compute_base_identity": "base_id",
         "nodes.exit.compute_lora_stats": {},
         "nodes.exit.validate_model_name": f"{model_name}.safetensors",
@@ -175,10 +175,11 @@ class TestFullModeSucceedsWithoutDictPath:
         self, mock_model_patcher, tmp_path
     ):
         """Full mode does not use the dict-returning chunked_evaluation path
-        for newly evaluated affected tensors — it uses MaterializationSink.
+        for newly evaluated affected tensors — it uses evaluate_affected_group.
 
-        We monkeypatch the dict-returning chunked_evaluation to raise, then
-        verify full mode still succeeds via MaterializationSink.
+        We monkeypatch chunked_evaluation to raise RuntimeError, then verify
+        full mode still succeeds because it calls evaluate_affected_group
+        instead of chunked_evaluation.
         """
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -194,15 +195,18 @@ class TestFullModeSucceedsWithoutDictPath:
         affected_tensors = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        # The full mode DOES call chunked_evaluation for actual computation,
-        # so we let it return normally. The key assertion is that full mode
-        # streams to MaterializationSink and returns a loaded artifact.
+        # Monkeypatch the dict-returning chunked_evaluation to fail.
+        # Full mode must succeed because it uses evaluate_affected_group.
+        def chunked_eval_bomb(**kwargs):
+            raise RuntimeError("chunked_evaluation must not be called in full mode")
+
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation", return_value=affected_tensors),
+            patch("nodes.exit.chunked_evaluation", side_effect=chunked_eval_bomb),
+            patch("nodes.exit.evaluate_affected_group", return_value=affected_tensors),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="test.safetensors"),
@@ -343,6 +347,10 @@ class TestPatchModePreserved:
 class TestFullModeEventOrder:
     """Full mode with multiple affected groups records correct runtime event order.
 
+    Uses two affected groups with different tensor shapes (4x4 and 8x8) to
+    verify that group 1's affected tensors are written to the sink before
+    group 2 is evaluated.
+
     AC: @streaming-full-model-materialization ac-direct-artifact-handoff
     AC: @streaming-full-model-materialization ac-affected-results-released
     """
@@ -350,49 +358,112 @@ class TestFullModeEventOrder:
     # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
     # AC: @streaming-full-model-materialization ac-affected-results-released
     def test_event_order_base_then_affected_then_finalize(
-        self, mock_model_patcher, tmp_path
+        self, tmp_path
     ):
-        """Full mode event order: affected tensors evaluated, written to sink,
-        artifact finalized, loaded model returned."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        """Full mode event order with two affected groups:
+        base weights written, group 1 evaluated + handed to materialization,
+        group 2 evaluated + handed to materialization, artifact finalized,
+        saved model loaded.
+
+        Critically: group 1 writes happen BEFORE group 2 evaluation.
+        """
+        # Create a model patcher with mixed-shape keys to produce two groups.
+        # Group 1 (4x4): input/middle keys
+        # Group 2 (8x8): output keys
+        group1_keys = [
+            "diffusion_model.input_blocks.0.0.weight",
+            "diffusion_model.middle_block.0.weight",
+        ]
+        group2_keys = [
+            "diffusion_model.output_blocks.0.0.weight",
+            "diffusion_model.output_blocks.1.0.weight",
+        ]
+        # Add a base-only key (not affected) to test base weight interleaving
+        base_only_key = "diffusion_model.base_only.weight"
+        all_keys = group1_keys + group2_keys
+        affected_keys = set(all_keys)
+
+        state_dict = {}
+        for k in group1_keys:
+            state_dict[k] = torch.randn(4, 4, dtype=torch.float32)
+        for k in group2_keys:
+            state_dict[k] = torch.randn(8, 8, dtype=torch.float32)
+        state_dict[base_only_key] = torch.randn(4, 4, dtype=torch.float32)
+
+        from tests.conftest import MockModelPatcher
+        mock_patcher = MockModelPatcher.__new__(MockModelPatcher)
+        mock_patcher._state_dict = state_dict
+        mock_patcher.model = MagicMock()
+        mock_patcher.model.diffusion_model = MagicMock()
+        mock_patcher.model.diffusion_model.state_dict = MagicMock(return_value=state_dict)
+        mock_patcher.patches = {}
+        import uuid
+        mock_patcher.patches_uuid = uuid.uuid4()
+
+        # Make clone() return a proper clone-like object
+        def _clone():
+            c = MockModelPatcher.__new__(MockModelPatcher)
+            c._state_dict = mock_patcher._state_dict
+            c.model = mock_patcher.model
+            c.patches = {}
+            c.patches_uuid = mock_patcher.patches_uuid
+            return c
+        mock_patcher.clone = _clone
+
+        base = RecipeBase(model_patcher=mock_patcher, arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        keys = list(mock_model_patcher.model_state_dict().keys())
         save_path = str(tmp_path / "event_order.safetensors")
 
         events = []
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, keys, recipe=merge,
+            mock_patcher, all_keys, recipe=merge,
         )
-        merged = {k: torch.randn(4, 4) for k in keys}
-        sig = OpSignature(shape=(4, 4), ndim=2)
 
-        def recording_chunked_eval(**kwargs):
-            events.append("affected_tensors_evaluated")
-            return merged
+        # Pre-build per-group results
+        group1_results = {k: torch.randn(4, 4) for k in group1_keys}
+        group2_results = {k: torch.randn(8, 8) for k in group2_keys}
+
+        sig1 = OpSignature(shape=(4, 4), ndim=2)
+        sig2 = OpSignature(shape=(8, 8), ndim=2)
+        batch_groups = {sig1: group1_keys, sig2: group2_keys}
+
+        def recording_eval(**kwargs):
+            called_keys = kwargs.get("keys", [])
+            # Determine which group based on keys
+            if set(called_keys) <= set(group1_keys):
+                events.append("eval:g1")
+                return group1_results
+            elif set(called_keys) <= set(group2_keys):
+                events.append("eval:g2")
+                return group2_results
+            else:
+                raise RuntimeError(f"Unexpected keys: {called_keys}")
 
         original_sink_class = MaterializationSink
 
         class RecordingSink(original_sink_class):
             def write_tensor(self, name, tensor):
-                if name in merged:
-                    events.append(f"affected_handed_to_materialization:{name}")
+                if name in group1_results:
+                    events.append(f"write:g1:{name}")
+                elif name in group2_results:
+                    events.append(f"write:g2:{name}")
                 else:
-                    events.append(f"base_weight_written:{name}")
+                    events.append(f"write:base:{name}")
                 super().write_tensor(name, tensor)
 
             def finalize(self, save_path):
-                events.append("artifact_finalized")
+                events.append("finalize")
                 super().finalize(save_path)
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
-            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation", side_effect=recording_chunked_eval),
+            patch("nodes.exit.compile_batch_groups", return_value=batch_groups),
+            patch("nodes.exit.evaluate_affected_group", side_effect=recording_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="event_order.safetensors"),
@@ -406,25 +477,37 @@ class TestFullModeEventOrder:
             (result,) = node.execute(merge, save_model=True, model_name="event_order")
             events.append("saved_model_loaded")
 
-        # Verify event order
-        assert "affected_tensors_evaluated" in events
-        assert "artifact_finalized" in events
+        # Both groups must be evaluated
+        assert "eval:g1" in events
+        assert "eval:g2" in events
+        assert "finalize" in events
         assert "saved_model_loaded" in events
 
-        eval_idx = events.index("affected_tensors_evaluated")
-        finalize_idx = events.index("artifact_finalized")
+        # Group 1 writes must happen BEFORE group 2 evaluation.
+        # This is the critical streaming assertion — group 1 results are
+        # handed to materialization before group 2 starts evaluating.
+        g1_write_events = [e for e in events if e.startswith("write:g1:")]
+        g2_write_events = [e for e in events if e.startswith("write:g2:")]
+        assert len(g1_write_events) == len(group1_keys)
+        assert len(g2_write_events) == len(group2_keys)
+
+        last_g1_write_idx = max(events.index(e) for e in g1_write_events)
+        eval_g2_idx = events.index("eval:g2")
+        finalize_idx = events.index("finalize")
         load_idx = events.index("saved_model_loaded")
 
-        # affected eval before finalize before load
-        assert eval_idx < finalize_idx < load_idx
+        # Group 1 is written to sink BEFORE group 2 starts evaluation
+        assert last_g1_write_idx < eval_g2_idx, (
+            f"Group 1 writes must complete before group 2 evaluation. "
+            f"Events: {events}"
+        )
 
-        # Affected tensors handed to materialization before finalize
-        affected_handoff_events = [
-            e for e in events if e.startswith("affected_handed_to_materialization:")
-        ]
-        assert len(affected_handoff_events) == len(keys)
-        for ae in affected_handoff_events:
-            assert events.index(ae) < finalize_idx
+        # All writes happen before finalize
+        for e in g1_write_events + g2_write_events:
+            assert events.index(e) < finalize_idx
+
+        # Finalize before load
+        assert finalize_idx < load_idx
 
 
 # ===========================================================================
@@ -456,7 +539,7 @@ class TestFailureAbortsMaterialization:
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        def failing_chunked_eval(**kwargs):
+        def failing_eval(**kwargs):
             raise RuntimeError("Simulated evaluation failure")
 
         mock_sink = MagicMock()
@@ -466,7 +549,7 @@ class TestFailureAbortsMaterialization:
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation", side_effect=failing_chunked_eval),
+            patch("nodes.exit.evaluate_affected_group", side_effect=failing_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="partial.safetensors"),
@@ -505,7 +588,7 @@ class TestFailureAbortsMaterialization:
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        def failing_eval(**kwargs):
+        def failing_group_eval(**kwargs):
             raise RuntimeError("fail")
 
         with (
@@ -513,7 +596,7 @@ class TestFailureAbortsMaterialization:
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation", side_effect=failing_eval),
+            patch("nodes.exit.evaluate_affected_group", side_effect=failing_group_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="fail.safetensors"),
@@ -572,7 +655,7 @@ class TestFinalizeFailure:
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation", return_value=merged),
+            patch("nodes.exit.evaluate_affected_group", return_value=merged),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="finalize_fail.safetensors"),
@@ -703,6 +786,42 @@ class TestCacheModeIsolation:
             },
         )
         assert check_full_model_cache(save_path, "wrong_hash") is False
+
+    # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_missing_affected_keys_not_accepted(self, tmp_path):
+        """Artifact with valid version/hash/mode but missing __ecaj_affected_keys__
+        is rejected. Such an artifact would crash _load_model_from_artifact."""
+        save_path = str(tmp_path / "no_affected_keys.safetensors")
+        save_file(
+            {"k": torch.randn(4, 4)},
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_output_mode__": "full",
+            },
+        )
+        assert check_full_model_cache(save_path, "hash1") is False
+
+    # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_malformed_affected_keys_not_accepted(self, tmp_path):
+        """Artifact with invalid JSON in __ecaj_affected_keys__ is rejected."""
+        save_path = str(tmp_path / "bad_json.safetensors")
+        save_file(
+            {"k": torch.randn(4, 4)},
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_affected_keys__": "not valid json",
+                "__ecaj_output_mode__": "full",
+            },
+        )
+        assert check_full_model_cache(save_path, "hash1") is False
 
     # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
     def test_valid_full_artifact_accepted(self, tmp_path):

@@ -27,6 +27,7 @@ from .gpu_ops import (
     chunked_evaluation,
     compute_batch_size,
     estimate_peak_ram,
+    evaluate_affected_group,
     get_available_ram_bytes,
 )
 from .per_block import (
@@ -48,6 +49,7 @@ __all__ = [
     "chunked",
     "apply_lora_batch_gpu",
     "chunked_evaluation",
+    "evaluate_affected_group",
     "estimate_peak_ram",
     "evaluate_recipe",
     "execute_plan",

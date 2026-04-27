@@ -411,9 +411,10 @@ def check_full_model_cache(save_path: str, expected_hash: str) -> bool:
 
     Validates:
     - File exists
-    - Has ecaj metadata
+    - Has ecaj metadata (version, recipe hash, output mode, affected keys)
     - Recipe hash matches
     - Output mode is "full" (not "patch")
+    - Affected keys metadata is present and valid JSON
 
     Args:
         save_path: Path to the safetensors file
@@ -442,6 +443,18 @@ def check_full_model_cache(save_path: str, expected_hash: str) -> bool:
 
     stored_mode = metadata.get("__ecaj_output_mode__", "")
     if stored_mode != "full":
+        return False
+
+    # Validate that affected keys metadata is present and parseable.
+    # Without this, _load_model_from_artifact will fail with KeyError.
+    affected_raw = metadata.get("__ecaj_affected_keys__")
+    if affected_raw is None:
+        return False
+    try:
+        parsed = json.loads(affected_raw)
+        if not isinstance(parsed, list):
+            return False
+    except (json.JSONDecodeError, TypeError):
         return False
 
     return True

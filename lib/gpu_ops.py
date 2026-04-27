@@ -355,7 +355,7 @@ def apply_lora_batch_gpu(
     return result
 
 
-def chunked_evaluation(
+def _chunked_eval_impl(
     keys: list[str],
     base_tensors: dict[str, torch.Tensor],
     eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
@@ -364,31 +364,10 @@ def chunked_evaluation(
     dtype: torch.dtype,
     storage_dtype: torch.dtype,
 ) -> dict[str, torch.Tensor]:
-    """Evaluate keys in chunks with OOM backoff, returning CPU tensors.
+    """Core chunked evaluation with OOM backoff, returning CPU tensors.
 
-    # AC: @batched-executor ac-4
-    OOM backoff: failed chunk retries at batch size 1 while others continue normally.
-
-    # AC: @batched-executor ac-5
-    All result tensors are on CPU ready for set patch installation.
-
-    # AC: @batched-executor ac-6
-    Output tensors match the base model storage dtype.
-
-    # AC: @memory-management ac-1
-    After chunk completes and results transfer to CPU, GPU tensors are freed.
-
-    Args:
-        keys: List of parameter keys to evaluate
-        base_tensors: Dict of key -> CPU tensor for base weights
-        eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu
-        batch_size: Initial batch size for chunking
-        device: GPU device string
-        dtype: Computation dtype (fp32 for numerical stability)
-        storage_dtype: Output dtype (matches base model)
-
-    Returns:
-        Dict of key -> CPU tensor with merged weights
+    Shared implementation for both chunked_evaluation (patch mode) and
+    evaluate_affected_group (full saved model mode).
     """
     results: dict[str, torch.Tensor] = {}
 
@@ -502,3 +481,81 @@ def chunked_evaluation(
             raise
 
     return results
+
+
+def chunked_evaluation(
+    keys: list[str],
+    base_tensors: dict[str, torch.Tensor],
+    eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
+    batch_size: int,
+    device: str,
+    dtype: torch.dtype,
+    storage_dtype: torch.dtype,
+) -> dict[str, torch.Tensor]:
+    """Evaluate keys in chunks with OOM backoff, returning CPU tensors.
+
+    Used by patch mode for dict-returning evaluation.
+
+    # AC: @batched-executor ac-4
+    OOM backoff: failed chunk retries at batch size 1 while others continue normally.
+
+    # AC: @batched-executor ac-5
+    All result tensors are on CPU ready for set patch installation.
+
+    # AC: @batched-executor ac-6
+    Output tensors match the base model storage dtype.
+
+    # AC: @memory-management ac-1
+    After chunk completes and results transfer to CPU, GPU tensors are freed.
+
+    Args:
+        keys: List of parameter keys to evaluate
+        base_tensors: Dict of key -> CPU tensor for base weights
+        eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu
+        batch_size: Initial batch size for chunking
+        device: GPU device string
+        dtype: Computation dtype (fp32 for numerical stability)
+        storage_dtype: Output dtype (matches base model)
+
+    Returns:
+        Dict of key -> CPU tensor with merged weights
+    """
+    return _chunked_eval_impl(
+        keys, base_tensors, eval_fn, batch_size, device, dtype, storage_dtype,
+    )
+
+
+def evaluate_affected_group(
+    keys: list[str],
+    base_tensors: dict[str, torch.Tensor],
+    eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
+    batch_size: int,
+    device: str,
+    dtype: torch.dtype,
+    storage_dtype: torch.dtype,
+) -> dict[str, torch.Tensor]:
+    """Evaluate an affected group for full saved model mode.
+
+    Same chunked evaluation with OOM backoff as chunked_evaluation, but
+    used exclusively by full saved model mode. Results are handed to
+    MaterializationSink per-group rather than accumulated into a merged_state
+    dict.
+
+    This is a separate entry point so that monkeypatching chunked_evaluation
+    (used by patch mode) does not affect full saved model mode.
+
+    Args:
+        keys: List of parameter keys to evaluate
+        base_tensors: Dict of key -> CPU tensor for base weights
+        eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu
+        batch_size: Initial batch size for chunking
+        device: GPU device string
+        dtype: Computation dtype (fp32 for numerical stability)
+        storage_dtype: Output dtype (matches base model)
+
+    Returns:
+        Dict of key -> CPU tensor with evaluated affected weights
+    """
+    return _chunked_eval_impl(
+        keys, base_tensors, eval_fn, batch_size, device, dtype, storage_dtype,
+    )
