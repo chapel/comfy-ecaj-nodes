@@ -344,9 +344,11 @@ class TestFullModeEventOrder:
     """Full mode with multiple affected groups records correct runtime event order.
 
     AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+    AC: @streaming-full-model-materialization ac-affected-results-released
     """
 
     # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+    # AC: @streaming-full-model-materialization ac-affected-results-released
     def test_event_order_base_then_affected_then_finalize(
         self, mock_model_patcher, tmp_path
     ):
