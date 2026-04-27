@@ -4000,7 +4000,7 @@ runs:
     completed_at: 2026-04-27T08:29:13.544Z
   - _ulid: 01KQ71ATFQDY1J1Z1KCS71YM6W
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -4015,7 +4015,18 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T08:37:17.179Z
-        completed_at: 2026-04-27T08:37:17.179Z
+        completed_at: 2026-04-27T08:37:43.009Z
+        notes: "Identified high-confidence items: (1) detached reviewer PR merge/delete-branch friction, (2)
+          task-subject review records cannot refresh examined commit after reviewer-pushed fixes,
+          (3) checking PR CI status before merge caught a failing lint gate. Existing coverage
+          found: inbox 01KQ6R11 covers detached PR merge command friction; inbox 01KQ6MFM and
+          01KQ6ZJF cover reviewer-fix review refresh gaps; existing success observation 01KQ6ZJF
+          covers PR CI status review as an effective gate. No new capture needed to avoid
+          duplicates."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T08:37:43.009Z
+        completed_at: 2026-04-27T08:37:43.009Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T08:36:43.128Z
