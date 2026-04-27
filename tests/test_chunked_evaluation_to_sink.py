@@ -7,6 +7,8 @@ dict-returning chunked_evaluation wrapper.
 AC: @streaming-full-model-materialization ac-affected-results-released
 """
 
+import sys
+
 import torch
 
 from lib.gpu_ops import chunked_evaluation, chunked_evaluation_to_sink
@@ -443,3 +445,86 @@ class TestDictReturningWrapper:
         assert len(results) == 2
         for k in keys:
             assert torch.allclose(results[k], base[k] + 1, atol=1e-5)
+
+
+class TestLocalReferenceRelease:
+    """Verify that merged_cpu is released between chunks / retry keys."""
+
+    # AC: @streaming-full-model-materialization ac-affected-results-released
+    def test_merged_cpu_released_between_chunks(self):
+        """merged_cpu from a prior chunk is not alive when the next chunk evaluates."""
+        keys = ["k0", "k1", "k2", "k3"]
+        base = {k: torch.randn(4, 4) for k in keys}
+
+        chunk_calls = [0]
+        merged_cpu_alive_on_later_chunk = [False]
+
+        def eval_fn(batch_keys, batch_gpu):
+            chunk_calls[0] += 1
+            if chunk_calls[0] > 1:
+                # Inspect the caller's locals (chunked_evaluation_to_sink)
+                frame = sys._getframe(1)
+                if "merged_cpu" in frame.f_locals:
+                    merged_cpu_alive_on_later_chunk[0] = True
+                del frame
+            return batch_gpu * 2
+
+        sink = InMemorySink()
+        chunked_evaluation_to_sink(
+            keys=keys,
+            base_tensors=base,
+            eval_fn=eval_fn,
+            batch_size=2,
+            device="cpu",
+            dtype=torch.float32,
+            storage_dtype=torch.float32,
+            sink=sink,
+        )
+
+        assert chunk_calls[0] == 2, "Expected 2 chunk calls"
+        assert not merged_cpu_alive_on_later_chunk[0], (
+            "merged_cpu from prior chunk was still alive in caller frame "
+            "when next chunk started evaluation"
+        )
+
+    # AC: @streaming-full-model-materialization ac-affected-results-released
+    def test_merged_cpu_released_between_oom_retry_keys(self):
+        """merged_cpu from a prior OOM-retry key is not alive when the next key evaluates."""
+        keys = ["k0", "k1", "k2"]
+        base = {k: torch.randn(4, 4) for k in keys}
+
+        call_count = [0]
+        retry_key_calls = [0]
+        merged_cpu_alive_on_later_key = [False]
+
+        def eval_fn(batch_keys, batch_gpu):
+            call_count[0] += 1
+            if call_count[0] == 1 and len(batch_keys) > 1:
+                raise torch.cuda.OutOfMemoryError("Simulated OOM")
+            # In single-key retry path
+            if len(batch_keys) == 1:
+                retry_key_calls[0] += 1
+                if retry_key_calls[0] > 1:
+                    frame = sys._getframe(1)
+                    if "merged_cpu" in frame.f_locals:
+                        merged_cpu_alive_on_later_key[0] = True
+                    del frame
+            return batch_gpu * 2
+
+        sink = InMemorySink()
+        chunked_evaluation_to_sink(
+            keys=keys,
+            base_tensors=base,
+            eval_fn=eval_fn,
+            batch_size=3,
+            device="cpu",
+            dtype=torch.float32,
+            storage_dtype=torch.float32,
+            sink=sink,
+        )
+
+        assert retry_key_calls[0] == 3, "Expected 3 single-key retry calls"
+        assert not merged_cpu_alive_on_later_key[0], (
+            "merged_cpu from prior retry key was still alive in caller frame "
+            "when next retry key started evaluation"
+        )

@@ -427,9 +427,12 @@ def chunked_evaluation_to_sink(
             merged_cpu = merged_gpu.to("cpu", dtype=storage_dtype)
             del merged_gpu
 
-            # Write each result to the sink immediately
+            # Write each result to the sink immediately, then release
+            # the full CPU batch so it is not alive when the next chunk
+            # allocates its base_stack / base_gpu tensors.
             for i, key in enumerate(chunk_keys):
                 sink.write_tensor(key, merged_cpu[i])
+            del merged_cpu
 
             # AC: @memory-management ac-1
             # GPU tensors freed via del statements above after results
@@ -457,6 +460,7 @@ def chunked_evaluation_to_sink(
                     del merged_gpu
 
                     sink.write_tensor(key, merged_cpu[0])
+                    del merged_cpu
 
                     # AC: @memory-management ac-1
                     # Free GPU memory after each single-key evaluation in OOM path
