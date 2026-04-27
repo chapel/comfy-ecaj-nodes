@@ -202,6 +202,110 @@ class TestIncrementalWriterRejection:
 
 # =============================================================================
 # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+# Poison: validation errors make the writer permanently unpublishable
+# =============================================================================
+
+
+class TestIncrementalWriterPoisonOnValidationError:
+    """Validation errors poison the writer so finalize can never succeed."""
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_duplicate_key_prevents_finalize(self, tmp_path):
+        """After a duplicate-key error, finalize is impossible even if caller catches."""
+        dest = tmp_path / "model.safetensors"
+        manifest = {"key": TensorSpec(shape=(4,), dtype=torch.float32)}
+
+        writer = IncrementalSafetensorsWriter(manifest, str(dest))
+        writer.write_tensor("key", torch.randn(4, dtype=torch.float32))
+
+        with pytest.raises(RuntimeError, match="[Dd]uplicate"):
+            writer.write_tensor("key", torch.randn(4, dtype=torch.float32))
+
+        # Writer is poisoned: finalize must refuse.
+        with pytest.raises(RuntimeError):
+            writer.finalize()
+        assert not dest.exists()
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_wrong_shape_prevents_finalize(self, tmp_path):
+        """After a shape-mismatch error, finalize is impossible."""
+        dest = tmp_path / "model.safetensors"
+        manifest = {"key": TensorSpec(shape=(4, 4), dtype=torch.float32)}
+
+        writer = IncrementalSafetensorsWriter(manifest, str(dest))
+
+        with pytest.raises(RuntimeError, match="[Ss]hape"):
+            writer.write_tensor("key", torch.randn(8, 8, dtype=torch.float32))
+
+        with pytest.raises(RuntimeError):
+            writer.finalize()
+        assert not dest.exists()
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_wrong_dtype_prevents_finalize(self, tmp_path):
+        """After a dtype-mismatch error, finalize is impossible."""
+        dest = tmp_path / "model.safetensors"
+        manifest = {"key": TensorSpec(shape=(4, 4), dtype=torch.float32)}
+
+        writer = IncrementalSafetensorsWriter(manifest, str(dest))
+
+        with pytest.raises(RuntimeError, match="[Dd]type"):
+            writer.write_tensor("key", torch.randn(4, 4, dtype=torch.float16))
+
+        with pytest.raises(RuntimeError):
+            writer.finalize()
+        assert not dest.exists()
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_unexpected_key_prevents_finalize(self, tmp_path):
+        """After an unexpected-key error, finalize is impossible."""
+        dest = tmp_path / "model.safetensors"
+        manifest = {"expected": TensorSpec(shape=(4,), dtype=torch.float32)}
+
+        writer = IncrementalSafetensorsWriter(manifest, str(dest))
+
+        with pytest.raises(RuntimeError, match="[Uu]nexpected"):
+            writer.write_tensor("surprise", torch.randn(4, dtype=torch.float32))
+
+        with pytest.raises(RuntimeError):
+            writer.finalize()
+        assert not dest.exists()
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_validation_error_prevents_further_writes(self, tmp_path):
+        """After a validation error, further write_tensor calls also fail."""
+        dest = tmp_path / "model.safetensors"
+        manifest = {
+            "a": TensorSpec(shape=(4,), dtype=torch.float32),
+            "b": TensorSpec(shape=(4,), dtype=torch.float32),
+        }
+
+        writer = IncrementalSafetensorsWriter(manifest, str(dest))
+
+        with pytest.raises(RuntimeError, match="[Dd]type"):
+            writer.write_tensor("a", torch.randn(4, dtype=torch.float16))
+
+        with pytest.raises(RuntimeError, match="aborted"):
+            writer.write_tensor("b", torch.randn(4, dtype=torch.float32))
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_validation_error_cleans_up_temp_file(self, tmp_path):
+        """Validation error immediately cleans up the temp file."""
+        dest = tmp_path / "model.safetensors"
+        manifest = {"key": TensorSpec(shape=(4,), dtype=torch.float32)}
+
+        writer = IncrementalSafetensorsWriter(manifest, str(dest))
+
+        with pytest.raises(RuntimeError):
+            writer.write_tensor("key", torch.randn(4, dtype=torch.float16))
+
+        assert not dest.exists()
+        tmp_files = list(tmp_path.glob(".ecaj_tmp_*"))
+        assert len(tmp_files) == 0, "Temp file should be removed on validation error"
+
+
+# =============================================================================
+# AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
 # Cleanup: failed or aborted writes leave no temp files
 # =============================================================================
 

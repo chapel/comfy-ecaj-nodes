@@ -67,6 +67,7 @@ class IncrementalSafetensorsWriter:
         self._dest_path = dest_path
         self._finalized = False
         self._aborted = False
+        self._failed = False
         self._manifest = dict(manifest)
         self._written: set[str] = set()
 
@@ -156,35 +157,25 @@ class IncrementalSafetensorsWriter:
             raise RuntimeError(
                 "Cannot write to a writer that has been aborted"
             )
-
-        if key not in self._manifest:
+        if self._failed:
             raise RuntimeError(
-                f"Unexpected key '{key}': not in manifest"
+                "Cannot write to a writer that has failed due to a "
+                "previous validation error"
             )
 
-        if key in self._written:
-            raise RuntimeError(
-                f"Duplicate key '{key}': already written"
-            )
-
-        spec = self._manifest[key]
-
-        if tuple(tensor.shape) != tuple(spec.shape):
-            raise RuntimeError(
-                f"Shape mismatch for '{key}': "
-                f"expected {spec.shape}, got {tuple(tensor.shape)}"
-            )
-
-        if tensor.dtype != spec.dtype:
-            raise RuntimeError(
-                f"Dtype mismatch for '{key}': "
-                f"expected {spec.dtype}, got {tensor.dtype}"
-            )
+        try:
+            self._validate_tensor(key, tensor)
+        except RuntimeError:
+            self._failed = True
+            self.abort()
+            raise
 
         data_bytes = _tensor_bytes(tensor)
         offset, expected_nbytes = self._key_offsets[key]
 
         if len(data_bytes) != expected_nbytes:
+            self._failed = True
+            self.abort()
             raise RuntimeError(
                 f"Byte size mismatch for '{key}': "
                 f"expected {expected_nbytes}, got {len(data_bytes)}"
@@ -208,6 +199,11 @@ class IncrementalSafetensorsWriter:
             raise RuntimeError("Writer has already been finalized")
         if self._aborted:
             raise RuntimeError("Cannot finalize an aborted writer")
+        if self._failed:
+            raise RuntimeError(
+                "Cannot finalize a writer that has failed due to a "
+                "previous validation error"
+            )
 
         missing = set(self._manifest.keys()) - self._written
         if missing:
@@ -256,6 +252,32 @@ class IncrementalSafetensorsWriter:
             self.abort()
 
     # -- Internal helpers --
+
+    def _validate_tensor(self, key: str, tensor: torch.Tensor) -> None:
+        """Check key, shape, and dtype against the manifest.
+
+        Raises RuntimeError on any mismatch.  Called by write_tensor
+        before any bytes are written.
+        """
+        if key not in self._manifest:
+            raise RuntimeError(f"Unexpected key '{key}': not in manifest")
+
+        if key in self._written:
+            raise RuntimeError(f"Duplicate key '{key}': already written")
+
+        spec = self._manifest[key]
+
+        if tuple(tensor.shape) != tuple(spec.shape):
+            raise RuntimeError(
+                f"Shape mismatch for '{key}': "
+                f"expected {spec.shape}, got {tuple(tensor.shape)}"
+            )
+
+        if tensor.dtype != spec.dtype:
+            raise RuntimeError(
+                f"Dtype mismatch for '{key}': "
+                f"expected {spec.dtype}, got {tensor.dtype}"
+            )
 
     def _close_file(self) -> None:
         try:
