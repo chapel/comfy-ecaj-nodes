@@ -4980,7 +4980,7 @@ runs:
     completed_at: 2026-04-27T20:07:53.051Z
   - _ulid: 01KQ8998E83X6FV1XFBZ719JYN
     status: active
-    current_step: 3
+    current_step: 4
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -5014,7 +5014,18 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T20:16:17.774Z
-        completed_at: 2026-04-27T20:16:17.774Z
+        completed_at: 2026-04-27T20:16:26.633Z
+        notes: "Proposed improvement: update kspec-merge guidance for dispatch
+          publication_mode=pull_request. Add an explicit PR-mode path after review approval: verify
+          review disposition/checks/blockers, inspect PR base/head and CI, merge the PR into the
+          dispatch-provided target, verify merged state/ref, then complete the task. Scope: small
+          documentation/workflow update to the merge skill or dispatch workflow text. Benefit:
+          reduces reviewer inference and avoids accidental use of the manual_merge detached helper
+          in PR-publication reviews."
+      - status: completed
+        step_index: 4
+        started_at: 2026-04-27T20:16:26.633Z
+        completed_at: 2026-04-27T20:16:26.633Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-04-27T20:14:54.920Z
