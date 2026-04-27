@@ -395,7 +395,8 @@ features:
               it.
             depends_on: []
             implements: []
-            relates_to: []
+            relates_to:
+              - "@memory-management"
             tests: []
             traits: []
             acceptance_criteria:
