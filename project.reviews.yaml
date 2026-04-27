@@ -1999,9 +1999,25 @@ reviews:
           status: pass
           name: AC annotation scan
         timestamp: 2026-04-27T06:23:05.518Z
+      - _ulid: 01KQ6SPEKJGM7X1EMG07KAZS54
+        actor: jacob.chapel@gmail.com
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-27T06:23:15.570Z
+      - _ulid: 01KQ6SPEKJQEEB9FFAKA3VVKVE
+        actor: jacob.chapel@gmail.com
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-27T06:23:15.570Z
     examined_commit: a6411d9558cd70c099f14a8ea61d0a1b39fb6ff9
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -2031,7 +2047,14 @@ reviews:
               masks this by replacing CheckpointMaterializationSink with MagicMock."
             created_at: 2026-04-27T06:22:57.955Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: jacob.chapel@gmail.com
+        role: reviewer
+        created_at: 2026-04-27T06:23:15.567Z
     created_at: 2026-04-27T06:19:25.143Z
-    updated_at: 2026-04-27T06:23:05.497Z
+    updated_at: 2026-04-27T06:23:15.570Z
     notes: []
