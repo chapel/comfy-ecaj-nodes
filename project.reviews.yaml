@@ -6367,6 +6367,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ86JEH638WF9QN0YGXVGAKA
         timestamp: 2026-04-27T19:27:30.413Z
+      - _ulid: 01KQ86JPG5008PTZM3KRGSQ3JC
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ86JPE01K61V2N51WS52KKA
+        timestamp: 2026-04-27T19:27:38.501Z
     examined_commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
     external_links: []
     lifecycle_state: open
@@ -6467,7 +6474,25 @@ reviews:
               reused a full artifact as tensor cache."
             created_at: 2026-04-27T19:27:30.343Z
         kind: blocker
+      - _ulid: 01KQ86JPE01K61V2N51WS52KKA
+        anchor:
+          type: code
+          commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
+          line_end: 1183
+          line_start: 1131
+          path: tests/test_full_model_streaming.py
+          side: head
+        entries:
+          - _ulid: 01KQ86JPE1C9ZW03BQ0PBGDDD0
+            author: Jacob Chapel
+            body: "MUST-FIX: The Dynamic VRAM/non-Dynamic VRAM/memory-mode-preserved tests all run the same
+              helper without simulating distinct Comfy memory modes, and the memory-mode-preserved
+              test captures attributes but never asserts no mode-changing API was called. These do
+              not satisfy the task-required dynamic tests for Dynamic VRAM enabled, Dynamic VRAM
+              inactive, cleanup APIs unavailable, and active memory mode not mutated."
+            created_at: 2026-04-27T19:27:38.433Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:19:54.224Z
-    updated_at: 2026-04-27T19:27:30.343Z
+    updated_at: 2026-04-27T19:27:38.433Z
     notes: []
