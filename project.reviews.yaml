@@ -7621,6 +7621,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T20:42:56.365Z
         completed_at: 2026-04-27T20:42:56.365Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: python -m ruff check scripts/manual/real_comfy_memory_validation.py
+          tests/test_real_comfy_memory_harness.py passed with all checks passed.
+        name: ruff changed files
+        required: true
+        runner: ruff
+        created_at: 2026-04-27T20:43:02.252Z
+        completed_at: 2026-04-27T20:43:02.252Z
     events:
       - _ulid: 01KQ8APQQ9F639YBW0BWBXPTTN
         actor: Jacob Chapel
@@ -7669,6 +7680,13 @@ reviews:
           status: pass
           name: targeted harness tests
         timestamp: 2026-04-27T20:42:56.431Z
+      - _ulid: 01KQ8AWR9T7EXV568FAFE6CPSJ
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff changed files
+        timestamp: 2026-04-27T20:43:02.330Z
     examined_commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
     external_links: []
     lifecycle_state: open
@@ -7728,5 +7746,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T20:39:45.129Z
-    updated_at: 2026-04-27T20:42:56.365Z
+    updated_at: 2026-04-27T20:43:02.252Z
     notes: []
