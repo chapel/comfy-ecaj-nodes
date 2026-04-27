@@ -36,3 +36,28 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-27T08:07:11.898Z
+  - _ulid: 01KQ7000Z0RFXGCQ3YNNFTGZ0S
+    content: >-
+      Submitted. PR #95 created: https://github.com/chapel/comfy-ecaj-nodes/pull/95
+
+
+      Coverage:
+
+      - ac-no-dynamic-vram-opt-out: 3 tests (Dynamic VRAM enabled workflow, cache hit, no mode
+      gating)
+
+      - ac-comfy-owns-returned-model-memory: 3 tests (load_saved_model path, comfy.sd API, patches
+      mode control)
+
+      - ac-measured-memory-behavior: 8 tests (comparative report, no install_patches, weight
+      equivalence, memory logging, unavailable detection, validation report shape)
+
+      - Output equivalence: 2 tests (artifact contents, cache reuse)
+
+      - Optional integration: 2 tests (Dynamic VRAM skip, GPU skip)
+
+
+      17 total tests, 16 pass, 1 expected skip (Dynamic VRAM measurement without ComfyUI).
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T08:13:20.737Z
