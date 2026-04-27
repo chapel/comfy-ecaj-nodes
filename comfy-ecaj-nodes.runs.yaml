@@ -4771,9 +4771,30 @@ runs:
     completed_at: 2026-04-27T19:30:12.302Z
   - _ulid: 01KQ87927YM9K204SMBT5JE33P
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T19:39:51.422Z
+        completed_at: 2026-04-27T19:40:18.507Z
+        notes: >-
+          What worked well:
+
+          1. Reading all 7 review threads in full before starting any fixes — avoided partial fixes
+          and rework.
+
+          2. Fixing production code (blockers 1 and 7) first, then all test fixes — clean dependency
+          order.
+
+          3. Running full test suite + ruff after all changes, not after each individual fix —
+          efficient.
+
+          4. All 7 blockers resolved in a single pass with 1 commit — clean history.
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T19:40:18.507Z
+        completed_at: 2026-04-27T19:40:18.507Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:39:51.422Z
