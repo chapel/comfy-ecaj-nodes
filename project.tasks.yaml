@@ -2020,7 +2020,7 @@
   title: Add guarded manual real-Comfy memory-mode validation harness
   type: task
   spec_ref: "@manual-comfy-memory-validation"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@task-full-model-streaming-artifact-cache"
@@ -2035,7 +2035,7 @@
   todos_count: 0
   created_at: 2026-04-27T16:11:48.246Z
   started_at: 2026-04-27T20:36:31.336Z
-  submitted_at: 2026-04-27T20:22:24.571Z
+  submitted_at: 2026-04-27T20:36:36.549Z
   automation: eligible
 - _ulid: 01KQ7VC3QNKF0XR8J2ZAK7VF2Y
   slugs:

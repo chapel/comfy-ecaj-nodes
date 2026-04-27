@@ -86,7 +86,7 @@ description: >-
 spec_ref: "@manual-comfy-memory-validation"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-full-model-streaming-artifact-cache"
@@ -102,11 +102,11 @@ review_ref: "@01KQ89VMEZSRBFB2QBSD59AB1E"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
-  captured_at: 2026-04-27T20:22:24.565Z
-  commit: afea787efe1c0a926a94ac97b416789f3af80b50
-  remote: null
-  remote_url: null
-  upstream_ref: dev
+  captured_at: 2026-04-27T20:36:36.544Z
+  commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
+  remote: origin
+  remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+  upstream_ref: refs/heads/dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
 session_id: 01KQ8A43BNQVA8NQN2KMTJ5G9C
 history:
   - author: Jacob Chapel
@@ -186,8 +186,35 @@ history:
         previous: 2026-04-27T20:14:54.339Z
     command: task-start
     timestamp: 2026-04-27T20:36:31.336Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
+          captured_at: 2026-04-27T20:36:36.544Z
+          commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
+        previous:
+          review_url: null
+          branch: dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
+          captured_at: 2026-04-27T20:22:24.565Z
+          commit: afea787efe1c0a926a94ac97b416789f3af80b50
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+      submitted_at:
+        new: 2026-04-27T20:36:36.549Z
+        previous: 2026-04-27T20:22:24.571Z
+    command: task-submit
+    timestamp: 2026-04-27T20:36:36.549Z
 created_at: 2026-04-27T16:11:48.246Z
 started_at: 2026-04-27T20:36:31.336Z
-submitted_at: 2026-04-27T20:22:24.571Z
+submitted_at: 2026-04-27T20:36:36.549Z
 todos: []
 automation: eligible
