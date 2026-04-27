@@ -4568,9 +4568,25 @@ reviews:
           status: pass
           name: AC annotation scan
         timestamp: 2026-04-27T18:34:53.166Z
+      - _ulid: 01KQ83JER4YN7CX9E277BC7B3Y
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-27T18:35:04.836Z
+      - _ulid: 01KQ83JER4JVVS3DFE8FF8PCSN
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-27T18:35:04.836Z
     examined_commit: d95ffd207b96388e10cd4db492db1ac601a5dcaa
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -4641,7 +4657,14 @@ reviews:
               incomplete-write-not-reused requirements."
             created_at: 2026-04-27T18:34:52.502Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-27T18:35:04.835Z
     created_at: 2026-04-27T18:29:56.361Z
-    updated_at: 2026-04-27T18:34:53.113Z
+    updated_at: 2026-04-27T18:35:04.836Z
     notes: []
