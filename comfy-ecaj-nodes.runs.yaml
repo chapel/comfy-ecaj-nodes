@@ -3695,9 +3695,21 @@ runs:
     completed_at: 2026-04-27T06:55:53.110Z
   - _ulid: 01KQ6WH5483MY1F8SYBF2QD8CA
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T07:12:47.753Z
+        completed_at: 2026-04-27T07:13:13.799Z
+        notes: "Worked well: fresh per-cycle review record plus direct repro commands made the cache
+          compatibility issue concrete. The direct Python safetensors repro showed check_cache
+          accepted unknown schema versions and missing required full-model metadata, which produced
+          review evidence stronger than static reasoning."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T07:13:13.799Z
+        completed_at: 2026-04-27T07:13:13.799Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T07:12:47.753Z
