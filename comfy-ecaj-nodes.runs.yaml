@@ -4042,7 +4042,7 @@ runs:
     started_at: 2026-04-27T08:36:43.128Z
     completed_at: 2026-04-27T08:38:17.718Z
   - _ulid: 01KQ7Z2BBS987HFX2HA2G1MKWV
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -4077,7 +4077,12 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T17:18:01.798Z
-        completed_at: 2026-04-27T17:18:01.798Z
+        completed_at: 2026-04-27T17:18:38.364Z
+        notes: "Captured 1 success observation (01KQ7Z5V): AC-by-AC coverage check as quality gate. Skipped
+          2 items: /tmp tmpfs full (covered by 01KQ6SHQ) and bash stdout suppression
+          (environment-specific, not project-systemic). Session completed task
+          @01KQ7VC3HBVJMA4S8K9VBDCP7D — 3 commits, 1222 tests pass, PR #96 open."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T17:16:22.777Z
+    completed_at: 2026-04-27T17:18:38.364Z
