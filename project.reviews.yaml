@@ -7753,6 +7753,12 @@ reviews:
         payload:
           thread_ulid: 01KQ8AW3X555XV5P0C0MK6ZHHW
         timestamp: 2026-04-27T20:51:43.329Z
+      - _ulid: 01KQ8BCTPKYTBA1TDPXSMNCF3Z
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ8AVBA034PQE3Z5075T5R9P
+        timestamp: 2026-04-27T20:51:49.075Z
     examined_commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
     external_links: []
     lifecycle_state: closed
@@ -7799,6 +7805,8 @@ reviews:
               importability after bridge."
             created_at: 2026-04-27T20:51:40.036Z
         kind: blocker
+        resolved_at: 2026-04-27T20:51:48.996Z
+        resolved_by: "@claude"
       - _ulid: 01KQ8AW3X555XV5P0C0MK6ZHHW
         anchor:
           type: code
@@ -7835,5 +7843,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T20:43:22.709Z
     created_at: 2026-04-27T20:39:45.129Z
-    updated_at: 2026-04-27T20:51:43.249Z
+    updated_at: 2026-04-27T20:51:48.996Z
     notes: []
