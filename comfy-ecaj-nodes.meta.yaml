@@ -527,6 +527,25 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-02-19T21:39:28.002Z
+  - _ulid: 01KQ6JV5KV7XGB4C99Y0X990NK
+    type: friction
+    content: "Spec-only tasks (no code changes) cause PR creation failure because dispatch branch has no
+      commits vs integration target. Workaround: create a .kspec-evidence/ marker file. The dispatch
+      workflow should anticipate spec-only tasks where all changes live on the kspec-meta shadow
+      branch and either skip PR creation or have a standard evidence-file pattern."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T04:23:30.171Z
+  - _ulid: 01KQ6JV5N6VFH5BVSX3R4SV762
+    type: success
+    content: kspec item ac set works well for bulk AC scoping — updated 15+ ACs across 4 specs with
+      clear old→new feedback per change. The atomic per-AC update model is well-suited for spec
+      reconciliation tasks where existing ACs need scoping annotations without restructuring.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T04:23:30.214Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
