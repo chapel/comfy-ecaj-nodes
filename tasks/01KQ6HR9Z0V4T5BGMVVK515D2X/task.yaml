@@ -34,8 +34,12 @@ description: |
 spec_ref: "@streaming-full-model-materialization"
 plan_ref: "@plan-full-saved-model-output-plan"
 origin: derived
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Reviewed and merged PR #90 into plan/plan-full-saved-model-output-plan/01kq5zsk at
+  aec6500. Incremental safetensors writer publishes only after all manifest tensors validate and are
+  written, rejects missing/duplicate/wrong-shape/wrong-dtype writes, and cleans temp artifacts on
+  failure."
 depends_on:
   - "@task-full-model-saved-artifact-reload-spike"
 context: []
@@ -159,8 +163,25 @@ history:
         previous: "@01KQ6N9RBTWF13YQC21293X9JS"
     command: review-link
     timestamp: 2026-04-27T05:18:37.636Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Reviewed and merged PR #90 into plan/plan-full-saved-model-output-plan/01kq5zsk at aec6500.
+          Incremental safetensors writer publishes only after all manifest tensors validate and are
+          written, rejects missing/duplicate/wrong-shape/wrong-dtype writes, and cleans temp
+          artifacts on failure."
+        previous: null
+      completed_at:
+        new: 2026-04-27T05:23:09.184Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-04-27T05:23:09.195Z
 created_at: 2026-04-27T04:04:27.744Z
 started_at: 2026-04-27T05:16:47.356Z
 submitted_at: 2026-04-27T05:16:52.609Z
+completed_at: 2026-04-27T05:23:09.184Z
 todos: []
 automation: eligible
