@@ -3532,12 +3532,15 @@ plans:
     slugs:
       - plan-full-saved-model-output-plan
     title: Full Saved Model Output Plan
-    content: |
+    content: >
       # Full Saved Model Output Plan
+
 
       ## Specs
 
+
       ```yaml
+
       - title: Full Saved Model Output
         slug: full-saved-model-output
         type: feature
@@ -3653,11 +3656,15 @@ plans:
               remain resident solely because the Exit node returned.
       ```
 
+
       ## Tasks
+
 
       derive_from_specs: false
 
+
       ```yaml
+
       - title: Update Exit output-mode specs for full saved model behavior
         slug: task-full-model-update-existing-specs
         priority: 1
@@ -3695,48 +3702,58 @@ plans:
 
           Covers: @full-saved-model-output ac-return-loaded-model;
             @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory.
-      - title: Validate Comfy loading and Dynamic VRAM behavior for saved merged artifacts
-        slug: task-full-model-dynamic-vram-spike
+      - title: Validate saved-artifact reload before full materialization work
+        slug: task-full-model-saved-artifact-reload-spike
         priority: 1
-        tags: [research, comfy, memory]
+        tags: [research, comfy, memory, persistence]
         spec_ref: "@comfy-memory-manager-compatibility"
         depends_on: []
         description: |
-          What: Prove how a saved merged diffusion artifact behaves when ComfyUI loads
-          it with Dynamic VRAM enabled, and record the supported loading path for the
-          implementation tasks.
+          What: Run a deliberately bounded technical spike that proves whether a WIDEN
+          merged diffusion artifact can be loaded through ComfyUI's normal model
+          loading path and returned as the Exit node's MODEL output with equivalent
+          downstream behavior.
 
-          Why: Dynamic VRAM applies to model weights that ComfyUI owns through its
-          model loading and model patcher lifecycle. This output option is only useful
-          if the returned merged MODEL becomes a normal Comfy-managed model and does
-          not leave the original merged patch tensors resident outside that lifecycle.
+          Why: The full saved model plan depends on ComfyUI accepting the saved merged
+          artifact as a normal loaded model. That compatibility should be proven before
+          investing in bounded merge-result sinks, incremental artifact writing, and
+          full materialization refactors. The spike is intentionally narrow so it can
+          stop the plan early if saved-artifact reload is not viable.
 
           How:
-          - Create or reuse a small representative merged safetensors artifact from
-            the project test fixtures or a local ComfyUI development install.
-          - In a ComfyUI environment with Dynamic VRAM enabled, load the artifact using
-            the same public diffusion-model loading path used by regular model nodes.
-          - Confirm that the loaded object is a Comfy MODEL/ModelPatcher suitable for
-            downstream nodes and not a manually patched clone carrying the old set
-            patch payload.
-          - Capture whether the active ModelPatcher class is the dynamic patcher when
-            Dynamic VRAM is enabled and the regular patcher when it is disabled or not
-            supported.
-          - Measure peak process RAM and GPU memory for the current in-memory patch
-            output versus the saved-artifact output on the same representative merge.
-          - Document any Comfy version, PyTorch/CUDA, hardware, or platform conditions
-            that make Dynamic VRAM unavailable so later tasks preserve graceful
-            fallback behavior.
+          - Use the existing save_model/atomic_save path or a temporary test-only path
+            to create a representative merged safetensors artifact. Do not optimize
+            peak RAM in this task.
+          - Load the saved artifact with the same public ComfyUI diffusion-model loading
+            path that regular model nodes use.
+          - Compare the loaded-artifact MODEL against the current in-memory patch
+            output for the same recipe and assert affected weights are equivalent.
+          - Exercise the existing cache-hit shape: when a saved artifact matches the
+            current recipe identity, prove the GPU merge can be skipped and the MODEL
+            can be loaded from that artifact.
+          - In a ComfyUI environment with Dynamic VRAM enabled, capture whether the
+            returned loaded model participates in ComfyUI's normal memory lifecycle.
+            When Dynamic VRAM is unavailable, record the fallback mode explicitly
+            rather than treating that as a failure.
+          - Produce a go/no-go note in the task evidence. If the saved artifact cannot
+            be loaded as a usable Comfy MODEL, stop the full saved model plan and revise
+            the design before starting the materialization tasks.
+          - Remove or isolate any temporary proof-of-concept output mode before the
+            task is complete unless a later approved task explicitly keeps it.
 
           Testing:
-          - Add a developer-facing test or script under tests/ or scripts/ that can be
-            run against a local ComfyUI checkout to verify the loading path and print
-            the observed patcher class and memory measurements.
-          - The script should succeed when Dynamic VRAM is unavailable by explicitly
-            reporting the fallback, not by requiring the feature.
+          - Add unit tests that monkeypatch ComfyUI's diffusion-model loader and assert
+            the saved path is loaded for the spike path and compatible cache-hit path.
+          - Add parity coverage comparing affected weights from current in-memory patch
+            output and saved-artifact reload output.
+          - Add an optional integration script or documented command for a local
+            ComfyUI checkout that prints the active patcher/memory mode and whether the
+            loaded artifact can feed downstream Comfy nodes.
+          - Run the focused persistence/Exit pytest slice.
 
           Covers: @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out,
-            ac-comfy-owns-returned-model-memory, ac-measured-memory-behavior.
+            ac-comfy-owns-returned-model-memory, ac-measured-memory-behavior;
+            @full-saved-model-output ac-return-loaded-model, ac-cache-reuses-artifact.
       - title: Introduce a bounded merge result sink
         slug: task-full-model-result-sink-interface
         priority: 1
@@ -3921,7 +3938,7 @@ plans:
         tags: [exit-node, persistence, comfy]
         spec_ref: "@full-saved-model-output"
         depends_on:
-          - "@task-full-model-dynamic-vram-spike"
+          - "@task-full-model-saved-artifact-reload-spike"
           - "@task-full-model-chunked-evaluation-to-sink"
           - "@task-full-model-checkpoint-materialization"
           - "@task-full-model-cache-metadata"
@@ -4000,20 +4017,41 @@ plans:
             ac-comfy-owns-returned-model-memory, ac-measured-memory-behavior.
       ```
 
+
       ## Implementation Notes
 
+
       This option is the strongest candidate for actually using ComfyUI's Dynamic
+
       VRAM system because the merged result becomes a normal saved diffusion artifact
+
       loaded through Comfy's own model loading path. Dynamic VRAM is implemented by
+
       Comfy/aimdo around Comfy-managed model weights and ModelPatcher lifecycle; it is
+
       not a general-purpose allocator for arbitrary tensors held by custom nodes.
 
+
       The tradeoff is disk usage and an extra artifact load path. The plan therefore
+
       keeps the full saved model path explicit instead of replacing the current patch
-      output by default. The proof point for promotion is measured behavior under a
-      current ComfyUI build with Dynamic VRAM enabled: the returned model should no
-      longer depend on the original in-memory set patch payload, and any new load-time
-      or write-time peak should be visible in the validation output.
+
+      output by default. The first implementation gate is the saved-artifact reload spike: before
+      any
+
+      bounded materialization refactor begins, the project must prove that a WIDEN
+
+      saved artifact can be loaded as a usable Comfy MODEL with parity against the
+
+      current in-memory patch output. After that gate passes, the proof point for
+
+      promotion is measured behavior under a current ComfyUI build with Dynamic VRAM
+
+      enabled: the returned model should no longer depend on the original in-memory
+
+      set patch payload, and any new load-time or write-time peak should be visible in
+
+      the validation output.
     status: draft
     approved_at: null
     derived_specs: []
@@ -4037,6 +4075,10 @@ plans:
           validation ACs pass/fail"
         author: Jacob Chapel
         created_at: 2026-04-27T00:04:08.309Z
+      - _ulid: 01KQ6AENV0D89753S6NW42DRJG
+        content: Fold saved-model reload PoC validation into full saved model plan as early gated spike
+        author: Jacob Chapel
+        created_at: 2026-04-27T01:56:52.193Z
   - _ulid: 01KQ5ZSQ13857R9CGT36JXYK91
     slugs:
       - plan-disk-backed-patch-output-plan
