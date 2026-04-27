@@ -1997,7 +1997,7 @@
   title: Stream full saved model materialization and make full-mode cache artifact-backed
   type: task
   spec_ref: "@streaming-full-model-materialization"
-  status: pending_review
+  status: needs_work
   blocked_by: []
   depends_on: []
   priority: 1
@@ -2007,7 +2007,7 @@
     - streaming
     - cache
   review_ref: "@01KQ822FQK09Q8WEEM2TND599M"
-  notes_count: 9
+  notes_count: 10
   todos_count: 0
   created_at: 2026-04-27T16:11:48.139Z
   started_at: 2026-04-27T18:05:51.942Z
