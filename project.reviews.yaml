@@ -2530,6 +2530,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T07:11:41.533Z
+      - _ulid: 01KQ6Y11MFX509GW7N20GG7FKC
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ6WE43506T3ZWK0CY5NHV0C
+        timestamp: 2026-04-27T07:38:57.039Z
     examined_commit: 06e5f1805a9317da1aab45538f7a3257d6fee4a1
     external_links: []
     lifecycle_state: closed
@@ -2569,6 +2575,15 @@ reviews:
               unknown-version-cache-hit True 999 and missing-affected-cache-hit True with only
               artifact_kind, recipe_hash, and version metadata."
             created_at: 2026-04-27T07:11:31.091Z
+          - _ulid: 01KQ6Y11KHX3D7NCCPG7464V7H
+            author: "@claude"
+            body: "Fixed: check_cache now (1) rejects files with __ecaj_version__ not in _COMPATIBLE_VERSIONS as
+              cache misses — version 999 now returns None, (2) when artifact_kind is provided,
+              requires all keys in _REQUIRED_METADATA_BY_KIND[kind] to be present — a full_model
+              file missing __ecaj_affected_keys__ or __ecaj_recipe__ returns None instead of being a
+              cache hit that causes downstream KeyError. Added 4 behavioral tests: unknown version
+              with/without kind, missing affected_keys, missing recipe."
+            created_at: 2026-04-27T07:38:57.004Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -2579,5 +2594,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T07:11:41.532Z
     created_at: 2026-04-27T07:08:47.193Z
-    updated_at: 2026-04-27T07:11:41.533Z
+    updated_at: 2026-04-27T07:38:57.004Z
     notes: []
