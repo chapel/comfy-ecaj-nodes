@@ -131,6 +131,17 @@ reviews:
         runner: kspec
         created_at: 2026-04-27T04:26:43.139Z
         completed_at: 2026-04-27T04:26:43.139Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "PR #87 targeting plan/plan-full-saved-model-output-plan/01kq5zsk: lint SUCCESS, test
+          SUCCESS; mergeStateStatus CLEAN."
+        name: GitHub PR CI
+        required: true
+        runner: gh
+        created_at: 2026-04-27T04:26:59.048Z
+        completed_at: 2026-04-27T04:26:59.048Z
     events:
       - _ulid: 01KQ6JYCYMCFZ50ZR0F47J1Q9T
         actor: Jacob Chapel
@@ -159,6 +170,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-27T04:26:43.144Z
+      - _ulid: 01KQ6K1HKC62ESSKJNZS53PX7K
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: GitHub PR CI
+        timestamp: 2026-04-27T04:26:59.052Z
     examined_commit: b1a3ef80ad93ded4cd5c5a820b9ec2e10a76b0bb
     external_links: []
     lifecycle_state: open
@@ -171,5 +189,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T04:25:15.989Z
-    updated_at: 2026-04-27T04:26:43.139Z
+    updated_at: 2026-04-27T04:26:59.048Z
     notes: []
