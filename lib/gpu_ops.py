@@ -5,7 +5,8 @@ Provides:
 - compute_batch_size: VRAM-aware batch sizing (targets 70% of free VRAM)
 - chunked: simple list chunking utility
 - apply_lora_batch_gpu: torch.bmm-based batched LoRA application
-- chunked_evaluation: OOM backoff wrapper for reliable GPU evaluation
+- chunked_evaluation_to_sink: OOM backoff evaluation writing to a MergeResultSink
+- chunked_evaluation: dict-returning wrapper over chunked_evaluation_to_sink
 
 This module is pure torch and stdlib - no ComfyUI imports.
 """
@@ -17,9 +18,12 @@ import logging
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 import torch
+
+if TYPE_CHECKING:
+    from .result_sink import MergeResultSink
 
 logger = logging.getLogger("ecaj.gpu_ops")
 
@@ -355,7 +359,7 @@ def apply_lora_batch_gpu(
     return result
 
 
-def chunked_evaluation(
+def chunked_evaluation_to_sink(
     keys: list[str],
     base_tensors: dict[str, torch.Tensor],
     eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
@@ -363,8 +367,14 @@ def chunked_evaluation(
     device: str,
     dtype: torch.dtype,
     storage_dtype: torch.dtype,
-) -> dict[str, torch.Tensor]:
-    """Evaluate keys in chunks with OOM backoff, returning CPU tensors.
+    sink: MergeResultSink,
+) -> None:
+    """Evaluate keys in chunks with OOM backoff, writing results to a sink.
+
+    # AC: @streaming-full-model-materialization ac-affected-results-released
+    Each evaluated key is converted to storage_dtype on CPU and written to
+    the sink immediately, allowing the caller to release or persist tensors
+    before later chunks are evaluated.
 
     # AC: @batched-executor ac-4
     OOM backoff: failed chunk retries at batch size 1 while others continue normally.
@@ -386,12 +396,8 @@ def chunked_evaluation(
         device: GPU device string
         dtype: Computation dtype (fp32 for numerical stability)
         storage_dtype: Output dtype (matches base model)
-
-    Returns:
-        Dict of key -> CPU tensor with merged weights
+        sink: MergeResultSink to receive each completed tensor
     """
-    results: dict[str, torch.Tensor] = {}
-
     # Cache available RAM once before the loop to avoid reading /proc/meminfo
     # per chunk. RAM doesn't change significantly within a single evaluation.
     avail_ram = get_available_ram_bytes() if device != "cpu" else 0
@@ -421,9 +427,12 @@ def chunked_evaluation(
             merged_cpu = merged_gpu.to("cpu", dtype=storage_dtype)
             del merged_gpu
 
-            # Unpack results
+            # Write each result to the sink immediately, then release
+            # the full CPU batch so it is not alive when the next chunk
+            # allocates its base_stack / base_gpu tensors.
             for i, key in enumerate(chunk_keys):
-                results[key] = merged_cpu[i]
+                sink.write_tensor(key, merged_cpu[i])
+            del merged_cpu
 
             # AC: @memory-management ac-1
             # GPU tensors freed via del statements above after results
@@ -450,7 +459,8 @@ def chunked_evaluation(
                     merged_cpu = merged_gpu.to("cpu", dtype=storage_dtype)
                     del merged_gpu
 
-                    results[key] = merged_cpu[0]
+                    sink.write_tensor(key, merged_cpu[0])
+                    del merged_cpu
 
                     # AC: @memory-management ac-1
                     # Free GPU memory after each single-key evaluation in OOM path
@@ -501,4 +511,56 @@ def chunked_evaluation(
                 ) from e
             raise
 
-    return results
+
+def chunked_evaluation(
+    keys: list[str],
+    base_tensors: dict[str, torch.Tensor],
+    eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
+    batch_size: int,
+    device: str,
+    dtype: torch.dtype,
+    storage_dtype: torch.dtype,
+) -> dict[str, torch.Tensor]:
+    """Evaluate keys in chunks with OOM backoff, returning CPU tensors.
+
+    Compatibility wrapper over chunked_evaluation_to_sink using an
+    InMemorySink. Preserves the original dict-returning interface.
+
+    # AC: @batched-executor ac-4
+    OOM backoff: failed chunk retries at batch size 1 while others continue normally.
+
+    # AC: @batched-executor ac-5
+    All result tensors are on CPU ready for set patch installation.
+
+    # AC: @batched-executor ac-6
+    Output tensors match the base model storage dtype.
+
+    # AC: @memory-management ac-1
+    After chunk completes and results transfer to CPU, GPU tensors are freed.
+
+    Args:
+        keys: List of parameter keys to evaluate
+        base_tensors: Dict of key -> CPU tensor for base weights
+        eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu
+        batch_size: Initial batch size for chunking
+        device: GPU device string
+        dtype: Computation dtype (fp32 for numerical stability)
+        storage_dtype: Output dtype (matches base model)
+
+    Returns:
+        Dict of key -> CPU tensor with merged weights
+    """
+    from .result_sink import InMemorySink
+
+    sink = InMemorySink()
+    chunked_evaluation_to_sink(
+        keys=keys,
+        base_tensors=base_tensors,
+        eval_fn=eval_fn,
+        batch_size=batch_size,
+        device=device,
+        dtype=dtype,
+        storage_dtype=storage_dtype,
+        sink=sink,
+    )
+    return sink.finalize()
