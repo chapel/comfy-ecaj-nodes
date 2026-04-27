@@ -2620,6 +2620,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-27T07:43:33.266Z
         completed_at: 2026-04-27T07:43:33.266Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found behavioral test annotations for @full-saved-model-output ac-cache-reuses-artifact
+          in tests/test_persistence.py and tests/test_exit_node.py; no @trait AC annotations
+          required/found for this spec.
+        name: AC annotation coverage
+        required: true
+        runner: rg
+        created_at: 2026-04-27T07:43:33.415Z
+        completed_at: 2026-04-27T07:43:33.415Z
     events:
       - _ulid: 01KQ6Y5XG70479PY7JPSE1SW4D
         actor: Jacob Chapel
@@ -2641,6 +2653,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-27T07:43:33.299Z
+      - _ulid: 01KQ6Y9FJ52BEEFWWJBMXTR4R1
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation coverage
+        timestamp: 2026-04-27T07:43:33.445Z
     examined_commit: 0dcfeeb44ea7938c1905ddd085700eb1ccbb2068
     external_links: []
     lifecycle_state: open
@@ -2653,5 +2672,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T07:41:36.647Z
-    updated_at: 2026-04-27T07:43:33.266Z
+    updated_at: 2026-04-27T07:43:33.415Z
     notes: []
