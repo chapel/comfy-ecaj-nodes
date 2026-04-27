@@ -8244,6 +8244,12 @@ reviews:
         payload:
           thread_ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
         timestamp: 2026-04-27T21:25:15.339Z
+      - _ulid: 01KQ8DA6EPFSVQVME0DE3TPY1P
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ8CRRAXTH65D884C7E6P0X2
+        timestamp: 2026-04-27T21:25:19.958Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: closed
@@ -8279,6 +8285,8 @@ reviews:
               return exit code 2 when any probe fails."
             created_at: 2026-04-27T21:25:12.421Z
         kind: blocker
+        resolved_at: 2026-04-27T21:25:19.888Z
+        resolved_by: "@claude"
       - _ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
         anchor:
           type: code
@@ -8314,5 +8322,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T21:16:17.323Z
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:25:15.265Z
+    updated_at: 2026-04-27T21:25:19.888Z
     notes: []
