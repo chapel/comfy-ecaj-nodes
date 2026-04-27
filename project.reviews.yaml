@@ -4125,7 +4125,19 @@ reviews:
     slugs: []
     title: Review full model streaming artifact cache cycle 3
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found runtime AC annotations for @streaming-full-model-materialization,
+          @full-saved-model-output, and @comfy-memory-manager-compatibility in
+          tests/test_full_model_streaming.py.
+        name: AC annotation grep
+        required: true
+        runner: rg
+        created_at: 2026-04-27T18:12:30.999Z
+        completed_at: 2026-04-27T18:12:30.999Z
     events:
       - _ulid: 01KQ822FQKTDX179J2MGPCR9NQ
         actor: Jacob Chapel
@@ -4140,6 +4152,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T18:09:20.074Z
+      - _ulid: 01KQ8294P7TAHG298D8C1WPRGB
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation grep
+        timestamp: 2026-04-27T18:12:31.047Z
     examined_commit: 2564ca6e52b64b52693022dda5479761d0c66018
     external_links: []
     lifecycle_state: open
@@ -4152,5 +4171,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T18:08:52.979Z
-    updated_at: 2026-04-27T18:09:20.030Z
+    updated_at: 2026-04-27T18:12:30.999Z
     notes: []
