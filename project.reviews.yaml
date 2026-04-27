@@ -8612,6 +8612,19 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T21:43:40.415Z
         completed_at: 2026-04-27T21:43:40.415Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "pytest -q exited 1 locally with 18 failures in tests/test_incremental_recompute.py and
+          tests/test_memory_management.py caused by RuntimeError: Insufficient system RAM for merge
+          (available ~827-948 MB, estimated need 1508 MB). No harness failures; PR CI test is
+          green."
+        name: full pytest
+        required: false
+        runner: pytest
+        created_at: 2026-04-27T21:43:57.713Z
+        completed_at: 2026-04-27T21:43:57.713Z
     events:
       - _ulid: 01KQ8E5PBEV7SD8EDSRNFAPJDY
         actor: Jacob Chapel
@@ -8654,6 +8667,13 @@ reviews:
           status: pass
           name: targeted harness tests
         timestamp: 2026-04-27T21:43:40.523Z
+      - _ulid: 01KQ8ECA2TVF72Y53P0H525HRH
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: full pytest
+        timestamp: 2026-04-27T21:43:57.786Z
     examined_commit: cf1d6f0b2b24c05d0411a5a727a2a72e72fb8675
     external_links: []
     lifecycle_state: open
@@ -8666,5 +8686,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T21:40:20.974Z
-    updated_at: 2026-04-27T21:43:40.415Z
+    updated_at: 2026-04-27T21:43:57.713Z
     notes: []
