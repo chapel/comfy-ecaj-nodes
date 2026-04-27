@@ -1974,7 +1974,7 @@
   type: task
   spec_ref: "@comfy-memory-manager-compatibility"
   plan_ref: "@plan-full-saved-model-output-plan"
-  status: needs_work
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@task-full-model-exit-integration"
@@ -1987,6 +1987,6 @@
   notes_count: 4
   todos_count: 0
   created_at: 2026-04-27T04:04:27.830Z
-  started_at: 2026-04-27T08:04:28.032Z
+  started_at: 2026-04-27T08:27:02.714Z
   submitted_at: 2026-04-27T08:13:00.306Z
   automation: eligible
