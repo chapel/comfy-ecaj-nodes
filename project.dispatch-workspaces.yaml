@@ -666,12 +666,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T08:29:24.630Z
+      updated_at: 2026-04-27T08:29:25.408Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T08:29:24.630Z
+      updated_at: 2026-04-27T08:29:25.408Z
     integration:
       status: pending
       detail: null
@@ -679,24 +679,29 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: a2c92314f76a1e672ce48f1b8fdca6dbf7e870f7
-      updated_at: 2026-04-27T08:29:24.630Z
-    lifecycle_state: ready
+      updated_at: 2026-04-27T08:29:25.408Z
+    lifecycle_state: integrating
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HRA1PMN922FBX8STVEFST"
     task_slug: task-full-model-memory-validation
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T08:18:56.952Z
-      last_reconciled_at: 2026-04-27T08:29:24.630Z
+      last_reconciled_at: 2026-04-27T08:29:25.408Z
       created_at: 2026-04-27T08:04:03.047Z
-      updated_at: 2026-04-27T08:29:24.630Z
+      updated_at: 2026-04-27T08:29:25.408Z
     workspace_id: dispatch-workspace-01KQ6HRA1PMN922FBX8STVEFST
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 23c45827b15d5d06151bb0f95786edc09f678cbb
+        last_seen_at: 2026-04-27T08:29:25.408Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-memory-validation-01kq6hra-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-full-model-memory-validation/01kq6hra
-        head: afa071697a2de53c89279a71551e917536fb468c
-        last_seen_at: 2026-04-27T08:18:56.313Z
+        head: 23c45827b15d5d06151bb0f95786edc09f678cbb
+        last_seen_at: 2026-04-27T08:29:25.408Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-memory-validation-01kq6hra
