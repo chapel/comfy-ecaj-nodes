@@ -943,6 +943,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T05:14:56.529Z
         completed_at: 2026-04-27T05:14:56.529Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: tests/test_result_sink.py contains no source-reading assertions; tests exercise
+          InMemorySink behavior directly
+        name: source-scanning test check
+        required: true
+        runner: rg
+        created_at: 2026-04-27T05:14:56.631Z
+        completed_at: 2026-04-27T05:14:56.631Z
     events:
       - _ulid: 01KQ6NN8D5PQHVJE220WG63JS7
         actor: Jacob Chapel
@@ -992,6 +1003,13 @@ reviews:
           status: pass
           name: pytest exit node integration
         timestamp: 2026-04-27T05:14:56.544Z
+      - _ulid: 01KQ6NSBR64CGHHRP08SFQHY19
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: source-scanning test check
+        timestamp: 2026-04-27T05:14:56.646Z
     examined_commit: 41033cd9a31e8404dfbc9fc6a3c709e6a7900be4
     external_links: []
     lifecycle_state: open
@@ -1004,5 +1022,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:12:42.149Z
-    updated_at: 2026-04-27T05:14:56.529Z
+    updated_at: 2026-04-27T05:14:56.631Z
     notes: []
