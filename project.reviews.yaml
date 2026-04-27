@@ -3580,6 +3580,18 @@ reviews:
         runner: rg
         created_at: 2026-04-27T17:21:23.751Z
         completed_at: 2026-04-27T17:21:23.751Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: A two-batch runtime probe recorded ['open', 'eval:g1', 'eval:g2', 'write:g1', 'write:g1',
+          'write:g2', 'write:g2', 'finalize']; group 2 is evaluated before group 1 is handed to
+          MaterializationSink.
+        name: streaming event probe
+        required: true
+        runner: python
+        created_at: 2026-04-27T17:21:33.971Z
+        completed_at: 2026-04-27T17:21:33.971Z
     events:
       - _ulid: 01KQ7Z2XTD01GE88Q74D7SCQ4V
         actor: Jacob Chapel
@@ -3615,6 +3627,13 @@ reviews:
           status: pass
           name: AC annotation grep
         timestamp: 2026-04-27T17:21:23.791Z
+      - _ulid: 01KQ7ZBV9TFM28ZNQMFMMEP873
+        actor: codex
+        event_type: check_added
+        payload:
+          status: fail
+          name: streaming event probe
+        timestamp: 2026-04-27T17:21:34.010Z
     examined_commit: e368231141abc45a6dce0314c147a15369756c00
     external_links: []
     lifecycle_state: open
@@ -3627,5 +3646,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T17:16:41.678Z
-    updated_at: 2026-04-27T17:21:23.751Z
+    updated_at: 2026-04-27T17:21:33.971Z
     notes: []
