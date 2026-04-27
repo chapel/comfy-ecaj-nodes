@@ -556,7 +556,8 @@ features:
             id: ac-6
             then: it differs from the previous call triggering a cache miss
             when: the hash is computed
-          - given: an exit node executing after a previous generation left set patches on a loaded clone
+          - given: an exit node executing in in-memory patch output mode after a previous generation left set
+              patches on a loaded clone
             id: ac-7
             then: loaded clones sharing the base model are fully unloaded first so model_state_dict() returns
               original unpatched weights
