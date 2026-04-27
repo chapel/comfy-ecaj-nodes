@@ -5031,7 +5031,7 @@ runs:
     started_at: 2026-04-27T20:14:54.920Z
   - _ulid: 01KQ89R16PE7RG6XD7R9HYW4SF
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5063,7 +5063,34 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T20:23:28.255Z
-        completed_at: 2026-04-27T20:23:28.255Z
+        completed_at: 2026-04-27T20:23:53.361Z
+        notes: >-
+          Searched existing state. 18 inbox items, ~50 observations already tracked.
+
+
+          High-confidence items:
+
+          1. SUCCESS: Task @task-full-model-real-comfy-memory-harness completed cleanly in one pass
+          — thorough task description with Testing section, AC-per-test annotations, and
+          implementation hints enabled autonomous completion without fix cycles. Pattern:
+          well-specified tasks with explicit testing requirements reduce review rounds.
+
+
+          2. FRICTION (low confidence, NOT capturing): Python dataclass +
+          importlib.util.spec_from_file_location requires sys.modules registration before
+          exec_module. This is a one-off Python gotcha, not systemic to this project. Already
+          handled in the test file.
+
+
+          3. FRICTION (low confidence, NOT capturing): ruff I001 blank-line sensitivity between
+          import blocks. One-off formatting issue, not systemic.
+
+
+          No new high-confidence friction points to capture. The session was clean.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T20:23:53.361Z
+        completed_at: 2026-04-27T20:23:53.361Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:22:59.030Z
