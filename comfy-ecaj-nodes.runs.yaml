@@ -3445,7 +3445,7 @@ runs:
     completed_at: 2026-04-27T06:24:53.622Z
   - _ulid: 01KQ6TDDDE7JQ6RZ4YMH31NDJ1
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -3468,7 +3468,43 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T06:36:26.049Z
-        completed_at: 2026-04-27T06:36:26.049Z
+        completed_at: 2026-04-27T06:36:59.033Z
+        notes: >-
+          Friction points identified:
+
+
+          1. ALREADY TRACKED (01KQ6SHQ): kspec review get truncates thread bodies — had to read the
+          full project.reviews.yaml to get the complete blocker description. Observation already
+          exists, no action needed.
+
+
+          2. ALREADY TRACKED (01KH6Y61): MagicMock masking real behavior — the
+          test_save_model_with_partial_recompute test used MagicMock for
+          CheckpointMaterializationSink, which accepted duplicate writes silently. This is the exact
+          pattern captured in observation 01KH6Y61. The fix was to use the real sink and verify via
+          safetensors.torch.load_file.
+
+
+          Successes identified:
+
+
+          1. Review-driven fix cycles are efficient when review threads are detailed: The blocker
+          thread included (a) exact failure mode, (b) evidence from a probe, (c) root cause
+          (MagicMock masking). This made the fix cycle a single-pass: read review → understand → fix
+          → test → submit. No back-and-forth.
+
+
+          2. Surgical production code fix (6 lines) with stronger test coverage: The fix was minimal
+          (build recompute_set, skip matching keys) and the test replacement was strictly stronger
+          (real sink, real file, value assertions vs mock call assertions).
+
+
+          No new untracked friction identified — both friction points were already captured in
+          existing observations.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T06:36:59.033Z
+        completed_at: 2026-04-27T06:36:59.033Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:35:48.014Z
