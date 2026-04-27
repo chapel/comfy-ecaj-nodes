@@ -3229,9 +3229,67 @@ runs:
     completed_at: 2026-04-27T05:43:07.298Z
   - _ulid: 01KQ6QEDHZ7H26BJ5FY6D43MSB
     status: active
-    current_step: 0
+    current_step: 3
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T05:43:55.199Z
+        completed_at: 2026-04-27T05:44:31.393Z
+        notes: "Worked well: clear review threads, minimal targeted fix, frame-inspection pattern reusable.
+          Friction: truncated thread bodies in CLI, worktree guard blocks rebase on mutable worker
+          branches."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T05:44:31.393Z
+        completed_at: 2026-04-27T05:45:12.417Z
+        notes: >-
+          High-confidence friction points (both systemic and repeatable):
+
+
+          1. FRICTION: kspec review get truncates thread bodies — review thread body text is cut off
+          with '...' in CLI output. In fix cycles, agents must read full blocker descriptions to
+          understand what to fix. Had to fall back to reading raw project.reviews.yaml to get the
+          complete text. This will happen every fix cycle where review comments exceed ~80 chars.
+          Not currently tracked.
+
+
+          2. FRICTION: Worktree guard blocks kspec workflow/rebase commands in mutable worker
+          worktrees — the hook treats all .kspec-worktrees as read-only kspec-meta worktrees, but
+          dispatch worker worktrees are on task branches and need git operations (rebase, kspec
+          workflow next which internally does git). Workaround: set GIT_DIR/GIT_WORK_TREE env vars
+          pointing to main repo. This will affect every automated dispatch session that uses
+          worktrees. Not currently tracked.
+
+
+          Success: Review-to-fix feedback loop was tight — reviewer evidence described the exact
+          frame-inspection technique, which became the test strategy. This is the review system
+          working as designed.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T05:45:12.417Z
+        completed_at: 2026-04-27T05:45:22.726Z
+        notes: >-
+          Evaluation:
+
+
+          1. Review thread body truncation — UNIQUE, HIGH-CONFIDENCE, CAPTURE as friction
+          observation. Every fix cycle agent will hit this. Clear cause (CLI display truncation),
+          clear effect (must read raw YAML), clear fix (show full body or add --verbose flag).
+
+
+          2. Worktree guard blocking worker worktrees — UNIQUE, HIGH-CONFIDENCE, CAPTURE as friction
+          observation. Every dispatch worker session in a worktree hits this for kspec commands and
+          rebase. Clear cause (hook doesn't distinguish kspec-meta from task worktrees), clear
+          workaround (GIT_DIR override), clear fix (hook should check branch name or worktree type).
+
+
+          3. Review-to-fix feedback loop — SUCCESS, worth noting but lower priority. Capture
+          briefly.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T05:45:22.726Z
+        completed_at: 2026-04-27T05:45:22.726Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:43:55.199Z
