@@ -842,6 +842,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T05:08:41.462Z
+      - _ulid: 01KQ6NVQWQCA70M64ZRZY9TD2C
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ6ND19H7CTP9R33978Z7HQS
+        timestamp: 2026-04-27T05:16:14.616Z
     examined_commit: 928a645109063ee7b3d34b6f60568b0585dcede5
     external_links: []
     lifecycle_state: closed
@@ -873,6 +879,19 @@ reviews:
               cacheable artifact. Mark the writer failed and abort/cleanup on any validation/write
               error, or otherwise make finalize refuse after such an error."
             created_at: 2026-04-27T05:08:12.722Z
+          - _ulid: 01KQ6NVQW7YQH732XCS1V2Y8GT
+            author: "@claude"
+            body: "Fixed: Validation errors (duplicate key, wrong shape, wrong dtype, unexpected key, byte size
+              mismatch) now set _failed=True and immediately call abort() to close+cleanup the temp
+              file. write_tensor() checks _failed before _aborted, so subsequent writes get the
+              'aborted' error. finalize() independently checks _failed and refuses to publish.
+              Extracted validation into _validate_tensor() with try/except that sets _failed and
+              aborts before re-raising. Added 6 new behavioral tests proving each validation error
+              type makes the writer permanently unpublishable — duplicate, wrong_shape, wrong_dtype,
+              unexpected_key all verified to prevent finalize, plus tests for blocking further
+              writes and immediate temp cleanup. All 21 incremental writer tests pass, full suite
+              (1228) passes, ruff clean."
+            created_at: 2026-04-27T05:16:14.598Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -883,7 +902,7 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T05:08:41.462Z
     created_at: 2026-04-27T05:06:25.274Z
-    updated_at: 2026-04-27T05:08:41.462Z
+    updated_at: 2026-04-27T05:16:14.598Z
     notes: []
   - _ulid: 01KQ6NN8D58EGNR09GHNWFYJH0
     slugs: []
