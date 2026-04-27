@@ -2118,6 +2118,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-27T06:41:22.520Z
         completed_at: 2026-04-27T06:41:22.520Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_checkpoint_materialization.py
+          tests/test_incremental_recompute.py::TestExitNodeIncrementalCache::test_save_model_with_p\
+          artial_recompute -q: 19 passed"
+        name: targeted materialization tests
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T06:41:22.679Z
+        completed_at: 2026-04-27T06:41:22.679Z
     events:
       - _ulid: 01KQ6TK8FCRNT26JGJATAF80F7
         actor: Jacob Chapel
@@ -2153,6 +2165,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-27T06:41:22.543Z
+      - _ulid: 01KQ6TQM8GY5R6WX6EKRWEGWCY
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: targeted materialization tests
+        timestamp: 2026-04-27T06:41:22.704Z
     examined_commit: 1662a4d339355ba800fbca2d66845b9e6afc91fd
     external_links: []
     lifecycle_state: open
@@ -2165,5 +2184,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T06:38:59.569Z
-    updated_at: 2026-04-27T06:41:22.520Z
+    updated_at: 2026-04-27T06:41:22.679Z
     notes: []
