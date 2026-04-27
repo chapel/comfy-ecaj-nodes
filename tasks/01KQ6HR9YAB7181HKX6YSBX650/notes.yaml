@@ -54,3 +54,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T05:31:25.262Z
+  - _ulid: 01KQ6QD0RJY9Q7T2Y58RP7V258
+    content: "Fix cycle 1: addressed both blocker threads. Added 'del merged_cpu' in normal chunk path
+      (after sink write loop) and OOM retry path (after single-key sink write). Added 2 behavioral
+      tests using frame inspection to prove merged_cpu is released before the next chunk/key
+      evaluates. Re-verified all ACs: parity tests, OOM retry tests, incremental write tests, error
+      handling tests all pass (16/16 sink tests + 15/15 result_sink tests). Executor tests also pass
+      (54/54). Pre-existing disk space failures on other test files are unrelated."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T05:43:09.330Z
