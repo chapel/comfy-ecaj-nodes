@@ -2632,6 +2632,17 @@ reviews:
         runner: rg
         created_at: 2026-04-27T07:43:33.415Z
         completed_at: 2026-04-27T07:43:33.415Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_persistence.py tests/test_exit_node.py
+          tests/test_spike_reload.py: 110 passed in 0.73s."
+        name: persistence and exit save/cache tests
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T07:43:33.569Z
+        completed_at: 2026-04-27T07:43:33.569Z
     events:
       - _ulid: 01KQ6Y5XG70479PY7JPSE1SW4D
         actor: Jacob Chapel
@@ -2660,6 +2671,13 @@ reviews:
           status: pass
           name: AC annotation coverage
         timestamp: 2026-04-27T07:43:33.445Z
+      - _ulid: 01KQ6Y9FPW66PK9QVPXKDCSZK7
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: persistence and exit save/cache tests
+        timestamp: 2026-04-27T07:43:33.597Z
     examined_commit: 0dcfeeb44ea7938c1905ddd085700eb1ccbb2068
     external_links: []
     lifecycle_state: open
@@ -2672,5 +2690,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T07:41:36.647Z
-    updated_at: 2026-04-27T07:43:33.415Z
+    updated_at: 2026-04-27T07:43:33.569Z
     notes: []
