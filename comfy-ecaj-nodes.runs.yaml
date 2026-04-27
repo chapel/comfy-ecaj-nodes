@@ -4000,7 +4000,7 @@ runs:
     completed_at: 2026-04-27T08:29:13.544Z
   - _ulid: 01KQ71ATFQDY1J1Z1KCS71YM6W
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -4026,7 +4026,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T08:37:43.009Z
-        completed_at: 2026-04-27T08:37:43.009Z
+        completed_at: 2026-04-27T08:38:04.437Z
+        notes: "Decision: skip all candidate captures. Detached PR merge friction matches existing inbox
+          @01KQ6R11. Reviewer-fix review refresh friction matches existing inbox @01KQ6MFM and
+          @01KQ6ZJF. PR CI status gate success matches existing observation @01KQ6ZJF. No unique
+          high-confidence item remains."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T08:38:04.437Z
+        completed_at: 2026-04-27T08:38:04.437Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T08:36:43.128Z
