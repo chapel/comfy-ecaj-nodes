@@ -3873,7 +3873,7 @@ runs:
     completed_at: 2026-04-27T08:05:56.699Z
   - _ulid: 01KQ700PC3NVGC0ZVRZK76KMCW
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -3883,7 +3883,20 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T08:14:07.351Z
-        completed_at: 2026-04-27T08:14:07.351Z
+        completed_at: 2026-04-27T08:14:23.287Z
+        notes: >-
+          Searched observations, inbox, and tasks. Baseline established. Key existing items relevant
+          to this session:
+
+          - 01KQ6YWG: Pre-existing test failure for incremental preflight (confirmed by full test
+          run)
+
+          - 01KH6Y61: Friction about mock-based tests validating wrong behavior (relevant to this
+          task's AC coverage approach)
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T08:14:23.287Z
+        completed_at: 2026-04-27T08:14:23.287Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T08:13:42.659Z
