@@ -22,9 +22,7 @@ from lib.streaming_save import MaterializationSink
 from nodes.exit import (
     WIDENExitNode,
     _incremental_cache,
-    install_merged_patches,
 )
-
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -194,14 +192,14 @@ class TestFullModeSucceedsWithoutDictPath:
     def test_full_mode_succeeds_when_dict_eval_patched_to_fail(
         self, mock_model_patcher, tmp_path
     ):
-        """Full mode does not use the dict-returning chunked_evaluation or
-        evaluate_affected_group paths for newly evaluated affected tensors —
-        it uses streaming_evaluation_to_sink which streams each tensor
-        directly to the sink via write_fn.
+        """Full mode does not use the dict-returning chunked_evaluation path
+        for newly evaluated affected tensors — it uses
+        streaming_evaluation_to_sink which streams each tensor directly to
+        the sink via write_fn.
 
-        We monkeypatch both chunked_evaluation and evaluate_affected_group
-        to raise RuntimeError, then verify full mode still succeeds because
-        it calls streaming_evaluation_to_sink instead.
+        We monkeypatch chunked_evaluation to raise RuntimeError, then verify
+        full mode still succeeds because it calls
+        streaming_evaluation_to_sink instead.
         """
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -217,13 +215,10 @@ class TestFullModeSucceedsWithoutDictPath:
         affected_tensors = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        # Monkeypatch the dict-returning paths to fail.
+        # Monkeypatch the dict-returning path to fail.
         # Full mode must succeed because it uses streaming_evaluation_to_sink.
         def chunked_eval_bomb(**kwargs):
             raise RuntimeError("chunked_evaluation must not be called in full mode")
-
-        def eval_group_bomb(**kwargs):
-            raise RuntimeError("evaluate_affected_group must not be called in full mode")
 
         def streaming_eval(*, keys, base_tensors, eval_fn, batch_size,
                            device, dtype, storage_dtype, write_fn):
@@ -236,7 +231,6 @@ class TestFullModeSucceedsWithoutDictPath:
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
             patch("nodes.exit.chunked_evaluation", side_effect=chunked_eval_bomb),
-            patch("nodes.exit.evaluate_affected_group", side_effect=eval_group_bomb),
             patch("nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
@@ -629,7 +623,10 @@ class TestFailureAbortsMaterialization:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="fail.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=str(tmp_path / "fail.safetensors")),
+            patch(
+                "nodes.exit._resolve_checkpoints_path",
+                return_value=str(tmp_path / "fail.safetensors"),
+            ),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
             patch("nodes.exit.ProgressBar", None),
@@ -791,7 +788,6 @@ class TestFullArtifactCacheHit:
 
         keys = list(mock_model_patcher.model_state_dict().keys())
         affected_key = keys[0]
-        unaffected_key = keys[1]
         save_path = str(tmp_path / "full_artifact.safetensors")
 
         # Build artifact with distinctive values
@@ -1107,9 +1103,7 @@ class TestNoOpFullMode:
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        save_path = str(tmp_path / "noop_merge.safetensors")
         # No keys to process (empty affected keys)
-
         (result,), mocks = _run_full_mode(
             merge, mock_model_patcher, [], tmp_path,
             model_name="noop_merge",
@@ -1174,7 +1168,6 @@ class TestComfyMemoryCompatibility:
 
         # Track calls to comfy.model_management
         mm_mod = sys.modules.get("comfy.model_management")
-        mode_change_calls = []
         if mm_mod is not None:
             original_attrs = {}
             for attr_name in ("set_vram_state", "vram_state"):

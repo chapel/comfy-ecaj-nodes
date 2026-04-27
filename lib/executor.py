@@ -59,4 +59,5 @@ __all__ = [
     "_get_block_t_factors",
     "_apply_widen_filter_per_block",
     "_apply_widen_merge_per_block",
+    "streaming_evaluation_to_sink",
 ]

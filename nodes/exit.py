@@ -26,15 +26,12 @@ from ..lib.executor import (
     compile_batch_groups,
     compile_plan,
     compute_batch_size,
-    evaluate_affected_group,
     execute_plan,
     get_available_ram_bytes,
     streaming_evaluation_to_sink,
 )
 from ..lib.persistence import (
-    atomic_save,
     build_metadata,
-    check_cache,
     check_full_model_cache,
     collect_block_configs,
     compute_base_identity,
@@ -44,7 +41,6 @@ from ..lib.persistence import (
     serialize_recipe,
     validate_model_name,
 )
-from ..lib.streaming_save import MaterializationSink
 from ..lib.recipe import (
     RecipeBase,
     RecipeCompose,
@@ -53,6 +49,7 @@ from ..lib.recipe import (
     RecipeModel,
     RecipeNode,
 )
+from ..lib.streaming_save import MaterializationSink
 from ..lib.widen import WIDEN, WIDENConfig
 
 try:
@@ -624,7 +621,8 @@ class WIDENExitNode:
         AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
         AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
         AC: @streaming-full-model-materialization ac-full-cache-avoids-resident-payload
-        AC: @streaming-full-model-materialization ac-failed-materialization-releases-resident-payload
+        AC: @streaming-full-model-materialization
+            ac-failed-materialization-releases-resident-payload
         AC: @full-saved-model-output ac-complete-artifact
         AC: @full-saved-model-output ac-return-loaded-model
         AC: @full-saved-model-output ac-cache-reuses-artifact
@@ -641,7 +639,6 @@ class WIDENExitNode:
         storage_dtype = next(iter(base_state.values())).dtype
 
         key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
-        key_byte_sizes = {k: v.nelement() * v.element_size() for k, v in base_state.items()}
 
         base_identity = compute_base_identity(base_state)
         lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
@@ -865,7 +862,8 @@ class WIDENExitNode:
 
         except BaseException:
             # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
-            # AC: @streaming-full-model-materialization ac-failed-materialization-releases-resident-payload
+            # AC: @streaming-full-model-materialization
+            #     ac-failed-materialization-releases-resident-payload
             sink.abort()
             raise
         finally:

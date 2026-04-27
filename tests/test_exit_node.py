@@ -819,7 +819,6 @@ class TestSaveModelOff:
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation", return_value={}),
             patch("nodes.exit.validate_model_name") as mock_validate,
-            patch("nodes.exit.atomic_save") as mock_save,
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -835,7 +834,6 @@ class TestSaveModelOff:
 
             # Persistence functions should NOT be called
             mock_validate.assert_not_called()
-            mock_save.assert_not_called()
 
 
 # =============================================================================
