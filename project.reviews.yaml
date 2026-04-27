@@ -2082,3 +2082,29 @@ reviews:
     created_at: 2026-04-27T06:19:25.143Z
     updated_at: 2026-04-27T06:34:22.762Z
     notes: []
+  - _ulid: 01KQ6TK8FHRKY2ADP00ZYJA66P
+    slugs: []
+    title: Review full checkpoint materialization (cycle 3)
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ6TK8FCRNT26JGJATAF80F7
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T06:38:59.565Z
+    examined_commit: 1662a4d339355ba800fbca2d66845b9e6afc91fd
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ6HR9ZR2NS2QC19B6QGS6C9"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T06:38:59.569Z
+    updated_at: null
+    notes: []
