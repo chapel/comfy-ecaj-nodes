@@ -2306,6 +2306,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ6VEJT361G7F083WWN18RZH
         timestamp: 2026-04-27T06:53:54.906Z
+      - _ulid: 01KQ6VEK00HE9GRJHPP5N31K2K
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
+        timestamp: 2026-04-27T06:53:55.072Z
     examined_commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
     external_links: []
     lifecycle_state: open
@@ -2335,7 +2342,26 @@ reviews:
               without __ecaj_artifact_kind__ and still passes the save_model=True cache-hit path."
             created_at: 2026-04-27T06:53:54.883Z
         kind: blocker
+      - _ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
+        anchor:
+          type: code
+          commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
+          line_end: 688
+          line_start: 686
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQ6VEJZ1Q9X5RTYZD32J552P
+            author: Jacob Chapel
+            body: "MUST-FIX: full saved model artifacts are still built with build_metadata(..., workflow_json)
+              and no artifact_kind. Newly saved full-model outputs therefore omit
+              __ecaj_artifact_kind__, so subsequent mode-aware cache checks cannot distinguish them
+              from older or other ecaj artifacts. Pass artifact_kind='full_model' here and
+              add/adjust an Exit-node behavioral test that asserts the materialization metadata
+              contains it."
+            created_at: 2026-04-27T06:53:55.041Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T06:52:06.368Z
-    updated_at: 2026-04-27T06:53:54.883Z
+    updated_at: 2026-04-27T06:53:55.041Z
     notes: []
