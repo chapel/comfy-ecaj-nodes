@@ -5170,7 +5170,7 @@ runs:
     started_at: 2026-04-27T20:27:56.824Z
     completed_at: 2026-04-27T20:29:20.889Z
   - _ulid: 01KQ8AJN29EGYBXDNGTT1E8ZF8
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -5212,7 +5212,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T20:38:51.734Z
-        completed_at: 2026-04-27T20:38:51.734Z
+        completed_at: 2026-04-27T20:39:13.295Z
+        notes: "Captured 2 observations: 1 success (efficient fix cycle from clear review threads), 1
+          friction (needs_work→submit requires intermediate start step). Skipped 1 already-tracked
+          item (review thread truncation)."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:37:31.337Z
+    completed_at: 2026-04-27T20:39:13.295Z
