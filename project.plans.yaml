@@ -4079,6 +4079,13 @@ plans:
         content: Fold saved-model reload PoC validation into full saved model plan as early gated spike
         author: Jacob Chapel
         created_at: 2026-04-27T01:56:52.193Z
+      - _ulid: 01KQ6AER7586GP9PZEPGQDS1G0
+        content: Standalone @plan-saved-model-reload-proof-of-concept-plan was rejected for now and its
+          useful validation was folded into this plan as
+          task-full-model-saved-artifact-reload-spike. The spike should gate later materialization
+          work.
+        author: Jacob Chapel
+        created_at: 2026-04-27T01:56:54.629Z
   - _ulid: 01KQ5ZSQ13857R9CGT36JXYK91
     slugs:
       - plan-disk-backed-patch-output-plan
