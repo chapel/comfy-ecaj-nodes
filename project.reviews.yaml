@@ -8578,6 +8578,18 @@ reviews:
         runner: ruff
         created_at: 2026-04-27T21:43:39.556Z
         completed_at: 2026-04-27T21:43:39.556Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found annotated tests for @manual-comfy-memory-validation ac-explicit-opt-in-required,
+          ac-refuses-before-comfy-work-without-opt-in, and ac-report-identifies-memory-mode in
+          tests/test_real_comfy_memory_harness.py.
+        name: AC annotations
+        required: true
+        runner: rg
+        created_at: 2026-04-27T21:43:39.857Z
+        completed_at: 2026-04-27T21:43:39.857Z
     events:
       - _ulid: 01KQ8E5PBEV7SD8EDSRNFAPJDY
         actor: Jacob Chapel
@@ -8599,6 +8611,13 @@ reviews:
           status: pass
           name: ruff changed files
         timestamp: 2026-04-27T21:43:39.631Z
+      - _ulid: 01KQ8EBRMTQ6CGMZ486HPXSNFM
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotations
+        timestamp: 2026-04-27T21:43:39.930Z
     examined_commit: cf1d6f0b2b24c05d0411a5a727a2a72e72fb8675
     external_links: []
     lifecycle_state: open
@@ -8611,5 +8630,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T21:40:20.974Z
-    updated_at: 2026-04-27T21:43:39.556Z
+    updated_at: 2026-04-27T21:43:39.857Z
     notes: []
