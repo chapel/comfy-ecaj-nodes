@@ -5222,7 +5222,7 @@ runs:
     completed_at: 2026-04-27T20:39:13.295Z
   - _ulid: 01KQ8AYPECNG5XVK6PEWYDYE11
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -5235,7 +5235,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T20:45:11.243Z
-        completed_at: 2026-04-27T20:45:11.243Z
+        completed_at: 2026-04-27T20:45:26.398Z
+        notes: "High-confidence item identified: project-shaped safetensors artifact probes are useful for
+          reviewing report/cache behavior. They caught a metadata key mismatch in the manual harness
+          where fake report-formatting tests could not. Existing coverage already tracks the
+          Comfy-shaped import probe (@01KQ8A2H) and shell-quoting friction (@01KQ6WJX), so no
+          duplicate capture for those."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T20:45:26.398Z
+        completed_at: 2026-04-27T20:45:26.398Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:44:05.964Z
