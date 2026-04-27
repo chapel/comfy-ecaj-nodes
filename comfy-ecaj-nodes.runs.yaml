@@ -4531,7 +4531,7 @@ runs:
     started_at: 2026-04-27T18:53:40.250Z
     completed_at: 2026-04-27T18:54:59.204Z
   - _ulid: 01KQ85655C4GAV7VQT3V6BKCRC
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -4600,7 +4600,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T19:04:13.731Z
-        completed_at: 2026-04-27T19:04:13.731Z
+        completed_at: 2026-04-27T19:04:29.292Z
+        notes: "Captured 1 friction observation (01KQ8582): worker agent should run ruff before submission.
+          Skipped 2 items: monkeypatch brittleness (covered by existing 01KH6Y61) and thread
+          workflow success (standard behavior, not novel). Session reflection complete."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:03:18.956Z
+    completed_at: 2026-04-27T19:04:29.292Z
