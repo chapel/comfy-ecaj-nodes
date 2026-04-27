@@ -1,12 +1,19 @@
 """Tests for WIDEN Exit Node — AC coverage for @exit-node spec."""
 
+import sys
+from types import ModuleType
 from unittest.mock import MagicMock, patch
 
 import pytest
 import torch
 
 from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
-from nodes.exit import WIDENExitNode, _validate_recipe_tree
+from nodes.exit import (
+    OUTPUT_MODE_FULL_MODEL,
+    OUTPUT_MODE_PATCHES,
+    WIDENExitNode,
+    _validate_recipe_tree,
+)
 
 # =============================================================================
 # AC-1: Returns ComfyUI MODEL with set patches
@@ -1106,3 +1113,553 @@ class TestIsChangedPersistence:
             prompt={"b": 2}, extra_pnginfo={"different": {}},
         )
         assert result1 == result2
+
+
+# =============================================================================
+# Full Saved Model Output — output_mode INPUT_TYPES
+# =============================================================================
+
+
+class TestOutputModeInput:
+    """Verify output_mode parameter is exposed in INPUT_TYPES."""
+
+    def test_output_mode_in_optional_inputs(self):
+        """output_mode should be in optional inputs with correct default."""
+        optional = WIDENExitNode.INPUT_TYPES()["optional"]
+        assert "output_mode" in optional
+        choices, opts = optional["output_mode"]
+        assert OUTPUT_MODE_PATCHES in choices
+        assert OUTPUT_MODE_FULL_MODEL in choices
+        assert opts["default"] == OUTPUT_MODE_PATCHES
+
+
+# =============================================================================
+# AC: @full-saved-model-output ac-complete-artifact
+# =============================================================================
+
+
+class TestFullModelUsesCheckpointMaterialization:
+    """AC: @full-saved-model-output ac-complete-artifact
+
+    Given: A valid merge recipe affects some or all diffusion model weights.
+    When: The Exit node produces a full saved model output for that recipe.
+    Then: The saved artifact contains every diffusion model weight required
+    for the merged model to be loaded without relying on the in-memory patch
+    payload.
+    """
+
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_full_model_mode_uses_materialization_not_install_patches(
+        self, mock_model_patcher, tmp_path
+    ):
+        """Full saved model mode should use CheckpointMaterializationSink
+        and load_saved_model, and NOT call install_merged_patches."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        affected_key = "diffusion_model.input_blocks.0.0.weight"
+
+        node = WIDENExitNode()
+
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.return_value = {}
+
+        fake_loaded_model = MagicMock()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_cache", return_value=None),  # cache miss
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch(
+                "nodes.exit.CheckpointMaterializationSink",
+                return_value=mock_mat_instance,
+            ) as mock_mat_cls,
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.load_saved_model", return_value=fake_loaded_model) as mock_load,
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+            (result,) = node.execute(
+                merge,
+                output_mode=OUTPUT_MODE_FULL_MODEL,
+                model_name="model",
+            )
+
+            # CheckpointMaterializationSink SHOULD have been created
+            mock_mat_cls.assert_called_once()
+            mock_mat_instance.finalize.assert_called_once()
+
+            # install_merged_patches should NOT have been called
+            mock_install.assert_not_called()
+
+            # load_saved_model SHOULD have been called with the artifact path
+            mock_load.assert_called_once_with(save_path)
+
+            # Result is the loaded model, not a patched clone
+            assert result is fake_loaded_model
+
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_full_model_validates_model_name_before_gpu_work(
+        self, mock_model_patcher
+    ):
+        """Full saved model mode should validate model_name before any
+        expensive merge work begins."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        node = WIDENExitNode()
+
+        # Empty model_name should raise ValueError before GPU work
+        with pytest.raises(ValueError, match="(?i)model name"):
+            node.execute(
+                merge,
+                output_mode=OUTPUT_MODE_FULL_MODEL,
+                model_name="",
+            )
+
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_full_model_rejects_path_traversal_in_model_name(
+        self, mock_model_patcher
+    ):
+        """Full saved model mode should reject model names with path traversal."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        node = WIDENExitNode()
+
+        with pytest.raises(ValueError, match="path traversal"):
+            node.execute(
+                merge,
+                output_mode=OUTPUT_MODE_FULL_MODEL,
+                model_name="../malicious",
+            )
+
+
+# =============================================================================
+# AC: @full-saved-model-output ac-return-loaded-model
+# =============================================================================
+
+
+class TestFullModelReturnsLoadedModel:
+    """AC: @full-saved-model-output ac-return-loaded-model
+
+    Given: A full saved model artifact is produced or reused for the current recipe.
+    When: The Exit node returns its MODEL output.
+    Then: Downstream nodes receive a MODEL representing the saved merged artifact,
+    and the result remains usable after temporary merge outputs have been released.
+    """
+
+    # AC: @full-saved-model-output ac-return-loaded-model
+    def test_cache_miss_materializes_then_loads(
+        self, mock_model_patcher, tmp_path
+    ):
+        """On cache miss, the Exit node materializes the artifact and then
+        loads it via load_saved_model, returning a Comfy-managed MODEL."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        affected_key = "diffusion_model.input_blocks.0.0.weight"
+
+        node = WIDENExitNode()
+
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.return_value = {}
+
+        fake_loaded = MagicMock()
+        fake_loaded.load_device = "cpu"
+        fake_loaded.offload_device = "cpu"
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_cache", return_value=None),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch(
+                "nodes.exit.CheckpointMaterializationSink",
+                return_value=mock_mat_instance,
+            ),
+            patch("nodes.exit.load_saved_model", return_value=fake_loaded) as mock_load,
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+            (result,) = node.execute(
+                merge,
+                output_mode=OUTPUT_MODE_FULL_MODEL,
+                model_name="model",
+            )
+
+            # load_saved_model should be called with the artifact path
+            mock_load.assert_called_once_with(save_path)
+
+            # Result is the Comfy-loaded model
+            assert result is fake_loaded
+            assert hasattr(result, "load_device")
+
+
+# =============================================================================
+# AC: @full-saved-model-output ac-cache-reuses-artifact
+# =============================================================================
+
+
+class TestFullModelCacheReusesArtifact:
+    """AC: @full-saved-model-output ac-cache-reuses-artifact
+
+    Given: A saved full model artifact matches the current recipe identity.
+    When: The Exit node executes in full saved model mode.
+    Then: The existing artifact is reused without recomputing the merged weights.
+    """
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_hit_loads_artifact_skips_gpu(
+        self, mock_model_patcher, tmp_path
+    ):
+        """Cache hit in full saved model mode should load the saved artifact
+        via load_saved_model and skip GPU work entirely."""
+        from safetensors.torch import save_file
+
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        # Create a fake cached file with artifact_kind metadata
+        cached_path = tmp_path / "cached.safetensors"
+        key = "diffusion_model.input_blocks.0.0.weight"
+        cached_tensors = {key: torch.randn(4, 4)}
+        cached_metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "will_match",
+            "__ecaj_affected_keys__": f'["{key}"]',
+            "__ecaj_artifact_kind__": "full_model",
+        }
+        save_file(cached_tensors, str(cached_path), metadata=cached_metadata)
+
+        node = WIDENExitNode()
+
+        fake_loaded = MagicMock()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="cached.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=str(cached_path)),
+            patch("nodes.exit.compute_recipe_hash", return_value="will_match"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.load_saved_model", return_value=fake_loaded) as mock_load,
+        ):
+            (result,) = node.execute(
+                merge,
+                output_mode=OUTPUT_MODE_FULL_MODEL,
+                model_name="cached",
+            )
+
+            # analyze_recipe should NOT have been called — GPU work was skipped
+            mock_analyze.assert_not_called()
+
+            # load_saved_model should have been called with the cached artifact path
+            mock_load.assert_called_once_with(str(cached_path))
+
+            # Result is the loaded model
+            assert result is fake_loaded
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_miss_does_not_load_until_materialized(
+        self, mock_model_patcher, tmp_path
+    ):
+        """On cache miss, load_saved_model is only called after materialization
+        completes (not before GPU work)."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        affected_key = "diffusion_model.input_blocks.0.0.weight"
+
+        node = WIDENExitNode()
+
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.return_value = {}
+
+        call_order = []
+
+        def track_finalize():
+            call_order.append("finalize")
+            return {}
+
+        def track_load(path):
+            call_order.append("load")
+            return MagicMock()
+
+        mock_mat_instance.finalize = track_finalize
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_cache", return_value=None),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch(
+                "nodes.exit.CheckpointMaterializationSink",
+                return_value=mock_mat_instance,
+            ),
+            patch("nodes.exit.load_saved_model", side_effect=track_load),
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+            node.execute(
+                merge,
+                output_mode=OUTPUT_MODE_FULL_MODEL,
+                model_name="model",
+            )
+
+            # finalize should happen before load
+            assert call_order == ["finalize", "load"]
+
+
+# =============================================================================
+# AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+# =============================================================================
+
+
+class TestComfyOwnsReturnedModelMemory:
+    """AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+
+    Given: The Exit node has returned a MODEL from a full saved model artifact.
+    When: ComfyUI manages models for a workflow.
+    Then: The returned MODEL remains compatible with ComfyUI's model memory
+    lifecycle.
+    """
+
+    # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    def test_full_model_returns_comfy_loaded_model(
+        self, mock_model_patcher, tmp_path, monkeypatch
+    ):
+        """Full saved model mode returns a model loaded via
+        comfy.sd.load_diffusion_model, ensuring ComfyUI owns its memory."""
+        from safetensors.torch import save_file
+        from tests.conftest import MockModelPatcher
+
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        cached_path = tmp_path / "cached.safetensors"
+        key = "diffusion_model.input_blocks.0.0.weight"
+        save_file(
+            {key: torch.randn(4, 4)},
+            str(cached_path),
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "match",
+                "__ecaj_affected_keys__": f'["{key}"]',
+                "__ecaj_artifact_kind__": "full_model",
+            },
+        )
+
+        node = WIDENExitNode()
+
+        # Track that comfy.sd.load_diffusion_model is the actual path used
+        load_calls = []
+
+        def mock_load(path, model_options={}):
+            load_calls.append(path)
+            patcher = MockModelPatcher()
+            patcher.load_device = "cuda"
+            patcher.offload_device = "cpu"
+            return patcher
+
+        comfy_sd = ModuleType("comfy.sd")
+        comfy_sd.load_diffusion_model = mock_load
+        monkeypatch.setitem(sys.modules, "comfy.sd", comfy_sd)
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="cached.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=str(cached_path)),
+            patch("nodes.exit.compute_recipe_hash", return_value="match"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.ProgressBar", None),
+        ):
+            (result,) = node.execute(
+                merge,
+                output_mode=OUTPUT_MODE_FULL_MODEL,
+                model_name="cached",
+            )
+
+        # comfy.sd.load_diffusion_model was called with the artifact path
+        assert load_calls == [str(cached_path)]
+
+        # The returned model has Comfy memory lifecycle attributes
+        assert hasattr(result, "load_device")
+        assert hasattr(result, "offload_device")
+
+
+# =============================================================================
+# Full Saved Model — backward compatibility: default mode unchanged
+# =============================================================================
+
+
+class TestDefaultModeUnchanged:
+    """Existing in-memory patch behavior should be unchanged when
+    output_mode is the default (In-Memory Patches)."""
+
+    def test_default_mode_returns_patched_clone(self, mock_model_patcher):
+        """Default output_mode should still return a patched ModelPatcher clone."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+
+        node = WIDENExitNode()
+        (result,) = node.execute(base)
+
+        assert result is not mock_model_patcher
+        assert result.patches_uuid == mock_model_patcher.patches_uuid
+
+    def test_explicit_patches_mode_same_as_default(self, mock_model_patcher):
+        """Explicitly passing OUTPUT_MODE_PATCHES should behave same as default."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+
+        node = WIDENExitNode()
+        (result,) = node.execute(base, output_mode=OUTPUT_MODE_PATCHES)
+
+        assert result is not mock_model_patcher
+
+    def test_patches_mode_does_not_call_load_saved_model(
+        self, mock_model_patcher, tmp_path
+    ):
+        """In-memory patches mode should NOT call load_saved_model."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        affected_key = "diffusion_model.input_blocks.0.0.weight"
+
+        node = WIDENExitNode()
+
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.return_value = {}
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_cache", return_value=None),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch(
+                "nodes.exit.CheckpointMaterializationSink",
+                return_value=mock_mat_instance,
+            ),
+            patch("nodes.exit.load_saved_model") as mock_load,
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+            node.execute(
+                merge,
+                output_mode=OUTPUT_MODE_PATCHES,
+                save_model=True,
+                model_name="model",
+            )
+
+            # load_saved_model should NOT have been called
+            mock_load.assert_not_called()
+
+
+# =============================================================================
+# Full Saved Model — IS_CHANGED includes output_mode
+# =============================================================================
+
+
+class TestIsChangedOutputMode:
+    """IS_CHANGED should produce different hashes for different output modes."""
+
+    def test_full_model_mode_different_from_patches(self, mock_model_patcher):
+        """Full saved model mode should produce a different IS_CHANGED hash."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        hash_patches = WIDENExitNode.IS_CHANGED(
+            merge,
+            output_mode=OUTPUT_MODE_PATCHES,
+            save_model=True,
+            model_name="test",
+        )
+        hash_full = WIDENExitNode.IS_CHANGED(
+            merge,
+            output_mode=OUTPUT_MODE_FULL_MODEL,
+            save_model=False,
+            model_name="test",
+        )
+        assert hash_patches != hash_full
