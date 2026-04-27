@@ -5171,9 +5171,20 @@ runs:
     completed_at: 2026-04-27T20:29:20.889Z
   - _ulid: 01KQ8AJN29EGYBXDNGTT1E8ZF8
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T20:37:31.337Z
+        completed_at: 2026-04-27T20:37:57.356Z
+        notes: "Gate passed: fix cycle 1 for task @01KQ7VC3MPV8MZAP7HKCFJWHQ6 completed. Two review blockers
+          addressed (sys.path shadowing, unused model_path). Commit 477264d pushed, PR #97 updated,
+          task resubmitted as pending_review."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T20:37:57.356Z
+        completed_at: 2026-04-27T20:37:57.356Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:37:31.337Z
