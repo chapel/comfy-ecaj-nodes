@@ -1,1 +1,34 @@
-notes: []
+notes:
+  - _ulid: 01KQ6N1FFNGJZ3MZ94GB4QBP37
+    content: >-
+      Approach: Add lib/incremental_writer.py with IncrementalSafetensorsWriter implementing
+      MergeResultSink ABC.
+
+      - Constructor takes manifest (key -> TensorSpec with shape/dtype), dest path, and metadata
+      dict
+
+      - Precomputes safetensors header + data offsets from manifest; writes header to temp file
+      immediately
+
+      - write_tensor() validates key/shape/dtype/bytes against manifest, writes at precomputed
+      offset, tracks written keys
+
+      - finalize() checks all expected keys written, fsyncs, atomically replaces dest; returns {}
+      (tensors on disk not memory)
+
+      - abort() removes temp file, safe to call multiple times
+
+      - Reuses _tensor_bytes and _DTYPE_MAP from streaming_save.py
+
+      - Follows atomic_save pattern: temp file in same dir, .ecaj_tmp_ prefix
+
+
+      Edge cases: duplicate key, missing key at finalize, wrong shape, wrong dtype, wrong byte
+      count, write after finalize/abort, abort after finalize, partial writes on error.
+
+      Test plan: 8+ behavioral tests covering round-trip with multiple dtypes, missing-key
+      rejection, duplicate-key rejection, wrong-shape rejection, wrong-dtype rejection, no artifact
+      on failure, temp cleanup on abort, AC annotation for ac-incomplete-write-not-reused.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T05:01:54.037Z
