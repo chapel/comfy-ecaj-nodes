@@ -1,1 +1,25 @@
-notes: []
+notes:
+  - _ulid: 01KQ6MG030KA490GK8HGYSERGR
+    content: >-
+      Approach: Add lib/result_sink.py with ABC MergeResultSink (write_tensor, finalize, abort) and
+      InMemorySink implementation.
+
+      - InMemorySink collects tensors into a dict, matching current merged_state behavior
+
+      - ABC is pure Python/PyTorch, no ComfyUI imports
+
+      - finalize() returns the collected dict and marks sink as sealed
+
+      - abort() clears internal state and releases tensor references
+
+      - Double-finalize/abort and use-after-finalize raise errors
+
+      Edge cases: finalize idempotency, abort after finalize, write_tensor after finalize/abort,
+      empty sink finalize.
+
+      Test plan: 6 ACs worth of behavioral tests covering write_tensor accumulation, finalize
+      returns correct dict, abort releases state, error paths are safe to call, double-finalize
+      semantics.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T04:52:21.216Z
