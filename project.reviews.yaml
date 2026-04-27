@@ -8216,9 +8216,25 @@ reviews:
           status: fail
           name: Comfy-shaped intentional-run probe
         timestamp: 2026-04-27T21:16:08.561Z
+      - _ulid: 01KQ8CSMHBTQRXXYW2GRRERQHP
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-27T21:16:17.323Z
+      - _ulid: 01KQ8CSMHBQ50KSAY61YPGEEP9
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-27T21:16:17.323Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -8263,7 +8279,14 @@ reviews:
               report contained '_HarnessModel' object has no attribute 'state_dict'."
             created_at: 2026-04-27T21:15:48.749Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-27T21:16:17.323Z
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:16:08.490Z
+    updated_at: 2026-04-27T21:16:17.323Z
     notes: []
