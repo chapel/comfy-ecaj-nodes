@@ -730,6 +730,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T08:15:04.756Z
+  - _ulid: 01KQ7Z5VX7VMQ2583CZSDH5VM5
+    type: success
+    content: AC-by-AC coverage check before task submission caught a missing test annotation
+      (ac-affected-results-released) that would have been flagged in review. Systematic grep for
+      each spec AC in test files is an effective final quality gate.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T17:18:18.023Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
