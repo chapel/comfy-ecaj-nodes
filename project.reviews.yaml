@@ -6797,6 +6797,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ87RBFM4CA29WPDEN0N5MNC
         timestamp: 2026-04-27T19:48:12.472Z
+      - _ulid: 01KQ87RK5Q8DGTBHN3D5JMSNZ1
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
+        timestamp: 2026-04-27T19:48:20.279Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: open
@@ -6901,7 +6908,25 @@ reviews:
               that full mode succeeds when in-memory result sink construction fails.
             created_at: 2026-04-27T19:48:12.405Z
         kind: blocker
+      - _ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
+        anchor:
+          type: code
+          commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+          line_end: 717
+          line_start: 611
+          path: tests/test_full_model_streaming.py
+          side: head
+        entries:
+          - _ulid: 01KQ87RK3NTFGHT9DHZ7E5BGR0
+            author: Jacob Chapel
+            body: The partial-streaming failure test does not verify that a partial artifact is rejected as a
+              later cache hit. It patches check_full_model_cache to always return False and only
+              asserts save_path does not exist after abort. The task requires a dynamic
+              later-run/cache validation path proving incomplete artifacts are not accepted; this
+              test currently cannot catch a regression in cache-hit validation.
+            created_at: 2026-04-27T19:48:20.213Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T19:48:12.405Z
+    updated_at: 2026-04-27T19:48:20.213Z
     notes: []
