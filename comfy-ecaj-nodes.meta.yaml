@@ -925,6 +925,15 @@ observations:
     resolved: false
     workflow_ref: "@01KQ8AYP"
     created_at: 2026-04-27T20:45:36.537Z
+  - _ulid: 01KQ8BTTSDZN3X9GDQJH33PFRM
+    type: success
+    content: For guarded manual harness reviews, a fake Comfy-shaped root can verify the intentional-run
+      import/report path without real ComfyUI, but the report still needs semantic review against
+      behaviors actually executed; availability strings are not measurement evidence.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T20:59:27.918Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
