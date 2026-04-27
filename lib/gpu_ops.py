@@ -620,6 +620,10 @@ def streaming_evaluation_to_sink(
             for i, key in enumerate(chunk_keys):
                 write_fn(key, merged_cpu[i])
 
+            # Release the chunk's CPU tensor immediately so the previous
+            # group's results are not resident while the next chunk is built.
+            del merged_cpu
+
         except torch.cuda.OutOfMemoryError:
             gc.collect()
             if torch.cuda.is_available():
@@ -637,6 +641,7 @@ def streaming_evaluation_to_sink(
                     del merged_gpu
 
                     write_fn(key, merged_cpu[0])
+                    del merged_cpu
 
                     gc.collect()
                     if torch.cuda.is_available():

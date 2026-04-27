@@ -345,10 +345,12 @@ def _load_model_from_artifact(
     # Load artifact weights directly into the clone's model state dict.
     # This makes the weights model-owned (Comfy-managed) rather than
     # patch-owned (always resident).
+    # Preserve each tensor's artifact dtype — do NOT coerce to a single
+    # global storage_dtype, which would destroy mixed-dtype artifacts.
     artifact_state: dict[str, torch.Tensor] = {}
     with safe_open(save_path, framework="pt", device="cpu") as f:
         for key in f.keys():
-            artifact_state[key] = f.get_tensor(key).to(dtype=storage_dtype)
+            artifact_state[key] = f.get_tensor(key)
 
     # Update the clone's underlying model weights with artifact data.
     # Try load_state_dict (real nn.Module) first, then fall back to
