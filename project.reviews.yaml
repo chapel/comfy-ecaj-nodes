@@ -8076,7 +8076,17 @@ reviews:
     slugs: []
     title: Review guarded manual real-Comfy memory harness cycle 4
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Validation passed; only existing alignment/completeness warnings were reported.
+        name: kspec validate --warnings-ok
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T21:15:48.086Z
+        completed_at: 2026-04-27T21:15:48.086Z
     events:
       - _ulid: 01KQ8CGH2WXWZ3Z6666VBE80DT
         actor: Jacob Chapel
@@ -8091,6 +8101,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T21:11:24.941Z
+      - _ulid: 01KQ8CRR2PC5ZGKS2F3Y9Z5F3C
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate --warnings-ok
+        timestamp: 2026-04-27T21:15:48.182Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: open
@@ -8103,5 +8120,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:11:24.874Z
+    updated_at: 2026-04-27T21:15:48.086Z
     notes: []
