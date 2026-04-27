@@ -438,7 +438,10 @@ features:
                 when: |
                   memory behavior is measured under ComfyUI with dynamic memory management
                   enabled.
-            tags: []
+            tags:
+              - comfy
+              - memory
+              - compatibility
             created: 2026-04-27T04:04:27.630Z
             notes: []
         created: 2026-04-27T04:04:27.562Z
