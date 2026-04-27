@@ -8133,6 +8133,19 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T21:16:08.237Z
         completed_at: 2026-04-27T21:16:08.237Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Explicit opt-in subprocess against fake Comfy root matching local ComfyUI ModelPatcher
+          state_dict contract exited 0 but report contained install_merged_patches error and
+          _load_model_from_artifact error: '_HarnessModel' object has no attribute 'state_dict';
+          report.errors was empty."
+        name: Comfy-shaped intentional-run probe
+        required: true
+        runner: python
+        created_at: 2026-04-27T21:16:08.490Z
+        completed_at: 2026-04-27T21:16:08.490Z
     events:
       - _ulid: 01KQ8CGH2WXWZ3Z6666VBE80DT
         actor: Jacob Chapel
@@ -8196,6 +8209,13 @@ reviews:
           status: fail
           name: full pytest
         timestamp: 2026-04-27T21:16:08.310Z
+      - _ulid: 01KQ8CSBZH9YMKKD56XB48MZ7T
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: Comfy-shaped intentional-run probe
+        timestamp: 2026-04-27T21:16:08.561Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: open
@@ -8245,5 +8265,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:16:08.237Z
+    updated_at: 2026-04-27T21:16:08.490Z
     notes: []
