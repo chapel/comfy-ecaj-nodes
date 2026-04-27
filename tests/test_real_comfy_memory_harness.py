@@ -532,3 +532,115 @@ class TestCanonicalMetadataKey:
         # Also verify the OLD (wrong) key returns empty:
         wrong_hash = meta.get("ecaj_recipe_hash", "")
         assert wrong_hash == ""
+
+
+# ===========================================================================
+# Behavioral measurement — harness exercises workflow functions, not just
+# availability checks.  These tests verify the standalone (non-ComfyUI)
+# components that run_validation invokes as real workflow steps.
+# ===========================================================================
+
+
+class TestMaterializationSinkRoundTrip:
+    """MaterializationSink write + check_full_model_cache validates the
+    full-model materialization and cache-reuse paths as actual behavior."""
+
+    # AC: @manual-comfy-memory-validation ac-report-identifies-memory-mode
+    def test_sink_write_and_cache_check_round_trip(self, tmp_path):
+        """Write tensors via MaterializationSink, then verify cache hit.
+
+        This exercises the same code paths run_validation uses for
+        full_model_materialization and artifact_reuse — not availability
+        strings but actual function invocations with real tensor data.
+        """
+        import torch
+
+        from lib.persistence import build_metadata, check_full_model_cache
+        from lib.streaming_save import MaterializationSink
+
+        # Prepare tensors and manifest.
+        tensors = {
+            "diffusion_model.key_a": torch.randn(4, 4, dtype=torch.float32),
+            "diffusion_model.key_b": torch.ones(2, 3, dtype=torch.float16),
+        }
+        manifest = {k: (t.dtype, tuple(t.shape)) for k, t in tensors.items()}
+        recipe_hash = "test_round_trip_hash"
+        affected_keys = sorted(tensors.keys())
+        metadata = build_metadata(
+            serialized="{}",
+            recipe_hash=recipe_hash,
+            affected_keys=affected_keys,
+            output_mode="full",
+        )
+
+        artifact_path = str(tmp_path / "harness_rt.safetensors")
+
+        # Write via MaterializationSink (same path as run_validation).
+        sink = MaterializationSink()
+        sink.open(manifest, artifact_path, metadata=metadata)
+        for key, tensor in tensors.items():
+            sink.write_tensor(key, tensor)
+        sink.finalize(artifact_path)
+
+        # Verify via check_full_model_cache (same path as run_validation).
+        assert check_full_model_cache(artifact_path, recipe_hash, manifest)
+
+    def test_sink_artifact_readable_with_correct_tensors(self, tmp_path):
+        """Artifact written by MaterializationSink is readable and contains
+        the expected tensor data — verifying materialization is real."""
+        import torch
+        from safetensors import safe_open
+
+        from lib.persistence import build_metadata
+        from lib.streaming_save import MaterializationSink
+
+        tensors = {"weight": torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)}
+        manifest = {k: (t.dtype, tuple(t.shape)) for k, t in tensors.items()}
+        metadata = build_metadata(
+            serialized="{}",
+            recipe_hash="read_test",
+            affected_keys=["weight"],
+            output_mode="full",
+        )
+
+        artifact_path = str(tmp_path / "readable.safetensors")
+        sink = MaterializationSink()
+        sink.open(manifest, artifact_path, metadata=metadata)
+        sink.write_tensor("weight", tensors["weight"])
+        sink.finalize(artifact_path)
+
+        # Read back and verify tensor data matches.
+        with safe_open(artifact_path, framework="pt") as f:
+            loaded = f.get_tensor("weight")
+        assert torch.equal(loaded, tensors["weight"])
+
+    def test_cache_check_rejects_wrong_hash(self, tmp_path):
+        """check_full_model_cache rejects an artifact with mismatched hash.
+
+        This verifies the cache-reuse validation path exercises real
+        comparison logic, not a hard-coded True return.
+        """
+        import torch
+
+        from lib.persistence import build_metadata, check_full_model_cache
+        from lib.streaming_save import MaterializationSink
+
+        tensors = {"w": torch.zeros(2, dtype=torch.float32)}
+        manifest = {k: (t.dtype, tuple(t.shape)) for k, t in tensors.items()}
+        metadata = build_metadata(
+            serialized="{}",
+            recipe_hash="correct_hash",
+            affected_keys=["w"],
+            output_mode="full",
+        )
+
+        artifact_path = str(tmp_path / "hash_mismatch.safetensors")
+        sink = MaterializationSink()
+        sink.open(manifest, artifact_path, metadata=metadata)
+        sink.write_tensor("w", tensors["w"])
+        sink.finalize(artifact_path)
+
+        # Wrong hash → cache miss.
+        assert not check_full_model_cache(artifact_path, "wrong_hash", manifest)
+        # Correct hash → cache hit.
+        assert check_full_model_cache(artifact_path, "correct_hash", manifest)

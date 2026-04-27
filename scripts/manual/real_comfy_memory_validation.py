@@ -522,77 +522,190 @@ def run_validation(
         report.memory_mode = _detect_memory_mode(comfy_root)
 
         # ---- Import project modules (resolve from project root) --------
-        from lib.persistence import check_full_model_cache  # noqa: E402
-        from lib.streaming_save import MaterializationSink  # noqa: E402, F401
-        from nodes.exit import (  # noqa: E402
-            _incremental_cache,
-            _load_model_from_artifact,  # noqa: F401
-            install_merged_patches,  # noqa: F401
-        )
-
-        # -- Probe patch-mode behaviour ---------------------------------
-        report.patch_mode_behavior = "install_merged_patches available"
-
-        report.memory_observations.append(
-            _collect_memory_observation("after-patch-mode-probe")
-        )
-
-        # -- Probe full-model materialization via the real model ---------
-        report.full_model_materialization = (
-            "MaterializationSink available"
-        )
-
-        # Actually open and inspect the model file to validate that it
-        # contains real tensor data — not just that the class exists.
+        import torch
         from safetensors import safe_open
 
-        with safe_open(model_path, framework="pt") as f:
-            tensor_keys = list(f.keys())
-            sample_key = tensor_keys[0] if tensor_keys else None
-            sample_tensor = f.get_tensor(sample_key) if sample_key else None
-
-        report.full_model_materialization = (
-            f"loaded {len(tensor_keys)} tensors from artifact; "
-            f"sample key={sample_key!r}, "
-            f"shape={tuple(sample_tensor.shape) if sample_tensor is not None else None}, "
-            f"dtype={sample_tensor.dtype if sample_tensor is not None else None}"
+        from lib.persistence import check_full_model_cache
+        from lib.streaming_save import MaterializationSink
+        from nodes.exit import (
+            _incremental_cache,
+            _load_model_from_artifact,
+            install_merged_patches,
         )
+
+        tensors: dict[str, torch.Tensor] = {}
+        with safe_open(model_path, framework="pt", device="cpu") as f:
+            tensor_keys = list(f.keys())
+            for key in tensor_keys:
+                tensors[key] = f.get_tensor(key)
+            file_meta = f.metadata() or {}
+
+        if not tensor_keys:
+            report.errors.append("model file contains no tensors")
+            return report
+
+        sample_key = tensor_keys[0]
+        sample_tensor = tensors[sample_key]
+        storage_dtype = sample_tensor.dtype
+
+        # Build manifest for cache/sink operations.
+        manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] = {
+            k: (t.dtype, tuple(t.shape)) for k, t in tensors.items()
+        }
+
+        # -- Build a model patcher from ComfyUI for real workflow calls -
+        try:
+            from comfy.model_patcher import ModelPatcher
+
+            # Build a minimal nn.Module whose state dict holds the tensors
+            # under a diffusion_model prefix (matching project conventions).
+            _DM_PREFIX = "diffusion_model."
+            dm_state = {}
+            for k, t in tensors.items():
+                unprefixed = (
+                    k.removeprefix(_DM_PREFIX) if k.startswith(_DM_PREFIX) else k
+                )
+                dm_state[unprefixed] = torch.nn.Parameter(t, requires_grad=False)
+
+            dm = torch.nn.Module()
+            for param_name, param in dm_state.items():
+                dm.register_parameter(param_name.replace(".", "__"), param)
+            # Also store as a raw state dict for patchers that use it.
+            dm._raw_sd = dm_state
+
+            class _HarnessModel:
+                """Minimal model wrapper satisfying ModelPatcher's interface."""
+                def __init__(self, diffusion_model):
+                    self.diffusion_model = diffusion_model
+
+            harness_model = _HarnessModel(dm)
+            model_patcher = ModelPatcher(
+                harness_model,
+                load_device=torch.device("cpu"),
+                offload_device=torch.device("cpu"),
+            )
+            # Populate _state_dict so install_merged_patches / clone work.
+            if hasattr(model_patcher, "_state_dict"):
+                model_patcher._state_dict = dict(tensors)
+            elif hasattr(model_patcher, "model_state_dict"):
+                pass  # real patcher builds _state_dict lazily
+            have_patcher = True
+        except Exception as exc:
+            have_patcher = False
+            report.errors.append(f"ModelPatcher construction: {exc}")
 
         report.memory_observations.append(
             _collect_memory_observation("after-model-load")
         )
 
-        # -- Probe artifact cache-hit behaviour via check_full_model_cache
-        # Build a minimal manifest from the loaded file for validation.
-        import torch
+        # -- Exercise patch-mode behaviour via install_merged_patches ---
+        if have_patcher:
+            try:
+                # Pick a subset of tensors as the "merged" state for patching.
+                merged_subset = {
+                    k: t.clone() for k, t in list(tensors.items())[:3]
+                }
+                patched = install_merged_patches(
+                    model_patcher, merged_subset, storage_dtype
+                )
+                patched_keys = list(patched.patches.keys()) if hasattr(patched, "patches") else []
+                report.patch_mode_behavior = (
+                    f"install_merged_patches executed; "
+                    f"patched {len(patched_keys)} keys on cloned patcher"
+                )
+            except Exception as exc:
+                report.patch_mode_behavior = f"install_merged_patches error: {exc}"
+        else:
+            report.patch_mode_behavior = (
+                "skipped (no ModelPatcher available from ComfyUI)"
+            )
 
-        manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] = {}
-        with safe_open(model_path, framework="pt") as f:
-            for key in f.keys():
-                t = f.get_tensor(key)
-                manifest[key] = (t.dtype, tuple(t.shape))
+        report.memory_observations.append(
+            _collect_memory_observation("after-patch-mode-probe")
+        )
 
-        # Compute a recipe hash from the file's ecaj metadata (if any).
+        # -- Exercise full-model materialization via MaterializationSink -
+        # Write a full artifact to a temp file using the streaming sink.
+        from lib.persistence import build_metadata
+
+        recipe_hash = file_meta.get("__ecaj_recipe_hash__", "harness_probe")
+        affected_keys = sorted(tensors.keys())
+        artifact_meta = build_metadata(
+            serialized="{}",
+            recipe_hash=recipe_hash,
+            affected_keys=affected_keys,
+            output_mode="full",
+        )
+
+        artifact_path = report_output + ".harness_artifact.safetensors"
+        sink = MaterializationSink()
         try:
-            with safe_open(model_path, framework="pt") as f:
-                meta = f.metadata() or {}
-            recipe_hash = meta.get("__ecaj_recipe_hash__", "")
+            sink.open(manifest, artifact_path, metadata=artifact_meta)
+            for key, tensor in tensors.items():
+                sink.write_tensor(key, tensor)
+            sink.finalize(artifact_path)
+            report.full_model_materialization = (
+                f"MaterializationSink wrote {len(tensors)} tensors to artifact; "
+                f"sample key={sample_key!r}, "
+                f"shape={tuple(sample_tensor.shape)}, "
+                f"dtype={sample_tensor.dtype}"
+            )
+        except Exception as exc:
+            sink.abort()
+            report.full_model_materialization = (
+                f"MaterializationSink error: {exc}"
+            )
+
+        report.memory_observations.append(
+            _collect_memory_observation("after-materialization")
+        )
+
+        # -- Exercise artifact cache-hit via check_full_model_cache -----
+        try:
             cache_hit = check_full_model_cache(
-                model_path, recipe_hash, manifest
+                artifact_path, recipe_hash, manifest
             )
             report.artifact_cache_hit = cache_hit
             report.artifact_reuse = (
-                f"cache check returned {cache_hit}; "
+                f"check_full_model_cache returned {cache_hit}; "
                 f"recipe_hash={recipe_hash!r}, manifest_keys={len(manifest)}"
             )
         except Exception as exc:
             report.artifact_cache_hit = False
             report.artifact_reuse = f"cache-check-error: {exc}"
 
-        # -- Probe returned-model / _load_model_from_artifact availability
-        report.returned_model_behavior = (
-            "_load_model_from_artifact available (artifact-backed)"
-        )
+        # -- Exercise returned-model loading via _load_model_from_artifact
+        if have_patcher and os.path.isfile(artifact_path):
+            try:
+                returned = _load_model_from_artifact(
+                    artifact_path, model_patcher, storage_dtype
+                )
+                # Verify the returned patcher has state accessible.
+                if hasattr(returned, "_state_dict") and returned._state_dict:
+                    returned_keys = len(returned._state_dict)
+                elif hasattr(returned, "model_state_dict"):
+                    returned_keys = len(returned.model_state_dict())
+                else:
+                    returned_keys = 0
+                report.returned_model_behavior = (
+                    f"_load_model_from_artifact loaded {returned_keys} keys; "
+                    f"patcher type={type(returned).__name__}"
+                )
+            except Exception as exc:
+                report.returned_model_behavior = (
+                    f"_load_model_from_artifact error: {exc}"
+                )
+        else:
+            report.returned_model_behavior = (
+                "skipped (no ModelPatcher or no artifact written)"
+            )
+
+        # -- Clean up harness artifact ----------------------------------
+        try:
+            if os.path.isfile(artifact_path):
+                os.unlink(artifact_path)
+        except OSError:
+            pass
 
         # -- Check incremental cache state ------------------------------
         report.weights_resident_in_cache = bool(_incremental_cache)
