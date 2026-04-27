@@ -3940,7 +3940,7 @@ runs:
     completed_at: 2026-04-27T08:15:12.622Z
   - _ulid: 01KQ70TVB7E3ZBQBP39HFPNGPP
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -3953,7 +3953,30 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T08:28:18.224Z
-        completed_at: 2026-04-27T08:28:18.224Z
+        completed_at: 2026-04-27T08:28:58.495Z
+        notes: >-
+          Identified patterns from this session:
+
+
+          SUCCESS: The fix cycle workflow worked smoothly. Reading review threads, understanding
+          both blockers, fixing them in one pass, running tests, replying/resolving threads, and
+          resubmitting was efficient.
+
+
+          FRICTION: Already tracked by @01KH6Y61 — 'Unit tests with mocks can validate the wrong
+          behavior.' This is exactly what both blockers were about: tests that passed but didn't
+          actually exercise the code paths they claimed to cover. The initial implementation mocked
+          CheckpointMaterializationSink (blocker 2) and hardcoded report values (blocker 1). The fix
+          used real CheckpointMaterializationSink and actual resource.getrusage measurements.
+
+
+          No new untracked friction identified. The task-work skill's 'Write Tests First' and
+          behavioral test guidance already addresses this pattern. The fix cycle infrastructure
+          worked as designed.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T08:28:58.495Z
+        completed_at: 2026-04-27T08:28:58.495Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T08:27:59.719Z
