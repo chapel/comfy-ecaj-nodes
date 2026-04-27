@@ -2732,3 +2732,29 @@ reviews:
     created_at: 2026-04-27T07:41:36.647Z
     updated_at: 2026-04-27T07:43:43.596Z
     notes: []
+  - _ulid: 01KQ6YZRD4DGXHESNDCA5J4HA8
+    slugs: []
+    title: Review task-full-model-exit-integration
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ6YZRCXG9K09QTZ8KEYSTZT
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T07:55:43.389Z
+    examined_commit: 00fdbaf75fd9bd92904e11505fb9258da72dd38e
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ6HRA11DGTMKET3Y0J4BN65"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T07:55:43.396Z
+    updated_at: null
+    notes: []
