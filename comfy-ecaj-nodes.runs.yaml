@@ -5262,9 +5262,21 @@ runs:
     completed_at: 2026-04-27T20:45:51.086Z
   - _ulid: 01KQ8BR80REAKFFKPFG2RMAKS1
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T20:58:03.160Z
+        completed_at: 2026-04-27T20:58:56.741Z
+        notes: "What worked: prior review threads gave a clear re-review checklist, and the fake
+          Comfy-shaped root probe verified the import-path/package-bridge fixes without touching a
+          real ComfyUI install. Comparing the generated report to actual executed code paths exposed
+          that availability strings were being reported as behavior."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T20:58:56.741Z
+        completed_at: 2026-04-27T20:58:56.741Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:58:03.160Z
