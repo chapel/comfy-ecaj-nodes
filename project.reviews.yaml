@@ -8087,6 +8087,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-27T21:15:48.086Z
         completed_at: 2026-04-27T21:15:48.086Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found @manual-comfy-memory-validation annotations for ac-explicit-opt-in-required,
+          ac-refuses-before-comfy-work-without-opt-in, and ac-report-identifies-memory-mode in
+          tests/test_real_comfy_memory_harness.py.
+        name: AC annotations
+        required: true
+        runner: rg
+        created_at: 2026-04-27T21:15:49.046Z
+        completed_at: 2026-04-27T21:15:49.046Z
     events:
       - _ulid: 01KQ8CGH2WXWZ3Z6666VBE80DT
         actor: Jacob Chapel
@@ -8122,6 +8134,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
         timestamp: 2026-04-27T21:15:48.832Z
+      - _ulid: 01KQ8CRRZVM6YN6JS67MGENERD
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotations
+        timestamp: 2026-04-27T21:15:49.116Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: open
@@ -8171,5 +8190,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:15:48.749Z
+    updated_at: 2026-04-27T21:15:49.046Z
     notes: []
