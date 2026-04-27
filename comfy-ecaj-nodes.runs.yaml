@@ -2698,7 +2698,7 @@ runs:
     started_at: 2026-04-27T04:22:15.572Z
     completed_at: 2026-04-27T04:23:37.410Z
   - _ulid: 01KQ6K4BN7EWSQY2TQ4Y8PC5SP
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -2730,7 +2730,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T04:30:01.679Z
-        completed_at: 2026-04-27T04:30:01.679Z
+        completed_at: 2026-04-27T04:30:08.596Z
+        notes: Captured @01KQ6K6S as a success observation. No new friction observation was created because
+          the only concrete friction was already represented by @01KHQDPF. No inbox/task items
+          created; no unresolved reflection follow-up.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T04:28:31.272Z
+    completed_at: 2026-04-27T04:30:08.596Z
