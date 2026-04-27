@@ -511,12 +511,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T07:41:02.945Z
+      updated_at: 2026-04-27T07:41:03.644Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T07:41:02.945Z
+      updated_at: 2026-04-27T07:41:03.644Z
     integration:
       status: pending
       detail: null
@@ -524,7 +524,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: e7d490dec277d3e3c1562d9674a48329fda3386e
-      updated_at: 2026-04-27T07:41:02.945Z
+      updated_at: 2026-04-27T07:41:03.644Z
     lifecycle_state: integrating
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HRA0DXES7K03VX0RCDXQ2"
@@ -532,16 +532,21 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T07:34:00.897Z
-      last_reconciled_at: 2026-04-27T07:41:02.945Z
+      last_reconciled_at: 2026-04-27T07:41:03.644Z
       created_at: 2026-04-27T06:42:44.573Z
-      updated_at: 2026-04-27T07:41:02.945Z
+      updated_at: 2026-04-27T07:41:03.644Z
     workspace_id: dispatch-workspace-01KQ6HRA0DXES7K03VX0RCDXQ2
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 0dcfeeb44ea7938c1905ddd085700eb1ccbb2068
+        last_seen_at: 2026-04-27T07:41:03.644Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-cache-metadata-01kq6hra-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-full-model-cache-metadata/01kq6hra
-        head: 06e5f1805a9317da1aab45538f7a3257d6fee4a1
-        last_seen_at: 2026-04-27T07:34:00.306Z
+        head: 0dcfeeb44ea7938c1905ddd085700eb1ccbb2068
+        last_seen_at: 2026-04-27T07:41:03.644Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-cache-metadata-01kq6hra
