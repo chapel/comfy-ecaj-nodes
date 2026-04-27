@@ -3310,7 +3310,7 @@ runs:
     completed_at: 2026-04-27T05:46:00.790Z
   - _ulid: 01KQ6QYTJCCEWWE2KW4HTNCF3N
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3325,7 +3325,20 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T05:53:08.120Z
-        completed_at: 2026-04-27T05:53:08.120Z
+        completed_at: 2026-04-27T05:53:53.190Z
+        notes: "High-confidence findings after baseline/search: (1) Success candidate: code-first review
+          with explicit spec alignment and targeted pytest verification worked, but existing
+          observations @01KQ6N3M and @01KQ6K6S already cover this pattern; do not duplicate. (2)
+          Success candidate: awaiter subagent for pytest kept review work moving, but existing
+          subagent-review success observations already cover background/parallel reviewer patterns;
+          do not duplicate. (3) Friction: in detached reviewer snapshots,  failed with 'could not
+          determine current branch'; retrying with explicit  succeeded. Searches for that exact
+          error and PR-publication detached workflow coverage found no match, so this is the only
+          capture candidate."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T05:53:53.190Z
+        completed_at: 2026-04-27T05:53:53.190Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:52:52.813Z
