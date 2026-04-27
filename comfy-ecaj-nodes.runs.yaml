@@ -5031,9 +5031,39 @@ runs:
     started_at: 2026-04-27T20:14:54.920Z
   - _ulid: 01KQ89R16PE7RG6XD7R9HYW4SF
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T20:22:59.030Z
+        completed_at: 2026-04-27T20:23:28.255Z
+        notes: >-
+          What worked well:
+
+          1. Task description was thorough — AC coverage, testing requirements, and implementation
+          hints were all clear, enabling fast implementation
+
+          2. Codebase exploration agent provided comprehensive context in one pass — no
+          back-and-forth needed
+
+          3. Existing patterns (logging, memory observation, dataclass usage) provided clear
+          templates to follow
+
+
+          Friction points:
+
+          1. Python dataclass + importlib.util.spec_from_file_location interaction: module must be
+          registered in sys.modules BEFORE exec_module or dataclass decorator fails. Cost ~1
+          test-fix iteration.
+
+          2. ruff I001 import sorting: the blank-line sensitivity between import blocks vs comments
+          is non-obvious. The noqa placement is on the last line of the block, not the flagged first
+          line.
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T20:23:28.255Z
+        completed_at: 2026-04-27T20:23:28.255Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:22:59.030Z
