@@ -34,3 +34,77 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-27T04:11:56.132Z
+  - _ulid: 01KQ6JN9ZZ9M7T7FEZSZ5NJR6E
+    content: >-
+      Spec reconciliation complete. Changes made on kspec-meta shadow branch:
+
+
+      @exit-node:
+
+      - Updated description to mention output modes (in-memory patch default, other modes possible)
+
+      - Scoped ac-1 (set patches) to in-memory patch output mode
+
+      - Scoped ac-7 (downstream LoRA additivity) to in-memory patch output mode
+
+      - Scoped ac-8 (patch dtype matching) to in-memory patch output mode
+
+      - Left ac-2 through ac-6 (validation, evaluation, chaining) and ac-9/ac-10 (progress, RAM
+      preflight) unscoped — they apply universally
+
+
+      @exit-patch-install:
+
+      - Added description scoping it to in-memory patch output mode
+
+      - Scoped ac-1, ac-2, ac-3, ac-4, ac-7 to in-memory patch output mode
+
+      - Left ac-5/ac-6 (IS_CHANGED cache validation) unscoped — universal
+
+
+      @exit-model-persistence:
+
+      - Updated description to acknowledge both output modes and clarify cache-hit behavior per mode
+
+      - Scoped ac-1 (no file I/O default) to in-memory patch mode
+
+      - Scoped ac-2 (save after GPU merge) to in-memory patch mode
+
+      - Updated ac-3 (cache hit) to follow active output mode for subsequent behavior
+
+      - Scoped ac-10 (atomic writes) to in-memory patch mode
+
+      - Left ac-4 through ac-9, ac-11 through ac-14 unscoped — universal cache/metadata behavior
+
+
+      @memory-management:
+
+      - Updated description to reference @streaming-full-model-materialization and
+      @comfy-memory-manager-compatibility for full saved model mode memory
+
+      - Scoped ac-7, ac-8, ac-13 (save_model streaming/offload/base_state release) to in-memory
+      patch mode
+
+      - Left ac-1 through ac-6, ac-9 through ac-12, ac-14 unscoped — universal GPU evaluation memory
+      behavior
+
+
+      New spec configuration:
+
+      - @full-saved-model-output: added tags (persistence, memory, comfy) and relationships
+      (relates_to @exit-model-persistence, @memory-management, @exit-patch-install)
+
+      - @streaming-full-model-materialization: added tags (persistence, memory) and relationship
+      (relates_to @exit-model-persistence)
+
+      - @comfy-memory-manager-compatibility: added tags (comfy, memory, compatibility) and
+      relationship (relates_to @memory-management)
+
+      - Parent hierarchy (@full-saved-model-output under @exit-node) was already correct from plan
+      import
+
+
+      Validation: kspec validate passes (Schema: OK, References: OK). All 1194 tests pass.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T04:20:18.047Z
