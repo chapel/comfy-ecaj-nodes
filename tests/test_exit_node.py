@@ -858,15 +858,18 @@ class TestSaveModelCacheHit:
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        # Create a fake cached file with full-mode metadata
+        # Create a fake cached file with full-mode metadata containing ALL model keys.
+        # The artifact must be complete (all model keys) to pass cache validation.
         cached_path = tmp_path / "cached.safetensors"
-        key = "diffusion_model.input_blocks.0.0.weight"
-        cached_tensors = {key: torch.randn(4, 4)}
+        all_keys = list(mock_model_patcher.model_state_dict().keys())
+        cached_tensors = {k: torch.randn(4, 4) for k in all_keys}
+        key = all_keys[0]
+        import json as _json
         cached_metadata = {
             "__ecaj_version__": "1",
             "__ecaj_recipe__": "{}",
             "__ecaj_recipe_hash__": "will_match",
-            "__ecaj_affected_keys__": f'["{key}"]',
+            "__ecaj_affected_keys__": _json.dumps([key]),
             "__ecaj_output_mode__": "full",
         }
         save_file(cached_tensors, str(cached_path), metadata=cached_metadata)
@@ -890,9 +893,10 @@ class TestSaveModelCacheHit:
             # analyze_recipe should NOT have been called
             mock_analyze.assert_not_called()
 
-        # Result should be a patched model
+        # Result should be a model loaded from the artifact (no set patches).
         assert result is not mock_model_patcher
-        assert key in result.patches
+        result_sd = result.model_state_dict()
+        assert key in result_sd
 
 
 # =============================================================================

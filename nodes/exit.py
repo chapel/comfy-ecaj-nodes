@@ -313,10 +313,11 @@ def _load_model_from_artifact(
     AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
     AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
 
-    Loads ALL keys from the artifact (both base and affected) and installs
-    them as set patches on a cloned ModelPatcher.  The returned model's
-    weights come entirely from the saved artifact, not from the original
-    base model's in-memory state.
+    Loads the artifact weights into the model's own state dict (not as set
+    patches) so that ComfyUI's memory manager can offload/reload the model
+    normally.  The returned clone owns an independent copy of the model
+    whose weights come from the artifact — they are not held as set patches
+    and do not remain resident solely because Exit returned.
 
     Args:
         save_path: Path to the full saved model artifact.
@@ -324,17 +325,61 @@ def _load_model_from_artifact(
         storage_dtype: Base model storage dtype.
 
     Returns:
-        Cloned ModelPatcher with all weights loaded from the artifact.
+        Cloned ModelPatcher whose model weights come from the artifact,
+        loaded through the model's own state dict (Comfy-owned memory).
     """
+    from copy import deepcopy
+
     from safetensors import safe_open
 
-    # Load every key from the artifact — the artifact is the complete model.
-    full_state: dict[str, torch.Tensor] = {}
+    # Clone the model patcher so patches are independent.
+    cloned = model_patcher.clone()  # type: ignore[attr-defined]
+
+    # Deep-copy the underlying model so the clone owns its own weight
+    # storage — the original model_patcher is not affected.
+    cloned.model = deepcopy(cloned.model)  # type: ignore[attr-defined]
+
+    # Give the clone its own _state_dict if present (clone() shares it).
+    # Without this, updating _state_dict would mutate the original patcher.
+    if hasattr(cloned, "_state_dict"):
+        cloned._state_dict = dict(cloned._state_dict)  # type: ignore[attr-defined]
+
+    # Load artifact weights directly into the clone's model state dict.
+    # This makes the weights model-owned (Comfy-managed) rather than
+    # patch-owned (always resident).
+    artifact_state: dict[str, torch.Tensor] = {}
     with safe_open(save_path, framework="pt", device="cpu") as f:
         for key in f.keys():
-            full_state[key] = f.get_tensor(key)
+            artifact_state[key] = f.get_tensor(key).to(dtype=storage_dtype)
 
-    return install_merged_patches(model_patcher, full_state, storage_dtype)
+    # Update the clone's underlying model weights with artifact data.
+    # Try load_state_dict (real nn.Module) first, then fall back to
+    # updating the diffusion_model's internal state dict.
+    _DIFFUSION_PREFIX = "diffusion_model."
+    dm = getattr(cloned.model, "diffusion_model", None)  # type: ignore[attr-defined]
+    if dm is not None and hasattr(dm, "load_state_dict"):
+        # Real nn.Module — strip prefix and load via PyTorch API.
+        unprefixed = {
+            k.removeprefix(_DIFFUSION_PREFIX): v
+            for k, v in artifact_state.items()
+        }
+        try:
+            dm.load_state_dict(unprefixed, strict=False)
+        except (TypeError, RuntimeError):
+            # Fallback for models without full load_state_dict support.
+            sd = dm.state_dict()
+            for k, v in unprefixed.items():
+                if k in sd:
+                    sd[k].copy_(v)
+
+    # Update the patcher's _state_dict if present (MockModelPatcher and
+    # some real patchers use this as the backing store for model_state_dict).
+    if hasattr(cloned, "_state_dict"):
+        for k, v in artifact_state.items():
+            if k in cloned._state_dict:  # type: ignore[attr-defined]
+                cloned._state_dict[k] = v  # type: ignore[attr-defined]
+
+    return cloned
 
 
 def _resolve_checkpoints_path(model_name: str) -> str:
@@ -524,11 +569,19 @@ class WIDENExitNode:
         recipe_hash = compute_recipe_hash(serialized)
 
         # AC: @full-saved-model-output ac-cache-reuses-artifact
-        if enable_cache and check_full_model_cache(save_path, recipe_hash):
+        if enable_cache and check_full_model_cache(
+            save_path, recipe_hash, expected_keys=set(base_state.keys()),
+        ):
             if ProgressBar is not None:
                 pbar = ProgressBar(1)
                 pbar.update(1)
             return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+
+        # Evict in-memory cache when cache is disabled.
+        # Full mode does not write to _incremental_cache, but pre-populated
+        # entries from earlier patch-mode runs must be cleared.
+        if not enable_cache:
+            _incremental_cache.clear()
 
         # Build manifest from base_state — all keys, no affected keys
         manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
@@ -600,7 +653,9 @@ class WIDENExitNode:
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
         # Full-mode cache: validate artifact metadata, load from artifact, no tensor payload
-        if enable_cache and check_full_model_cache(save_path, recipe_hash):
+        if enable_cache and check_full_model_cache(
+            save_path, recipe_hash, expected_keys=set(base_state.keys()),
+        ):
             del base_state
             if ProgressBar is not None:
                 pbar = ProgressBar(1)

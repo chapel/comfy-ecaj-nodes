@@ -402,11 +402,16 @@ def build_metadata(
     return metadata
 
 
-def check_full_model_cache(save_path: str, expected_hash: str) -> bool:
+def check_full_model_cache(
+    save_path: str,
+    expected_hash: str,
+    expected_keys: set[str] | None = None,
+) -> bool:
     """Check if a saved artifact is a valid full-model cache hit.
 
     AC: @full-saved-model-output ac-cache-reuses-artifact
     AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    AC: @full-saved-model-output ac-complete-artifact
     AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
 
     Validates:
@@ -415,10 +420,14 @@ def check_full_model_cache(save_path: str, expected_hash: str) -> bool:
     - Recipe hash matches
     - Output mode is "full" (not "patch")
     - Affected keys metadata is present and valid JSON
+    - Artifact actually contains all expected model keys (completeness)
 
     Args:
         save_path: Path to the safetensors file
         expected_hash: Expected recipe hash
+        expected_keys: If provided, the artifact must contain exactly these
+            tensor keys to be considered complete.  Incomplete artifacts
+            (e.g. partial writes, hand-crafted files) are rejected.
 
     Returns:
         True if the artifact is a valid full-model cache hit
@@ -431,6 +440,7 @@ def check_full_model_cache(save_path: str, expected_hash: str) -> bool:
     try:
         with safe_open(save_path, framework="pt") as f:
             metadata = f.metadata()
+            artifact_keys = set(f.keys())
     except Exception:
         return False
 
@@ -446,7 +456,6 @@ def check_full_model_cache(save_path: str, expected_hash: str) -> bool:
         return False
 
     # Validate that affected keys metadata is present and parseable.
-    # Without this, _load_model_from_artifact will fail with KeyError.
     affected_raw = metadata.get("__ecaj_affected_keys__")
     if affected_raw is None:
         return False
@@ -455,6 +464,14 @@ def check_full_model_cache(save_path: str, expected_hash: str) -> bool:
         if not isinstance(parsed, list):
             return False
     except (json.JSONDecodeError, TypeError):
+        return False
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    # AC: @full-saved-model-output ac-complete-artifact
+    # Verify artifact completeness: the file must contain all expected keys.
+    # Without this, a partial artifact (e.g. interrupted write that produced
+    # valid metadata but only some tensors) would be accepted as a cache hit.
+    if expected_keys is not None and artifact_keys != expected_keys:
         return False
 
     return True

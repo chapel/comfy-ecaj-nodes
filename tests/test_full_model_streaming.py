@@ -725,21 +725,27 @@ class TestFullArtifactCacheHit:
             mock_analyze.assert_not_called()
 
         assert result is not mock_model_patcher
-        # All keys (affected AND unaffected) must be loaded from the artifact
-        # as set patches — the returned model is fully artifact-backed.
+        # All keys must have artifact values (42.0) in model_state_dict —
+        # loaded into model-owned memory, not as set patches.
+        # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+        result_sd = result.model_state_dict()
         for k in keys:
-            assert k in result.patches
+            assert torch.allclose(result_sd[k], torch.ones(4, 4) * 42.0), (
+                f"Key {k} should have artifact value 42.0"
+            )
+        # No set patches — weights are model-owned, not patch-resident.
+        assert len(result.patches) == 0
 
     # AC: @full-saved-model-output ac-return-loaded-model
     # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
     def test_artifact_load_returns_full_model_weights(self, mock_model_patcher, tmp_path):
-        """_load_model_from_artifact loads ALL keys from the artifact, not just
-        affected keys.  The returned model's weights come entirely from the
-        saved artifact.
+        """_load_model_from_artifact loads ALL keys from the artifact into the
+        model's own state dict (not as set patches).
 
-        A runtime probe: create an artifact with an unaffected key b=20.0 and
-        the original base b=2.0.  The returned model must have b=20.0
-        (from the artifact), not b=2.0 (from the original base).
+        A runtime probe: create an artifact with value 20.0 for every key.
+        The returned model's model_state_dict() must have 20.0 (from the
+        artifact), not the original base values.  No set patches should exist.
         """
         from nodes.exit import _load_model_from_artifact
 
@@ -769,19 +775,23 @@ class TestFullArtifactCacheHit:
             save_path, mock_model_patcher, torch.float32,
         )
 
-        # Result must have patches for ALL keys, not just affected
-        assert affected_key in result.patches
-        assert unaffected_key in result.patches
-
-        # The patches must contain the artifact's values (20.0), not the
-        # original base values.  Extract the set-patch tensor.
+        # All keys must have artifact values in model_state_dict, not the
+        # original base values.  Weights are model-owned, not patch-owned.
+        result_sd = result.model_state_dict()
         for k in keys:
-            patch_entries = result.patches[k]
-            # Entry format: (strength_patch, ("set", (tensor,)), strength_model, None, None)
-            strength_patch, (kind, (tensor,)), strength_model, _, _ = patch_entries[-1]
-            assert kind == "set"
-            assert torch.allclose(tensor, torch.ones(4, 4) * 20.0), (
-                f"Key {k} should have artifact value 20.0, got {tensor[0, 0].item()}"
+            assert torch.allclose(result_sd[k], torch.ones(4, 4) * 20.0), (
+                f"Key {k} should have artifact value 20.0, got {result_sd[k][0, 0].item()}"
+            )
+
+        # No set patches — weights live in the model's own state dict.
+        # This ensures Comfy's memory manager owns the memory lifecycle.
+        assert len(result.patches) == 0
+
+        # Original model_patcher must not be affected.
+        orig_sd = mock_model_patcher.model_state_dict()
+        for k in keys:
+            assert not torch.allclose(orig_sd[k], torch.ones(4, 4) * 20.0), (
+                f"Original key {k} should NOT have artifact value"
             )
 
 
@@ -1290,3 +1300,217 @@ class TestBuildMetadataOutputMode:
         """output_mode='full' should be stored in metadata."""
         meta = build_metadata("{}", "hash", ["k"], output_mode="full")
         assert meta["__ecaj_output_mode__"] == "full"
+
+
+# ===========================================================================
+# AC: RecipeBase noop enable_cache=False eviction
+# ===========================================================================
+
+
+class TestNoopEnableCacheFalseEvicts:
+    """RecipeBase full saved model mode with enable_cache=False evicts
+    _incremental_cache entries.
+
+    AC: @streaming-full-model-materialization (cache disable behavior)
+    """
+
+    # AC: @streaming-full-model-materialization (cache disable)
+    def test_noop_enable_cache_false_clears_incremental_cache(
+        self, mock_model_patcher, tmp_path
+    ):
+        """RecipeBase full mode with enable_cache=False must clear any
+        pre-populated _incremental_cache entries."""
+        from nodes.exit import _CacheEntry
+
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        save_path = str(tmp_path / "noop_nocache.safetensors")
+
+        # Pre-populate cache with a sentinel
+        _incremental_cache.clear()
+        _incremental_cache["sentinel"] = _CacheEntry(
+            structural_fingerprint="sentinel",
+            block_configs=[],
+            merged_state={k: torch.zeros(4, 4) for k in keys},
+            storage_dtype=torch.float32,
+        )
+        assert len(_incremental_cache) == 1
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="noop_nocache.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="noop_hash"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit.ProgressBar", None),
+        ):
+            (result,) = WIDENExitNode().execute(
+                base, save_model=True, model_name="noop_nocache",
+                enable_cache=False,
+            )
+
+        # Cache must be empty after enable_cache=False
+        assert len(_incremental_cache) == 0
+        assert result is not None
+
+
+# ===========================================================================
+# AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+# Incomplete artifact key verification
+# ===========================================================================
+
+
+class TestIncompleteArtifactRejected:
+    """Incomplete artifacts (missing keys) are rejected by check_full_model_cache
+    when expected_keys are provided.
+
+    AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    AC: @full-saved-model-output ac-complete-artifact
+    """
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_incomplete_artifact_rejected_with_expected_keys(self, tmp_path):
+        """An artifact with valid metadata but only a subset of expected keys
+        is rejected when expected_keys is provided."""
+        save_path = str(tmp_path / "incomplete.safetensors")
+        # Create artifact with only ONE key
+        save_file(
+            {"only_one_key": torch.randn(4, 4)},
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_affected_keys__": '["only_one_key"]',
+                "__ecaj_output_mode__": "full",
+            },
+        )
+
+        # Without expected_keys, metadata is valid so it passes
+        assert check_full_model_cache(save_path, "hash1") is True
+
+        # With expected_keys that include more than just "only_one_key",
+        # the incomplete artifact must be rejected.
+        expected = {"only_one_key", "another_key", "third_key"}
+        assert check_full_model_cache(save_path, "hash1", expected_keys=expected) is False
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_complete_artifact_accepted_with_expected_keys(self, tmp_path):
+        """A complete artifact with exactly the expected keys is accepted."""
+        expected_keys = {"a", "b", "c"}
+        save_path = str(tmp_path / "complete.safetensors")
+        save_file(
+            {k: torch.randn(4, 4) for k in expected_keys},
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_affected_keys__": '["a"]',
+                "__ecaj_output_mode__": "full",
+            },
+        )
+        assert check_full_model_cache(
+            save_path, "hash1", expected_keys=expected_keys,
+        ) is True
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    def test_extra_keys_in_artifact_rejected(self, tmp_path):
+        """An artifact with extra unexpected keys is also rejected
+        (strict equality on key sets)."""
+        save_path = str(tmp_path / "extra.safetensors")
+        save_file(
+            {"a": torch.randn(4, 4), "b": torch.randn(4, 4), "extra": torch.randn(4, 4)},
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_affected_keys__": '["a"]',
+                "__ecaj_output_mode__": "full",
+            },
+        )
+        expected = {"a", "b"}
+        assert check_full_model_cache(
+            save_path, "hash1", expected_keys=expected,
+        ) is False
+
+
+# ===========================================================================
+# AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+# Loaded model has no resident set patches
+# ===========================================================================
+
+
+class TestLoadedModelNoResidentPatches:
+    """The model returned by _load_model_from_artifact has no set patches.
+    Weights live in the model's own state dict (Comfy-managed memory).
+
+    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    """
+
+    # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    def test_loaded_model_has_no_set_patches(self, mock_model_patcher, tmp_path):
+        """_load_model_from_artifact returns a model with zero set patches.
+        All weights are in the model's own state dict."""
+        from nodes.exit import _load_model_from_artifact
+
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        save_path = str(tmp_path / "no_patches.safetensors")
+
+        save_file(
+            {k: torch.ones(4, 4) * 7.0 for k in keys},
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "test",
+                "__ecaj_affected_keys__": json.dumps(keys),
+                "__ecaj_output_mode__": "full",
+            },
+        )
+
+        result = _load_model_from_artifact(
+            save_path, mock_model_patcher, torch.float32,
+        )
+
+        # No set patches — weights are model-owned.
+        assert len(result.patches) == 0
+
+        # All weights come from artifact (value 7.0).
+        result_sd = result.model_state_dict()
+        for k in keys:
+            assert torch.allclose(result_sd[k], torch.ones(4, 4) * 7.0)
+
+    # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    def test_loaded_model_does_not_mutate_original(self, mock_model_patcher, tmp_path):
+        """Loading from artifact does not change the original model_patcher."""
+        from nodes.exit import _load_model_from_artifact
+
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        save_path = str(tmp_path / "independence.safetensors")
+
+        orig_values = {k: v.clone() for k, v in mock_model_patcher.model_state_dict().items()}
+
+        save_file(
+            {k: torch.ones(4, 4) * 99.0 for k in keys},
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "test",
+                "__ecaj_affected_keys__": json.dumps(keys),
+                "__ecaj_output_mode__": "full",
+            },
+        )
+
+        _load_model_from_artifact(save_path, mock_model_patcher, torch.float32)
+
+        # Original must be unchanged.
+        for k, v in mock_model_patcher.model_state_dict().items():
+            assert torch.allclose(v, orig_values[k]), (
+                f"Original key {k} was mutated by _load_model_from_artifact"
+            )
