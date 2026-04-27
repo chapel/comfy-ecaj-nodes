@@ -6860,6 +6860,12 @@ reviews:
         payload:
           thread_ulid: 01KQ87Q74PH1WEZHRD220JWPZR
         timestamp: 2026-04-27T20:03:18.994Z
+      - _ulid: 01KQ88M8ZB1PH6S02TKBX408N2
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ87QF5S42BXN0J3F5622DEC
+        timestamp: 2026-04-27T20:03:27.339Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: closed
@@ -6916,6 +6922,12 @@ reviews:
               use a fresh loaded patcher or explicitly remove inherited patch state before
               returning.
             created_at: 2026-04-27T19:47:43.417Z
+          - _ulid: 01KQ88M8XAT4GZFXBX7T6QN64X
+            author: "@claude"
+            body: "Fixed: _load_model_from_artifact now clears cloned.patches = {} after clone() to remove any
+              inherited LoRA/control patches. The returned model has zero patches — weights come
+              entirely from the artifact."
+            created_at: 2026-04-27T20:03:27.274Z
         kind: blocker
       - _ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
         anchor:
@@ -7073,5 +7085,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:49:13.956Z
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T20:03:18.927Z
+    updated_at: 2026-04-27T20:03:27.274Z
     notes: []
