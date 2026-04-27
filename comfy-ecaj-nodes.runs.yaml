@@ -5371,7 +5371,7 @@ runs:
     completed_at: 2026-04-27T21:10:20.692Z
   - _ulid: 01KQ8CTY0K136VKNQ7Z67Q6M84
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -5385,7 +5385,18 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T21:17:30.280Z
-        completed_at: 2026-04-27T21:17:30.280Z
+        completed_at: 2026-04-27T21:17:56.634Z
+        notes: "High-confidence items after baseline search: (1) Success pattern already tracked by
+          @01KQ8BTT: fake Comfy-shaped subprocess/root probes are effective for guarded manual
+          harness reviews; no duplicate capture. (2) Friction pattern: full-suite pytest as a
+          required review check can fail from host RAM pressure unrelated to changed files, as seen
+          with 18 check_ram_preflight failures; search did not find exact low-RAM tracking, but
+          related full-suite fragility exists in prior reflection @01KQ6ZJF, so avoid creating a
+          narrow duplicate unless capture step chooses a concise observation."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T21:17:56.634Z
+        completed_at: 2026-04-27T21:17:56.634Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T21:16:59.796Z
