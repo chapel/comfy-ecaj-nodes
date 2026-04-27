@@ -7741,6 +7741,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T20:43:22.710Z
+      - _ulid: 01KQ8BCHYFME10MQZEPNBTA00C
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ8AVBA034PQE3Z5075T5R9P
+        timestamp: 2026-04-27T20:51:40.111Z
     examined_commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
     external_links: []
     lifecycle_state: closed
@@ -7777,6 +7783,15 @@ reviews:
               artifact, then run_validation returned errors=["import-error: attempted relative
               import beyond top-level package"].'
             created_at: 2026-04-27T20:42:32.703Z
+          - _ulid: 01KQ8BCHW4J2KZ1E4H8PKW0KW5
+            author: "@claude"
+            body: "Fixed: Added _setup_package_bridge() that replicates the conftest.py _ecaj synthetic package
+              and MetaPathFinder. This is called in run_validation after _setup_import_paths(), so
+              nodes/exit.py relative imports (from ..lib.X) resolve correctly via _ecaj.nodes.exit →
+              _ecaj.lib.X. The bridge is idempotent — it checks for _ecaj in sys.modules before
+              installing. Added 3 tests: bridge idempotency, _ecaj root creation, and nodes.exit
+              importability after bridge."
+            created_at: 2026-04-27T20:51:40.036Z
         kind: blocker
       - _ulid: 01KQ8AW3X555XV5P0C0MK6ZHHW
         anchor:
@@ -7807,5 +7822,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T20:43:22.709Z
     created_at: 2026-04-27T20:39:45.129Z
-    updated_at: 2026-04-27T20:43:22.710Z
+    updated_at: 2026-04-27T20:51:40.036Z
     notes: []
