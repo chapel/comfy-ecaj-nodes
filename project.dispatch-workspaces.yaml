@@ -310,7 +310,7 @@ workspaces:
         head: 41fafac0f765c3e82ee5507b49f04318176232ac
         last_seen_at: 2026-04-27T05:18:02.161Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-incremental-writer-01kq6hr9
-  - active_role: worker
+  - active_role: null
     base_branch_point: 4157d20dbda0c90cdd3954f0c113af534312fa5f
     bootstrap:
       status: succeeded
@@ -352,12 +352,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T05:25:44.060Z
+      updated_at: 2026-04-27T05:28:04.445Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T05:25:44.060Z
+      updated_at: 2026-04-27T05:28:04.445Z
     integration:
       status: pending
       detail: null
@@ -365,17 +365,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: 4157d20dbda0c90cdd3954f0c113af534312fa5f
-      updated_at: 2026-04-27T05:25:44.060Z
-    lifecycle_state: active
+      updated_at: 2026-04-27T05:28:04.445Z
+    lifecycle_state: ready
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HR9YAB7181HKX6YSBX650"
     task_slug: task-full-model-chunked-evaluation-to-sink
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T05:18:01.709Z
-      last_reconciled_at: 2026-04-27T05:25:44.060Z
+      last_reconciled_at: 2026-04-27T05:28:04.445Z
       created_at: 2026-04-27T05:18:01.072Z
-      updated_at: 2026-04-27T05:25:44.060Z
+      updated_at: 2026-04-27T05:28:04.445Z
     workspace_id: dispatch-workspace-01KQ6HR9YAB7181HKX6YSBX650
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
