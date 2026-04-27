@@ -61,3 +61,15 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T20:57:18.560Z
+  - _ulid: 01KQ8CA6Q8V4K1Y5P8NH3CK27S
+    content: "Fix cycle 3: addressed the behavioral completeness blocker. run_validation now exercises
+      workflow functions as real behavior instead of recording availability strings. (1)
+      install_merged_patches called with ComfyUI ModelPatcher + loaded tensors, reports patched key
+      count. (2) MaterializationSink writes full artifact via build_metadata + write_tensor +
+      finalize. (3) check_full_model_cache validates written artifact, reports cache hit/miss. (4)
+      _load_model_from_artifact loads artifact back, reports loaded key count. Added 3 behavioral
+      round-trip tests. All 36 harness tests pass, ruff clean. 5 pre-existing failures in
+      test_incremental_recompute due to low system RAM (unrelated)."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T21:07:51.656Z
