@@ -4771,7 +4771,7 @@ runs:
     completed_at: 2026-04-27T19:30:12.302Z
   - _ulid: 01KQ87927YM9K204SMBT5JE33P
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4825,7 +4825,39 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T19:40:45.111Z
-        completed_at: 2026-04-27T19:40:45.111Z
+        completed_at: 2026-04-27T19:40:58.058Z
+        notes: >-
+          Evaluation against existing state:
+
+
+          FRICTION 1 (behavioral test depth causing fix cycles): Partially tracked by 01KQ815T. The
+          existing observation is about tests passing while missing properties. My observation adds
+          the specific pattern: 8 fix cycles on a single task where later cycles are all about test
+          behavioral depth, not production code. This is a stronger signal worth capturing as it
+          adds specificity.
+
+          -> CAPTURE as observation (friction)
+
+
+          FRICTION 2 (review thread truncation): Already tracked as 01KQ82107.
+
+          -> SKIP
+
+
+          SUCCESS 1 (read all threads first): Already tracked as 01KQ6SHR.
+
+          -> SKIP
+
+
+          SUCCESS 2 (explicit dynamic test list in task spec): Not tracked. High confidence — the
+          task's 'Required dynamic tests' list was the authoritative reference that made cycle 8
+          succeed in one pass. Worth capturing.
+
+          -> CAPTURE as observation (success)
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T19:40:58.058Z
+        completed_at: 2026-04-27T19:40:58.058Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:39:51.422Z
