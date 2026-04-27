@@ -1900,7 +1900,7 @@
   type: task
   spec_ref: "@streaming-full-model-materialization"
   plan_ref: "@plan-full-saved-model-output-plan"
-  status: needs_work
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@task-full-model-result-sink-interface"
@@ -1913,7 +1913,7 @@
   notes_count: 3
   todos_count: 0
   created_at: 2026-04-27T04:04:27.768Z
-  started_at: 2026-04-27T05:28:28.575Z
+  started_at: 2026-04-27T06:17:05.092Z
   submitted_at: 2026-04-27T05:35:02.519Z
   automation: eligible
 - _ulid: 01KQ6HRA0DXES7K03VX0RCDXQ2
