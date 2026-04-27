@@ -3403,7 +3403,7 @@ runs:
     completed_at: 2026-04-27T06:20:51.471Z
   - _ulid: 01KQ6SQKRWB1TWC6XV98QH91GC
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3428,7 +3428,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T06:24:39.831Z
-        completed_at: 2026-04-27T06:24:39.831Z
+        completed_at: 2026-04-27T06:24:46.890Z
+        notes: "Decision: skip captures. The only concrete friction is already tracked: @01KHG2ZK covers the
+          missing save_model=True partial-recompute test path, and @01KH6Y61 captures the broader
+          mock-test false-confidence pattern. The success pattern is useful but not unique enough to
+          add another observation."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T06:24:46.890Z
+        completed_at: 2026-04-27T06:24:46.890Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:23:53.628Z
