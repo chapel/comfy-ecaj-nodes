@@ -5132,7 +5132,7 @@ runs:
     completed_at: 2026-04-27T20:24:17.433Z
   - _ulid: 01KQ8A140R4BDZHBY26P2K715B
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -5145,7 +5145,15 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T20:28:43.582Z
-        completed_at: 2026-04-27T20:28:43.582Z
+        completed_at: 2026-04-27T20:29:06.927Z
+        notes: "Captured one high-confidence success observation after baseline/search checks: minimal
+          ComfyUI-shaped fake root probes are a useful review technique for guarded harnesses. No
+          new friction item captured; related review-process friction is already represented in
+          existing observations/inbox items."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T20:29:06.927Z
+        completed_at: 2026-04-27T20:29:06.927Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:27:56.824Z
