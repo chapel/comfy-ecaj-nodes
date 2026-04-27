@@ -4307,7 +4307,7 @@ runs:
     completed_at: 2026-04-27T18:08:17.218Z
   - _ulid: 01KQ82BP7AQZDCCFSXR2ES7DSN
     status: active
-    current_step: 4
+    current_step: 5
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -4347,7 +4347,14 @@ runs:
       - status: completed
         step_index: 4
         started_at: 2026-04-27T18:15:21.301Z
-        completed_at: 2026-04-27T18:15:21.301Z
+        completed_at: 2026-04-27T18:15:30.465Z
+        notes: "Discussion: No new improvements were proposed for capture, so there was no item requiring
+          user approval. Existing review blockers and observations are the right tracking
+          locations."
+      - status: completed
+        step_index: 5
+        started_at: 2026-04-27T18:15:30.465Z
+        completed_at: 2026-04-27T18:15:30.465Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-04-27T18:13:54.539Z
