@@ -7411,6 +7411,16 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T20:26:52.763Z
         completed_at: 2026-04-27T20:26:52.763Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest -q: completed successfully; all tests passed"
+        name: full pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T20:26:53.017Z
+        completed_at: 2026-04-27T20:26:53.017Z
     events:
       - _ulid: 01KQ89VMEY5NZ6T98KYHP0BYCP
         actor: Jacob Chapel
@@ -7446,6 +7456,13 @@ reviews:
           status: pass
           name: targeted harness tests
         timestamp: 2026-04-27T20:26:52.829Z
+      - _ulid: 01KQ89Z5S5ZT11Y4VY3D7CMKCB
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: full pytest
+        timestamp: 2026-04-27T20:26:53.093Z
     examined_commit: afea787efe1c0a926a94ac97b416789f3af80b50
     external_links: []
     lifecycle_state: open
@@ -7458,5 +7475,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T20:24:57.055Z
-    updated_at: 2026-04-27T20:26:52.763Z
+    updated_at: 2026-04-27T20:26:53.017Z
     notes: []
