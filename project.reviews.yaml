@@ -6926,6 +6926,12 @@ reviews:
         payload:
           thread_ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
         timestamp: 2026-04-27T20:04:40.638Z
+      - _ulid: 01KQ88PJZGR6ND5HXZS9F9XTYW
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
+        timestamp: 2026-04-27T20:04:43.120Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: closed
@@ -7124,6 +7130,8 @@ reviews:
               temp files are left behind and no tensor payload in _incremental_cache."
             created_at: 2026-04-27T20:04:40.572Z
         kind: blocker
+        resolved_at: 2026-04-27T20:04:43.053Z
+        resolved_by: "@claude"
       - _ulid: 01KQ87S730XR5W5MSNKNXHYBMA
         anchor:
           type: code
@@ -7188,5 +7196,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:49:13.956Z
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T20:04:40.572Z
+    updated_at: 2026-04-27T20:04:43.053Z
     notes: []
