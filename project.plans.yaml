@@ -4652,3 +4652,15 @@ plans:
           validation ACs pass/fail"
         author: Jacob Chapel
         created_at: 2026-04-27T00:04:10.555Z
+      - _ulid: 01KQ6HGJWEA6MQFNGKRTMTM8V1
+        content: "Dependency note: Do not approve/derive this disk-backed patch output plan as an
+          independent parallel plan yet. It depends on shared foundation work currently scoped in
+          @plan-full-saved-model-output-plan, especially existing Exit/spec reconciliation,
+          saved-artifact reload viability, bounded merge result sink, sink-writing evaluation,
+          incremental safetensors writing, and mode-aware cache metadata. After the full saved model
+          plan completes those foundation tasks, revisit and rescope this plan so its tasks
+          explicitly reuse the completed foundation and reflect any design decisions or constraints
+          discovered there. Until then, keep this plan as a draft follow-up/sketch rather than
+          dispatch-ready work."
+        author: Jacob Chapel
+        created_at: 2026-04-27T04:00:14.734Z
