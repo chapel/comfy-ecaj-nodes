@@ -3979,6 +3979,13 @@ reviews:
           status: fail
           name: artifact load probe
         timestamp: 2026-04-27T17:50:13.666Z
+      - _ulid: 01KQ810Q653BDE9CM4MN0JPJ9N
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ810Q4W2A0FFC2B7RHK3MG5
+        timestamp: 2026-04-27T17:50:26.501Z
     examined_commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
     external_links: []
     lifecycle_state: open
@@ -3988,8 +3995,30 @@ reviews:
       content_hash: ""
       ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ810Q4W2A0FFC2B7RHK3MG5
+        anchor:
+          type: code
+          commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
+          line_end: 783
+          line_start: 757
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQ810Q4X5ED1DB0YB4JAH8J1
+            author: Jacob Chapel
+            body: "MUST-FIX: full-mode streaming still retains an evaluated group across later group evaluation
+              when that group's keys are interleaved in sorted safetensors order. The loop evaluates
+              an entire OpSignature at the first key, writes only the current key, and keeps the
+              rest in evaluated_groups until their sorted keys appear. A runtime probe with group1
+              keys a/z and group2 keys b/c produced eval:g1, write:g1:a, eval:g2, write:g2:b,
+              write:g2:c, write:g1:z. That violates
+              ac-direct-artifact-handoff/ac-affected-results-released because group1's completed
+              tensors remain resident while group2 is evaluated, and the current test only covers
+              non-interleaved key names."
+            created_at: 2026-04-27T17:50:26.461Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T17:45:43.925Z
-    updated_at: 2026-04-27T17:50:13.624Z
+    updated_at: 2026-04-27T17:50:26.461Z
     notes: []
