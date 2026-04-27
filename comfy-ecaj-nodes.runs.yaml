@@ -4043,7 +4043,7 @@ runs:
     completed_at: 2026-04-27T08:38:17.718Z
   - _ulid: 01KQ7Z2BBS987HFX2HA2G1MKWV
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4057,7 +4057,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T17:17:09.598Z
-        completed_at: 2026-04-27T17:17:09.598Z
+        completed_at: 2026-04-27T17:17:44.389Z
+        notes: "Friction: (1) /tmp tmpfs at 100% (31GB) caused cascading ENOSPC errors that masked real test
+          results as failures. Partially covered by observation 01KQ6SHQ (orphaned safetensors in
+          /tmp). (2) Bash tool stdout suppression — commands returned exit code 0 or 1 but no
+          stdout/stderr, requiring run_in_background workaround. Not previously tracked. Success:
+          (1) AC-by-AC coverage check is an effective final quality gate — caught missing annotation
+          for ac-affected-results-released."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T17:17:44.389Z
+        completed_at: 2026-04-27T17:17:44.389Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T17:16:22.777Z
