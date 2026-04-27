@@ -188,18 +188,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-full-model-result-sink-interface/01kq6hr9
-    canonical_branch_head: 068e946741d4b24ca47346d5d9fea9768abc237d
+    canonical_branch_head: e20213ae9f1e52182c6fa5b7fad587feaf949e93
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T04:49:44.974Z
+      updated_at: 2026-04-27T04:54:41.336Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T04:49:45.621Z
+      updated_at: 2026-04-27T04:54:41.336Z
     integration:
       status: pending
       detail: null
@@ -207,7 +207,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: 068e946741d4b24ca47346d5d9fea9768abc237d
-      updated_at: 2026-04-27T04:49:44.974Z
+      updated_at: 2026-04-27T04:54:41.336Z
     lifecycle_state: active
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HR9XP4F7PGP4ZDYNSEPFG"
@@ -215,9 +215,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T04:49:45.621Z
-      last_reconciled_at: 2026-04-27T04:49:45.621Z
+      last_reconciled_at: 2026-04-27T04:54:41.336Z
       created_at: 2026-04-27T04:49:44.974Z
-      updated_at: 2026-04-27T04:49:45.621Z
+      updated_at: 2026-04-27T04:54:41.336Z
     workspace_id: dispatch-workspace-01KQ6HR9XP4F7PGP4ZDYNSEPFG
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
