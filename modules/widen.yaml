@@ -309,6 +309,7 @@ features:
         implements: []
         relates_to:
           - "@exit-model-persistence"
+          - "@memory-management"
         tests: []
         traits: []
         acceptance_criteria:
