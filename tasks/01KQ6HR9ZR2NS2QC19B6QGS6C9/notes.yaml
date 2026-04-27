@@ -51,3 +51,32 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T05:41:12.135Z
+  - _ulid: 01KQ6RYC4CKP73FJATBA064X8D
+    content: >-
+      Fix cycle 1: addressed all 3 review blockers.
+
+
+      1. nodes/exit.py:678 (InMemorySink → CheckpointMaterializationSink): Wired
+      CheckpointMaterializationSink into the eval loop when save_model=True. The sink writes base
+      weights first (bounded pass), then writes affected tensors incrementally during GPU eval.
+      InMemorySink is still used alongside to collect merged_state for cache/patching.
+
+
+      2. nodes/exit.py:761 (redundant state_dict re-acquisition): Removed the entire save_model
+      block that re-acquired model_patcher.model_state_dict() and called atomic_save. The
+      materialization sink handles saving incrementally during eval, eliminating the need for a
+      second full model dict. Also removed unused atomic_save import.
+
+
+      3. tests/test_checkpoint_materialization.py:458 (ruff F541): Changed f-string with no
+      placeholders to a regular string.
+
+
+      Additional: cleared _base_state reference in CheckpointMaterializationSink after
+      write_base_weights() completes, so the caller's dict can be garbage collected.
+
+
+      All checks pass: ruff 0 errors, pytest full suite pass, kspec validate pass.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T06:10:06.604Z
