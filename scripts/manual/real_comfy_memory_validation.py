@@ -509,6 +509,16 @@ def run_validation(
         report.duration_seconds = time.time() - start_time
         return report
 
+    # --- Pre-flight: validate comfy_root contains a comfy package -------
+    comfy_pkg = os.path.join(comfy_root, "comfy", "__init__.py")
+    if not os.path.isfile(comfy_pkg):
+        report.errors.append(
+            f"--comfy-root does not contain a ComfyUI installation "
+            f"(missing {comfy_pkg})"
+        )
+        report.duration_seconds = time.time() - start_time
+        return report
+
     # --- Set up import paths (project root before ComfyUI root) ---------
     _setup_import_paths(comfy_root)
     _setup_package_bridge()
@@ -517,6 +527,32 @@ def run_validation(
         report.memory_observations.append(
             _collect_memory_observation("before-validation")
         )
+
+        # --- Post-import: verify comfy resolves from the specified root ---
+        import importlib.util
+
+        comfy_spec = importlib.util.find_spec("comfy")
+        if comfy_spec is None:
+            report.errors.append(
+                f"comfy package not importable after adding --comfy-root "
+                f"({comfy_root}) to sys.path"
+            )
+            report.duration_seconds = time.time() - start_time
+            return report
+
+        resolved_comfy = os.path.realpath(
+            comfy_spec.origin or comfy_spec.submodule_search_locations[0]
+        )
+        expected_comfy = os.path.realpath(os.path.join(comfy_root, "comfy"))
+        if not resolved_comfy.startswith(expected_comfy):
+            report.errors.append(
+                f"comfy package resolved from {resolved_comfy!r} which is "
+                f"not under the specified --comfy-root ({comfy_root!r}). "
+                f"The harness refuses to validate an ambient/random ComfyUI "
+                f"installation."
+            )
+            report.duration_seconds = time.time() - start_time
+            return report
 
         # Detect memory mode
         report.memory_mode = _detect_memory_mode(comfy_root)

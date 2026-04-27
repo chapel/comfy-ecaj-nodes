@@ -402,6 +402,92 @@ class TestRunValidationModelPathValidation:
 
 
 # ===========================================================================
+# AC: @manual-comfy-memory-validation ac-refuses-before-comfy-work-without-opt-in
+# Comfy-root validation — harness rejects roots that don't contain ComfyUI
+# ===========================================================================
+
+
+class TestComfyRootValidation:
+    """run_validation refuses when --comfy-root does not contain a comfy package."""
+
+    # AC: @manual-comfy-memory-validation ac-refuses-before-comfy-work-without-opt-in
+    def test_empty_comfy_root_rejects(self, tmp_path):
+        """An empty directory as --comfy-root is rejected before importing comfy."""
+        import torch
+        from safetensors.torch import save_file
+
+        model_file = tmp_path / "model.safetensors"
+        save_file({"w": torch.zeros(2)}, str(model_file))
+
+        report = harness.run_validation(
+            comfy_root=str(tmp_path / "empty_root"),
+            model_path=str(model_file),
+            report_output=str(tmp_path / "report.json"),
+        )
+        assert report.errors
+        assert any("does not contain a ComfyUI installation" in e for e in report.errors)
+        assert report.memory_mode == "unknown"
+
+    # AC: @manual-comfy-memory-validation ac-refuses-before-comfy-work-without-opt-in
+    def test_comfy_root_without_comfy_package_rejects(self, tmp_path):
+        """A directory without comfy/__init__.py is rejected."""
+        import torch
+        from safetensors.torch import save_file
+
+        fake_root = tmp_path / "no_comfy"
+        fake_root.mkdir()
+
+        model_file = tmp_path / "model.safetensors"
+        save_file({"w": torch.zeros(2)}, str(model_file))
+
+        report = harness.run_validation(
+            comfy_root=str(fake_root),
+            model_path=str(model_file),
+            report_output=str(tmp_path / "report.json"),
+        )
+        assert report.errors
+        assert any("does not contain a ComfyUI installation" in e for e in report.errors)
+
+    # AC: @manual-comfy-memory-validation ac-refuses-before-comfy-work-without-opt-in
+    def test_ambient_comfy_not_used_with_wrong_root(self, tmp_path):
+        """With valid model but wrong --comfy-root, ambient comfy is NOT used.
+
+        Reproduces the review scenario: an ambient comfy is importable on
+        sys.path, but --comfy-root points to a directory without comfy/.
+        The harness must refuse rather than importing the ambient package.
+        """
+        import torch
+        from safetensors.torch import save_file
+
+        # Create a valid model file.
+        model_file = tmp_path / "model.safetensors"
+        save_file({"w": torch.zeros(2)}, str(model_file))
+
+        # Create an empty --comfy-root (no comfy/ package).
+        empty_root = tmp_path / "empty_root"
+        empty_root.mkdir()
+
+        original_modules = set(sys.modules.keys())
+        report = harness.run_validation(
+            comfy_root=str(empty_root),
+            model_path=str(model_file),
+            report_output=str(tmp_path / "report.json"),
+        )
+        # Must have refused — errors present, memory_mode still unknown.
+        assert report.errors
+        assert report.memory_mode == "unknown"
+
+        # Must not have imported comfy from anywhere.
+        new_comfy = {
+            m for m in (set(sys.modules.keys()) - original_modules)
+            if m.startswith("comfy")
+        }
+        assert not new_comfy, (
+            f"Ambient comfy modules imported despite wrong root: {new_comfy}"
+        )
+
+
+# ===========================================================================
 # Import path ordering — project root before ComfyUI root
 # ===========================================================================
 
