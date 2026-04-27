@@ -1381,6 +1381,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-27T05:31:01.242Z
+      - _ulid: 01KQ6PQADNABW0DCFFS5VVH5EV
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ6PQAD4D3SYJA1B4N5714W0
+        timestamp: 2026-04-27T05:31:18.325Z
     examined_commit: a561fbe0865113b8f5d80344acaae3485e17f40b
     external_links: []
     lifecycle_state: open
@@ -1390,8 +1397,27 @@ reviews:
       content_hash: ""
       ref: "@01KQ6HR9YAB7181HKX6YSBX650"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ6PQAD4D3SYJA1B4N5714W0
+        anchor:
+          type: code
+          commit: a561fbe0865113b8f5d80344acaae3485e17f40b
+          line_end: 432
+          line_start: 431
+          path: lib/gpu_ops.py
+          side: head
+        entries:
+          - _ulid: 01KQ6PQAD49MCZPPVXVYETRJ9Y
+            author: Jacob Chapel
+            body: "MUST-FIX: the normal chunk path writes slices to the sink but never releases the local
+              merged_cpu batch before the next chunk starts. Evidence: an instrumented eval_fn
+              inspecting the caller frame saw merged_cpu from the prior chunk still present when
+              evaluating the next chunk. Impact: a streaming sink can still overlap the previous
+              full CPU chunk with the next chunk's base/eval tensors, so this does not satisfy the
+              task requirement to release local chunk references before later chunks are evaluated."
+            created_at: 2026-04-27T05:31:18.308Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T05:28:31.773Z
-    updated_at: 2026-04-27T05:31:01.224Z
+    updated_at: 2026-04-27T05:31:18.308Z
     notes: []
