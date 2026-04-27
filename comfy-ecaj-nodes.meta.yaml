@@ -755,6 +755,16 @@ observations:
     resolved: false
     workflow_ref: "@01KQ7ZF0"
     created_at: 2026-04-27T17:24:40.632Z
+  - _ulid: 01KQ80PSX8SJYRNQK6KMST9AMJ
+    type: success
+    content: Review checks with concrete runtime evidence (event logs, probe traces) enable single-pass
+      fix cycles. In the streaming materialization review, the failing probe recorded exact event
+      order ['open', 'eval:g1', 'eval:g2', 'write:g1', ...] which made the accumulation bug
+      self-evident and guided the restructuring directly.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T17:45:01.608Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
