@@ -38,7 +38,7 @@ description: |
 spec_ref: "@full-saved-model-output"
 plan_ref: "@plan-full-saved-model-output-plan"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -48,6 +48,14 @@ tags:
   - exit-node
   - persistence
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-full-model-update-existing-specs/01kq6hr9
+  captured_at: 2026-04-27T04:20:23.177Z
+  commit: 254c3623bee1e453ccf9494c3a137007a9f42ea1
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KQ6J3MZVQFS8KMYQNJ7PEC1N
 history:
   - author: Jacob Chapel
@@ -70,7 +78,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-04-27T04:11:13.507Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-full-model-update-existing-specs/01kq6hr9
+          captured_at: 2026-04-27T04:20:23.177Z
+          commit: 254c3623bee1e453ccf9494c3a137007a9f42ea1
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-04-27T04:20:23.180Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-04-27T04:20:23.180Z
 created_at: 2026-04-27T04:04:27.658Z
 started_at: 2026-04-27T04:11:13.507Z
+submitted_at: 2026-04-27T04:20:23.180Z
 todos: []
 automation: eligible
