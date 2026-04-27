@@ -337,6 +337,149 @@ def _setup_import_paths(comfy_root: str) -> None:
     sys.path.insert(0, project_root)
 
 
+def _setup_package_bridge() -> None:
+    """Set up the import bridge so ``nodes/`` relative imports resolve.
+
+    ``nodes/exit.py`` uses ``from ..lib.X import ...`` which requires a
+    parent package.  The project's ``conftest.py`` installs a MetaPathFinder
+    that loads everything under a synthetic ``_ecaj`` package so the ``..``
+    goes from ``_ecaj.nodes.exit`` up to ``_ecaj.lib.X``.
+
+    This function replicates the essential parts of that machinery for
+    standalone (non-pytest) execution.  It is idempotent.
+    """
+    import importlib.abc
+    import importlib.machinery
+    import importlib.util
+    from types import ModuleType
+
+    _PKG = "_ecaj"
+    _SUBS = frozenset(("lib", "nodes"))
+    project_root = _resolve_project_root()
+
+    # Already installed — nothing to do.
+    if _PKG in sys.modules:
+        return
+
+    class _HarnessFinder(importlib.abc.MetaPathFinder):
+        """Intercept lib.*, nodes.*, and _ecaj.* imports."""
+
+        def find_spec(self, fullname, path, target=None):
+            parts = fullname.split(".")
+            if parts[0] in _SUBS:
+                short, canonical = fullname, f"{_PKG}.{fullname}"
+            elif parts[0] == _PKG and len(parts) > 1 and parts[1] in _SUBS:
+                canonical, short = fullname, ".".join(parts[1:])
+            else:
+                return None
+
+            if canonical in sys.modules:
+                if short in sys.modules:
+                    return _mk_existing(fullname, sys.modules[canonical])
+                del sys.modules[canonical]
+            elif short in sys.modules:
+                mod = sys.modules[short]
+                sys.modules[canonical] = mod
+                return _mk_existing(fullname, mod)
+
+            # Ensure parent packages exist.
+            short_parts = short.split(".")
+            for i in range(1, len(short_parts)):
+                parent = ".".join(short_parts[:i])
+                if f"{_PKG}.{parent}" not in sys.modules:
+                    importlib.import_module(parent)
+
+            if canonical in sys.modules:
+                mod = sys.modules[canonical]
+                sys.modules.setdefault(short, mod)
+                return _mk_existing(fullname, mod)
+
+            # Resolve source file.
+            from pathlib import Path
+
+            rel = Path(*short_parts)
+            base = Path(project_root) / rel
+            if (base / "__init__.py").exists():
+                fp = str(base / "__init__.py")
+                search = [str(base)]
+            elif base.with_suffix(".py").exists():
+                fp = str(base.with_suffix(".py"))
+                search = None
+            else:
+                return None
+
+            spec = importlib.util.spec_from_file_location(
+                fullname, fp, submodule_search_locations=search,
+            )
+            if spec is None:
+                return None
+
+            is_nodes = short_parts[0] == "nodes"
+            spec.loader = _BridgeLoader(spec.loader, short, canonical, is_nodes)
+            return spec
+
+    class _BridgeLoader(importlib.abc.Loader):
+        def __init__(self, real, short, canonical, is_nodes):
+            self._real = real
+            self._short = short
+            self._canonical = canonical
+            self._is_nodes = is_nodes
+
+        def create_module(self, spec):
+            return self._real.create_module(spec)
+
+        def exec_module(self, module):
+            is_pkg = hasattr(module, "__path__")
+            if self._is_nodes:
+                pkg = self._canonical if is_pkg else self._canonical.rsplit(".", 1)[0]
+            else:
+                pkg = self._short if is_pkg else self._short.rsplit(".", 1)[0]
+            module.__package__ = pkg
+
+            spec_name = self._canonical if self._is_nodes else self._short
+            old = module.__spec__
+            if old is not None and old.name != spec_name:
+                new_spec = importlib.machinery.ModuleSpec(
+                    spec_name, old.loader, is_package=is_pkg, origin=old.origin,
+                )
+                if is_pkg and old.submodule_search_locations is not None:
+                    new_spec.submodule_search_locations = list(
+                        old.submodule_search_locations
+                    )
+                new_spec.has_location = getattr(old, "has_location", False)
+                module.__spec__ = new_spec
+
+            sys.modules[self._canonical] = module
+            sys.modules[self._short] = module
+
+            if "." in self._canonical:
+                parent_cn, attr = self._canonical.rsplit(".", 1)
+                if parent_cn in sys.modules:
+                    setattr(sys.modules[parent_cn], attr, module)
+
+            self._real.exec_module(module)
+
+    def _mk_existing(name, mod):
+        is_pkg = hasattr(mod, "__path__")
+        loader = type("_Noop", (importlib.abc.Loader,), {
+            "create_module": lambda self, spec: mod,
+            "exec_module": lambda self, module: None,
+        })()
+        spec = importlib.machinery.ModuleSpec(name, loader, is_package=is_pkg)
+        if is_pkg:
+            spec.submodule_search_locations = list(mod.__path__)
+        spec.origin = getattr(mod, "__file__", None)
+        return spec
+
+    # Create synthetic root package.
+    root = ModuleType(_PKG)
+    root.__path__ = [project_root]
+    root.__package__ = _PKG
+    sys.modules[_PKG] = root
+
+    sys.meta_path.insert(0, _HarnessFinder())
+
+
 def run_validation(
     comfy_root: str,
     model_path: str,
@@ -368,6 +511,7 @@ def run_validation(
 
     # --- Set up import paths (project root before ComfyUI root) ---------
     _setup_import_paths(comfy_root)
+    _setup_package_bridge()
 
     try:
         report.memory_observations.append(
@@ -432,7 +576,7 @@ def run_validation(
         try:
             with safe_open(model_path, framework="pt") as f:
                 meta = f.metadata() or {}
-            recipe_hash = meta.get("ecaj_recipe_hash", "")
+            recipe_hash = meta.get("__ecaj_recipe_hash__", "")
             cache_hit = check_full_model_cache(
                 model_path, recipe_hash, manifest
             )
