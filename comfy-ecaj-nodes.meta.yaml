@@ -840,6 +840,30 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T19:30:03.539Z
+  - _ulid: 01KQ87BK497ZT2VS6SHBFFY4X4
+    type: friction
+    content: Worker agents writing AC-annotated tests that structurally cover acceptance criteria but
+      lack behavioral depth (e.g. not proving properties with distinguishable values, using
+      MagicMock sinks instead of real runtime paths, not injecting failure after partial work) leads
+      to extended fix cycles. Task @task-full-model-streaming-artifact-cache went through 8 fix
+      cycles where cycles 5-8 were entirely about test rigor, not production bugs. Related to
+      01KQ815T but adds the repeated-cycle cost signal.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T19:41:14.249Z
+  - _ulid: 01KQ87BK5SE30BG565053BRSDQ
+    type: success
+    content: Task descriptions that include an explicit Required dynamic tests section with concrete
+      behavioral probes (e.g. monkeypatch X to fail then verify Y succeeds, record event order
+      showing A before B) dramatically reduce ambiguity about reviewer expectations and enable
+      single-pass fix cycles. The @task-full-model-streaming-artifact-cache task spec listed 15
+      required dynamic tests — this was the authoritative reference that made the final fix cycle
+      succeed in one pass.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T19:41:14.297Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
