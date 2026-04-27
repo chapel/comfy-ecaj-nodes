@@ -51,7 +51,12 @@ from ..lib.recipe import (
     RecipeNode,
 )
 from ..lib.result_sink import InMemorySink
+from ..lib.spike_reload import load_saved_model
 from ..lib.widen import WIDEN, WIDENConfig
+
+# Output mode constants
+OUTPUT_MODE_PATCHES = "In-Memory Patches"
+OUTPUT_MODE_FULL_MODEL = "Full Saved Model"
 
 try:
     from comfy.utils import ProgressBar
@@ -331,6 +336,8 @@ class WIDENExitNode:
                 "widen": ("WIDEN",),
             },
             "optional": {
+                "output_mode": ([OUTPUT_MODE_PATCHES, OUTPUT_MODE_FULL_MODEL],
+                                {"default": OUTPUT_MODE_PATCHES}),
                 "save_model": ("BOOLEAN", {"default": False}),
                 "model_name": ("STRING", {"default": ""}),
                 "save_workflow": ("BOOLEAN", {"default": True}),
@@ -352,6 +359,7 @@ class WIDENExitNode:
     def IS_CHANGED(
         cls,
         widen: RecipeNode,
+        output_mode: str = OUTPUT_MODE_PATCHES,
         save_model: bool = False,
         model_name: str = "",
         save_workflow: bool = True,
@@ -368,19 +376,22 @@ class WIDENExitNode:
         Returns:
             Hash string for ComfyUI caching
         """
+        # Full saved model mode always needs save parameters in the hash
+        full_model_mode = output_mode == OUTPUT_MODE_FULL_MODEL
+
         base_hash = compute_recipe_file_hash(
             widen,
             lora_path_resolver=_build_lora_resolver(),
             model_path_resolver=_build_model_resolver(),
         )
 
-        if not save_model and enable_cache:
+        if not save_model and not full_model_mode and enable_cache:
             return base_hash
 
         # Include save parameters, cache toggle, and cached file state
         hasher = hashlib.sha256(base_hash.encode())
         hasher.update(
-            f"|save={save_model}|name={model_name}"
+            f"|mode={output_mode}|save={save_model}|name={model_name}"
             f"|wf={save_workflow}|cache={enable_cache}".encode()
         )
         try:
@@ -395,6 +406,7 @@ class WIDENExitNode:
     def execute(
         self,
         widen: RecipeNode,
+        output_mode: str = OUTPUT_MODE_PATCHES,
         save_model: bool = False,
         model_name: str = "",
         save_workflow: bool = True,
@@ -413,9 +425,15 @@ class WIDENExitNode:
         AC: @exit-node ac-7 — downstream LoRA patches apply additively
         AC: @exit-node ac-8 — patch tensors match base model dtype
         AC: @exit-model-persistence ac-1 through ac-14
+        AC: @full-saved-model-output ac-complete-artifact
+        AC: @full-saved-model-output ac-return-loaded-model
+        AC: @full-saved-model-output ac-cache-reuses-artifact
+        AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
 
         Args:
             widen: Recipe tree root (should be RecipeMerge or RecipeBase)
+            output_mode: Output mode — "In-Memory Patches" (default) or
+                "Full Saved Model"
             save_model: Whether to save/cache the merged model
             model_name: Filename for the saved model
             save_workflow: Whether to embed workflow metadata
@@ -423,13 +441,23 @@ class WIDENExitNode:
             extra_pnginfo: ComfyUI workflow info (hidden input)
 
         Returns:
-            Tuple containing cloned ModelPatcher with merged weights as set patches
+            Tuple containing cloned ModelPatcher with merged weights as set patches,
+            or a Comfy-loaded MODEL from the saved artifact in full saved model mode
 
         Raises:
-            ValueError: If recipe tree structure is invalid
+            ValueError: If recipe tree structure is invalid, or if model_name
+                is missing/invalid when full saved model mode is active
         """
         # AC-2: Validate recipe tree structure
         _validate_recipe_tree(widen)
+
+        full_model_mode = output_mode == OUTPUT_MODE_FULL_MODEL
+
+        # AC: @full-saved-model-output ac-complete-artifact
+        # Validate model_name early — before any expensive merge work —
+        # when full saved model mode requires a usable artifact path.
+        if full_model_mode:
+            validated_name = validate_model_name(model_name)
 
         # Quick check: must end in RecipeMerge for actual merging
         if isinstance(widen, RecipeBase):
@@ -462,9 +490,13 @@ class WIDENExitNode:
         lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
 
         # --- Persistence: pre-GPU cache check ---
+        # Full saved model mode always needs a save path (it produces an artifact).
+        # The save_model flag controls persistence in the default patches mode.
+        needs_persistence = save_model or full_model_mode
         save_path = serialized = recipe_hash = None
-        if save_model:
-            validated_name = validate_model_name(model_name)
+        if needs_persistence:
+            if not full_model_mode:
+                validated_name = validate_model_name(model_name)
             save_path = _resolve_checkpoints_path(validated_name)
 
             serialized = serialize_recipe(widen, base_identity, lora_stats)
@@ -472,14 +504,26 @@ class WIDENExitNode:
 
             cached_metadata = check_cache(save_path, recipe_hash, artifact_kind="full_model")
             if cached_metadata is not None:
-                # CACHE HIT — skip GPU entirely, no LoRA/model loading
-                del base_state  # Free dict refs before loading cached tensors
-                affected = json.loads(cached_metadata["__ecaj_affected_keys__"])
-                merged_state = load_affected_keys(save_path, affected)
-                if ProgressBar is not None:
-                    pbar = ProgressBar(1)
-                    pbar.update(1)
-                return (install_merged_patches(model_patcher, merged_state, storage_dtype),)
+                if full_model_mode:
+                    # AC: @full-saved-model-output ac-cache-reuses-artifact
+                    # AC: @full-saved-model-output ac-return-loaded-model
+                    # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+                    # Cache hit in full saved model mode: load the saved artifact
+                    # as a Comfy MODEL. Skip GPU merge entirely.
+                    del base_state
+                    if ProgressBar is not None:
+                        pbar = ProgressBar(1)
+                        pbar.update(1)
+                    return (load_saved_model(save_path),)
+                else:
+                    # Cache hit in patches mode: load affected keys as set patches
+                    del base_state
+                    affected = json.loads(cached_metadata["__ecaj_affected_keys__"])
+                    merged_state = load_affected_keys(save_path, affected)
+                    if ProgressBar is not None:
+                        pbar = ProgressBar(1)
+                        pbar.update(1)
+                    return (install_merged_patches(model_patcher, merged_state, storage_dtype),)
 
         # --- Normal GPU pipeline ---
         analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
@@ -660,7 +704,7 @@ class WIDENExitNode:
                 check_ram_preflight(
                     merged_state_bytes=merged_state_bytes,
                     worst_chunk_bytes=worst_chunk_bytes,
-                    save_model=save_model,
+                    save_model=needs_persistence,
                     loader_bytes=current_loader_bytes,
                 )
 
@@ -678,8 +722,9 @@ class WIDENExitNode:
 
             # Set up materialization sink when saving the full model.
             # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+            # AC: @full-saved-model-output ac-complete-artifact
             mat_sink = None
-            if save_model and save_path is not None:
+            if needs_persistence and save_path is not None:
                 workflow_json = (
                     json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
                 )
@@ -815,7 +860,7 @@ class WIDENExitNode:
             # AC: @memory-management ac-8
             # After save completes, offload GPU models and clear VRAM cache.
             # Done after del base_state so refs don't hold GPU memory.
-            if save_model:
+            if needs_persistence:
                 try:
                     from comfy.model_management import (
                         free_memory,
@@ -888,6 +933,13 @@ class WIDENExitNode:
             # Cleanup model loaders (close file handles)
             for model_loader in model_analysis.model_loaders.values():
                 model_loader.cleanup()
+
+        if full_model_mode:
+            # AC: @full-saved-model-output ac-return-loaded-model
+            # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+            # Load the saved artifact as a Comfy MODEL. The returned
+            # ModelPatcher is managed by ComfyUI's memory lifecycle.
+            return (load_saved_model(save_path),)
 
         # Phase 3: Install merged weights as set patches
         # AC-1: Returns MODEL (ModelPatcher clone) with set patches
