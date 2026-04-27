@@ -122,3 +122,14 @@ inbox:
       - review
     added_by: Jacob Chapel
     created_at: 2026-04-27T05:54:05.416Z
+  - _ulid: 01KQ6VHSYNX5JHH4XDACT7GZ69
+    text: "Reduce or compact automated review dispatch prompts when task context is large. The review
+      for @task-full-model-cache-metadata recorded an [AGENT-FAIL] Internal error: Prompt is too
+      long before review could run, suggesting dispatch should trim repeated AGENTS/skill/context
+      blocks or provide a compact review payload."
+    tags:
+      - reflection
+      - kspec
+      - review
+    added_by: Jacob Chapel
+    created_at: 2026-04-27T06:55:40.501Z

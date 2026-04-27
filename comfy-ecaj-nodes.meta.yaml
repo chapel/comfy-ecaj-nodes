@@ -658,6 +658,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T06:37:22.178Z
+  - _ulid: 01KQ6VHSX4ZNTAPCKCNK7GYRJ7
+    type: friction
+    content: "Automated review dispatch can fail before review starts when the injected task/context
+      prompt is too long; task @task-full-model-cache-metadata recorded [AGENT-FAIL] Internal error:
+      Prompt is too long before the manual review cycle proceeded."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T06:55:40.452Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
