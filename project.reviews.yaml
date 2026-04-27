@@ -6397,6 +6397,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T19:27:58.014Z
+      - _ulid: 01KQ875X4FKZS6QPT65NT5W6J4
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ86H8PE6KD3Q160V0Z93FJH
+        timestamp: 2026-04-27T19:38:07.888Z
     examined_commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
     external_links: []
     lifecycle_state: closed
@@ -6425,6 +6431,13 @@ reviews:
               float32. Load tensors with their artifact/target per-key dtype instead of one global
               dtype."
             created_at: 2026-04-27T19:26:51.598Z
+          - _ulid: 01KQ875X2MA3V4VFJMCA9CZG9H
+            author: "@claude"
+            body: "Fixed: _load_model_from_artifact no longer coerces tensors to a single storage_dtype. Each
+              tensor retains its artifact dtype via f.get_tensor(key) without
+              .to(dtype=storage_dtype). New TestMixedDtypeArtifactPreservation test verifies
+              float32/float16 artifact tensors retain their per-key dtypes."
+            created_at: 2026-04-27T19:38:07.828Z
         kind: blocker
       - _ulid: 01KQ86HH1ZKCDGBK5GRK79R6NM
         anchor:
@@ -6542,5 +6555,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:27:58.014Z
     created_at: 2026-04-27T19:19:54.224Z
-    updated_at: 2026-04-27T19:27:58.014Z
+    updated_at: 2026-04-27T19:38:07.828Z
     notes: []
