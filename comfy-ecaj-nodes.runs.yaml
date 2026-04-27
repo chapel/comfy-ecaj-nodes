@@ -5415,7 +5415,7 @@ runs:
     completed_at: 2026-04-27T21:18:17.090Z
   - _ulid: 01KQ8DBRC0M12QQSTGWZ9M9T2X
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5429,7 +5429,37 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T21:26:27.739Z
-        completed_at: 2026-04-27T21:26:27.739Z
+        completed_at: 2026-04-27T21:27:08.980Z
+        notes: >-
+          High-confidence findings:
+
+
+          FRICTION (already tracked):
+
+          1. kspec review get truncates thread bodies — already tracked in observations 01KQ6SHQ and
+          01KQ8210. Had to read project.reviews.yaml directly to get full blocker text. Confirms
+          this is a recurring pattern across multiple sessions.
+
+
+          FRICTION (new, high confidence):
+
+          2. Fix cycle 4 on a single task (5 total cycles including initial). The _HarnessModel
+          contract mismatch could have been caught by the reviewer probe in earlier cycles if the
+          probe had been run sooner. Pattern: each cycle addresses one narrow issue, suggesting
+          review probes could be more comprehensive on first pass.
+
+
+          SUCCESS (already tracked in 01KQ6TG9):
+
+          3. Detailed review threads with evidence enabled single-pass fix. Both blockers had clear
+          reproduction evidence and line references, making the fix straightforward.
+
+
+          No new untracked items worth capturing — the friction is already covered.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T21:27:08.980Z
+        completed_at: 2026-04-27T21:27:08.980Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T21:26:11.072Z
