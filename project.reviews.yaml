@@ -2776,7 +2776,17 @@ reviews:
     slugs: []
     title: Review task-full-model-exit-integration after lint fix
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Schema/references OK; validation reported only existing alignment/completeness warnings.
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T08:02:26.744Z
+        completed_at: 2026-04-27T08:02:26.744Z
     events:
       - _ulid: 01KQ6Z98HNP7AEG5PAB0J56Z7V
         actor: Jacob Chapel
@@ -2791,6 +2801,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T08:01:00.782Z
+      - _ulid: 01KQ6ZC2AT0RXAAPZYAVPCNKCK
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-27T08:02:26.778Z
     examined_commit: 00fdbaf75fd9bd92904e11505fb9258da72dd38e
     external_links: []
     lifecycle_state: open
@@ -2803,5 +2820,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T08:00:54.837Z
-    updated_at: 2026-04-27T08:01:00.748Z
+    updated_at: 2026-04-27T08:02:26.744Z
     notes: []
