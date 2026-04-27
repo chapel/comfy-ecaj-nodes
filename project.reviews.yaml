@@ -3896,6 +3896,17 @@ reviews:
         runner: rg
         created_at: 2026-04-27T17:50:03.466Z
         completed_at: 2026-04-27T17:50:03.466Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Schema/references validation passed; command exited 6 only because existing
+          alignment/completeness warnings remain.
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T17:50:03.679Z
+        completed_at: 2026-04-27T17:50:03.679Z
     events:
       - _ulid: 01KQ80R37MDD6ZDPGAB73XR9J3
         actor: Jacob Chapel
@@ -3924,6 +3935,13 @@ reviews:
           status: pass
           name: AC annotation grep
         timestamp: 2026-04-27T17:50:03.514Z
+      - _ulid: 01KQ8100YEW9GBRTK96AGY70V5
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-27T17:50:03.727Z
     examined_commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
     external_links: []
     lifecycle_state: open
@@ -3936,5 +3954,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T17:45:43.925Z
-    updated_at: 2026-04-27T17:50:03.466Z
+    updated_at: 2026-04-27T17:50:03.679Z
     notes: []
