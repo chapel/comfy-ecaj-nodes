@@ -50,6 +50,7 @@ from ..lib.recipe import (
     RecipeModel,
     RecipeNode,
 )
+from ..lib.result_sink import InMemorySink
 from ..lib.widen import WIDEN, WIDENConfig
 
 try:
@@ -665,67 +666,81 @@ class WIDENExitNode:
 
             # Phase 2: Batched GPU evaluation per group
             # (skipped entirely on full cache hit)
+            # AC: @streaming-full-model-materialization ac-affected-results-released
+            # Use InMemorySink to collect affected tensors during evaluation.
+            # The sink allows merge evaluation to hand off each completed
+            # tensor without requiring all results to stay in one dict.
             _log_memory("before-gpu-eval")
             if batch_groups:
                 pbar_count = len(batch_groups)
                 pbar = ProgressBar(pbar_count) if ProgressBar is not None else None
 
-                for sig, group_keys in batch_groups.items():
-                    # Estimate batch size based on shape and VRAM
-                    # AC: @full-model-execution ac-13
-                    # Count both LoRA sets and model loaders for memory estimation
-                    n_models = len(set_affected) + len(model_loaders)
-                    batch_size = compute_batch_size(
-                        sig.shape,
-                        n_models,
-                        compute_dtype,
-                    )
+                sink = InMemorySink()
+                try:
+                    for sig, group_keys in batch_groups.items():
+                        # Estimate batch size based on shape and VRAM
+                        # AC: @full-model-execution ac-13
+                        # Count both LoRA sets and model loaders for memory estimation
+                        n_models = len(set_affected) + len(model_loaders)
+                        batch_size = compute_batch_size(
+                            sig.shape,
+                            n_models,
+                            compute_dtype,
+                        )
 
-                    # Build evaluation function using pre-compiled plan
-                    # AC: @merge-block-config ac-1, ac-2
-                    # AC: @full-model-execution ac-3, ac-5
-                    # Pass arch, widen_config, and model_loaders
-                    def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
-                        def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
-                            return execute_plan(
-                                plan=p,
-                                keys=keys,
-                                base_batch=base_batch,
-                                loader=ldr,
-                                widen=wdn,
-                                device=dev,
-                                dtype=dtype,
-                                arch=architecture,
-                                widen_config=wcfg,
-                                model_loaders=mdl_ldrs,
-                                domain=dom,
-                            )
-                        return eval_fn
+                        # Build evaluation function using pre-compiled plan
+                        # AC: @merge-block-config ac-1, ac-2
+                        # AC: @full-model-execution ac-3, ac-5
+                        # Pass arch, widen_config, and model_loaders
+                        def make_eval_fn(
+                            p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom,
+                        ):
+                            def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
+                                return execute_plan(
+                                    plan=p,
+                                    keys=keys,
+                                    base_batch=base_batch,
+                                    loader=ldr,
+                                    widen=wdn,
+                                    device=dev,
+                                    dtype=dtype,
+                                    arch=architecture,
+                                    widen_config=wcfg,
+                                    model_loaders=mdl_ldrs,
+                                    domain=dom,
+                                )
+                            return eval_fn
 
-                    eval_fn = make_eval_fn(
-                        plan, loader, widen_merger, device, compute_dtype,
-                        arch, widen_config, model_loaders, domain,
-                    )
+                        eval_fn = make_eval_fn(
+                            plan, loader, widen_merger, device, compute_dtype,
+                            arch, widen_config, model_loaders, domain,
+                        )
 
-                    # Run chunked evaluation with OOM backoff
-                    # AC: @full-model-execution ac-8
-                    # OOM backoff retries at batch_size=1 (streaming loader re-reads)
-                    group_base = {k: base_state[k] for k in group_keys}
-                    group_results = chunked_evaluation(
-                        keys=group_keys,
-                        base_tensors=group_base,
-                        eval_fn=eval_fn,
-                        batch_size=batch_size,
-                        device=device,
-                        dtype=compute_dtype,
-                        storage_dtype=storage_dtype,  # AC-8: match base model dtype
-                    )
+                        # Run chunked evaluation with OOM backoff
+                        # AC: @full-model-execution ac-8
+                        # OOM backoff retries at batch_size=1 (streaming loader re-reads)
+                        group_base = {k: base_state[k] for k in group_keys}
+                        group_results = chunked_evaluation(
+                            keys=group_keys,
+                            base_tensors=group_base,
+                            eval_fn=eval_fn,
+                            batch_size=batch_size,
+                            device=device,
+                            dtype=compute_dtype,
+                            storage_dtype=storage_dtype,  # AC-8: match base model dtype
+                        )
 
-                    merged_state.update(group_results)
+                        for key, tensor in group_results.items():
+                            sink.write_tensor(key, tensor)
 
-                    # AC-9: Update progress after each batch group
-                    if pbar is not None:
-                        pbar.update(1)
+                        # AC-9: Update progress after each batch group
+                        if pbar is not None:
+                            pbar.update(1)
+
+                    merged_state.update(sink.finalize())
+                except BaseException:
+                    sink.abort()
+                    raise
 
             # AC: @memory-management ac-2
             # Cleanup after all groups complete (OOM backoff handles per-group pressure)
