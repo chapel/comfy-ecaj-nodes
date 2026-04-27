@@ -2254,6 +2254,16 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T06:53:40.059Z
         completed_at: 2026-04-27T06:53:40.059Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_persistence.py: 56 passed in 0.27s"
+        name: persistence tests
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T06:53:40.214Z
+        completed_at: 2026-04-27T06:53:40.214Z
     events:
       - _ulid: 01KQ6VB8TZTQ99J5WEWSVKC25G
         actor: Jacob Chapel
@@ -2282,6 +2292,13 @@ reviews:
           status: pass
           name: exit save/cache slice
         timestamp: 2026-04-27T06:53:40.085Z
+      - _ulid: 01KQ6VE4GKZR8TQWFKQAY26F8N
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: persistence tests
+        timestamp: 2026-04-27T06:53:40.243Z
     examined_commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
     external_links: []
     lifecycle_state: open
@@ -2294,5 +2311,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T06:52:06.368Z
-    updated_at: 2026-04-27T06:53:40.059Z
+    updated_at: 2026-04-27T06:53:40.214Z
     notes: []
