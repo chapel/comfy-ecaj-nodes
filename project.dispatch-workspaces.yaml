@@ -822,12 +822,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T20:29:32.017Z
+      updated_at: 2026-04-27T20:29:34.082Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T20:29:32.267Z
+      updated_at: 2026-04-27T20:29:34.082Z
     integration:
       status: pending
       detail: null
@@ -835,7 +835,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 15d140f495cf3b7c221ded7f709022f645a34721
-      updated_at: 2026-04-27T20:29:32.017Z
+      updated_at: 2026-04-27T20:29:34.082Z
     lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
@@ -843,9 +843,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T20:24:37.998Z
-      last_reconciled_at: 2026-04-27T20:29:32.267Z
+      last_reconciled_at: 2026-04-27T20:29:34.082Z
       created_at: 2026-04-27T20:14:14.652Z
-      updated_at: 2026-04-27T20:29:32.267Z
+      updated_at: 2026-04-27T20:29:34.082Z
     workspace_id: dispatch-workspace-01KQ7VC3MPV8MZAP7HKCFJWHQ6
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
@@ -854,5 +854,5 @@ workspaces:
         branch_mode: branch
         branch_ref: dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
         head: afea787efe1c0a926a94ac97b416789f3af80b50
-        last_seen_at: 2026-04-27T20:24:37.459Z
+        last_seen_at: 2026-04-27T20:29:34.082Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-real-comfy-memory-harness-01kq7vc3
