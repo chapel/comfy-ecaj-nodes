@@ -887,6 +887,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T20:24:10.262Z
+  - _ulid: 01KQ8A2HT838QGAGV2ZFKK4N4K
+    type: success
+    content: During review of @task-full-model-real-comfy-memory-harness, a minimal ComfyUI-shaped fake
+      root with comfy/model_management.py plus top-level nodes.py exposed sys.path/package-shadowing
+      in the manual harness intentional-run path without running real ComfyUI.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T20:28:43.720Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
