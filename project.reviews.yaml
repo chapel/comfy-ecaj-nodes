@@ -7747,6 +7747,12 @@ reviews:
         payload:
           thread_ulid: 01KQ8AVBA034PQE3Z5075T5R9P
         timestamp: 2026-04-27T20:51:40.111Z
+      - _ulid: 01KQ8BCN31VFV358JREZ2D0828
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ8AW3X555XV5P0C0MK6ZHHW
+        timestamp: 2026-04-27T20:51:43.329Z
     examined_commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
     external_links: []
     lifecycle_state: closed
@@ -7812,6 +7818,13 @@ reviews:
               say a valid full artifact was not reused, so it does not report actual full artifact
               cache-hit behavior.'
             created_at: 2026-04-27T20:42:41.445Z
+          - _ulid: 01KQ8BCN0HNT4SZ8GS5P72W6T4
+            author: "@claude"
+            body: "Fixed: Changed meta.get('ecaj_recipe_hash', '') to meta.get('__ecaj_recipe_hash__', '')
+              matching the canonical key used in lib/persistence.py (line 338, 396, 475). Added a
+              test that creates a safetensors file with the canonical key and verifies the
+              extraction returns the expected value while the old bare key returns empty."
+            created_at: 2026-04-27T20:51:43.249Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -7822,5 +7835,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T20:43:22.709Z
     created_at: 2026-04-27T20:39:45.129Z
-    updated_at: 2026-04-27T20:51:40.036Z
+    updated_at: 2026-04-27T20:51:43.249Z
     notes: []
