@@ -731,6 +731,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T05:08:31.201Z
         completed_at: 2026-04-27T05:08:31.201Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "kspec validate: schema/references/skills OK; existing alignment/completeness warnings
+          only; command exits 6 because warnings are present"
+        name: kspec validate
+        required: false
+        runner: kspec
+        created_at: 2026-04-27T05:08:31.287Z
+        completed_at: 2026-04-27T05:08:31.287Z
     events:
       - _ulid: 01KQ6N9RBSF5VCS91PPSSEXEK5
         actor: Jacob Chapel
@@ -787,6 +798,13 @@ reviews:
           status: pass
           name: full test suite
         timestamp: 2026-04-27T05:08:31.214Z
+      - _ulid: 01KQ6NDKE3F0KPRZ7S7FCGX827
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-27T05:08:31.299Z
     examined_commit: 928a645109063ee7b3d34b6f60568b0585dcede5
     external_links: []
     lifecycle_state: open
@@ -821,5 +839,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T05:06:25.274Z
-    updated_at: 2026-04-27T05:08:31.201Z
+    updated_at: 2026-04-27T05:08:31.287Z
     notes: []
