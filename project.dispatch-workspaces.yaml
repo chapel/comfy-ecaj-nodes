@@ -701,7 +701,7 @@ workspaces:
         head: 23c45827b15d5d06151bb0f95786edc09f678cbb
         last_seen_at: 2026-04-27T08:29:25.408Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-memory-validation-01kq6hra
-  - active_role: worker
+  - active_role: null
     base_branch_point: 254c3623bee1e453ccf9494c3a137007a9f42ea1
     bootstrap:
       status: succeeded
@@ -743,12 +743,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T16:16:10.003Z
+      updated_at: 2026-04-27T16:46:14.912Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T16:16:10.510Z
+      updated_at: 2026-04-27T16:46:14.912Z
     integration:
       status: pending
       detail: null
@@ -756,17 +756,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 254c3623bee1e453ccf9494c3a137007a9f42ea1
-      updated_at: 2026-04-27T16:16:10.003Z
-    lifecycle_state: active
+      updated_at: 2026-04-27T16:46:14.912Z
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
     task_slug: task-full-model-streaming-artifact-cache
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T16:16:10.510Z
-      last_reconciled_at: 2026-04-27T16:16:10.510Z
+      last_reconciled_at: 2026-04-27T16:46:14.912Z
       created_at: 2026-04-27T16:16:10.003Z
-      updated_at: 2026-04-27T16:16:10.510Z
+      updated_at: 2026-04-27T16:46:14.912Z
     workspace_id: dispatch-workspace-01KQ7VC3HBVJMA4S8K9VBDCP7D
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
