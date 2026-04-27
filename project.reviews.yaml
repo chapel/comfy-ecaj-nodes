@@ -4719,7 +4719,19 @@ reviews:
     slugs: []
     title: Review full model streaming artifact cache cycle 5
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_full_model_streaming.py tests/test_exit_node.py
+          tests/test_incremental_recompute.py tests/test_memory_management.py -q passed: 186 tests,
+          100%, no failures."
+        name: focused pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T18:52:22.651Z
+        completed_at: 2026-04-27T18:52:22.651Z
     events:
       - _ulid: 01KQ84D6K6H54JV9KBWEPERR9X
         actor: Jacob Chapel
@@ -4734,6 +4746,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T18:49:53.480Z
+      - _ulid: 01KQ84J49MT1YDD8HA8G969K8P
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: focused pytest
+        timestamp: 2026-04-27T18:52:22.708Z
     examined_commit: 16f875cb81b657dddc42ca05650f29290a091f90
     external_links: []
     lifecycle_state: open
@@ -4746,5 +4765,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T18:49:41.222Z
-    updated_at: 2026-04-27T18:49:53.416Z
+    updated_at: 2026-04-27T18:52:22.651Z
     notes: []
