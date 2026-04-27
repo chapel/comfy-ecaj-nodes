@@ -8120,6 +8120,19 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T21:16:07.969Z
         completed_at: 2026-04-27T21:16:07.969Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "python -m pytest -q exited 1: 18 failures, concentrated in
+          tests/test_incremental_recompute.py and tests/test_memory_management.py; common cause was
+          check_ram_preflight RuntimeError for insufficient system RAM (~1.0-1.5GB available vs
+          ~1587MB needed)."
+        name: full pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T21:16:08.237Z
+        completed_at: 2026-04-27T21:16:08.237Z
     events:
       - _ulid: 01KQ8CGH2WXWZ3Z6666VBE80DT
         actor: Jacob Chapel
@@ -8176,6 +8189,13 @@ reviews:
           status: pass
           name: targeted harness tests
         timestamp: 2026-04-27T21:16:08.042Z
+      - _ulid: 01KQ8CSBQPS01NPG8PNKASKACM
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: full pytest
+        timestamp: 2026-04-27T21:16:08.310Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: open
@@ -8225,5 +8245,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:16:07.969Z
+    updated_at: 2026-04-27T21:16:08.237Z
     notes: []
