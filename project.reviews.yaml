@@ -965,6 +965,17 @@ reviews:
         runner: manual
         created_at: 2026-04-27T05:14:56.631Z
         completed_at: 2026-04-27T05:14:56.631Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found behavioral tests annotated for @streaming-full-model-materialization
+          ac-affected-results-released in tests/test_result_sink.py
+        name: AC annotation coverage
+        required: true
+        runner: rg
+        created_at: 2026-04-27T05:14:56.730Z
+        completed_at: 2026-04-27T05:14:56.730Z
     events:
       - _ulid: 01KQ6NN8D5PQHVJE220WG63JS7
         actor: Jacob Chapel
@@ -1028,6 +1039,13 @@ reviews:
           status: pass
           name: prior blocker verification
         timestamp: 2026-04-27T05:14:56.697Z
+      - _ulid: 01KQ6NSBVB01NKGV5RRAF03TFQ
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation coverage
+        timestamp: 2026-04-27T05:14:56.747Z
     examined_commit: 41033cd9a31e8404dfbc9fc6a3c709e6a7900be4
     external_links: []
     lifecycle_state: open
@@ -1040,5 +1058,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:12:42.149Z
-    updated_at: 2026-04-27T05:14:56.631Z
+    updated_at: 2026-04-27T05:14:56.730Z
     notes: []
