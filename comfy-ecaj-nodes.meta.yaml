@@ -689,6 +689,36 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T07:47:27.698Z
+  - _ulid: 01KQ6ZJF5SET4FBWGEQ4XR83RA
+    type: success
+    content: "Reviewing PR CI state before verdict was effective: the local code review found no
+      blockers, but GitHub CI exposed a single ruff import-order failure that could be fixed
+      mechanically and verified before merge."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KQ6ZFG"
+    created_at: 2026-04-27T08:05:56.537Z
+  - _ulid: 01KQ6ZJF6QHK52R2RKY8VNC5WG
+    type: friction
+    content: Full-suite pytest in one long process can become RAM-sensitive around preflight tests when
+      MemAvailable drops; chunked file-set verification produced stable signal and avoided treating
+      environmental RAM pressure as a product regression.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KQ6ZFG"
+    created_at: 2026-04-27T08:05:56.567Z
+  - _ulid: 01KQ6ZJF7TJXWR5XCHRNE26PZC
+    type: friction
+    content: Task-subject review records could not be refreshed after a reviewer-applied commit;
+      approving the updated head required closing the old review, patching submission linkage, and
+      creating a fresh review record.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KQ6ZFG"
+    created_at: 2026-04-27T08:05:56.602Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows

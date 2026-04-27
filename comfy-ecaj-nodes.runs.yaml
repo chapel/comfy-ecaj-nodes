@@ -3835,10 +3835,39 @@ runs:
     started_at: 2026-04-27T07:45:21.252Z
     completed_at: 2026-04-27T07:47:34.073Z
   - _ulid: 01KQ6ZFGZEY48P4KHQFRAQQ12K
-    status: active
-    current_step: 0
+    status: completed
+    current_step: 3
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T08:04:20.078Z
+        completed_at: 2026-04-27T08:05:56.228Z
+        notes: "Worked well: review records plus GitHub PR checks made the gate state explicit; fetching the
+          CI lint log identified a one-line ruff formatting failure, and applying a mechanical
+          reviewer fix preserved autonomous dispatch flow."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T08:05:56.228Z
+        completed_at: 2026-04-27T08:05:56.360Z
+        notes: "Friction: after a reviewer-applied commit, task-subject review records could not be
+          refreshed to the new head. I had to close the first review, patch task submission linkage,
+          and create a second review record before approval. Also, one monolithic pytest process
+          became RAM-sensitive around preflight tests, so full verification needed chunked runs."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T08:05:56.360Z
+        completed_at: 2026-04-27T08:05:56.457Z
+        notes: Coverage search completed before capture. Searches for review refresh task subject, task
+          review refresh, pytest RAM preflight chunked, single-process pytest, chunked pytest, and
+          low RAM found no existing tracking beyond this completed task closed_reason.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T08:05:56.457Z
+        completed_at: 2026-04-27T08:05:56.699Z
+        notes: Captured one inbox improvement plus success/friction observations. No tasks created directly
+          because improvements affect workflow/tooling scope and should be triaged.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T08:04:20.078Z
+    completed_at: 2026-04-27T08:05:56.699Z
