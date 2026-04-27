@@ -586,6 +586,17 @@ observations:
     resolved: false
     workflow_ref: "@01KQ6N19"
     created_at: 2026-04-27T05:03:05.068Z
+  - _ulid: 01KQ6N3MYPCQ1BZJADSKQ70BHG
+    type: friction
+    content: "Reflection workflow state is hard to inspect in large projects: 'kspec workflow runs'
+      emits a long all-history table and 'kspec workflow show <run>' only showed progress, not the
+      current step instructions, so continuing required reading 'workflow next' output rather than
+      querying the active run."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KQ6N19"
+    created_at: 2026-04-27T05:03:05.174Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
