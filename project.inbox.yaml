@@ -112,3 +112,13 @@ inbox:
       - review
     added_by: Jacob Chapel
     created_at: 2026-04-27T04:52:09.537Z
+  - _ulid: 01KQ6R11F8ATGBS79Z35E2WZES
+    text: Document or wrap PR-publication merge commands for detached reviewer snapshots so agents use
+      explicit repository context, e.g. gh pr merge <number> --repo owner/repo, avoiding
+      current-branch detection failures when HEAD is detached.
+    tags:
+      - reflection
+      - kspec
+      - review
+    added_by: Jacob Chapel
+    created_at: 2026-04-27T05:54:05.416Z

@@ -607,6 +607,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T05:33:24.173Z
+  - _ulid: 01KQ6R11DQ7EF4C6CPWDE638MQ
+    type: friction
+    content: "Detached reviewer snapshots in PR publication mode need explicit repository context for
+      GitHub CLI merge commands: gh pr merge <number> failed with current-branch detection because
+      HEAD is detached, while adding --repo chapel/comfy-ecaj-nodes succeeded."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T05:54:05.367Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
