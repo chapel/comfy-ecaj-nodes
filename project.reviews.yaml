@@ -1170,6 +1170,16 @@ reviews:
         runner: ruff
         created_at: 2026-04-27T05:22:04.048Z
         completed_at: 2026-04-27T05:22:04.048Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: uv run pytest -> 1228 passed in 7.57s
+        name: full test suite
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T05:22:10.077Z
+        completed_at: 2026-04-27T05:22:10.077Z
     events:
       - _ulid: 01KQ6P03D3PXVSM4CPR23XR85V
         actor: Jacob Chapel
@@ -1219,6 +1229,13 @@ reviews:
           status: pass
           name: ruff changed python files
         timestamp: 2026-04-27T05:22:04.065Z
+      - _ulid: 01KQ6P6K1GJ2X3H1T2QNNH688P
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: full test suite
+        timestamp: 2026-04-27T05:22:10.096Z
     examined_commit: 41fafac0f765c3e82ee5507b49f04318176232ac
     external_links: []
     lifecycle_state: open
@@ -1231,5 +1248,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:18:37.475Z
-    updated_at: 2026-04-27T05:22:04.048Z
+    updated_at: 2026-04-27T05:22:10.077Z
     notes: []
