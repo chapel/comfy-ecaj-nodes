@@ -660,18 +660,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-full-model-memory-validation/01kq6hra
-    canonical_branch_head: afa071697a2de53c89279a71551e917536fb468c
+    canonical_branch_head: 23c45827b15d5d06151bb0f95786edc09f678cbb
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T08:18:56.313Z
+      updated_at: 2026-04-27T08:26:01.149Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T08:18:56.952Z
+      updated_at: 2026-04-27T08:26:01.149Z
     integration:
       status: pending
       detail: null
@@ -679,7 +679,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: a2c92314f76a1e672ce48f1b8fdca6dbf7e870f7
-      updated_at: 2026-04-27T08:18:56.313Z
+      updated_at: 2026-04-27T08:26:01.149Z
     lifecycle_state: active
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HRA1PMN922FBX8STVEFST"
@@ -687,9 +687,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T08:18:56.952Z
-      last_reconciled_at: 2026-04-27T08:18:56.952Z
+      last_reconciled_at: 2026-04-27T08:26:01.149Z
       created_at: 2026-04-27T08:04:03.047Z
-      updated_at: 2026-04-27T08:18:56.952Z
+      updated_at: 2026-04-27T08:26:01.149Z
     workspace_id: dispatch-workspace-01KQ6HRA1PMN922FBX8STVEFST
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
