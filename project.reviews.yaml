@@ -68,9 +68,25 @@ reviews:
           status: pass
           name: Remaining coverage mapping
         timestamp: 2026-04-27T02:03:18.630Z
+      - _ulid: 01KQ6ATTPFRF0NHPWP59Y4ZVX4
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: approve
+        timestamp: 2026-04-27T02:03:30.383Z
+      - _ulid: 01KQ6ATTPFPJ3VF7JF9J0MVCWQ
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: draft
+          to: closed
+        timestamp: 2026-04-27T02:03:30.383Z
     examined_commit: null
     external_links: []
-    lifecycle_state: draft
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: plan
@@ -78,7 +94,14 @@ reviews:
       ref: "@plan-full-saved-model-output-plan"
       shadow_commit: ""
     threads: []
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: approve
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-27T02:03:30.383Z
     created_at: 2026-04-27T02:03:02.250Z
-    updated_at: 2026-04-27T02:03:18.576Z
+    updated_at: 2026-04-27T02:03:30.383Z
     notes: []
