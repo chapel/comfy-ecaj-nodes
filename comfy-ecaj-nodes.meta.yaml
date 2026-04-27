@@ -616,6 +616,37 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T05:54:05.367Z
+  - _ulid: 01KQ6SHQYJSR7GJRSX51X4WRH3
+    type: friction
+    content: "Orphaned safetensors test artifacts in /tmp accumulate across sessions. In this session,
+      ~30GB of tmp*.safetensors files filled the tmpfs, causing ENOSPC that silently suppressed all
+      bash stdout/stderr. Root cause: pytest creates temp files in /tmp for safetensors tests but
+      they are not always cleaned up between sessions. Fix-cycle agents lose significant time
+      diagnosing the silent output failure."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T06:20:41.298Z
+  - _ulid: 01KQ6SHQZZT0KBZDBQF58FSWJM
+    type: friction
+    content: kspec review get truncates thread bodies with no way to read full content. In fix-cycle
+      mode, agent needs to read complete blocker descriptions from review threads. The CLI shows
+      only the first ~80 chars of each thread entry. No --verbose or --full flag exists. Agent had
+      to infer full thread content from truncated first lines.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T06:20:41.343Z
+  - _ulid: 01KQ6SHR11GGS27KAN288CJ1TZ
+    type: success
+    content: Reading all ACs and full review threads before starting code changes prevents false starts
+      in fix cycles. This session read the spec ACs, all 3 review threads, and the full exit.py
+      context before writing any code — which led to discovering the dual-sink design was needed
+      (InMemorySink for cache/patching + CheckpointMaterializationSink for disk).
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T06:20:41.378Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
