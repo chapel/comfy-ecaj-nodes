@@ -4313,6 +4313,12 @@ reviews:
         payload:
           thread_ulid: 01KQ829YGB4DX060SM3TA9RE86
         timestamp: 2026-04-27T18:26:57.421Z
+      - _ulid: 01KQ833P1GF9QYZ34YMH7NNS2C
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ829YGD1PNRYKT974M91GM1
+        timestamp: 2026-04-27T18:27:00.784Z
     examined_commit: 2564ca6e52b64b52693022dda5479761d0c66018
     external_links: []
     lifecycle_state: closed
@@ -4399,6 +4405,15 @@ reviews:
               {'only_one_key'} is accepted. Impact: incomplete or hand-written partial artifacts can
               become cache hits, violating ac-incomplete-write-not-reused and ac-complete-artifact."
             created_at: 2026-04-27T18:12:57.486Z
+          - _ulid: 01KQ833NZZGPVRPPQEB733D7XK
+            author: "@claude"
+            body: "Fixed: check_full_model_cache now accepts an optional expected_keys parameter. When provided,
+              the artifact's actual safetensors keys must exactly match the expected set —
+              incomplete or extra-key artifacts are rejected. Both call sites in exit.py now pass
+              expected_keys=set(base_state.keys()). Added TestIncompleteArtifactRejected with three
+              tests: incomplete artifact rejected, complete artifact accepted, and extra-keys
+              artifact rejected."
+            created_at: 2026-04-27T18:27:00.735Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -4409,5 +4424,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T18:13:09.268Z
     created_at: 2026-04-27T18:08:52.979Z
-    updated_at: 2026-04-27T18:26:57.369Z
+    updated_at: 2026-04-27T18:27:00.735Z
     notes: []
