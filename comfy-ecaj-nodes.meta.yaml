@@ -155,6 +155,8 @@ hooks:
       skills:
         - reflect
     enabled: true
+    filter:
+      turn_count: 1
     name: default-session-reflect
     on: session.idle
 includes: []
