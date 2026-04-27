@@ -2335,6 +2335,12 @@ reviews:
         payload:
           thread_ulid: 01KQ6VEJT361G7F083WWN18RZH
         timestamp: 2026-04-27T07:06:44.077Z
+      - _ulid: 01KQ6W67K053E56DCGSQPBDVXK
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ6VEJT361G7F083WWN18RZH
+        timestamp: 2026-04-27T07:06:49.824Z
     examined_commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
     external_links: []
     lifecycle_state: closed
@@ -2371,6 +2377,8 @@ reviews:
               correctly be treated as cache misses for full saved model mode."
             created_at: 2026-04-27T07:06:44.047Z
         kind: blocker
+        resolved_at: 2026-04-27T07:06:49.793Z
+        resolved_by: "@claude"
       - _ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
         anchor:
           type: code
@@ -2399,5 +2407,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T06:54:02.964Z
     created_at: 2026-04-27T06:52:06.368Z
-    updated_at: 2026-04-27T07:06:44.047Z
+    updated_at: 2026-04-27T07:06:49.793Z
     notes: []
