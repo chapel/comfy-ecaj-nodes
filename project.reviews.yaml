@@ -4159,6 +4159,16 @@ reviews:
         runner: kspec
         created_at: 2026-04-27T18:12:31.402Z
         completed_at: 2026-04-27T18:12:31.402Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: No inspect.getsource/AST/source-grep style regression tests found in changed test files.
+        name: source-scanning test grep
+        required: true
+        runner: rg
+        created_at: 2026-04-27T18:12:31.609Z
+        completed_at: 2026-04-27T18:12:31.609Z
     events:
       - _ulid: 01KQ822FQKTDX179J2MGPCR9NQ
         actor: Jacob Chapel
@@ -4194,6 +4204,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-27T18:12:31.447Z
+      - _ulid: 01KQ829598MDH23515CHQ6GESP
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: source-scanning test grep
+        timestamp: 2026-04-27T18:12:31.656Z
     examined_commit: 2564ca6e52b64b52693022dda5479761d0c66018
     external_links: []
     lifecycle_state: open
@@ -4206,5 +4223,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T18:08:52.979Z
-    updated_at: 2026-04-27T18:12:31.402Z
+    updated_at: 2026-04-27T18:12:31.609Z
     notes: []
