@@ -56,3 +56,64 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-27T04:36:04.160Z
+  - _ulid: 01KQ6KWNRZ437Z4F8PY5D6REPS
+    content: |-
+      GO/NO-GO EVIDENCE — Decision: GO
+
+      ## Loader API
+      - API: comfy.sd.load_diffusion_model(path) — returns ModelPatcher
+      - Internally calls comfy.utils.load_torch_file(path) → state_dict, then
+        load_diffusion_model_state_dict(sd) which:
+        1. Strips diffusion_model. prefix via model_detection.unet_prefix_from_state_dict
+        2. Detects model config (SDXL, Flux, etc.) from stripped keys
+        3. Creates model architecture and loads weights
+        4. Returns ModelPatcher(model, load_device=GPU, offload_device=CPU)
+
+      ## Returned MODEL Contract
+      - ModelPatcher with load_device and offload_device attributes
+      - Participates in ComfyUI's model_management lifecycle (load, unload,
+        partial_load, prioritize) because it has the standard ModelPatcher API
+      - When Dynamic VRAM is active (DISABLE_SMART_MEMORY=False), ComfyUI owns
+        the weight lifecycle via these device attributes
+
+      ## Key Format Compatibility
+      - WIDEN saves with diffusion_model.* prefix (base model's key format)
+      - ComfyUI's load_diffusion_model_state_dict strips this prefix via
+        unet_prefix_from_state_dict — confirmed compatible
+      - Architecture detection works on stripped keys — same keys ComfyUI
+        originally detected when the base model was loaded
+
+      ## Parity Result
+      - Affected weights from loaded artifact match in-memory merge output exactly
+        (torch.allclose verified in tests)
+      - Unaffected base weights preserved identically in the artifact
+      - Works with both float32 and bfloat16 storage dtypes
+      - safetensors round-trip preserves exact tensor values
+
+      ## Cache-Hit Behavior
+      - Existing check_cache(path, recipe_hash) returns metadata on hash match
+      - load_saved_model(path) can then load the full artifact as a ComfyUI MODEL
+      - GPU merge is completely skippable: check_cache → load_saved_model → return
+      - No changes to cache metadata schema needed (ecaj v1 metadata sufficient)
+
+      ## Memory Mode Observation
+      - detect_memory_mode() reports Dynamic VRAM state via DISABLE_SMART_MEMORY
+      - When Dynamic VRAM active: loaded model participates in ComfyUI's memory
+        lifecycle through load_device/offload_device
+      - When unavailable: fallback mode explicitly recorded (not treated as failure)
+      - The loaded model does NOT require all merged weights to remain resident —
+        ComfyUI can offload/unload as it normally would for any loaded model
+
+      ## Test Evidence
+      - 13 spike tests pass (tests/test_spike_reload.py)
+      - 1207 total tests pass (0 regressions)
+      - kspec validate passes
+
+      ## Conclusion
+      Saved-artifact reload is viable. comfy.sd.load_diffusion_model accepts
+      WIDEN-saved safetensors artifacts, returns a standard ModelPatcher, and
+      the loaded model participates in ComfyUI's memory management. The full
+      saved model plan can proceed with materialization tasks.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T04:41:48.063Z
