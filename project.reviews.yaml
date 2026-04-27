@@ -1868,7 +1868,17 @@ reviews:
     slugs: []
     title: Review full checkpoint materialization (cycle 2)
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run ruff check .: All checks passed"
+        name: ruff
+        required: true
+        runner: ruff
+        created_at: 2026-04-27T06:22:13.780Z
+        completed_at: 2026-04-27T06:22:13.780Z
     events:
       - _ulid: 01KQ6SFDJQNMCW0A77GJ3JRVGF
         actor: Jacob Chapel
@@ -1883,6 +1893,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T06:19:42.455Z
+      - _ulid: 01KQ6SMJ9AC3Q7W2XFKATKV26P
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff
+        timestamp: 2026-04-27T06:22:13.803Z
     examined_commit: a6411d9558cd70c099f14a8ea61d0a1b39fb6ff9
     external_links: []
     lifecycle_state: open
@@ -1895,5 +1912,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T06:19:25.143Z
-    updated_at: 2026-04-27T06:19:42.432Z
+    updated_at: 2026-04-27T06:22:13.780Z
     notes: []
