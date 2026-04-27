@@ -588,12 +588,12 @@ workspaces:
       detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
       reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      updated_at: 2026-04-27T08:04:01.298Z
+      updated_at: 2026-04-27T08:07:02.960Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T08:06:23.270Z
+      updated_at: 2026-04-27T08:07:02.960Z
     integration:
       status: merged
       detail: integration:merged
@@ -601,17 +601,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: 464cb8bba6970b84edbd9cb0ba5555e12bb40def
-      updated_at: 2026-04-27T08:04:01.056Z
-    lifecycle_state: closing
+      updated_at: 2026-04-27T08:07:02.960Z
+    lifecycle_state: cleanup_blocked
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HRA11DGTMKET3Y0J4BN65"
     task_slug: task-full-model-exit-integration
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T07:55:26.192Z
-      last_reconciled_at: 2026-04-27T08:06:23.270Z
+      last_reconciled_at: 2026-04-27T08:07:02.960Z
       created_at: 2026-04-27T07:45:04.343Z
-      updated_at: 2026-04-27T08:06:23.270Z
+      updated_at: 2026-04-27T08:07:02.960Z
     workspace_id: dispatch-workspace-01KQ6HRA11DGTMKET3Y0J4BN65
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
