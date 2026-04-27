@@ -3700,8 +3700,9 @@ plans:
           - Confirm the resulting specs do not contain contradictory requirements for
             the same Exit output mode.
 
-          Covers: @full-saved-model-output ac-return-loaded-model;
-            @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory.
+          Reconciliation evidence, not final product coverage: confirms existing Exit,
+            patch-installation, persistence, and memory-management specs no longer
+            contradict the full saved model output mode before implementation begins.
       - title: Validate saved-artifact reload before full materialization work
         slug: task-full-model-saved-artifact-reload-spike
         priority: 1
@@ -4098,6 +4099,11 @@ plans:
           materialization work"
         author: Jacob Chapel
         created_at: 2026-04-27T02:00:47.826Z
+      - _ulid: 01KQ6ARGE580WWKWZPMWEZ5MJV
+        content: "Address reviewer finding: spec reconciliation task no longer claims final product AC
+          coverage"
+        author: Jacob Chapel
+        created_at: 2026-04-27T02:02:14.342Z
   - _ulid: 01KQ5ZSQ13857R9CGT36JXYK91
     slugs:
       - plan-disk-backed-patch-output-plan
