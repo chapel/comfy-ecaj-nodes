@@ -765,6 +765,24 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T17:45:01.608Z
+  - _ulid: 01KQ815T95699RMNPJYK8QAMAY
+    type: success
+    content: Reviewing with small runtime probes that encode the spec invariant caught regressions after
+      the full pytest suite passed; probes for interleaved group order and artifact-backed loading
+      were higher-signal than relying on existing mocked success-path tests.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T17:53:13.509Z
+  - _ulid: 01KQ815TA7D3R6TNK6DCTB5AYG
+    type: friction
+    content: Full-mode streaming tests can pass while missing adversarial ordering and artifact-source
+      semantics; success-path mocks need negative probes that mutate unaffected artifact weights and
+      interleave affected groups to prove the ACs.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T17:53:13.543Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows

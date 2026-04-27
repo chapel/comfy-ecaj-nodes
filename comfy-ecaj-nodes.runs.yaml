@@ -4202,9 +4202,35 @@ runs:
     completed_at: 2026-04-27T17:45:08.275Z
   - _ulid: 01KQ813C6QJANHX078Z82NGJCZ
     status: active
-    current_step: 0
+    current_step: 3
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T17:51:53.559Z
+        completed_at: 2026-04-27T17:53:13.213Z
+        notes: "What worked: adversarial runtime probes against specific AC semantics exposed issues after
+          the full suite passed; the probes directly checked interleaved group ordering and whether
+          returned models actually source unaffected weights from the artifact."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T17:53:13.213Z
+        completed_at: 2026-04-27T17:53:13.346Z
+        notes: "Friction: existing success-path tests were heavily mocked and did not cover adversarial key
+          ordering or artifact-source semantics, so they passed while two product guarantees
+          remained broken."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T17:53:13.346Z
+        completed_at: 2026-04-27T17:53:13.450Z
+        notes: "Coverage search completed before capture: searched interleaved streaming, artifact load,
+          runtime probe, loaded saved artifact, artifact-backed, and full artifact. Artifact-backed
+          behavior is already covered by the current task/spec, so no new inbox/task item was
+          created."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T17:53:13.450Z
+        completed_at: 2026-04-27T17:53:13.450Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T17:51:53.559Z
