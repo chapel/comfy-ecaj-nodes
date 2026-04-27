@@ -6783,6 +6783,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
         timestamp: 2026-04-27T19:47:53.342Z
+      - _ulid: 01KQ87R3TKB22PA96B5FGPNFAN
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ87R3RNY6HG0PCQ4JX4WRDS
+        timestamp: 2026-04-27T19:48:04.563Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: open
@@ -6850,7 +6857,26 @@ reviews:
               polluted patch weights as the complete 'base' artifact.
             created_at: 2026-04-27T19:47:53.278Z
         kind: blocker
+      - _ulid: 01KQ87R3RNY6HG0PCQ4JX4WRDS
+        anchor:
+          type: code
+          commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+          line_end: 524
+          line_start: 504
+          path: lib/persistence.py
+          side: head
+        entries:
+          - _ulid: 01KQ87R3RNWWP581N70EJDMRDG
+            author: Jacob Chapel
+            body: check_full_model_cache validates dtypes with a hard-coded safetensors map that omits dtypes
+              the writer supports, including BOOL, C64, U16/U32/U64, and float8 variants. A valid
+              full artifact containing one of those dtypes is rejected despite matching the
+              manifest, so full-mode artifact cache reuse fails and the node unnecessarily
+              recomputes/overwrites the artifact. Reuse the streaming_save dtype map or cover every
+              supported safetensors dtype.
+            created_at: 2026-04-27T19:48:04.501Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T19:47:53.278Z
+    updated_at: 2026-04-27T19:48:04.501Z
     notes: []
