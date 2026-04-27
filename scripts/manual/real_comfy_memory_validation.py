@@ -557,28 +557,58 @@ def run_validation(
         try:
             from comfy.model_patcher import ModelPatcher
 
-            # Build a minimal nn.Module whose state dict holds the tensors
-            # under a diffusion_model prefix (matching project conventions).
+            # Build an unprefixed state dict for the diffusion_model layer.
             _DM_PREFIX = "diffusion_model."
-            dm_state = {}
+            dm_state: dict[str, torch.Tensor] = {}
             for k, t in tensors.items():
                 unprefixed = (
                     k.removeprefix(_DM_PREFIX) if k.startswith(_DM_PREFIX) else k
                 )
-                dm_state[unprefixed] = torch.nn.Parameter(t, requires_grad=False)
+                dm_state[unprefixed] = t
 
-            dm = torch.nn.Module()
-            for param_name, param in dm_state.items():
-                dm.register_parameter(param_name.replace(".", "__"), param)
-            # Also store as a raw state dict for patchers that use it.
-            dm._raw_sd = dm_state
+            class _HarnessDiffusionModel:
+                """Minimal diffusion_model satisfying state_dict()/load_state_dict()."""
+                def __init__(self, unprefixed_state: dict[str, torch.Tensor]):
+                    self._sd = dict(unprefixed_state)
+
+                def state_dict(self) -> dict[str, torch.Tensor]:
+                    return dict(self._sd)
+
+                def load_state_dict(
+                    self, state_dict: dict[str, torch.Tensor], strict: bool = True
+                ) -> None:
+                    for k, v in state_dict.items():
+                        if k in self._sd:
+                            self._sd[k] = v
 
             class _HarnessModel:
-                """Minimal model wrapper satisfying ModelPatcher's interface."""
-                def __init__(self, diffusion_model):
-                    self.diffusion_model = diffusion_model
+                """Minimal model wrapper satisfying ModelPatcher's interface.
 
-            harness_model = _HarnessModel(dm)
+                Exposes ``diffusion_model`` (with state_dict/load_state_dict)
+                and a top-level ``state_dict()`` returning the full prefixed
+                tensor dict — matching the contract that real ComfyUI
+                ModelPatcher.clone() / model_state_dict() relies on.
+                """
+                def __init__(
+                    self,
+                    diffusion_model: _HarnessDiffusionModel,
+                    full_state: dict[str, torch.Tensor],
+                ):
+                    self.diffusion_model = diffusion_model
+                    self._full_state = dict(full_state)
+
+                def state_dict(self) -> dict[str, torch.Tensor]:
+                    return dict(self._full_state)
+
+                def load_state_dict(
+                    self, state_dict: dict[str, torch.Tensor], strict: bool = True
+                ) -> None:
+                    for k, v in state_dict.items():
+                        if k in self._full_state:
+                            self._full_state[k] = v
+
+            harness_dm = _HarnessDiffusionModel(dm_state)
+            harness_model = _HarnessModel(harness_dm, dict(tensors))
             model_patcher = ModelPatcher(
                 harness_model,
                 load_device=torch.device("cpu"),
@@ -615,6 +645,7 @@ def run_validation(
                 )
             except Exception as exc:
                 report.patch_mode_behavior = f"install_merged_patches error: {exc}"
+                report.errors.append(f"install_merged_patches: {exc}")
         else:
             report.patch_mode_behavior = (
                 "skipped (no ModelPatcher available from ComfyUI)"
@@ -655,6 +686,7 @@ def run_validation(
             report.full_model_materialization = (
                 f"MaterializationSink error: {exc}"
             )
+            report.errors.append(f"MaterializationSink: {exc}")
 
         report.memory_observations.append(
             _collect_memory_observation("after-materialization")
@@ -673,6 +705,7 @@ def run_validation(
         except Exception as exc:
             report.artifact_cache_hit = False
             report.artifact_reuse = f"cache-check-error: {exc}"
+            report.errors.append(f"check_full_model_cache: {exc}")
 
         # -- Exercise returned-model loading via _load_model_from_artifact
         if have_patcher and os.path.isfile(artifact_path):
@@ -695,6 +728,7 @@ def run_validation(
                 report.returned_model_behavior = (
                     f"_load_model_from_artifact error: {exc}"
                 )
+                report.errors.append(f"_load_model_from_artifact: {exc}")
         else:
             report.returned_model_behavior = (
                 "skipped (no ModelPatcher or no artifact written)"
