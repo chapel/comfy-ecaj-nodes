@@ -6339,6 +6339,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ86H8PE6KD3Q160V0Z93FJH
         timestamp: 2026-04-27T19:26:51.656Z
+      - _ulid: 01KQ86HH449DV786MKKEATKRQ1
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ86HH1ZKCDGBK5GRK79R6NM
+        timestamp: 2026-04-27T19:27:00.228Z
     examined_commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
     external_links: []
     lifecycle_state: open
@@ -6368,7 +6375,24 @@ reviews:
               dtype."
             created_at: 2026-04-27T19:26:51.598Z
         kind: blocker
+      - _ulid: 01KQ86HH1ZKCDGBK5GRK79R6NM
+        anchor:
+          type: code
+          commit: f0e414f2d7fe6aad5f44afed940dcb02a3a3f165
+          line_end: 277
+          line_start: 254
+          path: tests/test_full_model_streaming.py
+          side: head
+        entries:
+          - _ulid: 01KQ86HH203QB4Q68BDQR9VRS9
+            author: Jacob Chapel
+            body: "MUST-FIX: This required dynamic test claims in-memory result sink construction is
+              monkeypatched to fail, but it does not patch any in-memory sink/result construction
+              path. It only runs normal full mode and checks _incremental_cache is empty, so the
+              task-required regression is not exercised behaviorally."
+            created_at: 2026-04-27T19:27:00.160Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:19:54.224Z
-    updated_at: 2026-04-27T19:26:51.598Z
+    updated_at: 2026-04-27T19:27:00.160Z
     notes: []
