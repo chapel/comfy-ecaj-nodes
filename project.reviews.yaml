@@ -7389,6 +7389,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-27T20:26:52.253Z
         completed_at: 2026-04-27T20:26:52.253Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: With all opt-ins and a ComfyUI-shaped root containing comfy/model_management.py plus
+          top-level nodes.py, the script exited 0 while report fields contained import-error for
+          nodes.exit and lib, so patch/full/artifact behavior was not validated.
+        name: manual harness Comfy-shaped root probe
+        required: true
+        runner: shell
+        created_at: 2026-04-27T20:26:52.506Z
+        completed_at: 2026-04-27T20:26:52.506Z
     events:
       - _ulid: 01KQ89VMEY5NZ6T98KYHP0BYCP
         actor: Jacob Chapel
@@ -7410,6 +7422,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-27T20:26:52.323Z
+      - _ulid: 01KQ89Z593JESQT694KYG8HCNG
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: manual harness Comfy-shaped root probe
+        timestamp: 2026-04-27T20:26:52.579Z
     examined_commit: afea787efe1c0a926a94ac97b416789f3af80b50
     external_links: []
     lifecycle_state: open
@@ -7422,5 +7441,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T20:24:57.055Z
-    updated_at: 2026-04-27T20:26:52.253Z
+    updated_at: 2026-04-27T20:26:52.506Z
     notes: []
