@@ -6804,6 +6804,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
         timestamp: 2026-04-27T19:48:20.279Z
+      - _ulid: 01KQ87RWJ9SNKP6F2NHT461F38
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
+        timestamp: 2026-04-27T19:48:29.897Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: open
@@ -6926,7 +6933,26 @@ reviews:
               test currently cannot catch a regression in cache-hit validation.
             created_at: 2026-04-27T19:48:20.213Z
         kind: blocker
+      - _ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
+        anchor:
+          type: code
+          commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+          line_end: 824
+          line_start: 775
+          path: tests/test_full_model_streaming.py
+          side: head
+        entries:
+          - _ulid: 01KQ87RWGBDJZ6X3ZW88CG6Q79
+            author: Jacob Chapel
+            body: The finalize-failure test proves the test double cleaned itself up, not that production error
+              handling cleans up after finalize fails. FailingFinalizeSink.finalize calls
+              self.abort() before raising, so the outer WIDENExitNode exception path could stop
+              aborting and this test would still pass. Make finalize raise without self-cleanup,
+              then assert the node aborts and leaves no reusable artifact or full-mode cache
+              payload.
+            created_at: 2026-04-27T19:48:29.835Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T19:48:20.213Z
+    updated_at: 2026-04-27T19:48:29.835Z
     notes: []
