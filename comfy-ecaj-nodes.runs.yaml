@@ -3355,9 +3355,23 @@ runs:
     completed_at: 2026-04-27T05:54:21.400Z
   - _ulid: 01KQ6SF92N9VADTWT950SR6PQ0
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T06:19:20.533Z
+        completed_at: 2026-04-27T06:20:06.110Z
+        notes: "Session had meaningful work: fix cycle 1 for task @01KQ6HR9ZR2NS2QC19B6QGS6C9 (full
+          checkpoint materialization). Committed a6411d9, pushed to PR #92. Addressed 3 review
+          blockers, updated 6 tests across 3 files. What worked: reading all ACs and review threads
+          before coding; dual-sink design preserved existing behavior. Friction: /tmp disk full from
+          orphaned safetensors files broke all bash output; kspec review get truncates thread bodies
+          with no verbose option."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T06:20:06.110Z
+        completed_at: 2026-04-27T06:20:06.110Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:19:20.533Z
