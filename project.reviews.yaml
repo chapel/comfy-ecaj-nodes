@@ -1486,6 +1486,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T05:40:32.968Z
         completed_at: 2026-04-27T05:40:32.968Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "kspec validate: schema/references OK; exited 6 due to existing alignment/completeness
+          warnings"
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-27T05:40:33.117Z
+        completed_at: 2026-04-27T05:40:33.117Z
     events:
       - _ulid: 01KQ6Q46GE8XXRQERXNK9V02S8
         actor: Jacob Chapel
@@ -1507,6 +1518,13 @@ reviews:
           status: pass
           name: pytest targeted materialization/sinks
         timestamp: 2026-04-27T05:40:32.991Z
+      - _ulid: 01KQ6Q887EV69G1VQ8ZXHDWEX0
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-27T05:40:33.134Z
     examined_commit: 5332f72534f55032b658110039b7ae55fc29b89b
     external_links: []
     lifecycle_state: open
@@ -1519,5 +1537,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T05:38:20.302Z
-    updated_at: 2026-04-27T05:40:32.968Z
+    updated_at: 2026-04-27T05:40:33.117Z
     notes: []
