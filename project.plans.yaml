@@ -2870,7 +2870,7 @@ plans:
       - v1 scope: no incremental block recompute for CLIP Exit (add later).
 
       - v1 scope: no persistence cache for CLIP Exit (add later).
-    status: active
+    status: completed
     approved_at: null
     derived_specs:
       - "@diffusion-model-input-node"
