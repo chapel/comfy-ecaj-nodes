@@ -98,7 +98,7 @@ tags:
   - validation
   - manual-harness
 vcs_refs: []
-review_ref: "@01KQ8DFJTKPAGR1BQCEANHJ5KZ"
+review_ref: "@01KQ8E5PBED41561CCFX9VF0GX"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
@@ -441,6 +441,13 @@ history:
         previous: 2026-04-27T21:25:36.285Z
     command: task-submit
     timestamp: 2026-04-27T21:39:25.256Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KQ8E5PBED41561CCFX9VF0GX"
+        previous: "@01KQ8DFJTKPAGR1BQCEANHJ5KZ"
+    command: review-link
+    timestamp: 2026-04-27T21:40:21.249Z
 created_at: 2026-04-27T16:11:48.246Z
 started_at: 2026-04-27T21:36:07.913Z
 submitted_at: 2026-04-27T21:39:25.256Z
