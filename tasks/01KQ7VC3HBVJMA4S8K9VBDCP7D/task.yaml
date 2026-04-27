@@ -135,7 +135,7 @@ description: >-
 spec_ref: "@streaming-full-model-materialization"
 meta_ref: null
 plan_ref: null
-status: pending
+status: in_progress
 blocked_by: []
 depends_on: []
 context: []
@@ -147,6 +147,7 @@ tags:
   - cache
 vcs_refs: []
 review_ref: "@01KQ7VGP46JHPWSHY3C4ED3B2V"
+session_id: 01KQ7VM3Q5SH0ZEX1HGTRDMCJ9
 history:
   - author: Jacob Chapel
     changes:
@@ -162,6 +163,20 @@ history:
         previous: null
     command: task-set
     timestamp: 2026-04-27T16:15:54.074Z
+  - author: "@claude"
+    changes:
+      status:
+        new: in_progress
+        previous: pending
+      session_id:
+        new: 01KQ7VM3Q5SH0ZEX1HGTRDMCJ9
+        previous: null
+      started_at:
+        new: 2026-04-27T16:16:49.923Z
+        previous: null
+    command: task-start
+    timestamp: 2026-04-27T16:16:49.923Z
 created_at: 2026-04-27T16:11:48.139Z
+started_at: 2026-04-27T16:16:49.923Z
 todos: []
 automation: eligible
