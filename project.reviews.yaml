@@ -3648,6 +3648,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ7ZCCJ16XM39HK9QHVJP135
         timestamp: 2026-04-27T17:21:51.719Z
+      - _ulid: 01KQ7ZCNPXEKZSPC3HWDPZ2V1X
+        actor: codex
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ7ZCNNGZXA6W7862KWQBAT8
+        timestamp: 2026-04-27T17:22:01.053Z
     examined_commit: e368231141abc45a6dce0314c147a15369756c00
     external_links: []
     lifecycle_state: open
@@ -3697,7 +3704,26 @@ reviews:
               coverage."
             created_at: 2026-04-27T17:21:51.681Z
         kind: blocker
+      - _ulid: 01KQ7ZCNNGZXA6W7862KWQBAT8
+        anchor:
+          type: code
+          commit: e368231141abc45a6dce0314c147a15369756c00
+          line_end: 427
+          line_start: 350
+          path: tests/test_full_model_streaming.py
+          side: head
+        entries:
+          - _ulid: 01KQ7ZCNNGHN8CBR499KH01Y30
+            author: codex
+            body: "MUST-FIX: the direct-handoff/event-order coverage does not exercise multiple affected groups
+              or assert that group 1 is written before group 2 starts evaluation. The test uses one
+              OpSignature mapping all keys to one group and only checks that all affected writes
+              happen before finalize. The required dynamic test is specifically base weights
+              written, first group handed to materialization, later group handed to materialization,
+              finalize, load; this test would not catch the current all-groups accumulation bug."
+            created_at: 2026-04-27T17:22:01.008Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T17:16:41.678Z
-    updated_at: 2026-04-27T17:21:51.681Z
+    updated_at: 2026-04-27T17:22:01.008Z
     notes: []
