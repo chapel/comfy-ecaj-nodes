@@ -957,7 +957,7 @@ plans:
       7. exit-node + sub-reqs (depends on batched-executor + recipe-system + memory-management)
 
       8. per-block-control (layers on top of everything)
-    status: active
+    status: completed
     approved_at: null
     derived_specs:
       - "@recipe-system"
