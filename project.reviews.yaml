@@ -6018,7 +6018,17 @@ reviews:
     slugs: []
     title: Review full model streaming artifact cache cycle 6
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run ruff check .: All checks passed"
+        name: ruff check
+        required: true
+        runner: ruff
+        created_at: 2026-04-27T19:08:55.488Z
+        completed_at: 2026-04-27T19:08:55.488Z
     events:
       - _ulid: 01KQ8597RGNVZCF32M3A6376SA
         actor: Jacob Chapel
@@ -6033,6 +6043,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-27T19:05:25.275Z
+      - _ulid: 01KQ85GDVTBZDBDVC6DV5YNDQQ
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff check
+        timestamp: 2026-04-27T19:08:55.547Z
     examined_commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
     external_links: []
     lifecycle_state: open
@@ -6045,5 +6062,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T19:04:59.921Z
-    updated_at: 2026-04-27T19:05:25.221Z
+    updated_at: 2026-04-27T19:08:55.488Z
     notes: []
