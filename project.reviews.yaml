@@ -6151,6 +6151,12 @@ reviews:
         payload:
           thread_ulid: 01KQ85GX50N1CYZB785RA1VR23
         timestamp: 2026-04-27T19:17:19.562Z
+      - _ulid: 01KQ85ZWMS1298R79VDK93VHZR
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ85GXB7T83SSB04N8GXTBYB
+        timestamp: 2026-04-27T19:17:22.201Z
     examined_commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
     external_links: []
     lifecycle_state: closed
@@ -6221,6 +6227,8 @@ reviews:
               correct shape+dtype accepted, and multi-key partial shape mismatch rejected."
             created_at: 2026-04-27T19:17:13.926Z
         kind: blocker
+        resolved_at: 2026-04-27T19:17:22.140Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -6230,5 +6238,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:09:19.638Z
     created_at: 2026-04-27T19:04:59.921Z
-    updated_at: 2026-04-27T19:17:19.502Z
+    updated_at: 2026-04-27T19:17:22.140Z
     notes: []
