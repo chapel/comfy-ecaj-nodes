@@ -66,3 +66,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T08:18:32.836Z
+  - _ulid: 01KQ70RR5PH77P0RGH202GY3EN
+    content: "Fix cycle 1: addressed all review threads. Fixed blocker 1 (ac-measured-memory-behavior
+      report now measures real RSS/VRAM via resource.getrusage and torch.cuda, observes returned
+      model patches dict). Fixed blocker 2 (weight equivalence test now runs full saved model mode
+      with real CheckpointMaterializationSink, reads artifact from disk, compares to patches mode).
+      All 17 tests pass (16 pass + 1 expected skip). Also re-verified all 3 ACs against
+      implementation."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T08:26:50.934Z
