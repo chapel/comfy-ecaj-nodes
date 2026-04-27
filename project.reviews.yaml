@@ -8250,6 +8250,12 @@ reviews:
         payload:
           thread_ulid: 01KQ8CRRAXTH65D884C7E6P0X2
         timestamp: 2026-04-27T21:25:19.958Z
+      - _ulid: 01KQ8DA8V3TDKGDZH3JAA4ZABW
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
+        timestamp: 2026-04-27T21:25:22.403Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: closed
@@ -8313,6 +8319,8 @@ reviews:
               real ComfyUI ModelPatcher.clone() and model_state_dict() rely on."
             created_at: 2026-04-27T21:25:15.265Z
         kind: blocker
+        resolved_at: 2026-04-27T21:25:22.330Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -8322,5 +8330,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T21:16:17.323Z
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:25:19.888Z
+    updated_at: 2026-04-27T21:25:22.330Z
     notes: []
