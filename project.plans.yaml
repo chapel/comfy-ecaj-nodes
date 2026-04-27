@@ -4037,9 +4037,9 @@ plans:
         type: feature
         tags: [persistence, memory, comfy]
         description: |
-          The Exit node can return a patched MODEL whose merged weight payload is kept
-          in a persistent artifact instead of retained as the original in-memory set
-          patch tensors.
+          The Exit node can return a patched MODEL that can supply merged affected
+          weights without retaining all merged affected weights in process memory after
+          the Exit node returns.
         acceptance_criteria:
           - id: ac-return-patched-model
             given: |
@@ -4048,15 +4048,16 @@ plans:
               The Exit node runs in disk-backed patch output mode.
             then: |
               Downstream nodes receive a patched MODEL that can provide the merged
-              weight for each affected key from the persistent patch artifact.
+              weight for each affected key when that weight is requested.
           - id: ac-no-resident-patch-payload
             given: |
               The disk-backed patch MODEL has been returned.
             when: |
-              Its patch payload is inspected before ComfyUI applies those patches.
+              memory behavior is observed after the Exit node returns and before
+              downstream execution requests affected weights.
             then: |
-              The patch payload does not retain the full merged tensors as persistent
-              in-memory values.
+              The returned MODEL does not require all merged affected weights to remain
+              resident in process memory.
           - id: ac-downstream-merge-equivalence
             given: |
               The same recipe is executed with the current in-memory patch output and
@@ -4069,6 +4070,7 @@ plans:
       - title: Disk Patch Artifact Lifecycle
         slug: disk-patch-artifact-lifecycle
         type: requirement
+        parent: "@disk-backed-patch-output"
         tags: [persistence, cache]
         description: |
           Disk-backed patch artifacts remain valid for as long as returned patch
@@ -4077,8 +4079,8 @@ plans:
         acceptance_criteria:
           - id: ac-artifact-reuse
             given: |
-              A disk patch artifact matches the current recipe identity and disk patch
-              output behavior.
+              A disk-backed patch output artifact matches the current recipe identity
+              and requested output behavior.
             when: |
               The Exit node runs in disk-backed patch output mode.
             then: |
@@ -4095,7 +4097,7 @@ plans:
               artifact and affected key.
           - id: ac-artifact-mode-is-distinct
             given: |
-              A saved artifact exists for a different output behavior or artifact kind.
+              A saved artifact exists for a different output behavior.
             when: |
               Disk-backed patch mode checks for a reusable cache artifact.
             then: |
@@ -4104,10 +4106,11 @@ plans:
       - title: Streaming Affected Patch Materialization
         slug: streaming-affected-patch-materialization
         type: requirement
+        parent: "@disk-backed-patch-output"
         tags: [persistence, memory]
         description: |
-          Disk-backed patch artifact creation keeps affected merge outputs bounded
-          while writing only the affected weights required by the patch output.
+          Disk-backed patch artifact creation keeps affected merge output memory
+          bounded while writing only the affected weights required by the patch output.
         acceptance_criteria:
           - id: ac-affected-results-released
             given: |
@@ -4115,8 +4118,8 @@ plans:
             when: |
               Disk-backed patch mode records the affected patch artifact.
             then: |
-              Each affected weight can be recorded and released before all later groups
-              have been evaluated.
+              The operation can complete without requiring all affected weights to
+              remain resident until every later group has been evaluated.
           - id: ac-only-affected-keys-stored
             given: |
               A merge recipe affects a subset of the base model keys.
@@ -4129,11 +4132,12 @@ plans:
       - title: Dynamic Memory Compatibility for Disk Patches
         slug: disk-patch-dynamic-memory-compatibility
         type: requirement
+        parent: "@disk-backed-patch-output"
         tags: [comfy, memory, compatibility]
         description: |
           Disk-backed patch output remains compatible with ComfyUI's model memory
-          lifecycle while making clear which memory is controlled by ComfyUI and which
-          memory is owned by the patch artifact path.
+          lifecycle and clearly reports unsupported ComfyUI patch paths when
+          compatibility is not available.
         acceptance_criteria:
           - id: ac-no-dynamic-vram-opt-out
             given: |
@@ -4149,7 +4153,7 @@ plans:
             when: |
               Downstream execution requests one affected weight.
             then: |
-              The patch reads and materializes only the affected weight needed for that
+              The returned MODEL provides only the affected weight needed for that
               request rather than preloading every affected weight into process memory.
           - id: ac-memory-behavior-is-measured
             given: |
@@ -4159,9 +4163,10 @@ plans:
               memory behavior is measured under ComfyUI with dynamic memory management
               enabled.
             then: |
-              The measurements show whether disk-backed patch output removes the
-              persistent patch payload and whether patch application introduces an
-              acceptable temporary memory peak.
+              The validation output reports the active ComfyUI memory mode, peak RAM,
+              peak GPU memory, whether affected weights remain persistently resident
+              after the Exit node returns, and the temporary memory behavior observed
+              while downstream execution requests affected weights.
       ```
 
       ## Tasks
@@ -4169,6 +4174,43 @@ plans:
       derive_from_specs: false
 
       ```yaml
+      - title: Update Exit output-mode specs for disk-backed patch behavior
+        slug: task-disk-patch-update-existing-specs
+        priority: 1
+        tags: [specs, exit-node, patching]
+        spec_ref: "@disk-backed-patch-output"
+        depends_on: []
+        description: |
+          What: Update existing project specs so the current set-patch Exit behavior is
+          scoped as the default in-memory output mode and disk-backed patch output is a
+          distinct supported output behavior.
+
+          Why: Existing specs such as @exit-node, @exit-patch-install,
+          @exit-model-persistence, and @memory-management predate multiple output
+          modes. They currently make set patches look universal for Exit, which can
+          conflict with a mode that supplies affected weights without retaining all
+          affected merged tensors in memory after the Exit node returns.
+
+          How:
+          - Review existing specs for Exit return behavior, patch installation,
+            persistence/cache behavior, and memory management.
+          - Scope set-patch requirements to the in-memory patch output mode.
+          - Add or refine specs for disk-backed patch output, artifact lifecycle,
+            bounded affected-result materialization, and Comfy memory compatibility.
+          - Add relationships from disk-backed patch requirements to existing
+            persistence and memory-management specs where supported by kspec.
+          - Keep spec wording behavioral: describe downstream MODEL behavior, cache
+            reuse, clear errors, and memory observations rather than internal adapter,
+            writer, or artifact-kind implementation details.
+
+          Testing:
+          - Run kspec validation or plan import checks after the spec edits.
+          - Confirm the resulting specs do not contain contradictory requirements for
+            the same Exit output mode.
+
+          Covers: @disk-backed-patch-output ac-return-patched-model,
+            ac-no-resident-patch-payload; @disk-patch-dynamic-memory-compatibility
+            ac-no-dynamic-vram-opt-out.
       - title: Validate Comfy patching and Dynamic VRAM behavior for disk-backed patches
         slug: task-disk-patch-dynamic-vram-spike
         priority: 1
@@ -4210,7 +4252,6 @@ plans:
 
           Covers: @disk-patch-dynamic-memory-compatibility ac-no-dynamic-vram-opt-out,
             ac-patch-materializes-on-demand, ac-memory-behavior-is-measured.
-
       - title: Introduce or reuse a bounded merge result sink for affected patch output
         slug: task-disk-patch-result-sink-foundation
         priority: 1
@@ -4248,7 +4289,6 @@ plans:
             unchanged.
 
           Covers: @streaming-affected-patch-materialization ac-affected-results-released.
-
       - title: Implement affected-key patch artifact materialization
         slug: task-disk-patch-affected-artifact
         priority: 1
@@ -4287,7 +4327,45 @@ plans:
 
           Covers: @streaming-affected-patch-materialization ac-only-affected-keys-stored,
             ac-affected-results-released.
+      - title: Implement disk patch cache semantics
+        slug: task-disk-patch-cache-semantics
+        priority: 2
+        tags: [persistence, cache]
+        spec_ref: "@disk-patch-artifact-lifecycle"
+        depends_on:
+          - "@task-disk-patch-affected-artifact"
+        description: |
+          What: Extend persistence metadata and cache checks for disk-backed patch
+          artifacts.
 
+          Why: Disk-backed patch mode must reuse matching artifacts without accepting
+          full saved models, older affected-key files, or incompatible metadata as
+          equivalent cache hits.
+
+          How:
+          - Update lib/persistence.py metadata helpers to include an artifact kind for
+            disk-backed patch outputs.
+          - Add or update cache-checking behavior so callers can require a specific
+            artifact kind and metadata schema.
+          - Store the affected key list plus each key's expected shape and dtype so
+            patch objects can be recreated after a cache hit.
+          - Reject or recompute when recipe hash matches but artifact kind, key list,
+            shape metadata, dtype metadata, or schema version is incompatible.
+          - Preserve existing refusal to overwrite non-ecaj files.
+          - Emit clear diagnostics that distinguish cache miss, cache incompatibility,
+            and unsafe overwrite cases.
+
+          Testing:
+          - Cache hit with matching disk patch metadata installs patch objects and
+            skips merge work.
+          - Matching recipe hash with full-model artifact kind is rejected for
+            disk-backed patch mode.
+          - Missing shape/dtype metadata produces a clear incompatibility error or
+            forced recompute, according to the behavior chosen in code.
+          - Non-ecaj files are still protected from overwrite.
+
+          Covers: @disk-patch-artifact-lifecycle ac-artifact-reuse,
+            ac-artifact-mode-is-distinct.
       - title: Add disk-backed patch object
         slug: task-disk-patch-object
         priority: 1
@@ -4331,7 +4409,6 @@ plans:
             ac-no-resident-patch-payload, ac-downstream-merge-equivalence;
             @disk-patch-artifact-lifecycle ac-artifact-missing-error;
             @disk-patch-dynamic-memory-compatibility ac-patch-materializes-on-demand.
-
       - title: Install disk-backed patches from Exit
         slug: task-disk-patch-exit-installation
         priority: 2
@@ -4339,6 +4416,7 @@ plans:
         spec_ref: "@disk-backed-patch-output"
         depends_on:
           - "@task-disk-patch-object"
+          - "@task-disk-patch-cache-semantics"
         description: |
           What: Add an Exit path that returns a cloned patched MODEL whose affected
           keys use disk-backed patch objects instead of in-memory set patch tensors.
@@ -4374,54 +4452,13 @@ plans:
           Covers: @disk-backed-patch-output ac-return-patched-model,
             ac-no-resident-patch-payload; @disk-patch-artifact-lifecycle
             ac-artifact-reuse.
-
-      - title: Implement disk patch cache semantics
-        slug: task-disk-patch-cache-semantics
-        priority: 2
-        tags: [persistence, cache]
-        spec_ref: "@disk-patch-artifact-lifecycle"
-        depends_on:
-          - "@task-disk-patch-exit-installation"
-        description: |
-          What: Extend persistence metadata and cache checks for disk-backed patch
-          artifacts.
-
-          Why: Disk-backed patch mode must reuse matching artifacts without accepting
-          full saved models, older affected-key files, or incompatible metadata as
-          equivalent cache hits.
-
-          How:
-          - Update lib/persistence.py metadata helpers to include an artifact kind for
-            disk-backed patch outputs.
-          - Add or update cache-checking behavior so callers can require a specific
-            artifact kind and metadata schema.
-          - Store the affected key list plus each key's expected shape and dtype so
-            patch objects can be recreated after a cache hit.
-          - Reject or recompute when recipe hash matches but artifact kind, key list,
-            shape metadata, dtype metadata, or schema version is incompatible.
-          - Preserve existing refusal to overwrite non-ecaj files.
-          - Emit clear diagnostics that distinguish cache miss, cache incompatibility,
-            and unsafe overwrite cases.
-
-          Testing:
-          - Cache hit with matching disk patch metadata installs patch objects and
-            skips merge work.
-          - Matching recipe hash with full-model artifact kind is rejected for
-            disk-backed patch mode.
-          - Missing shape/dtype metadata produces a clear incompatibility error or
-            forced recompute, according to the behavior chosen in code.
-          - Non-ecaj files are still protected from overwrite.
-
-          Covers: @disk-patch-artifact-lifecycle ac-artifact-reuse,
-            ac-artifact-mode-is-distinct.
-
       - title: Validate disk-backed patch equivalence and lifecycle
         slug: task-disk-patch-equivalence-validation
         priority: 3
         tags: [testing, validation]
         spec_ref: "@disk-backed-patch-output"
         depends_on:
-          - "@task-disk-patch-cache-semantics"
+          - "@task-disk-patch-exit-installation"
         description: |
           What: Add end-to-end-style tests for disk-backed patch output against the
           existing in-memory patch output.
@@ -4450,7 +4487,6 @@ plans:
           Covers: @disk-backed-patch-output ac-downstream-merge-equivalence;
             @disk-patch-artifact-lifecycle ac-artifact-missing-error,
             ac-artifact-reuse.
-
       - title: Measure disk-backed patch Dynamic VRAM impact
         slug: task-disk-patch-memory-validation
         priority: 3
@@ -4520,3 +4556,8 @@ plans:
         content: Harden specs/tasks for Dynamic VRAM investigation and plan best practices
         author: Jacob Chapel
         created_at: 2026-04-26T23:52:34.639Z
+      - _ulid: 01KQ63S0XBFYYX79DFKZWMF42S
+        content: "Address plan-reviewer findings: parent hierarchy, behavioral specs, standalone spec-update
+          tasks, cache ordering"
+        author: Jacob Chapel
+        created_at: 2026-04-27T00:00:11.179Z
