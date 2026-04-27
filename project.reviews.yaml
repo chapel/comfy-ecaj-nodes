@@ -8115,6 +8115,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ8CRRAXTH65D884C7E6P0X2
         timestamp: 2026-04-27T21:15:48.520Z
+      - _ulid: 01KQ8CRRQ0N1ZCWPCDTWF8SFKC
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
+        timestamp: 2026-04-27T21:15:48.832Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: open
@@ -8143,7 +8150,26 @@ reviews:
               _load_model_from_artifact errors with exit code 0 and an empty errors list."
             created_at: 2026-04-27T21:15:48.445Z
         kind: blocker
+      - _ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
+        anchor:
+          type: code
+          commit: bc595d85033c2b23ff040c97d038437aa987ba13
+          line_end: 581
+          line_start: 576
+          path: scripts/manual/real_comfy_memory_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQ8CRRMDJ9ASVV84J0YMRRQW
+            author: Jacob Chapel
+            body: "MUST-FIX: _HarnessModel only exposes diffusion_model, but real ComfyUI
+              ModelPatcher.add_patches/model_state_dict call self.model.state_dict(). The
+              intentional path passes _HarnessModel into ModelPatcher, so install_merged_patches and
+              _load_model_from_artifact fail before validating patch-mode or returned-model
+              behavior. Verified with a fake ModelPatcher matching the local ComfyUI contract: the
+              report contained '_HarnessModel' object has no attribute 'state_dict'."
+            created_at: 2026-04-27T21:15:48.749Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:15:48.445Z
+    updated_at: 2026-04-27T21:15:48.749Z
     notes: []
