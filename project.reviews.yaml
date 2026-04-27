@@ -4807,6 +4807,13 @@ reviews:
           status: pass
           name: full pytest
         timestamp: 2026-04-27T18:52:23.436Z
+      - _ulid: 01KQ84JVHY6758S47AZME3JJDP
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ84JVFZEYT66T3GA8XKVH89
+        timestamp: 2026-04-27T18:52:46.526Z
     examined_commit: 16f875cb81b657dddc42ca05650f29290a091f90
     external_links: []
     lifecycle_state: open
@@ -4816,8 +4823,371 @@ reviews:
       content_hash: ""
       ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ84JVFZEYT66T3GA8XKVH89
+        anchor:
+          type: code
+          commit: 16f875cb81b657dddc42ca05650f29290a091f90
+          line_end: 32
+          line_start: 32
+          path: lib/executor.py
+          side: head
+        entries:
+          - _ulid: 01KQ84JVFZ36M7BG9PS98Y0402
+            author: Jacob Chapel
+            body: >-
+              MUST-FIX: F401 [*] `.gpu_ops.streaming_evaluation_to_sink` imported but unused
+                --> lib/executor.py:32:5
+                 |
+              30 |     evaluate_affected_group,
+
+              31 |     get_available_ram_bytes,
+
+              32 |     streaming_evaluation_to_sink,
+                 |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              33 | )
+
+              34 | from .per_block import (
+                 |
+              help: Remove unused import: `.gpu_ops.streaming_evaluation_to_sink`
+
+
+              I001 [*] Import block is un-sorted or un-formatted
+                --> nodes/exit.py:3:1
+                 |
+               1 |   """WIDEN Exit Node — Executes the recipe tree, returns ComfyUI MODEL."""
+               2 |
+               3 | / from __future__ import annotations
+               4 | |
+               5 | | import gc
+               6 | | import hashlib
+               7 | | import json
+               8 | | import logging
+               9 | | import os
+              10 | | from collections.abc import Callable
+
+              11 | | from typing import TYPE_CHECKING
+
+              12 | |
+
+              13 | | import torch
+
+              14 | |
+
+              15 | | from ..lib.analysis import (
+
+              16 | |     analyze_recipe,
+
+              17 | |     analyze_recipe_models,
+
+              18 | |     compute_recipe_file_hash,
+
+              19 | |     get_keys_to_process,
+
+              20 | |     walk_to_base,
+
+              21 | | )
+
+              22 | | from ..lib.block_classify import compute_changed_blocks, filter_changed_keys
+
+              23 | | from ..lib.executor import (
+
+              24 | |     check_ram_preflight,
+
+              25 | |     chunked_evaluation,
+
+              26 | |     compile_batch_groups,
+
+              27 | |     compile_plan,
+
+              28 | |     compute_batch_size,
+
+              29 | |     evaluate_affected_group,
+
+              30 | |     execute_plan,
+
+              31 | |     get_available_ram_bytes,
+
+              32 | |     streaming_evaluation_to_sink,
+
+              33 | | )
+
+              34 | | from ..lib.persistence import (
+
+              35 | |     atomic_save,
+
+              36 | |     build_metadata,
+
+              37 | |     check_cache,
+
+              38 | |     check_full_model_cache,
+
+              39 | |     collect_block_configs,
+
+              40 | |     compute_base_identity,
+
+              41 | |     compute_lora_stats,
+
+              42 | |     compute_recipe_hash,
+
+              43 | |     compute_structural_fingerprint,
+
+              44 | |     serialize_recipe,
+
+              45 | |     validate_model_name,
+
+              46 | | )
+
+              47 | | from ..lib.streaming_save import MaterializationSink
+
+              48 | | from ..lib.recipe import (
+
+              49 | |     RecipeBase,
+
+              50 | |     RecipeCompose,
+
+              51 | |     RecipeLoRA,
+
+              52 | |     RecipeMerge,
+
+              53 | |     RecipeModel,
+
+              54 | |     RecipeNode,
+
+              55 | | )
+
+              56 | | from ..lib.widen import WIDEN, WIDENConfig
+                 | |__________________________________________^
+              57 |
+
+              58 |   try:
+                 |
+              help: Organize imports
+
+
+              F401 [*] `..lib.executor.evaluate_affected_group` imported but unused
+                --> nodes/exit.py:29:5
+                 |
+              27 |     compile_plan,
+
+              28 |     compute_batch_size,
+
+              29 |     evaluate_affected_group,
+                 |     ^^^^^^^^^^^^^^^^^^^^^^^
+              30 |     execute_plan,
+
+              31 |     get_available_ram_bytes,
+                 |
+              help: Remove unused import: `..lib.executor.evaluate_affected_group`
+
+
+              F401 [*] `..lib.persistence.atomic_save` imported but unused
+                --> nodes/exit.py:35:5
+                 |
+              33 | )
+
+              34 | from ..lib.persistence import (
+
+              35 |     atomic_save,
+                 |     ^^^^^^^^^^^
+              36 |     build_metadata,
+
+              37 |     check_cache,
+                 |
+              help: Remove unused import
+
+
+              F401 [*] `..lib.persistence.check_cache` imported but unused
+                --> nodes/exit.py:37:5
+                 |
+              35 |     atomic_save,
+
+              36 |     build_metadata,
+
+              37 |     check_cache,
+                 |     ^^^^^^^^^^^
+              38 |     check_full_model_cache,
+
+              39 |     collect_block_configs,
+                 |
+              help: Remove unused import
+
+
+              E501 Line too long (101 > 99)
+                 --> nodes/exit.py:627:100
+                  |
+              625 |         AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+
+              626 |         AC: @streaming-full-model-materialization
+              ac-full-cache-avoids-resident-payload
+
+              627 |         AC: @streaming-full-model-materialization
+              ac-failed-materialization-releases-resident-payload
+                  |                                                                                                    ^^
+              628 |         AC: @full-saved-model-output ac-complete-artifact
+
+              629 |         AC: @full-saved-model-output ac-return-loaded-model
+                  |
+
+              F841 Local variable `key_byte_sizes` is assigned to but never used
+                 --> nodes/exit.py:644:9
+                  |
+              643 |         key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
+
+              644 |         key_byte_sizes = {k: v.nelement() * v.element_size() for k, v in
+              base_state.items()}
+                  |         ^^^^^^^^^^^^^^
+              645 |
+
+              646 |         base_identity = compute_base_identity(base_state)
+                  |
+              help: Remove assignment to unused variable `key_byte_sizes`
+
+
+              E501 Line too long (107 > 99)
+                 --> nodes/exit.py:868:100
+                  |
+              866 |         except BaseException:
+
+              867 |             # AC: @streaming-full-model-materialization
+              ac-incomplete-write-not-reused
+
+              868 |             # AC: @streaming-full-model-materialization
+              ac-failed-materialization-releases-resident-payload
+                  |                                                                                                    ^^^^^^^^
+              869 |             sink.abort()
+
+              870 |             raise
+                  |
+
+              I001 [*] Import block is un-sorted or un-formatted
+                --> tests/test_full_model_streaming.py:9:1
+                 |
+               7 |   """
+               8 |
+               9 | / import json
+              10 | | from unittest.mock import MagicMock, patch
+
+              11 | |
+
+              12 | | import pytest
+
+              13 | | import torch
+
+              14 | | from safetensors import safe_open
+
+              15 | | from safetensors.torch import save_file
+
+              16 | |
+
+              17 | | from lib.batch_groups import OpSignature
+
+              18 | | from lib.persistence import build_metadata, check_full_model_cache
+
+              19 | | from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+
+              20 | | from lib.recipe_eval import EvalPlan
+
+              21 | | from lib.streaming_save import MaterializationSink
+
+              22 | | from nodes.exit import (
+
+              23 | |     WIDENExitNode,
+
+              24 | |     _incremental_cache,
+
+              25 | |     install_merged_patches,
+
+              26 | | )
+                 | |_^
+                 |
+              help: Organize imports
+
+
+              F401 [*] `nodes.exit.install_merged_patches` imported but unused
+                --> tests/test_full_model_streaming.py:25:5
+                 |
+              23 |     WIDENExitNode,
+
+              24 |     _incremental_cache,
+
+              25 |     install_merged_patches,
+                 |     ^^^^^^^^^^^^^^^^^^^^^^
+              26 | )
+                 |
+              help: Remove unused import: `nodes.exit.install_merged_patches`
+
+
+              E501 Line too long (107 > 99)
+                 --> tests/test_full_model_streaming.py:632:100
+                  |
+              630 |             patch("nodes.exit.compute_lora_stats", return_value={}),
+
+              631 |             patch("nodes.exit.validate_model_name",
+              return_value="fail.safetensors"),
+
+              632 |             patch("nodes.exit._resolve_checkpoints_path",
+              return_value=str(tmp_path / "fail.safetensors")),
+                  |                                                                                                    ^^^^^^^^
+              633 |             patch("nodes.exit.check_full_model_cache", return_value=False),
+
+              634 |             patch("nodes.exit.check_ram_preflight"),
+                  |
+
+              F841 Local variable `unaffected_key` is assigned to but never used
+                 --> tests/test_full_model_streaming.py:794:9
+                  |
+              792 |         keys = list(mock_model_patcher.model_state_dict().keys())
+
+              793 |         affected_key = keys[0]
+
+              794 |         unaffected_key = keys[1]
+                  |         ^^^^^^^^^^^^^^
+              795 |         save_path = str(tmp_path / "full_artifact.safetensors")
+                  |
+              help: Remove assignment to unused variable `unaffected_key`
+
+
+              F841 Local variable `save_path` is assigned to but never used
+                  --> tests/test_full_model_streaming.py:1110:9
+                   |
+              1108 |         merge = RecipeMerge(base=base, target=lora, backbone=None,
+              t_factor=1.0)
+
+              1109 |
+
+              1110 |         save_path = str(tmp_path / "noop_merge.safetensors")
+                   |         ^^^^^^^^^
+              1111 |         # No keys to process (empty affected keys)
+                   |
+              help: Remove assignment to unused variable `save_path`
+
+
+              F841 Local variable `mode_change_calls` is assigned to but never used
+                  --> tests/test_full_model_streaming.py:1177:9
+                   |
+              1175 |         # Track calls to comfy.model_management
+
+              1176 |         mm_mod = sys.modules.get("comfy.model_management")
+
+              1177 |         mode_change_calls = []
+                   |         ^^^^^^^^^^^^^^^^^
+              1178 |         if mm_mod is not None:
+
+              1179 |             original_attrs = {}
+                   |
+              help: Remove assignment to unused variable `mode_change_calls`
+
+
+              Found 14 errors.
+
+              [*] 7 fixable with the `--fix` option (4 hidden fixes can be enabled with the
+              `--unsafe-fixes` option). fails on this facade because  is imported but not used or
+              exported in . This breaks the lint gate for the submitted snapshot; either export it
+              intentionally or remove the unused import.
+            created_at: 2026-04-27T18:52:46.463Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T18:49:41.222Z
-    updated_at: 2026-04-27T18:52:23.378Z
+    updated_at: 2026-04-27T18:52:46.463Z
     notes: []
