@@ -353,6 +353,9 @@ features:
             description: |
               Full model materialization keeps merge output memory bounded while creating
               the complete saved artifact.
+            status:
+              maturity: draft
+              implementation: in_progress
             depends_on: []
             implements: []
             relates_to:
