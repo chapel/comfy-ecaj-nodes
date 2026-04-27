@@ -5171,7 +5171,7 @@ runs:
     completed_at: 2026-04-27T20:29:20.889Z
   - _ulid: 01KQ8AJN29EGYBXDNGTT1E8ZF8
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5184,7 +5184,22 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T20:37:57.356Z
-        completed_at: 2026-04-27T20:37:57.356Z
+        completed_at: 2026-04-27T20:38:44.327Z
+        notes: >-
+          High-confidence findings:
+
+          SUCCESS: Fix cycle was efficient — kspec review thread-based feedback made both blockers
+          crystal clear, fixed in single pass, all 1275 tests passed first run.
+
+          FRICTION: needs_work tasks require kspec task start before kspec task submit — minor
+          ceremony that's easy to forget during fix cycles. Not yet tracked.
+
+          FRICTION (ALREADY TRACKED): kspec review get truncates thread bodies — had to read raw
+          YAML. Covered by observations 01KQ6SHQZ and 01KQ82107.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T20:38:44.327Z
+        completed_at: 2026-04-27T20:38:44.327Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:37:31.337Z
