@@ -3649,7 +3649,7 @@ runs:
     started_at: 2026-04-27T06:48:13.500Z
     completed_at: 2026-04-27T06:49:18.216Z
   - _ulid: 01KQ6VFZTQB80788C18AHDXK77
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -3684,7 +3684,12 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T06:55:46.431Z
-        completed_at: 2026-04-27T06:55:46.431Z
+        completed_at: 2026-04-27T06:55:53.109Z
+        notes: "Captured via kspec batch: one friction observation for automated review dispatch
+          prompt-length failure and one inbox item tagged reflection/kspec/review for compacting
+          large review dispatch prompts. No other items captured due existing coverage or lower
+          confidence."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:54:40.983Z
+    completed_at: 2026-04-27T06:55:53.110Z
