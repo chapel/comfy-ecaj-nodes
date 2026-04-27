@@ -3079,7 +3079,7 @@ runs:
     started_at: 2026-04-27T05:25:07.535Z
     completed_at: 2026-04-27T05:26:03.431Z
   - _ulid: 01KQ6PS888HJD0RPA1RJEFCF4W
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -3112,7 +3112,10 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T05:33:24.047Z
-        completed_at: 2026-04-27T05:33:24.047Z
+        completed_at: 2026-04-27T05:33:31.087Z
+        notes: Captured observation @01KQ6PV5 as a success pattern. No inbox items or tasks created; no
+          additional friction observations captured.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:32:21.640Z
+    completed_at: 2026-04-27T05:33:31.087Z
