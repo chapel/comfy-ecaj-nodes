@@ -4911,7 +4911,7 @@ runs:
     completed_at: 2026-04-27T19:51:10.166Z
   - _ulid: 01KQ88T2CH423TWC7V3BY1PRE9
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4924,7 +4924,32 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T20:06:56.488Z
-        completed_at: 2026-04-27T20:06:56.488Z
+        completed_at: 2026-04-27T20:07:24.699Z
+        notes: >-
+          High-confidence findings:
+
+
+          FRICTION 1: Duplicate dtype maps across modules. check_full_model_cache had a hard-coded
+          safetensors-to-torch dtype map that was a subset of streaming_save._DTYPE_MAP. This caused
+          silent cache rejection for supported dtypes (BOOL, C64, float8, U16/U32/U64). Fix was
+          importing the canonical map. Pattern: when two modules need the same mapping, a single
+          source of truth should be established. NOT YET TRACKED — no existing observation covers
+          this.
+
+
+          FRICTION 2: /tmp disk space exhaustion from leaked safetensors temp files. Had to manually
+          clean 30GB of tmp*.safetensors files from /tmp before tests could pass. These appear to be
+          from prior test runs or agent sessions that crashed without cleanup. NOT YET TRACKED.
+
+
+          SUCCESS 1: Reading the full review YAML file (project.reviews.yaml) to get untruncated
+          thread content was effective. The kspec review get CLI truncated thread body text, but
+          reading the YAML directly gave full context. Already partially tracked by existing
+          observations about CLI output truncation.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T20:07:24.699Z
+        completed_at: 2026-04-27T20:07:24.699Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:06:37.201Z
