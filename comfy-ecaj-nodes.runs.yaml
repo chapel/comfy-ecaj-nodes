@@ -3778,7 +3778,7 @@ runs:
     completed_at: 2026-04-27T07:40:55.607Z
   - _ulid: 01KQ6YCRV4MYNNFVN6B082P8SK
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3801,7 +3801,17 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T07:46:38.751Z
-        completed_at: 2026-04-27T07:46:38.751Z
+        completed_at: 2026-04-27T07:46:48.119Z
+        notes: "Coverage search completed: searched validate warnings, warnings-ok, own pull request
+          approve, self approval, GitHub approval, workflow show, workflow show run-ref, dispatch
+          review merge gate, prior review records, fix-cycle review, and review records. Existing
+          coverage: @01KQ6K6S covers merge-gate evidence and same-account GitHub approval
+          limitation; @01KQ6N3MY covers workflow inspection friction; @01KQ6MFM covers task-subject
+          review refresh limitation. No duplicate capture for those."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T07:46:48.119Z
+        completed_at: 2026-04-27T07:46:48.119Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-04-27T07:45:21.252Z
