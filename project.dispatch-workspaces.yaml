@@ -746,12 +746,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-27T18:29:39.886Z
+      updated_at: 2026-04-27T18:29:40.572Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T18:29:39.886Z
+      updated_at: 2026-04-27T18:29:40.572Z
     integration:
       status: pending
       detail: null
@@ -759,24 +759,29 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 254c3623bee1e453ccf9494c3a137007a9f42ea1
-      updated_at: 2026-04-27T18:29:39.886Z
-    lifecycle_state: ready
+      updated_at: 2026-04-27T18:29:40.572Z
+    lifecycle_state: integrating
     resolved_base_branch: dev
     task_ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
     task_slug: task-full-model-streaming-artifact-cache
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T18:15:53.370Z
-      last_reconciled_at: 2026-04-27T18:29:39.886Z
+      last_reconciled_at: 2026-04-27T18:29:40.572Z
       created_at: 2026-04-27T16:16:10.003Z
-      updated_at: 2026-04-27T18:29:39.886Z
+      updated_at: 2026-04-27T18:29:40.572Z
     workspace_id: dispatch-workspace-01KQ7VC3HBVJMA4S8K9VBDCP7D
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: d95ffd207b96388e10cd4db492db1ac601a5dcaa
+        last_seen_at: 2026-04-27T18:29:40.572Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-streaming-artifact-cache-01kq7vc3-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-full-model-streaming-artifact-cache/01kq7vc3
-        head: 2564ca6e52b64b52693022dda5479761d0c66018
-        last_seen_at: 2026-04-27T18:15:52.960Z
+        head: d95ffd207b96388e10cd4db492db1ac601a5dcaa
+        last_seen_at: 2026-04-27T18:29:40.572Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-streaming-artifact-cache-01kq7vc3
