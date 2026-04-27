@@ -86,7 +86,7 @@ description: >-
 spec_ref: "@manual-comfy-memory-validation"
 meta_ref: null
 plan_ref: null
-status: needs_work
+status: in_progress
 blocked_by: []
 depends_on:
   - "@task-full-model-streaming-artifact-cache"
@@ -107,7 +107,7 @@ submission_linkage:
   remote: null
   remote_url: null
   upstream_ref: dev
-session_id: null
+session_id: 01KQ8A43BNQVA8NQN2KMTJ5G9C
 history:
   - author: Jacob Chapel
     changes:
@@ -173,8 +173,21 @@ history:
         previous: 01KQ8981K9CPY32ESK3RNB867T
     command: review-verdict-needs-work
     timestamp: 2026-04-27T20:27:22.981Z
+  - author: "@claude"
+    changes:
+      status:
+        new: in_progress
+        previous: needs_work
+      session_id:
+        new: 01KQ8A43BNQVA8NQN2KMTJ5G9C
+        previous: null
+      started_at:
+        new: 2026-04-27T20:36:31.336Z
+        previous: 2026-04-27T20:14:54.339Z
+    command: task-start
+    timestamp: 2026-04-27T20:36:31.336Z
 created_at: 2026-04-27T16:11:48.246Z
-started_at: 2026-04-27T20:14:54.339Z
+started_at: 2026-04-27T20:36:31.336Z
 submitted_at: 2026-04-27T20:22:24.571Z
 todos: []
 automation: eligible
