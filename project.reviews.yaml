@@ -7493,6 +7493,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T20:27:22.816Z
+      - _ulid: 01KQ8AFX2MHSK6JH9EBPSVDMEM
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ89ZSMM9CZQENYZ5QFY4D1J
+        timestamp: 2026-04-27T20:36:01.236Z
     examined_commit: afea787efe1c0a926a94ac97b416789f3af80b50
     external_links: []
     lifecycle_state: closed
@@ -7521,6 +7527,13 @@ reviews:
               returned-model behavior while main still exited 0. The harness therefore reports
               success without validating the required behavior."
             created_at: 2026-04-27T20:27:13.428Z
+          - _ulid: 01KQ8AFX0EQFW0MFPHVXSYQE62
+            author: "@claude"
+            body: "Fixed: Added _setup_import_paths() that inserts the project root before the ComfyUI root on
+              sys.path, preventing ComfyUI's nodes.py from shadowing the project's nodes/ package.
+              Project modules (nodes.exit, lib.*) now resolve correctly even when a real ComfyUI
+              root with nodes.py is present. Added tests verifying path ordering and idempotency."
+            created_at: 2026-04-27T20:36:01.158Z
         kind: blocker
       - _ulid: 01KQ89ZSWHTK0Y0H5VEV6PW9AK
         anchor:
@@ -7550,5 +7563,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T20:27:22.816Z
     created_at: 2026-04-27T20:24:57.055Z
-    updated_at: 2026-04-27T20:27:22.816Z
+    updated_at: 2026-04-27T20:36:01.158Z
     notes: []
