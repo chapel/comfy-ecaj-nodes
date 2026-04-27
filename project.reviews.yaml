@@ -954,6 +954,17 @@ reviews:
         runner: rg
         created_at: 2026-04-27T05:14:56.631Z
         completed_at: 2026-04-27T05:14:56.631Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Verified nodes/exit.py now creates InMemorySink, writes group result tensors via
+          write_tensor(), finalizes into merged_state, and aborts/re-raises on errors
+        name: prior blocker verification
+        required: true
+        runner: manual
+        created_at: 2026-04-27T05:14:56.631Z
+        completed_at: 2026-04-27T05:14:56.631Z
     events:
       - _ulid: 01KQ6NN8D5PQHVJE220WG63JS7
         actor: Jacob Chapel
@@ -1010,6 +1021,13 @@ reviews:
           status: pass
           name: source-scanning test check
         timestamp: 2026-04-27T05:14:56.646Z
+      - _ulid: 01KQ6NSBSSWSZRRCCKWJ7DB0X3
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: prior blocker verification
+        timestamp: 2026-04-27T05:14:56.697Z
     examined_commit: 41033cd9a31e8404dfbc9fc6a3c709e6a7900be4
     external_links: []
     lifecycle_state: open
