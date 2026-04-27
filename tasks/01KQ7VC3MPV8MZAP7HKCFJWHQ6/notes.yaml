@@ -46,3 +46,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T20:43:22.875Z
+  - _ulid: 01KQ8BD5ED55D2N5FBNFHFQ6G6
+    content: "Fix cycle 2: addressed both review blockers. (1) Added _setup_package_bridge() replicating
+      conftest.py's _ecaj MetaPathFinder for standalone execution — nodes/exit.py relative imports
+      now resolve via _ecaj.nodes.exit → _ecaj.lib.X. (2) Fixed metadata key from bare
+      ecaj_recipe_hash to canonical __ecaj_recipe_hash__. Added 4 new tests: bridge idempotency,
+      _ecaj root, nodes.exit importability, canonical key extraction. All 1279 tests pass, ruff
+      clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T20:52:00.077Z
