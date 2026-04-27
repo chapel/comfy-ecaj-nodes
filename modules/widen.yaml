@@ -544,7 +544,7 @@ features:
             id: ac-3
             then: all tensors are on CPU (transferred from GPU during this phase)
             when: stored as patches
-          - given: the base model uses bf16 storage dtype
+          - given: the base model uses bf16 storage dtype and in-memory patch output mode is active
             id: ac-4
             then: they match the base model storage dtype
             when: set patch tensors are created
