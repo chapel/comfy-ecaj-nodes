@@ -86,7 +86,7 @@ description: >-
 spec_ref: "@manual-comfy-memory-validation"
 meta_ref: null
 plan_ref: null
-status: needs_work
+status: in_progress
 blocked_by: []
 depends_on:
   - "@task-full-model-streaming-artifact-cache"
@@ -107,7 +107,7 @@ submission_linkage:
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-full-model-real-comfy-memory-harness/01kq7vc3
-session_id: null
+session_id: 01KQ8BVVANBJG2PG4229RPXK0F
 history:
   - author: Jacob Chapel
     changes:
@@ -287,8 +287,21 @@ history:
         previous: 01KQ8B2M7ZAN6KNF75GK9NHAJS
     command: review-verdict-needs-work
     timestamp: 2026-04-27T20:57:18.561Z
+  - author: "@claude"
+    changes:
+      status:
+        new: in_progress
+        previous: needs_work
+      session_id:
+        new: 01KQ8BVVANBJG2PG4229RPXK0F
+        previous: null
+      started_at:
+        new: 2026-04-27T21:08:06.183Z
+        previous: 2026-04-27T20:52:08.585Z
+    command: task-start
+    timestamp: 2026-04-27T21:08:06.183Z
 created_at: 2026-04-27T16:11:48.246Z
-started_at: 2026-04-27T20:52:08.585Z
+started_at: 2026-04-27T21:08:06.183Z
 submitted_at: 2026-04-27T20:52:13.199Z
 todos: []
 automation: eligible
