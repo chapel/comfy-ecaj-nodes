@@ -672,7 +672,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T08:37:02.133Z
+      updated_at: 2026-04-27T08:38:45.532Z
     integration:
       status: merged
       detail: integration:merged
@@ -681,25 +681,20 @@ workspaces:
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: a2c92314f76a1e672ce48f1b8fdca6dbf7e870f7
       updated_at: 2026-04-27T08:37:02.133Z
-    lifecycle_state: cleanup_blocked
+    lifecycle_state: closing
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HRA1PMN922FBX8STVEFST"
     task_slug: task-full-model-memory-validation
     timestamps:
       closed_at: null
       last_active_at: 2026-04-27T08:29:25.982Z
-      last_reconciled_at: 2026-04-27T08:38:45.300Z
+      last_reconciled_at: 2026-04-27T08:38:45.532Z
       created_at: 2026-04-27T08:04:03.047Z
-      updated_at: 2026-04-27T08:38:45.300Z
+      updated_at: 2026-04-27T08:38:45.532Z
     workspace_id: dispatch-workspace-01KQ6HRA1PMN922FBX8STVEFST
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer:
-        branch_mode: detached
-        branch_ref: null
-        head: 23c45827b15d5d06151bb0f95786edc09f678cbb
-        last_seen_at: 2026-04-27T08:29:25.408Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-memory-validation-01kq6hra-review
+      reviewer: null
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-full-model-memory-validation/01kq6hra
