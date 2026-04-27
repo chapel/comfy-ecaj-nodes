@@ -2624,7 +2624,7 @@ runs:
     completed_at: 2026-02-19T21:39:33.854Z
   - _ulid: 01KQ6JRWRMGM86WBYZSNDT50P5
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -2664,7 +2664,29 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T04:23:11.185Z
-        completed_at: 2026-04-27T04:23:11.185Z
+        completed_at: 2026-04-27T04:23:20.776Z
+        notes: >-
+          Evaluation against existing state:
+
+
+          FRICTION 1 (spec-only PR pattern): No existing tracking found. High confidence — this is
+          systemic for any spec-reconciliation task. CAPTURE as friction observation.
+
+
+          FRICTION 2 (parent not exposed/settable): No existing tracking found. However, on closer
+          inspection the parent WAS correctly set via YAML nesting — the issue was just that 'item
+          get --json' doesn't include a 'parent' field in output. This is minor/one-off confusion,
+          not systemic. SKIP.
+
+
+          SUCCESS 1 (AC set workflow): No existing tracking. High confidence, worth noting. CAPTURE.
+
+
+          SUCCESS 2 (link create): Minor — straightforward CLI usage, not a novel pattern. SKIP.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T04:23:20.776Z
+        completed_at: 2026-04-27T04:23:20.776Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T04:22:15.572Z
