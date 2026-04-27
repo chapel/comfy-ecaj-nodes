@@ -576,6 +576,16 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T04:57:22.202Z
+  - _ulid: 01KQ6N3MVCW1MV5MKS0A02CNS7
+    type: success
+    content: Code-first review plus explicit spec-alignment checks caught a scaffold-only implementation
+      even though both focused and full pytest suites passed; keep treating passing tests as
+      evidence, not proof, when ACs describe integration behavior.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KQ6N19"
+    created_at: 2026-04-27T05:03:05.068Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
