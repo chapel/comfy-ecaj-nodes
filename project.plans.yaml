@@ -1657,7 +1657,7 @@ plans:
       - merge-router/scripts/sdxl_merge.py: SDXL full model merge pattern
       - merge-router/scripts/qwen_merge.py: Streaming safe_open() pattern
       - merge-router/src/models/qwen_key_mapper.py: Key normalization pattern
-    status: active
+    status: completed
     approved_at: null
     derived_specs:
       - "@full-model-recipe"
