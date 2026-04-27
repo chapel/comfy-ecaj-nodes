@@ -13,11 +13,16 @@ AC: @memory-management ac-7
 from __future__ import annotations
 
 import json
+import logging
+import os
+import secrets
 import struct
 
 import torch
 
-__all__ = ["stream_save_file"]
+logger = logging.getLogger("ecaj.streaming_save")
+
+__all__ = ["stream_save_file", "MaterializationSink"]
 
 # Maps torch dtype → safetensors dtype string.
 # Must mirror safetensors' dtype table exactly.
@@ -135,3 +140,220 @@ def stream_save_file(
         f.write(padded)
         for name in sorted_names:
             f.write(_tensor_bytes(tensors[name]))
+
+
+class MaterializationSink:
+    """Incremental safetensors writer for full saved model materialization.
+
+    AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+    AC: @streaming-full-model-materialization ac-affected-results-released
+    AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+    AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+
+    The sink writes a safetensors file incrementally using random-access writes:
+    1. open() — compute and write the header, pre-allocate the data region
+    2. write_tensor(name, tensor) — seek to the tensor's offset and write (any order)
+    3. finalize(save_path) — fsync and atomically replace save_path
+    4. abort() — delete the temp file on failure
+
+    Tensors can be written in any order (not just sorted-name order) because
+    the header pre-computes byte offsets for every tensor. This allows
+    group-at-a-time evaluation: evaluate a group, write all its keys, free
+    the group, then evaluate the next group — even when groups' keys are
+    interleaved in sorted name order.
+
+    Tensors can be released after write_tensor returns — they are not retained.
+    """
+
+    def __init__(self) -> None:
+        self._file = None
+        self._tmp_path: str | None = None
+        self._tensor_offsets: dict[str, int] | None = None
+        self._tensor_specs: dict[str, tuple[torch.dtype, tuple[int, ...], int]] | None = None
+        self._written: set[str] | None = None
+        self._total_count: int = 0
+        self._data_start: int = 0
+        self._finalized: bool = False
+        self._aborted: bool = False
+
+    def open(
+        self,
+        manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]],
+        save_path: str,
+        metadata: dict[str, str] | None = None,
+    ) -> None:
+        """Write the safetensors header from a manifest of key→(dtype, shape).
+
+        Args:
+            manifest: Dict of tensor_name → (dtype, shape) for every tensor
+                      that will be written (base + affected).
+            save_path: Target file path (used to determine temp file location).
+            metadata: Optional safetensors metadata dict.
+        """
+        directory = os.path.dirname(save_path) or "."
+        suffix = secrets.token_hex(4)
+        self._tmp_path = os.path.join(
+            directory, f".ecaj_tmp_{suffix}_{os.path.basename(save_path)}"
+        )
+
+        sorted_names = sorted(manifest.keys())
+
+        # Compute header and record per-tensor byte offsets and expected specs
+        header_info: dict[str, dict] = {}
+        tensor_offsets: dict[str, int] = {}
+        tensor_specs: dict[str, tuple[torch.dtype, tuple[int, ...], int]] = {}
+        current_offset = 0
+        for name in sorted_names:
+            dt, shape = manifest[name]
+            dtype_str = _DTYPE_MAP[dt]
+            elem_size = torch.tensor([], dtype=dt).element_size()
+            numel = 1
+            for d in shape:
+                numel *= d
+            nbytes = numel * elem_size
+            header_info[name] = {
+                "dtype": dtype_str,
+                "shape": list(shape),
+                "data_offsets": [current_offset, current_offset + nbytes],
+            }
+            tensor_offsets[name] = current_offset
+            tensor_specs[name] = (dt, shape, nbytes)
+            current_offset += nbytes
+
+        total_data_bytes = current_offset
+
+        # Build padded header
+        combined: dict = {}
+        if metadata:
+            combined["__metadata__"] = metadata
+        combined.update(header_info)
+        header_json = json.dumps(combined, separators=(",", ":")).encode()
+        pad = (8 - ((8 + len(header_json)) % 8)) % 8
+        padded = header_json + b" " * pad
+
+        self._file = open(self._tmp_path, "wb")
+        self._file.write(struct.pack("<Q", len(padded)))
+        self._file.write(padded)
+
+        # Record where the data region starts (after header)
+        self._data_start = 8 + len(padded)
+
+        # Pre-allocate file to full size so seek-based writes land correctly
+        if total_data_bytes > 0:
+            self._file.seek(self._data_start + total_data_bytes - 1)
+            self._file.write(b"\x00")
+
+        self._tensor_offsets = tensor_offsets
+        self._tensor_specs = tensor_specs
+        self._written = set()
+        self._total_count = len(sorted_names)
+
+    def write_tensor(self, name: str, tensor: torch.Tensor) -> None:
+        """Write a single tensor's data to the file at its pre-computed offset.
+
+        Can be called in any order — the header defines each tensor's byte
+        position.  The tensor can be released after this call returns.
+
+        Validates the tensor's dtype, shape, and byte length against the
+        manifest before writing.  A mismatch is rejected immediately so
+        that corrupt or incomplete artifacts cannot be finalized and later
+        accepted as valid cache hits.
+
+        Args:
+            name: Tensor name (must be a key from the manifest).
+            tensor: The tensor data to write.
+
+        Raises:
+            RuntimeError: If sink not open, already finalized/aborted, or
+                name is not in the manifest / already written.
+            ValueError: If the tensor's dtype, shape, or byte length does
+                not match the manifest.
+        """
+        if self._file is None or self._tensor_offsets is None or self._written is None:
+            raise RuntimeError("MaterializationSink not open")
+        if self._finalized or self._aborted:
+            raise RuntimeError("MaterializationSink already finalized or aborted")
+        if name not in self._tensor_offsets:
+            raise RuntimeError(
+                f"write_tensor called with unknown tensor name: {name!r}"
+            )
+        if name in self._written:
+            raise RuntimeError(
+                f"write_tensor called twice for tensor: {name!r}"
+            )
+
+        # Validate tensor against manifest expectations.
+        assert self._tensor_specs is not None
+        expected_dtype, expected_shape, expected_nbytes = self._tensor_specs[name]
+        if tensor.dtype != expected_dtype:
+            raise ValueError(
+                f"write_tensor {name!r}: dtype mismatch — "
+                f"expected {expected_dtype}, got {tensor.dtype}"
+            )
+        if tuple(tensor.shape) != expected_shape:
+            raise ValueError(
+                f"write_tensor {name!r}: shape mismatch — "
+                f"expected {expected_shape}, got {tuple(tensor.shape)}"
+            )
+        actual_nbytes = tensor.nelement() * tensor.element_size()
+        if actual_nbytes != expected_nbytes:
+            raise ValueError(
+                f"write_tensor {name!r}: byte length mismatch — "
+                f"expected {expected_nbytes}, got {actual_nbytes}"
+            )
+
+        offset = self._data_start + self._tensor_offsets[name]
+        self._file.seek(offset)
+        self._file.write(_tensor_bytes(tensor))
+        self._written.add(name)
+
+    def finalize(self, save_path: str) -> None:
+        """Flush, fsync, and atomically replace save_path with the completed file.
+
+        AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+
+        Args:
+            save_path: Target file path to atomically replace.
+
+        Raises:
+            RuntimeError: If not all tensors were written, or already finalized.
+        """
+        if self._file is None or self._written is None:
+            raise RuntimeError("MaterializationSink not open")
+        if self._finalized or self._aborted:
+            raise RuntimeError("MaterializationSink already finalized or aborted")
+        if len(self._written) != self._total_count:
+            raise RuntimeError(
+                f"Cannot finalize: wrote {len(self._written)}/{self._total_count} tensors"
+            )
+
+        self._file.flush()
+        os.fsync(self._file.fileno())
+        self._file.close()
+        self._file = None
+
+        os.replace(self._tmp_path, save_path)
+        self._finalized = True
+        logger.info("MaterializationSink finalized: %s", save_path)
+
+    def abort(self) -> None:
+        """Clean up the temp file without replacing the target.
+
+        AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+
+        Safe to call multiple times. Safe to call after finalize (no-op).
+        """
+        if self._finalized:
+            return
+        self._aborted = True
+        if self._file is not None:
+            try:
+                self._file.close()
+            except OSError:
+                pass
+            self._file = None
+        if self._tmp_path is not None:
+            try:
+                os.unlink(self._tmp_path)
+            except OSError:
+                pass

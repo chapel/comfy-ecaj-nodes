@@ -26,6 +26,7 @@ __all__ = [
     "atomic_save",
     "build_metadata",
     "check_cache",
+    "check_full_model_cache",
     "collect_block_configs",
     "compute_base_identity",
     "compute_lora_stats",
@@ -372,16 +373,19 @@ def build_metadata(
     recipe_hash: str,
     affected_keys: list[str],
     workflow_json: str | None = None,
+    output_mode: str = "patch",
 ) -> dict[str, str]:
     """Assemble safetensors metadata dict.
 
     AC: @exit-model-persistence ac-6, ac-13, ac-14
+    AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
 
     Args:
         serialized: Deterministic JSON recipe
         recipe_hash: SHA-256 of serialized
         affected_keys: Sorted list of keys that were merged (not base-only)
         workflow_json: Optional workflow JSON string
+        output_mode: "patch" or "full" — stored in metadata for cache validation
 
     Returns:
         Metadata dict with string values (safetensors requirement)
@@ -391,10 +395,129 @@ def build_metadata(
         "__ecaj_recipe__": serialized,
         "__ecaj_recipe_hash__": recipe_hash,
         "__ecaj_affected_keys__": json.dumps(affected_keys),
+        "__ecaj_output_mode__": output_mode,
     }
     if workflow_json is not None:
         metadata["__ecaj_workflow__"] = workflow_json
     return metadata
+
+
+def check_full_model_cache(
+    save_path: str,
+    expected_hash: str,
+    expected_manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] | None = None,
+) -> bool:
+    """Check if a saved artifact is a valid full-model cache hit.
+
+    AC: @full-saved-model-output ac-cache-reuses-artifact
+    AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    AC: @full-saved-model-output ac-complete-artifact
+    AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    AC: @exit-model-persistence ac-9
+
+    Validates:
+    - File exists
+    - File is a valid safetensors file with ecaj metadata (AC-9: raises on
+      non-ecaj or corrupt files, same as check_cache)
+    - Recipe hash matches
+    - Output mode is "full" (not "patch")
+    - Affected keys metadata is present and valid JSON
+    - Artifact tensor keys, shapes, and dtypes match the expected manifest
+
+    Args:
+        save_path: Path to the safetensors file
+        expected_hash: Expected recipe hash
+        expected_manifest: If provided, maps each expected tensor key to its
+            (dtype, shape).  The artifact must contain exactly these keys with
+            matching dtypes and shapes.  Incomplete, extra, or mismatched
+            tensors cause rejection.
+
+    Returns:
+        True if the artifact is a valid full-model cache hit
+
+    Raises:
+        ValueError: If file exists but is not a valid ecaj-saved model (AC-9).
+            This prevents silent overwriting of user files.
+    """
+    if not os.path.exists(save_path):
+        return False
+
+    from safetensors import safe_open
+
+    # AC: @exit-model-persistence ac-9
+    # If the file exists but is corrupt or not a safetensors file, raise
+    # rather than returning False (which would cause the caller to overwrite).
+    try:
+        with safe_open(save_path, framework="pt") as f:
+            metadata = f.metadata()
+            artifact_keys = set(f.keys())
+            # Read tensor metadata (shape/dtype) for validation if needed.
+            artifact_specs: dict[str, tuple[str, list[int]]] = {}
+            if expected_manifest is not None:
+                for key in f.keys():
+                    t = f.get_slice(key)
+                    artifact_specs[key] = (t.get_dtype(), t.get_shape())
+    except Exception as exc:
+        raise ValueError(
+            f"File exists but is not a valid safetensors file: {save_path}\n"
+            f"Refusing to overwrite. Choose a different model_name.\n"
+            f"Underlying error: {exc}"
+        ) from exc
+
+    # AC: @exit-model-persistence ac-9
+    if metadata is None or "__ecaj_version__" not in metadata:
+        raise ValueError(
+            f"File exists but is not an ecaj-saved model: {save_path}\n"
+            f"Refusing to overwrite a file without ecaj metadata. "
+            f"Choose a different model_name."
+        )
+
+    stored_hash = metadata.get("__ecaj_recipe_hash__", "")
+    if stored_hash != expected_hash:
+        return False
+
+    stored_mode = metadata.get("__ecaj_output_mode__", "")
+    if stored_mode != "full":
+        return False
+
+    # Validate that affected keys metadata is present and parseable.
+    affected_raw = metadata.get("__ecaj_affected_keys__")
+    if affected_raw is None:
+        return False
+    try:
+        parsed = json.loads(affected_raw)
+        if not isinstance(parsed, list):
+            return False
+    except (json.JSONDecodeError, TypeError):
+        return False
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    # AC: @full-saved-model-output ac-complete-artifact
+    # Verify artifact completeness and correctness: the file must contain
+    # exactly the expected keys with matching dtypes and shapes.
+    if expected_manifest is not None:
+        expected_keys = set(expected_manifest.keys())
+        if artifact_keys != expected_keys:
+            return False
+
+        # Map safetensors dtype strings to torch dtypes for comparison.
+        # Reuse the canonical map from streaming_save (which covers all
+        # dtypes the writer supports, including BOOL, C64, float8, U16/U32/U64).
+        from .streaming_save import _DTYPE_MAP as _WRITER_DTYPE_MAP
+        _ST_DTYPE_MAP = {v: k for k, v in _WRITER_DTYPE_MAP.items()}
+
+        for key, (expected_dtype, expected_shape) in expected_manifest.items():
+            if key not in artifact_specs:
+                return False
+            st_dtype_str, st_shape = artifact_specs[key]
+            # Convert safetensors dtype string to torch dtype.
+            artifact_dtype = _ST_DTYPE_MAP.get(str(st_dtype_str))
+            if artifact_dtype != expected_dtype:
+                return False
+            if tuple(st_shape) != tuple(expected_shape):
+                return False
+
+    return True
 
 
 def atomic_save(

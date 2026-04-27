@@ -27,7 +27,9 @@ from .gpu_ops import (
     chunked_evaluation,
     compute_batch_size,
     estimate_peak_ram,
+    evaluate_affected_group,
     get_available_ram_bytes,
+    streaming_evaluation_to_sink,
 )
 from .per_block import (
     _apply_per_block_lora_strength,
@@ -48,6 +50,7 @@ __all__ = [
     "chunked",
     "apply_lora_batch_gpu",
     "chunked_evaluation",
+    "evaluate_affected_group",
     "estimate_peak_ram",
     "evaluate_recipe",
     "execute_plan",
@@ -56,4 +59,5 @@ __all__ = [
     "_get_block_t_factors",
     "_apply_widen_filter_per_block",
     "_apply_widen_merge_per_block",
+    "streaming_evaluation_to_sink",
 ]

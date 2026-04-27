@@ -1113,7 +1113,13 @@ class TestExitNodeIncrementalCache:
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         new_results = {k: torch.randn(4, 4) for k in keys}
-        atomic_save_mock = MagicMock()
+
+        # Track which tensor names the MaterializationSink writes
+        written_keys = []
+        mock_sink = MagicMock()
+        mock_sink.write_tensor = MagicMock(
+            side_effect=lambda name, tensor: written_keys.append(name)
+        )
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
@@ -1137,24 +1143,26 @@ class TestExitNodeIncrementalCache:
                   return_value='{"test": true}'),
             patch("nodes.exit.compute_recipe_hash",
                   return_value="recipe_hash"),
-            patch("nodes.exit.check_cache", return_value=None),
-            patch("nodes.exit.build_metadata",
-                  return_value={"__ecaj_version__": "1"}),
-            patch("nodes.exit.atomic_save", atomic_save_mock),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
+            patch("nodes.exit._load_model_from_artifact",
+                  return_value=mock_model_patcher.clone()),
+            patch("nodes.exit.ProgressBar", None),
         ):
             node = WIDENExitNode()
             node.execute(
                 recipe, save_model=True, model_name="test",
             )
 
-        # atomic_save should have been called
-        atomic_save_mock.assert_called_once()
-        saved_state = atomic_save_mock.call_args[0][0]
+        # MaterializationSink.finalize should have been called
+        mock_sink.finalize.assert_called_once()
 
-        # Saved state should contain ALL keys (complete merged state)
-        for k in keys:
-            assert k in saved_state, (
-                f"Key {k} missing from saved state"
+        # All keys (base + affected) should have been written to the sink
+        base_keys = set(mock_model_patcher.model_state_dict().keys())
+        for k in base_keys:
+            assert k in written_keys, (
+                f"Key {k} missing from MaterializationSink writes"
             )
 
 

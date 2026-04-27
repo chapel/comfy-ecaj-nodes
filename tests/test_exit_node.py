@@ -819,7 +819,6 @@ class TestSaveModelOff:
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation", return_value={}),
             patch("nodes.exit.validate_model_name") as mock_validate,
-            patch("nodes.exit.atomic_save") as mock_save,
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -835,7 +834,6 @@ class TestSaveModelOff:
 
             # Persistence functions should NOT be called
             mock_validate.assert_not_called()
-            mock_save.assert_not_called()
 
 
 # =============================================================================
@@ -858,15 +856,19 @@ class TestSaveModelCacheHit:
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        # Create a fake cached file
+        # Create a fake cached file with full-mode metadata containing ALL model keys.
+        # The artifact must be complete (all model keys) to pass cache validation.
         cached_path = tmp_path / "cached.safetensors"
-        key = "diffusion_model.input_blocks.0.0.weight"
-        cached_tensors = {key: torch.randn(4, 4)}
+        all_keys = list(mock_model_patcher.model_state_dict().keys())
+        cached_tensors = {k: torch.randn(4, 4) for k in all_keys}
+        key = all_keys[0]
+        import json as _json
         cached_metadata = {
             "__ecaj_version__": "1",
             "__ecaj_recipe__": "{}",
             "__ecaj_recipe_hash__": "will_match",
-            "__ecaj_affected_keys__": f'["{key}"]',
+            "__ecaj_affected_keys__": _json.dumps([key]),
+            "__ecaj_output_mode__": "full",
         }
         save_file(cached_tensors, str(cached_path), metadata=cached_metadata)
 
@@ -889,9 +891,10 @@ class TestSaveModelCacheHit:
             # analyze_recipe should NOT have been called
             mock_analyze.assert_not_called()
 
-        # Result should be a patched model
+        # Result should be a model loaded from the artifact (no set patches).
         assert result is not mock_model_patcher
-        assert key in result.patches
+        result_sd = result.model_state_dict()
+        assert key in result_sd
 
 
 # =============================================================================
@@ -902,12 +905,12 @@ class TestSaveModelCacheHit:
 class TestSaveModelCacheMiss:
     """AC: @exit-model-persistence ac-2, ac-4
 
-    On cache miss, GPU pipeline runs normally and file is saved after.
+    On cache miss, GPU pipeline runs normally and file is saved via MaterializationSink.
     """
 
     # AC: @exit-model-persistence ac-2
     def test_saves_after_gpu(self, mock_model_patcher, tmp_path):
-        """Cache miss should run GPU pipeline and save result."""
+        """Cache miss should run GPU pipeline and save result via MaterializationSink."""
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -916,6 +919,8 @@ class TestSaveModelCacheMiss:
         affected_key = "diffusion_model.input_blocks.0.0.weight"
 
         node = WIDENExitNode()
+
+        mock_sink = MagicMock()
 
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
@@ -924,12 +929,14 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
-            patch("nodes.exit.check_cache", return_value=None),  # cache miss
+            patch("nodes.exit.check_full_model_cache", return_value=False),  # cache miss
             patch("nodes.exit.analyze_recipe") as mock_analyze,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation") as mock_chunked,
-            patch("nodes.exit.atomic_save") as mock_save,
+            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
+            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.check_ram_preflight"),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -941,6 +948,7 @@ class TestSaveModelCacheMiss:
                 affected_keys={affected_key},
             )
             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+            mock_load.return_value = mock_model_patcher.clone()
 
             (result,) = node.execute(
                 merge, save_model=True, model_name="model"
@@ -948,12 +956,12 @@ class TestSaveModelCacheMiss:
 
             # analyze_recipe SHOULD have been called
             mock_analyze.assert_called_once()
-            # atomic_save SHOULD have been called
-            mock_save.assert_called_once()
+            # MaterializationSink.finalize SHOULD have been called
+            mock_sink.finalize.assert_called_once()
 
     # AC: @exit-model-persistence ac-4
     def test_overwrites_stale_cache(self, mock_model_patcher, tmp_path):
-        """Hash mismatch should overwrite the stale cached file."""
+        """Hash mismatch should overwrite the stale cached file via MaterializationSink."""
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -963,6 +971,8 @@ class TestSaveModelCacheMiss:
 
         node = WIDENExitNode()
 
+        mock_sink = MagicMock()
+
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
@@ -970,12 +980,14 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
-            patch("nodes.exit.check_cache", return_value=None),  # stale = mismatch
+            patch("nodes.exit.check_full_model_cache", return_value=False),  # stale
             patch("nodes.exit.analyze_recipe") as mock_analyze,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation") as mock_chunked,
-            patch("nodes.exit.atomic_save") as mock_save,
+            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
+            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.check_ram_preflight"),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -987,12 +999,13 @@ class TestSaveModelCacheMiss:
                 affected_keys={affected_key},
             )
             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+            mock_load.return_value = mock_model_patcher.clone()
 
             (result,) = node.execute(
                 merge, save_model=True, model_name="model"
             )
 
-            mock_save.assert_called_once()
+            mock_sink.finalize.assert_called_once()
 
 
 # =============================================================================
