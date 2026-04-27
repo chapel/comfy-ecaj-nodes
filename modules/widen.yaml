@@ -247,9 +247,10 @@ features:
     tests: []
     traits: []
     acceptance_criteria:
-      - given: a valid recipe tree ending in RecipeMerge
+      - given: a valid recipe tree ending in RecipeMerge and the Exit node is using in-memory patch output
+          mode (the default)
         id: ac-1
-        then: it returns a ComfyUI MODEL (ModelPatcher clone) with set patches
+        then: it returns a ComfyUI MODEL (ModelPatcher clone) with merged weights installed as set patches
         when: Exit node executes
       - given: an invalid recipe tree with type mismatches
         id: ac-2
