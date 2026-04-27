@@ -4609,7 +4609,7 @@ runs:
     started_at: 2026-04-27T19:03:18.956Z
     completed_at: 2026-04-27T19:04:29.292Z
   - _ulid: 01KQ85J9KBN5R50QYTCZPPFG6W
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -4638,10 +4638,14 @@ runs:
           @01KQ815TA covers full-mode streaming tests missing adversarial invalid-artifact cases.
           Specific cache validation defects are already actionable as unresolved blocker threads on
           @01KQ8597, so creating inbox items or observations would duplicate live review tracking."
-      - status: completed
+      - status: skipped
         step_index: 3
         started_at: 2026-04-27T19:10:57.979Z
-        completed_at: 2026-04-27T19:10:57.979Z
+        completed_at: 2026-04-27T19:11:05.198Z
+        notes: "No capture: all high-confidence observations from this session are either already covered by
+          existing observations (@01KQ815T9, @01KQ815TA) or already tracked as live review blockers
+          on @01KQ8597."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:09:56.716Z
+    completed_at: 2026-04-27T19:11:05.198Z
