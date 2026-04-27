@@ -307,7 +307,8 @@ features:
           implementation: in_progress
         depends_on: []
         implements: []
-        relates_to: []
+        relates_to:
+          - "@exit-model-persistence"
         tests: []
         traits: []
         acceptance_criteria:
