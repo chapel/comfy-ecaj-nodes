@@ -3512,7 +3512,7 @@ plans:
       "If WIDEN saves a merged artifact, can Exit return a Comfy-loaded MODEL from
       that artifact and preserve behavior?" If this fails, the larger saved-model path
       should not proceed until the loader incompatibility is understood.
-    status: draft
+    status: rejected
     approved_at: null
     derived_specs: []
     derived_tasks: []
