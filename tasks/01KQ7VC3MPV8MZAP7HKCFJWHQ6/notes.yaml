@@ -94,3 +94,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T21:32:51.297Z
+  - _ulid: 01KQ8E3TJTW1S9Q6G0PSWPMH07
+    content: "Fix cycle 5: addressed the comfy-root isolation blocker. (1) Pre-import: run_validation
+      now checks comfy/__init__.py exists under --comfy-root before mutating sys.path. (2)
+      Post-import: importlib.util.find_spec verifies the resolved comfy package is under the
+      specified root, refusing ambient installations. Added 3 new tests: empty root rejection,
+      root-without-comfy rejection, and ambient comfy isolation. Re-verified all 3 ACs against
+      implementation. All 39 harness tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T21:39:19.770Z
