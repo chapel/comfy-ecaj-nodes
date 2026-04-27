@@ -518,6 +518,9 @@ features:
                   Real ComfyUI memory validation is an explicitly directed maintainer action.
                   It is not part of normal automated test execution and cannot run against a
                   ComfyUI installation unless the operator provides explicit opt-in inputs.
+                status:
+                  maturity: draft
+                  implementation: in_progress
                 depends_on: []
                 implements: []
                 relates_to: []
