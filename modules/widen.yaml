@@ -606,10 +606,11 @@ features:
             id: ac-1
             then: behavior is unchanged from baseline — no file I/O
             when: exit node executes
-          - given: save_model enabled and model_name provided
+          - given: save_model enabled, model_name provided, and the Exit node is using in-memory patch output
+              mode
             id: ac-2
-            then: fully-merged state dict (all base model keys with WIDEN-affected keys replaced) saved as
-              safetensors in the base model directory using model_name
+            then: fully-merged state dict (all base model keys with affected keys replaced) saved as safetensors
+              in the base model directory using model_name
             when: exit node completes GPU merge
           - given: cached safetensors exists at expected path
             id: ac-3
