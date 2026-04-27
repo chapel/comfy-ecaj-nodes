@@ -8637,6 +8637,18 @@ reviews:
         runner: python
         created_at: 2026-04-27T21:43:57.962Z
         completed_at: 2026-04-27T21:43:57.962Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: With a temp Comfy-shaped root, safetensors fixture, and all guards, the harness exited 0,
+          reported memory_mode=NORMAL_FAKE, artifact_cache_hit=True, returned-model behavior, memory
+          observations, and weights_resident_in_cache=False.
+        name: Comfy-shaped intentional-run probe
+        required: true
+        runner: python
+        created_at: 2026-04-27T21:43:58.221Z
+        completed_at: 2026-04-27T21:43:58.221Z
     events:
       - _ulid: 01KQ8E5PBEV7SD8EDSRNFAPJDY
         actor: Jacob Chapel
@@ -8693,6 +8705,13 @@ reviews:
           status: pass
           name: ambient Comfy root isolation probe
         timestamp: 2026-04-27T21:43:58.036Z
+      - _ulid: 01KQ8ECAJK4V9SZWSX9MGJCYXJ
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Comfy-shaped intentional-run probe
+        timestamp: 2026-04-27T21:43:58.291Z
     examined_commit: cf1d6f0b2b24c05d0411a5a727a2a72e72fb8675
     external_links: []
     lifecycle_state: open
@@ -8705,5 +8724,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T21:40:20.974Z
-    updated_at: 2026-04-27T21:43:57.962Z
+    updated_at: 2026-04-27T21:43:58.221Z
     notes: []
