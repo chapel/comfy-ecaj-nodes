@@ -247,3 +247,25 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T18:35:04.988Z
+  - _ulid: 01KQ84AFT13C4RKAHGW7Y3D1GZ
+    content: >-
+      Fix cycle 4: addressed both review blockers.
+
+
+      1. Per-tensor streaming (blocker 1): Created streaming_evaluation_to_sink() that takes a
+      write_fn callback and hands each completed tensor to it immediately — no dict accumulates the
+      group's results. Full mode now calls streaming_evaluation_to_sink(write_fn=sink.write_tensor)
+      instead of evaluate_affected_group. Test verifies both chunked_evaluation AND
+      evaluate_affected_group can be patched to fail and full mode still succeeds.
+
+
+      2. Manifest validation (blocker 2): MaterializationSink.write_tensor now validates dtype,
+      shape, and byte length against the manifest before writing. Mismatches raise ValueError. Added
+      3 new validation tests.
+
+
+      All 1236 tests pass (42 streaming + 1194 existing). All 6 spec ACs re-verified against
+      implementation.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T18:48:12.354Z
