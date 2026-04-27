@@ -499,3 +499,29 @@ reviews:
     created_at: 2026-04-27T04:48:05.588Z
     updated_at: 2026-04-27T04:49:07.928Z
     notes: []
+  - _ulid: 01KQ6MTXW31S0YZC1R5PFQ5YEZ
+    slugs: []
+    title: Review task-full-model-result-sink-interface
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ6MTXW3PKGKW5GSW5QK9ARB
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T04:58:19.395Z
+    examined_commit: e20213ae9f1e52182c6fa5b7fad587feaf949e93
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ6HR9XP4F7PGP4ZDYNSEPFG"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T04:58:19.395Z
+    updated_at: null
+    notes: []
