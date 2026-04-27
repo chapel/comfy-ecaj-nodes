@@ -7911,6 +7911,17 @@ reviews:
         runner: code-review
         created_at: 2026-04-27T20:57:10.162Z
         completed_at: 2026-04-27T20:57:10.162Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Fake Comfy root plus ecaj safetensors artifact exited 0; report identified FAKE_LOWVRAM,
+          cache_hit=true, recipe_hash='probe_hash', and no errors.
+        name: manual harness Comfy-shaped root probe
+        required: false
+        runner: manual-probe
+        created_at: 2026-04-27T20:57:10.465Z
+        completed_at: 2026-04-27T20:57:10.465Z
     events:
       - _ulid: 01KQ8BF1N3GHD5KFWSHGH6C7KQ
         actor: Jacob Chapel
@@ -7967,6 +7978,13 @@ reviews:
           status: fail
           name: manual validation behavior completeness
         timestamp: 2026-04-27T20:57:10.245Z
+      - _ulid: 01KQ8BPMMM1W8H9GT3K4C134B8
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: manual harness Comfy-shaped root probe
+        timestamp: 2026-04-27T20:57:10.548Z
     examined_commit: e8da6173778d6762451b3acb794f838f376da6c2
     external_links: []
     lifecycle_state: open
@@ -8004,5 +8022,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T20:53:01.731Z
-    updated_at: 2026-04-27T20:57:10.162Z
+    updated_at: 2026-04-27T20:57:10.465Z
     notes: []
