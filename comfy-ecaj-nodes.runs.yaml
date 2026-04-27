@@ -4980,7 +4980,7 @@ runs:
     completed_at: 2026-04-27T20:07:53.051Z
   - _ulid: 01KQ8998E83X6FV1XFBZ719JYN
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -4995,7 +4995,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T20:15:32.956Z
-        completed_at: 2026-04-27T20:15:32.956Z
+        completed_at: 2026-04-27T20:15:42.453Z
+        notes: "Friction: publication mode was pull_request, but the merge skill's detached-review section
+          emphasizes the manual_merge helper and does not give an explicit PR-mode path. I had to
+          infer that gh pr merge was the right completion action after checking review disposition
+          and PR CI. Secondary low-grade friction: kspec review workflow says run kspec validate,
+          but this project has known warnings and the actionable pass command is kspec validate
+          --warnings-ok."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T20:15:42.453Z
+        completed_at: 2026-04-27T20:15:42.453Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-04-27T20:14:54.920Z
