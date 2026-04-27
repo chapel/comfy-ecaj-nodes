@@ -299,6 +299,9 @@ features:
           The Exit node can produce a complete saved diffusion model artifact for a
           merge recipe and return a MODEL that behaves like a normally loaded ComfyUI
           diffusion model for downstream execution.
+        status:
+          maturity: draft
+          implementation: in_progress
         depends_on: []
         implements: []
         relates_to: []
