@@ -3355,7 +3355,7 @@ runs:
     completed_at: 2026-04-27T05:54:21.400Z
   - _ulid: 01KQ6SF92N9VADTWT950SR6PQ0
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -3371,7 +3371,19 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T06:20:06.110Z
-        completed_at: 2026-04-27T06:20:06.110Z
+        completed_at: 2026-04-27T06:20:16.276Z
+        notes: "High-confidence friction: (1) /tmp disk filling with orphaned safetensors test artifacts —
+          previous test sessions left ~30GB of tmp*.safetensors files in /tmp, causing ENOSPC that
+          silently suppressed all bash stdout/stderr. Systemic because pytest temp directories on
+          tmpfs accumulate across sessions. (2) kspec review get truncates thread bodies — review
+          had 3 blocker threads but thread content was cut off with no way to expand. Had to infer
+          full content from first line. This is systemic for any fix-cycle agent needing to read
+          review feedback. High-confidence success: reading all ACs and full review before starting
+          code changes — prevented false starts and ensured comprehensive fix."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T06:20:16.276Z
+        completed_at: 2026-04-27T06:20:16.276Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:19:20.533Z
