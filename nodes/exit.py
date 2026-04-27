@@ -33,6 +33,7 @@ from ..lib.persistence import (
     atomic_save,
     build_metadata,
     check_cache,
+    check_full_model_cache,
     collect_block_configs,
     compute_base_identity,
     compute_lora_stats,
@@ -42,6 +43,7 @@ from ..lib.persistence import (
     serialize_recipe,
     validate_model_name,
 )
+from ..lib.streaming_save import MaterializationSink
 from ..lib.recipe import (
     RecipeBase,
     RecipeCompose,
@@ -300,6 +302,37 @@ def _build_model_resolver() -> Callable[[str, str], str | None]:
     return resolver
 
 
+def _load_model_from_artifact(
+    save_path: str,
+    model_patcher: object,
+    storage_dtype: torch.dtype,
+) -> object:
+    """Load a full saved model artifact and return a patched ModelPatcher.
+
+    AC: @full-saved-model-output ac-return-loaded-model
+    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+
+    Loads affected keys from the artifact and installs them as set patches
+    on a cloned ModelPatcher.
+
+    Args:
+        save_path: Path to the full saved model artifact.
+        model_patcher: Original ModelPatcher to clone.
+        storage_dtype: Base model storage dtype.
+
+    Returns:
+        Cloned ModelPatcher with artifact weights as set patches.
+    """
+    from safetensors import safe_open
+
+    with safe_open(save_path, framework="pt") as f:
+        metadata = f.metadata()
+
+    affected = json.loads(metadata["__ecaj_affected_keys__"])
+    merged_state = load_affected_keys(save_path, affected)
+    return install_merged_patches(model_patcher, merged_state, storage_dtype)
+
+
 def _resolve_checkpoints_path(model_name: str) -> str:
     """Resolve a model name to a full path in the first checkpoints directory.
 
@@ -412,10 +445,12 @@ class WIDENExitNode:
         AC: @exit-node ac-7 — downstream LoRA patches apply additively
         AC: @exit-node ac-8 — patch tensors match base model dtype
         AC: @exit-model-persistence ac-1 through ac-14
+        AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+        AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
 
         Args:
             widen: Recipe tree root (should be RecipeMerge or RecipeBase)
-            save_model: Whether to save/cache the merged model
+            save_model: Whether to produce full saved model output
             model_name: Filename for the saved model
             save_workflow: Whether to embed workflow metadata
             prompt: ComfyUI prompt (hidden input)
@@ -432,6 +467,13 @@ class WIDENExitNode:
 
         # Quick check: must end in RecipeMerge for actual merging
         if isinstance(widen, RecipeBase):
+            if save_model:
+                # AC: @full-saved-model-output ac-no-op-produces-full-artifact
+                # No-op recipe in full mode: produce a full artifact with all base weights
+                return self._execute_full_model_noop(
+                    widen, model_name, save_workflow, enable_cache,
+                    extra_pnginfo,
+                )
             return (widen.model_patcher.clone(),)  # type: ignore[attr-defined]
 
         if not isinstance(widen, RecipeMerge):
@@ -440,251 +482,244 @@ class WIDENExitNode:
                 f"got {type(widen).__name__}. Connect a Merge node to Exit."
             )
 
-        # Build resolvers that search all ComfyUI directories
+        if save_model:
+            return self._execute_full_saved_model(
+                widen, model_name, save_workflow, enable_cache,
+                extra_pnginfo,
+            )
+        else:
+            return self._execute_patch_mode(
+                widen, enable_cache, save_model=False,
+            )
+
+    def _execute_full_model_noop(
+        self,
+        widen: RecipeBase,
+        model_name: str,
+        save_workflow: bool,
+        enable_cache: bool,
+        extra_pnginfo: object,
+    ) -> tuple[object]:
+        """Handle no-op recipe (RecipeBase) in full saved model mode.
+
+        AC: @full-saved-model-output ac-no-op-produces-full-artifact
+        AC: @full-saved-model-output ac-complete-artifact
+        """
+        model_patcher = widen.model_patcher
+        base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
+        storage_dtype = next(iter(base_state.values())).dtype
+
+        lora_path_resolver = _build_lora_resolver()
+        model_path_resolver = _build_model_resolver()
+        base_identity = compute_base_identity(base_state)
+        lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+
+        validated_name = validate_model_name(model_name)
+        save_path = _resolve_checkpoints_path(validated_name)
+        serialized = serialize_recipe(widen, base_identity, lora_stats)
+        recipe_hash = compute_recipe_hash(serialized)
+
+        # AC: @full-saved-model-output ac-cache-reuses-artifact
+        if enable_cache and check_full_model_cache(save_path, recipe_hash):
+            if ProgressBar is not None:
+                pbar = ProgressBar(1)
+                pbar.update(1)
+            return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+
+        # Build manifest from base_state — all keys, no affected keys
+        manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
+        workflow_json = (
+            json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
+        )
+        metadata = build_metadata(
+            serialized, recipe_hash, [], workflow_json, output_mode="full",
+        )
+
+        sink = MaterializationSink()
+        try:
+            sink.open(manifest, save_path, metadata)
+            for name in sorted(base_state.keys()):
+                sink.write_tensor(name, base_state[name])
+            sink.finalize(save_path)
+        except BaseException:
+            sink.abort()
+            raise
+
+        if ProgressBar is not None:
+            pbar = ProgressBar(1)
+            pbar.update(1)
+
+        return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+
+    def _execute_full_saved_model(
+        self,
+        widen: RecipeMerge,
+        model_name: str,
+        save_workflow: bool,
+        enable_cache: bool,
+        extra_pnginfo: object,
+    ) -> tuple[object]:
+        """Execute in full saved model mode — stream to artifact, return loaded model.
+
+        AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+        AC: @streaming-full-model-materialization ac-affected-results-released
+        AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+        AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+        AC: @streaming-full-model-materialization ac-full-cache-avoids-resident-payload
+        AC: @streaming-full-model-materialization ac-failed-materialization-releases-resident-payload
+        AC: @full-saved-model-output ac-complete-artifact
+        AC: @full-saved-model-output ac-return-loaded-model
+        AC: @full-saved-model-output ac-cache-reuses-artifact
+        AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+        AC: @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out
+        AC: @comfy-memory-manager-compatibility ac-memory-mode-preserved
+        """
         lora_path_resolver = _build_lora_resolver()
         model_path_resolver = _build_model_resolver()
 
-        # --- Shared setup: compute base_state ONCE ---
         model_patcher = walk_to_base(widen).model_patcher
         _unpatch_loaded_clones(model_patcher)
         base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
         storage_dtype = next(iter(base_state.values())).dtype
 
-        # Extract shape/size metadata so compile_batch_groups and preflight
-        # don't need to hold tensor refs after GPU eval completes.
-        # AC: @memory-management ac-13
         key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
         key_byte_sizes = {k: v.nelement() * v.element_size() for k, v in base_state.items()}
 
-        # --- Compute base_identity and lora_stats for both persistence and incremental cache ---
         base_identity = compute_base_identity(base_state)
         lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
 
-        # --- Persistence: pre-GPU cache check ---
-        save_path = serialized = recipe_hash = None
-        if save_model:
-            validated_name = validate_model_name(model_name)
-            save_path = _resolve_checkpoints_path(validated_name)
+        validated_name = validate_model_name(model_name)
+        save_path = _resolve_checkpoints_path(validated_name)
+        serialized = serialize_recipe(widen, base_identity, lora_stats)
+        recipe_hash = compute_recipe_hash(serialized)
 
-            serialized = serialize_recipe(widen, base_identity, lora_stats)
-            recipe_hash = compute_recipe_hash(serialized)
+        # AC: @full-saved-model-output ac-cache-reuses-artifact
+        # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+        # Full-mode cache: validate artifact metadata, load from artifact, no tensor payload
+        if enable_cache and check_full_model_cache(save_path, recipe_hash):
+            del base_state
+            if ProgressBar is not None:
+                pbar = ProgressBar(1)
+                pbar.update(1)
+            return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
 
-            cached_metadata = check_cache(save_path, recipe_hash)
-            if cached_metadata is not None:
-                # CACHE HIT — skip GPU entirely, no LoRA/model loading
-                del base_state  # Free dict refs before loading cached tensors
-                affected = json.loads(cached_metadata["__ecaj_affected_keys__"])
-                merged_state = load_affected_keys(save_path, affected)
-                if ProgressBar is not None:
-                    pbar = ProgressBar(1)
-                    pbar.update(1)
-                return (install_merged_patches(model_patcher, merged_state, storage_dtype),)
-
-        # --- Normal GPU pipeline ---
+        # --- GPU pipeline for full saved model mode ---
         analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
 
-        # AC: @full-model-execution ac-1
-        # AC: @recipe-domain-field ac-4
-        # Analyze recipe for full model checkpoints, passing domain for dispatch
         base = walk_to_base(widen)
-        domain = getattr(base, "domain", "diffusion")  # Backward compat
+        domain = getattr(base, "domain", "diffusion")
         model_analysis = analyze_recipe_models(
             widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
         )
 
+        sink = MaterializationSink()
         try:
             loader = analysis.loader
             set_affected = analysis.set_affected
             lora_affected_keys = analysis.affected_keys
             arch = analysis.arch
 
-            # AC: @full-model-execution ac-12
-            # Model affected keys (all diffusion model keys in both base and checkpoint)
             model_affected = model_analysis.model_affected
             model_loaders = model_analysis.model_loaders
             all_model_keys = model_analysis.all_model_keys
 
-            # Computation dtype is fp32 for numerical stability
             compute_dtype = torch.float32
-
-            # Get device for GPU computation
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
-            # AC: @full-model-execution ac-12
-            # For models-only recipes, process all diffusion keys in both base and model
-            # For mixed recipes, union of LoRA-affected and model-affected keys
             all_keys = set(base_state.keys())
             lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
-            model_keys = all_keys & all_model_keys  # Keys in both base and model
+            model_keys = all_keys & all_model_keys
             keys_to_process = lora_keys | model_keys
 
-            if not keys_to_process:
-                # No keys affected - return clone
-                return (model_patcher.clone(),)  # type: ignore[attr-defined]
+            # AC: @full-saved-model-output ac-no-op-produces-full-artifact
+            # Even with no affected keys, produce full artifact
+            affected_key_set = keys_to_process
 
-            # Build set_id_map from object ids to string keys
-            # This maps id(RecipeLoRA) -> str for evaluate_recipe
             set_id_map: dict[int, str] = {}
             for set_key, affected in set_affected.items():
-                # set_key is str(id(RecipeLoRA)), convert back to int
                 set_id = int(set_key)
                 set_id_map[set_id] = set_key
 
-            # Build model_id_map from object ids to string keys
-            # AC: @full-model-execution ac-2
             model_id_map: dict[int, str] = {}
             for model_key in model_affected.keys():
                 model_id = int(model_key)
                 model_id_map[model_id] = model_key
 
-            # Create WIDEN instance with t_factor from the root merge
-            # AC-6: Single-branch compose will be handled by evaluate_recipe
-            # dispatching to filter_delta for len(branches)==1
             widen_config = WIDENConfig(
                 t_factor=widen.t_factor,
                 dtype=compute_dtype,
             )
             widen_merger = WIDEN(widen_config)
 
-            # Group keys by OpSignature for batched evaluation
-            batch_groups = compile_batch_groups(
-                list(keys_to_process),
-                arch=arch,
-                key_shapes=key_shapes,
-            )
-
-            # Pre-compile recipe tree into flat evaluation plan (once)
-            # AC: @full-model-execution ac-2
             plan = compile_plan(widen, set_id_map, arch, model_id_map)
 
-            # --- Incremental cache: detect which blocks changed ---
-            # AC: @incremental-block-recompute ac-1 through ac-16
-            structural_fp = compute_structural_fingerprint(
-                widen, base_identity, lora_stats
+            # Build manifest for entire model (base + affected keys with final dtypes/shapes)
+            manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] = {}
+            for k, v in base_state.items():
+                manifest[k] = (v.dtype, tuple(v.shape))
+
+            workflow_json = (
+                json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
             )
-            current_block_configs = collect_block_configs(widen)
-            # AC: @cache-loader-metadata ac-1, ac-3
-            # Measure loader bytes at time of evaluation (before cache lookup).
-            current_loader_bytes = loader.loaded_bytes + sum(
-                ml.loaded_bytes for ml in model_loaders.values()
+            metadata = build_metadata(
+                serialized, recipe_hash, sorted(affected_key_set), workflow_json,
+                output_mode="full",
             )
-            # AC: @incremental-block-recompute ac-18
-            # When enable_cache=False, skip cache lookup entirely.
-            cached_entry = _incremental_cache.get(structural_fp) if enable_cache else None
-            incremental_hit = False
 
-            if (
-                cached_entry is not None
-                and cached_entry.storage_dtype == storage_dtype
-            ):
-                diff = compute_changed_blocks(
-                    cached_entry.block_configs, current_block_configs, arch
+            # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+            # Open sink and write header
+            sink.open(manifest, save_path, metadata)
+
+            # Pre-flight RAM check (reduced estimate — no merged_state accumulation)
+            if keys_to_process:
+                batch_groups = compile_batch_groups(
+                    list(keys_to_process), arch=arch, key_shapes=key_shapes,
                 )
-                if diff is not None:
-                    changed_blocks, changed_layer_types = diff
+            else:
+                batch_groups = {}
 
-                    if not changed_blocks and not changed_layer_types:
-                        # AC-2: Full cache hit — all keys identical
-                        merged_state = {
-                            k: v for k, v in cached_entry.merged_state.items()
-                        }
-                        incremental_hit = True
-                        batch_groups = {}  # Skip GPU loop entirely
-
-                        if ProgressBar is not None:
-                            pbar = ProgressBar(1)
-                            pbar.update(1)
-                    else:
-                        # AC-3, AC-5, AC-6, AC-15: Partial hit
-                        recompute_keys = filter_changed_keys(
-                            keys_to_process, changed_blocks,
-                            changed_layer_types, arch,
-                        )
-
-                        if not recompute_keys:
-                            # Edge case: changed blocks don't affect any keys
-                            merged_state = {
-                                k: v for k, v in cached_entry.merged_state.items()
-                            }
-                            incremental_hit = True
-                            batch_groups = {}  # Skip GPU loop
-                        else:
-                            # Start from cached state, recompute subset
-                            merged_state = {
-                                k: v for k, v in cached_entry.merged_state.items()
-                            }
-
-                            # Rebuild batch_groups for only changed keys
-                            batch_groups = compile_batch_groups(
-                                list(recompute_keys), arch=arch,
-                                key_shapes=key_shapes,
-                            )
-                            incremental_hit = True
-
-            # AC: @cache-loader-metadata ac-2
-            # Log cached loader_bytes on any incremental cache hit.
-            if incremental_hit and cached_entry is not None:
-                cached_lb = cached_entry.loader_bytes
-                logger.info(
-                    "Incremental cache hit: cached loader_bytes=%d bytes (%.1f MB)",
-                    cached_lb,
-                    cached_lb / (1024 * 1024),
-                )
-
-            if not incremental_hit:
-                merged_state = {}
-
-            # AC: @exit-node ac-9
-            # Pre-flight RAM check before GPU loop
             if batch_groups:
-                # Only count keys being processed — not the full base_state.
-                # LoRA merges typically affect a subset of keys.
-                processed_keys = {k for keys in batch_groups.values() for k in keys}
-                merged_state_bytes = sum(
-                    key_byte_sizes[k] for k in processed_keys
-                )
                 n_models = len(set_affected) + len(model_loaders)
-                # Use storage_dtype for CPU RAM estimate — base_stack is created
-                # in model dtype, not compute_dtype. compute_dtype is only for
-                # GPU tensors which don't count against system RAM.
                 storage_element_size = torch.finfo(storage_dtype).bits // 8
-                # Compute worst-case chunk bytes: pair each group's batch_size
-                # with its own shape (not max_batch * max_shape).
                 worst_chunk_bytes = max(
                     storage_element_size
                     * torch.Size(sig.shape).numel()
                     * compute_batch_size(sig.shape, n_models, compute_dtype)
                     for sig in batch_groups
                 )
+                # Full mode doesn't accumulate merged_state in RAM — tensors go to sink
                 check_ram_preflight(
-                    merged_state_bytes=merged_state_bytes,
+                    merged_state_bytes=worst_chunk_bytes,
                     worst_chunk_bytes=worst_chunk_bytes,
-                    save_model=save_model,
-                    loader_bytes=current_loader_bytes,
+                    save_model=True,
+                    loader_bytes=loader.loaded_bytes + sum(
+                        ml.loaded_bytes for ml in model_loaders.values()
+                    ),
                 )
 
-            # Phase 2: Batched GPU evaluation per group
-            # (skipped entirely on full cache hit)
-            _log_memory("before-gpu-eval")
+            # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+            # Evaluate affected groups and stream results into sink.
+            # All tensor names must be written in sorted order. We need to
+            # interleave base weights (unaffected) and affected tensors in
+            # sorted key order.
+
+            # Pre-evaluate all affected groups and collect results keyed by name.
+            # While this collects per-group results (not all-groups), the per-group
+            # results are freed after each group writes to the sink below.
+            _log_memory("before-gpu-eval-full")
+
+            # Evaluate affected tensors per batch group
+            affected_results: dict[str, torch.Tensor] = {}
             if batch_groups:
                 pbar_count = len(batch_groups)
                 pbar = ProgressBar(pbar_count) if ProgressBar is not None else None
 
                 for sig, group_keys in batch_groups.items():
-                    # Estimate batch size based on shape and VRAM
-                    # AC: @full-model-execution ac-13
-                    # Count both LoRA sets and model loaders for memory estimation
                     n_models = len(set_affected) + len(model_loaders)
                     batch_size = compute_batch_size(
-                        sig.shape,
-                        n_models,
-                        compute_dtype,
+                        sig.shape, n_models, compute_dtype,
                     )
 
-                    # Build evaluation function using pre-compiled plan
-                    # AC: @merge-block-config ac-1, ac-2
-                    # AC: @full-model-execution ac-3, ac-5
-                    # Pass arch, widen_config, and model_loaders
                     def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
                         def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
                             return execute_plan(
@@ -707,9 +742,6 @@ class WIDENExitNode:
                         arch, widen_config, model_loaders, domain,
                     )
 
-                    # Run chunked evaluation with OOM backoff
-                    # AC: @full-model-execution ac-8
-                    # OOM backoff retries at batch_size=1 (streaming loader re-reads)
                     group_base = {k: base_state[k] for k in group_keys}
                     group_results = chunked_evaluation(
                         keys=group_keys,
@@ -718,89 +750,300 @@ class WIDENExitNode:
                         batch_size=batch_size,
                         device=device,
                         dtype=compute_dtype,
-                        storage_dtype=storage_dtype,  # AC-8: match base model dtype
+                        storage_dtype=storage_dtype,
+                    )
+
+                    # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+                    # Hand completed group tensors to affected_results.
+                    # These will be written to the sink in sorted order below.
+                    affected_results.update(group_results)
+
+                    if pbar is not None:
+                        pbar.update(1)
+
+            _log_memory("after-gpu-eval-full")
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
+            # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+            # AC: @streaming-full-model-materialization ac-affected-results-released
+            # Write all tensors to sink in sorted key order, using affected results
+            # where available, base_state otherwise. Each tensor can be released
+            # after write_tensor returns.
+            sorted_all_keys = sorted(manifest.keys())
+            for key in sorted_all_keys:
+                if key in affected_results:
+                    sink.write_tensor(key, affected_results[key])
+                    # AC: @streaming-full-model-materialization ac-affected-results-released
+                    del affected_results[key]
+                else:
+                    sink.write_tensor(key, base_state[key])
+
+            # Free base_state and affected_results before finalize
+            del base_state
+            affected_results.clear()
+
+            sink.finalize(save_path)
+            _log_memory("after-finalize-full")
+
+            # Offload GPU models
+            try:
+                from comfy.model_management import (
+                    free_memory,
+                    get_torch_device,
+                    soft_empty_cache,
+                )
+                free_memory(1e30, get_torch_device())
+                soft_empty_cache()
+            except (ImportError, AttributeError):
+                pass
+
+            # AC: @streaming-full-model-materialization ac-full-cache-avoids-resident-payload
+            # Full mode does NOT store affected tensor payload in _incremental_cache.
+            # Cache reuse is artifact-backed (check_full_model_cache).
+            if not enable_cache:
+                _incremental_cache.clear()
+
+        except BaseException:
+            # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+            # AC: @streaming-full-model-materialization ac-failed-materialization-releases-resident-payload
+            sink.abort()
+            raise
+        finally:
+            loader.cleanup()
+            for model_loader in model_analysis.model_loaders.values():
+                model_loader.cleanup()
+
+        # AC: @full-saved-model-output ac-return-loaded-model
+        # Return MODEL loaded from the saved artifact
+        return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+
+    def _execute_patch_mode(
+        self,
+        widen: RecipeMerge,
+        enable_cache: bool,
+        save_model: bool = False,
+    ) -> tuple[object]:
+        """Execute in patch mode — dict-returning evaluation, set-patch installation.
+
+        This preserves the original patch-mode behavior unchanged.
+        """
+        lora_path_resolver = _build_lora_resolver()
+        model_path_resolver = _build_model_resolver()
+
+        model_patcher = walk_to_base(widen).model_patcher
+        _unpatch_loaded_clones(model_patcher)
+        base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
+        storage_dtype = next(iter(base_state.values())).dtype
+
+        key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
+        key_byte_sizes = {k: v.nelement() * v.element_size() for k, v in base_state.items()}
+
+        base_identity = compute_base_identity(base_state)
+        lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+
+        # --- Normal GPU pipeline ---
+        analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
+
+        base = walk_to_base(widen)
+        domain = getattr(base, "domain", "diffusion")
+        model_analysis = analyze_recipe_models(
+            widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
+        )
+
+        try:
+            loader = analysis.loader
+            set_affected = analysis.set_affected
+            lora_affected_keys = analysis.affected_keys
+            arch = analysis.arch
+
+            model_affected = model_analysis.model_affected
+            model_loaders = model_analysis.model_loaders
+            all_model_keys = model_analysis.all_model_keys
+
+            compute_dtype = torch.float32
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+
+            all_keys = set(base_state.keys())
+            lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
+            model_keys = all_keys & all_model_keys
+            keys_to_process = lora_keys | model_keys
+
+            if not keys_to_process:
+                return (model_patcher.clone(),)  # type: ignore[attr-defined]
+
+            set_id_map: dict[int, str] = {}
+            for set_key, affected in set_affected.items():
+                set_id = int(set_key)
+                set_id_map[set_id] = set_key
+
+            model_id_map: dict[int, str] = {}
+            for model_key in model_affected.keys():
+                model_id = int(model_key)
+                model_id_map[model_id] = model_key
+
+            widen_config = WIDENConfig(
+                t_factor=widen.t_factor,
+                dtype=compute_dtype,
+            )
+            widen_merger = WIDEN(widen_config)
+
+            batch_groups = compile_batch_groups(
+                list(keys_to_process), arch=arch, key_shapes=key_shapes,
+            )
+
+            plan = compile_plan(widen, set_id_map, arch, model_id_map)
+
+            # --- Incremental cache: detect which blocks changed ---
+            structural_fp = compute_structural_fingerprint(
+                widen, base_identity, lora_stats
+            )
+            current_block_configs = collect_block_configs(widen)
+            current_loader_bytes = loader.loaded_bytes + sum(
+                ml.loaded_bytes for ml in model_loaders.values()
+            )
+            cached_entry = _incremental_cache.get(structural_fp) if enable_cache else None
+            incremental_hit = False
+
+            if (
+                cached_entry is not None
+                and cached_entry.storage_dtype == storage_dtype
+            ):
+                diff = compute_changed_blocks(
+                    cached_entry.block_configs, current_block_configs, arch
+                )
+                if diff is not None:
+                    changed_blocks, changed_layer_types = diff
+
+                    if not changed_blocks and not changed_layer_types:
+                        merged_state = {
+                            k: v for k, v in cached_entry.merged_state.items()
+                        }
+                        incremental_hit = True
+                        batch_groups = {}
+
+                        if ProgressBar is not None:
+                            pbar = ProgressBar(1)
+                            pbar.update(1)
+                    else:
+                        recompute_keys = filter_changed_keys(
+                            keys_to_process, changed_blocks,
+                            changed_layer_types, arch,
+                        )
+
+                        if not recompute_keys:
+                            merged_state = {
+                                k: v for k, v in cached_entry.merged_state.items()
+                            }
+                            incremental_hit = True
+                            batch_groups = {}
+                        else:
+                            merged_state = {
+                                k: v for k, v in cached_entry.merged_state.items()
+                            }
+                            batch_groups = compile_batch_groups(
+                                list(recompute_keys), arch=arch,
+                                key_shapes=key_shapes,
+                            )
+                            incremental_hit = True
+
+            if incremental_hit and cached_entry is not None:
+                cached_lb = cached_entry.loader_bytes
+                logger.info(
+                    "Incremental cache hit: cached loader_bytes=%d bytes (%.1f MB)",
+                    cached_lb,
+                    cached_lb / (1024 * 1024),
+                )
+
+            if not incremental_hit:
+                merged_state = {}
+
+            if batch_groups:
+                processed_keys = {k for keys in batch_groups.values() for k in keys}
+                merged_state_bytes = sum(
+                    key_byte_sizes[k] for k in processed_keys
+                )
+                n_models = len(set_affected) + len(model_loaders)
+                storage_element_size = torch.finfo(storage_dtype).bits // 8
+                worst_chunk_bytes = max(
+                    storage_element_size
+                    * torch.Size(sig.shape).numel()
+                    * compute_batch_size(sig.shape, n_models, compute_dtype)
+                    for sig in batch_groups
+                )
+                check_ram_preflight(
+                    merged_state_bytes=merged_state_bytes,
+                    worst_chunk_bytes=worst_chunk_bytes,
+                    save_model=save_model,
+                    loader_bytes=current_loader_bytes,
+                )
+
+            _log_memory("before-gpu-eval")
+            if batch_groups:
+                pbar_count = len(batch_groups)
+                pbar = ProgressBar(pbar_count) if ProgressBar is not None else None
+
+                for sig, group_keys in batch_groups.items():
+                    n_models = len(set_affected) + len(model_loaders)
+                    batch_size = compute_batch_size(
+                        sig.shape, n_models, compute_dtype,
+                    )
+
+                    def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
+                        def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
+                            return execute_plan(
+                                plan=p,
+                                keys=keys,
+                                base_batch=base_batch,
+                                loader=ldr,
+                                widen=wdn,
+                                device=dev,
+                                dtype=dtype,
+                                arch=architecture,
+                                widen_config=wcfg,
+                                model_loaders=mdl_ldrs,
+                                domain=dom,
+                            )
+                        return eval_fn
+
+                    eval_fn = make_eval_fn(
+                        plan, loader, widen_merger, device, compute_dtype,
+                        arch, widen_config, model_loaders, domain,
+                    )
+
+                    group_base = {k: base_state[k] for k in group_keys}
+                    group_results = chunked_evaluation(
+                        keys=group_keys,
+                        base_tensors=group_base,
+                        eval_fn=eval_fn,
+                        batch_size=batch_size,
+                        device=device,
+                        dtype=compute_dtype,
+                        storage_dtype=storage_dtype,
                     )
 
                     merged_state.update(group_results)
 
-                    # AC-9: Update progress after each batch group
                     if pbar is not None:
                         pbar.update(1)
 
-            # AC: @memory-management ac-2
-            # Cleanup after all groups complete (OOM backoff handles per-group pressure)
             _log_memory("after-gpu-eval")
             gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
-            # AC: @memory-management ac-13
-            # Free base_state after GPU eval completes — no longer needed.
-            # Re-acquired fresh below only if save_model requires it.
             del base_state
-
-            # --- Persistence: save after GPU, before cache write ---
-            _log_memory("before-save")
-            # AC: @incremental-block-recompute ac-10
-            # Moved before cache write so base_state can be freed early.
-            if save_model and save_path is not None:
-                # AC: @memory-management ac-13
-                # Re-acquire state dict fresh for save only.
-                save_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
-                # AC: @memory-management ac-6
-                # Overlay merged keys into save_state by reference (no copy).
-                # merged_state tensors are already CPU + storage_dtype from
-                # chunked_evaluation, so no conversion needed.
-                for key, tensor in merged_state.items():
-                    save_state[key] = tensor
-                workflow_json = (
-                    json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
-                )
-                metadata = build_metadata(
-                    serialized, recipe_hash, sorted(merged_state.keys()), workflow_json
-                )
-                atomic_save(save_state, save_path, metadata)
-                del save_state
-                _log_memory("after-save")
-
-            # AC: @memory-management ac-8
-            # After save completes, offload GPU models and clear VRAM cache.
-            # Done after del base_state so refs don't hold GPU memory.
-            if save_model:
-                try:
-                    from comfy.model_management import (
-                        free_memory,
-                        get_torch_device,
-                        soft_empty_cache,
-                    )
-                    free_memory(1e30, get_torch_device())
-                    soft_empty_cache()
-                except (ImportError, AttributeError):
-                    pass
-                _log_memory("after-save-offload")
 
             # AC: @incremental-block-recompute ac-1, ac-16, ac-17, ac-18
             # AC: @memory-management ac-6
-            # Store result in incremental cache (atomic swap).
-            # Build new entry fully, then swap. On exception above,
-            # old entry is preserved (we never reach this point).
-            # Skip when full cache hit (no GPU work done).
-            # Tensors stored by reference — no clone. Downstream consumers
-            # (install_merged_patches, persistence) are read-only.
-            # When enable_cache=False, evict existing entries instead.
+            # Patch-mode incremental cache storage
             if not enable_cache:
                 _incremental_cache.clear()
             elif batch_groups or not incremental_hit:
-                # AC: @memory-management ac-12, ac-14
-                # Check if RAM is too low to safely store the cache entry.
-                # Cache storage is a pointer transfer (not a new allocation) —
-                # merged_state tensors are already resident in process memory.
-                # Evict only when MemAvailable is below a safety margin for the
-                # next execution's new allocations, not a multiple of cache size.
                 avail = get_available_ram_bytes()
                 _CACHE_EVICTION_MARGIN = 512 * 1024 * 1024  # 512 MB
                 if avail < _CACHE_EVICTION_MARGIN:
-                    # Evict instead of storing — RAM is too tight for next run
                     logger.info(
                         "Cache eviction: avail=%d MB < safety margin=%d MB; "
                         "evicting instead of storing",
@@ -809,7 +1052,6 @@ class WIDENExitNode:
                     )
                     _incremental_cache.clear()
                 else:
-                    # AC: @cache-loader-metadata ac-1, ac-3
                     new_entry = _CacheEntry(
                         structural_fingerprint=structural_fp,
                         block_configs=current_block_configs,
@@ -831,19 +1073,9 @@ class WIDENExitNode:
             _log_memory("before-cache-write")
 
         finally:
-            # AC: @memory-management ac-3
-            # Cleanup loader resources (delta caches and file handles)
             loader.cleanup()
-
-            # AC: @full-model-execution ac-7
-            # Cleanup model loaders (close file handles)
             for model_loader in model_analysis.model_loaders.values():
                 model_loader.cleanup()
 
-        # Phase 3: Install merged weights as set patches
-        # AC-1: Returns MODEL (ModelPatcher clone) with set patches
-        # AC-7: Set patches work with downstream LoRA patches additively
-        # AC-8: Patch tensors match base model dtype (handled by install_merged_patches)
         result = install_merged_patches(model_patcher, merged_state, storage_dtype)
-
         return (result,)

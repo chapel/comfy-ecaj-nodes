@@ -13,11 +13,16 @@ AC: @memory-management ac-7
 from __future__ import annotations
 
 import json
+import logging
+import os
+import secrets
 import struct
 
 import torch
 
-__all__ = ["stream_save_file"]
+logger = logging.getLogger("ecaj.streaming_save")
+
+__all__ = ["stream_save_file", "MaterializationSink"]
 
 # Maps torch dtype → safetensors dtype string.
 # Must mirror safetensors' dtype table exactly.
@@ -135,3 +140,159 @@ def stream_save_file(
         f.write(padded)
         for name in sorted_names:
             f.write(_tensor_bytes(tensors[name]))
+
+
+class MaterializationSink:
+    """Incremental safetensors writer for full saved model materialization.
+
+    AC: @streaming-full-model-materialization ac-direct-artifact-handoff
+    AC: @streaming-full-model-materialization ac-affected-results-released
+    AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+    AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+
+    The sink writes a safetensors file incrementally:
+    1. open() — compute and write the header from a manifest of all keys
+    2. write_tensor(name, tensor) — write one tensor's data (must be in sorted-name order)
+    3. finalize(save_path) — fsync and atomically replace save_path
+    4. abort() — delete the temp file on failure
+
+    Tensors can be released after write_tensor returns — they are not retained.
+    """
+
+    def __init__(self) -> None:
+        self._file = None
+        self._tmp_path: str | None = None
+        self._sorted_names: list[str] | None = None
+        self._write_index: int = 0
+        self._finalized: bool = False
+        self._aborted: bool = False
+
+    def open(
+        self,
+        manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]],
+        save_path: str,
+        metadata: dict[str, str] | None = None,
+    ) -> None:
+        """Write the safetensors header from a manifest of key→(dtype, shape).
+
+        Args:
+            manifest: Dict of tensor_name → (dtype, shape) for every tensor
+                      that will be written (base + affected).
+            save_path: Target file path (used to determine temp file location).
+            metadata: Optional safetensors metadata dict.
+        """
+        directory = os.path.dirname(save_path) or "."
+        suffix = secrets.token_hex(4)
+        self._tmp_path = os.path.join(
+            directory, f".ecaj_tmp_{suffix}_{os.path.basename(save_path)}"
+        )
+
+        self._sorted_names = sorted(manifest.keys())
+
+        # Compute header
+        header_info: dict[str, dict] = {}
+        current_offset = 0
+        for name in self._sorted_names:
+            dt, shape = manifest[name]
+            dtype_str = _DTYPE_MAP[dt]
+            elem_size = torch.tensor([], dtype=dt).element_size()
+            numel = 1
+            for d in shape:
+                numel *= d
+            nbytes = numel * elem_size
+            header_info[name] = {
+                "dtype": dtype_str,
+                "shape": list(shape),
+                "data_offsets": [current_offset, current_offset + nbytes],
+            }
+            current_offset += nbytes
+
+        # Build padded header
+        combined: dict = {}
+        if metadata:
+            combined["__metadata__"] = metadata
+        combined.update(header_info)
+        header_json = json.dumps(combined, separators=(",", ":")).encode()
+        pad = (8 - ((8 + len(header_json)) % 8)) % 8
+        padded = header_json + b" " * pad
+
+        self._file = open(self._tmp_path, "wb")
+        self._file.write(struct.pack("<Q", len(padded)))
+        self._file.write(padded)
+        self._write_index = 0
+
+    def write_tensor(self, name: str, tensor: torch.Tensor) -> None:
+        """Write a single tensor's data to the file.
+
+        Must be called in sorted-name order matching the manifest.
+        The tensor can be released after this call returns.
+
+        Args:
+            name: Tensor name (must match the next expected name in sorted order).
+            tensor: The tensor data to write.
+
+        Raises:
+            RuntimeError: If called out of order or after finalize/abort.
+        """
+        if self._file is None or self._sorted_names is None:
+            raise RuntimeError("MaterializationSink not open")
+        if self._finalized or self._aborted:
+            raise RuntimeError("MaterializationSink already finalized or aborted")
+        expected = self._sorted_names[self._write_index]
+        if name != expected:
+            raise RuntimeError(
+                f"write_tensor called out of order: expected {expected!r}, got {name!r}"
+            )
+        self._file.write(_tensor_bytes(tensor))
+        self._write_index += 1
+
+    def finalize(self, save_path: str) -> None:
+        """Flush, fsync, and atomically replace save_path with the completed file.
+
+        AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+
+        Args:
+            save_path: Target file path to atomically replace.
+
+        Raises:
+            RuntimeError: If not all tensors were written, or already finalized.
+        """
+        if self._file is None or self._sorted_names is None:
+            raise RuntimeError("MaterializationSink not open")
+        if self._finalized or self._aborted:
+            raise RuntimeError("MaterializationSink already finalized or aborted")
+        if self._write_index != len(self._sorted_names):
+            raise RuntimeError(
+                f"Cannot finalize: wrote {self._write_index}/{len(self._sorted_names)} tensors"
+            )
+
+        self._file.flush()
+        os.fsync(self._file.fileno())
+        self._file.close()
+        self._file = None
+
+        os.replace(self._tmp_path, save_path)
+        self._finalized = True
+        logger.info("MaterializationSink finalized: %s", save_path)
+
+    def abort(self) -> None:
+        """Clean up the temp file without replacing the target.
+
+        AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+
+        Safe to call multiple times. Safe to call after finalize (no-op).
+        """
+        if self._finalized:
+            return
+        self._aborted = True
+        if self._file is not None:
+            try:
+                self._file.close()
+            except OSError:
+                pass
+            self._file = None
+        if self._tmp_path is not None:
+            try:
+                os.unlink(self._tmp_path)
+            except OSError:
+                pass

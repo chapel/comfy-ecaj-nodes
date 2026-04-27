@@ -26,6 +26,7 @@ __all__ = [
     "atomic_save",
     "build_metadata",
     "check_cache",
+    "check_full_model_cache",
     "collect_block_configs",
     "compute_base_identity",
     "compute_lora_stats",
@@ -372,16 +373,19 @@ def build_metadata(
     recipe_hash: str,
     affected_keys: list[str],
     workflow_json: str | None = None,
+    output_mode: str = "patch",
 ) -> dict[str, str]:
     """Assemble safetensors metadata dict.
 
     AC: @exit-model-persistence ac-6, ac-13, ac-14
+    AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
 
     Args:
         serialized: Deterministic JSON recipe
         recipe_hash: SHA-256 of serialized
         affected_keys: Sorted list of keys that were merged (not base-only)
         workflow_json: Optional workflow JSON string
+        output_mode: "patch" or "full" — stored in metadata for cache validation
 
     Returns:
         Metadata dict with string values (safetensors requirement)
@@ -391,10 +395,56 @@ def build_metadata(
         "__ecaj_recipe__": serialized,
         "__ecaj_recipe_hash__": recipe_hash,
         "__ecaj_affected_keys__": json.dumps(affected_keys),
+        "__ecaj_output_mode__": output_mode,
     }
     if workflow_json is not None:
         metadata["__ecaj_workflow__"] = workflow_json
     return metadata
+
+
+def check_full_model_cache(save_path: str, expected_hash: str) -> bool:
+    """Check if a saved artifact is a valid full-model cache hit.
+
+    AC: @full-saved-model-output ac-cache-reuses-artifact
+    AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+
+    Validates:
+    - File exists
+    - Has ecaj metadata
+    - Recipe hash matches
+    - Output mode is "full" (not "patch")
+
+    Args:
+        save_path: Path to the safetensors file
+        expected_hash: Expected recipe hash
+
+    Returns:
+        True if the artifact is a valid full-model cache hit
+    """
+    if not os.path.exists(save_path):
+        return False
+
+    from safetensors import safe_open
+
+    try:
+        with safe_open(save_path, framework="pt") as f:
+            metadata = f.metadata()
+    except Exception:
+        return False
+
+    if metadata is None or "__ecaj_version__" not in metadata:
+        return False
+
+    stored_hash = metadata.get("__ecaj_recipe_hash__", "")
+    if stored_hash != expected_hash:
+        return False
+
+    stored_mode = metadata.get("__ecaj_output_mode__", "")
+    if stored_mode != "full":
+        return False
+
+    return True
 
 
 def atomic_save(
