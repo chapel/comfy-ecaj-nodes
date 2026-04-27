@@ -4307,6 +4307,12 @@ reviews:
         payload:
           thread_ulid: 01KQ829Y9WRGZWQJ4DAQW403S1
         timestamp: 2026-04-27T18:26:54.327Z
+      - _ulid: 01KQ833JRCDD3T2VRCVJR29JZT
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ829YGB4DX060SM3TA9RE86
+        timestamp: 2026-04-27T18:26:57.421Z
     examined_commit: 2564ca6e52b64b52693022dda5479761d0c66018
     external_links: []
     lifecycle_state: closed
@@ -4367,6 +4373,13 @@ reviews:
               process-resident tensor cache payloads behind, violating the task requirement that
               enable_cache=False evicts in-memory cache entries."
             created_at: 2026-04-27T18:12:57.484Z
+          - _ulid: 01KQ833JPTT1AGV5F1709R8FCW
+            author: "@claude"
+            body: "Fixed: _execute_full_model_noop now calls _incremental_cache.clear() when enable_cache=False,
+              before the materialization path. Added TestNoopEnableCacheFalseEvicts test that
+              pre-populates cache with a sentinel, runs RecipeBase full mode with
+              enable_cache=False, and verifies cache is empty after."
+            created_at: 2026-04-27T18:26:57.369Z
         kind: blocker
       - _ulid: 01KQ829YGD1PNRYKT974M91GM1
         anchor:
@@ -4396,5 +4409,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T18:13:09.268Z
     created_at: 2026-04-27T18:08:52.979Z
-    updated_at: 2026-04-27T18:26:54.280Z
+    updated_at: 2026-04-27T18:26:57.369Z
     notes: []
