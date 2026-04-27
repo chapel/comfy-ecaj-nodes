@@ -37,3 +37,14 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T05:08:41.591Z
+  - _ulid: 01KQ6NWE2D1SK8NKWB4K1QC298
+    content: "Fix cycle 1: addressed blocker — validation errors now poison the writer. Added _failed
+      flag set on any validation error in write_tensor(), which also immediately calls abort() to
+      cleanup temp file. finalize() independently checks _failed and refuses. Extracted validation
+      into _validate_tensor() helper. Added 6 new behavioral tests:
+      duplicate/wrong_shape/wrong_dtype/unexpected_key all prevent finalize, plus tests for blocking
+      further writes and immediate temp cleanup. All 21 focused tests pass, full suite (1228)
+      passes, ruff clean. Re-verified all ACs for ac-incomplete-write-not-reused."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T05:16:37.325Z
