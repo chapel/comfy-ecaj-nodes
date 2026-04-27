@@ -634,3 +634,164 @@ class TestAtomicSave:
             saved_meta = f.metadata()
         assert saved_meta["__ecaj_version__"] == "1"
         assert saved_meta["__ecaj_recipe_hash__"] == "test_hash"
+
+
+# =============================================================================
+# AC: @full-saved-model-output ac-cache-reuses-artifact
+# Mode-aware artifact kind metadata and cache checks
+# =============================================================================
+
+
+class TestArtifactKindMetadata:
+    """AC: @full-saved-model-output ac-cache-reuses-artifact
+
+    build_metadata with artifact_kind includes __ecaj_artifact_kind__ in
+    the metadata dict. check_cache with artifact_kind only returns a cache
+    hit when the stored kind matches.
+    """
+
+    def _make_cached_file(self, path, recipe_hash="abc123", artifact_kind=None):
+        """Helper to create an ecaj-cached safetensors file with optional kind."""
+        tensors = {"key_a": torch.randn(4, 4)}
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": recipe_hash,
+            "__ecaj_affected_keys__": '["key_a"]',
+        }
+        if artifact_kind is not None:
+            metadata["__ecaj_artifact_kind__"] = artifact_kind
+        save_file(tensors, str(path), metadata=metadata)
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_build_metadata_includes_artifact_kind(self):
+        """build_metadata with artifact_kind stores __ecaj_artifact_kind__."""
+        metadata = build_metadata(
+            "{}", "abc", ["k"], artifact_kind="full_model"
+        )
+        assert metadata["__ecaj_artifact_kind__"] == "full_model"
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_build_metadata_omits_kind_when_none(self):
+        """build_metadata without artifact_kind omits __ecaj_artifact_kind__."""
+        metadata = build_metadata("{}", "abc", ["k"])
+        assert "__ecaj_artifact_kind__" not in metadata
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_hit_matching_kind(self, tmp_path):
+        """Cache hit when recipe hash and artifact kind both match."""
+        path = tmp_path / "model.safetensors"
+        self._make_cached_file(path, "abc123", artifact_kind="full_model")
+        result = check_cache(str(path), "abc123", artifact_kind="full_model")
+        assert result is not None
+        assert result["__ecaj_artifact_kind__"] == "full_model"
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_miss_mismatched_kind(self, tmp_path):
+        """Cache miss when recipe hash matches but artifact kind differs."""
+        path = tmp_path / "model.safetensors"
+        self._make_cached_file(path, "abc123", artifact_kind="full_model")
+        result = check_cache(str(path), "abc123", artifact_kind="patch_output")
+        assert result is None
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_miss_missing_kind_in_file(self, tmp_path):
+        """Cache miss when kind is requested but file has no artifact kind (legacy)."""
+        path = tmp_path / "model.safetensors"
+        self._make_cached_file(path, "abc123")  # No artifact_kind
+        result = check_cache(str(path), "abc123", artifact_kind="full_model")
+        assert result is None
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_hit_no_kind_requested_legacy_file(self, tmp_path):
+        """Backward compat: cache hit when no kind requested and file has no kind."""
+        path = tmp_path / "model.safetensors"
+        self._make_cached_file(path, "abc123")  # No artifact_kind
+        result = check_cache(str(path), "abc123")  # No artifact_kind
+        assert result is not None
+        assert result["__ecaj_recipe_hash__"] == "abc123"
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_hit_no_kind_requested_file_has_kind(self, tmp_path):
+        """Backward compat: cache hit when no kind requested even if file has kind."""
+        path = tmp_path / "model.safetensors"
+        self._make_cached_file(path, "abc123", artifact_kind="full_model")
+        result = check_cache(str(path), "abc123")  # No artifact_kind filter
+        assert result is not None
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_non_ecaj_file_raises_with_kind(self, tmp_path):
+        """Non-ecaj file still raises ValueError even when kind is specified."""
+        path = tmp_path / "model.safetensors"
+        save_file({"key_a": torch.randn(4, 4)}, str(path))
+        with pytest.raises(ValueError, match="not an ecaj-saved model"):
+            check_cache(str(path), "abc123", artifact_kind="full_model")
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_miss_wrong_hash_right_kind(self, tmp_path):
+        """Cache miss when kind matches but recipe hash differs."""
+        path = tmp_path / "model.safetensors"
+        self._make_cached_file(path, "abc123", artifact_kind="full_model")
+        result = check_cache(str(path), "different", artifact_kind="full_model")
+        assert result is None
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_miss_unknown_schema_version(self, tmp_path):
+        """Cache miss when ecaj file has an unknown/future schema version."""
+        path = tmp_path / "model.safetensors"
+        tensors = {"key_a": torch.randn(4, 4)}
+        metadata = {
+            "__ecaj_version__": "999",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": '["key_a"]',
+            "__ecaj_artifact_kind__": "full_model",
+        }
+        save_file(tensors, str(path), metadata=metadata)
+        result = check_cache(str(path), "abc123", artifact_kind="full_model")
+        assert result is None
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_miss_unknown_version_without_kind(self, tmp_path):
+        """Cache miss for unknown version even when no artifact_kind requested."""
+        path = tmp_path / "model.safetensors"
+        tensors = {"key_a": torch.randn(4, 4)}
+        metadata = {
+            "__ecaj_version__": "999",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": '["key_a"]',
+        }
+        save_file(tensors, str(path), metadata=metadata)
+        result = check_cache(str(path), "abc123")
+        assert result is None
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_miss_full_model_missing_affected_keys(self, tmp_path):
+        """Cache miss when full_model file is missing __ecaj_affected_keys__."""
+        path = tmp_path / "model.safetensors"
+        tensors = {"key_a": torch.randn(4, 4)}
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_artifact_kind__": "full_model",
+        }
+        save_file(tensors, str(path), metadata=metadata)
+        result = check_cache(str(path), "abc123", artifact_kind="full_model")
+        assert result is None
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_cache_miss_full_model_missing_recipe(self, tmp_path):
+        """Cache miss when full_model file is missing __ecaj_recipe__."""
+        path = tmp_path / "model.safetensors"
+        tensors = {"key_a": torch.randn(4, 4)}
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": '["key_a"]',
+            "__ecaj_artifact_kind__": "full_model",
+        }
+        save_file(tensors, str(path), metadata=metadata)
+        result = check_cache(str(path), "abc123", artifact_kind="full_model")
+        assert result is None

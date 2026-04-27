@@ -867,6 +867,7 @@ class TestSaveModelCacheHit:
             "__ecaj_recipe__": "{}",
             "__ecaj_recipe_hash__": "will_match",
             "__ecaj_affected_keys__": f'["{key}"]',
+            "__ecaj_artifact_kind__": "full_model",
         }
         save_file(cached_tensors, str(cached_path), metadata=cached_metadata)
 
@@ -1007,6 +1008,57 @@ class TestSaveModelCacheMiss:
 
             mock_mat_cls.assert_called_once()
             mock_mat_instance.finalize.assert_called_once()
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    def test_materialization_metadata_includes_artifact_kind(
+        self, mock_model_patcher, tmp_path
+    ):
+        """Full saved model materialization metadata includes artifact_kind='full_model'."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        affected_key = "diffusion_model.input_blocks.0.0.weight"
+
+        node = WIDENExitNode()
+
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.return_value = {}
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_cache", return_value=None),  # cache miss
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch(
+                "nodes.exit.CheckpointMaterializationSink",
+                return_value=mock_mat_instance,
+            ) as mock_mat_cls,
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+            node.execute(merge, save_model=True, model_name="model")
+
+            # Verify materialization metadata includes artifact_kind
+            metadata = mock_mat_cls.call_args.kwargs["metadata"]
+            assert metadata["__ecaj_artifact_kind__"] == "full_model"
 
 
 # =============================================================================

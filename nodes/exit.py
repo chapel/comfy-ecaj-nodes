@@ -470,7 +470,7 @@ class WIDENExitNode:
             serialized = serialize_recipe(widen, base_identity, lora_stats)
             recipe_hash = compute_recipe_hash(serialized)
 
-            cached_metadata = check_cache(save_path, recipe_hash)
+            cached_metadata = check_cache(save_path, recipe_hash, artifact_kind="full_model")
             if cached_metadata is not None:
                 # CACHE HIT — skip GPU entirely, no LoRA/model loading
                 del base_state  # Free dict refs before loading cached tensors
@@ -684,7 +684,8 @@ class WIDENExitNode:
                     json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
                 )
                 save_metadata = build_metadata(
-                    serialized, recipe_hash, sorted(keys_to_process), workflow_json
+                    serialized, recipe_hash, sorted(keys_to_process), workflow_json,
+                    artifact_kind="full_model",
                 )
                 mat_sink = CheckpointMaterializationSink(
                     base_state=base_state,

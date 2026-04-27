@@ -39,6 +39,23 @@ __all__ = [
 # Current metadata schema version
 _ECAJ_VERSION = "1"
 
+# Metadata schema versions that this code can safely interpret.
+# A cached file whose __ecaj_version__ is not in this set is treated as a
+# cache miss — the file may have been written by a newer ecaj release whose
+# metadata layout is incompatible.
+_COMPATIBLE_VERSIONS: frozenset[str] = frozenset({"1"})
+
+# Required metadata keys per artifact kind.  When check_cache is called with
+# an artifact_kind, the cached file must contain every key listed here for
+# that kind; missing any of them makes the file an incompatible cache miss
+# rather than a usable hit.
+_REQUIRED_METADATA_BY_KIND: dict[str, tuple[str, ...]] = {
+    "full_model": (
+        "__ecaj_affected_keys__",
+        "__ecaj_recipe__",
+    ),
+}
+
 
 def validate_model_name(name: str) -> str:
     """Validate and normalize a model filename.
@@ -300,17 +317,35 @@ def compute_recipe_hash(serialized: str) -> str:
     return hashlib.sha256(serialized.encode()).hexdigest()
 
 
-def check_cache(save_path: str, expected_hash: str) -> dict | None:
-    """Check if a cached model matches the expected recipe hash.
+def check_cache(
+    save_path: str,
+    expected_hash: str,
+    artifact_kind: str | None = None,
+) -> dict | None:
+    """Check if a cached model matches the expected recipe hash and artifact kind.
 
     AC: @exit-model-persistence ac-3, ac-4, ac-9
+    AC: @full-saved-model-output ac-cache-reuses-artifact
 
     Reads safetensors header only (cheap). Returns metadata on hash match,
     None on mismatch or missing file. Raises on non-ecaj files.
 
+    Validates schema compatibility: files whose ``__ecaj_version__`` is not
+    in ``_COMPATIBLE_VERSIONS`` are treated as cache misses.
+
+    When *artifact_kind* is provided, the cached file must also contain a
+    matching ``__ecaj_artifact_kind__`` entry and all metadata keys listed
+    in ``_REQUIRED_METADATA_BY_KIND`` for that kind.  A file with the right
+    hash but a missing/mismatched kind or missing required metadata is
+    treated as a cache miss (returns ``None``), not an error — this prevents
+    older or incomplete ecaj files from becoming silent cache hits for a
+    different output mode.
+
     Args:
         save_path: Path to the safetensors file
         expected_hash: Expected recipe hash
+        artifact_kind: When set, require the cached metadata to contain
+            this exact ``__ecaj_artifact_kind__`` value.
 
     Returns:
         Metadata dict on cache hit, None on miss/mismatch
@@ -334,9 +369,28 @@ def check_cache(save_path: str, expected_hash: str) -> dict | None:
             f"Choose a different model_name."
         )
 
+    # Reject incompatible schema versions — a valid ecaj file from a
+    # different version cannot be trusted to contain the fields the
+    # caller expects.  Treated as a cache miss, not an error.
+    if metadata.get("__ecaj_version__") not in _COMPATIBLE_VERSIONS:
+        return None
+
     stored_hash = metadata.get("__ecaj_recipe_hash__", "")
     if stored_hash != expected_hash:
         return None
+
+    # When an artifact kind is requested, the stored kind must match exactly.
+    # Missing kind in the file → cache miss (legacy file, not an error).
+    if artifact_kind is not None:
+        stored_kind = metadata.get("__ecaj_artifact_kind__")
+        if stored_kind != artifact_kind:
+            return None
+        # Require metadata fields that the cache-hit path depends on.
+        # A file with the right kind but missing required fields is
+        # incompatible — treat as cache miss to force recompute.
+        required = _REQUIRED_METADATA_BY_KIND.get(artifact_kind, ())
+        if any(key not in metadata for key in required):
+            return None
 
     return metadata
 
@@ -372,16 +426,22 @@ def build_metadata(
     recipe_hash: str,
     affected_keys: list[str],
     workflow_json: str | None = None,
+    artifact_kind: str | None = None,
 ) -> dict[str, str]:
     """Assemble safetensors metadata dict.
 
     AC: @exit-model-persistence ac-6, ac-13, ac-14
+    AC: @full-saved-model-output ac-cache-reuses-artifact
 
     Args:
         serialized: Deterministic JSON recipe
         recipe_hash: SHA-256 of serialized
         affected_keys: Sorted list of keys that were merged (not base-only)
         workflow_json: Optional workflow JSON string
+        artifact_kind: Optional artifact kind string (e.g. ``"full_model"``).
+            When present, stored as ``__ecaj_artifact_kind__`` so cache
+            checks can distinguish artifacts produced by different output
+            modes.
 
     Returns:
         Metadata dict with string values (safetensors requirement)
@@ -394,6 +454,8 @@ def build_metadata(
     }
     if workflow_json is not None:
         metadata["__ecaj_workflow__"] = workflow_json
+    if artifact_kind is not None:
+        metadata["__ecaj_artifact_kind__"] = artifact_kind
     return metadata
 
 
