@@ -233,11 +233,12 @@ features:
       - exit-node
     title: Exit Node
     type: feature
-    description: |
-      The only node that performs GPU computation. Receives the complete recipe
-      tree, validates it, executes the full batched GPU pipeline, and returns
-      a ComfyUI MODEL with merged weights as set patches. Handles IS_CHANGED
-      for LoRA file monitoring and reports progress.
+    description: The only node that performs GPU computation. Receives the complete recipe tree,
+      validates it, executes the full batched GPU pipeline, and returns a ComfyUI MODEL. In the
+      default in-memory patch output mode, merged weights are installed as set patches on a
+      ModelPatcher clone. Other output modes (such as full saved model output) may return a MODEL
+      loaded from a saved artifact instead. Handles IS_CHANGED for LoRA file monitoring and reports
+      progress.
     status:
       maturity: draft
       implementation: implemented
