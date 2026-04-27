@@ -5486,7 +5486,7 @@ runs:
     completed_at: 2026-04-27T21:27:36.142Z
   - _ulid: 01KQ8DS625B9575EAKJGCGTJJQ
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -5500,7 +5500,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T21:33:57.840Z
-        completed_at: 2026-04-27T21:33:57.840Z
+        completed_at: 2026-04-27T21:34:13.217Z
+        notes: "High-confidence items after baseline check: (1) Success already covered by observation
+          01KQ8BTT / related review-probe successes: fake ComfyUI probes are effective for guarded
+          harness reviews, so no duplicate capture. (2) Friction not found in search: kspec batch
+          --dry-run printed 'Batch complete (atomic): 9/9 succeeded', which looked like a real
+          mutation until review state was checked. This is repeatable CLI UX friction because
+          dry-run output should be visually distinct from execution output."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T21:34:13.217Z
+        completed_at: 2026-04-27T21:34:13.217Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T21:33:31.077Z
