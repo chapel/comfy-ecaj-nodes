@@ -3778,7 +3778,7 @@ runs:
     completed_at: 2026-04-27T07:40:55.607Z
   - _ulid: 01KQ6YCRV4MYNNFVN6B082P8SK
     status: active
-    current_step: 3
+    current_step: 4
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3811,7 +3811,16 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T07:46:48.119Z
-        completed_at: 2026-04-27T07:46:48.119Z
+        completed_at: 2026-04-27T07:47:03.720Z
+        notes: "No new improvement tasks proposed: the actual friction was already tracked. One untracked
+          success pattern is worth capturing as an observation: in fix-cycle reviews, reading prior
+          closed review threads before worker notes turns previous blockers into a concrete
+          verification checklist and reduces anchoring on the resubmission summary. Scope:
+          observation only, not a task."
+      - status: completed
+        step_index: 4
+        started_at: 2026-04-27T07:47:03.720Z
+        completed_at: 2026-04-27T07:47:03.720Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-04-27T07:45:21.252Z
