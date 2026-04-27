@@ -405,7 +405,7 @@ def build_metadata(
 def check_full_model_cache(
     save_path: str,
     expected_hash: str,
-    expected_keys: set[str] | None = None,
+    expected_manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] | None = None,
 ) -> bool:
     """Check if a saved artifact is a valid full-model cache hit.
 
@@ -413,39 +413,65 @@ def check_full_model_cache(
     AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
     AC: @full-saved-model-output ac-complete-artifact
     AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    AC: @exit-model-persistence ac-9
 
     Validates:
     - File exists
-    - Has ecaj metadata (version, recipe hash, output mode, affected keys)
+    - File is a valid safetensors file with ecaj metadata (AC-9: raises on
+      non-ecaj or corrupt files, same as check_cache)
     - Recipe hash matches
     - Output mode is "full" (not "patch")
     - Affected keys metadata is present and valid JSON
-    - Artifact actually contains all expected model keys (completeness)
+    - Artifact tensor keys, shapes, and dtypes match the expected manifest
 
     Args:
         save_path: Path to the safetensors file
         expected_hash: Expected recipe hash
-        expected_keys: If provided, the artifact must contain exactly these
-            tensor keys to be considered complete.  Incomplete artifacts
-            (e.g. partial writes, hand-crafted files) are rejected.
+        expected_manifest: If provided, maps each expected tensor key to its
+            (dtype, shape).  The artifact must contain exactly these keys with
+            matching dtypes and shapes.  Incomplete, extra, or mismatched
+            tensors cause rejection.
 
     Returns:
         True if the artifact is a valid full-model cache hit
+
+    Raises:
+        ValueError: If file exists but is not a valid ecaj-saved model (AC-9).
+            This prevents silent overwriting of user files.
     """
     if not os.path.exists(save_path):
         return False
 
+    import torch
     from safetensors import safe_open
 
+    # AC: @exit-model-persistence ac-9
+    # If the file exists but is corrupt or not a safetensors file, raise
+    # rather than returning False (which would cause the caller to overwrite).
     try:
         with safe_open(save_path, framework="pt") as f:
             metadata = f.metadata()
             artifact_keys = set(f.keys())
-    except Exception:
-        return False
+            # Read tensor metadata (shape/dtype) for validation if needed.
+            artifact_specs: dict[str, tuple[str, list[int]]] = {}
+            if expected_manifest is not None:
+                for key in f.keys():
+                    t = f.get_slice(key)
+                    artifact_specs[key] = (t.get_dtype(), t.get_shape())
+    except Exception as exc:
+        raise ValueError(
+            f"File exists but is not a valid safetensors file: {save_path}\n"
+            f"Refusing to overwrite. Choose a different model_name.\n"
+            f"Underlying error: {exc}"
+        ) from exc
 
+    # AC: @exit-model-persistence ac-9
     if metadata is None or "__ecaj_version__" not in metadata:
-        return False
+        raise ValueError(
+            f"File exists but is not an ecaj-saved model: {save_path}\n"
+            f"Refusing to overwrite a file without ecaj metadata. "
+            f"Choose a different model_name."
+        )
 
     stored_hash = metadata.get("__ecaj_recipe_hash__", "")
     if stored_hash != expected_hash:
@@ -468,11 +494,36 @@ def check_full_model_cache(
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
     # AC: @full-saved-model-output ac-complete-artifact
-    # Verify artifact completeness: the file must contain all expected keys.
-    # Without this, a partial artifact (e.g. interrupted write that produced
-    # valid metadata but only some tensors) would be accepted as a cache hit.
-    if expected_keys is not None and artifact_keys != expected_keys:
-        return False
+    # Verify artifact completeness and correctness: the file must contain
+    # exactly the expected keys with matching dtypes and shapes.
+    if expected_manifest is not None:
+        expected_keys = set(expected_manifest.keys())
+        if artifact_keys != expected_keys:
+            return False
+
+        # Map safetensors dtype strings to torch dtypes for comparison.
+        _ST_DTYPE_MAP = {
+            "F16": torch.float16,
+            "BF16": torch.bfloat16,
+            "F32": torch.float32,
+            "F64": torch.float64,
+            "I8": torch.int8,
+            "I16": torch.int16,
+            "I32": torch.int32,
+            "I64": torch.int64,
+            "U8": torch.uint8,
+        }
+
+        for key, (expected_dtype, expected_shape) in expected_manifest.items():
+            if key not in artifact_specs:
+                return False
+            st_dtype_str, st_shape = artifact_specs[key]
+            # Convert safetensors dtype string to torch dtype.
+            artifact_dtype = _ST_DTYPE_MAP.get(str(st_dtype_str))
+            if artifact_dtype != expected_dtype:
+                return False
+            if tuple(st_shape) != tuple(expected_shape):
+                return False
 
     return True
 

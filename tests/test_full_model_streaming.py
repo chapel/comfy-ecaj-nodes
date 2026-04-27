@@ -1444,7 +1444,7 @@ class TestNoopEnableCacheFalseEvicts:
 
 class TestIncompleteArtifactRejected:
     """Incomplete artifacts (missing keys) are rejected by check_full_model_cache
-    when expected_keys are provided.
+    when expected_manifest is provided.
 
     AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
     AC: @full-saved-model-output ac-complete-artifact
@@ -1452,9 +1452,9 @@ class TestIncompleteArtifactRejected:
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
     # AC: @full-saved-model-output ac-complete-artifact
-    def test_incomplete_artifact_rejected_with_expected_keys(self, tmp_path):
+    def test_incomplete_artifact_rejected_with_expected_manifest(self, tmp_path):
         """An artifact with valid metadata but only a subset of expected keys
-        is rejected when expected_keys is provided."""
+        is rejected when expected_manifest is provided."""
         save_path = str(tmp_path / "incomplete.safetensors")
         # Create artifact with only ONE key
         save_file(
@@ -1469,17 +1469,23 @@ class TestIncompleteArtifactRejected:
             },
         )
 
-        # Without expected_keys, metadata is valid so it passes
+        # Without expected_manifest, metadata is valid so it passes
         assert check_full_model_cache(save_path, "hash1") is True
 
-        # With expected_keys that include more than just "only_one_key",
+        # With expected_manifest that include more than just "only_one_key",
         # the incomplete artifact must be rejected.
-        expected = {"only_one_key", "another_key", "third_key"}
-        assert check_full_model_cache(save_path, "hash1", expected_keys=expected) is False
+        expected_manifest = {
+            "only_one_key": (torch.float32, (4, 4)),
+            "another_key": (torch.float32, (4, 4)),
+            "third_key": (torch.float32, (4, 4)),
+        }
+        assert check_full_model_cache(
+            save_path, "hash1", expected_manifest=expected_manifest,
+        ) is False
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
-    def test_complete_artifact_accepted_with_expected_keys(self, tmp_path):
-        """A complete artifact with exactly the expected keys is accepted."""
+    def test_complete_artifact_accepted_with_expected_manifest(self, tmp_path):
+        """A complete artifact with exactly the expected keys/shapes/dtypes is accepted."""
         expected_keys = {"a", "b", "c"}
         save_path = str(tmp_path / "complete.safetensors")
         save_file(
@@ -1493,8 +1499,9 @@ class TestIncompleteArtifactRejected:
                 "__ecaj_output_mode__": "full",
             },
         )
+        expected_manifest = {k: (torch.float32, (4, 4)) for k in expected_keys}
         assert check_full_model_cache(
-            save_path, "hash1", expected_keys=expected_keys,
+            save_path, "hash1", expected_manifest=expected_manifest,
         ) is True
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
@@ -1513,9 +1520,220 @@ class TestIncompleteArtifactRejected:
                 "__ecaj_output_mode__": "full",
             },
         )
-        expected = {"a", "b"}
+        expected_manifest = {
+            "a": (torch.float32, (4, 4)),
+            "b": (torch.float32, (4, 4)),
+        }
         assert check_full_model_cache(
-            save_path, "hash1", expected_keys=expected,
+            save_path, "hash1", expected_manifest=expected_manifest,
+        ) is False
+
+
+# ===========================================================================
+# AC: @exit-model-persistence ac-9
+# Non-ecaj / corrupt file raises ValueError (not silently overwritten)
+# ===========================================================================
+
+
+class TestNonEcajFileRaisesOnFullModeCache:
+    """check_full_model_cache raises ValueError for non-ecaj or corrupt files.
+
+    AC: @exit-model-persistence ac-9
+    """
+
+    # AC: @exit-model-persistence ac-9
+    def test_non_safetensors_file_raises(self, tmp_path):
+        """A pre-existing non-safetensors file at save_path must raise ValueError,
+        not return False (which would cause the caller to overwrite it)."""
+        save_path = str(tmp_path / "user_model.safetensors")
+        # Write a plain text file — not a valid safetensors file.
+        with open(save_path, "w") as f:
+            f.write("this is not a safetensors file")
+
+        with pytest.raises(ValueError, match="not a valid safetensors file"):
+            check_full_model_cache(save_path, "any_hash")
+
+    # AC: @exit-model-persistence ac-9
+    def test_safetensors_without_ecaj_metadata_raises(self, tmp_path):
+        """A valid safetensors file without ecaj metadata must raise ValueError."""
+        save_path = str(tmp_path / "foreign.safetensors")
+        # Save a valid safetensors file with NO ecaj metadata.
+        save_file(
+            {"layer.weight": torch.randn(4, 4)},
+            save_path,
+            metadata={},
+        )
+
+        with pytest.raises(ValueError, match="not an ecaj-saved model"):
+            check_full_model_cache(save_path, "any_hash")
+
+    # AC: @exit-model-persistence ac-9
+    def test_safetensors_with_no_metadata_raises(self, tmp_path):
+        """A safetensors file with None metadata must raise ValueError."""
+        save_path = str(tmp_path / "no_meta.safetensors")
+        save_file(
+            {"x": torch.randn(2, 2)},
+            save_path,
+        )
+
+        with pytest.raises(ValueError, match="not an ecaj-saved model"):
+            check_full_model_cache(save_path, "any_hash")
+
+    # AC: @exit-model-persistence ac-9
+    def test_full_mode_does_not_overwrite_non_ecaj_file(
+        self, mock_model_patcher, tmp_path,
+    ):
+        """Runtime probe: a pre-existing non-safetensors file at the save path
+        must cause the full-mode execution to raise, NOT silently overwrite."""
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        save_path = str(tmp_path / "user_file.safetensors")
+
+        # Create a non-safetensors file the user cares about.
+        with open(save_path, "w") as f:
+            f.write("important user data — must not be overwritten")
+
+        mock_analyze, mock_model_analysis, mock_loader, dummy_plan = (
+            _make_full_mode_mocks(mock_model_patcher, keys, recipe=merge)
+        )
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        def streaming_eval(**kwargs):
+            write_fn = kwargs.get("write_fn")
+            for k in kwargs.get("keys", []):
+                write_fn(k, torch.randn(4, 4))
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.validate_model_name", return_value="user_file.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            # Do NOT mock check_full_model_cache — let the real one run.
+            patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit.ProgressBar", None),
+        ):
+            with pytest.raises(ValueError, match="not a valid safetensors"):
+                WIDENExitNode().execute(merge, save_model=True, model_name="user_file")
+
+        # The user's file must not have been overwritten.
+        with open(save_path) as f:
+            assert f.read() == "important user data — must not be overwritten"
+
+
+# ===========================================================================
+# AC: @full-saved-model-output ac-complete-artifact
+# Artifact tensor shape/dtype validation
+# ===========================================================================
+
+
+class TestArtifactShapeDtypeValidation:
+    """check_full_model_cache validates tensor shapes and dtypes against the
+    expected manifest, not just key names.
+
+    AC: @full-saved-model-output ac-complete-artifact
+    """
+
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_wrong_shape_rejected(self, tmp_path):
+        """An artifact with correct key name but wrong tensor shape is rejected."""
+        save_path = str(tmp_path / "wrong_shape.safetensors")
+        save_file(
+            {"a": torch.randn(3, 3)},
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_affected_keys__": '["a"]',
+                "__ecaj_output_mode__": "full",
+            },
+        )
+        # Manifest expects (4, 4) but artifact has (3, 3).
+        expected_manifest = {"a": (torch.float32, (4, 4))}
+        assert check_full_model_cache(
+            save_path, "hash1", expected_manifest=expected_manifest,
+        ) is False
+
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_wrong_dtype_rejected(self, tmp_path):
+        """An artifact with correct key name and shape but wrong dtype is rejected."""
+        save_path = str(tmp_path / "wrong_dtype.safetensors")
+        save_file(
+            {"a": torch.randn(4, 4, dtype=torch.float16)},
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_affected_keys__": '["a"]',
+                "__ecaj_output_mode__": "full",
+            },
+        )
+        # Manifest expects float32 but artifact has float16.
+        expected_manifest = {"a": (torch.float32, (4, 4))}
+        assert check_full_model_cache(
+            save_path, "hash1", expected_manifest=expected_manifest,
+        ) is False
+
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_correct_shape_and_dtype_accepted(self, tmp_path):
+        """An artifact with matching key names, shapes, and dtypes is accepted."""
+        save_path = str(tmp_path / "correct.safetensors")
+        save_file(
+            {
+                "a": torch.randn(4, 4, dtype=torch.float32),
+                "b": torch.randn(8, 8, dtype=torch.float16),
+            },
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_affected_keys__": '["a", "b"]',
+                "__ecaj_output_mode__": "full",
+            },
+        )
+        expected_manifest = {
+            "a": (torch.float32, (4, 4)),
+            "b": (torch.float16, (8, 8)),
+        }
+        assert check_full_model_cache(
+            save_path, "hash1", expected_manifest=expected_manifest,
+        ) is True
+
+    # AC: @full-saved-model-output ac-complete-artifact
+    def test_multi_key_one_wrong_shape(self, tmp_path):
+        """If one of multiple keys has the wrong shape, the entire artifact
+        is rejected."""
+        save_path = str(tmp_path / "partial_mismatch.safetensors")
+        save_file(
+            {
+                "a": torch.randn(4, 4),
+                "b": torch.randn(3, 3),  # Wrong: manifest expects (8, 8)
+            },
+            save_path,
+            metadata={
+                "__ecaj_version__": "1",
+                "__ecaj_recipe__": "{}",
+                "__ecaj_recipe_hash__": "hash1",
+                "__ecaj_affected_keys__": '["a", "b"]',
+                "__ecaj_output_mode__": "full",
+            },
+        )
+        expected_manifest = {
+            "a": (torch.float32, (4, 4)),
+            "b": (torch.float32, (8, 8)),
+        }
+        assert check_full_model_cache(
+            save_path, "hash1", expected_manifest=expected_manifest,
         ) is False
 
 

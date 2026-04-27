@@ -566,9 +566,12 @@ class WIDENExitNode:
         serialized = serialize_recipe(widen, base_identity, lora_stats)
         recipe_hash = compute_recipe_hash(serialized)
 
+        # Build manifest from base_state — all keys, no affected keys
+        manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
+
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         if enable_cache and check_full_model_cache(
-            save_path, recipe_hash, expected_keys=set(base_state.keys()),
+            save_path, recipe_hash, expected_manifest=manifest,
         ):
             if ProgressBar is not None:
                 pbar = ProgressBar(1)
@@ -580,9 +583,6 @@ class WIDENExitNode:
         # entries from earlier patch-mode runs must be cleared.
         if not enable_cache:
             _incremental_cache.clear()
-
-        # Build manifest from base_state — all keys, no affected keys
-        manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
         workflow_json = (
             json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
         )
@@ -648,11 +648,16 @@ class WIDENExitNode:
         serialized = serialize_recipe(widen, base_identity, lora_stats)
         recipe_hash = compute_recipe_hash(serialized)
 
+        # Build manifest early for cache validation (shapes + dtypes, not just key names).
+        base_manifest = {
+            k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()
+        }
+
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
         # Full-mode cache: validate artifact metadata, load from artifact, no tensor payload
         if enable_cache and check_full_model_cache(
-            save_path, recipe_hash, expected_keys=set(base_state.keys()),
+            save_path, recipe_hash, expected_manifest=base_manifest,
         ):
             del base_state
             if ProgressBar is not None:
