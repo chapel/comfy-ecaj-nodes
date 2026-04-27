@@ -663,11 +663,11 @@ workspaces:
     canonical_branch: dispatch/task/task-full-model-memory-validation/01kq6hra
     canonical_branch_head: 23c45827b15d5d06151bb0f95786edc09f678cbb
     cleanup:
-      status: scheduled
-      detail: integrated-into-base-branch
+      status: blocked
+      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
-      reason: integrated-into-base-branch
-      updated_at: 2026-04-27T08:37:02.133Z
+      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
+      updated_at: 2026-04-27T08:37:02.398Z
     health:
       status: healthy
       issues: []
@@ -681,7 +681,7 @@ workspaces:
       target_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
       target_commit: a2c92314f76a1e672ce48f1b8fdca6dbf7e870f7
       updated_at: 2026-04-27T08:37:02.133Z
-    lifecycle_state: closing
+    lifecycle_state: cleanup_blocked
     resolved_base_branch: plan/plan-full-saved-model-output-plan/01kq5zsk
     task_ref: "@01KQ6HRA1PMN922FBX8STVEFST"
     task_slug: task-full-model-memory-validation
@@ -690,7 +690,7 @@ workspaces:
       last_active_at: 2026-04-27T08:29:25.982Z
       last_reconciled_at: 2026-04-27T08:37:02.133Z
       created_at: 2026-04-27T08:04:03.047Z
-      updated_at: 2026-04-27T08:37:02.133Z
+      updated_at: 2026-04-27T08:37:02.398Z
     workspace_id: dispatch-workspace-01KQ6HRA1PMN922FBX8STVEFST
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
