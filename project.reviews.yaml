@@ -3365,3 +3365,35 @@ reviews:
     created_at: 2026-04-27T08:34:13.487Z
     updated_at: 2026-04-27T08:34:51.245Z
     notes: []
+  - _ulid: 01KQ7VGP46JHPWSHY3C4ED3B2V
+    slugs: []
+    title: Review full saved model memory hardening follow-up package
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ7VGP463WCFY3QQAMJ86EV8
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T16:14:18.246Z
+    examined_commit: null
+    external_links: []
+    lifecycle_state: draft
+    related_refs:
+      - "@streaming-full-model-materialization"
+      - "@comfy-memory-manager-compatibility"
+      - "@manual-comfy-memory-validation"
+      - "@task-full-model-streaming-artifact-cache"
+      - "@task-full-model-real-comfy-memory-harness"
+      - "@task-full-model-real-comfy-memory-validation-manual-run"
+    subject:
+      type: spec
+      content_hash: ""
+      ref: "@full-saved-model-output"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T16:14:18.246Z
+    updated_at: null
+    notes: []
