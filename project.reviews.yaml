@@ -7505,6 +7505,12 @@ reviews:
         payload:
           thread_ulid: 01KQ89ZSWHTK0Y0H5VEV6PW9AK
         timestamp: 2026-04-27T20:36:04.301Z
+      - _ulid: 01KQ8AG55RJ9NRTD9D9GVE5DEF
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ89ZSMM9CZQENYZ5QFY4D1J
+        timestamp: 2026-04-27T20:36:09.528Z
     examined_commit: afea787efe1c0a926a94ac97b416789f3af80b50
     external_links: []
     lifecycle_state: closed
@@ -7541,6 +7547,8 @@ reviews:
               root with nodes.py is present. Added tests verifying path ordering and idempotency."
             created_at: 2026-04-27T20:36:01.158Z
         kind: blocker
+        resolved_at: 2026-04-27T20:36:09.465Z
+        resolved_by: "@claude"
       - _ulid: 01KQ89ZSWHTK0Y0H5VEV6PW9AK
         anchor:
           type: code
@@ -7577,5 +7585,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T20:27:22.816Z
     created_at: 2026-04-27T20:24:57.055Z
-    updated_at: 2026-04-27T20:36:04.236Z
+    updated_at: 2026-04-27T20:36:09.465Z
     notes: []
