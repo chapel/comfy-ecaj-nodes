@@ -64,3 +64,12 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T07:11:41.664Z
+  - _ulid: 01KQ6Y1J1H5Q447GTPHCFRXBNF
+    content: "Fix cycle 2: addressed blocker — check_cache now validates schema version compatibility
+      (rejects unknown __ecaj_version__ as cache miss) and required metadata presence per artifact
+      kind (full_model requires __ecaj_affected_keys__ and __ecaj_recipe__). Added
+      _COMPATIBLE_VERSIONS frozenset and _REQUIRED_METADATA_BY_KIND lookup table. 4 new behavioral
+      tests. All 1291 tests pass."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T07:39:13.841Z
