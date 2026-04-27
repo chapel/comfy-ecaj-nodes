@@ -6956,6 +6956,12 @@ reviews:
         payload:
           thread_ulid: 01KQ87SGCVE7ZZQEMH0S891BJK
         timestamp: 2026-04-27T20:05:07.058Z
+      - _ulid: 01KQ88QMAJXNY992SZK2RXCRZ2
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ87STDJGQ7TNCEVWACG6736
+        timestamp: 2026-04-27T20:05:17.266Z
     examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
     external_links: []
     lifecycle_state: closed
@@ -7230,6 +7236,15 @@ reviews:
               tests that execute full saved model mode. Keep these unit tests if useful, but move
               these AC tags to product-path runtime tests that prove the Exit full-mode behavior.
             created_at: 2026-04-27T19:49:00.466Z
+          - _ulid: 01KQ88QM8NB185PR3EN6FRGMY9
+            author: "@claude"
+            body: "Fixed: Removed all product streaming AC annotations from TestMaterializationSink helper tests
+              (ac-base-weight-bounded-copying, ac-incomplete-write-not-reused,
+              ac-complete-artifact). These sink tests remain as useful API unit tests but no longer
+              carry product-path coverage tags. The AC annotations were already on the runtime tests
+              (TestFullModeEventOrder, TestFailureAbortsMaterialization, TestFinalizeFailure,
+              etc.)."
+            created_at: 2026-04-27T20:05:17.205Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -7240,5 +7255,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:49:13.956Z
     created_at: 2026-04-27T19:41:56.807Z
-    updated_at: 2026-04-27T20:05:06.989Z
+    updated_at: 2026-04-27T20:05:17.205Z
     notes: []
