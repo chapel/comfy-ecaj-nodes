@@ -742,11 +742,11 @@ workspaces:
     canonical_branch: dispatch/task/task-full-model-streaming-artifact-cache/01kq7vc3
     canonical_branch_head: e3eba7dbee6adaf989421af7f46230c0929c4b95
     cleanup:
-      status: scheduled
-      detail: integrated-into-base-branch
+      status: blocked
+      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
-      reason: integrated-into-base-branch
-      updated_at: 2026-04-27T20:14:12.203Z
+      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
+      updated_at: 2026-04-27T20:14:12.315Z
     health:
       status: healthy
       issues: []
@@ -760,7 +760,7 @@ workspaces:
       target_branch: dev
       target_commit: 254c3623bee1e453ccf9494c3a137007a9f42ea1
       updated_at: 2026-04-27T20:14:12.203Z
-    lifecycle_state: closing
+    lifecycle_state: cleanup_blocked
     resolved_base_branch: dev
     task_ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
     task_slug: task-full-model-streaming-artifact-cache
@@ -769,7 +769,7 @@ workspaces:
       last_active_at: 2026-04-27T20:08:02.127Z
       last_reconciled_at: 2026-04-27T20:14:12.203Z
       created_at: 2026-04-27T16:16:10.003Z
-      updated_at: 2026-04-27T20:14:12.203Z
+      updated_at: 2026-04-27T20:14:12.315Z
     workspace_id: dispatch-workspace-01KQ7VC3HBVJMA4S8K9VBDCP7D
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
