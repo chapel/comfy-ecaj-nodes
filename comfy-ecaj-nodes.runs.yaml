@@ -4651,9 +4651,23 @@ runs:
     completed_at: 2026-04-27T19:11:05.198Z
   - _ulid: 01KQ861V9C10QM3YTE1W0Y03FV
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T19:18:26.348Z
+        completed_at: 2026-04-27T19:18:42.111Z
+        notes: "What worked well: (1) The fix cycle was clean — both blockers were well-described by the
+          reviewer with concrete reproduction evidence (non-safetensors file overwritten,
+          wrong-shape artifact accepted). This made the fix straightforward. (2) The existing
+          check_cache function provided a clear pattern to follow for the AC-9 fix — same ValueError
+          raise behavior. (3) safetensors get_slice API provided exactly what was needed for
+          shape/dtype validation without loading full tensors."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T19:18:42.111Z
+        completed_at: 2026-04-27T19:18:42.111Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T19:18:26.348Z
