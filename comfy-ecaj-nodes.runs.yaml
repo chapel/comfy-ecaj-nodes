@@ -5132,9 +5132,20 @@ runs:
     completed_at: 2026-04-27T20:24:17.433Z
   - _ulid: 01KQ8A140R4BDZHBY26P2K715B
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T20:27:56.824Z
+        completed_at: 2026-04-27T20:28:43.582Z
+        notes: "Meaningful session confirmed: review record created, checks run, blockers recorded, task
+          transitioned to needs_work. What worked: targeted ComfyUI-shaped fake root probe exposed
+          intentional-run behavior failure without launching real ComfyUI."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T20:28:43.582Z
+        completed_at: 2026-04-27T20:28:43.582Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T20:27:56.824Z
