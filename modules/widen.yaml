@@ -399,6 +399,9 @@ features:
               Full saved model output remains compatible with ComfyUI's current model
               memory lifecycle, including dynamic memory management when ComfyUI enables
               it.
+            status:
+              maturity: draft
+              implementation: in_progress
             depends_on: []
             implements: []
             relates_to:
