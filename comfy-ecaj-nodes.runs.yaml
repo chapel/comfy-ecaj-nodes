@@ -3737,7 +3737,7 @@ runs:
     started_at: 2026-04-27T07:12:47.753Z
     completed_at: 2026-04-27T07:14:12.354Z
   - _ulid: 01KQ6Y31PG6X3XQYNFNYMZP1J1
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -3769,7 +3769,10 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T07:40:49.606Z
-        completed_at: 2026-04-27T07:40:49.606Z
+        completed_at: 2026-04-27T07:40:55.607Z
+        notes: Nothing to capture. All items were either already tracked or below the confidence threshold.
+          Session complete.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T07:40:02.640Z
+    completed_at: 2026-04-27T07:40:55.607Z
