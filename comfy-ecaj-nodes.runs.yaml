@@ -3695,7 +3695,7 @@ runs:
     completed_at: 2026-04-27T06:55:53.110Z
   - _ulid: 01KQ6WH5483MY1F8SYBF2QD8CA
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3709,7 +3709,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T07:13:13.799Z
-        completed_at: 2026-04-27T07:13:13.799Z
+        completed_at: 2026-04-27T07:13:52.909Z
+        notes: "Identified one high-confidence friction point after baseline and keyword searches:
+          shell-significant inline code in review comment bodies can be evaluated by bash before
+          kspec receives it. Existing searches for review comment shell quoting, kspec validate
+          warnings, and review evidence found no matching tracking. Success pattern around direct
+          repro/evidence was already covered by existing observations such as detailed review
+          threads with evidence/probes, so no duplicate success observation was captured."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T07:13:52.909Z
+        completed_at: 2026-04-27T07:13:52.909Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T07:12:47.753Z
