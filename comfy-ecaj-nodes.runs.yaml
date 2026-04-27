@@ -4237,7 +4237,7 @@ runs:
     completed_at: 2026-04-27T17:53:30.839Z
   - _ulid: 01KQ81YNA33ZVENM96KD7WBGC1
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4247,7 +4247,30 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T18:07:05.955Z
-        completed_at: 2026-04-27T18:07:05.955Z
+        completed_at: 2026-04-27T18:07:30.854Z
+        notes: >-
+          Identified 1 high-confidence success and 1 high-confidence friction point from fix cycle 2
+          session.
+
+
+          SUCCESS: Random-access sink design resolved a fundamental architectural constraint. The
+          sorted-name-order write requirement in MaterializationSink made per-group streaming
+          impossible when group keys interleaved in sorted order. Switching to seek-based
+          random-access writes was the correct design — it decoupled write order from evaluation
+          order, enabling true group-at-a-time processing. The key insight was that the safetensors
+          header already contains byte offsets for every tensor, so the data can be written in any
+          order.
+
+
+          FRICTION: Review blocker thread content is truncated in kspec review get output. The
+          thread body text is cut off with '...' in the summary line (e.g. 'MUST-FIX: full-mode
+          streaming still retains an evaluated group across later g...'). To read the full thread
+          text, I had to grep the raw YAML file for the review ULID and read the file directly. The
+          CLI should show full thread body text by default or provide an option to expand threads.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T18:07:30.854Z
+        completed_at: 2026-04-27T18:07:30.854Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T18:06:47.619Z
