@@ -1925,6 +1925,17 @@ reviews:
         runner: python
         created_at: 2026-04-27T06:22:47.349Z
         completed_at: 2026-04-27T06:22:47.349Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "rg -n 'AC: @streaming-full-model-materialization' tests lib nodes found annotations for
+          all three ACs; no source-scanning tests found in changed materialization tests"
+        name: AC annotation scan
+        required: false
+        runner: rg
+        created_at: 2026-04-27T06:23:05.497Z
+        completed_at: 2026-04-27T06:23:05.497Z
     events:
       - _ulid: 01KQ6SFDJQNMCW0A77GJ3JRVGF
         actor: Jacob Chapel
@@ -1981,6 +1992,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ6SNXD3D0XMZ4PF8533D7J6
         timestamp: 2026-04-27T06:22:57.979Z
+      - _ulid: 01KQ6SP4SEVCWGXKYWJKAWXWKS
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation scan
+        timestamp: 2026-04-27T06:23:05.518Z
     examined_commit: a6411d9558cd70c099f14a8ea61d0a1b39fb6ff9
     external_links: []
     lifecycle_state: open
@@ -2015,5 +2033,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T06:19:25.143Z
-    updated_at: 2026-04-27T06:22:57.955Z
+    updated_at: 2026-04-27T06:23:05.497Z
     notes: []
