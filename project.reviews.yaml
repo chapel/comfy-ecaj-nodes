@@ -545,6 +545,19 @@ reviews:
         runner: pytest
         created_at: 2026-04-27T05:00:13.864Z
         completed_at: 2026-04-27T05:00:13.864Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Submitted code adds lib/result_sink.py, but nodes/exit.py still accumulates all
+          chunked_evaluation results in merged_state and saves only after all groups complete;
+          @streaming-full-model-materialization ac-affected-results-released is not behaviorally
+          satisfied.
+        name: spec alignment
+        required: true
+        runner: reviewer
+        created_at: 2026-04-27T05:00:31.258Z
+        completed_at: 2026-04-27T05:00:31.258Z
     events:
       - _ulid: 01KQ6MTXW3PKGKW5GSW5QK9ARB
         actor: Jacob Chapel
@@ -594,6 +607,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQ6MYYHJ013M6TX9XF4KY08G
         timestamp: 2026-04-27T05:00:31.165Z
+      - _ulid: 01KQ6MYYN4ARR727WW3VEQG3AN
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: spec alignment
+        timestamp: 2026-04-27T05:00:31.268Z
     examined_commit: e20213ae9f1e52182c6fa5b7fad587feaf949e93
     external_links: []
     lifecycle_state: open
@@ -628,5 +648,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-27T04:58:19.395Z
-    updated_at: 2026-04-27T05:00:31.154Z
+    updated_at: 2026-04-27T05:00:31.258Z
     notes: []
