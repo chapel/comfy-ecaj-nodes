@@ -34,7 +34,7 @@ description: |
 spec_ref: "@streaming-full-model-materialization"
 plan_ref: "@plan-full-saved-model-output-plan"
 origin: derived
-status: needs_work
+status: in_progress
 blocked_by: []
 depends_on:
   - "@task-full-model-saved-artifact-reload-spike"
@@ -53,7 +53,7 @@ submission_linkage:
   remote: null
   remote_url: null
   upstream_ref: dev
-session_id: null
+session_id: 01KQ6NM4J0JXQZV9J87XSQHV2R
 history:
   - author: Jacob Chapel
     changes:
@@ -112,8 +112,21 @@ history:
         previous: 01KQ6MTBGPTQFQS094SFVA5Q6M
     command: review-verdict-needs-work
     timestamp: 2026-04-27T05:08:41.591Z
+  - author: "@claude"
+    changes:
+      status:
+        new: in_progress
+        previous: needs_work
+      session_id:
+        new: 01KQ6NM4J0JXQZV9J87XSQHV2R
+        previous: null
+      started_at:
+        new: 2026-04-27T05:16:47.356Z
+        previous: 2026-04-27T04:58:28.606Z
+    command: task-start
+    timestamp: 2026-04-27T05:16:47.356Z
 created_at: 2026-04-27T04:04:27.744Z
-started_at: 2026-04-27T04:58:28.606Z
+started_at: 2026-04-27T05:16:47.356Z
 submitted_at: 2026-04-27T05:04:53.199Z
 todos: []
 automation: eligible
