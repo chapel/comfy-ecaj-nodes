@@ -4021,6 +4021,12 @@ reviews:
         payload:
           thread_ulid: 01KQ8113VT6G7D7QWXZSH5N5NY
         timestamp: 2026-04-27T18:05:17.155Z
+      - _ulid: 01KQ81W1T4R6AC8PRN0KS5RHZB
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ810Q4W2A0FFC2B7RHK3MG5
+        timestamp: 2026-04-27T18:05:22.116Z
     examined_commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
     external_links: []
     lifecycle_state: closed
@@ -4063,6 +4069,8 @@ reviews:
               b/c) that would have failed under the old approach."
             created_at: 2026-04-27T18:05:12.619Z
         kind: blocker
+        resolved_at: 2026-04-27T18:05:22.075Z
+        resolved_by: "@claude"
       - _ulid: 01KQ8113VT6G7D7QWXZSH5N5NY
         anchor:
           type: code
@@ -4103,5 +4111,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T17:50:51.644Z
     created_at: 2026-04-27T17:45:43.925Z
-    updated_at: 2026-04-27T18:05:17.117Z
+    updated_at: 2026-04-27T18:05:22.075Z
     notes: []
