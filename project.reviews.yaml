@@ -4121,3 +4121,29 @@ reviews:
     created_at: 2026-04-27T17:45:43.925Z
     updated_at: 2026-04-27T18:05:24.537Z
     notes: []
+  - _ulid: 01KQ822FQK09Q8WEEM2TND599M
+    slugs: []
+    title: Review full model streaming artifact cache cycle 3
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ822FQKTDX179J2MGPCR9NQ
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T18:08:52.979Z
+    examined_commit: 2564ca6e52b64b52693022dda5479761d0c66018
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T18:08:52.979Z
+    updated_at: null
+    notes: []
