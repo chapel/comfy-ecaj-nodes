@@ -3708,6 +3708,12 @@ reviews:
         payload:
           thread_ulid: 01KQ7ZCNNGZXA6W7862KWQBAT8
         timestamp: 2026-04-27T17:39:59.616Z
+      - _ulid: 01KQ80DW1JA3C8TE4ZVQFY8T4X
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ7ZCNNGZXA6W7862KWQBAT8
+        timestamp: 2026-04-27T17:40:08.883Z
     examined_commit: e368231141abc45a6dce0314c147a15369756c00
     external_links: []
     lifecycle_state: closed
@@ -3806,6 +3812,8 @@ reviews:
               finalize, (3) finalize precedes load. This directly catches the accumulation bug."
             created_at: 2026-04-27T17:39:59.573Z
         kind: blocker
+        resolved_at: 2026-04-27T17:40:08.848Z
+        resolved_by: "@claude"
       - _ulid: 01KQ7ZD04R3QK2EM511ZDE8CNT
         anchor:
           type: code
@@ -3835,5 +3843,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T17:22:20.587Z
     created_at: 2026-04-27T17:16:41.678Z
-    updated_at: 2026-04-27T17:39:59.573Z
+    updated_at: 2026-04-27T17:40:08.848Z
     notes: []
