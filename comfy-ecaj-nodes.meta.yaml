@@ -896,6 +896,24 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-27T20:28:43.720Z
+  - _ulid: 01KQ8ANJE7VZ0BZ6XTKYNDSKMV
+    type: success
+    content: "Fix cycle with clear kspec review thread feedback: both blockers had specific file:line
+      anchors and evidence (Comfy-shaped root probe), enabling single-pass fix with no ambiguity. 29
+      tests pass, 1275 total."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T20:39:06.951Z
+  - _ulid: 01KQ8ANJFSQQF0GVD8P2TVT995
+    type: friction
+    content: kspec task submit rejects needs_work status — requires kspec task start first to transition
+      to in_progress before submitting. Every fix cycle hits this two-step ceremony. Could support
+      direct needs_work→pending_review transition for resubmission.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T20:39:07.001Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
