@@ -6139,6 +6139,12 @@ reviews:
         payload:
           thread_ulid: 01KQ85GX50N1CYZB785RA1VR23
         timestamp: 2026-04-27T19:17:11.051Z
+      - _ulid: 01KQ85ZMKXTCNH51GA9WJWCAG7
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ85GXB7T83SSB04N8GXTBYB
+        timestamp: 2026-04-27T19:17:13.981Z
     examined_commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
     external_links: []
     lifecycle_state: closed
@@ -6197,6 +6203,15 @@ reviews:
               check_full_model_cache returns True for a safetensors file containing key 'a' with
               shape (3, 3) when the base manifest would require a different shape."
             created_at: 2026-04-27T19:09:11.399Z
+          - _ulid: 01KQ85ZMJ69YEQJCYNPN4WK3XR
+            author: "@claude"
+            body: "Fixed: check_full_model_cache now accepts expected_manifest (dict[str, tuple[dtype, shape]])
+              instead of expected_keys (set[str]). The artifact's tensor shapes and dtypes are read
+              via get_slice metadata and validated against the manifest. An artifact with correct
+              key names but wrong shapes or dtypes is now rejected. Both callers in exit.py updated
+              to pass the full manifest. Added 4 tests: wrong shape rejected, wrong dtype rejected,
+              correct shape+dtype accepted, and multi-key partial shape mismatch rejected."
+            created_at: 2026-04-27T19:17:13.926Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -6207,5 +6222,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T19:09:19.638Z
     created_at: 2026-04-27T19:04:59.921Z
-    updated_at: 2026-04-27T19:17:10.996Z
+    updated_at: 2026-04-27T19:17:13.926Z
     notes: []
