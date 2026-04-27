@@ -5371,9 +5371,21 @@ runs:
     completed_at: 2026-04-27T21:10:20.692Z
   - _ulid: 01KQ8CTY0K136VKNQ7Z67Q6M84
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T21:16:59.796Z
+        completed_at: 2026-04-27T21:17:30.280Z
+        notes: "Meaningful review session confirmed: created review @01KQ8CGH, recorded checks/findings, and
+          transitioned task @01KQ7VC3MPV8MZAP7HKCFJWHQ6 to needs_work. What worked: targeted fake
+          Comfy-shaped subprocess probe independently verified the intentional-run path beyond unit
+          tests; awaiter kept full pytest running while review continued."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T21:17:30.280Z
+        completed_at: 2026-04-27T21:17:30.280Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T21:16:59.796Z
