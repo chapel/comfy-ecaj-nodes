@@ -3146,3 +3146,29 @@ reviews:
     created_at: 2026-04-27T08:15:52.375Z
     updated_at: 2026-04-27T08:26:34.564Z
     notes: []
+  - _ulid: 01KQ70YD8EFDTQ4MGRP77CF2EZ
+    slugs: []
+    title: Review full model memory validation fix cycle
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQ70YD8ESPXHWA143ENDK9RD
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-27T08:29:56.366Z
+    examined_commit: 23c45827b15d5d06151bb0f95786edc09f678cbb
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQ6HRA1PMN922FBX8STVEFST"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-27T08:29:56.366Z
+    updated_at: null
+    notes: []
