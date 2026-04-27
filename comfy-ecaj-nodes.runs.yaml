@@ -2927,7 +2927,7 @@ runs:
     started_at: 2026-04-27T04:56:10.540Z
     completed_at: 2026-04-27T04:57:33.869Z
   - _ulid: 01KQ6N19DG31MAHN17KGNN0Q5X
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -2961,7 +2961,12 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-27T05:03:21.328Z
-        completed_at: 2026-04-27T05:03:21.328Z
+        completed_at: 2026-04-27T05:03:28.848Z
+        notes: "Capture complete. Created observations: success: code-first/spec-alignment review caught
+          scaffold-only work despite passing tests; friction: reflection workflow state inspection
+          is noisy/incomplete for active runs. No inbox item created because the only actionable
+          implementation gap is already tracked by @task-full-model-chunked-evaluation-to-sink."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:01:47.824Z
+    completed_at: 2026-04-27T05:03:28.849Z
