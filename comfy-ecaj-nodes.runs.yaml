@@ -3402,7 +3402,7 @@ runs:
     started_at: 2026-04-27T06:19:20.533Z
     completed_at: 2026-04-27T06:20:51.471Z
   - _ulid: 01KQ6SQKRWB1TWC6XV98QH91GC
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -3433,10 +3433,13 @@ runs:
           missing save_model=True partial-recompute test path, and @01KH6Y61 captures the broader
           mock-test false-confidence pattern. The success pattern is useful but not unique enough to
           add another observation."
-      - status: completed
+      - status: skipped
         step_index: 3
         started_at: 2026-04-27T06:24:46.890Z
-        completed_at: 2026-04-27T06:24:46.890Z
+        completed_at: 2026-04-27T06:24:53.621Z
+        notes: No new captures. All high-confidence reflection items were already covered by existing
+          observation/inbox records, so adding another item would duplicate tracking.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:23:53.628Z
+    completed_at: 2026-04-27T06:24:53.622Z
