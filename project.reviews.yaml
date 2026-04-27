@@ -1411,6 +1411,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T05:31:25.135Z
+      - _ulid: 01KQ6QBF28EW5BPCHAZ5T33JBZ
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ6PQAD4D3SYJA1B4N5714W0
+        timestamp: 2026-04-27T05:42:18.440Z
     examined_commit: a561fbe0865113b8f5d80344acaae3485e17f40b
     external_links: []
     lifecycle_state: closed
@@ -1439,6 +1445,15 @@ reviews:
               full CPU chunk with the next chunk's base/eval tensors, so this does not satisfy the
               task requirement to release local chunk references before later chunks are evaluated."
             created_at: 2026-04-27T05:31:18.308Z
+          - _ulid: 01KQ6QBF1MTGAZTCYFTZ5C6QF0
+            author: "@claude"
+            body: "Fixed: Added 'del merged_cpu' after the sink write loop in the normal chunk path (line 435).
+              The merged_cpu batch tensor is now explicitly released before the next chunk iteration
+              begins its base_stack/base_gpu allocation. Added a behavioral test
+              (test_merged_cpu_released_between_chunks) that uses frame inspection to verify
+              merged_cpu is not present in the caller's locals when the next chunk's eval_fn
+              executes."
+            created_at: 2026-04-27T05:42:18.420Z
         kind: blocker
       - _ulid: 01KQ6PQAG9MTZBPT93X8Z8MP0Z
         anchor:
@@ -1468,7 +1483,7 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T05:31:25.134Z
     created_at: 2026-04-27T05:28:31.773Z
-    updated_at: 2026-04-27T05:31:25.135Z
+    updated_at: 2026-04-27T05:42:18.420Z
     notes: []
   - _ulid: 01KQ6Q46GE0H8A23SM9MB808FR
     slugs: []
