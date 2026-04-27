@@ -1599,9 +1599,25 @@ reviews:
           status: pass
           name: AC annotation scan
         timestamp: 2026-04-27T05:41:04.928Z
+      - _ulid: 01KQ6Q9E62J8AAA0GDA3F5WSDW
+        actor: jacob.chapel@gmail.com
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-27T05:41:12.002Z
+      - _ulid: 01KQ6Q9E625FHWG021Z5P7Y60D
+        actor: jacob.chapel@gmail.com
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-27T05:41:12.002Z
     examined_commit: 5332f72534f55032b658110039b7ae55fc29b89b
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -1662,7 +1678,14 @@ reviews:
               placeholders. Remove the f prefix or otherwise satisfy the configured lint gate."
             created_at: 2026-04-27T05:40:52.960Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: jacob.chapel@gmail.com
+        role: reviewer
+        created_at: 2026-04-27T05:41:12.001Z
     created_at: 2026-04-27T05:38:20.302Z
-    updated_at: 2026-04-27T05:41:04.907Z
+    updated_at: 2026-04-27T05:41:12.002Z
     notes: []
