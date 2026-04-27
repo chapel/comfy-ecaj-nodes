@@ -4088,9 +4088,21 @@ runs:
     completed_at: 2026-04-27T17:18:38.364Z
   - _ulid: 01KQ7ZF0FFMTKV0AYB6T59GX3E
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-27T17:23:17.615Z
+        completed_at: 2026-04-27T17:23:48.998Z
+        notes: "Gate passed: session produced review @01KQ7Z2XTECTF1KDNSSQASJ0SS, failed streaming event
+          probe, four blocker threads, and task @01KQ7VC3HBVJMA4S8K9VBDCP7D transitioned to
+          needs_work. What worked: adversarial runtime probe checked the semantic event order after
+          focused tests passed and exposed the core streaming violation."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-27T17:23:48.998Z
+        completed_at: 2026-04-27T17:23:48.998Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T17:23:17.615Z
