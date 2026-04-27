@@ -80,3 +80,30 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T16:46:12.885Z
+  - _ulid: 01KQ7YM6P22HZ902F4E66RQRNM
+    content: >-
+      Implementation complete. All 28 new behavioral tests pass + all 36 existing exit node tests
+      pass. Changes:
+
+
+      1. MaterializationSink in streaming_save.py - incremental safetensors writer with
+      open/write_tensor/finalize/abort
+
+      2. check_full_model_cache in persistence.py - mode-aware artifact cache validation  
+
+      3. build_metadata output_mode parameter - distinguishes patch vs full artifacts
+
+      4. exit.py split into _execute_patch_mode and _execute_full_saved_model
+
+      5. Full mode: streams to MaterializationSink, no merged_state dict, no _incremental_cache
+      tensor payload
+
+      6. Full mode cache: artifact-backed via check_full_model_cache, not tensor-payload-backed
+
+      7. Patch mode: completely unchanged behavior
+
+
+      Test coverage: 28 behavioral tests covering all required dynamic tests from the task spec.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T17:08:39.234Z
