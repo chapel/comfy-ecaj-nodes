@@ -3189,7 +3189,7 @@ runs:
     completed_at: 2026-04-27T05:37:12.593Z
   - _ulid: 01KQ6QAT1NZQA3GXE5FXSHNZX0
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3202,7 +3202,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T05:42:22.253Z
-        completed_at: 2026-04-27T05:42:22.253Z
+        completed_at: 2026-04-27T05:42:47.923Z
+        notes: "Identified candidates after baseline scan: (1) success: code-first review plus symbol usage
+          search caught an unintegrated helper even though unit tests passed; likely covered by
+          existing observation @01KQ6N3M and older mock/test friction @01KH6Y61. (2) friction:
+          reflection docs say 'kspec workflow show' but CLI requires a run ref; likely covered by
+          existing observation @01KQ6N3MY about workflow state being hard to inspect. No
+          high-confidence new task-level item yet."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T05:42:47.923Z
+        completed_at: 2026-04-27T05:42:47.923Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:41:56.917Z
