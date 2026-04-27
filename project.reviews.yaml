@@ -2501,6 +2501,13 @@ reviews:
           status: pass
           name: full pytest suite
         timestamp: 2026-04-27T07:10:53.001Z
+      - _ulid: 01KQ6WE4408EAN7AYE3884VJQT
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ6WE43506T3ZWK0CY5NHV0C
+        timestamp: 2026-04-27T07:11:08.416Z
     examined_commit: 06e5f1805a9317da1aab45538f7a3257d6fee4a1
     external_links: []
     lifecycle_state: open
@@ -2510,8 +2517,30 @@ reviews:
       content_hash: ""
       ref: "@01KQ6HRA0DXES7K03VX0RCDXQ2"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ6WE43506T3ZWK0CY5NHV0C
+        anchor:
+          type: code
+          commit: 06e5f1805a9317da1aab45538f7a3257d6fee4a1
+          line_end: 361
+          line_start: 343
+          path: lib/persistence.py
+          side: head
+        entries:
+          - _ulid: 01KQ6WE435N0PKCAG07PXZG9K5
+            author: Jacob Chapel
+            body: "MUST-FIX: full-model cache hits still do not validate metadata schema compatibility or
+              required metadata before returning a hit.  accepts any file with a present , matching
+              recipe hash, and matching artifact kind; I confirmed with a safetensors file
+              using  that  returns metadata instead of forcing recompute. I also confirmed a
+              matching full_model file missing  is returned as a cache hit, after which the Exit
+              cache-hit path indexes  and would fail instead of treating the artifact as
+              incompatible. This violates the task requirement to reject/recompute for incompatible
+              metadata schema and to require the metadata needed by the active full saved model
+              behavior."
+            created_at: 2026-04-27T07:11:08.389Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T07:08:47.193Z
-    updated_at: 2026-04-27T07:10:52.975Z
+    updated_at: 2026-04-27T07:11:08.389Z
     notes: []
