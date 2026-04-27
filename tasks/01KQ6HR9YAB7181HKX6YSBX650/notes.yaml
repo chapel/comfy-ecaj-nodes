@@ -44,3 +44,8 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-27T05:19:56.978Z
+  - _ulid: 01KQ6PHB5WHTKSDCW656KM82W7
+    content: "[AGENT-FAIL] Invocation failed: Internal error: Prompt is too long"
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-04-27T05:28:02.493Z
