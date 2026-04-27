@@ -2130,7 +2130,7 @@ plans:
       (dispatches via classify_key/classify_layer_type registries), nodes/exit.py
       (architecture-agnostic), lib/persistence.py (recipe serialization is
       architecture-agnostic).
-    status: active
+    status: completed
     approved_at: null
     derived_specs:
       - "@qwen-support"
