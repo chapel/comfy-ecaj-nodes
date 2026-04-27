@@ -1493,6 +1493,7 @@ class TestComfyOwnsReturnedModelMemory:
         """Full saved model mode returns a model loaded via
         comfy.sd.load_diffusion_model, ensuring ComfyUI owns its memory."""
         from safetensors.torch import save_file
+
         from tests.conftest import MockModelPatcher
 
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
