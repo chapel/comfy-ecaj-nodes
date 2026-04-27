@@ -4364,7 +4364,7 @@ runs:
     completed_at: 2026-04-27T18:15:38.566Z
   - _ulid: 01KQ83607KMTQ5DNDW6Z3M9WR7
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -4416,7 +4416,29 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T18:29:05.123Z
-        completed_at: 2026-04-27T18:29:05.123Z
+        completed_at: 2026-04-27T18:29:15.459Z
+        notes: >-
+          Evaluating items:
+
+
+          1. MockModelPatcher._state_dict sharing on clone — UNIQUE, high-confidence. The mock's
+          clone() shares _state_dict by reference, but real ModelPatcher.clone() shares the .model
+          object (whose state_dict is method-based). Code that deep-copies .model but doesn't know
+          about _state_dict will silently mutate the original. This bit us in
+          _load_model_from_artifact. CAPTURE as friction observation.
+
+
+          2. Test artifacts missing full model keys — RELATED to existing 01KH6Y61 (mock tests
+          validating wrong behavior). The pre-existing test_cache_hit_skips_analyze used a 1-key
+          artifact for a 4-key model. This is a specific instance of the general pattern. SKIP —
+          already tracked by 01KH6Y61.
+
+
+          3. Reading all review threads before starting — ALREADY TRACKED as 01KQ6SHR. SKIP.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T18:29:15.459Z
+        completed_at: 2026-04-27T18:29:15.459Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T18:28:16.755Z
