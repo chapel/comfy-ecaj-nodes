@@ -3720,6 +3720,12 @@ reviews:
         payload:
           thread_ulid: 01KQ7ZD04R3QK2EM511ZDE8CNT
         timestamp: 2026-04-27T17:40:12.150Z
+      - _ulid: 01KQ80E72X4WPTAH6VHHDP1V6H
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ7ZD04R3QK2EM511ZDE8CNT
+        timestamp: 2026-04-27T17:40:20.189Z
     examined_commit: e368231141abc45a6dce0314c147a15369756c00
     external_links: []
     lifecycle_state: closed
@@ -3848,6 +3854,8 @@ reviews:
               having invalid affected_keys metadata are rejected."
             created_at: 2026-04-27T17:40:12.112Z
         kind: blocker
+        resolved_at: 2026-04-27T17:40:20.149Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -3857,5 +3865,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T17:22:20.587Z
     created_at: 2026-04-27T17:16:41.678Z
-    updated_at: 2026-04-27T17:40:12.112Z
+    updated_at: 2026-04-27T17:40:20.149Z
     notes: []
