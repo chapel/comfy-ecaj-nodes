@@ -3310,7 +3310,7 @@ runs:
     completed_at: 2026-04-27T05:46:00.790Z
   - _ulid: 01KQ6QYTJCCEWWE2KW4HTNCF3N
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3338,7 +3338,14 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-27T05:53:53.190Z
-        completed_at: 2026-04-27T05:53:53.190Z
+        completed_at: 2026-04-27T05:54:14.955Z
+        notes: "Decision: skipped duplicate success observations covered by existing refs. Captured unique
+          high-confidence friction about gh pr merge needing explicit repo context in detached
+          reviewer snapshots as a friction observation and inbox item via kspec batch."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-27T05:54:14.955Z
+        completed_at: 2026-04-27T05:54:14.955Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T05:52:52.813Z
