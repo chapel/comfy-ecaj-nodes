@@ -3551,7 +3551,7 @@ runs:
     completed_at: 2026-04-27T06:37:30.577Z
   - _ulid: 01KQ6TTRJZW6R9J0G01VJ828RG
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -3565,7 +3565,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-27T06:43:55.812Z
-        completed_at: 2026-04-27T06:43:55.812Z
+        completed_at: 2026-04-27T06:44:17.917Z
+        notes: "Identified candidates: (1) PR-publication detached reviewer merge path was unclear, but this
+          is already tracked by inbox 01KQ6R11 and related friction observation 01KQ6R11. (2)
+          Evidence-backed review cycles with targeted repro tests worked well, but this is already
+          covered by recent success observations such as 01KQ6TG9 and 01KQ6SHR. (3) workflow show
+          requiring run-ref is covered by existing reflection workflow inspection friction 01KQ6N3M.
+          No new high-confidence untracked items."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-27T06:44:17.917Z
+        completed_at: 2026-04-27T06:44:17.917Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-27T06:43:05.439Z
