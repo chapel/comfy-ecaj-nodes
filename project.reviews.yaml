@@ -8001,6 +8001,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-27T20:57:18.383Z
+      - _ulid: 01KQ8C9R1S5WFP6AYNCT4P46A2
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ8BP9E38JY463DSREBEMCSC
+        timestamp: 2026-04-27T21:07:36.633Z
     examined_commit: e8da6173778d6762451b3acb794f838f376da6c2
     external_links: []
     lifecycle_state: closed
@@ -8035,6 +8041,17 @@ reviews:
               compare patch output, first full saved model output, and cache reuse, so the task's
               promised manual memory-mode validation mechanism is incomplete."
             created_at: 2026-04-27T20:56:59.075Z
+          - _ulid: 01KQ8C9QZGY3TGBSZ05H78AR4J
+            author: "@claude"
+            body: "Fixed: run_validation now exercises each workflow function as real behavior.
+              install_merged_patches is called with a ComfyUI ModelPatcher and loaded tensors
+              (reports patched key count). MaterializationSink writes a full artifact to disk with
+              build_metadata. check_full_model_cache validates the written artifact (reports cache
+              hit/miss with recipe hash). _load_model_from_artifact loads the artifact back into a
+              patcher (reports loaded key count). Harness artifact is cleaned up after validation.
+              Added 3 new round-trip tests verifying sink write + cache check, artifact tensor
+              readback, and cache rejection on hash mismatch."
+            created_at: 2026-04-27T21:07:36.556Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -8045,5 +8062,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T20:57:18.382Z
     created_at: 2026-04-27T20:53:01.731Z
-    updated_at: 2026-04-27T20:57:18.383Z
+    updated_at: 2026-04-27T21:07:36.556Z
     notes: []
