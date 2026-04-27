@@ -815,7 +815,10 @@ class TestGpuOffloadAfterSave:
         # Track call order
         call_order = []
 
-        mock_atomic_save = MagicMock(side_effect=lambda *a, **kw: call_order.append("atomic_save"))
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.side_effect = (
+            lambda: (call_order.append("mat_finalize"), {})[1]
+        )
 
         # Inject comfy.model_management with trackable functions
         mm_mod = sys.modules.get("comfy.model_management")
@@ -842,16 +845,17 @@ class TestGpuOffloadAfterSave:
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
             patch("nodes.exit.check_cache", return_value=None),
             patch("nodes.exit.build_metadata", return_value={"__ecaj_version__": "1"}),
-            patch("nodes.exit.atomic_save", mock_atomic_save),
+            patch("nodes.exit.CheckpointMaterializationSink",
+                  return_value=mock_mat_instance),
         ):
             node = WIDENExitNode()
             node.execute(recipe, save_model=True, model_name="test")
 
-        assert "atomic_save" in call_order
+        assert "mat_finalize" in call_order
         assert "free_memory" in call_order
         assert "soft_empty_cache" in call_order
-        # Ordering: save before free_memory before soft_empty_cache
-        assert call_order.index("atomic_save") < call_order.index("free_memory")
+        # Ordering: save finalize before free_memory before soft_empty_cache
+        assert call_order.index("mat_finalize") < call_order.index("free_memory")
         assert call_order.index("free_memory") < call_order.index("soft_empty_cache")
 
 
@@ -1831,8 +1835,13 @@ class TestBaseStateFreedBeforeSave:
         _incremental_cache.clear()
 
     # AC: @memory-management ac-13
+    # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
     def test_base_state_freed_before_save(self, mock_model_patcher):
-        """model_state_dict called twice (setup + save) when save_model=True."""
+        """model_state_dict called once (setup only) when save_model=True.
+
+        With CheckpointMaterializationSink, base weights are written from the
+        original base_state dict — no second model_state_dict() call needed.
+        """
         keys = list(mock_model_patcher.model_state_dict().keys())
         recipe = RecipeMerge(
             base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
@@ -1851,6 +1860,9 @@ class TestBaseStateFreedBeforeSave:
 
         mock_model_patcher.model_state_dict = tracking_msd
 
+        mock_mat_instance = MagicMock()
+        mock_mat_instance.finalize.return_value = {}
+
         _run_exit_node(
             recipe, mock_model_patcher, keys,
             extra_patches={
@@ -1860,13 +1872,14 @@ class TestBaseStateFreedBeforeSave:
                 "nodes.exit.compute_recipe_hash": "hash",
                 "nodes.exit.check_cache": None,
                 "nodes.exit.build_metadata": {"__ecaj_version__": "1"},
-                "nodes.exit.atomic_save": MagicMock(),
+                "nodes.exit.CheckpointMaterializationSink": mock_mat_instance,
             },
             save_model=True,
             model_name="test",
         )
 
-        # Called once at setup (line 445) and once for save re-acquisition
-        assert call_count[0] == 2, (
-            f"Expected 2 model_state_dict calls (setup + save), got {call_count[0]}"
+        # Called once at setup only — materialization sink writes from the
+        # existing base_state dict, no re-acquisition needed.
+        assert call_count[0] == 1, (
+            f"Expected 1 model_state_dict call (setup only), got {call_count[0]}"
         )

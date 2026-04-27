@@ -1066,8 +1066,18 @@ class TestExitNodeIncrementalCache:
             assert torch.equal(entry.merged_state[k], old_state[k])
 
     # AC: @incremental-block-recompute ac-10
-    def test_save_model_with_partial_recompute(self, mock_model_patcher):
-        """save_model=True with partial recompute saves complete state."""
+    # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
+    def test_save_model_with_partial_recompute(
+        self, mock_model_patcher, tmp_path,
+    ):
+        """save_model=True with partial recompute saves complete artifact.
+
+        Uses the real CheckpointMaterializationSink (no MagicMock) so
+        duplicate-key writes are caught by IncrementalSafetensorsWriter.
+        Only IN-block keys are recomputed; MID and OUT keys come from
+        cache.  The resulting safetensors file must contain all four
+        keys: cached values for MID/OUT, recomputed values for IN.
+        """
         keys = list(mock_model_patcher.model_state_dict().keys())
         bc_old = BlockConfig(
             arch="sdxl", block_overrides=(("IN00", 0.5), ("MID", 1.0)),
@@ -1086,7 +1096,7 @@ class TestExitNodeIncrementalCache:
             t_factor=1.0,
         )
 
-        # Pre-populate cache with old block config
+        # Pre-populate cache with old block config — all keys cached.
         fp = "test_fingerprint"
         cached_state = {k: torch.randn(4, 4) for k in keys}
         old_recipe = RecipeMerge(
@@ -1112,8 +1122,12 @@ class TestExitNodeIncrementalCache:
         from lib.batch_groups import OpSignature
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        new_results = {k: torch.randn(4, 4) for k in keys}
-        atomic_save_mock = MagicMock()
+        # Only IN-block keys are recomputed; MID/OUT stay cached.
+        recompute_keys = [k for k in keys if "input_blocks" in k]
+        cached_only_keys = [k for k in keys if k not in recompute_keys]
+        new_results = {k: torch.randn(4, 4) for k in recompute_keys}
+
+        save_dest = str(tmp_path / "test.safetensors")
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
@@ -1126,13 +1140,13 @@ class TestExitNodeIncrementalCache:
                   return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.compile_batch_groups",
-                  return_value={sig: keys}),
+                  return_value={sig: recompute_keys}),
             patch("nodes.exit.chunked_evaluation",
                   return_value=new_results),
             patch("nodes.exit.validate_model_name",
                   return_value="test.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path",
-                  return_value="/tmp/test.safetensors"),
+                  return_value=save_dest),
             patch("nodes.exit.serialize_recipe",
                   return_value='{"test": true}'),
             patch("nodes.exit.compute_recipe_hash",
@@ -1140,21 +1154,30 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.check_cache", return_value=None),
             patch("nodes.exit.build_metadata",
                   return_value={"__ecaj_version__": "1"}),
-            patch("nodes.exit.atomic_save", atomic_save_mock),
         ):
             node = WIDENExitNode()
             node.execute(
                 recipe, save_model=True, model_name="test",
             )
 
-        # atomic_save should have been called
-        atomic_save_mock.assert_called_once()
-        saved_state = atomic_save_mock.call_args[0][0]
+        # Load the artifact and verify contents.
+        import safetensors.torch as st
+        artifact = st.load_file(save_dest)
 
-        # Saved state should contain ALL keys (complete merged state)
-        for k in keys:
-            assert k in saved_state, (
-                f"Key {k} missing from saved state"
+        # All base-state keys must be present (affected + unaffected).
+        base_keys = set(mock_model_patcher.model_state_dict().keys())
+        assert set(artifact.keys()) == base_keys
+
+        # Recomputed keys should match the new eval results.
+        for k in recompute_keys:
+            assert torch.equal(artifact[k], new_results[k]), (
+                f"Recomputed key {k} has wrong value in artifact"
+            )
+
+        # Cached (non-recomputed) affected keys should match cached state.
+        for k in cached_only_keys:
+            assert torch.equal(artifact[k], cached_state[k]), (
+                f"Cached key {k} has wrong value in artifact"
             )
 
 
