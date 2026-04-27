@@ -304,3 +304,41 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T19:27:58.188Z
+  - _ulid: 01KQ877QAEZK6M41T6795VA12W
+    content: >-
+      Fix cycle 8: addressed all 7 review blockers from cycle 7.
+
+
+      Production fixes:
+
+      1. _load_model_from_artifact: removed .to(dtype=storage_dtype) coercion — each tensor retains
+      its native artifact dtype, preserving mixed-dtype artifacts.
+
+      2. streaming_evaluation_to_sink: explicitly del merged_cpu after write_fn loop in both normal
+      and OOM paths, so previous chunk results are freed before next chunk.
+
+
+      Test fixes:
+
+      3. test_full_mode_succeeds_when_inmemory_sink_construction_fails: monkeypatches BOTH
+      chunked_evaluation AND evaluate_affected_group to raise.
+
+      4. test_event_order_interleaved_keys: asserts base_only key written, base writes precede group
+      1 eval, carries ac-base-weight-bounded-copying.
+
+      5. test_failure_during_eval_aborts_sink: real runtime test with 2 groups (different shapes) —
+      first succeeds, second raises. Verifies tensors_written > 0.
+
+      6. test_pre_populated_patch_cache_not_read_by_full_mode: sentinel zeros vs fresh 42.0 values
+      proves sentinel not used. New cross-mode isolation test.
+
+      7. Dynamic VRAM: _run_with_vram_state helper with mock comfy.model_management, distinct
+      vram_state values, set_vram_state tracking. All 4 tests simulate different modes.
+
+      8. New TestMixedDtypeArtifactPreservation for blocker 1 regression.
+
+
+      All 1246 tests pass. Ruff clean. All 6 spec ACs re-verified.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T19:39:07.470Z
