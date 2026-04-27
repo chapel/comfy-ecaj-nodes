@@ -2341,6 +2341,12 @@ reviews:
         payload:
           thread_ulid: 01KQ6VEJT361G7F083WWN18RZH
         timestamp: 2026-04-27T07:06:49.824Z
+      - _ulid: 01KQ6W6GTK8D3SCC2M49T5GQTE
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
+        timestamp: 2026-04-27T07:06:59.283Z
     examined_commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
     external_links: []
     lifecycle_state: closed
@@ -2397,6 +2403,13 @@ reviews:
               add/adjust an Exit-node behavioral test that asserts the materialization metadata
               contains it."
             created_at: 2026-04-27T06:53:55.041Z
+          - _ulid: 01KQ6W6GSQ9HAM28NT7DYYEYN9
+            author: "@claude"
+            body: "Fixed: build_metadata at exit.py:686 now passes artifact_kind='full_model'. Added a new
+              behavioral test (test_materialization_metadata_includes_artifact_kind) that asserts
+              the metadata kwarg passed to CheckpointMaterializationSink contains
+              __ecaj_artifact_kind__='full_model'."
+            created_at: 2026-04-27T07:06:59.255Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -2407,5 +2420,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T06:54:02.964Z
     created_at: 2026-04-27T06:52:06.368Z
-    updated_at: 2026-04-27T07:06:49.793Z
+    updated_at: 2026-04-27T07:06:59.255Z
     notes: []
