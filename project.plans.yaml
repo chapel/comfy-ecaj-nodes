@@ -3707,7 +3707,8 @@ plans:
         priority: 1
         tags: [research, comfy, memory, persistence]
         spec_ref: "@comfy-memory-manager-compatibility"
-        depends_on: []
+        depends_on:
+          - "@task-full-model-update-existing-specs"
         description: |
           What: Run a deliberately bounded technical spike that proves whether a WIDEN
           merged diffusion artifact can be loaded through ComfyUI's normal model
@@ -3735,9 +3736,12 @@ plans:
             returned loaded model participates in ComfyUI's normal memory lifecycle.
             When Dynamic VRAM is unavailable, record the fallback mode explicitly
             rather than treating that as a failure.
-          - Produce a go/no-go note in the task evidence. If the saved artifact cannot
-            be loaded as a usable Comfy MODEL, stop the full saved model plan and revise
-            the design before starting the materialization tasks.
+          - Produce a go/no-go note in the task evidence with the exact loader API or
+            path used, returned MODEL contract, cache-hit behavior, parity result,
+            memory-mode observation, and decision outcome.
+          - If the saved artifact cannot be loaded as a usable Comfy MODEL, stop the
+            full saved model plan and revise the design before starting the
+            materialization tasks.
           - Remove or isolate any temporary proof-of-concept output mode before the
             task is complete unless a later approved task explicitly keeps it.
 
@@ -3751,15 +3755,17 @@ plans:
             loaded artifact can feed downstream Comfy nodes.
           - Run the focused persistence/Exit pytest slice.
 
-          Covers: @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out,
-            ac-comfy-owns-returned-model-memory, ac-measured-memory-behavior;
-            @full-saved-model-output ac-return-loaded-model, ac-cache-reuses-artifact.
+          Gate evidence, not final product coverage: records whether
+            @full-saved-model-output ac-return-loaded-model and ac-cache-reuses-artifact
+            are viable before the implementation tasks proceed; final product coverage
+            remains with Exit integration and memory validation tasks.
       - title: Introduce a bounded merge result sink
         slug: task-full-model-result-sink-interface
         priority: 1
         tags: [persistence, memory]
         spec_ref: "@streaming-full-model-materialization"
-        depends_on: []
+        depends_on:
+          - "@task-full-model-saved-artifact-reload-spike"
         description: |
           What: Introduce an internal sink interface so merge evaluation can hand off
           each completed affected tensor without requiring the whole affected result
@@ -3831,7 +3837,8 @@ plans:
         priority: 1
         tags: [persistence, storage]
         spec_ref: "@streaming-full-model-materialization"
-        depends_on: []
+        depends_on:
+          - "@task-full-model-saved-artifact-reload-spike"
         description: |
           What: Implement a safetensors artifact writer that can publish a complete
           file only after every required tensor has been written successfully.
@@ -4086,6 +4093,11 @@ plans:
           work.
         author: Jacob Chapel
         created_at: 2026-04-27T01:56:54.629Z
+      - _ulid: 01KQ6ANVYJWAQ4CAJMA8T87SRX
+        content: "Address reviewer gate findings: spec reconciliation and reload spike now gate
+          materialization work"
+        author: Jacob Chapel
+        created_at: 2026-04-27T02:00:47.826Z
   - _ulid: 01KQ5ZSQ13857R9CGT36JXYK91
     slugs:
       - plan-disk-backed-patch-output-plan
