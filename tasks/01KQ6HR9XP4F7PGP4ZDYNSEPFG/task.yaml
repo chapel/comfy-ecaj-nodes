@@ -1,0 +1,49 @@
+_ulid: 01KQ6HR9XP4F7PGP4ZDYNSEPFG
+slugs:
+  - task-full-model-result-sink-interface
+title: Introduce a bounded merge result sink
+type: task
+description: |
+  What: Introduce an internal sink interface so merge evaluation can hand off
+  each completed affected tensor without requiring the whole affected result
+  set to stay resident in one dictionary.
+
+  Why: The current Exit implementation builds merged_state and then installs or
+  saves it. Full saved model output cannot reduce memory until merge
+  evaluation can emit each completed tensor to a consumer that may immediately
+  persist it and release references.
+
+  How:
+  - Inspect the current merge execution path in nodes/exit.py and
+    lib/gpu_ops.py.
+  - Add a pure Python/PyTorch result sink abstraction with write_tensor(key,
+    tensor), finalize(), and abort() behavior.
+  - Provide an in-memory sink that preserves current in_memory_patches behavior
+    and lets existing callers continue receiving a dict of affected tensors.
+  - Keep the sink layer free of ComfyUI imports so it can be unit-tested
+    without a running ComfyUI instance.
+  - Ensure abort paths release temporary resources and preserve existing error
+    propagation.
+
+  Testing:
+  - Add focused unit tests for the in-memory sink.
+  - Assert the sink records the exact affected keys and tensors passed to it.
+  - Assert abort/finalize behavior is deterministic and safe to call from
+    error paths.
+
+  Covers: @streaming-full-model-materialization ac-affected-results-released.
+spec_ref: "@streaming-full-model-materialization"
+plan_ref: "@plan-full-saved-model-output-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-full-model-saved-artifact-reload-spike"
+context: []
+priority: 1
+tags:
+  - persistence
+  - memory
+vcs_refs: []
+created_at: 2026-04-27T04:04:27.702Z
+todos: []

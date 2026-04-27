@@ -1,0 +1,59 @@
+_ulid: 01KQ6HRA11DGTMKET3Y0J4BN65
+slugs:
+  - task-full-model-exit-integration
+title: Integrate full saved model output into Exit
+type: task
+description: |
+  What: Add a user-selectable full saved model output mode to the Exit node.
+
+  Why: Users need an option that returns a reusable Comfy-loadable merged model
+  and does not keep the merged result as the original in-memory set patch
+  payload.
+
+  How:
+  - Modify nodes/exit.py to expose an output mode that includes full saved
+    model output while preserving the current in-memory patch output as the
+    default behavior.
+  - Validate that the mode has a usable output artifact name or path before
+    any expensive merge work begins.
+  - On a cache hit for the current recipe and full-model artifact kind, load
+    the saved artifact as a Comfy MODEL and skip GPU merge work.
+  - On a cache miss, run merge evaluation through the sink-writing path,
+    materialize the complete artifact, then load the artifact as a Comfy MODEL
+    through the supported loading path identified by the research task.
+  - Do not call the current in-memory patch installation path when this output
+    mode is active.
+  - Preserve existing save/cache flags or migrate them in a backwards-compatible
+    way so existing workflows continue to use their prior output mode.
+
+  Testing:
+  - Unit-test that full saved model mode uses the full checkpoint
+    materialization path and does not call the current in-memory patch
+    installer.
+  - Monkeypatch the Comfy loading path and assert it receives the completed
+    artifact path after successful materialization and on cache hit.
+  - Test validation errors for missing or invalid artifact names.
+  - Run existing in-memory patch output tests unchanged.
+
+  Covers: @full-saved-model-output ac-complete-artifact,
+    ac-return-loaded-model, ac-cache-reuses-artifact;
+    @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory.
+spec_ref: "@full-saved-model-output"
+plan_ref: "@plan-full-saved-model-output-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-full-model-saved-artifact-reload-spike"
+  - "@task-full-model-chunked-evaluation-to-sink"
+  - "@task-full-model-checkpoint-materialization"
+  - "@task-full-model-cache-metadata"
+context: []
+priority: 2
+tags:
+  - exit-node
+  - persistence
+  - comfy
+vcs_refs: []
+created_at: 2026-04-27T04:04:27.809Z
+todos: []

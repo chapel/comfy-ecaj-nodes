@@ -1,0 +1,51 @@
+_ulid: 01KQ6HR9ZR2NS2QC19B6QGS6C9
+slugs:
+  - task-full-model-checkpoint-materialization
+title: Implement full checkpoint materialization
+type: task
+description: |
+  What: Add the materialization path that creates a complete merged diffusion
+  artifact while receiving affected tensors from merge evaluation.
+
+  Why: The full saved model option must include both affected merged weights
+  and unaffected base weights without constructing a second complete state dict
+  in memory.
+
+  How:
+  - Build the artifact's required key list from the base model state dict.
+  - Record unaffected base weights directly to the artifact writer in a bounded
+    pass that does not also retain a duplicate full-model dictionary.
+  - For affected keys, write merged tensors through the result sink as merge
+    evaluation produces them.
+  - Ensure affected keys replace only their corresponding base entries in the
+    final artifact.
+  - Finalize the artifact only after all affected and unaffected keys have been
+    recorded.
+  - On errors, abort the writer and leave any previous valid cache artifact
+    untouched.
+
+  Testing:
+  - Use a fake base model state with affected and unaffected keys.
+  - Load the resulting safetensors artifact and assert unaffected keys equal
+    the base tensors while affected keys equal the merged tensors.
+  - Assert materialization does not expose or require a full merged_state dict.
+  - Assert a write failure leaves no partially published artifact.
+
+  Covers: @streaming-full-model-materialization ac-base-weight-bounded-copying,
+    ac-affected-results-released, ac-incomplete-write-not-reused.
+spec_ref: "@streaming-full-model-materialization"
+plan_ref: "@plan-full-saved-model-output-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-full-model-result-sink-interface"
+  - "@task-full-model-incremental-writer"
+context: []
+priority: 2
+tags:
+  - persistence
+  - memory
+vcs_refs: []
+created_at: 2026-04-27T04:04:27.768Z
+todos: []

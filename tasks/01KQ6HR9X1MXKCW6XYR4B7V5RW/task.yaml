@@ -1,0 +1,72 @@
+_ulid: 01KQ6HR9X1MXKCW6XYR4B7V5RW
+slugs:
+  - task-full-model-saved-artifact-reload-spike
+title: Validate saved-artifact reload before full materialization work
+type: task
+description: |
+  What: Run a deliberately bounded technical spike that proves whether a WIDEN
+  merged diffusion artifact can be loaded through ComfyUI's normal model
+  loading path and returned as the Exit node's MODEL output with equivalent
+  downstream behavior.
+
+  Why: The full saved model plan depends on ComfyUI accepting the saved merged
+  artifact as a normal loaded model. That compatibility should be proven before
+  investing in bounded merge-result sinks, incremental artifact writing, and
+  full materialization refactors. The spike is intentionally narrow so it can
+  stop the plan early if saved-artifact reload is not viable.
+
+  How:
+  - Use the existing save_model/atomic_save path or a temporary test-only path
+    to create a representative merged safetensors artifact. Do not optimize
+    peak RAM in this task.
+  - Load the saved artifact with the same public ComfyUI diffusion-model loading
+    path that regular model nodes use.
+  - Compare the loaded-artifact MODEL against the current in-memory patch
+    output for the same recipe and assert affected weights are equivalent.
+  - Exercise the existing cache-hit shape: when a saved artifact matches the
+    current recipe identity, prove the GPU merge can be skipped and the MODEL
+    can be loaded from that artifact.
+  - In a ComfyUI environment with Dynamic VRAM enabled, capture whether the
+    returned loaded model participates in ComfyUI's normal memory lifecycle.
+    When Dynamic VRAM is unavailable, record the fallback mode explicitly
+    rather than treating that as a failure.
+  - Produce a go/no-go note in the task evidence with the exact loader API or
+    path used, returned MODEL contract, cache-hit behavior, parity result,
+    memory-mode observation, and decision outcome.
+  - If the saved artifact cannot be loaded as a usable Comfy MODEL, stop the
+    full saved model plan and revise the design before starting the
+    materialization tasks.
+  - Remove or isolate any temporary proof-of-concept output mode before the
+    task is complete unless a later approved task explicitly keeps it.
+
+  Testing:
+  - Add unit tests that monkeypatch ComfyUI's diffusion-model loader and assert
+    the saved path is loaded for the spike path and compatible cache-hit path.
+  - Add parity coverage comparing affected weights from current in-memory patch
+    output and saved-artifact reload output.
+  - Add an optional integration script or documented command for a local
+    ComfyUI checkout that prints the active patcher/memory mode and whether the
+    loaded artifact can feed downstream Comfy nodes.
+  - Run the focused persistence/Exit pytest slice.
+
+  Gate evidence, not final product coverage: records whether
+    @full-saved-model-output ac-return-loaded-model and ac-cache-reuses-artifact
+    are viable before the implementation tasks proceed; final product coverage
+    remains with Exit integration and memory validation tasks.
+spec_ref: "@comfy-memory-manager-compatibility"
+plan_ref: "@plan-full-saved-model-output-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-full-model-update-existing-specs"
+context: []
+priority: 1
+tags:
+  - research
+  - comfy
+  - memory
+  - persistence
+vcs_refs: []
+created_at: 2026-04-27T04:04:27.681Z
+todos: []

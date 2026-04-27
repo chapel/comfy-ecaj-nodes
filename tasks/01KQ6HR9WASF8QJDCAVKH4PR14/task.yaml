@@ -1,0 +1,52 @@
+_ulid: 01KQ6HR9WASF8QJDCAVKH4PR14
+slugs:
+  - task-full-model-update-existing-specs
+title: Update Exit output-mode specs for full saved model behavior
+type: task
+description: |
+  What: Update existing project specs so the current set-patch Exit behavior is
+  scoped as the default in-memory output mode and full saved model output is a
+  distinct supported output behavior.
+
+  Why: Existing specs such as @exit-node, @exit-patch-install,
+  @exit-model-persistence, and @memory-management predate multiple output
+  modes. They currently describe the Exit result as set patches and saved
+  artifacts as persistence/cache support, which can conflict with returning a
+  Comfy-loadable saved MODEL.
+
+  How:
+  - Review existing specs for Exit return behavior, patch installation,
+    persistence, cache hits, and memory management.
+  - Scope existing set-patch acceptance criteria to the in-memory patch output
+    mode instead of making them universal Exit behavior.
+  - Extend or refine saved-model persistence specs so a full saved model output
+    can return a MODEL loaded from the saved artifact.
+  - Add relationships from new full saved model requirements to existing
+    persistence and memory-management specs where supported by kspec.
+  - Keep spec wording behavioral: describe user-visible output mode behavior,
+    reloadability, cache reuse, and memory observations rather than internal
+    writer or patcher classes.
+
+  Testing:
+  - Run kspec validation or plan import checks after the spec edits.
+  - Confirm the resulting specs do not contain contradictory requirements for
+    the same Exit output mode.
+
+  Reconciliation evidence, not final product coverage: confirms existing Exit,
+    patch-installation, persistence, and memory-management specs no longer
+    contradict the full saved model output mode before implementation begins.
+spec_ref: "@full-saved-model-output"
+plan_ref: "@plan-full-saved-model-output-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - specs
+  - exit-node
+  - persistence
+vcs_refs: []
+created_at: 2026-04-27T04:04:27.658Z
+todos: []

@@ -1,0 +1,47 @@
+_ulid: 01KQ6HRA0DXES7K03VX0RCDXQ2
+slugs:
+  - task-full-model-cache-metadata
+title: Add mode-aware persistence metadata and cache checks
+type: task
+description: |
+  What: Extend persistence metadata so full saved model artifacts are safely
+  distinguished from other ecaj artifacts and from older saved files.
+
+  Why: A matching recipe hash is not enough once multiple output modes can
+  write artifacts. Cache hits must only reuse artifacts whose kind and required
+  metadata match the active output behavior.
+
+  How:
+  - Update metadata construction and cache checks in lib/persistence.py to
+    include and verify an artifact kind for full saved model outputs.
+  - Reject or recompute when an artifact has the right recipe hash but the
+    wrong artifact kind, missing kind, or incompatible metadata schema.
+  - Preserve protection against overwriting non-ecaj safetensors files.
+  - Include enough metadata for later diagnostics, such as affected keys and
+    the saved recipe identity.
+  - Ensure older ecaj files without an artifact kind do not become silent cache
+    hits for full saved model output.
+
+  Testing:
+  - Add persistence tests for matching kind, mismatched kind, missing kind, and
+    non-ecaj files.
+  - Assert cache hits skip merge work only for compatible full saved model
+    artifacts.
+  - Run the persistence test slice and existing save/cache tests.
+
+  Covers: @full-saved-model-output ac-cache-reuses-artifact.
+spec_ref: "@full-saved-model-output"
+plan_ref: "@plan-full-saved-model-output-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-full-model-checkpoint-materialization"
+context: []
+priority: 2
+tags:
+  - persistence
+  - cache
+vcs_refs: []
+created_at: 2026-04-27T04:04:27.789Z
+todos: []

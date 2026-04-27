@@ -4060,11 +4060,23 @@ plans:
       set patch payload, and any new load-time or write-time peak should be visible in
 
       the validation output.
-    status: approved
+    status: active
     approved_at: 2026-04-27T04:04:17.161Z
     branch: plan/plan-full-saved-model-output-plan/01kq5zsk
-    derived_specs: []
-    derived_tasks: []
+    derived_specs:
+      - "@full-saved-model-output"
+      - "@streaming-full-model-materialization"
+      - "@comfy-memory-manager-compatibility"
+    derived_tasks:
+      - "@task-full-model-update-existing-specs"
+      - "@task-full-model-saved-artifact-reload-spike"
+      - "@task-full-model-result-sink-interface"
+      - "@task-full-model-chunked-evaluation-to-sink"
+      - "@task-full-model-incremental-writer"
+      - "@task-full-model-checkpoint-materialization"
+      - "@task-full-model-cache-metadata"
+      - "@task-full-model-exit-integration"
+      - "@task-full-model-memory-validation"
     module_ref: null
     source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/full-saved-model-output.md
     created_at: 2026-04-26T22:50:36.045Z
@@ -4105,6 +4117,41 @@ plans:
           coverage"
         author: Jacob Chapel
         created_at: 2026-04-27T02:02:14.342Z
+      - _ulid: 01KQ6HRA2JM4ET31DYJNTZGS2M
+        content: >-
+          This option is the strongest candidate for actually using ComfyUI's Dynamic
+
+          VRAM system because the merged result becomes a normal saved diffusion artifact
+
+          loaded through Comfy's own model loading path. Dynamic VRAM is implemented by
+
+          Comfy/aimdo around Comfy-managed model weights and ModelPatcher lifecycle; it is
+
+          not a general-purpose allocator for arbitrary tensors held by custom nodes.
+
+
+          The tradeoff is disk usage and an extra artifact load path. The plan therefore
+
+          keeps the full saved model path explicit instead of replacing the current patch
+
+          output by default. The first implementation gate is the saved-artifact reload spike:
+          before any
+
+          bounded materialization refactor begins, the project must prove that a WIDEN
+
+          saved artifact can be loaded as a usable Comfy MODEL with parity against the
+
+          current in-memory patch output. After that gate passes, the proof point for
+
+          promotion is measured behavior under a current ComfyUI build with Dynamic VRAM
+
+          enabled: the returned model should no longer depend on the original in-memory
+
+          set patch payload, and any new load-time or write-time peak should be visible in
+
+          the validation output.
+        author: Jacob Chapel
+        created_at: 2026-04-27T04:04:27.858Z
   - _ulid: 01KQ5ZSQ13857R9CGT36JXYK91
     slugs:
       - plan-disk-backed-patch-output-plan

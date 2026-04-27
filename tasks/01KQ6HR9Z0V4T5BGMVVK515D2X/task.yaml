@@ -1,0 +1,48 @@
+_ulid: 01KQ6HR9Z0V4T5BGMVVK515D2X
+slugs:
+  - task-full-model-incremental-writer
+title: Implement an incremental safetensors artifact writer
+type: task
+description: |
+  What: Implement a safetensors artifact writer that can publish a complete
+  file only after every required tensor has been written successfully.
+
+  Why: Full saved model output needs a complete model artifact, but a simple
+  all-at-once save can create a second model-sized memory spike. The writer
+  needs to accept tensors incrementally while preserving safetensors validity
+  and cache safety.
+
+  How:
+  - Extend the existing streaming save support or add a new persistence helper
+    for predetermined tensor metadata and incremental writes.
+  - Precompute each required tensor's name, shape, dtype, and byte length from
+    base model metadata and the selected storage dtype.
+  - Write to a temporary file in the destination directory and publish the
+    final file atomically only after all required tensors have been written.
+  - Validate every write against the expected key, shape, dtype, and byte size.
+  - Track missing or duplicate keys and fail before publishing if the artifact
+    would be incomplete or inconsistent.
+  - Remove temporary files on abort or failure.
+
+  Testing:
+  - Round-trip artifacts with multiple keys and dtypes through safetensors.
+  - Assert missing-key, duplicate-key, wrong-shape, and wrong-dtype cases fail
+    with clear errors and do not publish a cacheable artifact.
+  - Assert a failure leaves no completed artifact at the destination path.
+
+  Covers: @streaming-full-model-materialization ac-incomplete-write-not-reused.
+spec_ref: "@streaming-full-model-materialization"
+plan_ref: "@plan-full-saved-model-output-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-full-model-saved-artifact-reload-spike"
+context: []
+priority: 1
+tags:
+  - persistence
+  - storage
+vcs_refs: []
+created_at: 2026-04-27T04:04:27.744Z
+todos: []

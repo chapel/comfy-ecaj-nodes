@@ -1,0 +1,50 @@
+_ulid: 01KQ6HR9YAB7181HKX6YSBX650
+slugs:
+  - task-full-model-chunked-evaluation-to-sink
+title: Add sink-writing chunk evaluation
+type: task
+description: |
+  What: Add a sink-writing variant of the chunked evaluation loop used by the
+  Exit node.
+
+  Why: The existing chunked evaluation returns a dict, which keeps all affected
+  CPU tensors alive until later install or save work completes. A sink-writing
+  path allows full saved model output to bound affected-result memory while
+  preserving the current computation semantics.
+
+  How:
+  - Modify lib/gpu_ops.py or add a focused streaming evaluation module.
+  - Implement a function with the same merge evaluation inputs as the current
+    chunked evaluation path plus a result sink.
+  - For every successfully evaluated key, convert the result to the base-model
+    storage dtype on CPU, pass it to the sink, and then release local chunk
+    references before later chunks are evaluated.
+  - Preserve current GPU out-of-memory retry behavior, system memory error
+    handling, dtype conversion, CPU output guarantees, and cleanup behavior.
+  - Keep the existing dict-returning function as a compatibility wrapper over
+    the in-memory sink or otherwise prove existing behavior remains unchanged.
+
+  Testing:
+  - Compare dict-returning evaluation and sink-writing evaluation on identical
+    small fake tensors.
+  - Add a retry-path test showing the sink receives exactly the completed keys
+    after an out-of-memory retry succeeds.
+  - Run the existing executor and Exit tests to prove current patch output is
+    unchanged.
+
+  Covers: @streaming-full-model-materialization ac-affected-results-released.
+spec_ref: "@streaming-full-model-materialization"
+plan_ref: "@plan-full-saved-model-output-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-full-model-result-sink-interface"
+context: []
+priority: 1
+tags:
+  - executor
+  - memory
+vcs_refs: []
+created_at: 2026-04-27T04:04:27.722Z
+todos: []
