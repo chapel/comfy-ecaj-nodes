@@ -50,3 +50,12 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-27T06:54:03.101Z
+  - _ulid: 01KQ6W6Z0ZSGV2W0DM764XDG1J
+    content: "Fix cycle 1: addressed both review blockers. (1) check_cache now passes
+      artifact_kind='full_model' so legacy files without kind are rejected as cache hits. (2)
+      build_metadata now passes artifact_kind='full_model' so newly saved full-model artifacts
+      include the kind. Updated cache-hit test metadata, added new behavioral test asserting
+      materialization metadata contains artifact_kind. All 1287 tests pass, kspec validate passes."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-27T07:07:13.823Z
