@@ -597,6 +597,16 @@ observations:
     resolved: false
     workflow_ref: "@01KQ6N19"
     created_at: 2026-04-27T05:03:05.174Z
+  - _ulid: 01KQ6PV5AD2CDSA82FDEQ90DJA
+    type: success
+    content: "Frame-inspection probes are effective for reviewing memory-lifetime guarantees: an
+      instrumented eval_fn can inspect the caller frame across chunk boundaries and prove whether
+      local tensor references from prior chunks remain alive, catching issues that parity/output
+      tests miss."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-27T05:33:24.173Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
