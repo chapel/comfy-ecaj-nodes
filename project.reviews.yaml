@@ -8506,6 +8506,12 @@ reviews:
         payload:
           thread_ulid: 01KQ8DQXQW34NE0A43KS0GVB0N
         timestamp: 2026-04-27T21:39:02.373Z
+      - _ulid: 01KQ8E3FZ08VM0MDMN165RVBD6
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQ8DQXQW34NE0A43KS0GVB0N
+        timestamp: 2026-04-27T21:39:08.897Z
     examined_commit: 5bf8bf9f735bf30616ff18fa6040814933affa03
     external_links: []
     lifecycle_state: closed
@@ -8543,6 +8549,8 @@ reviews:
               Added 3 tests covering empty root, root without comfy/, and ambient comfy isolation."
             created_at: 2026-04-27T21:39:02.297Z
         kind: blocker
+        resolved_at: 2026-04-27T21:39:08.825Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -8552,5 +8560,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-27T21:32:51.164Z
     created_at: 2026-04-27T21:28:16.467Z
-    updated_at: 2026-04-27T21:39:02.297Z
+    updated_at: 2026-04-27T21:39:08.825Z
     notes: []
