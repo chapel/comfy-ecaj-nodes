@@ -592,9 +592,6 @@ class TestMeasuredMemoryBehavior:
 
         node = WIDENExitNode()
 
-        # Measure peak RSS around patches mode execution
-        rss_before_patches = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
@@ -622,11 +619,6 @@ class TestMeasuredMemoryBehavior:
         full_model_patches["nodes.exit.load_saved_model"] = fake_loaded
 
         _incremental_cache.clear()  # Reset between runs
-
-        rss_before_full = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        gpu_before_full = (
-            torch.cuda.memory_allocated() if torch.cuda.is_available() else 0
-        )
 
         def run_full():
             return node.execute(
