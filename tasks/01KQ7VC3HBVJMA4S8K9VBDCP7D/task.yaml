@@ -135,8 +135,11 @@ description: >-
 spec_ref: "@streaming-full-model-materialization"
 meta_ref: null
 plan_ref: null
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Approved review @01KQ88X3 and merged PR #96 into dev at
+  15d140f495cf3b7c221ded7f709022f645a34721. Verified locally with uv run pytest (1246 passed), uv
+  run ruff check ., and kspec validate --warnings-ok."
 depends_on: []
 context: []
 priority: 1
@@ -667,8 +670,24 @@ history:
         previous: "@01KQ87CWP72FAHDG733B7VYKZ2"
     command: review-link
     timestamp: 2026-04-27T20:08:16.567Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Approved review @01KQ88X3 and merged PR #96 into dev at
+          15d140f495cf3b7c221ded7f709022f645a34721. Verified locally with uv run pytest (1246
+          passed), uv run ruff check ., and kspec validate --warnings-ok."
+        previous: null
+      completed_at:
+        new: 2026-04-27T20:14:10.007Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-04-27T20:14:10.027Z
 created_at: 2026-04-27T16:11:48.139Z
 started_at: 2026-04-27T19:52:39.858Z
 submitted_at: 2026-04-27T20:06:06.220Z
+completed_at: 2026-04-27T20:14:10.007Z
 todos: []
 automation: eligible
