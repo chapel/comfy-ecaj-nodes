@@ -8108,6 +8108,13 @@ reviews:
           status: pass
           name: kspec validate --warnings-ok
         timestamp: 2026-04-27T21:15:48.182Z
+      - _ulid: 01KQ8CRRD82WWPGH4MX3KV62WW
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQ8CRRAXTH65D884C7E6P0X2
+        timestamp: 2026-04-27T21:15:48.520Z
     examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
     external_links: []
     lifecycle_state: open
@@ -8117,8 +8124,26 @@ reviews:
       content_hash: ""
       ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQ8CRRAXTH65D884C7E6P0X2
+        anchor:
+          type: code
+          commit: bc595d85033c2b23ff040c97d038437aa987ba13
+          line_end: 617
+          line_start: 616
+          path: scripts/manual/real_comfy_memory_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQ8CRRAX17H7PW3YKAQR3FD6
+            author: Jacob Chapel
+            body: "MUST-FIX: critical workflow probe exceptions are written only into behavior strings, not
+              report.errors. main returns 0 whenever report.errors is empty, so patch install,
+              materialization, cache, or returned-model failures can be reported as a successful
+              validation. The fake Comfy-shaped probe produced install_merged_patches and
+              _load_model_from_artifact errors with exit code 0 and an empty errors list."
+            created_at: 2026-04-27T21:15:48.445Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-27T21:11:18.877Z
-    updated_at: 2026-04-27T21:15:48.086Z
+    updated_at: 2026-04-27T21:15:48.445Z
     notes: []
