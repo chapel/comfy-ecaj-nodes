@@ -56,7 +56,7 @@ description: |
 spec_ref: "@comfy-memory-manager-compatibility"
 plan_ref: "@plan-full-saved-model-output-plan"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-full-model-update-existing-specs"
@@ -68,6 +68,14 @@ tags:
   - memory
   - persistence
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-full-model-saved-artifact-reload-spike/01kq6hr9
+  captured_at: 2026-04-27T04:42:34.277Z
+  commit: def6c3b845f69c4ffcba5bf03782cdf16f901381
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KQ6K4R2ED2FHXP5EBPGY5Q9H
 history:
   - author: Jacob Chapel
@@ -90,7 +98,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-04-27T04:29:19.470Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-full-model-saved-artifact-reload-spike/01kq6hr9
+          captured_at: 2026-04-27T04:42:34.277Z
+          commit: def6c3b845f69c4ffcba5bf03782cdf16f901381
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-04-27T04:42:34.286Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-04-27T04:42:34.286Z
 created_at: 2026-04-27T04:04:27.681Z
 started_at: 2026-04-27T04:29:19.470Z
+submitted_at: 2026-04-27T04:42:34.286Z
 todos: []
 automation: eligible
