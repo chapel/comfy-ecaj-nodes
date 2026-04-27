@@ -780,7 +780,7 @@ workspaces:
         head: e3eba7dbee6adaf989421af7f46230c0929c4b95
         last_seen_at: 2026-04-27T20:08:01.456Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-full-model-streaming-artifact-cache-01kq7vc3
-  - active_role: null
+  - active_role: reviewer
     base_branch_point: 15d140f495cf3b7c221ded7f709022f645a34721
     bootstrap:
       status: succeeded
@@ -827,7 +827,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-27T20:24:37.459Z
+      updated_at: 2026-04-27T20:24:37.998Z
     integration:
       status: pending
       detail: null
@@ -842,10 +842,10 @@ workspaces:
     task_slug: task-full-model-real-comfy-memory-harness
     timestamps:
       closed_at: null
-      last_active_at: 2026-04-27T20:14:15.191Z
-      last_reconciled_at: 2026-04-27T20:24:37.459Z
+      last_active_at: 2026-04-27T20:24:37.998Z
+      last_reconciled_at: 2026-04-27T20:24:37.998Z
       created_at: 2026-04-27T20:14:14.652Z
-      updated_at: 2026-04-27T20:24:37.668Z
+      updated_at: 2026-04-27T20:24:37.998Z
     workspace_id: dispatch-workspace-01KQ7VC3MPV8MZAP7HKCFJWHQ6
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
