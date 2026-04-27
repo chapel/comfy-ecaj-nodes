@@ -8602,6 +8602,16 @@ reviews:
         runner: kspec
         created_at: 2026-04-27T21:43:40.109Z
         completed_at: 2026-04-27T21:43:40.109Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: pytest tests/test_real_comfy_memory_harness.py -q -> 39 passed.
+        name: targeted harness tests
+        required: true
+        runner: pytest
+        created_at: 2026-04-27T21:43:40.415Z
+        completed_at: 2026-04-27T21:43:40.415Z
     events:
       - _ulid: 01KQ8E5PBEV7SD8EDSRNFAPJDY
         actor: Jacob Chapel
@@ -8637,6 +8647,13 @@ reviews:
           status: pass
           name: kspec validate --warnings-ok
         timestamp: 2026-04-27T21:43:40.187Z
+      - _ulid: 01KQ8EBS7BFTRSXFH4JC46NVSW
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: targeted harness tests
+        timestamp: 2026-04-27T21:43:40.523Z
     examined_commit: cf1d6f0b2b24c05d0411a5a727a2a72e72fb8675
     external_links: []
     lifecycle_state: open
@@ -8649,5 +8666,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-27T21:40:20.974Z
-    updated_at: 2026-04-27T21:43:40.109Z
+    updated_at: 2026-04-27T21:43:40.415Z
     notes: []
