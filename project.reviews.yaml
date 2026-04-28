@@ -8793,6 +8793,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQAW8X733EG2K86W0G03DB3W
         timestamp: 2026-04-28T20:25:15.316Z
+      - _ulid: 01KQAW9APFG3WTV1DS3J342A22
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQAW9AM3P1Q6NYM9DFYBNC66
+        timestamp: 2026-04-28T20:25:29.039Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -8820,7 +8827,23 @@ reviews:
               task testing."
             created_at: 2026-04-28T20:25:15.236Z
         kind: blocker
+      - _ulid: 01KQAW9AM3P1Q6NYM9DFYBNC66
+        anchor:
+          type: structured
+          field: ac-missing-components-diagnostic
+          ref: "@saved-model-artifact-safety"
+          section: acceptance_criteria
+        entries:
+          - _ulid: 01KQAW9AM34J60N5E25BKBGN1B
+            author: Jacob Chapel
+            body: "MUST-FIX: The Then clause contains two separate assertions: the diagnostic names the missing
+              requirement, and it explains how the workflow can provide it. Because these can pass
+              or fail independently, split them into two ACs or replace the Then with a single
+              observable standard such as 'the diagnostic is actionable for the missing checkpoint
+              components' and put the exact content expectations in task tests."
+            created_at: 2026-04-28T20:25:28.963Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:24:35.603Z
-    updated_at: 2026-04-28T20:25:15.236Z
+    updated_at: 2026-04-28T20:25:28.963Z
     notes: []
