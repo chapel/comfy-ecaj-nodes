@@ -9110,6 +9110,17 @@ reviews:
         required: true
         created_at: 2026-04-28T20:35:33.432Z
         completed_at: 2026-04-28T20:35:33.432Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Behavioral ACs are mostly timeless and previous compound ACs were fixed, but
+          @checkpoint-loadable-saved-model-output ac-generated-workflow-round-trip omits the
+          required bounded image-producing/SaveImage-style downstream success baseline.
+        name: Spec quality
+        required: true
+        created_at: 2026-04-28T20:35:39.234Z
+        completed_at: 2026-04-28T20:35:39.234Z
     events:
       - _ulid: 01KQAWTK2Z08HR0AXR519N99F9
         actor: Jacob Chapel
@@ -9145,6 +9156,13 @@ reviews:
           status: pass
           name: Prior blocker regression
         timestamp: 2026-04-28T20:35:33.511Z
+      - _ulid: 01KQAWVYNJWCRAN9D270A8Y1MC
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: Spec quality
+        timestamp: 2026-04-28T20:35:39.314Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9194,5 +9212,5 @@ reviews:
         kind: question
     verdicts: []
     created_at: 2026-04-28T20:34:54.687Z
-    updated_at: 2026-04-28T20:35:33.432Z
+    updated_at: 2026-04-28T20:35:39.234Z
     notes: []
