@@ -8783,6 +8783,18 @@ reviews:
         required: true
         created_at: 2026-04-28T20:26:24.838Z
         completed_at: 2026-04-28T20:26:24.838Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Found compound/multi-case ACs in @saved-model-artifact-safety and
+          @live-comfy-saved-output-validation; see blocker threads on
+          ac-incompatible-artifact-not-reused, ac-missing-components-diagnostic, and
+          ac-report-captures-live-behavior.
+        name: Spec quality
+        required: true
+        created_at: 2026-04-28T20:26:24.839Z
+        completed_at: 2026-04-28T20:26:24.839Z
     events:
       - _ulid: 01KQAW7PGKETRKK5QC9YZ74TZA
         actor: Jacob Chapel
@@ -8846,6 +8858,13 @@ reviews:
           status: fail
           name: Task standalone executability
         timestamp: 2026-04-28T20:26:24.917Z
+      - _ulid: 01KQAWB1DCWE7M6KME4H9G6ETE
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: Spec quality
+        timestamp: 2026-04-28T20:26:25.069Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -8960,5 +8979,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:24:35.603Z
-    updated_at: 2026-04-28T20:26:24.838Z
+    updated_at: 2026-04-28T20:26:24.839Z
     notes: []
