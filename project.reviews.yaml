@@ -8807,6 +8807,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQAW9AM9N9HCVESC65Z7EHNV
         timestamp: 2026-04-28T20:25:29.202Z
+      - _ulid: 01KQAW9B0K8NMBXAV22JYDRD9A
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQAW9AMTVQBYYZJZD6JMV618
+        timestamp: 2026-04-28T20:25:29.363Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -8867,7 +8874,24 @@ reviews:
               and cache-reuse outcome."
             created_at: 2026-04-28T20:25:28.969Z
         kind: blocker
+      - _ulid: 01KQAW9AMTVQBYYZJZD6JMV618
+        anchor:
+          type: structured
+          ref: "@task-checkpoint-save-component-sourcing"
+          section: description
+        entries:
+          - _ulid: 01KQAW9AMTMM67ERSZMB4H5QP1
+            author: Jacob Chapel
+            body: "MUST-FIX: The task leaves the checkpoint component graph contract as an implementation-time
+              choice ('Choose the least confusing graph contract ... optional inputs ... or
+              equivalent source'). That contract changes the public node surface and determines
+              whether SDXL-style checkpoint saves can be satisfied. Patch the plan so the contract
+              is decided here, or split out an explicit design/decision task whose output is
+              required before implementation tasks depend on it. A fresh agent should not have to
+              infer this from prior chat or live-investigation context."
+            created_at: 2026-04-28T20:25:28.986Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:24:35.603Z
-    updated_at: 2026-04-28T20:25:28.969Z
+    updated_at: 2026-04-28T20:25:28.986Z
     notes: []
