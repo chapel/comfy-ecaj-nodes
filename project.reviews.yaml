@@ -9256,9 +9256,25 @@ reviews:
           status: pass
           name: kspec validation
         timestamp: 2026-04-28T20:36:12.852Z
+      - _ulid: 01KQAWX4V5P5XP758359P3M8RP
+        actor: Jacob Chapel
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-28T20:36:18.405Z
+      - _ulid: 01KQAWX4V53AJF8KRM04VJN0Z1
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-28T20:36:18.405Z
     examined_commit: null
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: plan
@@ -9303,7 +9319,14 @@ reviews:
               split an early inventory/decision task from later code adoption."
             created_at: 2026-04-28T20:35:21.461Z
         kind: question
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: Jacob Chapel
+        role: reviewer
+        created_at: 2026-04-28T20:36:18.404Z
     created_at: 2026-04-28T20:34:54.687Z
-    updated_at: 2026-04-28T20:36:12.761Z
+    updated_at: 2026-04-28T20:36:18.405Z
     notes: []
