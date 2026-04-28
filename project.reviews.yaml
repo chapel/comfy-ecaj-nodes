@@ -8771,7 +8771,18 @@ reviews:
     slugs: []
     title: "Plan review: Checkpoint Save Reconciliation Plan"
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "@task-checkpoint-save-component-sourcing leaves the public checkpoint component graph
+          contract to implementation-time choice, which requires conversation/product context to
+          decide safely."
+        name: Task standalone executability
+        required: true
+        created_at: 2026-04-28T20:26:24.838Z
+        completed_at: 2026-04-28T20:26:24.838Z
     events:
       - _ulid: 01KQAW7PGKETRKK5QC9YZ74TZA
         actor: Jacob Chapel
@@ -8828,6 +8839,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQAWAHFA7TTPCA2AMYXHZFMF
         timestamp: 2026-04-28T20:26:08.826Z
+      - _ulid: 01KQAWB18MZJXN0WJ5VRT9XEEG
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: Task standalone executability
+        timestamp: 2026-04-28T20:26:24.917Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -8942,5 +8960,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:24:35.603Z
-    updated_at: 2026-04-28T20:26:08.747Z
+    updated_at: 2026-04-28T20:26:24.838Z
     notes: []
