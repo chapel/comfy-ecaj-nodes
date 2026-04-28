@@ -8828,6 +8828,16 @@ reviews:
         required: true
         created_at: 2026-04-28T20:26:39.122Z
         completed_at: 2026-04-28T20:26:39.122Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Ran kspec validate: schema/references passed; existing repository warnings remain for
+          orphan modules, status mismatches, and missing descriptions unrelated to this draft plan."
+        name: kspec validation
+        required: false
+        created_at: 2026-04-28T20:26:39.179Z
+        completed_at: 2026-04-28T20:26:39.179Z
     events:
       - _ulid: 01KQAW7PGKETRKK5QC9YZ74TZA
         actor: Jacob Chapel
@@ -8919,6 +8929,13 @@ reviews:
           status: pass
           name: Dependency ordering
         timestamp: 2026-04-28T20:26:39.349Z
+      - _ulid: 01KQAWBFGQA9VJJZFKEAF6266T
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validation
+        timestamp: 2026-04-28T20:26:39.511Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9033,5 +9050,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:24:35.603Z
-    updated_at: 2026-04-28T20:26:39.122Z
+    updated_at: 2026-04-28T20:26:39.179Z
     notes: []
