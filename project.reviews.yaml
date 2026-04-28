@@ -9121,6 +9121,17 @@ reviews:
         required: true
         created_at: 2026-04-28T20:35:39.234Z
         completed_at: 2026-04-28T20:35:39.234Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: All listed ACs are claimed by tasks, but the plan lacks an AC/task coverage target for the
+          required SaveImage-style image-producing downstream validation, so release-relevant
+          downstream coverage is incomplete.
+        name: AC coverage mapping
+        required: true
+        created_at: 2026-04-28T20:35:45.105Z
+        completed_at: 2026-04-28T20:35:45.105Z
     events:
       - _ulid: 01KQAWTK2Z08HR0AXR519N99F9
         actor: Jacob Chapel
@@ -9163,6 +9174,13 @@ reviews:
           status: fail
           name: Spec quality
         timestamp: 2026-04-28T20:35:39.314Z
+      - _ulid: 01KQAWW4CZXRM4Y1A1R8PHNQ8G
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: AC coverage mapping
+        timestamp: 2026-04-28T20:35:45.183Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9212,5 +9230,5 @@ reviews:
         kind: question
     verdicts: []
     created_at: 2026-04-28T20:34:54.687Z
-    updated_at: 2026-04-28T20:35:39.234Z
+    updated_at: 2026-04-28T20:35:45.105Z
     notes: []
