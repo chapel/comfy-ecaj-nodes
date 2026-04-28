@@ -9167,6 +9167,18 @@ reviews:
         required: true
         created_at: 2026-04-28T20:36:06.629Z
         completed_at: 2026-04-28T20:36:06.629Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Ran kspec validate and kspec validate --alignment. Both passed schema/reference
+          validation with existing repository warnings: orphan Foundation/WIDEN Merge modules, Full
+          Saved Model Output/Accurate RAM status mismatches, and pre-existing missing descriptions."
+        name: kspec validation
+        required: false
+        runner: kspec
+        created_at: 2026-04-28T20:36:12.761Z
+        completed_at: 2026-04-28T20:36:12.761Z
     events:
       - _ulid: 01KQAWTK2Z08HR0AXR519N99F9
         actor: Jacob Chapel
@@ -9237,6 +9249,13 @@ reviews:
           status: pass
           name: Scope discipline
         timestamp: 2026-04-28T20:36:06.709Z
+      - _ulid: 01KQAWWZDMS8EGQ5W03835CQ5E
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validation
+        timestamp: 2026-04-28T20:36:12.852Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9286,5 +9305,5 @@ reviews:
         kind: question
     verdicts: []
     created_at: 2026-04-28T20:34:54.687Z
-    updated_at: 2026-04-28T20:36:06.629Z
+    updated_at: 2026-04-28T20:36:12.761Z
     notes: []
