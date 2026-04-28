@@ -9112,6 +9112,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-28T20:35:04.684Z
+      - _ulid: 01KQAWV653EYXV1M972WS664TF
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQAWV62NX9D8MHRB6Q6MSYPN
+        timestamp: 2026-04-28T20:35:14.211Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9121,8 +9128,28 @@ reviews:
       content_hash: ""
       ref: "@plan-checkpoint-save-reconciliation-plan-1"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQAWV62NX9D8MHRB6Q6MSYPN
+        anchor:
+          type: structured
+          field: ac-generated-workflow-round-trip
+          ref: "@checkpoint-loadable-saved-model-output"
+          section: acceptance_criteria
+        entries:
+          - _ulid: 01KQAWV62NEBMEQM1ECF0VMRV1
+            author: Jacob Chapel
+            body: "MUST-FIX: The plan brief requires checkpoint-style saved artifacts to prove bounded
+              KSampler/VAEDecode/SaveImage-style downstream success, not only diffusion-loadability.
+              This AC requires an appropriate loader and a normal generation-and-decode workflow,
+              but it does not durably require an image-producing/SaveImage-style downstream output
+              step. Impact: a future task could satisfy the spec with loader plus sampler/decode
+              smoke coverage while still missing the terminal image-output behavior that
+              distinguishes a usable checkpoint workflow in ComfyUI. Update this AC or add a
+              separate AC so checkpoint-style round-trip validation explicitly includes a bounded
+              image-producing downstream workflow for the model kind."
+            created_at: 2026-04-28T20:35:14.134Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:34:54.687Z
-    updated_at: 2026-04-28T20:35:04.607Z
+    updated_at: 2026-04-28T20:35:14.134Z
     notes: []
