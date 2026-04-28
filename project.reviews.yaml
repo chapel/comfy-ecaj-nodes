@@ -8795,6 +8795,17 @@ reviews:
         required: true
         created_at: 2026-04-28T20:26:24.839Z
         completed_at: 2026-04-28T20:26:24.839Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Covers lines omit existing @full-saved-model-output ACs explicitly edited by
+          @task-checkpoint-save-spec-alignment, and @task-checkpoint-save-live-validation-harness
+          overclaims release-assessment coverage.
+        name: AC coverage mapping
+        required: true
+        created_at: 2026-04-28T20:26:24.842Z
+        completed_at: 2026-04-28T20:26:24.842Z
     events:
       - _ulid: 01KQAW7PGKETRKK5QC9YZ74TZA
         actor: Jacob Chapel
@@ -8865,6 +8876,13 @@ reviews:
           status: fail
           name: Spec quality
         timestamp: 2026-04-28T20:26:25.069Z
+      - _ulid: 01KQAWB1J5JQVTNY05H5EJTDAD
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: AC coverage mapping
+        timestamp: 2026-04-28T20:26:25.222Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -8979,5 +8997,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:24:35.603Z
-    updated_at: 2026-04-28T20:26:24.839Z
+    updated_at: 2026-04-28T20:26:24.842Z
     notes: []
