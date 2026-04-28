@@ -9119,6 +9119,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQAWV62NX9D8MHRB6Q6MSYPN
         timestamp: 2026-04-28T20:35:14.211Z
+      - _ulid: 01KQAWVDA2WVVSG8642JX5BQ1V
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: question
+          thread_ulid: 01KQAWVD7MFHRRABPE3GQQ9P76
+        timestamp: 2026-04-28T20:35:21.538Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9149,7 +9156,24 @@ reviews:
               image-producing downstream workflow for the model kind."
             created_at: 2026-04-28T20:35:14.134Z
         kind: blocker
+      - _ulid: 01KQAWVD7MFHRRABPE3GQQ9P76
+        anchor:
+          type: structured
+          ref: "@task-checkpoint-save-prior-branch-reconciliation"
+          section: dependencies
+        entries:
+          - _ulid: 01KQAWVD7NBEH4GF1ESBC5JH4C
+            author: Jacob Chapel
+            body: "SHOULD-FIX: This task is where the previous branch is classified as
+              adopt/rewrite/supersede/discard, including checkpoint/materialization helpers,
+              metadata checks, incomplete-write cleanup, and cache behavior. It currently depends on
+              the artifact-format and returned-model implementation tasks, so the salvage decisions
+              happen after the tasks most likely to need that input. If reconciliation is intended
+              as implementation input rather than a post-implementation audit, move it earlier or
+              split an early inventory/decision task from later code adoption."
+            created_at: 2026-04-28T20:35:21.461Z
+        kind: question
     verdicts: []
     created_at: 2026-04-28T20:34:54.687Z
-    updated_at: 2026-04-28T20:35:14.134Z
+    updated_at: 2026-04-28T20:35:21.461Z
     notes: []
