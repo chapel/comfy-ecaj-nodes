@@ -8800,6 +8800,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQAW9AM3P1Q6NYM9DFYBNC66
         timestamp: 2026-04-28T20:25:29.039Z
+      - _ulid: 01KQAW9AVJJDJWNFNAP0M2ZKD4
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQAW9AM9N9HCVESC65Z7EHNV
+        timestamp: 2026-04-28T20:25:29.202Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -8843,7 +8850,24 @@ reviews:
               components' and put the exact content expectations in task tests."
             created_at: 2026-04-28T20:25:28.963Z
         kind: blocker
+      - _ulid: 01KQAW9AM9N9HCVESC65Z7EHNV
+        anchor:
+          type: structured
+          field: ac-report-captures-live-behavior
+          ref: "@live-comfy-saved-output-validation"
+          section: acceptance_criteria
+        entries:
+          - _ulid: 01KQAW9AM9RT8754P3D8VPAYW9
+            author: Jacob Chapel
+            body: "MUST-FIX: This AC's Then clause is a report schema checklist covering environment identity,
+              workflow shape, save result, artifact classification, loader result, downstream
+              result, and cache-reuse result. That is too many independently testable outcomes for
+              one AC and makes task coverage ambiguous. Split it into smaller ACs, for example
+              environment/memory identification, saved-artifact outcome, loader/downstream outcome,
+              and cache-reuse outcome."
+            created_at: 2026-04-28T20:25:28.969Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:24:35.603Z
-    updated_at: 2026-04-28T20:25:28.963Z
+    updated_at: 2026-04-28T20:25:28.969Z
     notes: []
