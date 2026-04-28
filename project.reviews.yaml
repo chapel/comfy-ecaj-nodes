@@ -9132,6 +9132,18 @@ reviews:
         required: true
         created_at: 2026-04-28T20:35:45.105Z
         completed_at: 2026-04-28T20:35:45.105Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Tasks include what/why/how/testing sections, explicit save_model boolean constraint,
+          relevant files/areas, and guarded live-validation requirements. The component sourcing
+          task now states visible graph sourcing/no hidden global state; remaining
+          dependency-ordering concern is recorded as a non-blocking question.
+        name: Task standalone executability
+        required: true
+        created_at: 2026-04-28T20:35:51.764Z
+        completed_at: 2026-04-28T20:35:51.764Z
     events:
       - _ulid: 01KQAWTK2Z08HR0AXR519N99F9
         actor: Jacob Chapel
@@ -9181,6 +9193,13 @@ reviews:
           status: fail
           name: AC coverage mapping
         timestamp: 2026-04-28T20:35:45.183Z
+      - _ulid: 01KQAWWAX51EME5ZWTBK8QXEXG
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Task standalone executability
+        timestamp: 2026-04-28T20:35:51.846Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9230,5 +9249,5 @@ reviews:
         kind: question
     verdicts: []
     created_at: 2026-04-28T20:34:54.687Z
-    updated_at: 2026-04-28T20:35:45.105Z
+    updated_at: 2026-04-28T20:35:51.764Z
     notes: []
