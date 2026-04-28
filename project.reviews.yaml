@@ -9330,3 +9330,29 @@ reviews:
     created_at: 2026-04-28T20:34:54.687Z
     updated_at: 2026-04-28T20:36:18.405Z
     notes: []
+  - _ulid: 01KQAX3JYGSTEJA91ZX10KVSMJ
+    slugs: []
+    title: "Plan review: Checkpoint Save Reconciliation Plan v3"
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQAX3JYGRNJC7MW606QT9RN3
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-28T20:39:49.456Z
+    examined_commit: null
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: plan
+      content_hash: ""
+      ref: "@plan-checkpoint-save-reconciliation-plan-2"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-28T20:39:49.456Z
+    updated_at: null
+    notes: []
