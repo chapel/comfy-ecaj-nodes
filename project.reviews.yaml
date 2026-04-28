@@ -9097,7 +9097,19 @@ reviews:
     slugs: []
     title: "Plan review: Checkpoint Save Reconciliation Plan v2"
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Checked all six blockers from @01KQAW7P: compound cache rejection AC split; diagnostic AC
+          split; live report AC split; component sourcing now requires visible graph source/no
+          hidden global state; existing-spec Covers line added; primitive-test coverage moved off
+          the harness task."
+        name: Prior blocker regression
+        required: true
+        created_at: 2026-04-28T20:35:33.432Z
+        completed_at: 2026-04-28T20:35:33.432Z
     events:
       - _ulid: 01KQAWTK2Z08HR0AXR519N99F9
         actor: Jacob Chapel
@@ -9126,6 +9138,13 @@ reviews:
           kind: question
           thread_ulid: 01KQAWVD7MFHRRABPE3GQQ9P76
         timestamp: 2026-04-28T20:35:21.538Z
+      - _ulid: 01KQAWVS07VTP3XCM385KQC2E5
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Prior blocker regression
+        timestamp: 2026-04-28T20:35:33.511Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9175,5 +9194,5 @@ reviews:
         kind: question
     verdicts: []
     created_at: 2026-04-28T20:34:54.687Z
-    updated_at: 2026-04-28T20:35:21.461Z
+    updated_at: 2026-04-28T20:35:33.432Z
     notes: []
