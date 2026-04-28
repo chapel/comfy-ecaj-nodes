@@ -8814,6 +8814,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQAW9AMTVQBYYZJZD6JMV618
         timestamp: 2026-04-28T20:25:29.363Z
+      - _ulid: 01KQAW9ZAERN2BYGZWYSD96PBW
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQAW9Z83WGSHNBDMF19ZXDT6
+        timestamp: 2026-04-28T20:25:50.158Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -8891,7 +8898,25 @@ reviews:
               infer this from prior chat or live-investigation context."
             created_at: 2026-04-28T20:25:28.986Z
         kind: blocker
+      - _ulid: 01KQAW9Z83WGSHNBDMF19ZXDT6
+        anchor:
+          type: structured
+          field: covers
+          ref: "@task-checkpoint-save-spec-alignment"
+          section: tasks
+        entries:
+          - _ulid: 01KQAW9Z83PXRD63QX80FES24T
+            author: Jacob Chapel
+            body: "MUST-FIX: The task explicitly says it will refine existing @full-saved-model-output ACs
+              ac-complete-artifact and ac-return-loaded-model, and may update
+              @exit-model-persistence if it still describes saved files broadly, but its Covers line
+              only lists new-plan ACs. Add the existing ACs this task is responsible for
+              updating/validating, or narrow the task so it no longer claims to modify those specs.
+              Without that, the plan's coverage map is incomplete and a fresh agent cannot tell
+              which existing behavioral contracts must be reconciled."
+            created_at: 2026-04-28T20:25:50.083Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:24:35.603Z
-    updated_at: 2026-04-28T20:25:28.986Z
+    updated_at: 2026-04-28T20:25:50.083Z
     notes: []
