@@ -4712,3 +4712,677 @@ plans:
           dispatch-ready work."
         author: Jacob Chapel
         created_at: 2026-04-27T04:00:14.734Z
+  - _ulid: 01KQAVZDPG2ESEMBRYF7S45QT1
+    slugs:
+      - plan-checkpoint-save-reconciliation-plan
+    title: Checkpoint Save Reconciliation Plan
+    content: >
+      # Checkpoint Save Reconciliation Plan
+
+
+      ## Specs
+
+
+      ```yaml
+
+      - title: Checkpoint-Loadable Saved Model Output
+        slug: checkpoint-loadable-saved-model-output
+        type: requirement
+        parent: "@full-saved-model-output"
+        tags: [persistence, comfy, checkpoint]
+        description: |
+          Saved model output produces artifacts that can be loaded as the same ComfyUI
+          model kind users expect from the source workflow, including checkpoint-style
+          models whose usable workflow requires more than diffusion weights alone.
+        acceptance_criteria:
+          - id: ac-terminal-save-executes
+            given: |
+              A ComfyUI workflow ends at the WIDEN Exit node and the Exit node is
+              configured to save the merged model.
+            when: |
+              the workflow is queued without any downstream consumer of the Exit
+              node's MODEL output.
+            then: |
+              ComfyUI treats the Exit node as an executable side-effecting output and
+              attempts the save instead of rejecting the workflow because it has no
+              outputs.
+          - id: ac-artifact-matches-source-model-kind
+            given: |
+              A merge recipe starts from a checkpoint-style source model whose normal
+              ComfyUI use depends on model, conditioning, and decode components.
+            when: |
+              the Exit node saves the merged result for that recipe.
+            then: |
+              the saved artifact is loadable through the appropriate checkpoint-style
+              ComfyUI loader with the components required for that model kind, rather
+              than being only a diffusion-weight artifact.
+          - id: ac-generated-workflow-round-trip
+            given: |
+              A saved artifact was produced for a checkpoint-style merge recipe.
+            when: |
+              the artifact is loaded through the appropriate ComfyUI loader and used
+              in a normal generation-and-decode workflow for that model kind.
+            then: |
+              the workflow completes successfully without relying on the original
+              in-memory WIDEN merge payload.
+          - id: ac-downstream-return-remains-usable
+            given: |
+              A workflow both saves through the WIDEN Exit node and connects the Exit
+              node's MODEL output to downstream nodes in the same queued execution.
+            when: |
+              the save completes successfully.
+            then: |
+              downstream nodes receive a usable MODEL for the saved merge result.
+
+      - title: Saved Model Artifact Safety
+        slug: saved-model-artifact-safety
+        type: requirement
+        parent: "@full-saved-model-output"
+        tags: [persistence, cache, safety]
+        description: |
+          Saved model output publishes and reuses only complete artifacts whose kind,
+          contents, and metadata match the requested saved-model behavior.
+        acceptance_criteria:
+          - id: ac-incompatible-artifact-not-reused
+            given: |
+              A saved file has the same recipe identity as the current request but is
+              missing required saved-model metadata or was written for a different
+              artifact kind.
+            when: |
+              saved model output checks whether it can reuse that file.
+            then: |
+              the file is not accepted as a cache hit for the current saved-model
+              behavior.
+          - id: ac-internal-format-not-checkpoint-cache
+            given: |
+              A saved file contains only internal diffusion-weight keys for a
+              checkpoint-style source model.
+            when: |
+              checkpoint-style saved model output checks whether it can reuse that
+              file.
+            then: |
+              the file is rejected or recomputed with a clear diagnostic rather than
+              being treated as a usable checkpoint-style artifact.
+          - id: ac-no-partial-publication
+            given: |
+              saved model artifact creation fails before every required component has
+              been written and validated.
+            when: |
+              the failed save returns control to ComfyUI.
+            then: |
+              no newly incomplete artifact is published as a reusable saved model.
+          - id: ac-existing-valid-artifact-preserved
+            given: |
+              a previously valid saved model artifact exists at the requested logical
+              target.
+            when: |
+              a later save to the same logical target fails before publication.
+            then: |
+              the previously valid saved model artifact remains safe for later reuse.
+          - id: ac-missing-components-fail-before-work
+            given: |
+              a checkpoint-style save is requested without the components required to
+              create a loadable checkpoint-style artifact.
+            when: |
+              the Exit node validates the save request.
+            then: |
+              the workflow fails before expensive merge work or artifact publication
+              begins.
+          - id: ac-missing-components-diagnostic
+            given: |
+              a checkpoint-style save is requested without the components required to
+              create a loadable checkpoint-style artifact.
+            when: |
+              the Exit node reports the validation failure.
+            then: |
+              the error names the missing requirement and how the workflow can provide
+              it.
+
+      - title: Live Comfy Saved Output Validation
+        slug: live-comfy-saved-output-validation
+        type: requirement
+        parent: "@comfy-memory-manager-compatibility"
+        tags: [comfy, validation, memory]
+        description: |
+          Real ComfyUI validation proves saved model output through the same scheduler,
+          loader, memory-management mode, and downstream workflow shapes that users run.
+        acceptance_criteria:
+          - id: ac-explicit-real-comfy-opt-in
+            given: |
+              a validation harness or command can interact with a real ComfyUI
+              installation, service, model directory, or API.
+            when: |
+              normal automated tests, CI, or automated task dispatch run.
+            then: |
+              the real ComfyUI validation does not run unless an operator supplies
+              explicit opt-in inputs for the target environment.
+          - id: ac-report-captures-live-behavior
+            given: |
+              an operator intentionally runs saved-model validation against a real
+              ComfyUI environment.
+            when: |
+              the validation report is produced.
+            then: |
+              it records the ComfyUI version, active memory-management mode, queued
+              workflow shape, save result, artifact classification, loader result,
+              downstream workflow result, and cache-reuse result.
+          - id: ac-memory-mode-not-changed-for-success
+            given: |
+              ComfyUI is running in a supported memory-management mode.
+            when: |
+              saved model output is validated in that environment.
+            then: |
+              success does not require disabling or changing the active memory mode;
+              if the save can only succeed after changing the mode, the report records
+              that as a validation failure for the original mode.
+          - id: ac-primitive-tests-do-not-substitute-for-live-validation
+            given: |
+              lower-level tests prove artifact helpers, metadata checks, or mock model
+              behavior.
+            when: |
+              saved model output compatibility is assessed for release.
+            then: |
+              those primitive tests are treated as supporting evidence only; release
+              compatibility requires a live workflow validation result or an explicit
+              documented deferral.
+      ```
+
+
+      ## Tasks
+
+
+      derive_from_specs: false
+
+
+      ```yaml
+
+      - title: Align saved-output specs with checkpoint-style behavior
+        slug: task-checkpoint-save-spec-alignment
+        priority: 1
+        tags: [specs, persistence, comfy]
+        spec_ref: "@checkpoint-loadable-saved-model-output"
+        depends_on: []
+        description: |
+          What: Update the existing saved-output specs so they no longer describe a
+          diffusion-weight-only artifact as sufficient for every saved model output.
+          The update must keep the simple save_model user control and make
+          checkpoint-style behavior explicit.
+
+          Why: Current full saved model specs were written before live ComfyUI testing
+          distinguished diffusion-only artifacts from checkpoint-style artifacts. For
+          SDXL-style workflows, a file that only loads as a diffusion model is not a
+          complete saved checkpoint because the normal workflow also needs the
+          conditioning and decode components.
+
+          How:
+          - Review and update these existing specs before implementation changes:
+            @full-saved-model-output, @streaming-full-model-materialization,
+            @comfy-memory-manager-compatibility, @manual-comfy-memory-validation,
+            and @exit-model-persistence if it still describes saved files broadly.
+          - Preserve the current save_model boolean as the user-facing request to save;
+            do not introduce an output-mode dropdown as part of this plan.
+          - Refine @full-saved-model-output acceptance criteria so
+            ac-complete-artifact and ac-return-loaded-model distinguish the model kind
+            being saved and require checkpoint-style workflows to produce
+            checkpoint-style artifacts.
+          - Add or link the new @checkpoint-loadable-saved-model-output,
+            @saved-model-artifact-safety, and @live-comfy-saved-output-validation
+            requirements under the existing full saved model and Comfy compatibility
+            specs.
+          - If any existing spec is marked implemented but the new acceptance criteria
+            are not yet satisfied, move that spec's implementation status back to an
+            in-progress state rather than leaving stale implemented coverage.
+          - Keep spec wording behavioral: describe loadability, component availability,
+            cache safety, diagnostics, and live workflow results. Do not specify helper
+            class names, safetensors key prefixes, or Comfy private internals in
+            acceptance criteria.
+
+          Testing:
+          - Run kspec validation after the spec edits.
+          - Confirm no acceptance criterion states or implies that diffusion-only
+            loading is sufficient for checkpoint-style saved model output.
+          - Confirm the plan-derived task coverage still maps to the changed specs.
+
+          Covers: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind;
+            @saved-model-artifact-safety ac-missing-components-fail-before-work,
+            ac-missing-components-diagnostic.
+
+      - title: Make terminal WIDEN Exit saves executable in ComfyUI
+        slug: task-checkpoint-save-terminal-output-node
+        priority: 1
+        tags: [exit-node, comfy, persistence]
+        spec_ref: "@checkpoint-loadable-saved-model-output"
+        depends_on:
+          - "@task-checkpoint-save-spec-alignment"
+        description: |
+          What: Ensure WIDEN Exit is treated by ComfyUI as an executable output node
+          when it performs a save side effect, even when no downstream node consumes
+          its MODEL output.
+
+          Why: A terminal save workflow should actually run. If ComfyUI rejects the
+          graph as having no outputs, users experience save_model as doing nothing and
+          none of the artifact-format or memory-management behavior can be validated.
+
+          How:
+          - Update WIDENExitNode metadata so a terminal WIDEN Exit save is queueable by
+            ComfyUI.
+          - Keep the existing MODEL return type so workflows that connect downstream
+            MODEL consumers remain valid.
+          - Add an automated regression test that fails if WIDENExitNode is not marked
+            as a ComfyUI output node.
+          - Add a guarded manual/API validation step or documented command that queues
+            a minimal terminal save workflow against a real ComfyUI API and confirms
+            it is accepted instead of rejected with a no-output prompt validation
+            error.
+          - The API validation must be small and must not require a full sampling run;
+            it only proves ComfyUI schedules the side-effecting Exit node.
+
+          Testing:
+          - Run the focused Exit-node metadata test.
+          - Run existing Exit node unit tests to confirm connected MODEL output
+            behavior is unchanged.
+          - When real ComfyUI validation is explicitly requested, capture the prompt
+            submission response and any scheduler rejection in a report file.
+
+          Covers: @checkpoint-loadable-saved-model-output ac-terminal-save-executes.
+
+      - title: Define and implement checkpoint component sourcing for save_model
+        slug: task-checkpoint-save-component-sourcing
+        priority: 1
+        tags: [exit-node, checkpoint, comfy]
+        spec_ref: "@saved-model-artifact-safety"
+        depends_on:
+          - "@task-checkpoint-save-spec-alignment"
+        description: |
+          What: Define how WIDEN Exit obtains the non-diffusion components required to
+          write a checkpoint-style saved artifact while keeping save_model as the
+          simple user-facing save request.
+
+          Why: A WIDEN MODEL alone is not enough to produce a full SDXL-style
+          checkpoint artifact. The implementation needs an explicit, validated source
+          for companion components such as conditioning and decode assets, or it must
+          fail clearly before writing a misleading diffusion-only file.
+
+          How:
+          - Inspect the current node graph contracts for WIDEN Entry and WIDEN Exit and
+            identify which components are available from existing inputs and which are
+            not.
+          - Choose the least confusing graph contract that preserves save_model as a
+            boolean, such as optional checkpoint-component inputs on WIDEN Exit or an
+            equivalent source that is visible and testable in ComfyUI workflows.
+          - For checkpoint-style saves, validate component availability before recipe
+            analysis, GPU merge work, or artifact publication begins.
+          - If required components are missing, raise a clear ComfyUI-visible error
+            explaining that checkpoint-style save_model needs those components and how
+            to connect or provide them.
+          - Ensure diffusion-model-only saves, if still supported for model kinds that
+            are truly diffusion-only, are not written into checkpoint locations or
+            reused as checkpoint-style artifacts.
+          - Update example or test workflow JSON only if the repository already
+            maintains examples for this save path; do not make examples the source of
+            truth for behavior.
+
+          Testing:
+          - Unit-test that checkpoint-style save validation fails before expensive work
+            when required components are absent.
+          - Unit-test that a save request with valid components proceeds to the
+            artifact writer path.
+          - Unit-test that diffusion-only artifacts are clearly classified and cannot
+            satisfy checkpoint-style cache checks.
+
+          Covers: @saved-model-artifact-safety ac-missing-components-fail-before-work,
+            ac-missing-components-diagnostic,
+            ac-internal-format-not-checkpoint-cache.
+
+      - title: Write checkpoint-style saved artifacts through Comfy-compatible save semantics
+        slug: task-checkpoint-save-artifact-format
+        priority: 1
+        tags: [persistence, checkpoint, comfy]
+        spec_ref: "@checkpoint-loadable-saved-model-output"
+        depends_on:
+          - "@task-checkpoint-save-component-sourcing"
+        description: |
+          What: Replace the checkpoint-style save path with one that writes artifacts
+          ComfyUI recognizes as the appropriate checkpoint model kind.
+
+          Why: Internal model state dumps can look like successful safetensors writes
+          while still being unusable as checkpoint-style outputs. The saved file must
+          round-trip through ComfyUI's normal checkpoint loader and preserve the
+          components required by downstream generation workflows.
+
+          How:
+          - Use ComfyUI's public or stable checkpoint save/load behavior as the format
+            oracle for checkpoint-style artifacts, rather than inventing a parallel key
+            layout from internal ModelPatcher state dumps.
+          - Build the saved artifact from the merged MODEL plus the validated companion
+            components selected in the component-sourcing task.
+          - Preserve existing safety properties from the previous full saved model
+            work: atomic publication, refusal to overwrite non-ecaj files, metadata
+            identifying the recipe and artifact kind, and no cache hit from incomplete
+            writes.
+          - Keep bounded materialization where it already exists, but do not let
+            streaming concerns justify publishing an artifact that cannot be loaded as
+            the requested model kind.
+          - Add classification checks that distinguish checkpoint-style artifacts from
+            diffusion-only artifacts and older ecaj internal-format files.
+          - Preserve existing in-memory patch output behavior for workflows that do not
+            request save_model.
+
+          Testing:
+          - Unit-test artifact metadata and cache checks for checkpoint-style artifacts,
+            diffusion-only artifacts, missing metadata, wrong artifact kind, and older
+            ecaj internal-format files.
+          - Add a focused test using small fake tensors or monkeypatched Comfy save
+            helpers to prove checkpoint-style save requests use the Comfy-compatible
+            save path.
+          - Verify failed writes do not publish a reusable artifact and do not clobber a
+            previously valid artifact at the same logical target.
+          - Run the persistence and Exit-node test slices.
+
+          Covers: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind;
+            @saved-model-artifact-safety ac-incompatible-artifact-not-reused,
+            ac-internal-format-not-checkpoint-cache, ac-no-partial-publication,
+            ac-existing-valid-artifact-preserved.
+
+      - title: Return saved MODELs without deep-copying ComfyUI model internals
+        slug: task-checkpoint-save-returned-model
+        priority: 2
+        tags: [exit-node, comfy, memory]
+        spec_ref: "@checkpoint-loadable-saved-model-output"
+        depends_on:
+          - "@task-checkpoint-save-artifact-format"
+        description: |
+          What: Repair save_model return behavior so WIDEN Exit can provide a usable
+          MODEL after saving without deep-copying live ComfyUI model internals.
+
+          Why: Deep-copying real ComfyUI model objects is not a reliable ownership or
+          memory-management boundary, especially under current ComfyUI model memory
+          modes. The returned MODEL should come from a supported Comfy loading path or
+          another explicitly tested path that remains compatible with downstream
+          ComfyUI execution.
+
+          How:
+          - Remove or bypass any save_model return path that deep-copies the underlying
+            ComfyUI model object to create a returned model from an artifact.
+          - On a cache miss, after publishing a valid saved artifact, return a MODEL
+            produced by the supported ComfyUI loading path for the artifact kind or by
+            the normal in-memory patched output path if the graph contract explicitly
+            requires that behavior and tests prove it.
+          - On a cache hit, skip GPU merge work and return a MODEL loaded from the
+            compatible saved artifact when the saved-model specs require artifact-backed
+            reuse.
+          - Ensure downstream connected workflows receive a MODEL of the expected type
+            and do not need the transient merge payload to remain alive solely because
+            save_model was enabled.
+          - Surface loader failures clearly and avoid publishing the artifact as a
+            successful cache hit when the load/return step is part of the required
+            saved-model contract and fails.
+
+          Testing:
+          - Unit-test that save_model return behavior does not call copy.deepcopy on
+            the live ComfyUI model internals.
+          - Unit-test cache-hit behavior loads from a compatible saved artifact and
+            skips merge computation.
+          - Unit-test downstream MODEL usability with the repository's existing mock
+            patcher or Comfy monkeypatch fixtures.
+          - Run Exit, persistence, and memory-management test slices.
+
+          Covers: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable,
+            ac-generated-workflow-round-trip; @saved-model-artifact-safety
+            ac-incompatible-artifact-not-reused.
+
+      - title: Reconcile the prior full-saved-model branch without blind merge
+        slug: task-checkpoint-save-prior-branch-reconciliation
+        priority: 2
+        tags: [reconciliation, persistence, tests]
+        spec_ref: "@saved-model-artifact-safety"
+        depends_on:
+          - "@task-checkpoint-save-artifact-format"
+          - "@task-checkpoint-save-returned-model"
+        description: |
+          What: Review the previous full saved model implementation branch and salvage
+          only the pieces that still support checkpoint-loadable saved output and safe
+          artifact lifecycle behavior.
+
+          Why: The previous branch contains useful work around streaming sinks,
+          metadata, failure cleanup, and validation, but live ComfyUI testing changed
+          the product focus. A normal merge risks reintroducing diffusion-only reload
+          assumptions, weak primitive-only validation, or a more complex output-mode UI
+          that is no longer desired.
+
+          How:
+          - Inspect branch plan/plan-full-saved-model-output-plan/01kq5zsk against the
+            current dev branch using git diff, targeted file reads, and tests rather
+            than merging it wholesale.
+          - Classify each prior-branch change as adopt, rewrite, supersede, or discard.
+            At minimum, review prior work in checkpoint/materialization helpers,
+            streaming or result-sink helpers, persistence metadata checks, spike reload
+            code, manual validation harnesses, and their tests.
+          - Adopt only behavior that is still correct for checkpoint-style saved model
+            output, artifact safety, or bounded memory. Rewrite tests that only prove
+            fake ModelPatcher or primitive helper behavior when live workflow behavior
+            is the actual requirement.
+          - Explicitly discard or avoid prior-branch UI changes that add an output-mode
+            dropdown; keep save_model as the saved-output control for this plan.
+          - Preserve or recreate valuable hardening from the branch, including metadata
+            schema checks, incompatible-artifact rejection, sink abort/failure cleanup,
+            incomplete artifact cleanup, and cache behavior that is artifact-backed.
+          - Record a reconciliation note in the task evidence listing the branch files
+            reviewed and the decision for each major area.
+
+          Testing:
+          - Run the tests for any adopted or rewritten code from the prior branch.
+          - Add regression coverage for every prior-branch behavior that is kept.
+          - Confirm no test remains that treats diffusion-only loader success as
+            sufficient evidence for checkpoint-style saved output.
+
+          Covers: @saved-model-artifact-safety ac-incompatible-artifact-not-reused,
+            ac-no-partial-publication, ac-existing-valid-artifact-preserved;
+            @checkpoint-loadable-saved-model-output
+            ac-artifact-matches-source-model-kind.
+
+      - title: Add guarded live Comfy saved-output validation harness
+        slug: task-checkpoint-save-live-validation-harness
+        priority: 2
+        tags: [validation, comfy, memory]
+        spec_ref: "@live-comfy-saved-output-validation"
+        depends_on:
+          - "@task-checkpoint-save-terminal-output-node"
+          - "@task-checkpoint-save-artifact-format"
+          - "@task-checkpoint-save-returned-model"
+        description: |
+          What: Add or update a validation harness that can intentionally drive real
+          ComfyUI API workflows for saved model output while refusing to touch a real
+          environment unless explicitly opted in.
+
+          Why: Mock and primitive tests cannot prove ComfyUI scheduler behavior,
+          output-node behavior, checkpoint loader compatibility, Dynamic VRAM mode
+          compatibility, or downstream generation workflow usability. The harness must
+          make live validation repeatable without surprising normal test runs.
+
+          How:
+          - Require explicit opt-in inputs such as a ComfyUI API URL, model names or
+            paths, an output directory, and an environment variable or flag confirming
+            the run may interact with real ComfyUI.
+          - Refuse before importing ComfyUI modules, mutating a ComfyUI installation,
+            submitting API prompts, or starting processes when required opt-in inputs
+            are missing.
+          - Query ComfyUI object info and system stats to record the actual node class
+            names, ComfyUI version, and active memory-management mode.
+          - Submit a terminal WIDEN Exit save workflow and report whether ComfyUI
+            accepted or rejected it.
+          - Submit a checkpoint-style saved-output workflow, then load the saved
+            artifact through the appropriate ComfyUI loader and run a bounded downstream
+            generation-and-decode smoke workflow.
+          - Submit or simulate a cache-reuse run that proves a compatible saved
+            artifact can be reused without recomputing the merge.
+          - Capture report JSON plus stdout/stderr or API history references so failures
+            identify whether scheduling, saving, loading, downstream execution, cache
+            reuse, or memory-mode compatibility failed.
+          - Use low-risk workflow settings and document any local model requirements;
+            do not make the live harness part of the normal unit test suite.
+
+          Testing:
+          - Add automated tests for the harness refusal behavior and report schema
+            without requiring ComfyUI.
+          - Add tests that mock the ComfyUI API and prove the harness classifies
+            scheduler rejection, save failure, loader failure, downstream failure, and
+            cache-reuse failure distinctly.
+          - Run the normal pytest suite slice for the harness and related persistence
+            code.
+
+          Covers: @live-comfy-saved-output-validation ac-explicit-real-comfy-opt-in,
+            ac-report-captures-live-behavior, ac-primitive-tests-do-not-substitute-for-live-validation.
+
+      - title: Manually validate checkpoint-style save_model in live ComfyUI
+        slug: task-checkpoint-save-live-validation-manual-run
+        priority: 3
+        tags: [manual, validation, comfy, memory]
+        spec_ref: "@live-comfy-saved-output-validation"
+        depends_on:
+          - "@task-checkpoint-save-live-validation-harness"
+          - "@task-checkpoint-save-prior-branch-reconciliation"
+        description: |
+          What: Run the guarded live validation harness against a real ComfyUI
+          environment and record the evidence needed to decide whether checkpoint-style
+          save_model is ready.
+
+          Why: The release-relevant behavior depends on ComfyUI's live scheduler,
+          loaders, model memory mode, artifact directories, and downstream execution.
+          This task supplies that evidence; the harness task only proves the harness is
+          safe and well-structured.
+
+          How:
+          - Keep this task manual-only unless a human explicitly authorizes the exact
+            ComfyUI environment, model files, output directory, service/API target, and
+            acceptable resource limits for the run.
+          - Run the harness in the selected ComfyUI memory-management mode without
+            changing that mode to make the test pass.
+          - Validate a terminal save workflow is accepted and executes.
+          - Validate checkpoint-style save_model writes an artifact classified as the
+            expected checkpoint model kind.
+          - Validate the saved artifact loads through the appropriate ComfyUI loader and
+            completes a bounded generation-and-decode workflow.
+          - Validate a compatible cache reuse run avoids recomputing the merge and
+            returns or loads from the saved artifact according to the saved-output
+            contract.
+          - Record the report path, ComfyUI version, memory mode, model names, artifact
+            path, output image or downstream success evidence, and any failures or
+            deferrals in task notes.
+          - If the live run creates large artifacts, list them in the task evidence and
+            ask a maintainer before deleting them.
+
+          Testing:
+          - Attach or reference the live validation report produced by the harness.
+          - Run the focused unit and integration test slices after the live run to make
+            sure debug instrumentation or temporary probes were not left as required
+            behavior.
+
+          Covers: @checkpoint-loadable-saved-model-output ac-terminal-save-executes,
+            ac-artifact-matches-source-model-kind, ac-generated-workflow-round-trip;
+            @live-comfy-saved-output-validation ac-report-captures-live-behavior,
+            ac-memory-mode-not-changed-for-success.
+
+      - title: Reconcile kspec plan state after checkpoint-save validation
+        slug: task-checkpoint-save-kspec-state-reconciliation
+        priority: 3
+        tags: [kspec, reconciliation]
+        spec_ref: "@live-comfy-saved-output-validation"
+        depends_on:
+          - "@task-checkpoint-save-live-validation-manual-run"
+        description: |
+          What: Update kspec records so the previous full saved model plan and this
+          checkpoint-save reconciliation plan reflect the actual validated state.
+
+          Why: The older active plan has completed implementation tasks whose evidence
+          was later shown to be insufficient for live checkpoint-style saved output.
+          Project state should not imply that the old plan fully validated behavior
+          that this plan had to redefine and re-test.
+
+          How:
+          - Inspect active and draft plans related to saved model output, including
+            @01KQ5ZSK if it still exists, and identify tasks whose conclusions were
+            superseded by checkpoint-style live validation.
+          - Add notes to the prior plan or relevant tasks explaining that their
+            primitive-level validation was superseded by this checkpoint-save plan and
+            that diffusion-only loadability is not the acceptance baseline for
+            checkpoint-style models.
+          - Mark the prior plan completed, superseded, or otherwise reconciled only in
+            the way kspec supports and only after the new live validation evidence is
+            recorded.
+          - Ensure spec implementation statuses match the final evidence: implemented
+            only when the checkpoint-style acceptance criteria and live validation
+            requirements are satisfied, otherwise in progress with clear remaining
+            work.
+          - Run kspec validation and classify any remaining warnings as intentional
+            plan/task-only warnings or blockers to fix.
+
+          Testing:
+          - Run kspec validation after state reconciliation.
+          - Verify no active task or plan still claims checkpoint-style saved output is
+            done solely because a primitive harness or diffusion-only loader check
+            passed.
+
+          Covers: @live-comfy-saved-output-validation ac-primitive-tests-do-not-substitute-for-live-validation.
+      ```
+
+
+      ## Implementation Notes
+
+
+      This plan supersedes the previous assumption that a saved WIDEN artifact is
+
+      acceptable for checkpoint-style workflows merely because some loader can consume
+
+      its diffusion weights. For SDXL-style checkpoints, the validated artifact must be
+
+      loadable as a checkpoint-style model and usable in a normal generation-and-decode
+
+      workflow. Diffusion-only artifacts may still be useful for model kinds that are
+
+      actually diffusion-only, but they must not masquerade as checkpoint-style saved
+
+      model output.
+
+
+      The user-facing control remains the existing save_model boolean. The plan should
+
+      not add an output-mode dropdown. If checkpoint-style output requires additional
+
+      components, the implementation should make those requirements explicit through a
+
+      clear graph contract and early validation rather than hiding the problem behind a
+
+      mode selector.
+
+
+      ComfyUI Dynamic VRAM should be treated as Comfy-owned model weight lifecycle
+
+      management, not as a general allocator for arbitrary WIDEN merge tensors. The
+
+      saved-output path can benefit from Dynamic VRAM only after the artifact is
+
+      loadable through ComfyUI's normal model loading paths. Merge-time intermediates
+
+      still need this project's existing bounded execution, cleanup, and artifact
+
+      safety behavior.
+
+
+      The previous branch `plan/plan-full-saved-model-output-plan/01kq5zsk` is
+
+      reconciliation input, not a merge target. Review it file by file and keep only
+
+      work that remains correct under the checkpoint-style acceptance baseline and the
+
+      simple save_model control.
+    status: draft
+    approved_at: null
+    branch: null
+    derived_specs: []
+    derived_tasks: []
+    module_ref: null
+    source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/checkpoint-save-reconciliation.md
+    created_at: 2026-04-28T20:20:04.432Z
+    completed_at: null
+    notes: []
