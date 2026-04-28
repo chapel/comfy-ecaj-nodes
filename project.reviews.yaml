@@ -9144,6 +9144,18 @@ reviews:
         required: true
         created_at: 2026-04-28T20:35:51.764Z
         completed_at: 2026-04-28T20:35:51.764Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Task graph is acyclic and main implementation dependencies are sensible: spec alignment
+          first; terminal output/component sourcing before artifact/return behavior; harness before
+          manual live run; kspec-state reconciliation last. Recorded a non-blocking question about
+          whether prior-branch reconciliation should be split or moved earlier."
+        name: Dependency ordering
+        required: true
+        created_at: 2026-04-28T20:35:58.408Z
+        completed_at: 2026-04-28T20:35:58.408Z
     events:
       - _ulid: 01KQAWTK2Z08HR0AXR519N99F9
         actor: Jacob Chapel
@@ -9200,6 +9212,13 @@ reviews:
           status: pass
           name: Task standalone executability
         timestamp: 2026-04-28T20:35:51.846Z
+      - _ulid: 01KQAWWHCNQ74383QS8A62XBTD
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Dependency ordering
+        timestamp: 2026-04-28T20:35:58.486Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9249,5 +9268,5 @@ reviews:
         kind: question
     verdicts: []
     created_at: 2026-04-28T20:34:54.687Z
-    updated_at: 2026-04-28T20:35:51.764Z
+    updated_at: 2026-04-28T20:35:58.408Z
     notes: []
