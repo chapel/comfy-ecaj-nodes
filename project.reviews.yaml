@@ -8816,6 +8816,18 @@ reviews:
         required: true
         created_at: 2026-04-28T20:26:39.120Z
         completed_at: 2026-04-28T20:26:39.120Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Task graph is acyclic: spec alignment precedes implementation; terminal output and
+          component sourcing unblock artifact format/return behavior; guarded harness and
+          prior-branch reconciliation precede the manual live run; kspec-state reconciliation is
+          last."
+        name: Dependency ordering
+        required: true
+        created_at: 2026-04-28T20:26:39.122Z
+        completed_at: 2026-04-28T20:26:39.122Z
     events:
       - _ulid: 01KQAW7PGKETRKK5QC9YZ74TZA
         actor: Jacob Chapel
@@ -8900,6 +8912,13 @@ reviews:
           status: pass
           name: Scope discipline
         timestamp: 2026-04-28T20:26:39.201Z
+      - _ulid: 01KQAWBFBN15H8A6ZHBNB5833P
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Dependency ordering
+        timestamp: 2026-04-28T20:26:39.349Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -9014,5 +9033,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-28T20:24:35.603Z
-    updated_at: 2026-04-28T20:26:39.120Z
+    updated_at: 2026-04-28T20:26:39.122Z
     notes: []
