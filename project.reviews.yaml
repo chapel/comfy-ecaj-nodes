@@ -10561,6 +10561,17 @@ reviews:
         runner: python
         created_at: 2026-04-29T06:25:41.166Z
         completed_at: 2026-04-29T06:25:41.166Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Schema and references OK; command exited 6 because existing alignment/completeness
+          warnings remain (no trait coverage blocker reported).
+        name: kspec validate
+        required: false
+        runner: kspec
+        created_at: 2026-04-29T06:25:41.551Z
+        completed_at: 2026-04-29T06:25:41.551Z
     events:
       - _ulid: 01KQBYGDA297ZHYQ77JKD6TKPK
         actor: Jacob Chapel
@@ -10596,6 +10607,13 @@ reviews:
           status: fail
           name: checkpoint cache integration repro
         timestamp: 2026-04-29T06:25:41.266Z
+      - _ulid: 01KQBYMB8YAK4GNY8HSDGG3DYY
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-29T06:25:41.662Z
     examined_commit: b4fddba6ff319d353e122663560f4d502e28db0a
     external_links: []
     lifecycle_state: open
@@ -10608,5 +10626,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T06:23:32.674Z
-    updated_at: 2026-04-29T06:25:41.166Z
+    updated_at: 2026-04-29T06:25:41.551Z
     notes: []
