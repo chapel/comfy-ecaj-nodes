@@ -46,7 +46,7 @@ description: |
 spec_ref: "@saved-model-artifact-safety"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: pending_review
+status: needs_work
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-artifact-cache-classification"
@@ -66,7 +66,7 @@ submission_linkage:
   remote: null
   remote_url: null
   upstream_ref: dev
-session_id: 01KQC2Z5CKHAWJQX22GRDBSP6N
+session_id: null
 history:
   - author: Jacob Chapel
     changes:
@@ -115,6 +115,16 @@ history:
         previous: null
     command: review-link
     timestamp: 2026-04-29T07:50:30.207Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: needs_work
+        previous: pending_review
+      session_id:
+        new: null
+        previous: 01KQC2Z5CKHAWJQX22GRDBSP6N
+    command: review-verdict-needs-work
+    timestamp: 2026-04-29T07:57:37.415Z
 created_at: 2026-04-29T05:21:58.019Z
 started_at: 2026-04-29T07:42:07.592Z
 submitted_at: 2026-04-29T07:47:20.333Z

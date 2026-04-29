@@ -11804,9 +11804,25 @@ reviews:
           status: pass
           name: pytest incremental writer
         timestamp: 2026-04-29T07:57:16.609Z
+      - _ulid: 01KQC3WNHDR2X8K59DWHEKF7QR
+        actor: jacob.chapel@gmail.com
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-29T07:57:37.197Z
+      - _ulid: 01KQC3WNHES13BZYDXC9WD3P5N
+        actor: jacob.chapel@gmail.com
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T07:57:37.198Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -11934,7 +11950,14 @@ reviews:
               terminal (aborted/poisoned) and test the post-failure behavior."
             created_at: 2026-04-29T07:57:00.599Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: jacob.chapel@gmail.com
+        role: reviewer
+        created_at: 2026-04-29T07:57:37.197Z
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T07:57:16.500Z
+    updated_at: 2026-04-29T07:57:37.198Z
     notes: []
