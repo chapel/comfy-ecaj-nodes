@@ -5868,7 +5868,7 @@ runs:
     completed_at: 2026-04-29T05:57:12.932Z
   - _ulid: 01KQBX05CFH5G07C6TR12RB9KV
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5891,7 +5891,30 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T05:57:38.225Z
-        completed_at: 2026-04-29T05:57:38.225Z
+        completed_at: 2026-04-29T05:58:25.662Z
+        notes: >-
+          Friction points identified (high confidence):
+
+          1. kspec-worktree-guard hook CWD matching is too broad — checks for /.kspec in CWD which
+          matches .kspec-worktrees worker worktree paths, not just the .kspec metadata worktree.
+          This caused all git commands (including safe ones like status, add, commit) to be blocked
+          or fail when running from a worker worktree. ALREADY TRACKED: @01KQ7036 covers the
+          branch-update aspect. The broader CWD matching issue may warrant an update to that
+          observation.
+
+
+          2. Shell state corruption — after the worktree guard blocked a dangerous git operation,
+          subsequent basic shell commands (echo, ls, pwd) all returned exit code 1 with no output.
+          Required using Task subagent to run git commands. This is a one-off (not systemic), so NOT
+          capturing.
+
+
+          Success: Well-scoped task with clear ACs made this a clean single-change implementation
+          with minimal ambiguity.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T05:58:25.662Z
+        completed_at: 2026-04-29T05:58:25.662Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T05:57:11.695Z
