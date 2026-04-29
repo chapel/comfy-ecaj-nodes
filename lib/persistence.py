@@ -428,6 +428,10 @@ def check_full_model_cache(
     save_path: str,
     expected_hash: str,
     expected_manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] | None = None,
+    *,
+    expected_artifact_kind: str | None = None,
+    expected_base_identity: str | None = None,
+    expected_dependency_fingerprints: str | None = None,
 ) -> bool:
     """Check if a saved artifact is a valid full-model cache hit.
 
@@ -435,7 +439,9 @@ def check_full_model_cache(
     AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
     AC: @full-saved-model-output ac-complete-artifact
     AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
-    AC: @exit-model-persistence ac-9
+    AC: @exit-model-persistence ac-4, ac-6, ac-9
+    AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
 
     Validates:
     - File exists
@@ -444,6 +450,9 @@ def check_full_model_cache(
     - Recipe hash matches
     - Output mode is "full" (not "patch")
     - Affected keys metadata is present and valid JSON
+    - Artifact kind matches expected (when provided)
+    - Base model identity matches expected (when provided)
+    - Dependency fingerprints match expected (when provided)
     - Artifact tensor keys, shapes, and dtypes match the expected manifest
 
     Args:
@@ -453,6 +462,12 @@ def check_full_model_cache(
             (dtype, shape).  The artifact must contain exactly these keys with
             matching dtypes and shapes.  Incomplete, extra, or mismatched
             tensors cause rejection.
+        expected_artifact_kind: If provided, the artifact must have a matching
+            __ecaj_artifact_kind__ metadata value.
+        expected_base_identity: If provided, the artifact must have a matching
+            __ecaj_base_identity__ metadata value.
+        expected_dependency_fingerprints: If provided, the artifact must have a
+            matching __ecaj_dependency_fingerprints__ metadata value.
 
     Returns:
         True if the artifact is a valid full-model cache hit
@@ -512,6 +527,24 @@ def check_full_model_cache(
             return False
     except (json.JSONDecodeError, TypeError):
         return False
+
+    # AC: @exit-model-persistence ac-4, ac-6
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+    # Validate artifact classification and cache identity metadata when
+    # the caller provides expected values.
+    if expected_artifact_kind is not None:
+        stored_kind = metadata.get("__ecaj_artifact_kind__")
+        if stored_kind is None or stored_kind != expected_artifact_kind:
+            return False
+    if expected_base_identity is not None:
+        stored_base = metadata.get("__ecaj_base_identity__")
+        if stored_base is None or stored_base != expected_base_identity:
+            return False
+    if expected_dependency_fingerprints is not None:
+        stored_deps = metadata.get("__ecaj_dependency_fingerprints__")
+        if stored_deps is None or stored_deps != expected_dependency_fingerprints:
+            return False
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
     # AC: @full-saved-model-output ac-complete-artifact
@@ -653,6 +686,12 @@ def check_checkpoint_cache(
     if stored_version != _ECAJ_VERSION:
         return False
 
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    # Require serialized recipe metadata — files missing required saved-model
+    # metadata must not be reused.
+    if "__ecaj_recipe__" not in metadata:
+        return False
+
     # AC: @exit-model-persistence ac-3, ac-4 — recipe identity
     stored_hash = metadata.get("__ecaj_recipe_hash__", "")
     if stored_hash != expected_hash:
@@ -666,9 +705,11 @@ def check_checkpoint_cache(
     if stored_kind != "checkpoint":
         return False
 
-    # Checkpoint component classification must be present
+    # Checkpoint component classification must be present and truthy.
+    # A value of "false" explicitly says the artifact was NOT written with
+    # checkpoint companion components, so it must not be accepted.
     stored_components = metadata.get("__ecaj_checkpoint_components__")
-    if stored_components is None:
+    if stored_components != "true":
         return False
 
     # AC: @exit-model-persistence ac-6 — base model identity

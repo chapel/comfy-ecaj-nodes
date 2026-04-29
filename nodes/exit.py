@@ -596,13 +596,20 @@ class WIDENExitNode:
         save_path = _resolve_checkpoints_path(validated_name)
         serialized = serialize_recipe(widen, base_identity, lora_stats)
         recipe_hash = compute_recipe_hash(serialized)
+        dependency_fingerprints_json = json.dumps(
+            lora_stats, sort_keys=True, separators=(",", ":"),
+        )
 
         # Build manifest from base_state — all keys, no affected keys
         manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
 
         # AC: @full-saved-model-output ac-cache-reuses-artifact
+        # AC: @exit-model-persistence ac-4, ac-6
         if enable_cache and check_full_model_cache(
             save_path, recipe_hash, expected_manifest=manifest,
+            expected_artifact_kind="diffusion",
+            expected_base_identity=base_identity,
+            expected_dependency_fingerprints=dependency_fingerprints_json,
         ):
             if ProgressBar is not None:
                 pbar = ProgressBar(1)
@@ -619,6 +626,9 @@ class WIDENExitNode:
         )
         metadata = build_metadata(
             serialized, recipe_hash, [], workflow_json, output_mode="full",
+            artifact_kind="diffusion",
+            base_identity=base_identity,
+            dependency_fingerprints=dependency_fingerprints_json,
         )
 
         sink = MaterializationSink()
@@ -710,6 +720,9 @@ class WIDENExitNode:
             else:
                 cache_hit = check_full_model_cache(
                     save_path, recipe_hash, expected_manifest=base_manifest,
+                    expected_artifact_kind="diffusion",
+                    expected_base_identity=base_identity,
+                    expected_dependency_fingerprints=dependency_fingerprints_json,
                 )
             if cache_hit:
                 del base_state
@@ -779,16 +792,15 @@ class WIDENExitNode:
             # AC: @exit-model-persistence ac-6
             # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
             # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
-            # Checkpoint-style: include artifact_kind, base_identity,
-            # dependency_fingerprints, and checkpoint component classification.
+            # All artifacts include artifact_kind, base_identity, and
+            # dependency_fingerprints. Checkpoint-style additionally includes
+            # checkpoint component classification.
             metadata = build_metadata(
                 serialized, recipe_hash, sorted(affected_key_set), workflow_json,
                 output_mode="full",
-                artifact_kind="checkpoint" if is_checkpoint else None,
-                base_identity=base_identity if is_checkpoint else None,
-                dependency_fingerprints=(
-                    dependency_fingerprints_json if is_checkpoint else None
-                ),
+                artifact_kind="checkpoint" if is_checkpoint else "diffusion",
+                base_identity=base_identity,
+                dependency_fingerprints=dependency_fingerprints_json,
                 checkpoint_components=is_checkpoint,
             )
 

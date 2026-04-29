@@ -923,6 +923,11 @@ class TestSaveModelCacheHit:
             "__ecaj_recipe_hash__": "will_match",
             "__ecaj_affected_keys__": _json.dumps([key]),
             "__ecaj_output_mode__": "full",
+            "__ecaj_artifact_kind__": "diffusion",
+            "__ecaj_base_identity__": "base_id",
+            "__ecaj_dependency_fingerprints__": _json.dumps(
+                {}, sort_keys=True, separators=(",", ":"),
+            ),
         }
         save_file(cached_tensors, str(cached_path), metadata=cached_metadata)
 
