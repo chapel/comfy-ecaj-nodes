@@ -12700,6 +12700,12 @@ reviews:
         payload:
           thread_ulid: 01KQC933CVXWNSZ658EFER9WWV
         timestamp: 2026-04-29T09:47:26.449Z
+      - _ulid: 01KQCA5XRKRRS7D617EA1W7CRN
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQC933CVXWNSZ658EFER9WWV
+        timestamp: 2026-04-29T09:47:31.987Z
     examined_commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
     external_links: []
     lifecycle_state: closed
@@ -12777,6 +12783,8 @@ reviews:
               instances, no internal-format keys leak, and ecaj metadata survives the round trip."
             created_at: 2026-04-29T09:47:26.344Z
         kind: blocker
+        resolved_at: 2026-04-29T09:47:31.884Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -12786,5 +12794,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T09:30:43.356Z
     created_at: 2026-04-29T09:19:15.423Z
-    updated_at: 2026-04-29T09:47:26.344Z
+    updated_at: 2026-04-29T09:47:31.884Z
     notes: []
