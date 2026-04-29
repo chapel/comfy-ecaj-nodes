@@ -12278,9 +12278,25 @@ reviews:
           status: pass
           name: pytest sink handoff
         timestamp: 2026-04-29T08:28:50.705Z
+      - _ulid: 01KQC5PB8R9YCQGBRPN9PVM8Q0
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: approve
+        timestamp: 2026-04-29T08:29:07.224Z
+      - _ulid: 01KQC5PB8RJ1NM3542JF176F0Q
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T08:29:07.224Z
     examined_commit: 5348166a85d36aa4e27cd8cf35a527c932a59085
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -12288,7 +12304,14 @@ reviews:
       ref: "@01KQBTZN8XD9E6VCFXJYRPWBHC"
       shadow_commit: ""
     threads: []
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: approve
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T08:29:07.224Z
     created_at: 2026-04-29T08:25:19.340Z
-    updated_at: 2026-04-29T08:28:50.589Z
+    updated_at: 2026-04-29T08:29:07.224Z
     notes: []
