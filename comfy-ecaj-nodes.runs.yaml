@@ -7031,7 +7031,7 @@ runs:
     completed_at: 2026-04-29T08:55:04.258Z
   - _ulid: 01KQC8EH482X0R7NKKEF94P07N
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -7047,7 +7047,20 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T09:17:42.292Z
-        completed_at: 2026-04-29T09:17:42.292Z
+        completed_at: 2026-04-29T09:18:04.833Z
+        notes: "High-confidence friction: (1) _execute_diffusion_save is now effectively unreachable dead
+          code — validate_checkpoint_components requires checkpoint_components for save_model=True,
+          and any recipe with valid checkpoint_components routes as checkpoint-style. 18+ tests had
+          to bypass validation to exercise this path. This is a concrete code health issue that
+          should be tracked. (2) The cascading test update pattern: changing classification logic in
+          _recipe_has_checkpoint_components required updating tests in 7 files because tests were
+          coupled to the old checkpoint_components+LoRA=diffusion routing assumption. This is
+          consistent with existing observation 01KH6Y61 about mocks validating wrong behavior — not
+          a new pattern to capture."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T09:18:04.833Z
+        completed_at: 2026-04-29T09:18:04.833Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T09:17:16.809Z
