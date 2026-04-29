@@ -6477,7 +6477,7 @@ runs:
     started_at: 2026-04-29T07:14:22.622Z
     completed_at: 2026-04-29T07:17:00.538Z
   - _ulid: 01KQC23NQH63M87AR7M1VNSBPM
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -6552,7 +6552,10 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T07:27:42.314Z
-        completed_at: 2026-04-29T07:27:42.314Z
+        completed_at: 2026-04-29T07:27:48.453Z
+        notes: Step 4 - Nothing to capture. All friction matched existing observation @01KH6Y61. Clean fix
+          cycle — no new items warranted.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:26:29.617Z
+    completed_at: 2026-04-29T07:27:48.453Z
