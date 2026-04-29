@@ -6105,7 +6105,7 @@ runs:
     completed_at: 2026-04-29T06:20:28.050Z
   - _ulid: 01KQBYCF83N1F5PZWH1FQZZMVV
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -6119,7 +6119,18 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T06:21:50.323Z
-        completed_at: 2026-04-29T06:21:50.323Z
+        completed_at: 2026-04-29T06:22:14.497Z
+        notes: "Identified items after baseline/search: success patterns were already covered by existing
+          observations (review CI before verdict; concrete runtime review checks). Friction around
+          task-subject review refresh and PR-publication detached merge is already tracked by inbox
+          items 01KQ6MFM, 01KQ6ZJF, and 01KQ6R11. One untracked concrete friction remains: kspec
+          batch JSON requires every positional argument and option inside args, so using an
+          argv-style args array plus options object fails validation; this is repeatable for agents
+          composing batch commands from normal CLI syntax."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T06:22:14.497Z
+        completed_at: 2026-04-29T06:22:14.497Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:21:23.587Z
