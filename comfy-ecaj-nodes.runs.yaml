@@ -5603,7 +5603,7 @@ runs:
     completed_at: 2026-04-29T05:30:54.955Z
   - _ulid: 01KQBVSS1BEKJQNFZF0DWYY9HF
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -5615,7 +5615,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T05:37:00.565Z
-        completed_at: 2026-04-29T05:37:00.565Z
+        completed_at: 2026-04-29T05:37:32.522Z
+        notes: "Identified high-confidence session patterns: detached PR merge command friction and own-PR
+          approval rejection. Both are already covered by existing tracking: inbox @01KQ6R11 for
+          detached PR-publication merge commands and observation @01KHQDPF for own-PR approval
+          attempts. Existing success pattern for dispatch review merge gates is already captured by
+          @01KQ6K6S. No new untracked items to capture."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T05:37:32.522Z
+        completed_at: 2026-04-29T05:37:32.522Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T05:36:13.867Z
