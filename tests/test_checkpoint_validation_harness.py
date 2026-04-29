@@ -1370,6 +1370,185 @@ class TestExtractNodeErrors:
 
 
 # ===========================================================================
+# _extract_failing_node_type — parse node class from node_error() strings
+# ===========================================================================
+
+
+class TestExtractFailingNodeType:
+    """_extract_failing_node_type parses the failing node class from error strings."""
+
+    def test_ksampler_node_error(self):
+        assert harness._extract_failing_node_type(
+            "node_error(KSampler): inference failed",
+        ) == "KSampler"
+
+    def test_checkpoint_loader_node_error(self):
+        assert harness._extract_failing_node_type(
+            "node_error(CheckpointLoaderSimple): could not load model",
+        ) == "CheckpointLoaderSimple"
+
+    def test_widen_exit_node_error(self):
+        assert harness._extract_failing_node_type(
+            "node_error(WIDENExit): save failed",
+        ) == "WIDENExit"
+
+    def test_non_node_error_returns_empty(self):
+        error = "execution_timeout: prompt never completed"
+        assert harness._extract_failing_node_type(error) == ""
+
+    def test_empty_string_returns_empty(self):
+        assert harness._extract_failing_node_type("") == ""
+
+
+# ===========================================================================
+# Loader/downstream outcome distinction
+# ===========================================================================
+
+
+class TestLoaderDownstreamDistinction:
+    """Loader and downstream outcomes must be distinct in run_validation.
+
+    When a downstream node (KSampler, VAEDecode) fails, the checkpoint loader
+    result must remain accepted=True — the loader succeeded, only the
+    downstream step failed.  Conversely, when CheckpointLoaderSimple fails,
+    the loader result is accepted=False and downstream is skipped.
+    """
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-loader-downstream-outcome
+    def test_ksampler_failure_loader_still_accepted(self):
+        """When KSampler fails, checkpoint_loader_result.accepted is True."""
+        mock_stats = {
+            "system": {"comfyui_version": "0.3.4"},
+            "devices": [{"vram_state": "normal"}],
+        }
+
+        def mock_submit(base_url, workflow, name):
+            if name == "downstream_ksampler":
+                return harness.WorkflowResult(
+                    name=name, accepted=False,
+                    error="node_error(KSampler): KSampler inference failed",
+                )
+            return harness.WorkflowResult(
+                name=name, accepted=True, prompt_id="p1",
+            )
+
+        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="test.safetensors",
+                report_output="/fake/report.json",
+            )
+
+        # Loader succeeded — the failing node was KSampler, not the loader
+        assert report.checkpoint_loader_result.accepted is True
+        assert report.failure_categories["loader"] == "none"
+        # Downstream failed
+        assert report.downstream_result.accepted is False
+        assert "KSampler" in report.downstream_result.error
+        assert report.failure_categories["downstream"] == "downstream"
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-loader-downstream-outcome
+    def test_checkpoint_loader_failure_downstream_skipped(self):
+        """When CheckpointLoaderSimple fails, downstream is skipped."""
+        mock_stats = {
+            "system": {"comfyui_version": "0.3.4"},
+            "devices": [{"vram_state": "normal"}],
+        }
+
+        def mock_submit(base_url, workflow, name):
+            if name == "downstream_ksampler":
+                return harness.WorkflowResult(
+                    name=name, accepted=False,
+                    error="node_error(CheckpointLoaderSimple): could not load model",
+                )
+            return harness.WorkflowResult(
+                name=name, accepted=True, prompt_id="p1",
+            )
+
+        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="test.safetensors",
+                report_output="/fake/report.json",
+            )
+
+        # Loader failed
+        assert report.checkpoint_loader_result.accepted is False
+        assert "CheckpointLoaderSimple" in report.checkpoint_loader_result.error
+        assert report.failure_categories["loader"] == "loader"
+        # Downstream was skipped because the loader failed
+        assert report.downstream_result.accepted is False
+        assert "skipped" in report.downstream_result.error
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-loader-downstream-outcome
+    def test_both_succeed_when_downstream_succeeds(self):
+        """When everything succeeds, both loader and downstream are accepted."""
+        mock_stats = {
+            "system": {"comfyui_version": "0.3.4"},
+            "devices": [{"vram_state": "normal"}],
+        }
+
+        def mock_submit(base_url, workflow, name):
+            return harness.WorkflowResult(
+                name=name, accepted=True, prompt_id=f"p_{name}",
+            )
+
+        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse", return_value=(True, "cached")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="test.safetensors",
+                report_output="/fake/report.json",
+            )
+
+        assert report.checkpoint_loader_result.accepted is True
+        assert report.downstream_result.accepted is True
+        assert report.failure_categories["loader"] == "none"
+        assert report.failure_categories["downstream"] == "none"
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-loader-downstream-outcome
+    def test_vaedecode_failure_loader_still_accepted(self):
+        """When VAEDecode fails, the loader still succeeded."""
+        mock_stats = {
+            "system": {"comfyui_version": "0.3.4"},
+            "devices": [{"vram_state": "normal"}],
+        }
+
+        def mock_submit(base_url, workflow, name):
+            if name == "downstream_ksampler":
+                return harness.WorkflowResult(
+                    name=name, accepted=False,
+                    error="node_error(VAEDecode): decode failed",
+                )
+            return harness.WorkflowResult(
+                name=name, accepted=True, prompt_id="p1",
+            )
+
+        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="test.safetensors",
+                report_output="/fake/report.json",
+            )
+
+        assert report.checkpoint_loader_result.accepted is True
+        assert report.failure_categories["loader"] == "none"
+        assert report.downstream_result.accepted is False
+        assert "VAEDecode" in report.downstream_result.error
+
+
+# ===========================================================================
 # Memory-mode failure propagation
 # ===========================================================================
 

@@ -757,6 +757,19 @@ def submit_workflow(
     return result
 
 
+def _extract_failing_node_type(error: str) -> str:
+    """Extract the failing node class type from a ``node_error(NodeType): ...`` string.
+
+    Returns the node type (e.g. ``"KSampler"``, ``"CheckpointLoaderSimple"``)
+    or ``""`` if the error string does not match the ``node_error(...)`` pattern.
+    """
+    if error.startswith("node_error("):
+        paren_end = error.find(")")
+        if paren_end > len("node_error("):
+            return error[len("node_error("):paren_end]
+    return ""
+
+
 def classify_failure(result: WorkflowResult) -> str:
     """Classify a workflow result into a failure category.
 
@@ -884,16 +897,56 @@ def run_validation(
                 scheduler=scheduler,
                 batch_size=batch_size,
             )
-            report.downstream_result = submit_workflow(
+            downstream_full_result = submit_workflow(
                 comfy_api_url, downstream_wf, "downstream_ksampler",
             )
-            # Record loader + downstream together (same prompt exercises both)
-            report.checkpoint_loader_result = WorkflowResult(
-                name="checkpoint_loader",
-                accepted=report.downstream_result.accepted,
-                prompt_id=report.downstream_result.prompt_id,
-                error=report.downstream_result.error,
+            # The downstream workflow contains both CheckpointLoaderSimple
+            # (node "1") and KSampler (node "5").  A single submission
+            # exercises both, but we need *distinct* outcomes: the loader
+            # may succeed while KSampler fails (or vice-versa).
+            #
+            # ComfyUI executes nodes in dependency order.  When a node
+            # raises an error, the error message encodes the failing
+            # node type as ``node_error(NodeType): ...``.  If the failing
+            # node is CheckpointLoaderSimple, the loader itself broke
+            # and downstream never ran.  If the failing node is anything
+            # else (KSampler, VAEDecode, …), the loader must have
+            # succeeded — so the loader result is "accepted" and only
+            # the downstream result carries the failure.
+            failing_node = _extract_failing_node_type(
+                downstream_full_result.error,
             )
+            if downstream_full_result.accepted:
+                # Everything succeeded — both loader and downstream are OK.
+                report.checkpoint_loader_result = WorkflowResult(
+                    name="checkpoint_loader",
+                    accepted=True,
+                    prompt_id=downstream_full_result.prompt_id,
+                )
+                report.downstream_result = downstream_full_result
+            elif failing_node == "CheckpointLoaderSimple":
+                # The loader node itself failed — downstream never ran.
+                report.checkpoint_loader_result = WorkflowResult(
+                    name="checkpoint_loader",
+                    accepted=False,
+                    prompt_id=downstream_full_result.prompt_id,
+                    error=downstream_full_result.error,
+                )
+                report.downstream_result = WorkflowResult(
+                    name="downstream_ksampler",
+                    accepted=False,
+                    prompt_id=downstream_full_result.prompt_id,
+                    error="skipped: checkpoint loader failed",
+                )
+            else:
+                # A non-loader node failed (e.g. KSampler, VAEDecode).
+                # The loader succeeded; only downstream failed.
+                report.checkpoint_loader_result = WorkflowResult(
+                    name="checkpoint_loader",
+                    accepted=True,
+                    prompt_id=downstream_full_result.prompt_id,
+                )
+                report.downstream_result = downstream_full_result
             report.failure_categories["loader"] = classify_failure(
                 report.checkpoint_loader_result,
             )
