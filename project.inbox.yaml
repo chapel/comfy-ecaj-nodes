@@ -174,3 +174,17 @@ inbox:
       - cleanup
     added_by: "@claude"
     created_at: 2026-04-29T08:24:32.817Z
+  - _ulid: 01KQC8GGC9CY8F7J575JZ3AH7S
+    text: "_execute_diffusion_save is unreachable dead code: validate_checkpoint_components requires
+      checkpoint_components for save_model=True, and _recipe_has_checkpoint_components returns True
+      for any recipe with valid checkpoint_components. The diffusion-only MaterializationSink save
+      path through _execute_diffusion_save can never be reached by valid inputs. 18+ tests bypass
+      validation to exercise this path. Consider removing _execute_diffusion_save and the diffusion
+      branch in _execute_full_model_noop, consolidating all save_model=True into the checkpoint save
+      path."
+    tags:
+      - reflection
+      - dead-code
+      - checkpoint
+    added_by: "@claude"
+    created_at: 2026-04-29T09:18:21.577Z
