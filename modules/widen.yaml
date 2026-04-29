@@ -956,49 +956,57 @@ features:
             id: ac-1
             then: behavior is unchanged from baseline — no file I/O
             when: exit node executes
-          - given: save_model enabled, model_name provided, and the Exit node is using in-memory patch output
-              mode
+          - given: save_model is enabled, model_name is provided, and the Exit node has the components required
+              for the requested saved model kind.
             id: ac-2
-            then: fully-merged state dict (all base model keys with affected keys replaced) saved as safetensors
-              in the base model directory using model_name
-            when: exit node completes GPU merge
-          - given: cached safetensors exists at expected path and save_model is enabled
+            then: The node publishes an ecaj-owned saved model artifact for the requested artifact kind using
+              model_name. For checkpoint-style source workflows, the artifact is loadable through
+              the appropriate checkpoint-style ComfyUI loader with the required conditioning and
+              decode components, not merely as a diffusion-weight-only file.
+            when: The Exit node completes the merge for the current recipe.
+          - given: A saved artifact exists at the expected path and save_model is enabled.
             id: ac-3
-            then: merged state is loaded from disk and GPU merge pipeline is skipped; subsequent output behavior
-              follows the active output mode (set-patch installation for in-memory patch mode, or
-              loaded MODEL return for full saved model mode)
-            when: exit node executes with save_model enabled and metadata matches current config
-          - given: cached file exists but metadata does not match
+            then: The saved artifact is accepted as a cache hit, the GPU merge pipeline is skipped, and
+              subsequent output behavior follows the saved-output contract for that artifact kind.
+            when: The Exit node executes and the artifact metadata matches the current recipe, requested
+              artifact kind, base model identity, and dependency fingerprints.
+          - given: A saved artifact exists at the expected path but its ecaj metadata does not match the current
+              recipe, requested artifact kind, base model identity, or dependency fingerprints.
             id: ac-4
-            then: GPU merge pipeline runs and cached file is overwritten with new results
-            when: exit node executes with save_model enabled
+            then: The existing artifact is not accepted as a cache hit. The merge recomputes and publication
+              proceeds only if the target is safe for ecaj-owned replacement.
+            when: The Exit node executes with save_model enabled.
           - given: save_model enabled and model_name is empty or not provided
             id: ac-5
             then: raises clear error requesting a model name
             when: exit node validates inputs
-          - given: a saved safetensors file
+          - given: A saved artifact written by the Exit node.
             id: ac-6
-            then: header contains the full serialized recipe tree (with model_patcher replaced by base model
-              identity) and a recipe identity hash derived from that serialization. The serialized
-              recipe is the single source of truth for cache validation.
-            when: examined for metadata
+            then: The metadata identifies the serialized recipe tree with model objects replaced by stable
+              source identities, the recipe identity hash, the requested artifact kind, the base
+              model identity, and dependency fingerprints used for cache validation.
+            when: The artifact is examined for metadata.
           - given: LoRA files on disk have changed (different mtime or size)
             id: ac-7
             then: cache is invalidated and merge recomputes
             when: exit node checks cache validity
-          - given: saved safetensors from exit node containing full base model state dict
+          - given: A saved artifact written by the Exit node for a checkpoint-style source workflow.
             id: ac-8
-            then: functions as a complete standalone model (all keys present, correct dtypes)
-            when: loaded by ComfyUI standard model loader
+            then: The loaded result functions as a complete checkpoint-style model for normal downstream
+              generation and decode use, including the merged diffusion weights and required
+              conditioning and decode components, without relying on the original in-memory WIDEN
+              merge payload.
+            when: The artifact is loaded through the appropriate ComfyUI checkpoint-style loader.
           - given: file with model_name already exists but lacks ecaj metadata in safetensors header
             id: ac-9
             then: raises error indicating file was not created by this node and suggests a different model_name
             when: exit node attempts save or cache-check
-          - given: save_model enabled and GPU merge completes in in-memory patch output mode
+          - given: save_model is enabled and artifact creation reaches publication.
             id: ac-10
-            then: file is written atomically (temp file + rename) so partial writes never leave a corrupt cache
-              file
-            when: saving merged model to disk
+            then: Publication is atomic for the logical artifact target, so partial writes are not accepted as
+              successful saved-model cache entries and do not replace a previously valid ecaj-owned
+              artifact.
+            when: The Exit node writes the saved artifact to disk.
           - given: model_name contains path separators or .. sequences
             id: ac-11
             then: raises clear error rejecting the model_name as unsafe
