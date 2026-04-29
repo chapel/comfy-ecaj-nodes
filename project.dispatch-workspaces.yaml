@@ -1394,7 +1394,7 @@ workspaces:
         head: 3d1835ff431c4b586dc1382d7b8b0396847453b8
         last_seen_at: 2026-04-29T06:20:50.056Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-preserve-scoped-existing-specs-01kqbtzn
-  - active_role: reviewer
+  - active_role: null
     base_branch_point: 51eb583862d183e00229c9279268f4a645197ef6
     bootstrap:
       status: succeeded
@@ -1435,34 +1435,34 @@ workspaces:
     canonical_branch: dispatch/task/task-checkpoint-save-atomic-artifact-writer/01kqbtzn
     canonical_branch_head: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
     cleanup:
-      status: not_scheduled
-      detail: null
-      eligible: false
-      reason: null
-      updated_at: 2026-04-29T08:07:56.258Z
+      status: scheduled
+      detail: integrated-into-base-branch
+      eligible: true
+      reason: integrated-into-base-branch
+      updated_at: 2026-04-29T08:11:42.493Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T08:07:57.101Z
+      updated_at: 2026-04-29T08:11:42.493Z
     integration:
-      status: pending
-      detail: null
-      outcome: pull_request
+      status: merged
+      detail: integration:merged
+      outcome: merged
       publication_mode: pull_request
       target_branch: dev
       target_commit: 51eb583862d183e00229c9279268f4a645197ef6
-      updated_at: 2026-04-29T08:07:56.258Z
-    lifecycle_state: integrating
+      updated_at: 2026-04-29T08:11:42.493Z
+    lifecycle_state: closing
     resolved_base_branch: dev
     task_ref: "@01KQBTZN83176W432HWKN1CTV4"
     task_slug: task-checkpoint-save-atomic-artifact-writer
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T08:07:57.101Z
-      last_reconciled_at: 2026-04-29T08:07:57.101Z
+      last_reconciled_at: 2026-04-29T08:11:42.493Z
       created_at: 2026-04-29T07:41:29.896Z
-      updated_at: 2026-04-29T08:07:57.101Z
+      updated_at: 2026-04-29T08:11:42.493Z
     workspace_id: dispatch-workspace-01KQBTZN83176W432HWKN1CTV4
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
