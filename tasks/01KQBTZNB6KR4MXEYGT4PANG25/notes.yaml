@@ -61,3 +61,16 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T12:13:12.812Z
+  - _ulid: 01KQCJWVM8J90SMMT5FB0787RG
+    content: "Fix cycle 3: addressed the memory-mode classification masking blocker. The root cause was
+      classify_failure() checking workflow-stage keywords (save, loader, ksampler) before
+      memory/VRAM/OOM keywords, so errors like 'node_error(KSampler): OOM: cannot allocate' were
+      classified as 'downstream' instead of 'memory_mode'. Fix: moved memory/OOM check to run first
+      in classify_failure(). The run_validation propagation logic was already correct — it just
+      never triggered because classify_failure masked the memory failures. Added 4 new tests (87
+      total): classify OOM-in-KSampler, CUDA-OOM-in-WIDENExit-save, VRAM-in-loader, and full
+      run_validation memory_mode propagation from downstream OOM. All 1561 project tests pass, ruff
+      clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T12:19:52.072Z
