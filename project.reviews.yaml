@@ -16140,9 +16140,25 @@ reviews:
           status: pass
           name: diff check
         timestamp: 2026-04-29T13:47:28.310Z
+      - _ulid: 01KQCQXNHSQ2BJQWQSPVJVHM83
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: approve
+        timestamp: 2026-04-29T13:47:41.498Z
+      - _ulid: 01KQCQXNHTG238J82J4YWZ30HV
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T13:47:41.498Z
     examined_commit: 5422952696fec659c9655db6da3e892e0b48d72c
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -16150,7 +16166,14 @@ reviews:
       ref: "@01KQBTZNCWM8AP31SWX4FQEYJ7"
       shadow_commit: ""
     threads: []
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: approve
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T13:47:41.497Z
     created_at: 2026-04-29T13:45:18.815Z
-    updated_at: 2026-04-29T13:47:28.173Z
+    updated_at: 2026-04-29T13:47:41.498Z
     notes: []
