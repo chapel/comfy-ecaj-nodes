@@ -335,13 +335,11 @@ features:
               return or load path for that artifact kind, and the result remains usable after
               temporary merge outputs have been released by the Exit node.
             when: The Exit node returns its MODEL output.
-          - given: |
-              A saved full model artifact matches the current recipe identity.
+          - given: A saved full model artifact matches the current recipe identity, requested artifact kind, and
+              required saved-model metadata.
             id: ac-cache-reuses-artifact
-            then: |
-              The existing artifact is reused without recomputing the merged weights.
-            when: |
-              The Exit node executes in full saved model mode.
+            then: The existing artifact is reused without recomputing the merged weights.
+            when: The Exit node executes with save_model enabled for that same saved model kind.
           - given: |-
               A valid full saved model workflow selects a recipe that does not change any
               diffusion model weights.
