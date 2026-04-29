@@ -6217,7 +6217,7 @@ runs:
     started_at: 2026-04-29T06:25:57.651Z
     completed_at: 2026-04-29T06:27:43.436Z
   - _ulid: 01KQBYPSWCATTX8C51F7Z4TQPX
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -6247,10 +6247,14 @@ runs:
         notes: "Skipped capture decision: candidate success and friction are already covered by existing
           unresolved observations @01KQ815T and @01KQ815TA. Creating another observation would
           duplicate the same process lesson. No vague/uncertain items captured."
-      - status: completed
+      - status: skipped
         step_index: 3
         started_at: 2026-04-29T06:28:21.099Z
-        completed_at: 2026-04-29T06:28:21.099Z
+        completed_at: 2026-04-29T06:28:31.949Z
+        notes: "No capture performed. Reflection candidates were duplicates of existing observations:
+          @01KQ815T for high-signal runtime probes during review and @01KQ815TA for full-mode/cache
+          tests missing adversarial artifact semantics."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:27:02.156Z
+    completed_at: 2026-04-29T06:28:31.949Z
