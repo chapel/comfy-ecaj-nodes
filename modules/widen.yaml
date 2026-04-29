@@ -298,10 +298,16 @@ features:
           - full-saved-model-output
         title: Full Saved Model Output
         type: feature
-        description: |
-          The Exit node can produce a complete saved diffusion model artifact for a
-          merge recipe and return a MODEL that behaves like a normally loaded ComfyUI
-          diffusion model for downstream execution.
+        description: >-
+          The Exit node can produce a complete saved model artifact for a merge recipe in the model
+          kind requested by the source workflow and return a MODEL that behaves like a normally
+          loaded ComfyUI model for downstream execution.
+
+
+          For checkpoint-style source workflows, complete means the saved artifact remains loadable
+          through the appropriate checkpoint-style ComfyUI loader with the non-diffusion components
+          needed for normal generation and decode use. A diffusion-weight-only artifact is not
+          sufficient for checkpoint-style saved model output.
         status:
           maturity: draft
           implementation: in_progress
