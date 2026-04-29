@@ -6759,9 +6759,21 @@ runs:
     completed_at: 2026-04-29T08:07:43.608Z
   - _ulid: 01KQC4QYF6ET9XSND9XW4X0ATW
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T08:12:31.078Z
+        completed_at: 2026-04-29T08:13:29.956Z
+        notes: "Gate passed: task @01KQBTZN83176W432HWKN1CTV4 completed and PR #104 merged this session.
+          What worked well: prior review record plus focused fix-cycle diff made it straightforward
+          to verify all four blocker fixes; existing observations already cover dispatch review gate
+          success, so no duplicate success observation captured."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T08:13:29.956Z
+        completed_at: 2026-04-29T08:13:29.956Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T08:12:31.078Z
