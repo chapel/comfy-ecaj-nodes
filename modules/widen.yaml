@@ -685,7 +685,7 @@ features:
               contents, and metadata match the requested saved-model behavior.
             status:
               maturity: draft
-              implementation: in_progress
+              implementation: implemented
             depends_on: []
             implements: []
             relates_to: []
