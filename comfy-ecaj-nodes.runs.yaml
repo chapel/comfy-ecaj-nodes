@@ -8234,7 +8234,7 @@ runs:
     completed_at: 2026-04-29T13:38:26.324Z
   - _ulid: 01KQCQMQGGS6KDZ7H3RBJ7FVKK
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -8257,7 +8257,27 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T13:43:24.349Z
-        completed_at: 2026-04-29T13:43:24.349Z
+        completed_at: 2026-04-29T13:44:03.752Z
+        notes: >-
+          Searched existing state:
+
+          - kspec meta observations list: 27 observations exist, including @01KQ6JV5K covering
+          'spec-only tasks cause PR creation failures' (directly relevant to this session's
+          friction).
+
+          - kspec inbox list: 22 items, none directly related to this session's friction.
+
+          - kspec tasks ready: 4 ready tasks remain.
+
+          - Existing friction @01KQBWY9M covers 'kspec task review reported 0/6 AC coverage for
+          spec-only tasks' — also related.
+
+
+          Baseline established. Two existing observations match this session's primary friction.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T13:44:03.752Z
+        completed_at: 2026-04-29T13:44:03.752Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:42:48.592Z
