@@ -6,6 +6,7 @@ Covers @saved-model-artifact-safety ACs:
   ac-missing-component-diagnostic-gives-guidance
 """
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -14,7 +15,6 @@ from lib.recipe import CheckpointComponents, RecipeBase, RecipeLoRA, RecipeMerge
 from nodes.entry import WIDENEntryNode
 from nodes.exit import WIDENExitNode, validate_checkpoint_components
 from tests.conftest import MockModelPatcher
-
 
 # =============================================================================
 # Entry node: optional CLIP and VAE inputs
@@ -365,8 +365,8 @@ class TestValidComponentsPassValidation:
         # Should not raise
         validate_checkpoint_components(base, save_model=True)
 
-    def test_valid_components_proceed_past_validation_in_execute(self):
-        """With valid CLIP+VAE, execute proceeds past validation to recipe analysis."""
+    def test_valid_components_proceed_to_artifact_writer_in_execute(self):
+        """With valid CLIP+VAE, execute proceeds to the artifact writer seam."""
         patcher = MockModelPatcher()
         clip = MagicMock(name="clip")
         vae = MagicMock(name="vae")
@@ -376,9 +376,11 @@ class TestValidComponentsPassValidation:
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         node = WIDENExitNode()
+        mock_sink = MagicMock(name="sink")
+        mock_loader = MagicMock(name="loader")
 
         # With valid components, execution should proceed past validation and
-        # reach analyze_recipe (which we mock to confirm it was called)
+        # reach the artifact writer seam without real checkpoint I/O.
         with patch("nodes.exit.analyze_recipe") as mock_analyze, \
              patch("nodes.exit.analyze_recipe_models") as mock_model_analyze, \
              patch("nodes.exit.walk_to_base", return_value=base), \
@@ -391,11 +393,28 @@ class TestValidComponentsPassValidation:
              patch("nodes.exit._resolve_checkpoints_path", return_value="/tmp/test.safetensors"), \
              patch("nodes.exit.serialize_recipe", return_value="serialized"), \
              patch("nodes.exit.compute_recipe_hash", return_value="hash"), \
-             patch("nodes.exit.check_full_model_cache", return_value=True), \
+             patch("nodes.exit.check_full_model_cache", return_value=False), \
+             patch("nodes.exit.compile_plan", return_value=object()), \
+             patch("nodes.exit.MaterializationSink", return_value=mock_sink), \
              patch("nodes.exit._load_model_from_artifact", return_value=patcher.clone()):
 
             mock_lr.return_value = lambda name: None
             mock_mr.return_value = lambda name, src: None
+            mock_analyze.return_value = SimpleNamespace(
+                loader=mock_loader,
+                set_affected={},
+                affected_keys=set(),
+                arch="sdxl",
+            )
+            mock_model_analyze.return_value = SimpleNamespace(
+                model_affected={},
+                model_loaders={},
+                all_model_keys=set(),
+            )
 
             # Should not raise ValueError — validation passed
             node.execute(merge, save_model=True, model_name="test.safetensors")
+            mock_analyze.assert_called_once()
+            mock_model_analyze.assert_called_once()
+            mock_sink.open.assert_called_once()
+            mock_sink.finalize.assert_called_once_with("/tmp/test.safetensors")
