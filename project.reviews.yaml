@@ -15708,7 +15708,17 @@ reviews:
     slugs: []
     title: Review task-checkpoint-save-live-validation-manual-run
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Full suite passed in reviewer snapshot: 1570 passed in 16.89s (exit 0)."
+        name: uv run pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T13:06:55.149Z
+        completed_at: 2026-04-29T13:06:55.149Z
     events:
       - _ulid: 01KQCNFBFFNMHVCMWVBK0SB9JV
         actor: Jacob Chapel
@@ -15723,6 +15733,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T13:05:27.281Z
+      - _ulid: 01KQCNK0N80HHRA63HED2VHYF1
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: uv run pytest
+        timestamp: 2026-04-29T13:06:55.272Z
     examined_commit: 60842f5808796d60d59926b6ab58fc486aebfb3a
     external_links: []
     lifecycle_state: open
@@ -15735,5 +15752,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T13:04:55.279Z
-    updated_at: 2026-04-29T13:05:27.153Z
+    updated_at: 2026-04-29T13:06:55.149Z
     notes: []
