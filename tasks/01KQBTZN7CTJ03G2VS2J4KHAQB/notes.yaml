@@ -92,3 +92,10 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-29T07:25:37.934Z
+  - _ulid: 01KQC2KRAS871112TTX3TBMQ57
+    content: Reviewer resolved PR merge conflict with dev in tests/test_exit_node.py by combining
+      imports and updating checkpoint cache routing tests to provide checkpoint components required
+      by dev preflight. Pushed refreshed head 91395bb after focused tests and full pytest passed.
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-04-29T07:35:16.570Z
