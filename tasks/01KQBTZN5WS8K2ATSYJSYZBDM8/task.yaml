@@ -37,7 +37,7 @@ description: |
 spec_ref: "@checkpoint-loadable-saved-model-output"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
@@ -50,6 +50,14 @@ tags:
   - ux
   - persistence
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-checkpoint-save-exit-ui-and-terminal-scheduling/01kqbtzn
+  captured_at: 2026-04-29T05:56:16.216Z
+  commit: 3af78183e8cfe148f9ade0dc28228675fe837c0b
+  remote: origin
+  remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+  upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-exit-ui-and-terminal-scheduling/01kqbtzn
 session_id: 01KQBWG8GTEZHARM3DMDHJMH6P
 history:
   - author: Jacob Chapel
@@ -72,7 +80,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-04-29T05:48:58.806Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-exit-ui-and-terminal-scheduling/01kqbtzn
+          captured_at: 2026-04-29T05:56:16.216Z
+          commit: 3af78183e8cfe148f9ade0dc28228675fe837c0b
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-exit-ui-and-terminal-scheduling/01kqbtzn
+        previous: null
+      submitted_at:
+        new: 2026-04-29T05:56:16.219Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-04-29T05:56:16.219Z
 created_at: 2026-04-29T05:21:57.948Z
 started_at: 2026-04-29T05:48:58.805Z
+submitted_at: 2026-04-29T05:56:16.219Z
 todos: []
 automation: eligible
