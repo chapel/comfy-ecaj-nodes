@@ -10548,6 +10548,19 @@ reviews:
         runner: pytest
         created_at: 2026-04-29T06:25:40.815Z
         completed_at: 2026-04-29T06:25:40.815Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Created an ecaj full-mode safetensors with only diffusion_model.* keys and no
+          artifact_kind/base/dependency/checkpoint metadata. check_full_model_cache returned True;
+          check_checkpoint_cache returned False. nodes/exit.py still uses check_full_model_cache for
+          save_model cache reuse.
+        name: checkpoint cache integration repro
+        required: true
+        runner: python
+        created_at: 2026-04-29T06:25:41.166Z
+        completed_at: 2026-04-29T06:25:41.166Z
     events:
       - _ulid: 01KQBYGDA297ZHYQ77JKD6TKPK
         actor: Jacob Chapel
@@ -10576,6 +10589,13 @@ reviews:
           status: pass
           name: pytest exit/full streaming
         timestamp: 2026-04-29T06:25:40.911Z
+      - _ulid: 01KQBYMAWJ2SYBXPQXJJ542DHP
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: checkpoint cache integration repro
+        timestamp: 2026-04-29T06:25:41.266Z
     examined_commit: b4fddba6ff319d353e122663560f4d502e28db0a
     external_links: []
     lifecycle_state: open
@@ -10588,5 +10608,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T06:23:32.674Z
-    updated_at: 2026-04-29T06:25:40.815Z
+    updated_at: 2026-04-29T06:25:41.166Z
     notes: []
