@@ -1444,7 +1444,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T08:12:27.595Z
+      updated_at: 2026-04-29T08:14:22.856Z
     integration:
       status: merged
       detail: integration:merged
@@ -1453,25 +1453,20 @@ workspaces:
       target_branch: dev
       target_commit: 51eb583862d183e00229c9279268f4a645197ef6
       updated_at: 2026-04-29T08:12:27.595Z
-    lifecycle_state: cleanup_blocked
+    lifecycle_state: closing
     resolved_base_branch: dev
     task_ref: "@01KQBTZN83176W432HWKN1CTV4"
     task_slug: task-checkpoint-save-atomic-artifact-writer
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T08:07:57.101Z
-      last_reconciled_at: 2026-04-29T08:14:22.542Z
+      last_reconciled_at: 2026-04-29T08:14:22.856Z
       created_at: 2026-04-29T07:41:29.896Z
-      updated_at: 2026-04-29T08:14:22.542Z
+      updated_at: 2026-04-29T08:14:22.856Z
     workspace_id: dispatch-workspace-01KQBTZN83176W432HWKN1CTV4
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer:
-        branch_mode: detached
-        branch_ref: null
-        head: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
-        last_seen_at: 2026-04-29T08:07:56.258Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-atomic-artifact-writer-01kqbtzn-review
+      reviewer: null
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-checkpoint-save-atomic-artifact-writer/01kqbtzn
