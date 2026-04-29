@@ -1241,6 +1241,17 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T13:10:12.155Z
+  - _ulid: 01KQCQ05PFMJARSDTFGT7VME7J
+    type: success
+    content: "Fix cycle on cache detection: disabling enable_cache on the baseline save workflow +
+      adding timing-based cache detection as a fallback method resolved a systemic false-negative in
+      the checkpoint validation harness. All three existing friction points (worktree guard, review
+      truncation, cache detection) were already tracked — search-before-capture prevented
+      duplicates."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T13:31:34.991Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
