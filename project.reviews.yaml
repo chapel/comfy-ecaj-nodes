@@ -11009,6 +11009,17 @@ reviews:
         runner: rg
         created_at: 2026-04-29T07:13:07.405Z
         completed_at: 2026-04-29T07:13:07.405Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "kspec validate: schema/references/skills OK; exited 6 due existing alignment/completeness
+          warnings."
+        name: kspec validate
+        required: false
+        runner: kspec
+        created_at: 2026-04-29T07:13:07.764Z
+        completed_at: 2026-04-29T07:13:07.764Z
     events:
       - _ulid: 01KQC130TRD4TXMQ40MWHWTK2S
         actor: Jacob Chapel
@@ -11058,6 +11069,13 @@ reviews:
           status: pass
           name: AC annotations
         timestamp: 2026-04-29T07:13:07.507Z
+      - _ulid: 01KQC1B6RZ81ZR6924XC922JHN
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-29T07:13:07.871Z
     examined_commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
     external_links: []
     lifecycle_state: open
@@ -11132,5 +11150,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:08:39.641Z
-    updated_at: 2026-04-29T07:13:07.405Z
+    updated_at: 2026-04-29T07:13:07.764Z
     notes: []
