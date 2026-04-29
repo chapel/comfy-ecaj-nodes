@@ -1094,6 +1094,27 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T08:32:17.155Z
+  - _ulid: 01KQC6NCZ5T0KYFEHZ6GM8BVFW
+    type: success
+    content: "Checkpoint-save reconciliation plan with explicit dependency chain: Each predecessor task
+      (component sourcing, cache classification, atomic writer, sink handoff) delivered exactly what
+      the artifact format task needed. The final task could focus on Comfy save integration without
+      building infrastructure. Well-decomposed plan with concrete deliverables at each stage."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T08:46:04.773Z
+  - _ulid: 01KQC6ND0TD20Q4WW5N8VNRD58
+    type: friction
+    content: Test conftest.py stubs lag behind new ComfyUI module usage. When production code adds
+      import comfy.sd for checkpoint save, tests fail until a corresponding stub is added to
+      conftest._mock_comfyui_modules. Each new ComfyUI API surface consumed in production requires a
+      manual conftest update. Consider documenting the stub pattern or adding a checklist step to
+      task-work when new ComfyUI imports are introduced.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T08:46:04.826Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
