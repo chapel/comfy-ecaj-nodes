@@ -48,7 +48,7 @@ description: |
 spec_ref: "@streaming-full-model-materialization"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
@@ -60,6 +60,14 @@ tags:
   - persistence
   - validation
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-checkpoint-save-preserve-scoped-existing-specs/01kqbtzn
+  captured_at: 2026-04-29T06:25:00.538Z
+  commit: 3d1835ff431c4b586dc1382d7b8b0396847453b8
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KQBYBF1S45GQYG8KHJFP8DWZ
 history:
   - author: Jacob Chapel
@@ -82,7 +90,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-04-29T06:21:14.319Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-preserve-scoped-existing-specs/01kqbtzn
+          captured_at: 2026-04-29T06:25:00.538Z
+          commit: 3d1835ff431c4b586dc1382d7b8b0396847453b8
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-04-29T06:25:00.542Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-04-29T06:25:00.542Z
 created_at: 2026-04-29T05:21:57.925Z
 started_at: 2026-04-29T06:21:14.318Z
+submitted_at: 2026-04-29T06:25:00.542Z
 todos: []
 automation: eligible
