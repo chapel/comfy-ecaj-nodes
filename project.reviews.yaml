@@ -14042,6 +14042,17 @@ reviews:
           tests/test_exit_node.py -q
         created_at: 2026-04-29T10:39:43.196Z
         completed_at: 2026-04-29T10:39:43.196Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Validation passed; warnings were existing alignment/completeness warnings and command
+          exited 0 with --warnings-ok.
+        name: kspec validate
+        required: true
+        runner: kspec validate --warnings-ok
+        created_at: 2026-04-29T10:39:43.662Z
+        completed_at: 2026-04-29T10:39:43.662Z
     events:
       - _ulid: 01KQCCYVQ87C8R0FG048W234XF
         actor: Jacob Chapel
@@ -14070,6 +14081,13 @@ reviews:
           status: pass
           name: targeted checkpoint tests
         timestamp: 2026-04-29T10:39:43.367Z
+      - _ulid: 01KQCD5G4HSXJDVBCN97VH0HXZ
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-29T10:39:43.761Z
     examined_commit: 7bcc9c2f7322b63ed8cb663b248d388f42694350
     external_links: []
     lifecycle_state: open
@@ -14109,5 +14127,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T10:36:06.249Z
-    updated_at: 2026-04-29T10:39:43.196Z
+    updated_at: 2026-04-29T10:39:43.662Z
     notes: []
