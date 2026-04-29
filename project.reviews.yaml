@@ -14573,6 +14573,13 @@ reviews:
           status: pass
           name: ruff
         timestamp: 2026-04-29T11:34:45.410Z
+      - _ulid: 01KQCGAKS2QNSQMF464QRBHA4Z
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCGAKNSYY59S3WWY1DBMPH0
+        timestamp: 2026-04-29T11:34:57.058Z
     examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
     external_links: []
     lifecycle_state: open
@@ -14582,8 +14589,29 @@ reviews:
       content_hash: ""
       ref: "@01KQBTZNB6KR4MXEYGT4PANG25"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQCGAKNSYY59S3WWY1DBMPH0
+        anchor:
+          type: code
+          commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
+          line_end: 438
+          line_start: 428
+          path: scripts/manual/real_comfy_checkpoint_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQCGAKNS4Z44AV75ZAACW6MK
+            author: Jacob Chapel
+            body: "MUST-FIX: the checkpoint save workflow does not wire the source checkpoint CLIP and VAE into
+              WIDENEntry. The current prompt only passes MODEL to node 2, but nodes/entry.py exposes
+              optional clip/vae inputs and nodes/exit.py validates those components for
+              checkpoint-style save_model. This means the live checkpoint-save validation either
+              exercises a diffusion-only path or fails before proving the required MODEL+CLIP+VAE
+              checkpoint artifact path. Evidence:
+              build_checkpoint_save_workflow('source.safetensors') produces entry_inputs {'model':
+              ['1', 0]}."
+            created_at: 2026-04-29T11:34:56.953Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T11:31:40.966Z
-    updated_at: 2026-04-29T11:34:45.306Z
+    updated_at: 2026-04-29T11:34:56.953Z
     notes: []
