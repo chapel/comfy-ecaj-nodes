@@ -5784,7 +5784,7 @@ runs:
     completed_at: 2026-04-29T05:48:00.128Z
   - _ulid: 01KQBWEHJRDVC88YZRXJ38A375
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -5799,7 +5799,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T05:48:09.920Z
-        completed_at: 2026-04-29T05:48:09.920Z
+        completed_at: 2026-04-29T05:48:26.808Z
+        notes: "High-confidence friction: completing a spec-rewrite task can auto-sync the linked spec
+          implementation status to implemented even when the task explicitly required the spec to
+          remain in_progress for later implementation work. Existing searches and baseline lists did
+          not show direct tracking for this auto-sync/status-preservation issue. Success candidates
+          were already covered by existing observations about review checks and PR CI, so no
+          duplicate success capture needed."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T05:48:26.808Z
+        completed_at: 2026-04-29T05:48:26.808Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T05:47:34.360Z
