@@ -451,59 +451,43 @@ features:
             tests: []
             traits: []
             acceptance_criteria:
-              - given: |
-                  ComfyUI is running with its dynamic model memory management enabled.
+              - given: ComfyUI is running with its dynamic model memory management enabled.
                 id: ac-no-dynamic-vram-opt-out
-                then: |
-                  The workflow can run without requiring users to disable ComfyUI's dynamic
-                  memory management.
-                when: |
-                  A workflow uses full saved model output.
-              - given: |
-                  The Exit node has returned a MODEL from a full saved model artifact.
+                then: The workflow can run without requiring users to disable ComfyUI's dynamic memory management.
+                  If checkpoint-style output is requested, the saved artifact remains loadable
+                  through the appropriate checkpoint-style ComfyUI loader in that memory mode.
+                when: A workflow uses saved model output for a supported artifact kind.
+              - given: The Exit node has returned a MODEL after producing or reusing saved model output.
                 id: ac-comfy-owns-returned-model-memory
-                then: |
-                  The returned MODEL remains compatible with ComfyUI's model memory
-                  lifecycle and does not require all merged affected weights to remain
-                  resident solely because the Exit node returned.
-                when: |
-                  ComfyUI loads, unloads, partially loads, or prioritizes models for a
-                  workflow.
-              - given: |-
-                  A representative merge workflow is run in an explicitly selected ComfyUI
-                  memory-management mode.
+                then: The returned MODEL remains compatible with ComfyUI's model memory lifecycle and does not
+                  require the transient WIDEN merge payload or a deep-copied ComfyUI model object to
+                  remain resident solely because the Exit node returned.
+                when: ComfyUI loads, unloads, partially loads, or prioritizes models for a workflow.
+              - given: A representative merge workflow is run in an explicitly selected ComfyUI memory-management
+                  mode.
                 id: ac-measured-memory-report
-                then: |-
-                  The validation output reports the active memory mode, memory observations
-                  when available, returned-model behavior, artifact reuse behavior, and whether
-                  merged affected weights remain persistently resident after the Exit node returns.
-                when: |-
-                  memory behavior is measured for patch output, first full saved model output,
-                  and full saved model artifact reuse.
-              - given: |-
-                  ComfyUI is running in a supported memory-management mode where Dynamic VRAM
-                  is not active.
+                then: The validation output reports the active memory mode, saved artifact classification, loader
+                  and downstream workflow result when applicable, returned-model behavior, artifact
+                  reuse behavior, and whether transient merge outputs remain persistently resident
+                  after the Exit node returns.
+                when: memory behavior is measured for patch output, first saved model output, and saved artifact
+                  reuse.
+              - given: ComfyUI is running in a supported memory-management mode where Dynamic VRAM is not active.
                 id: ac-non-dynamic-memory-mode-supported
-                then: |-
-                  The workflow can produce and return the full saved model output without
-                  requiring Dynamic VRAM to be enabled.
-                when: A workflow uses full saved model output.
+                then: The workflow can produce and return the saved model output without requiring Dynamic VRAM to
+                  be enabled.
+                when: A workflow uses saved model output for a supported artifact kind.
               - given: ComfyUI has an active memory-management mode for the workflow.
                 id: ac-memory-mode-preserved
-                then: |-
-                  The workflow does not require users or the node to change that memory mode
-                  in order to produce the full saved model output.
-                when: A workflow uses full saved model output.
-              - given: |-
-                  A validation run is measuring full saved model output under an explicitly
-                  selected ComfyUI memory-management mode.
+                then: The workflow does not require users or the node to change that memory mode in order to
+                  produce, load, reuse, or return the saved model output.
+                when: A workflow uses saved model output.
+              - given: A validation run is measuring saved model output under an explicitly selected ComfyUI
+                  memory-management mode.
                 id: ac-memory-validation-fails-on-mode-opt-out
-                then: |-
-                  The validation reports the run as failed rather than treating the mode change
-                  as a successful compatibility result.
-                when: |-
-                  full saved model output can only complete by changing or disabling that
-                  selected memory mode.
+                then: The validation reports the run as failed rather than treating the mode change as a successful
+                  compatibility result.
+                when: saved model output can only complete by changing or disabling that selected memory mode.
             tags:
               - comfy
               - memory
