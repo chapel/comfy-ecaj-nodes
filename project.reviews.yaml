@@ -15480,6 +15480,12 @@ reviews:
         payload:
           thread_ulid: 01KQCK7PBY20TPN7VDB310EDBV
         timestamp: 2026-04-29T12:40:00.896Z
+      - _ulid: 01KQCM1XXJA02F0GKNSDK4FNW9
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQCK7PBY20TPN7VDB310EDBV
+        timestamp: 2026-04-29T12:40:06.834Z
     examined_commit: 099b309999b053bbad95f13eb7badb1a1b6463ba
     external_links: []
     lifecycle_state: closed
@@ -15523,6 +15529,8 @@ reviews:
               accepted, all-success case, and the helper itself). All 1570 tests pass."
             created_at: 2026-04-29T12:40:00.780Z
         kind: blocker
+        resolved_at: 2026-04-29T12:40:06.715Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -15532,5 +15540,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T12:28:09.443Z
     created_at: 2026-04-29T12:22:03.386Z
-    updated_at: 2026-04-29T12:40:00.780Z
+    updated_at: 2026-04-29T12:40:06.715Z
     notes: []
