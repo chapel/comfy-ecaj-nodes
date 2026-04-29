@@ -7267,9 +7267,20 @@ runs:
     completed_at: 2026-04-29T10:19:21.617Z
   - _ulid: 01KQCCAHB6A73AWS6CE1B1JG6D
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T10:25:00.262Z
+        completed_at: 2026-04-29T10:25:43.841Z
+        notes: "Gate passed: session produced a closed review record and moved
+          @task-checkpoint-save-artifact-format to needs_work. Working tree remained clean and no
+          code commits were made in the detached review snapshot."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T10:25:43.841Z
+        completed_at: 2026-04-29T10:25:43.841Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T10:25:00.262Z
