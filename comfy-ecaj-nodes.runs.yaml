@@ -8233,7 +8233,7 @@ runs:
     started_at: 2026-04-29T13:37:11.819Z
     completed_at: 2026-04-29T13:38:26.324Z
   - _ulid: 01KQCQMQGGS6KDZ7H3RBJ7FVKK
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -8299,7 +8299,23 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T13:44:21.271Z
-        completed_at: 2026-04-29T13:44:21.271Z
+        completed_at: 2026-04-29T13:44:37.465Z
+        notes: >-
+          Captured 1 item:
+
+          - SUCCESS @01KQCQQT: Structured task notes as durable evidence for downstream
+          reconciliation.
+
+
+          Skipped:
+
+          - Validate status mismatch false positives (too narrow, reconciliation-only edge case)
+
+          - kspec item set --status discoverability (one-off learning)
+
+
+          Session reflection complete. Low volume, high confidence.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:42:48.592Z
+    completed_at: 2026-04-29T13:44:37.466Z
