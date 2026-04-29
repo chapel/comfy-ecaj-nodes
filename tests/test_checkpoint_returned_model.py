@@ -78,7 +78,6 @@ class TestNoDeepCopyOnCheckpointReturn:
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.compile_plan", return_value=MagicMock()),
-            patch("nodes.exit.compile_plan", return_value=MagicMock()),
             patch("nodes.exit.chunked_evaluation", return_value={}),
             patch("nodes.exit.compile_batch_groups", return_value={}),
             patch("nodes.exit.install_merged_patches") as mock_install,
