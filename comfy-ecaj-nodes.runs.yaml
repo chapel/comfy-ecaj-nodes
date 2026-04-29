@@ -7394,9 +7394,24 @@ runs:
     completed_at: 2026-04-29T10:42:08.807Z
   - _ulid: 01KQCDRK1FH6FPW916MA65AV4K
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T10:50:09.327Z
+        completed_at: 2026-04-29T10:50:39.121Z
+        notes: "What worked well: (1) Reading the full review thread YAML directly gave exact reproduction
+          steps — the reviewer's probe scenario (conditioner-only artifact) translated directly into
+          both the fix and the primary new test. (2) The fix was narrow and well-scoped: one new
+          validation function applied in two places, 6 new tests, 2 mock updates. No structural
+          refactoring needed. (3) Existing _is_internal_only_artifact provided a negative gate; the
+          new _has_checkpoint_component_prefixes added the missing positive gate — complementary
+          layers rather than replacement."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T10:50:39.121Z
+        completed_at: 2026-04-29T10:50:39.121Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T10:50:09.327Z
