@@ -7223,9 +7223,22 @@ runs:
     completed_at: 2026-04-29T09:58:47.003Z
   - _ulid: 01KQCBWHS7Q9MHY3ENFBKB5GMH
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T10:17:21.960Z
+        completed_at: 2026-04-29T10:18:03.805Z
+        notes: "What worked: (1) Reading review YAML directly for full thread content when CLI truncated —
+          got complete blocker descriptions. (2) Running ruff project-wide caught 6 additional
+          violations in 3 other files beyond the 2 reviewed files. (3) Running tests immediately
+          after the validation guard change caught the 4 tests needing updates — fast feedback
+          loop."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T10:18:03.805Z
+        completed_at: 2026-04-29T10:18:03.805Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T10:17:21.960Z
