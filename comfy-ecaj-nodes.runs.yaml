@@ -8191,7 +8191,7 @@ runs:
     started_at: 2026-04-29T13:29:36.094Z
     completed_at: 2026-04-29T13:32:16.946Z
   - _ulid: 01KQCQAEMB43VCWSK823V6BGXZ
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -8222,10 +8222,13 @@ runs:
           01KQC4S9 for validate warning exits, 01KQ6R11 for detached PR merge command wrapping,
           01KQCM72/01KQCNS0 for review probes and machine-readable report verification. No unique
           high-confidence improvement remains after search."
-      - status: completed
+      - status: skipped
         step_index: 3
         started_at: 2026-04-29T13:38:17.717Z
-        completed_at: 2026-04-29T13:38:17.717Z
+        completed_at: 2026-04-29T13:38:26.324Z
+        notes: "No capture performed: all high-confidence reflection candidates were already covered by
+          existing observations or inbox items; creating new entries would duplicate tracking."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:37:11.819Z
+    completed_at: 2026-04-29T13:38:26.324Z
