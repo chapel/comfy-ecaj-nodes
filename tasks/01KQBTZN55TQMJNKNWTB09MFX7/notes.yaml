@@ -40,3 +40,10 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-29T06:24:45.020Z
+  - _ulid: 01KQBYKN828VSTMQ0KD9NZ974B
+    content: "PR not applicable: This preservation task verified that no spec or code changes are
+      needed. The branch has zero diff against dev. Task deliverables are the verification notes
+      above confirming both specs remain scoped and unchanged."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T06:25:19.106Z
