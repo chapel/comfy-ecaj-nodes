@@ -1749,12 +1749,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-29T12:43:15.773Z
+      updated_at: 2026-04-29T12:43:17.991Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T12:43:15.773Z
+      updated_at: 2026-04-29T12:43:17.991Z
     integration:
       status: pending
       detail: null
@@ -1762,24 +1762,29 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 930b8de30c7e44c3fba57d026d63186cc2f639f0
-      updated_at: 2026-04-29T12:43:15.773Z
-    lifecycle_state: ready
+      updated_at: 2026-04-29T12:43:17.991Z
+    lifecycle_state: integrating
     resolved_base_branch: dev
     task_ref: "@01KQBTZNB6KR4MXEYGT4PANG25"
     task_slug: task-checkpoint-save-live-validation-harness
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T12:32:07.809Z
-      last_reconciled_at: 2026-04-29T12:43:15.773Z
+      last_reconciled_at: 2026-04-29T12:43:17.991Z
       created_at: 2026-04-29T11:18:36.320Z
-      updated_at: 2026-04-29T12:43:15.773Z
+      updated_at: 2026-04-29T12:43:17.991Z
     workspace_id: dispatch-workspace-01KQBTZNB6KR4MXEYGT4PANG25
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 37c7029f0288d8d6438a6d44a9dac519e9e50d3d
+        last_seen_at: 2026-04-29T12:43:17.991Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-live-validation-harness-01kqbtzn-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-checkpoint-save-live-validation-harness/01kqbtzn
-        head: 099b309999b053bbad95f13eb7badb1a1b6463ba
-        last_seen_at: 2026-04-29T12:32:06.354Z
+        head: 37c7029f0288d8d6438a6d44a9dac519e9e50d3d
+        last_seen_at: 2026-04-29T12:43:17.991Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-live-validation-harness-01kqbtzn
