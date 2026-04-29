@@ -6801,7 +6801,7 @@ runs:
     completed_at: 2026-04-29T08:14:02.923Z
   - _ulid: 01KQC5BV99PX1192P2TZRXV3NM
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -6814,7 +6814,29 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T08:23:38.845Z
-        completed_at: 2026-04-29T08:23:38.845Z
+        completed_at: 2026-04-29T08:24:10.168Z
+        notes: >-
+          Friction identified:
+
+          1. Pre-existing test failure in TestCheckpointCacheRouting (MagicMock
+          model_loader.get_weights returns mock not tensors) — not tracked. These 5 tests fail on
+          dev HEAD and are unrelated to any task work, causing confusion during -x runs.
+
+          2. /tmp disk space exhaustion from pytest temp files — not tracked. tmpfs filled to 31GB
+          causing spurious safetensors serialization errors until manual cleanup.
+
+          3. Worktree guard blocks rebase — already tracked (observation @01KQC4EZ).
+
+
+          Success identified:
+
+          1. Sink-based refactoring was cleanly additive — existing tests passed without changes
+          because streaming_evaluation_to_sink was preserved as a backward-compat wrapper. This
+          avoided touching 13+ test patch sites.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T08:24:10.168Z
+        completed_at: 2026-04-29T08:24:10.168Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T08:23:23.177Z
