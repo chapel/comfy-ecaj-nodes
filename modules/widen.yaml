@@ -320,15 +320,14 @@ features:
         tests: []
         traits: []
         acceptance_criteria:
-          - given: |
-              A valid merge recipe affects some or all diffusion model weights.
+          - given: A valid merge recipe starts from a source workflow whose normal ComfyUI use has a defined
+              saved model kind.
             id: ac-complete-artifact
-            then: |
-              The saved artifact contains every diffusion model weight required for the
-              merged model to be loaded without relying on the original in-memory patch
-              payload.
-            when: |
-              The Exit node produces a full saved model output for that recipe.
+            then: The saved artifact is complete for that same model kind and can be loaded without relying on
+              the original in-memory WIDEN merge payload. For checkpoint-style source workflows, the
+              artifact includes the conditioning and decode components required by the appropriate
+              checkpoint-style ComfyUI loader, not only the merged diffusion weights.
+            when: The Exit node produces full saved model output for that recipe.
           - given: |
               A full saved model artifact is produced or reused for the current recipe.
             id: ac-return-loaded-model
