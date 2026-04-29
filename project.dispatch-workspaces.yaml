@@ -1394,7 +1394,7 @@ workspaces:
         head: 3d1835ff431c4b586dc1382d7b8b0396847453b8
         last_seen_at: 2026-04-29T06:20:50.056Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-preserve-scoped-existing-specs-01kqbtzn
-  - active_role: null
+  - active_role: worker
     base_branch_point: 51eb583862d183e00229c9279268f4a645197ef6
     bootstrap:
       status: succeeded
@@ -1443,7 +1443,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T08:00:02.881Z
+      updated_at: 2026-04-29T08:00:03.826Z
     integration:
       status: pending
       detail: null
@@ -1452,16 +1452,16 @@ workspaces:
       target_branch: dev
       target_commit: 51eb583862d183e00229c9279268f4a645197ef6
       updated_at: 2026-04-29T08:00:02.881Z
-    lifecycle_state: ready
+    lifecycle_state: active
     resolved_base_branch: dev
     task_ref: "@01KQBTZN83176W432HWKN1CTV4"
     task_slug: task-checkpoint-save-atomic-artifact-writer
     timestamps:
       closed_at: null
-      last_active_at: 2026-04-29T07:50:00.200Z
-      last_reconciled_at: 2026-04-29T08:00:02.881Z
+      last_active_at: 2026-04-29T08:00:03.826Z
+      last_reconciled_at: 2026-04-29T08:00:03.826Z
       created_at: 2026-04-29T07:41:29.896Z
-      updated_at: 2026-04-29T08:00:03.492Z
+      updated_at: 2026-04-29T08:00:03.826Z
     workspace_id: dispatch-workspace-01KQBTZN83176W432HWKN1CTV4
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
