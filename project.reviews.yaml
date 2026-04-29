@@ -12605,6 +12605,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-29T09:29:30.278Z
         completed_at: 2026-04-29T09:29:30.278Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Targeted suites from review helpers passed; transient probe confirmed
+          save_comfy_checkpoint overwrites an existing non-ecaj target when no caller-side guard
+          runs.
+        name: targeted review probes
+        required: false
+        runner: pytest
+        created_at: 2026-04-29T09:29:58.393Z
+        completed_at: 2026-04-29T09:29:58.393Z
     events:
       - _ulid: 01KQC8J4YZPQZ1V53A31KMTC8E
         actor: Jacob Chapel
@@ -12647,6 +12659,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-29T09:29:30.420Z
+      - _ulid: 01KQC95RYV0GX7H9X657RKKKKF
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: targeted review probes
+        timestamp: 2026-04-29T09:29:58.491Z
     examined_commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
     external_links: []
     lifecycle_state: open
@@ -12703,5 +12722,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T09:19:15.423Z
-    updated_at: 2026-04-29T09:29:30.278Z
+    updated_at: 2026-04-29T09:29:58.393Z
     notes: []
