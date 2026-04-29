@@ -10888,6 +10888,12 @@ reviews:
         payload:
           thread_ulid: 01KQBZZ53P4DG6E7YFWF377WGV
         timestamp: 2026-04-29T07:03:43.058Z
+      - _ulid: 01KQC0T1HB5NH385EQ41Y5JN40
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQBZYTRTPEG96Q5ZXJAQ5ZRK
+        timestamp: 2026-04-29T07:03:45.451Z
     examined_commit: 58ee1cd21f036143cf551f1150523d0ed4e418c6
     external_links: []
     lifecycle_state: closed
@@ -10931,6 +10937,8 @@ reviews:
               diffusion-only RecipeModel recipes route to check_full_model_cache."
             created_at: 2026-04-29T07:03:37.310Z
         kind: blocker
+        resolved_at: 2026-04-29T07:03:45.354Z
+        resolved_by: "@claude"
       - _ulid: 01KQBZZ53P4DG6E7YFWF377WGV
         anchor:
           type: code
@@ -10973,5 +10981,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T06:49:14.316Z
     created_at: 2026-04-29T06:45:15.637Z
-    updated_at: 2026-04-29T07:03:42.963Z
+    updated_at: 2026-04-29T07:03:45.354Z
     notes: []
