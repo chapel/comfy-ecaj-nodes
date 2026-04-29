@@ -7031,7 +7031,7 @@ runs:
     completed_at: 2026-04-29T08:55:04.258Z
   - _ulid: 01KQC8EH482X0R7NKKEF94P07N
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -7060,7 +7060,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T09:18:04.833Z
-        completed_at: 2026-04-29T09:18:04.833Z
+        completed_at: 2026-04-29T09:18:13.408Z
+        notes: "Evaluation: (1) _execute_diffusion_save unreachable dead code — unique, high-confidence,
+          concrete. CAPTURE as inbox item (scope is clear enough for a task but should be triaged in
+          context of the broader checkpoint save work). (2) Test coupling to routing assumptions —
+          matches existing observation @01KH6Y61. SKIP."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T09:18:13.408Z
+        completed_at: 2026-04-29T09:18:13.408Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T09:17:16.809Z
