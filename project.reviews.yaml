@@ -12435,6 +12435,12 @@ reviews:
         payload:
           thread_ulid: 01KQC70S4YBZ3X6DM7MGHDRSBB
         timestamp: 2026-04-29T09:15:42.212Z
+      - _ulid: 01KQC8BQWXKPCW7B4SA9GSRF5T
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQC712WBKPC6B585RT0Q6Q5C
+        timestamp: 2026-04-29T09:15:45.437Z
     examined_commit: bddfbc71a07578a396071075ca5ed286c5b24b71
     external_links: []
     lifecycle_state: closed
@@ -12528,6 +12534,15 @@ reviews:
               @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind for the
               no-op checkpoint-source workflow."
             created_at: 2026-04-29T08:52:27.659Z
+          - _ulid: 01KQC8BQSNW80R191EAS6HDXTP
+            author: "@claude"
+            body: "Fixed: _execute_full_model_noop now detects checkpoint-style RecipeBase via
+              _recipe_has_checkpoint_components and routes through save_comfy_checkpoint with
+              artifact_kind=checkpoint instead of MaterializationSink with artifact_kind=diffusion.
+              Cache validation also uses check_checkpoint_cache for checkpoint noop saves. Added 3
+              tests covering noop checkpoint save, noop diffusion save, and noop checkpoint cache
+              hit."
+            created_at: 2026-04-29T09:15:45.333Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -12538,5 +12553,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T08:52:39.708Z
     created_at: 2026-04-29T08:47:01.592Z
-    updated_at: 2026-04-29T09:15:42.109Z
+    updated_at: 2026-04-29T09:15:45.333Z
     notes: []
