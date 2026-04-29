@@ -15601,6 +15601,16 @@ reviews:
         runner: pytest
         created_at: 2026-04-29T12:49:07.021Z
         completed_at: 2026-04-29T12:49:07.021Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run ruff check . passed: All checks passed."
+        name: ruff
+        required: true
+        runner: ruff
+        created_at: 2026-04-29T12:49:07.474Z
+        completed_at: 2026-04-29T12:49:07.474Z
     events:
       - _ulid: 01KQCM8FFXK77NWZ5C3KRH7973
         actor: Jacob Chapel
@@ -15650,6 +15660,13 @@ reviews:
           status: pass
           name: full pytest
         timestamp: 2026-04-29T12:49:07.164Z
+      - _ulid: 01KQCMJE0HFXNE00SHT9C4Q72Z
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff
+        timestamp: 2026-04-29T12:49:07.601Z
     examined_commit: 37c7029f0288d8d6438a6d44a9dac519e9e50d3d
     external_links: []
     lifecycle_state: open
@@ -15662,5 +15679,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T12:43:41.438Z
-    updated_at: 2026-04-29T12:49:07.021Z
+    updated_at: 2026-04-29T12:49:07.474Z
     notes: []
