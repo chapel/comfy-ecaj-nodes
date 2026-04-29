@@ -64,7 +64,7 @@ description: |
 spec_ref: "@checkpoint-loadable-saved-model-output"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: pending_review
+status: needs_work
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-component-sourcing"
@@ -87,7 +87,7 @@ submission_linkage:
   remote: null
   remote_url: null
   upstream_ref: dev
-session_id: 01KQC5RWZ10R5ARJVRKKQXVW4Q
+session_id: null
 history:
   - author: Jacob Chapel
     changes:
@@ -136,6 +136,16 @@ history:
         previous: null
     command: review-link
     timestamp: 2026-04-29T08:47:01.937Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: needs_work
+        previous: pending_review
+      session_id:
+        new: null
+        previous: 01KQC5RWZ10R5ARJVRKKQXVW4Q
+    command: review-verdict-needs-work
+    timestamp: 2026-04-29T08:52:39.935Z
 created_at: 2026-04-29T05:21:58.068Z
 started_at: 2026-04-29T08:31:10.009Z
 submitted_at: 2026-04-29T08:43:57.042Z
