@@ -30,3 +30,26 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-29T13:39:41.451Z
+  - _ulid: 01KQCQH11G5E1CHYGZVQRTFCE4
+    content: >-
+      Verification complete:
+
+      - All 8 specs confirmed as 'implemented' status
+
+      - kspec validate passes (warnings-only, no errors or ref issues)
+
+      - Supersession notes added to @plan-full-saved-model-output-plan
+
+      - Reconciliation notes added to @plan-checkpoint-save-reconciliation-plan-2
+
+      - Individual spec notes added to @full-saved-model-output, @exit-model-persistence,
+      @comfy-memory-manager-compatibility, @live-comfy-saved-output-validation
+
+      - No active task or note claims checkpoint-style output is done solely from
+      primitive/diffusion-only validation
+
+      - Status misalignment warnings for 2 specs are expected: validator infers from task progress,
+      but live validation evidence overrides the inference
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T13:40:47.281Z
