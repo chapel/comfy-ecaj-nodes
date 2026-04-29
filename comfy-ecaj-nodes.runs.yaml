@@ -8320,7 +8320,7 @@ runs:
     started_at: 2026-04-29T13:42:48.592Z
     completed_at: 2026-04-29T13:44:37.466Z
   - _ulid: 01KQCR08GVETND17GW24DQWDH7
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -8357,7 +8357,12 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T13:50:27.535Z
-        completed_at: 2026-04-29T13:50:27.535Z
+        completed_at: 2026-04-29T13:50:59.525Z
+        notes: "Captured two inbox items: kspec ref-type discoverability for plan refs, and PR-publication
+          guidance for self-owned PR approvals. Skipped duplicate captures for detached PR merge
+          command handling (@01KQ6R11), validate warning behavior (@01KQC4S9), machine-readable
+          report review success (@01KQCNS0), and structured task-note evidence (@01KQCQQT)."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:49:06.460Z
+    completed_at: 2026-04-29T13:50:59.525Z
