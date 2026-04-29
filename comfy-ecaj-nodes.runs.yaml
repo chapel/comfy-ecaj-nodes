@@ -7717,7 +7717,7 @@ runs:
     started_at: 2026-04-29T11:57:34.317Z
     completed_at: 2026-04-29T11:59:12.236Z
   - _ulid: 01KQCJ6P75AY320ENCWTJ2PHY2
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -7746,7 +7746,9 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T12:09:15.541Z
-        completed_at: 2026-04-29T12:09:15.541Z
+        completed_at: 2026-04-29T12:09:21.539Z
+        notes: No items to capture. All friction was already tracked. Clean session with no novel patterns.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:07:45.637Z
+    completed_at: 2026-04-29T12:09:21.540Z
