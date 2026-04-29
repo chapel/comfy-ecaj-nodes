@@ -1155,6 +1155,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T10:25:33.857Z
+  - _ulid: 01KQCF38KE1Q3YNM3K3DYX6AT2
+    type: success
+    content: Detailed plan return contracts (explicit cache-miss/cache-hit signatures with exact
+      function names and parameters) made the checkpoint-save-returned-model task implementation
+      direct — one function added, two call sites changed, 18 tests, zero ambiguity.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T11:13:27.662Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
