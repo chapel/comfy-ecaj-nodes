@@ -11684,7 +11684,18 @@ reviews:
     slugs: []
     title: Review atomic incremental writer
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: pytest -q exited 0; full suite completed successfully with progress reaching 100% and no
+          failures/errors.
+        name: pytest full suite
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T07:57:15.432Z
+        completed_at: 2026-04-29T07:57:15.432Z
     events:
       - _ulid: 01KQC3FM8D1TWCZDE5E50GZXC9
         actor: Jacob Chapel
@@ -11733,6 +11744,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQC3VHSQJ2NTVVT86E5R3P1Z
         timestamp: 2026-04-29T07:57:00.700Z
+      - _ulid: 01KQC3W0C5PQVCX4N7J30F0GJP
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest full suite
+        timestamp: 2026-04-29T07:57:15.525Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: open
@@ -11865,5 +11883,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T07:57:00.599Z
+    updated_at: 2026-04-29T07:57:15.432Z
     notes: []
