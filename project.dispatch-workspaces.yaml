@@ -1239,7 +1239,7 @@ workspaces:
         head: 611531b279ec6b891bf702639752dee1dbd1d724
         last_seen_at: 2026-04-29T06:12:29.367Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-component-sourcing-01kqbtzn
-  - active_role: reviewer
+  - active_role: null
     base_branch_point: 283c19998a95c6e8c0596f7baa4bcb0fc33864a2
     bootstrap:
       status: succeeded
@@ -1284,12 +1284,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-29T06:44:51.609Z
+      updated_at: 2026-04-29T06:51:03.760Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T06:44:53.262Z
+      updated_at: 2026-04-29T06:51:03.760Z
     integration:
       status: pending
       detail: null
@@ -1297,7 +1297,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 283c19998a95c6e8c0596f7baa4bcb0fc33864a2
-      updated_at: 2026-04-29T06:44:51.609Z
+      updated_at: 2026-04-29T06:51:03.760Z
     lifecycle_state: integrating
     resolved_base_branch: dev
     task_ref: "@01KQBTZN7CTJ03G2VS2J4KHAQB"
@@ -1305,9 +1305,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T06:44:53.262Z
-      last_reconciled_at: 2026-04-29T06:44:53.262Z
+      last_reconciled_at: 2026-04-29T06:51:03.760Z
       created_at: 2026-04-29T06:12:31.350Z
-      updated_at: 2026-04-29T06:44:53.262Z
+      updated_at: 2026-04-29T06:51:03.760Z
     workspace_id: dispatch-workspace-01KQBTZN7CTJ03G2VS2J4KHAQB
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
