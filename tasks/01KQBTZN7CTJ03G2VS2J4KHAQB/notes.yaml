@@ -1,1 +1,28 @@
-notes: []
+notes:
+  - _ulid: 01KQBXZERQ2HM77W4D9CS8AHHJ
+    content: >-
+      Approach: 
+
+      1. Add __ecaj_artifact_kind__, __ecaj_base_identity__, __ecaj_dependency_fingerprints__,
+      __ecaj_checkpoint_components__ metadata keys.
+
+      2. Extend build_metadata() to accept artifact_kind, base_identity, dependency_fingerprints
+      params and include them.
+
+      3. Add check_checkpoint_cache() function that validates all checkpoint-specific metadata
+      fields including artifact_kind=checkpoint, component classification, base identity match,
+      dependency fingerprint match, and rejects old internal-format/diffusion-only artifacts.
+
+      4. Preserve existing check_cache() and check_full_model_cache() behavior — don't break them.
+
+      5. Preserve non-ecaj overwrite protection (ac-9).
+
+
+      Edge cases: unsupported ecaj version, missing individual metadata fields, diffusion-only key
+      sets (diffusion_model/noise_augmentor/model_sampling only).
+
+
+      Test plan: 8 test cases per task description, each annotated with AC refs.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T06:14:17.111Z
