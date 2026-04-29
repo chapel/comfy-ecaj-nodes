@@ -1783,7 +1783,7 @@ workspaces:
         head: 37c7029f0288d8d6438a6d44a9dac519e9e50d3d
         last_seen_at: 2026-04-29T12:43:17.991Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-live-validation-harness-01kqbtzn
-  - active_role: worker
+  - active_role: null
     base_branch_point: 42876749654995b28bd6c90a032744456f202d4f
     bootstrap:
       status: succeeded
@@ -1825,12 +1825,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-29T13:01:36.788Z
+      updated_at: 2026-04-29T13:04:21.069Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T13:01:36.788Z
+      updated_at: 2026-04-29T13:04:21.069Z
     integration:
       status: pending
       detail: null
@@ -1838,17 +1838,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 42876749654995b28bd6c90a032744456f202d4f
-      updated_at: 2026-04-29T13:01:36.788Z
-    lifecycle_state: active
+      updated_at: 2026-04-29T13:04:21.069Z
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@01KQBTZNC4NGZ7R5ZT37Z4GJQQ"
     task_slug: task-checkpoint-save-live-validation-manual-run
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T12:51:42.174Z
-      last_reconciled_at: 2026-04-29T13:01:36.788Z
+      last_reconciled_at: 2026-04-29T13:04:21.069Z
       created_at: 2026-04-29T12:51:41.554Z
-      updated_at: 2026-04-29T13:01:36.788Z
+      updated_at: 2026-04-29T13:04:21.069Z
     workspace_id: dispatch-workspace-01KQBTZNC4NGZ7R5ZT37Z4GJQQ
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
