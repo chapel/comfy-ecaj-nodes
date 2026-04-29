@@ -13854,6 +13854,12 @@ reviews:
           kind: blocker
           thread_ulid: 01KQCC7P9ZBMHRCNKQ1F0G1451
         timestamp: 2026-04-29T10:23:27.153Z
+      - _ulid: 01KQCC89CKBZ8RKKYZWVB6H6J5
+        actor: Jacob Chapel
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCC7P9ZBMHRCNKQ1F0G1451
+        timestamp: 2026-04-29T10:23:46.579Z
     examined_commit: 369c96affe4e9809134217d949df55abbdaae28e
     external_links: []
     lifecycle_state: open
@@ -13884,8 +13890,19 @@ reviews:
               targeted probe classified that recipe as checkpoint-style, then raised  with  already
               called."
             created_at: 2026-04-29T10:23:27.039Z
+          - _ulid: 01KQCC899CBMH5053X7JJST2D7
+            author: Jacob Chapel
+            body: 'Clarification with code identifiers: `_recipe_has_checkpoint_components()` returns true for
+              `RecipeModel(source_dir="checkpoints")`, but `execute()` only calls
+              `validate_checkpoint_components()` when `base.checkpoint_components is not None`. A
+              save_model recipe with a checkpoint RecipeModel and no base CLIP/VAE proceeds into
+              `analyze_recipe`/merge work and then crashes in `_execute_checkpoint_save` when
+              `base.checkpoint_components` is `None`. Targeted probe evidence:
+              `classified_checkpoint=True`, `AttributeError: NoneType object has no attribute clip`,
+              and `analyze_called=True`.'
+            created_at: 2026-04-29T10:23:46.475Z
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T10:20:18.962Z
-    updated_at: 2026-04-29T10:23:27.039Z
+    updated_at: 2026-04-29T10:23:46.475Z
     notes: []
