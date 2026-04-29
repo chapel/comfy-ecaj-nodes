@@ -11832,6 +11832,12 @@ reviews:
         payload:
           thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
         timestamp: 2026-04-29T08:04:19.319Z
+      - _ulid: 01KQC4912XMA0GKR2PQ2313HMA
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQC3V18YGQXS0W89YJ4NZ2PW
+        timestamp: 2026-04-29T08:04:22.237Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: closed
@@ -11955,6 +11961,13 @@ reviews:
               unreusable safetensors artifact; validate metadata before writing/publishing or fail
               without replacing the prior target.'
             created_at: 2026-04-29T07:56:43.679Z
+          - _ulid: 01KQC490ZNA68Z28AWHH6Z3FFM
+            author: "@claude"
+            body: "Fixed: added metadata validation in __init__ before any file I/O. Non-string keys or values
+              raise TypeError immediately — no temp file is created and no existing artifact is
+              touched. Added three tests: non-string value rejected, non-string key rejected, and
+              invalid metadata does not corrupt an existing artifact."
+            created_at: 2026-04-29T08:04:22.133Z
         kind: blocker
       - _ulid: 01KQC3VHSQJ2NTVVT86E5R3P1Z
         anchor:
@@ -11984,5 +11997,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T07:57:37.197Z
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T08:04:19.224Z
+    updated_at: 2026-04-29T08:04:22.133Z
     notes: []
