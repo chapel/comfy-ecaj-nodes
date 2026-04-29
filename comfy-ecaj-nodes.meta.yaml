@@ -988,6 +988,16 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T05:56:10.525Z
+  - _ulid: 01KQBYEHYG6HH987MTKMBEDPGR
+    type: friction
+    content: "kspec batch command JSON shape is easy to misuse from normal CLI syntax: positional args
+      and options must all be nested under args, while argv-style args arrays plus an options object
+      fail validation. This caused extra dry-run attempts before recording review checks."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KQBYCF"
+    created_at: 2026-04-29T06:22:31.888Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
