@@ -110,3 +110,25 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T13:07:31.366Z
+  - _ulid: 01KQCPTAG2Z7VMMZW4RR3464RA
+    content: |-
+      Fix cycle 1: addressed all review threads (1 blocker).
+
+      Root cause: WIDENExit returns MODEL (not a UI type), so ComfyUI's history API
+      never records exit node outputs. The previous detection methods (output-based
+      and execution_cached) both failed. Additionally, the checkpoint_save workflow
+      defaulted enable_cache=True, allowing repeat validation runs to cache-hit on
+      both prompts — hiding the timing difference.
+
+      Fixes applied:
+      1. checkpoint_save workflow now sets enable_cache=False (forces fresh save)
+      2. check_cache_reuse adds timing-based detection (≥2x speedup = cache hit)
+      3. submit_workflow captures elapsed_seconds for machine-readable timing
+
+      Re-run result: first=22.784s, reuse=2.003s, speedup=11.4x.
+      Report cache status: "none" (was "cache_not_reused").
+      All 101 harness tests pass. kspec validate passes.
+      Re-verified all 7 ACs on @live-comfy-saved-output-validation — all covered.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T13:28:23.298Z
