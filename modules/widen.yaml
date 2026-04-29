@@ -328,15 +328,13 @@ features:
               artifact includes the conditioning and decode components required by the appropriate
               checkpoint-style ComfyUI loader, not only the merged diffusion weights.
             when: The Exit node produces full saved model output for that recipe.
-          - given: |
-              A full saved model artifact is produced or reused for the current recipe.
+          - given: A full saved model artifact is produced or reused for the current recipe and requested saved
+              model kind.
             id: ac-return-loaded-model
-            then: |
-              Downstream nodes receive a MODEL representing the saved merged artifact,
-              and the result remains usable after temporary merge outputs have been
-              released by the Exit node.
-            when: |
-              The Exit node returns its MODEL output.
+            then: Downstream nodes receive a MODEL representing the saved merged artifact through a supported
+              return or load path for that artifact kind, and the result remains usable after
+              temporary merge outputs have been released by the Exit node.
+            when: The Exit node returns its MODEL output.
           - given: |
               A saved full model artifact matches the current recipe identity.
             id: ac-cache-reuses-artifact
