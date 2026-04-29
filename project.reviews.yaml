@@ -14810,7 +14810,59 @@ reviews:
     slugs: []
     title: Review checkpoint save live validation harness cycle 2
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: kspec validate --warnings-ok exited 0; existing alignment/completeness warnings only.
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-29T11:56:28.935Z
+        completed_at: 2026-04-29T11:56:28.935Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg -n AC annotations found coverage entries for all seven
+          @live-comfy-saved-output-validation ACs in tests/test_checkpoint_validation_harness.py.
+        name: AC annotation scan
+        required: true
+        runner: rg
+        created_at: 2026-04-29T11:56:29.179Z
+        completed_at: 2026-04-29T11:56:29.179Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: pytest -q tests/test_checkpoint_validation_harness.py exited 0; 72 tests collected and
+          passed.
+        name: targeted pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T11:56:29.432Z
+        completed_at: 2026-04-29T11:56:29.432Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: pytest -q exited 0 and reached 100% completion.
+        name: full pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T11:56:29.716Z
+        completed_at: 2026-04-29T11:56:29.716Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: ruff check . exited 0 with All checks passed.
+        name: ruff
+        required: true
+        runner: ruff
+        created_at: 2026-04-29T11:56:29.960Z
+        completed_at: 2026-04-29T11:56:29.960Z
     events:
       - _ulid: 01KQCHA9HZCKDZK75PBFJ3WCV4
         actor: Jacob Chapel
@@ -14825,17 +14877,156 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T11:53:10.345Z
+      - _ulid: 01KQCHJ0NSZDWZYCW85B871WP2
+        actor: codex
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCHJ0HVAG9DPKVACWZTYT0F
+        timestamp: 2026-04-29T11:56:28.217Z
+      - _ulid: 01KQCHJ0YYQKDK455S2TH99751
+        actor: codex
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCHJ0VX0MJHRZRP3009XE57
+        timestamp: 2026-04-29T11:56:28.510Z
+      - _ulid: 01KQCHJ17520400GYN39BSS78G
+        actor: codex
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCHJ146JB76HVNWRX0F5HD8
+        timestamp: 2026-04-29T11:56:28.774Z
+      - _ulid: 01KQCHJ1F3564X4BWPX6Q74X1C
+        actor: codex
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-29T11:56:29.028Z
+      - _ulid: 01KQCHJ1PQBC5M2ZK18X5EM3H1
+        actor: codex
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation scan
+        timestamp: 2026-04-29T11:56:29.272Z
+      - _ulid: 01KQCHJ1ZJKM2NE0J81DA9RSTF
+        actor: codex
+        event_type: check_added
+        payload:
+          status: pass
+          name: targeted pytest
+        timestamp: 2026-04-29T11:56:29.554Z
+      - _ulid: 01KQCHJ27H8W8Y7HS5WYRD264J
+        actor: codex
+        event_type: check_added
+        payload:
+          status: pass
+          name: full pytest
+        timestamp: 2026-04-29T11:56:29.809Z
+      - _ulid: 01KQCHJ2F77BDF36TCXA1JA2D2
+        actor: codex
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff
+        timestamp: 2026-04-29T11:56:30.055Z
+      - _ulid: 01KQCHJ2Q5TTBT8SWZ3MHHMR10
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-29T11:56:30.309Z
+      - _ulid: 01KQCHJ2Q5A8SDM59TR6N6PF5S
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T11:56:30.309Z
     examined_commit: 5ec36f5610bab3aa744310ee394860fe589550b7
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
       content_hash: ""
       ref: "@01KQBTZNB6KR4MXEYGT4PANG25"
       shadow_commit: ""
-    threads: []
-    verdicts: []
+    threads:
+      - _ulid: 01KQCHJ0HVAG9DPKVACWZTYT0F
+        anchor:
+          type: code
+          commit: 5ec36f5610bab3aa744310ee394860fe589550b7
+          line_end: 689
+          line_start: 685
+          path: scripts/manual/real_comfy_checkpoint_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQCHJ0HVHE5N7PCWMC1DK9JF
+            author: codex
+            body: "MUST-FIX: submit_workflow marks a prompt successful as soon as /prompt returns a prompt_id;
+              it never waits for /history completion for save, loader, downstream, or image-save
+              execution. Comfy accepts prompts before nodes run, so runtime
+              save/load/KSampler/SaveImage failures can still produce accepted=true,
+              saved_artifact_classification=checkpoint, and failure categories of none. Evidence: a
+              mocked _api_post_prompt returning only a prompt_id made submit_workflow return
+              accepted=True without any history lookup. The harness must wait for completed
+              execution/history and classify executed node errors before reporting workflow
+              success."
+            created_at: 2026-04-29T11:56:28.091Z
+        kind: blocker
+      - _ulid: 01KQCHJ0VX0MJHRZRP3009XE57
+        anchor:
+          type: code
+          commit: 5ec36f5610bab3aa744310ee394860fe589550b7
+          line_end: 820
+          line_start: 806
+          path: scripts/manual/real_comfy_checkpoint_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQCHJ0VX3YGKN4Y1F190MJJY
+            author: codex
+            body: "MUST-FIX: when checkpoint save is rejected, loader_ckpt falls back to source_model, so the
+              downstream workflow validates the original checkpoint instead of the saved artifact.
+              Evidence: with checkpoint_save mocked rejected, run_validation still submitted
+              downstream_ksampler with source.safetensors and reported loader/downstream accepted.
+              The loader/downstream phase should not use source_model as a substitute for the saved
+              artifact; it should skip or fail with the save failure recorded."
+            created_at: 2026-04-29T11:56:28.414Z
+        kind: blocker
+      - _ulid: 01KQCHJ146JB76HVNWRX0F5HD8
+        anchor:
+          type: code
+          commit: 5ec36f5610bab3aa744310ee394860fe589550b7
+          line_end: 877
+          line_start: 876
+          path: scripts/manual/real_comfy_checkpoint_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQCHJ146TKW12MQM7Y81FDYE
+            author: codex
+            body: 'MUST-FIX: memory_mode is unconditionally recorded as none after the workflows.
+              classify_failure can identify VRAM/OOM errors as memory_mode, but run_validation
+              stores that under the per-workflow category and then still reports
+              failure_categories["memory_mode"] = "none". Evidence: a mocked save error of "VRAM out
+              of memory during save" produced {save: memory_mode, memory_mode: none}. This loses the
+              distinct memory-mode failure category required by the task.'
+            created_at: 2026-04-29T11:56:28.678Z
+        kind: blocker
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T11:56:30.309Z
     created_at: 2026-04-29T11:52:15.167Z
-    updated_at: 2026-04-29T11:53:10.233Z
+    updated_at: 2026-04-29T11:56:30.309Z
     notes: []
