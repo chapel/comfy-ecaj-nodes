@@ -14266,6 +14266,16 @@ reviews:
         runner: ruff
         created_at: 2026-04-29T10:55:45.843Z
         completed_at: 2026-04-29T10:55:45.843Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: kspec validate --warnings-ok passed; warnings were existing alignment/completeness warnings
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-29T10:55:46.255Z
+        completed_at: 2026-04-29T10:55:46.255Z
     events:
       - _ulid: 01KQCDWD8AP15KB25RW15MJ1SS
         actor: Jacob Chapel
@@ -14301,6 +14311,13 @@ reviews:
           status: pass
           name: ruff
         timestamp: 2026-04-29T10:55:45.966Z
+      - _ulid: 01KQCE2W6CXT5QM4R9FT8SBK2N
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-29T10:55:46.380Z
     examined_commit: 11f3ee7902ee6d9969f6e092dcd9a2bbc75fbcfe
     external_links: []
     lifecycle_state: open
@@ -14313,5 +14330,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T10:52:14.475Z
-    updated_at: 2026-04-29T10:55:45.843Z
+    updated_at: 2026-04-29T10:55:46.255Z
     notes: []
