@@ -6352,7 +6352,7 @@ runs:
     completed_at: 2026-04-29T06:44:35.404Z
   - _ulid: 01KQC00MMR7Z3S6M92JDF1AMGT
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -6366,7 +6366,20 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T06:50:07.268Z
-        completed_at: 2026-04-29T06:50:07.268Z
+        completed_at: 2026-04-29T06:50:24.071Z
+        notes: "Identified one high-confidence success pattern and one high-confidence friction pattern.
+          Success: a tiny behavioral probe against persistence semantics exposed the
+          writer/validator mismatch despite passing focused and full pytest. Existing coverage
+          found: observations 01KQ815T (small runtime probes encode invariants) and 01KQ80PS (review
+          checks with concrete runtime evidence). Friction: mocked Exit routing tests passed while
+          missing the real writer/validator contract mismatch. Existing coverage found: observation
+          01KH6Y61 (unit tests with mocks can validate wrong behavior) and 01KQ815T friction
+          (full-mode streaming tests can pass while missing behavioral contract). No untracked
+          high-confidence item found."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T06:50:24.071Z
+        completed_at: 2026-04-29T06:50:24.071Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:49:53.048Z
