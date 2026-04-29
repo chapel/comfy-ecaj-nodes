@@ -11009,6 +11009,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQC197PHN01A5K51PAY37TVY
         timestamp: 2026-04-29T07:12:03.379Z
+      - _ulid: 01KQC19MZSD9KSS52RJXQ11ECF
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQC19MWWMVTSVFZ9NRZDHGDN
+        timestamp: 2026-04-29T07:12:16.889Z
     examined_commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
     external_links: []
     lifecycle_state: open
@@ -11039,7 +11046,27 @@ reviews:
               checkpoint classification requirement and allowing an invalid cache hit."
             created_at: 2026-04-29T07:12:03.281Z
         kind: blocker
+      - _ulid: 01KQC19MWWMVTSVFZ9NRZDHGDN
+        anchor:
+          type: code
+          commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
+          line_end: 659
+          line_start: 651
+          path: lib/persistence.py
+          side: head
+        entries:
+          - _ulid: 01KQC19MWWDE7PEXFKX8BAXBT5
+            author: Jacob Chapel
+            body: "MUST-FIX: checkpoint cache validation does not require the serialized recipe metadata
+              (__ecaj_recipe__) before accepting a hit. I created a safetensors file with matching
+              __ecaj_recipe_hash__, artifact_kind=checkpoint, checkpoint_components=true, matching
+              base/dependencies, and non-internal tensor keys, but no __ecaj_recipe__;
+              check_checkpoint_cache returned True. The task requires saved artifacts to include
+              __ecaj_recipe__, and @saved-model-artifact-safety ac-missing-metadata-not-reused says
+              files missing required saved-model metadata must not be reused."
+            created_at: 2026-04-29T07:12:16.796Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:08:39.641Z
-    updated_at: 2026-04-29T07:12:03.281Z
+    updated_at: 2026-04-29T07:12:16.796Z
     notes: []
