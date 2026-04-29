@@ -15568,6 +15568,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-29T12:48:37.781Z
         completed_at: 2026-04-29T12:48:37.781Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found AC annotations for @live-comfy-saved-output-validation across
+          tests/test_checkpoint_validation_harness.py, covering all seven ACs; no trait AC
+          annotations required by kspec validate.
+        name: AC annotation scan
+        required: true
+        runner: rg
+        created_at: 2026-04-29T12:48:38.191Z
+        completed_at: 2026-04-29T12:48:38.191Z
     events:
       - _ulid: 01KQCM8FFXK77NWZ5C3KRH7973
         actor: Jacob Chapel
@@ -15596,6 +15608,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-29T12:48:37.899Z
+      - _ulid: 01KQCMHHD7DRK05P1623CFJFNT
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation scan
+        timestamp: 2026-04-29T12:48:38.311Z
     examined_commit: 37c7029f0288d8d6438a6d44a9dac519e9e50d3d
     external_links: []
     lifecycle_state: open
@@ -15608,5 +15627,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T12:43:41.438Z
-    updated_at: 2026-04-29T12:48:37.781Z
+    updated_at: 2026-04-29T12:48:38.191Z
     notes: []
