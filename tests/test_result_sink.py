@@ -11,7 +11,6 @@ import torch
 
 from lib.result_sink import DictResultSink, ResultSink, WriteFnSink
 
-
 # ===========================================================================
 # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
 # Protocol conformance

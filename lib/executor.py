@@ -32,7 +32,6 @@ from .gpu_ops import (
     get_available_ram_bytes,
     streaming_evaluation_to_sink,
 )
-from .result_sink import DictResultSink, ResultSink
 from .per_block import (
     _apply_per_block_lora_strength,
     _apply_widen_filter_per_block,
@@ -40,6 +39,7 @@ from .per_block import (
     _get_block_t_factors,
 )
 from .recipe_eval import EvalPlan, compile_plan, evaluate_recipe, execute_plan
+from .result_sink import DictResultSink, ResultSink
 
 __all__ = [
     "OpSignature",

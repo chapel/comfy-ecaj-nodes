@@ -11,7 +11,7 @@ AC coverage for:
   @streaming-full-model-materialization ac-failed-materialization-releases-resident-payload
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 import torch
@@ -23,7 +23,6 @@ from lib.gpu_ops import (
     streaming_evaluation_to_sink,
 )
 from lib.result_sink import DictResultSink, WriteFnSink
-
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -354,7 +353,6 @@ class TestOOMRetry:
         """
         keys = ["a", "b", "c"]
         base = _make_base_tensors(keys, shape=(4,))
-        received = {}
 
         call_count = [0]
 

@@ -26,12 +26,10 @@ from ..lib.executor import (
     compile_batch_groups,
     compile_plan,
     compute_batch_size,
-    evaluate_to_sink,
     execute_plan,
     get_available_ram_bytes,
     streaming_evaluation_to_sink,
 )
-from ..lib.result_sink import ResultSink, WriteFnSink
 from ..lib.persistence import (
     build_metadata,
     check_checkpoint_cache,
