@@ -15919,6 +15919,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-29T13:34:44.112Z
         completed_at: 2026-04-29T13:34:44.112Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "reports/checkpoint_validation_report.json has failure_categories.cache=none and
+          cache_reuse_detail='application-level cache reuse confirmed via timing: first=22.784s,
+          reuse=2.003s, speedup=11.4x (threshold: 2.0x)'."
+        name: live report cache reuse assertion
+        required: true
+        runner: manual
+        created_at: 2026-04-29T13:34:44.545Z
+        completed_at: 2026-04-29T13:34:44.545Z
     events:
       - _ulid: 01KQCQ2MTCZ0M2JD45YC9JXC2Q
         actor: Jacob Chapel
@@ -15954,6 +15966,13 @@ reviews:
           status: pass
           name: kspec validate --warnings-ok
         timestamp: 2026-04-29T13:34:44.265Z
+      - _ulid: 01KQCQ5YYZ0734XDSK83P6XNK2
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: live report cache reuse assertion
+        timestamp: 2026-04-29T13:34:44.703Z
     examined_commit: 6688433eb367b01ef32a546a874febc170b13f5f
     external_links: []
     lifecycle_state: open
@@ -15966,5 +15985,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T13:32:56.012Z
-    updated_at: 2026-04-29T13:34:44.112Z
+    updated_at: 2026-04-29T13:34:44.545Z
     notes: []
