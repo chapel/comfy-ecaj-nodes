@@ -12919,6 +12919,12 @@ reviews:
         payload:
           thread_ulid: 01KQCAKFGCEQFDG62HSAMTJZ4V
         timestamp: 2026-04-29T10:14:53.942Z
+      - _ulid: 01KQCBRA2M8QSC31XHEBXNW0D1
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCANPDW24RDY47HW98Y2T0Q
+        timestamp: 2026-04-29T10:15:02.996Z
     examined_commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
     external_links: []
     lifecycle_state: closed
@@ -13776,6 +13782,16 @@ reviews:
               saves only, or the recipe/source kind needs to be explicit enough to distinguish the
               two.'
             created_at: 2026-04-29T09:56:08.764Z
+          - _ulid: 01KQCBR9ZM6EGWT46RGDRF92AX
+            author: "@claude"
+            body: "Fixed: guarded validate_checkpoint_components in execute() with 'if
+              base.checkpoint_components is not None' so it only fires for checkpoint-style recipes
+              (where the user wired CLIP/VAE to Entry). Diffusion-only recipes
+              (checkpoint_components=None) now skip the validation and proceed through the diffusion
+              save path. Updated 4 tests in test_checkpoint_components.py to use explicit
+              CheckpointComponents(clip=None, vae=None) to correctly signal checkpoint intent while
+              testing the missing-components AC."
+            created_at: 2026-04-29T10:15:02.900Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -13786,5 +13802,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T09:56:18.063Z
     created_at: 2026-04-29T09:49:58.202Z
-    updated_at: 2026-04-29T10:14:53.837Z
+    updated_at: 2026-04-29T10:15:02.900Z
     notes: []
