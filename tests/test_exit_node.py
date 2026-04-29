@@ -1239,8 +1239,6 @@ class TestCheckpointCacheRouting:
         save_path = str(tmp_path / "model.safetensors")
         node = WIDENExitNode()
 
-        mock_sink = MagicMock()
-
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
@@ -1254,9 +1252,9 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit.streaming_evaluation_to_sink"),
-            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
@@ -1278,7 +1276,7 @@ class TestCheckpointCacheRouting:
                 model_affected={str(id(model)): frozenset()},
                 all_model_keys=frozenset(),
             )
-            mock_load.return_value = mock_model_patcher.clone()
+            mock_install.return_value = mock_model_patcher.clone()
 
             node.execute(merge, save_model=True, model_name="model")
 
@@ -1303,8 +1301,6 @@ class TestCheckpointCacheRouting:
         save_path = str(tmp_path / "model.safetensors")
         node = WIDENExitNode()
 
-        mock_sink = MagicMock()
-
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
@@ -1317,10 +1313,10 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit.streaming_evaluation_to_sink"),
+            patch("nodes.exit.chunked_evaluation", return_value={}),
             patch("nodes.exit.build_metadata") as mock_build_meta,
-            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
@@ -1343,7 +1339,7 @@ class TestCheckpointCacheRouting:
                 all_model_keys=frozenset(),
             )
             mock_build_meta.return_value = {"__ecaj_version__": "1"}
-            mock_load.return_value = mock_model_patcher.clone()
+            mock_install.return_value = mock_model_patcher.clone()
 
             node.execute(merge, save_model=True, model_name="model")
 
@@ -1495,8 +1491,6 @@ class TestCheckpointCacheRouting:
         save_path = str(tmp_path / "model.safetensors")
         node = WIDENExitNode()
 
-        mock_sink = MagicMock()
-
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
@@ -1509,9 +1503,9 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit.streaming_evaluation_to_sink"),
-            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
         ):
             mock_loader = MagicMock()
@@ -1532,7 +1526,7 @@ class TestCheckpointCacheRouting:
                 model_affected={str(id(model)): frozenset()},
                 all_model_keys=frozenset(),
             )
-            mock_load.return_value = mock_model_patcher.clone()
+            mock_install.return_value = mock_model_patcher.clone()
 
             node.execute(merge, save_model=True, model_name="model")
 

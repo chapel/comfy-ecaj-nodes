@@ -1,0 +1,855 @@
+"""Tests for checkpoint artifact save through Comfy checkpoint semantics.
+
+AC coverage for:
+- @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+- @saved-model-artifact-safety ac-missing-metadata-not-reused
+- @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+- @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+- @saved-model-artifact-safety ac-no-partial-publication
+- @saved-model-artifact-safety ac-existing-valid-artifact-preserved
+- @exit-model-persistence ac-2, ac-8, ac-10
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from unittest.mock import MagicMock, call, patch
+
+import pytest
+import torch
+from safetensors.torch import load_file, save_file
+
+from lib.persistence import (
+    build_metadata,
+    check_checkpoint_cache,
+)
+from lib.recipe import (
+    CheckpointComponents,
+    RecipeBase,
+    RecipeCompose,
+    RecipeLoRA,
+    RecipeMerge,
+    RecipeModel,
+)
+from nodes.exit import WIDENExitNode, save_comfy_checkpoint
+from tests.conftest import make_checkpoint_components
+
+
+# =============================================================================
+# save_comfy_checkpoint — unit tests
+# =============================================================================
+
+
+class TestSaveComfyCheckpoint:
+    """Tests for save_comfy_checkpoint wrapper function."""
+
+    # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+    def test_calls_comfy_sd_save_checkpoint(self, tmp_path):
+        """save_comfy_checkpoint must call comfy.sd.save_checkpoint with
+        merged MODEL, CLIP, VAE, and ecaj metadata."""
+        save_path = str(tmp_path / "model.safetensors")
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+        metadata = {"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"}
+
+        with patch("comfy.sd.save_checkpoint") as mock_save:
+            # comfy.sd.save_checkpoint writes to the temp path — simulate by
+            # creating the temp file so os.fsync/os.replace succeed.
+            def side_effect(path, model_arg, **kwargs):
+                save_file({"dummy": torch.zeros(1)}, path, metadata=kwargs.get("metadata", {}))
+            mock_save.side_effect = side_effect
+
+            save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
+
+            mock_save.assert_called_once()
+            call_kwargs = mock_save.call_args
+            # Positional: (tmp_path, model)
+            assert call_kwargs.args[1] is model
+            # Keywords: clip, vae, metadata
+            assert call_kwargs.kwargs["clip"] is clip
+            assert call_kwargs.kwargs["vae"] is vae
+            assert call_kwargs.kwargs["metadata"] is metadata
+
+    # AC: @exit-model-persistence ac-10
+    def test_atomic_publication(self, tmp_path):
+        """save_comfy_checkpoint must write to temp, then atomically replace target."""
+        save_path = str(tmp_path / "model.safetensors")
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+        metadata = {"__ecaj_version__": "1"}
+
+        temp_paths_seen = []
+
+        def side_effect(path, model_arg, **kwargs):
+            # Record that we're writing to a temp path, not the final path
+            temp_paths_seen.append(path)
+            assert path != save_path, "Must write to temp path, not final target"
+            assert ".ecaj_tmp_" in path, "Temp path should contain .ecaj_tmp_ prefix"
+            save_file({"dummy": torch.zeros(1)}, path, metadata=kwargs.get("metadata", {}))
+
+        with patch("comfy.sd.save_checkpoint", side_effect=side_effect):
+            save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
+
+        # Final file should exist at save_path
+        assert os.path.exists(save_path)
+        # Temp file should NOT exist (was renamed)
+        for tp in temp_paths_seen:
+            assert not os.path.exists(tp)
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_failed_save_does_not_publish(self, tmp_path):
+        """If comfy.sd.save_checkpoint fails, no artifact is published."""
+        save_path = str(tmp_path / "model.safetensors")
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+        metadata = {"__ecaj_version__": "1"}
+
+        with patch("comfy.sd.save_checkpoint", side_effect=RuntimeError("save failed")):
+            with pytest.raises(RuntimeError, match="save failed"):
+                save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
+
+        # No file should exist at save_path
+        assert not os.path.exists(save_path)
+
+    # AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
+    def test_failed_save_preserves_existing_artifact(self, tmp_path):
+        """If save fails, a previously valid artifact at the target remains intact."""
+        save_path = str(tmp_path / "model.safetensors")
+        # Create a pre-existing valid artifact
+        original_tensor = torch.randn(4, 4)
+        save_file({"weight": original_tensor}, save_path)
+        original_stat = os.stat(save_path)
+
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+        metadata = {"__ecaj_version__": "1"}
+
+        with patch("comfy.sd.save_checkpoint", side_effect=RuntimeError("save failed")):
+            with pytest.raises(RuntimeError, match="save failed"):
+                save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
+
+        # Original artifact must still exist and be unchanged
+        assert os.path.exists(save_path)
+        loaded = load_file(save_path)
+        assert torch.equal(loaded["weight"], original_tensor)
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_failed_save_cleans_up_temp(self, tmp_path):
+        """If save fails, the temp file is cleaned up."""
+        save_path = str(tmp_path / "model.safetensors")
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+        metadata = {"__ecaj_version__": "1"}
+
+        def side_effect(path, model_arg, **kwargs):
+            # Write something to temp before failing
+            save_file({"dummy": torch.zeros(1)}, path)
+            raise RuntimeError("save failed after write")
+
+        with patch("comfy.sd.save_checkpoint", side_effect=side_effect):
+            with pytest.raises(RuntimeError, match="save failed after write"):
+                save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
+
+        # No temp files should remain
+        tmp_files = [f for f in os.listdir(str(tmp_path)) if f.startswith(".ecaj_tmp_")]
+        assert tmp_files == []
+
+
+# =============================================================================
+# Checkpoint save integration — exit node routes checkpoint saves to Comfy path
+# =============================================================================
+
+
+class TestCheckpointSaveRouting:
+    """Verify checkpoint-style saves call save_comfy_checkpoint instead of
+    writing through MaterializationSink."""
+
+    # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+    # AC: @exit-model-persistence ac-2
+    def test_checkpoint_save_calls_save_comfy_checkpoint(self, mock_model_patcher, tmp_path):
+        """Checkpoint-style recipe must call save_comfy_checkpoint with merged
+        MODEL, CLIP, VAE, and ecaj metadata."""
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        compose = RecipeCompose(branches=(lora, model))
+        merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            affected_key = "diffusion_model.input_blocks.0.0.weight"
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={str(id(model)): mock_model_loader},
+                model_affected={str(id(model)): frozenset()},
+                all_model_keys=frozenset(),
+            )
+            merged_model = mock_model_patcher.clone()
+            mock_install.return_value = merged_model
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+            result = node.execute(merge, save_model=True, model_name="model")
+
+            # save_comfy_checkpoint MUST have been called
+            mock_save_ckpt.assert_called_once()
+            call_kwargs = mock_save_ckpt.call_args
+            # save_path
+            assert call_kwargs.args[0] == save_path
+            # merged_model
+            assert call_kwargs.args[1] is merged_model
+            # CLIP and VAE from checkpoint_components
+            assert call_kwargs.kwargs["clip"] is cc.clip
+            assert call_kwargs.kwargs["vae"] is cc.vae
+            # metadata must include checkpoint artifact kind
+            meta = call_kwargs.kwargs["metadata"]
+            assert meta["__ecaj_artifact_kind__"] == "checkpoint"
+            assert meta["__ecaj_checkpoint_components__"] == "true"
+
+    # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+    def test_checkpoint_save_does_not_use_materialization_sink(self, mock_model_patcher, tmp_path):
+        """Checkpoint-style save must NOT use MaterializationSink."""
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+        model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch("nodes.exit.MaterializationSink") as mock_sink_cls,
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={},
+                affected_keys=set(),
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={str(id(model)): mock_model_loader},
+                model_affected={str(id(model)): frozenset()},
+                all_model_keys=frozenset(),
+            )
+            mock_install.return_value = mock_model_patcher.clone()
+
+            node.execute(merge, save_model=True, model_name="model")
+
+            # MaterializationSink must NOT be instantiated for checkpoint saves
+            mock_sink_cls.assert_not_called()
+
+    def test_non_checkpoint_save_uses_materialization_sink(self, mock_model_patcher, tmp_path):
+        """Non-checkpoint (LoRA-only) save must use MaterializationSink, not save_comfy_checkpoint."""
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        mock_sink = MagicMock()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.MaterializationSink", return_value=mock_sink) as mock_sink_cls,
+            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            affected_key = "diffusion_model.input_blocks.0.0.weight"
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_load.return_value = mock_model_patcher.clone()
+
+            node.execute(merge, save_model=True, model_name="model")
+
+            # MaterializationSink MUST have been used
+            mock_sink_cls.assert_called_once()
+            # save_comfy_checkpoint must NOT have been called
+            mock_save_ckpt.assert_not_called()
+
+
+# =============================================================================
+# Checkpoint artifact metadata and cache classification
+# =============================================================================
+
+
+class TestCheckpointArtifactMetadata:
+    """AC: @saved-model-artifact-safety — metadata must be written and required
+    for checkpoint cache reuse."""
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    def test_artifact_kind_metadata_is_written(self, mock_model_patcher, tmp_path):
+        """Checkpoint save must include artifact_kind='checkpoint' in metadata."""
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+        model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch("nodes.exit.build_metadata") as mock_build_meta,
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={},
+                affected_keys=set(),
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={str(id(model)): mock_model_loader},
+                model_affected={str(id(model)): frozenset()},
+                all_model_keys=frozenset(),
+            )
+            mock_build_meta.return_value = {"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"}
+            mock_install.return_value = mock_model_patcher.clone()
+
+            node.execute(merge, save_model=True, model_name="model")
+
+            mock_build_meta.assert_called_once()
+            call_kwargs = mock_build_meta.call_args
+            assert call_kwargs.kwargs.get("artifact_kind") == "checkpoint"
+            assert call_kwargs.kwargs.get("checkpoint_components") is True
+            assert call_kwargs.kwargs.get("base_identity") == "base_id"
+
+
+# =============================================================================
+# Internal-format artifact rejection for checkpoint cache
+# =============================================================================
+
+
+class TestInternalFormatRejection:
+    """AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache —
+    Internal WIDEN artifacts with diffusion_model/noise_augmentor/model_sampling-only
+    keys must be rejected as checkpoint cache hits."""
+
+    _BASE_IDENTITY = "base_sha256_abc"
+    _DEPS = json.dumps({"lora.safetensors": [1234.5, 100]})
+
+    def _make_file(self, path, tensors, **kwargs):
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": kwargs.get("recipe_hash", "abc123"),
+            "__ecaj_affected_keys__": "[]",
+            "__ecaj_artifact_kind__": kwargs.get("artifact_kind", "checkpoint"),
+            "__ecaj_base_identity__": kwargs.get("base_identity", self._BASE_IDENTITY),
+            "__ecaj_dependency_fingerprints__": kwargs.get("deps", self._DEPS),
+            "__ecaj_checkpoint_components__": "true",
+        }
+        save_file(tensors, str(path), metadata=metadata)
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_diffusion_model_only_keys_rejected(self, tmp_path):
+        """Artifact with only diffusion_model.* keys is rejected as checkpoint cache hit."""
+        path = tmp_path / "model.safetensors"
+        self._make_file(path, {
+            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
+            "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
+        })
+        assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS) is False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_noise_augmentor_only_keys_rejected(self, tmp_path):
+        """Artifact with diffusion_model + noise_augmentor keys only is rejected."""
+        path = tmp_path / "model.safetensors"
+        self._make_file(path, {
+            "diffusion_model.layers.0.weight": torch.randn(4, 4),
+            "noise_augmentor.weight": torch.randn(4, 4),
+            "model_sampling.sigmas": torch.randn(4),
+        })
+        assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS) is False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_checkpoint_with_vae_keys_accepted(self, tmp_path):
+        """Artifact with diffusion + VAE keys (proper checkpoint) IS accepted."""
+        path = tmp_path / "model.safetensors"
+        self._make_file(path, {
+            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
+            "first_stage_model.decoder.weight": torch.randn(4, 4),
+            "cond_stage_model.transformer.weight": torch.randn(4, 4),
+        })
+        assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS) is True
+
+    # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+    def test_wrong_artifact_kind_rejected(self, tmp_path):
+        """Artifact with artifact_kind='diffusion' is rejected for checkpoint cache."""
+        path = tmp_path / "model.safetensors"
+        self._make_file(path, {
+            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
+            "first_stage_model.decoder.weight": torch.randn(4, 4),
+        }, artifact_kind="diffusion")
+        assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS) is False
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    def test_missing_metadata_rejected(self, tmp_path):
+        """Artifact without ecaj metadata raises ValueError (non-ecaj file)."""
+        path = tmp_path / "model.safetensors"
+        save_file({"weight": torch.randn(4, 4)}, str(path))
+        with pytest.raises(ValueError, match="not an ecaj-saved model"):
+            check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS)
+
+
+# =============================================================================
+# Failed checkpoint save safety
+# =============================================================================
+
+
+class TestCheckpointSaveSafety:
+    """AC: @saved-model-artifact-safety — failed saves must not clobber existing
+    valid artifacts or leave partial artifacts."""
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    # AC: @exit-model-persistence ac-10
+    def test_failed_checkpoint_save_no_artifact_published(self, mock_model_patcher, tmp_path):
+        """If checkpoint save fails, no artifact is published at the save path."""
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+        model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint", side_effect=RuntimeError("save failed")),
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={},
+                affected_keys=set(),
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={str(id(model)): mock_model_loader},
+                model_affected={str(id(model)): frozenset()},
+                all_model_keys=frozenset(),
+            )
+            mock_install.return_value = mock_model_patcher.clone()
+
+            with pytest.raises(RuntimeError, match="save failed"):
+                node.execute(merge, save_model=True, model_name="model")
+
+        # No artifact published
+        assert not os.path.exists(save_path)
+
+    # AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
+    def test_failed_checkpoint_save_preserves_existing(self, mock_model_patcher, tmp_path):
+        """If checkpoint save fails, existing valid artifact at target is preserved."""
+        save_path = str(tmp_path / "model.safetensors")
+        # Create pre-existing valid artifact
+        original = torch.randn(4, 4)
+        save_file({"weight": original}, save_path)
+
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+        model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=1.0)
+
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint", side_effect=RuntimeError("fail")),
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={},
+                affected_keys=set(),
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={str(id(model)): mock_model_loader},
+                model_affected={str(id(model)): frozenset()},
+                all_model_keys=frozenset(),
+            )
+            mock_install.return_value = mock_model_patcher.clone()
+
+            with pytest.raises(RuntimeError):
+                node.execute(merge, save_model=True, model_name="model")
+
+        # Original artifact preserved
+        loaded = load_file(save_path)
+        assert torch.equal(loaded["weight"], original)
+
+
+# =============================================================================
+# Monkeypatched Comfy save/load smoke test
+# =============================================================================
+
+
+class TestCheckpointSaveLoadSmokeTest:
+    """Monkeypatched Comfy save/load smoke test proving the checkpoint path
+    is selected without requiring real model weights.
+
+    AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+    AC: @exit-model-persistence ac-8
+    """
+
+    def test_checkpoint_save_produces_comfy_compatible_keys(self, tmp_path):
+        """Prove that the checkpoint save path passes through comfy.sd.save_checkpoint
+        which produces model.*, conditioner.*, and first_stage_model.* keys."""
+        save_path = str(tmp_path / "model.safetensors")
+
+        # Create representative checkpoint-style state dict that Comfy would produce
+        comfy_checkpoint_tensors = {
+            "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
+            "model.diffusion_model.middle_block.0.weight": torch.randn(4, 4),
+            "conditioner.embedders.0.weight": torch.randn(4, 4),
+            "first_stage_model.decoder.conv_in.weight": torch.randn(4, 4),
+        }
+
+        ecaj_metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe_hash__": "test_hash",
+            "__ecaj_artifact_kind__": "checkpoint",
+            "__ecaj_checkpoint_components__": "true",
+        }
+
+        # Simulate comfy.sd.save_checkpoint by writing the state dict directly.
+        # In production, comfy.sd.save_checkpoint calls model.state_dict_for_saving()
+        # which produces these key prefixes.
+        def mock_comfy_save(path, model, clip=None, vae=None, metadata=None, **kwargs):
+            save_file(comfy_checkpoint_tensors, path, metadata=metadata or {})
+
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+
+        with patch("comfy.sd.save_checkpoint", side_effect=mock_comfy_save):
+            save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=ecaj_metadata)
+
+        # Verify the artifact exists and contains the expected key prefixes
+        loaded = load_file(save_path)
+        key_prefixes = {k.split(".")[0] for k in loaded.keys()}
+        # Must contain Comfy checkpoint-style component prefixes
+        assert "model" in key_prefixes, "Missing model.* keys (diffusion component)"
+        assert "conditioner" in key_prefixes, "Missing conditioner.* keys (CLIP component)"
+        assert "first_stage_model" in key_prefixes, "Missing first_stage_model.* keys (VAE component)"
+
+        # Must NOT contain internal-format prefixes as top-level keys
+        for key in loaded.keys():
+            assert not key.startswith("diffusion_model."), (
+                f"Found internal-format key {key!r} — checkpoint artifact must use "
+                "model.diffusion_model.* prefix, not bare diffusion_model.*"
+            )
+
+    def test_checkpoint_artifact_not_accepted_as_internal_format_cache(self, tmp_path):
+        """A proper checkpoint artifact with Comfy keys must be accepted by
+        check_checkpoint_cache (not rejected as internal-only)."""
+        path = tmp_path / "model.safetensors"
+        base_id = "test_base_id"
+        deps = json.dumps({})
+
+        # Create checkpoint with Comfy key prefixes + ecaj metadata
+        tensors = {
+            "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
+            "conditioner.embedders.0.weight": torch.randn(4, 4),
+            "first_stage_model.decoder.weight": torch.randn(4, 4),
+        }
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "hash1",
+            "__ecaj_affected_keys__": "[]",
+            "__ecaj_artifact_kind__": "checkpoint",
+            "__ecaj_base_identity__": base_id,
+            "__ecaj_dependency_fingerprints__": deps,
+            "__ecaj_checkpoint_components__": "true",
+        }
+        save_file(tensors, str(path), metadata=metadata)
+
+        result = check_checkpoint_cache(str(path), "hash1", base_id, deps)
+        assert result is True, "Proper checkpoint artifact must be accepted as cache hit"
+
+
+# =============================================================================
+# save_model=False preserves in-memory patch output behavior
+# =============================================================================
+
+
+class TestPatchModePreserved:
+    """AC: @exit-model-persistence ac-1 — save_model=False must preserve
+    in-memory patch output behavior (no checkpoint save)."""
+
+    def test_save_model_false_does_not_call_save_comfy_checkpoint(self, mock_model_patcher):
+        """save_model=False must not invoke save_comfy_checkpoint."""
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            affected_key = "diffusion_model.input_blocks.0.0.weight"
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={},
+                model_affected={},
+                all_model_keys=frozenset(),
+            )
+            mock_chunked.return_value = {
+                affected_key: torch.randn(4, 4, dtype=torch.float32),
+            }
+
+            result = node.execute(merge, save_model=False, model_name="model")
+
+            # save_comfy_checkpoint must NOT be called
+            mock_save_ckpt.assert_not_called()
+            # Result must be a tuple with a model
+            assert len(result) == 1
+            assert result[0] is not None
+
+
+# =============================================================================
+# Checkpoint save returns usable merged MODEL
+# =============================================================================
+
+
+class TestCheckpointSaveReturnModel:
+    """AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable —
+    checkpoint save must return a usable MODEL for downstream consumers."""
+
+    def test_checkpoint_save_returns_merged_model(self, mock_model_patcher, tmp_path):
+        """Checkpoint save must return the in-memory merged MODEL, not None."""
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+        model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        expected_model = mock_model_patcher.clone()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.install_merged_patches", return_value=expected_model),
+            patch("nodes.exit.save_comfy_checkpoint"),
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={},
+                affected_keys=set(),
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={str(id(model)): mock_model_loader},
+                model_affected={str(id(model)): frozenset()},
+                all_model_keys=frozenset(),
+            )
+
+            result = node.execute(merge, save_model=True, model_name="model")
+
+            assert len(result) == 1
+            assert result[0] is expected_model
