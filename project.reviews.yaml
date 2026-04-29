@@ -15128,6 +15128,17 @@ reviews:
         runner: ruff
         created_at: 2026-04-29T12:12:36.435Z
         completed_at: 2026-04-29T12:12:36.435Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found annotations for all seven @live-comfy-saved-output-validation ACs in
+          tests/test_checkpoint_validation_harness.py; no trait AC annotations required.
+        name: AC annotation scan
+        required: true
+        runner: rg
+        created_at: 2026-04-29T12:12:36.869Z
+        completed_at: 2026-04-29T12:12:36.869Z
     events:
       - _ulid: 01KQCJARQDXZX0JRYBEAE4F9TV
         actor: Jacob Chapel
@@ -15156,6 +15167,13 @@ reviews:
           status: pass
           name: ruff
         timestamp: 2026-04-29T12:12:36.551Z
+      - _ulid: 01KQCJFJQNC7XJQ6KZSXQ50RAT
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotation scan
+        timestamp: 2026-04-29T12:12:36.981Z
     examined_commit: 3f36d68b94be306650b1eae189bcdf9c2caad793
     external_links: []
     lifecycle_state: open
@@ -15168,5 +15186,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T12:09:59.283Z
-    updated_at: 2026-04-29T12:12:36.435Z
+    updated_at: 2026-04-29T12:12:36.869Z
     notes: []
