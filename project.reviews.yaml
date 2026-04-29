@@ -12694,6 +12694,12 @@ reviews:
         payload:
           thread_ulid: 01KQC9233WRT128TE3KF8H19JP
         timestamp: 2026-04-29T09:47:16.751Z
+      - _ulid: 01KQCA5RBH8V9HSXQEMB7DZ99N
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQC933CVXWNSZ658EFER9WWV
+        timestamp: 2026-04-29T09:47:26.449Z
     examined_commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
     external_links: []
     lifecycle_state: closed
@@ -12760,6 +12766,16 @@ reviews:
               consumed through the checkpoint loader path with MODEL, CLIP, and VAE/decode
               components."
             created_at: 2026-04-29T09:28:30.876Z
+          - _ulid: 01KQCA5R89CFYHAB9FWTCKNEDA
+            author: "@claude"
+            body: "Fixed: Replaced test_checkpoint_save_produces_comfy_compatible_keys with
+              test_checkpoint_save_load_round_trip — a behavioral save/load smoke test. After saving
+              via save_comfy_checkpoint with monkeypatched comfy.sd.save_checkpoint, the test loads
+              the artifact with safe_open and performs CheckpointLoaderSimple-style key routing:
+              model.* → MODEL, conditioner.* → CLIP, first_stage_model.* → VAE. Asserts all three
+              component sets are non-empty, no orphan keys exist, all values are torch.Tensor
+              instances, no internal-format keys leak, and ecaj metadata survives the round trip."
+            created_at: 2026-04-29T09:47:26.344Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -12770,5 +12786,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T09:30:43.356Z
     created_at: 2026-04-29T09:19:15.423Z
-    updated_at: 2026-04-29T09:47:16.649Z
+    updated_at: 2026-04-29T09:47:26.344Z
     notes: []
