@@ -12884,6 +12884,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQCAKFGCEQFDG62HSAMTJZ4V
         timestamp: 2026-04-29T09:54:56.237Z
+      - _ulid: 01KQCANPH05GC0E8FM3XFJENV3
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCANPDW24RDY47HW98Y2T0Q
+        timestamp: 2026-04-29T09:56:08.864Z
     examined_commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
     external_links: []
     lifecycle_state: open
@@ -13705,7 +13712,30 @@ reviews:
               so the review cannot advance until the lint check is clean.
             created_at: 2026-04-29T09:54:56.141Z
         kind: blocker
+      - _ulid: 01KQCANPDW24RDY47HW98Y2T0Q
+        anchor:
+          type: code
+          commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
+          line_end: 767
+          line_start: 765
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQCANPDW7652M8QV41N1XRAS
+            author: Jacob Chapel
+            body: 'MUST-FIX: checkpoint component validation now runs for every save_model request before the
+              code classifies the recipe as checkpoint or diffusion. That makes the diffusion-only
+              save path unreachable through execute, even though this patch keeps and tests
+              _execute_diffusion_save by patching validate_checkpoint_components out. I confirmed
+              with a zimage RecipeBase without checkpoint_components: WIDENExitNode.execute(...,
+              save_model=True) raises "Checkpoint save_model requires CLIP and VAE components"
+              before reaching the diffusion save path. This regresses the exit-model-persistence
+              contract for truly diffusion-only artifacts and should be scoped to checkpoint-style
+              saves only, or the recipe/source kind needs to be explicit enough to distinguish the
+              two.'
+            created_at: 2026-04-29T09:56:08.764Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T09:49:58.202Z
-    updated_at: 2026-04-29T09:54:56.141Z
+    updated_at: 2026-04-29T09:56:08.764Z
     notes: []
