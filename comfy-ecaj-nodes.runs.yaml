@@ -8011,7 +8011,7 @@ runs:
     completed_at: 2026-04-29T12:52:57.460Z
   - _ulid: 01KQCN9YZPZ00ZMTH0Y5V0TZPM
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -8069,7 +8069,25 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T13:03:29.185Z
-        completed_at: 2026-04-29T13:03:29.185Z
+        completed_at: 2026-04-29T13:03:39.310Z
+        notes: >-
+          Decision for each item:
+
+
+          1. Cache reuse detection limitation in harness — UNIQUE, HIGH CONFIDENCE. The harness's
+          check_cache_reuse function (scripts/manual/real_comfy_checkpoint_validation.py:421-482)
+          checks ComfyUI execution_cached messages and outputs dict for node '3', but WIDEN's
+          enable_cache operates at the artifact level. Every harness run with cache enabled will
+          report cache_not_reused even when cache IS reused. CAPTURE as inbox item (scope needs
+          design — could be harness fix or spec clarification about what cache reuse means).
+
+
+          2. Pre-run environment verification pattern — UNIQUE, HIGH CONFIDENCE success. CAPTURE as
+          success observation.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T13:03:39.310Z
+        completed_at: 2026-04-29T13:03:39.310Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:01:58.647Z
