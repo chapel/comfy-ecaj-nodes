@@ -998,6 +998,18 @@ observations:
     resolved: false
     workflow_ref: "@01KQBYCF"
     created_at: 2026-04-29T06:22:31.888Z
+  - _ulid: 01KQBYQWJV46XT4STRQY3SX90S
+    type: friction
+    content: kspec task start and kspec task complete auto-sync the linked spec implementation status
+      (to in_progress and based on task progress respectively). For preservation/verification tasks
+      where the spec should remain at implemented status, this requires manual restoration with
+      kspec item set after each lifecycle transition. Encountered during
+      @task-checkpoint-save-preserve-scoped-existing-specs — had to restore
+      @streaming-full-model-materialization to implemented twice.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T06:27:37.691Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
