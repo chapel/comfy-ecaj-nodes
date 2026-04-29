@@ -15383,6 +15383,18 @@ reviews:
         runner: ruff
         created_at: 2026-04-29T12:27:36.553Z
         completed_at: 2026-04-29T12:27:36.553Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Mocked run_validation with downstream_ksampler returning node_error(KSampler) produced
+          checkpoint_loader_result.accepted=False and failure_categories['loader']='downstream', so
+          loader and downstream outcomes are not distinct.
+        name: loader/downstream distinction probe
+        required: true
+        runner: python
+        created_at: 2026-04-29T12:27:58.768Z
+        completed_at: 2026-04-29T12:27:58.768Z
     events:
       - _ulid: 01KQCK0VVS424003HCW4RMXJSR
         actor: Jacob Chapel
@@ -15439,6 +15451,13 @@ reviews:
           status: pass
           name: ruff
         timestamp: 2026-04-29T12:27:36.710Z
+      - _ulid: 01KQCKBQ27JRAPJR9XQTKHGH1K
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: loader/downstream distinction probe
+        timestamp: 2026-04-29T12:27:58.919Z
     examined_commit: 099b309999b053bbad95f13eb7badb1a1b6463ba
     external_links: []
     lifecycle_state: open
@@ -15473,5 +15492,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T12:22:03.386Z
-    updated_at: 2026-04-29T12:27:36.553Z
+    updated_at: 2026-04-29T12:27:58.768Z
     notes: []
