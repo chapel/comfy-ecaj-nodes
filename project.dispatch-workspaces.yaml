@@ -1278,18 +1278,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-checkpoint-save-artifact-cache-classification/01kqbtzn
-    canonical_branch_head: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
+    canonical_branch_head: 2e59a99cdf62fd7d8a9535efb70e7cb7a3580938
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-29T07:17:26.514Z
+      updated_at: 2026-04-29T07:25:27.106Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T07:17:27.131Z
+      updated_at: 2026-04-29T07:25:27.106Z
     integration:
       status: pending
       detail: null
@@ -1297,7 +1297,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 283c19998a95c6e8c0596f7baa4bcb0fc33864a2
-      updated_at: 2026-04-29T07:17:26.514Z
+      updated_at: 2026-04-29T07:25:27.106Z
     lifecycle_state: active
     resolved_base_branch: dev
     task_ref: "@01KQBTZN7CTJ03G2VS2J4KHAQB"
@@ -1305,9 +1305,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T07:17:27.131Z
-      last_reconciled_at: 2026-04-29T07:17:27.131Z
+      last_reconciled_at: 2026-04-29T07:25:27.106Z
       created_at: 2026-04-29T06:12:31.350Z
-      updated_at: 2026-04-29T07:17:27.131Z
+      updated_at: 2026-04-29T07:25:27.106Z
     workspace_id: dispatch-workspace-01KQBTZN7CTJ03G2VS2J4KHAQB
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
