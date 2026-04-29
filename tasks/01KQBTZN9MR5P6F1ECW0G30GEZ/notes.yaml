@@ -123,3 +123,14 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T10:24:21.589Z
+  - _ulid: 01KQCCSRR7KF212J5K0YA31NAH
+    content: "Fix cycle 4: addressed blocker. The validation gate in execute() only checked
+      base.checkpoint_components is not None, missing recipes classified as checkpoint-style via
+      RecipeModel(source_dir='checkpoints'). Fixed by combining both signals:
+      base.checkpoint_components presence OR _recipe_has_checkpoint_components() tree
+      classification. Added test proving RecipeModel-based checkpoint intent with missing base
+      components fails early with diagnostic before analyze_recipe. All 1450 tests pass, ruff clean,
+      kspec validate passes."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T10:33:19.367Z
