@@ -12090,6 +12090,17 @@ reviews:
         runner: kspec
         created_at: 2026-04-29T08:10:30.290Z
         completed_at: 2026-04-29T08:10:30.290Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "PR #104 into dev: lint and test check runs completed successfully; mergeStateStatus
+          CLEAN."
+        name: PR CI
+        required: true
+        runner: github-actions
+        created_at: 2026-04-29T08:10:36.835Z
+        completed_at: 2026-04-29T08:10:36.835Z
     events:
       - _ulid: 01KQC4HF923F9XS1G2M983PWJ4
         actor: Jacob Chapel
@@ -12132,6 +12143,13 @@ reviews:
           status: fail
           name: kspec validate
         timestamp: 2026-04-29T08:10:30.392Z
+      - _ulid: 01KQC4MF074EA0CJFJ0XYC5EP7
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: PR CI
+        timestamp: 2026-04-29T08:10:36.935Z
     examined_commit: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
     external_links: []
     lifecycle_state: open
@@ -12144,5 +12162,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T08:08:58.914Z
-    updated_at: 2026-04-29T08:10:30.290Z
+    updated_at: 2026-04-29T08:10:36.835Z
     notes: []
