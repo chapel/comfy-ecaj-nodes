@@ -84,3 +84,24 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-29T12:59:44.456Z
+  - _ulid: 01KQCN8G46QF6VRTVN95RVRVQC
+    content: >-
+      AC Coverage — Live Validation Evidence:
+
+
+      @live-comfy-saved-output-validation:
+        ac-explicit-real-comfy-opt-in: COVERED — harness required COMFY_ECAJ_CHECKPOINT_VALIDATION=1 env var + --run-checkpoint-validation flag + all required args. Tests confirm guard refusal (96 tests pass including guard tests).
+        ac-report-identifies-environment: COVERED — report records ComfyUI version (0.20.1) and memory mode ('unknown' = default/normal).
+        ac-report-records-save-outcome: COVERED — report records terminal_save_workflow_shape, checkpoint_save_workflow_shape, saved_artifact_classification='checkpoint'.
+        ac-report-records-loader-downstream-outcome: COVERED — report records checkpoint_loader_result (accepted=true) and downstream_result (accepted=true) as distinct outcomes.
+        ac-report-records-cache-reuse-outcome: COVERED — report records cache_reuse_result (accepted=true), cache_reuse_detail (timing evidence), failure_categories.cache='cache_not_reused' (ComfyUI API limitation, but timing shows 5.9x speedup).
+        ac-memory-mode-not-changed-for-success: COVERED — ComfyUI ran in default mode (--reserve-vram 5, no --lowvram/--highvram), mode not changed, all workflows passed, failure_categories.memory_mode='none'.
+        ac-primitive-tests-do-not-substitute-for-live-validation: COVERED — this IS the live validation run. 1531 unit tests pass as supporting evidence. The live report is the primary evidence.
+
+      @checkpoint-loadable-saved-model-output:
+        ac-terminal-save-executes: COVERED — terminal_save_result.accepted=true (prompt 3db1de68).
+        ac-artifact-matches-source-model-kind: COVERED — saved artifact has model(1680)+conditioner(587)+first_stage_model(248) keys, metadata __ecaj_artifact_kind__=checkpoint, arch=sdxl.
+        ac-generated-workflow-round-trip: COVERED — downstream workflow loaded saved artifact through CheckpointLoaderSimple, ran KSampler+VAEDecode+SaveImage, produced image (ecaj_checkpoint_validation_00001_.png).
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T13:01:10.663Z
