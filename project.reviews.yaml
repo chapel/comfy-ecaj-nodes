@@ -11002,6 +11002,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T07:09:06.574Z
+      - _ulid: 01KQC197SKD0Z1ZMNBHG1NBSTE
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQC197PHN01A5K51PAY37TVY
+        timestamp: 2026-04-29T07:12:03.379Z
     examined_commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
     external_links: []
     lifecycle_state: open
@@ -11011,8 +11018,28 @@ reviews:
       content_hash: ""
       ref: "@01KQBTZN7CTJ03G2VS2J4KHAQB"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQC197PHN01A5K51PAY37TVY
+        anchor:
+          type: code
+          commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
+          line_end: 672
+          line_start: 669
+          path: lib/persistence.py
+          side: head
+        entries:
+          - _ulid: 01KQC197PHB37DAJ6J1DTS0VAP
+            author: Jacob Chapel
+            body: "MUST-FIX: checkpoint component classification only checks that __ecaj_checkpoint_components__
+              exists, not that it records a checkpoint artifact with companion components. I created
+              a safetensors file with artifact_kind=checkpoint, matching hash/base/dependencies,
+              non-internal tensor keys, and __ecaj_checkpoint_components__='false';
+              check_checkpoint_cache returned True. That accepts metadata that explicitly does not
+              say the artifact was written with checkpoint companion components, violating the
+              checkpoint classification requirement and allowing an invalid cache hit."
+            created_at: 2026-04-29T07:12:03.281Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:08:39.641Z
-    updated_at: 2026-04-29T07:09:06.474Z
+    updated_at: 2026-04-29T07:12:03.281Z
     notes: []
