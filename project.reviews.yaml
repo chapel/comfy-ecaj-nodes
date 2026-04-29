@@ -14955,6 +14955,12 @@ reviews:
         payload:
           thread_ulid: 01KQCHJ0HVAG9DPKVACWZTYT0F
         timestamp: 2026-04-29T12:05:53.285Z
+      - _ulid: 01KQCJ3CNBV0YJ96EK2Z8KPBB5
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCHJ0VX0MJHRZRP3009XE57
+        timestamp: 2026-04-29T12:05:57.547Z
     examined_commit: 5ec36f5610bab3aa744310ee394860fe589550b7
     external_links: []
     lifecycle_state: closed
@@ -15015,6 +15021,16 @@ reviews:
               The loader/downstream phase should not use source_model as a substitute for the saved
               artifact; it should skip or fail with the save failure recorded."
             created_at: 2026-04-29T11:56:28.414Z
+          - _ulid: 01KQCJ3CJ2AN9PQ3EX3D43TK56
+            author: "@claude"
+            body: "Fixed: When checkpoint save is rejected (no saved_artifact_filename), loader/downstream
+              workflows are now skipped entirely instead of falling back to source_model. The skip
+              is recorded with accepted=False and error='skipped: checkpoint save failed, no
+              artifact to validate'. Failure categories for loader and downstream are set to 'save'
+              to indicate the root cause. Updated test_validation_with_rejected_save to verify
+              downstream_ksampler is never submitted and both loader/downstream results contain
+              'skipped' in their error."
+            created_at: 2026-04-29T12:05:57.442Z
         kind: blocker
       - _ulid: 01KQCHJ146JB76HVNWRX0F5HD8
         anchor:
@@ -15044,5 +15060,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T11:56:30.309Z
     created_at: 2026-04-29T11:52:15.167Z
-    updated_at: 2026-04-29T12:05:53.181Z
+    updated_at: 2026-04-29T12:05:57.442Z
     notes: []
