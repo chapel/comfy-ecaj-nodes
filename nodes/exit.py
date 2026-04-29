@@ -498,6 +498,72 @@ def _recipe_has_checkpoint_components(node: RecipeNode) -> bool:
     return False
 
 
+def _guard_non_ecaj_overwrite(save_path: str) -> None:
+    """Refuse to overwrite a non-ecaj file at save_path.
+
+    AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
+
+    Checks the safetensors header metadata. If the file exists and lacks
+    ``__ecaj_version__`` metadata, raises ``ValueError`` to prevent
+    overwriting user files that were not produced by ecaj.
+
+    This is the same guard that ``check_checkpoint_cache`` and
+    ``check_full_model_cache`` provide, extracted so it runs
+    unconditionally — even when ``enable_cache=False``.
+    """
+    if not os.path.exists(save_path):
+        return
+
+    from safetensors import safe_open
+
+    try:
+        with safe_open(save_path, framework="pt") as f:
+            file_metadata = f.metadata()
+    except Exception as exc:
+        raise ValueError(
+            f"File exists but is not a valid safetensors file: {save_path}\n"
+            f"Refusing to overwrite. Choose a different model_name.\n"
+            f"Underlying error: {exc}"
+        ) from exc
+
+    if file_metadata is None or "__ecaj_version__" not in file_metadata:
+        raise ValueError(
+            f"File exists but is not an ecaj-saved model: {save_path}\n"
+            f"Refusing to overwrite a file without ecaj metadata. "
+            f"Choose a different model_name."
+        )
+
+
+def _classify_temp_artifact(tmp_path: str, expected_kind: str) -> None:
+    """Verify the temp artifact has correct ecaj metadata before publication.
+
+    AC: @saved-model-artifact-safety ac-no-partial-publication
+
+    Reads the safetensors header and confirms:
+    - ``__ecaj_version__`` is present
+    - ``__ecaj_artifact_kind__`` matches ``expected_kind``
+
+    Raises ``RuntimeError`` if classification fails, so the caller can
+    clean up the temp file without publishing it.
+    """
+    from safetensors import safe_open
+
+    with safe_open(tmp_path, framework="pt") as f:
+        file_metadata = f.metadata()
+
+    if file_metadata is None or "__ecaj_version__" not in file_metadata:
+        raise RuntimeError(
+            f"Temp artifact missing ecaj metadata — refusing to publish: {tmp_path}"
+        )
+
+    stored_kind = file_metadata.get("__ecaj_artifact_kind__", "")
+    if stored_kind != expected_kind:
+        raise RuntimeError(
+            f"Temp artifact kind {stored_kind!r} != expected {expected_kind!r} "
+            f"— refusing to publish: {tmp_path}"
+        )
+
+
 def save_comfy_checkpoint(
     save_path: str,
     model_patcher: object,
@@ -515,7 +581,11 @@ def save_comfy_checkpoint(
     Calls comfy.sd.save_checkpoint to produce a Comfy-compatible checkpoint
     artifact with model.*, conditioner.*, and first_stage_model.* keys.
     Writes to a same-directory temp target and atomically replaces the final
-    path only after the artifact is completely written.
+    path only after the artifact is completely written and classified.
+
+    Before writing, refuses to overwrite an existing non-ecaj file.
+    After writing, verifies the temp artifact contains correct ecaj metadata
+    and artifact kind before publishing via atomic replace.
 
     Args:
         save_path: Target file path for the checkpoint artifact.
@@ -525,9 +595,15 @@ def save_comfy_checkpoint(
         metadata: Ecaj metadata dict to embed in the safetensors header.
 
     Raises:
+        ValueError: If save_path exists and is not an ecaj artifact.
+        RuntimeError: If temp artifact fails classification.
         Exception: If Comfy save fails. Temp file is cleaned up, existing
             valid artifact at save_path is preserved.
     """
+    # AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
+    # Guard runs unconditionally — even when enable_cache=False.
+    _guard_non_ecaj_overwrite(save_path)
+
     import comfy.sd
 
     directory = os.path.dirname(save_path) or "."
@@ -556,8 +632,13 @@ def save_comfy_checkpoint(
         finally:
             os.close(fd)
 
+        # AC: @saved-model-artifact-safety ac-no-partial-publication
+        # Classify the temp artifact before publishing — verify ecaj metadata
+        # and artifact kind are present and correct.
+        _classify_temp_artifact(tmp_path, expected_kind="checkpoint")
+
         # Atomic replace — existing valid artifact is only replaced after
-        # the temp file is completely written and synced.
+        # the temp file is completely written, synced, and classified.
         os.replace(tmp_path, save_path)
     except BaseException:
         try:

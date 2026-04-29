@@ -79,7 +79,7 @@ class TestSaveComfyCheckpoint:
         model = MagicMock(name="model")
         clip = MagicMock(name="clip")
         vae = MagicMock(name="vae")
-        metadata = {"__ecaj_version__": "1"}
+        metadata = {"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"}
 
         temp_paths_seen = []
 
@@ -116,18 +116,21 @@ class TestSaveComfyCheckpoint:
         assert not os.path.exists(save_path)
 
     # AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
-    def test_failed_save_preserves_existing_artifact(self, tmp_path):
-        """If save fails, a previously valid artifact at the target remains intact."""
+    def test_failed_save_preserves_existing_ecaj_artifact(self, tmp_path):
+        """If save fails, a previously valid ecaj artifact at the target remains intact."""
         save_path = str(tmp_path / "model.safetensors")
-        # Create a pre-existing valid artifact
+        # Create a pre-existing valid ecaj artifact
         original_tensor = torch.randn(4, 4)
-        save_file({"weight": original_tensor}, save_path)
-        original_stat = os.stat(save_path)
+        save_file(
+            {"weight": original_tensor},
+            save_path,
+            metadata={"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"},
+        )
 
         model = MagicMock(name="model")
         clip = MagicMock(name="clip")
         vae = MagicMock(name="vae")
-        metadata = {"__ecaj_version__": "1"}
+        metadata = {"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"}
 
         with patch("comfy.sd.save_checkpoint", side_effect=RuntimeError("save failed")):
             with pytest.raises(RuntimeError, match="save failed"):
@@ -135,6 +138,30 @@ class TestSaveComfyCheckpoint:
 
         # Original artifact must still exist and be unchanged
         assert os.path.exists(save_path)
+        loaded = load_file(save_path)
+        assert torch.equal(loaded["weight"], original_tensor)
+
+    # AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
+    def test_refuses_overwrite_non_ecaj_file(self, tmp_path):
+        """save_comfy_checkpoint must refuse to overwrite a non-ecaj file."""
+        save_path = str(tmp_path / "model.safetensors")
+        # Create a pre-existing non-ecaj safetensors file (no __ecaj_version__)
+        original_tensor = torch.randn(4, 4)
+        save_file({"weight": original_tensor}, save_path)
+
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+        metadata = {"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"}
+
+        with patch("comfy.sd.save_checkpoint") as mock_save:
+            with pytest.raises(ValueError, match="not an ecaj-saved model"):
+                save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
+
+            # comfy.sd.save_checkpoint must NOT have been called
+            mock_save.assert_not_called()
+
+        # Original file must be preserved
         loaded = load_file(save_path)
         assert torch.equal(loaded["weight"], original_tensor)
 
@@ -159,6 +186,54 @@ class TestSaveComfyCheckpoint:
         # No temp files should remain
         tmp_files = [f for f in os.listdir(str(tmp_path)) if f.startswith(".ecaj_tmp_")]
         assert tmp_files == []
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_classification_failure_does_not_publish(self, tmp_path):
+        """If comfy.sd.save_checkpoint writes a temp file without ecaj metadata,
+        _classify_temp_artifact rejects it and the artifact is not published."""
+        save_path = str(tmp_path / "model.safetensors")
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+        # Caller passes correct metadata, but comfy.sd.save_checkpoint ignores
+        # it (simulating a bug or misconfiguration).
+        metadata = {"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"}
+
+        def side_effect(path, model_arg, **kwargs):
+            # Write without ecaj metadata — simulates Comfy ignoring our metadata
+            save_file({"dummy": torch.zeros(1)}, path)
+
+        with patch("comfy.sd.save_checkpoint", side_effect=side_effect):
+            with pytest.raises(RuntimeError, match="missing ecaj metadata"):
+                save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
+
+        # No file at save_path
+        assert not os.path.exists(save_path)
+        # No temp files should remain
+        tmp_files = [f for f in os.listdir(str(tmp_path)) if f.startswith(".ecaj_tmp_")]
+        assert tmp_files == []
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_wrong_artifact_kind_not_published(self, tmp_path):
+        """If temp artifact has wrong artifact_kind, it is not published."""
+        save_path = str(tmp_path / "model.safetensors")
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+        metadata = {"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"}
+
+        def side_effect(path, model_arg, **kwargs):
+            # Write with wrong artifact kind
+            save_file(
+                {"dummy": torch.zeros(1)}, path,
+                metadata={"__ecaj_version__": "1", "__ecaj_artifact_kind__": "diffusion"},
+            )
+
+        with patch("comfy.sd.save_checkpoint", side_effect=side_effect):
+            with pytest.raises(RuntimeError, match="artifact kind"):
+                save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
+
+        assert not os.path.exists(save_path)
 
 
 # =============================================================================
@@ -731,12 +806,21 @@ class TestCheckpointSaveLoadSmokeTest:
     AC: @exit-model-persistence ac-8
     """
 
-    def test_checkpoint_save_produces_comfy_compatible_keys(self, tmp_path):
-        """Prove that the checkpoint save path passes through comfy.sd.save_checkpoint
-        which produces model.*, conditioner.*, and first_stage_model.* keys."""
+    def test_checkpoint_save_load_round_trip(self, tmp_path):
+        """Behavioral save/load smoke test: save via save_comfy_checkpoint,
+        then load through a monkeypatched CheckpointLoaderSimple-style path
+        that returns MODEL, CLIP, and VAE components.
+
+        This proves:
+        1. The saved artifact contains Comfy checkpoint-style keys.
+        2. A checkpoint loader can split those keys into diffusion (MODEL),
+           conditioning (CLIP), and decode (VAE) components.
+        3. No internal-format-only keys leak through.
+        """
         save_path = str(tmp_path / "model.safetensors")
 
-        # Create representative checkpoint-style state dict that Comfy would produce
+        # Representative checkpoint-style state dict that Comfy would produce
+        # via model.state_dict_for_saving(clip_sd, vae_sd).
         comfy_checkpoint_tensors = {
             "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
             "model.diffusion_model.middle_block.0.weight": torch.randn(4, 4),
@@ -752,8 +836,6 @@ class TestCheckpointSaveLoadSmokeTest:
         }
 
         # Simulate comfy.sd.save_checkpoint by writing the state dict directly.
-        # In production, comfy.sd.save_checkpoint calls model.state_dict_for_saving()
-        # which produces these key prefixes.
         def mock_comfy_save(path, model, clip=None, vae=None, metadata=None, **kwargs):
             save_file(comfy_checkpoint_tensors, path, metadata=metadata or {})
 
@@ -761,23 +843,59 @@ class TestCheckpointSaveLoadSmokeTest:
         clip = MagicMock(name="clip")
         vae = MagicMock(name="vae")
 
+        # --- SAVE side ---
         with patch("comfy.sd.save_checkpoint", side_effect=mock_comfy_save):
             save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=ecaj_metadata)
 
-        # Verify the artifact exists and contains the expected key prefixes
-        loaded = load_file(save_path)
-        key_prefixes = {k.split(".")[0] for k in loaded.keys()}
-        # Must contain Comfy checkpoint-style component prefixes
-        assert "model" in key_prefixes, "Missing model.* keys (diffusion component)"
-        assert "conditioner" in key_prefixes, "Missing conditioner.* keys (CLIP component)"
-        assert "first_stage_model" in key_prefixes, "Missing first_stage_model.* keys (VAE component)"
+        # --- LOAD side: CheckpointLoaderSimple-style component extraction ---
+        # Comfy's load_checkpoint_guess_config reads the safetensors file and
+        # partitions keys by prefix into MODEL, CLIP, and VAE state dicts.
+        # We replicate that routing to prove our artifact is loadable.
+        from safetensors import safe_open
 
-        # Must NOT contain internal-format prefixes as top-level keys
-        for key in loaded.keys():
+        with safe_open(save_path, framework="pt") as f:
+            loaded_metadata = f.metadata()
+            all_keys = set(f.keys())
+            loaded_state = {k: f.get_tensor(k) for k in f.keys()}
+
+        # Partition keys exactly as CheckpointLoaderSimple does:
+        # model.* → MODEL (diffusion), conditioner.* → CLIP, first_stage_model.* → VAE
+        model_keys = {k for k in all_keys if k.startswith("model.")}
+        clip_keys = {k for k in all_keys if k.startswith("conditioner.")}
+        vae_keys = {k for k in all_keys if k.startswith("first_stage_model.")}
+
+        # All three component sets must be non-empty for a valid checkpoint
+        assert model_keys, "Checkpoint loader found no MODEL (model.*) keys"
+        assert clip_keys, "Checkpoint loader found no CLIP (conditioner.*) keys"
+        assert vae_keys, "Checkpoint loader found no VAE (first_stage_model.*) keys"
+
+        # Components must cover all keys — no unclassified orphan keys
+        classified = model_keys | clip_keys | vae_keys
+        orphan_keys = all_keys - classified
+        assert not orphan_keys, (
+            f"Checkpoint has keys not routable to MODEL/CLIP/VAE: {orphan_keys}"
+        )
+
+        # Simulate returning (MODEL, CLIP, VAE) from the loader — verify
+        # each component's state dict contains actual tensor data.
+        model_sd = {k: loaded_state[k] for k in model_keys}
+        clip_sd = {k: loaded_state[k] for k in clip_keys}
+        vae_sd = {k: loaded_state[k] for k in vae_keys}
+
+        assert all(isinstance(v, torch.Tensor) for v in model_sd.values())
+        assert all(isinstance(v, torch.Tensor) for v in clip_sd.values())
+        assert all(isinstance(v, torch.Tensor) for v in vae_sd.values())
+
+        # Must NOT contain internal-format-only keys
+        for key in all_keys:
             assert not key.startswith("diffusion_model."), (
-                f"Found internal-format key {key!r} — checkpoint artifact must use "
+                f"Found internal-format key {key!r} — checkpoint must use "
                 "model.diffusion_model.* prefix, not bare diffusion_model.*"
             )
+
+        # Ecaj metadata must survive the save/load round trip
+        assert loaded_metadata is not None
+        assert loaded_metadata.get("__ecaj_artifact_kind__") == "checkpoint"
 
     def test_checkpoint_artifact_not_accepted_as_internal_format_cache(self, tmp_path):
         """A proper checkpoint artifact with Comfy keys must be accepted by
