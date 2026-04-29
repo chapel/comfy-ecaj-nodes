@@ -626,7 +626,7 @@ features:
               models whose usable workflow requires more than diffusion weights alone.
             status:
               maturity: draft
-              implementation: in_progress
+              implementation: implemented
             depends_on: []
             implements: []
             relates_to: []
