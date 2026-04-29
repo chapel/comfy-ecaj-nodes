@@ -7754,7 +7754,7 @@ runs:
     completed_at: 2026-04-29T12:09:21.540Z
   - _ulid: 01KQCJHSFAZFSHT0BC27NHGPXJ
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7769,7 +7769,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T12:14:38.786Z
-        completed_at: 2026-04-29T12:14:38.786Z
+        completed_at: 2026-04-29T12:14:55.415Z
+        notes: "Identified one high-confidence friction point: kspec review checks/comments created in this
+          review were attributed to the environment author while the verdict was attributed to
+          codex. The mismatch is repeatable for reviewer snapshots when --reviewer is only available
+          on verdicts, and it makes the review audit trail harder to scan. Success pattern around
+          targeted probes was already covered by existing observations such as
+          @01KQ7ZHH/@01KQ80PS/@01KQ815T, so no new success capture needed."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T12:14:55.415Z
+        completed_at: 2026-04-29T12:14:55.415Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:13:49.419Z
