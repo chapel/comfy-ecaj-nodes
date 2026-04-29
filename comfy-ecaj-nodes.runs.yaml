@@ -7677,7 +7677,7 @@ runs:
     completed_at: 2026-04-29T11:51:27.197Z
   - _ulid: 01KQCHM17D8JDH0B90TJSM6YK7
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7691,7 +7691,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T11:58:10.029Z
-        completed_at: 2026-04-29T11:58:10.029Z
+        completed_at: 2026-04-29T11:58:34.091Z
+        notes: "Identified candidates: success pattern was already covered by existing observations around
+          small runtime probes and guarded Comfy harness reviews, so no duplicate capture.
+          High-confidence friction remains: Comfy API harnesses can confuse prompt queue acceptance
+          with completed execution unless they explicitly poll /history and classify node runtime
+          errors; this is repeatable for any live Comfy API validation harness."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T11:58:34.091Z
+        completed_at: 2026-04-29T11:58:34.091Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T11:57:34.317Z
