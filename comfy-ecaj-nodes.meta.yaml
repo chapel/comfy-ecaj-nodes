@@ -1064,6 +1064,34 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T08:24:32.841Z
+  - _ulid: 01KQC5W4N81GYW6FDKJ12PMKCY
+    type: friction
+    content: In detached pull_request review snapshots, GitHub CLI commands can need explicit repository
+      context because the worktree is not on a branch; gh pr merge failed until rerun with --repo,
+      and gh pr review --approve failed because the authenticated user owned the PR.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T08:32:17.064Z
+  - _ulid: 01KQC5W4PYDCNJSGE9C2Q85NB3
+    type: friction
+    content: When a reviewer pushes a small fix during a task-subject review, kspec review refresh
+      cannot update the examined commit because refresh only supports code subjects; the review
+      record can show the old examined commit even though checks and the PR head are verified on the
+      newer commit.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T08:32:17.118Z
+  - _ulid: 01KQC5W4R3774WY2B095J06CTS
+    type: success
+    content: For review-time cleanup, making the smallest lint-only fix, pushing it to the task branch,
+      then rerunning targeted tests, relevant broader tests, ruff, and kspec validate gave enough
+      evidence to approve and merge without a worker fix cycle.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T08:32:17.155Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
