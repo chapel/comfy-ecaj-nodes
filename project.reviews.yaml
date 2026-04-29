@@ -15228,6 +15228,13 @@ reviews:
           status: pass
           name: full pytest
         timestamp: 2026-04-29T12:12:47.952Z
+      - _ulid: 01KQCJGFK2ZGZAYW1DS0AKC44R
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCJGFFCA7X0JR5WHZ9H5KGD
+        timestamp: 2026-04-29T12:13:06.530Z
     examined_commit: 3f36d68b94be306650b1eae189bcdf9c2caad793
     external_links: []
     lifecycle_state: open
@@ -15237,8 +15244,32 @@ reviews:
       content_hash: ""
       ref: "@01KQBTZNB6KR4MXEYGT4PANG25"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQCJGFFCA7X0JR5WHZ9H5KGD
+        anchor:
+          type: code
+          commit: 3f36d68b94be306650b1eae189bcdf9c2caad793
+          line_end: 776
+          line_start: 767
+          path: scripts/manual/real_comfy_checkpoint_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQCJGFFCB3P8RGCETJFDV8B6
+            author: Jacob Chapel
+            body: "MUST-FIX: memory-mode failures are still masked when the runtime error also names the failing
+              workflow node. The classifier checks save/loader/downstream keywords before
+              memory/vram/oom, so node_error(KSampler): OOM: cannot allocate returns downstream and
+              node_error(WIDENExit): save_model failed: CUDA out of memory returns save. Because
+              run_validation only populates the top-level memory_mode category from per-workflow
+              classifications equal to memory_mode, these real OOM/VRAM failures are reported as
+              memory_mode none. This violates ac-memory-mode-not-changed-for-success and the task
+              requirement for distinct memory-mode failure categories. Evidence: a direct probe at
+              this snapshot returned downstream for the KSampler OOM case, and a mocked
+              run_validation with downstream_ksampler OOM produced scheduling none, save none,
+              loader downstream, downstream downstream, cache none, memory_mode none."
+            created_at: 2026-04-29T12:13:06.412Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T12:09:59.283Z
-    updated_at: 2026-04-29T12:12:47.839Z
+    updated_at: 2026-04-29T12:13:06.412Z
     notes: []
