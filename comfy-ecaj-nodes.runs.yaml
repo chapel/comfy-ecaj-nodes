@@ -6148,7 +6148,7 @@ runs:
     completed_at: 2026-04-29T06:22:46.572Z
   - _ulid: 01KQBYMTWK30B9X1DK9XZJWD80
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -6162,7 +6162,34 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T06:26:12.980Z
-        completed_at: 2026-04-29T06:26:12.980Z
+        completed_at: 2026-04-29T06:27:03.552Z
+        notes: >-
+          High-confidence friction points identified:
+
+
+          1. kspec task start auto-syncs linked spec implementation status to in_progress —
+          problematic for preservation/verification tasks where the spec should STAY at implemented.
+          Had to manually restore with kspec item set twice (once after start, once after complete).
+          Not tracked in existing observations.
+
+
+          2. kspec task complete also syncs spec status — same issue on the other end. Completing a
+          preservation task moved the spec back to in_progress.
+
+
+          These are the same root issue: the spec-implementation-sync logic doesn't account for task
+          types that verify rather than implement.
+
+
+          High-confidence success:
+
+          1. Tasks with explicit Testing sections (already tracked in observations as @01KQ89T6) —
+          the task description clearly spelled out what verification to perform, making this
+          preservation task unambiguous.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T06:27:03.552Z
+        completed_at: 2026-04-29T06:27:03.552Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:25:57.651Z
