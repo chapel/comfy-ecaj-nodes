@@ -1,1 +1,21 @@
-notes: []
+notes:
+  - _ulid: 01KQBWJ5HPNF15Z7WSQ80G9CTP
+    content: >-
+      Approach: Single code change needed — set OUTPUT_NODE = True in WIDENExitNode (currently
+      False). 
+
+      This covers ac-terminal-save-executes: ComfyUI treats OUTPUT_NODE = True nodes as executable
+      side-effecting outputs.
+
+      Also covers @exit-model-persistence ac-1 (save_model=False unchanged) and ac-5 (model_name
+      validation — already implemented).
+
+      RETURN_TYPES already correct as ('MODEL',), save_model already exists as BOOLEAN, no
+      output_mode dropdown exists.
+
+      Test plan: 3 new test cases — OUTPUT_NODE is True, RETURN_TYPES is ('MODEL',), optional inputs
+      include save_model but not output_mode. Plus verify existing save_model=False tests still
+      pass.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T05:49:33.110Z
