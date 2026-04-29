@@ -1,1 +1,28 @@
-notes: []
+notes:
+  - _ulid: 01KQCFK6GV5GXNRQGHN1CHVGNZ
+    content: |-
+      Approach: Create scripts/manual/real_comfy_checkpoint_validation.py as a new harness
+      focused on checkpoint-save validation via the ComfyUI HTTP API.
+
+      Pattern: Follow the existing real_comfy_memory_validation.py harness pattern:
+      - GuardResult/check_guards for opt-in refusal
+      - ValidationReport dataclass for structured JSON reporting
+      - format_report/format_refusal for human-readable output
+      - main() entry point with guard → validate → report flow
+
+      Key differences from memory harness:
+      - Uses ComfyUI HTTP API (not direct imports) for workflow submission
+      - Requires: env var, flag, API URL, source model path, report path
+      - Submits 5 workflow types: terminal exit save, checkpoint save_model,
+        checkpoint loader, downstream KSampler pipeline, cache-reuse
+      - Classifies each workflow result (accepted/rejected/error)
+      - Queries /system_stats and /object_info for environment info
+
+      Test plan: 7 ACs × 1+ tests each, plus unit tests for:
+      - Guard refusal (missing env, URL, model, report, flag)
+      - Refusal before import/prompt/mutation
+      - Report schema completeness
+      - Mocked API classification for each failure category
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T11:22:09.819Z
