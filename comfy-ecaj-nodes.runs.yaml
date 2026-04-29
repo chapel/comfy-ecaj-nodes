@@ -8011,7 +8011,7 @@ runs:
     completed_at: 2026-04-29T12:52:57.460Z
   - _ulid: 01KQCN9YZPZ00ZMTH0Y5V0TZPM
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -8038,7 +8038,38 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T13:02:59.022Z
-        completed_at: 2026-04-29T13:02:59.022Z
+        completed_at: 2026-04-29T13:03:29.185Z
+        notes: >-
+          High-confidence friction points:
+
+
+          1. FRICTION: Cache reuse detection in checkpoint validation harness relies on ComfyUI
+          execution_cached history messages, but WIDEN's enable_cache operates at the application
+          level (artifact existence check). The harness reported 'cache_not_reused' even though
+          timing proved 5.9x speedup. The harness should check timing and/or WIDEN-specific cache
+          signals, not just ComfyUI execution_cached messages. This is systemic — any future harness
+          run will hit this same false negative.
+
+
+          2. FRICTION (lower confidence, not capturing): ComfyUI needed restart to pick up updated
+          node definitions. This is a general ComfyUI behavior (node cache at startup), not specific
+          to our code.
+
+
+          High-confidence success patterns:
+
+
+          1. SUCCESS: Pre-run environment interrogation via /object_info and /system_stats caught
+          the node definition mismatch before submitting any workflows. This prevented confusing
+          error analysis and should be a documented practice for manual validation runs.
+
+
+          Searched: 'cache reuse detection', 'harness cache', 'stale node', 'ComfyUI restart',
+          'object_info' — no existing tracking found.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T13:03:29.185Z
+        completed_at: 2026-04-29T13:03:29.185Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:01:58.647Z
