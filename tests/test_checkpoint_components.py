@@ -366,7 +366,7 @@ class TestValidComponentsPassValidation:
         validate_checkpoint_components(base, save_model=True)
 
     def test_valid_components_proceed_to_artifact_writer_in_execute(self):
-        """With valid CLIP+VAE, execute proceeds to the artifact writer seam."""
+        """With valid CLIP+VAE, execute proceeds to the checkpoint save seam."""
         patcher = MockModelPatcher()
         clip = MagicMock(name="clip")
         vae = MagicMock(name="vae")
@@ -376,11 +376,13 @@ class TestValidComponentsPassValidation:
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         node = WIDENExitNode()
-        mock_sink = MagicMock(name="sink")
         mock_loader = MagicMock(name="loader")
+        mock_loader.loaded_bytes = 0
+        mock_loader.cleanup = MagicMock()
 
         # With valid components, execution should proceed past validation and
-        # reach the artifact writer seam without real checkpoint I/O.
+        # reach the checkpoint save seam (save_comfy_checkpoint) without
+        # real checkpoint I/O.
         with patch("nodes.exit.analyze_recipe") as mock_analyze, \
              patch("nodes.exit.analyze_recipe_models") as mock_model_analyze, \
              patch("nodes.exit.walk_to_base", return_value=base), \
@@ -393,10 +395,14 @@ class TestValidComponentsPassValidation:
              patch("nodes.exit._resolve_checkpoints_path", return_value="/tmp/test.safetensors"), \
              patch("nodes.exit.serialize_recipe", return_value="serialized"), \
              patch("nodes.exit.compute_recipe_hash", return_value="hash"), \
-             patch("nodes.exit.check_full_model_cache", return_value=False), \
+             patch("nodes.exit.check_checkpoint_cache", return_value=False), \
              patch("nodes.exit.compile_plan", return_value=object()), \
-             patch("nodes.exit.MaterializationSink", return_value=mock_sink), \
-             patch("nodes.exit._load_model_from_artifact", return_value=patcher.clone()):
+             patch("nodes.exit.compile_batch_groups", return_value={}), \
+             patch("nodes.exit.chunked_evaluation", return_value={}), \
+             patch("nodes.exit.install_merged_patches", return_value=patcher.clone()), \
+             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt, \
+             patch("nodes.exit.check_ram_preflight"), \
+             patch("nodes.exit.ProgressBar", None):
 
             mock_lr.return_value = lambda name: None
             mock_mr.return_value = lambda name, src: None
@@ -409,12 +415,15 @@ class TestValidComponentsPassValidation:
             mock_model_analyze.return_value = SimpleNamespace(
                 model_affected={},
                 model_loaders={},
-                all_model_keys=set(),
+                all_model_keys=frozenset(),
             )
 
             # Should not raise ValueError — validation passed
             node.execute(merge, save_model=True, model_name="test.safetensors")
             mock_analyze.assert_called_once()
             mock_model_analyze.assert_called_once()
-            mock_sink.open.assert_called_once()
-            mock_sink.finalize.assert_called_once_with("/tmp/test.safetensors")
+            # Checkpoint-style recipe routes to save_comfy_checkpoint
+            mock_save_ckpt.assert_called_once()
+            call_kwargs = mock_save_ckpt.call_args
+            assert call_kwargs.kwargs["clip"] is clip
+            assert call_kwargs.kwargs["vae"] is vae

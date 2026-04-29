@@ -802,7 +802,7 @@ class TestGpuOffloadAfterSave:
         keys = list(mock_model_patcher.model_state_dict().keys())
         recipe = RecipeMerge(
             base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                            checkpoint_components=make_checkpoint_components()),
+                            checkpoint_components=None),
             target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
             backbone=None,
             t_factor=1.0,
@@ -846,6 +846,7 @@ class TestGpuOffloadAfterSave:
             patch("nodes.exit._resolve_checkpoints_path", return_value="/tmp/test.safetensors"),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
+            patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
             patch("nodes.exit.MaterializationSink", return_value=mock_sink),
@@ -1846,7 +1847,7 @@ class TestBaseStateFreedBeforeSave:
         keys = list(mock_model_patcher.model_state_dict().keys())
         recipe = RecipeMerge(
             base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                            checkpoint_components=make_checkpoint_components()),
+                            checkpoint_components=None),
             target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
             backbone=None,
             t_factor=1.0,
@@ -1872,6 +1873,7 @@ class TestBaseStateFreedBeforeSave:
                 "nodes.exit._resolve_checkpoints_path": "/tmp/test.safetensors",
                 "nodes.exit.serialize_recipe": "{}",
                 "nodes.exit.compute_recipe_hash": "hash",
+                "nodes.exit.validate_checkpoint_components": None,
                 "nodes.exit.check_full_model_cache": False,
                 "nodes.exit.check_ram_preflight": None,
                 "nodes.exit.MaterializationSink": mock_sink,

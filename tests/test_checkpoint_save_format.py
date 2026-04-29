@@ -305,11 +305,18 @@ class TestCheckpointSaveRouting:
             mock_sink_cls.assert_not_called()
 
     def test_non_checkpoint_save_uses_materialization_sink(self, mock_model_patcher, tmp_path):
-        """Non-checkpoint (LoRA-only) save must use MaterializationSink, not save_comfy_checkpoint."""
+        """Non-checkpoint (diffusion-only, no checkpoint_components) save must use
+        MaterializationSink, not save_comfy_checkpoint.
+
+        Note: validate_checkpoint_components normally rejects save_model=True
+        without checkpoint_components. This test bypasses validation to verify
+        the branching logic in _execute_full_saved_model.
+        """
+        # No checkpoint_components → diffusion-only source
         base = RecipeBase(
             model_patcher=mock_model_patcher,
             arch="sdxl",
-            checkpoint_components=make_checkpoint_components(),
+            checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -326,10 +333,13 @@ class TestCheckpointSaveRouting:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.validate_checkpoint_components"),  # bypass validation
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.streaming_evaluation_to_sink"),
             patch("nodes.exit.MaterializationSink", return_value=mock_sink) as mock_sink_cls,
             patch("nodes.exit._load_model_from_artifact") as mock_load,
             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
@@ -338,12 +348,18 @@ class TestCheckpointSaveRouting:
             affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
             mock_analyze.return_value = MagicMock(
                 model_patcher=mock_model_patcher,
                 arch="sdxl",
                 loader=mock_loader,
                 set_affected={str(id(lora)): {affected_key}},
                 affected_keys={affected_key},
+            )
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={},
+                model_affected={},
+                all_model_keys=frozenset(),
             )
             mock_load.return_value = mock_model_patcher.clone()
 
@@ -353,6 +369,72 @@ class TestCheckpointSaveRouting:
             mock_sink_cls.assert_called_once()
             # save_comfy_checkpoint must NOT have been called
             mock_save_ckpt.assert_not_called()
+
+    # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+    def test_checkpoint_base_plus_lora_routes_as_checkpoint(self, mock_model_patcher, tmp_path):
+        """RecipeBase with checkpoint_components + LoRA merge must route through
+        save_comfy_checkpoint, not MaterializationSink."""
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch("nodes.exit.MaterializationSink") as mock_sink_cls,
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            affected_key = "diffusion_model.input_blocks.0.0.weight"
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={str(id(lora)): {affected_key}},
+                affected_keys={affected_key},
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={},
+                model_affected={},
+                all_model_keys=frozenset(),
+            )
+            mock_install.return_value = mock_model_patcher.clone()
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+            result = node.execute(merge, save_model=True, model_name="model")
+
+            # save_comfy_checkpoint MUST be called (checkpoint-style)
+            mock_save_ckpt.assert_called_once()
+            call_kwargs = mock_save_ckpt.call_args
+            assert call_kwargs.kwargs["clip"] is cc.clip
+            assert call_kwargs.kwargs["vae"] is cc.vae
+            # MaterializationSink must NOT be used
+            mock_sink_cls.assert_not_called()
 
 
 # =============================================================================
@@ -853,3 +935,289 @@ class TestCheckpointSaveReturnModel:
 
             assert len(result) == 1
             assert result[0] is expected_model
+
+
+# =============================================================================
+# Checkpoint cache hit returns correct MODEL with Comfy-style keys
+# =============================================================================
+
+
+class TestCheckpointCacheHitModelLoading:
+    """AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
+    AC: @exit-model-persistence ac-8
+
+    Valid checkpoint cache hits must load merged weights from the artifact
+    into the returned MODEL, including when the artifact uses Comfy
+    checkpoint-style key prefixes (model.diffusion_model.*).
+    """
+
+    # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
+    def test_load_model_from_checkpoint_artifact_updates_weights(self, mock_model_patcher, tmp_path):
+        """_load_model_from_artifact must load Comfy checkpoint keys
+        (model.diffusion_model.*) into the returned model's state dict."""
+        from nodes.exit import _load_model_from_artifact
+
+        save_path = str(tmp_path / "model.safetensors")
+
+        # Simulate a Comfy checkpoint artifact with model.diffusion_model.* keys
+        merged_weight = torch.randn(4, 4)
+        artifact_tensors = {
+            "model.diffusion_model.input_blocks.0.0.weight": merged_weight,
+            "model.diffusion_model.middle_block.0.weight": torch.randn(4, 4),
+            "conditioner.embedders.0.weight": torch.randn(4, 4),
+            "first_stage_model.decoder.weight": torch.randn(4, 4),
+        }
+        save_file(artifact_tensors, save_path)
+
+        original_weight = mock_model_patcher.model_state_dict()[
+            "diffusion_model.input_blocks.0.0.weight"
+        ].clone()
+
+        result = _load_model_from_artifact(save_path, mock_model_patcher, torch.float32)
+
+        # The returned model's state dict must reflect the artifact weights,
+        # not the original base weights.
+        loaded_weight = result.model_state_dict()["diffusion_model.input_blocks.0.0.weight"]
+        assert torch.equal(loaded_weight, merged_weight), (
+            "Checkpoint cache hit must load merged weights from model.diffusion_model.* keys"
+        )
+        assert not torch.equal(loaded_weight, original_weight), (
+            "Returned model must not still have the original base weights"
+        )
+
+    # AC: @exit-model-persistence ac-8
+    def test_load_model_from_internal_artifact_still_works(self, mock_model_patcher, tmp_path):
+        """_load_model_from_artifact must continue to work with internal-format
+        (diffusion_model.*) artifacts."""
+        from nodes.exit import _load_model_from_artifact
+
+        save_path = str(tmp_path / "model.safetensors")
+
+        merged_weight = torch.randn(4, 4)
+        artifact_tensors = {
+            "diffusion_model.input_blocks.0.0.weight": merged_weight,
+            "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
+        }
+        save_file(artifact_tensors, save_path)
+
+        result = _load_model_from_artifact(save_path, mock_model_patcher, torch.float32)
+
+        loaded_weight = result.model_state_dict()["diffusion_model.input_blocks.0.0.weight"]
+        assert torch.equal(loaded_weight, merged_weight), (
+            "Internal-format artifact loading must still work"
+        )
+
+
+# =============================================================================
+# Base-only checkpoint saves through checkpoint path (not diffusion)
+# =============================================================================
+
+
+class TestBaseOnlyCheckpointSave:
+    """AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+
+    A RecipeBase with checkpoint_components (no merge) in save_model mode
+    must save through the checkpoint path, not the diffusion/MaterializationSink path.
+    """
+
+    # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+    def test_noop_checkpoint_base_uses_save_comfy_checkpoint(self, mock_model_patcher, tmp_path):
+        """RecipeBase (no-op) with checkpoint_components must call save_comfy_checkpoint."""
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch("nodes.exit.MaterializationSink") as mock_sink_cls,
+        ):
+            mock_install.return_value = mock_model_patcher.clone()
+
+            result = node.execute(base, save_model=True, model_name="model")
+
+            # save_comfy_checkpoint MUST be called
+            mock_save_ckpt.assert_called_once()
+            call_kwargs = mock_save_ckpt.call_args
+            assert call_kwargs.kwargs["clip"] is cc.clip
+            assert call_kwargs.kwargs["vae"] is cc.vae
+            # metadata must include checkpoint artifact kind
+            meta = call_kwargs.kwargs["metadata"]
+            assert meta["__ecaj_artifact_kind__"] == "checkpoint"
+            # MaterializationSink must NOT be used
+            mock_sink_cls.assert_not_called()
+            # Must return a model
+            assert len(result) == 1
+            assert result[0] is not None
+
+    # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+    def test_noop_diffusion_base_uses_materialization_sink(self, mock_model_patcher, tmp_path):
+        """RecipeBase (no-op) WITHOUT checkpoint_components must use MaterializationSink.
+
+        Note: validate_checkpoint_components normally rejects save_model=True
+        without checkpoint_components. This test bypasses validation to verify
+        the noop branching logic.
+        """
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=None,
+        )
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        mock_sink = MagicMock()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.validate_checkpoint_components"),  # bypass validation
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.MaterializationSink", return_value=mock_sink) as mock_sink_cls,
+            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+        ):
+            mock_load.return_value = mock_model_patcher.clone()
+
+            result = node.execute(base, save_model=True, model_name="model")
+
+            # MaterializationSink MUST be used
+            mock_sink_cls.assert_called_once()
+            # save_comfy_checkpoint must NOT be called
+            mock_save_ckpt.assert_not_called()
+
+    # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+    def test_noop_checkpoint_cache_hit_uses_checkpoint_cache(self, mock_model_patcher, tmp_path):
+        """RecipeBase (no-op) checkpoint with cache hit must use check_checkpoint_cache,
+        not check_full_model_cache with artifact_kind=diffusion."""
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=True) as mock_ckpt_cache,
+            patch("nodes.exit.check_full_model_cache") as mock_full_cache,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+        ):
+            mock_load.return_value = mock_model_patcher.clone()
+
+            result = node.execute(base, save_model=True, model_name="model")
+
+            # check_checkpoint_cache MUST be called (not check_full_model_cache)
+            mock_ckpt_cache.assert_called_once()
+            mock_full_cache.assert_not_called()
+            # save_comfy_checkpoint must NOT be called (cache hit)
+            mock_save_ckpt.assert_not_called()
+            # Model must be loaded from artifact
+            mock_load.assert_called_once()
+
+
+# =============================================================================
+# _recipe_has_checkpoint_components — classification tests
+# =============================================================================
+
+
+class TestRecipeHasCheckpointComponents:
+    """Verify _recipe_has_checkpoint_components correctly identifies
+    checkpoint-style recipes from RecipeBase.checkpoint_components."""
+
+    def test_recipe_base_with_checkpoint_components(self, mock_model_patcher):
+        """RecipeBase with valid checkpoint_components must be detected."""
+        from nodes.exit import _recipe_has_checkpoint_components
+
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+        assert _recipe_has_checkpoint_components(base) is True
+
+    def test_recipe_base_without_checkpoint_components(self, mock_model_patcher):
+        """RecipeBase without checkpoint_components must not be detected."""
+        from nodes.exit import _recipe_has_checkpoint_components
+
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=None,
+        )
+        assert _recipe_has_checkpoint_components(base) is False
+
+    def test_merge_with_checkpoint_base_plus_lora(self, mock_model_patcher):
+        """RecipeMerge with checkpoint RecipeBase + LoRA target must be detected."""
+        from nodes.exit import _recipe_has_checkpoint_components
+
+        cc = make_checkpoint_components()
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=cc,
+        )
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+        assert _recipe_has_checkpoint_components(merge) is True
+
+    def test_merge_with_diffusion_base_plus_lora(self, mock_model_patcher):
+        """RecipeMerge with diffusion-only RecipeBase + LoRA must not be detected."""
+        from nodes.exit import _recipe_has_checkpoint_components
+
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=None,
+        )
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+        assert _recipe_has_checkpoint_components(merge) is False
+
+    def test_recipe_model_with_checkpoints_source(self):
+        """RecipeModel with source_dir='checkpoints' must be detected."""
+        from nodes.exit import _recipe_has_checkpoint_components
+
+        model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        assert _recipe_has_checkpoint_components(model) is True
+
+    def test_recipe_model_with_diffusion_source(self):
+        """RecipeModel with source_dir='diffusion_models' must not be detected."""
+        from nodes.exit import _recipe_has_checkpoint_components
+
+        model = RecipeModel(path="unet.safetensors", strength=1.0, source_dir="diffusion_models")
+        assert _recipe_has_checkpoint_components(model) is False

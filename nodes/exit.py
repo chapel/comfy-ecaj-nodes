@@ -405,29 +405,48 @@ def _load_model_from_artifact(
     # Update the clone's underlying model weights with artifact data.
     # Try load_state_dict (real nn.Module) first, then fall back to
     # updating the diffusion_model's internal state dict.
+    #
+    # Checkpoint artifacts from comfy.sd.save_checkpoint use Comfy-style
+    # key prefixes: model.diffusion_model.*, conditioner.*, first_stage_model.*.
+    # Internal-format artifacts use bare diffusion_model.* keys.
+    # We need to extract diffusion weights from either format.
     _DIFFUSION_PREFIX = "diffusion_model."
+    _COMFY_MODEL_PREFIX = "model.diffusion_model."
+
+    # Extract diffusion weights: try Comfy checkpoint prefix first, then
+    # internal diffusion_model.* prefix.  Strip to bare weight names for
+    # load_state_dict.
+    diffusion_weights: dict[str, torch.Tensor] = {}
+    for k, v in artifact_state.items():
+        if k.startswith(_COMFY_MODEL_PREFIX):
+            diffusion_weights[k.removeprefix(_COMFY_MODEL_PREFIX)] = v
+        elif k.startswith(_DIFFUSION_PREFIX):
+            diffusion_weights[k.removeprefix(_DIFFUSION_PREFIX)] = v
+
     dm = getattr(cloned.model, "diffusion_model", None)  # type: ignore[attr-defined]
-    if dm is not None and hasattr(dm, "load_state_dict"):
-        # Real nn.Module — strip prefix and load via PyTorch API.
-        unprefixed = {
-            k.removeprefix(_DIFFUSION_PREFIX): v
-            for k, v in artifact_state.items()
-        }
+    if dm is not None and hasattr(dm, "load_state_dict") and diffusion_weights:
+        # Real nn.Module — load via PyTorch API.
         try:
-            dm.load_state_dict(unprefixed, strict=False)
+            dm.load_state_dict(diffusion_weights, strict=False)
         except (TypeError, RuntimeError):
             # Fallback for models without full load_state_dict support.
             sd = dm.state_dict()
-            for k, v in unprefixed.items():
+            for k, v in diffusion_weights.items():
                 if k in sd:
                     sd[k].copy_(v)
 
     # Update the patcher's _state_dict if present (MockModelPatcher and
     # some real patchers use this as the backing store for model_state_dict).
+    # Map checkpoint-style keys back to the patcher's diffusion_model.* keys.
     if hasattr(cloned, "_state_dict"):
         for k, v in artifact_state.items():
             if k in cloned._state_dict:  # type: ignore[attr-defined]
                 cloned._state_dict[k] = v  # type: ignore[attr-defined]
+            elif k.startswith(_COMFY_MODEL_PREFIX):
+                # Map model.diffusion_model.X → diffusion_model.X
+                patcher_key = _DIFFUSION_PREFIX + k.removeprefix(_COMFY_MODEL_PREFIX)
+                if patcher_key in cloned._state_dict:  # type: ignore[attr-defined]
+                    cloned._state_dict[patcher_key] = v  # type: ignore[attr-defined]
 
     return cloned
 
@@ -453,13 +472,19 @@ def _resolve_checkpoints_path(model_name: str) -> str:
 
 
 def _recipe_has_checkpoint_components(node: RecipeNode) -> bool:
-    """Check if recipe tree contains checkpoint-sourced RecipeModel nodes.
+    """Check if recipe tree originates from a checkpoint-style source.
 
-    Only RecipeModel nodes with source_dir="checkpoints" represent checkpoint
-    companion components (e.g. CLIP, VAE). RecipeModel nodes with
-    source_dir="diffusion_models" are diffusion-only model inputs and do not
-    make a recipe checkpoint-style.
+    A recipe is checkpoint-style when:
+    - The RecipeBase at the root carries checkpoint_components (CLIP/VAE from
+      CheckpointLoaderSimple), OR
+    - The tree contains RecipeModel nodes with source_dir="checkpoints".
+
+    RecipeModel nodes with source_dir="diffusion_models" are diffusion-only
+    model inputs and do not make a recipe checkpoint-style.
     """
+    if isinstance(node, RecipeBase):
+        cc = node.checkpoint_components
+        return cc is not None and isinstance(cc, CheckpointComponents) and cc.clip is not None and cc.vae is not None
     if isinstance(node, RecipeModel):
         return node.source_dir == "checkpoints"
     if isinstance(node, RecipeCompose):
@@ -699,6 +724,7 @@ class WIDENExitNode:
 
         AC: @full-saved-model-output ac-no-op-produces-full-artifact
         AC: @full-saved-model-output ac-complete-artifact
+        AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
         """
         model_patcher = widen.model_patcher
         _unpatch_loaded_clones(model_patcher)
@@ -718,21 +744,32 @@ class WIDENExitNode:
             lora_stats, sort_keys=True, separators=(",", ":"),
         )
 
+        # Detect checkpoint-style source: RecipeBase with checkpoint_components
+        is_checkpoint = _recipe_has_checkpoint_components(widen)
+
         # Build manifest from base_state — all keys, no affected keys
         manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
 
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         # AC: @exit-model-persistence ac-4, ac-6
-        if enable_cache and check_full_model_cache(
-            save_path, recipe_hash, expected_manifest=manifest,
-            expected_artifact_kind="diffusion",
-            expected_base_identity=base_identity,
-            expected_dependency_fingerprints=dependency_fingerprints_json,
-        ):
-            if ProgressBar is not None:
-                pbar = ProgressBar(1)
-                pbar.update(1)
-            return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+        if enable_cache:
+            if is_checkpoint:
+                cache_hit = check_checkpoint_cache(
+                    save_path, recipe_hash, base_identity,
+                    dependency_fingerprints_json,
+                )
+            else:
+                cache_hit = check_full_model_cache(
+                    save_path, recipe_hash, expected_manifest=manifest,
+                    expected_artifact_kind="diffusion",
+                    expected_base_identity=base_identity,
+                    expected_dependency_fingerprints=dependency_fingerprints_json,
+                )
+            if cache_hit:
+                if ProgressBar is not None:
+                    pbar = ProgressBar(1)
+                    pbar.update(1)
+                return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
 
         # Evict in-memory cache when cache is disabled.
         # Full mode does not write to _incremental_cache, but pre-populated
@@ -742,28 +779,61 @@ class WIDENExitNode:
         workflow_json = (
             json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
         )
-        metadata = build_metadata(
-            serialized, recipe_hash, [], workflow_json, output_mode="full",
-            artifact_kind="diffusion",
-            base_identity=base_identity,
-            dependency_fingerprints=dependency_fingerprints_json,
-        )
 
-        sink = MaterializationSink()
-        try:
-            sink.open(manifest, save_path, metadata)
-            for name in sorted(base_state.keys()):
-                sink.write_tensor(name, base_state[name])
-            sink.finalize(save_path)
-        except BaseException:
-            sink.abort()
-            raise
+        if is_checkpoint:
+            # Checkpoint-style no-op: save via Comfy checkpoint semantics.
+            # Install base weights as set patches (no merge needed — this is
+            # a no-op save of the original checkpoint).
+            merged_model = install_merged_patches(
+                model_patcher, {}, storage_dtype,
+            )
 
-        if ProgressBar is not None:
-            pbar = ProgressBar(1)
-            pbar.update(1)
+            metadata = build_metadata(
+                serialized, recipe_hash, [], workflow_json, output_mode="full",
+                artifact_kind="checkpoint",
+                base_identity=base_identity,
+                dependency_fingerprints=dependency_fingerprints_json,
+                checkpoint_components=True,
+            )
 
-        return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+            checkpoint_components = widen.checkpoint_components
+            save_comfy_checkpoint(
+                save_path,
+                merged_model,
+                clip=checkpoint_components.clip,
+                vae=checkpoint_components.vae,
+                metadata=metadata,
+            )
+
+            if ProgressBar is not None:
+                pbar = ProgressBar(1)
+                pbar.update(1)
+
+            return (merged_model,)
+        else:
+            # Diffusion-only no-op: write through MaterializationSink.
+            metadata = build_metadata(
+                serialized, recipe_hash, [], workflow_json, output_mode="full",
+                artifact_kind="diffusion",
+                base_identity=base_identity,
+                dependency_fingerprints=dependency_fingerprints_json,
+            )
+
+            sink = MaterializationSink()
+            try:
+                sink.open(manifest, save_path, metadata)
+                for name in sorted(base_state.keys()):
+                    sink.write_tensor(name, base_state[name])
+                sink.finalize(save_path)
+            except BaseException:
+                sink.abort()
+                raise
+
+            if ProgressBar is not None:
+                pbar = ProgressBar(1)
+                pbar.update(1)
+
+            return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
 
     def _execute_full_saved_model(
         self,

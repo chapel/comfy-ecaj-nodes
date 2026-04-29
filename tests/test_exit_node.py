@@ -912,24 +912,30 @@ class TestSaveModelCacheHit:
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
-        # Create a fake cached file with full-mode metadata containing ALL model keys.
-        # The artifact must be complete (all model keys) to pass cache validation.
+        # Create a fake cached checkpoint artifact with Comfy-style keys.
+        # Uses model.diffusion_model.* prefix (Comfy checkpoint format) so the
+        # loader correctly maps keys back to the patcher's diffusion_model.* keys.
         cached_path = tmp_path / "cached.safetensors"
-        all_keys = list(mock_model_patcher.model_state_dict().keys())
-        cached_tensors = {k: torch.randn(4, 4) for k in all_keys}
-        key = all_keys[0]
+        patcher_keys = list(mock_model_patcher.model_state_dict().keys())
+        # Map patcher keys (diffusion_model.*) to Comfy checkpoint keys (model.diffusion_model.*)
+        cached_tensors = {f"model.{k}": torch.randn(4, 4) for k in patcher_keys}
+        # Also add checkpoint companion keys
+        cached_tensors["conditioner.embedders.0.weight"] = torch.randn(4, 4)
+        cached_tensors["first_stage_model.decoder.weight"] = torch.randn(4, 4)
+        patcher_key = patcher_keys[0]
         import json as _json
         cached_metadata = {
             "__ecaj_version__": "1",
             "__ecaj_recipe__": "{}",
             "__ecaj_recipe_hash__": "will_match",
-            "__ecaj_affected_keys__": _json.dumps([key]),
+            "__ecaj_affected_keys__": _json.dumps([patcher_key]),
             "__ecaj_output_mode__": "full",
-            "__ecaj_artifact_kind__": "diffusion",
+            "__ecaj_artifact_kind__": "checkpoint",
             "__ecaj_base_identity__": "base_id",
             "__ecaj_dependency_fingerprints__": _json.dumps(
                 {}, sort_keys=True, separators=(",", ":"),
             ),
+            "__ecaj_checkpoint_components__": "true",
         }
         save_file(cached_tensors, str(cached_path), metadata=cached_metadata)
 
@@ -955,7 +961,7 @@ class TestSaveModelCacheHit:
         # Result should be a model loaded from the artifact (no set patches).
         assert result is not mock_model_patcher
         result_sd = result.model_state_dict()
-        assert key in result_sd
+        assert patcher_key in result_sd
 
 
 # =============================================================================
@@ -971,7 +977,7 @@ class TestSaveModelCacheMiss:
 
     # AC: @exit-model-persistence ac-2
     def test_saves_after_gpu(self, mock_model_patcher, tmp_path):
-        """Cache miss should run GPU pipeline and save result via MaterializationSink."""
+        """Cache miss should run GPU pipeline and save result via save_comfy_checkpoint."""
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
                           checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -981,8 +987,6 @@ class TestSaveModelCacheMiss:
         affected_key = "diffusion_model.input_blocks.0.0.weight"
 
         node = WIDENExitNode()
-
-        mock_sink = MagicMock()
 
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
@@ -991,18 +995,19 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
-            patch("nodes.exit.check_full_model_cache", return_value=False),  # cache miss
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),  # cache miss
             patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation") as mock_chunked,
-            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
             patch("nodes.exit.check_ram_preflight"),
         ):
-            affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
             mock_analyze.return_value = MagicMock(
                 model_patcher=mock_model_patcher,
                 arch="sdxl",
@@ -1010,8 +1015,13 @@ class TestSaveModelCacheMiss:
                 set_affected={str(id(lora)): {affected_key}},
                 affected_keys={affected_key},
             )
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={},
+                model_affected={},
+                all_model_keys=frozenset(),
+            )
+            mock_install.return_value = mock_model_patcher.clone()
             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
-            mock_load.return_value = mock_model_patcher.clone()
 
             (result,) = node.execute(
                 merge, save_model=True, model_name="model"
@@ -1019,12 +1029,12 @@ class TestSaveModelCacheMiss:
 
             # analyze_recipe SHOULD have been called
             mock_analyze.assert_called_once()
-            # MaterializationSink.finalize SHOULD have been called
-            mock_sink.finalize.assert_called_once()
+            # save_comfy_checkpoint SHOULD have been called (checkpoint-style)
+            mock_save_ckpt.assert_called_once()
 
     # AC: @exit-model-persistence ac-4
     def test_overwrites_stale_cache(self, mock_model_patcher, tmp_path):
-        """Hash mismatch should overwrite the stale cached file via MaterializationSink."""
+        """Hash mismatch should overwrite the stale cached file via save_comfy_checkpoint."""
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
                           checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -1035,8 +1045,6 @@ class TestSaveModelCacheMiss:
 
         node = WIDENExitNode()
 
-        mock_sink = MagicMock()
-
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
@@ -1044,18 +1052,19 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
-            patch("nodes.exit.check_full_model_cache", return_value=False),  # stale
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),  # stale
             patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation") as mock_chunked,
-            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
             patch("nodes.exit.check_ram_preflight"),
         ):
-            affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
             mock_analyze.return_value = MagicMock(
                 model_patcher=mock_model_patcher,
                 arch="sdxl",
@@ -1063,14 +1072,20 @@ class TestSaveModelCacheMiss:
                 set_affected={str(id(lora)): {affected_key}},
                 affected_keys={affected_key},
             )
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={},
+                model_affected={},
+                all_model_keys=frozenset(),
+            )
+            mock_install.return_value = mock_model_patcher.clone()
             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
-            mock_load.return_value = mock_model_patcher.clone()
 
             (result,) = node.execute(
                 merge, save_model=True, model_name="model"
             )
 
-            mock_sink.finalize.assert_called_once()
+            # Stale cache miss should write new artifact
+            mock_save_ckpt.assert_called_once()
 
 
 # =============================================================================
@@ -1352,8 +1367,9 @@ class TestCheckpointCacheRouting:
             assert call_kwargs.kwargs.get("dependency_fingerprints") is not None
 
     # AC: @full-saved-model-output ac-cache-reuses-artifact
-    def test_non_checkpoint_recipe_uses_check_full_model_cache(self, mock_model_patcher, tmp_path):
-        """Non-checkpoint (LoRA-only) recipe must use check_full_model_cache."""
+    def test_checkpoint_sourced_lora_recipe_uses_checkpoint_cache(self, mock_model_patcher, tmp_path):
+        """Checkpoint-sourced LoRA recipe (RecipeBase with checkpoint_components + LoRA)
+        must use check_checkpoint_cache, not check_full_model_cache."""
         base = RecipeBase(
             model_patcher=mock_model_patcher,
             arch="sdxl",
@@ -1365,8 +1381,6 @@ class TestCheckpointCacheRouting:
         save_path = str(tmp_path / "model.safetensors")
         node = WIDENExitNode()
 
-        mock_sink = MagicMock()
-
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
@@ -1374,18 +1388,21 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
-            patch("nodes.exit.check_checkpoint_cache") as mock_ckpt_cache,
-            patch("nodes.exit.check_full_model_cache", return_value=False) as mock_full_cache,
+            patch("nodes.exit.check_checkpoint_cache", return_value=False) as mock_ckpt_cache,
+            patch("nodes.exit.check_full_model_cache") as mock_full_cache,
             patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.chunked_evaluation") as mock_chunked,
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
             mock_analyze.return_value = MagicMock(
                 model_patcher=mock_model_patcher,
                 arch="sdxl",
@@ -1393,23 +1410,29 @@ class TestCheckpointCacheRouting:
                 set_affected={str(id(lora)): {affected_key}},
                 affected_keys={affected_key},
             )
-            mock_load.return_value = mock_model_patcher.clone()
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={},
+                model_affected={},
+                all_model_keys=frozenset(),
+            )
+            mock_install.return_value = mock_model_patcher.clone()
+            mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
 
             node.execute(merge, save_model=True, model_name="model")
 
-            # check_full_model_cache MUST have been called (non-checkpoint recipe)
-            mock_full_cache.assert_called_once()
-            # check_checkpoint_cache must NOT have been called
-            mock_ckpt_cache.assert_not_called()
+            # check_checkpoint_cache MUST have been called (checkpoint-sourced recipe)
+            mock_ckpt_cache.assert_called_once()
+            # check_full_model_cache must NOT have been called
+            mock_full_cache.assert_not_called()
 
     # AC: @exit-model-persistence ac-3
     # AC: @exit-model-persistence ac-4
-    def test_diffusion_model_recipe_uses_full_model_cache(self, mock_model_patcher, tmp_path):
-        """RecipeModel with source_dir='diffusion_models' must route to check_full_model_cache.
+    def test_diffusion_model_recipe_with_checkpoint_base_uses_checkpoint_cache(self, mock_model_patcher, tmp_path):
+        """RecipeModel with source_dir='diffusion_models' merged onto a checkpoint
+        base still uses check_checkpoint_cache, because the base has checkpoint_components.
 
-        Diffusion-only model inputs are not checkpoint companions. They must
-        not be classified as checkpoint-style and must not use checkpoint cache
-        validation.
+        The checkpoint-source classification is driven by the base's
+        checkpoint_components, not by the RecipeModel's source_dir.
         """
         base = RecipeBase(
             model_patcher=mock_model_patcher,
@@ -1431,15 +1454,15 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
-            patch("nodes.exit.check_checkpoint_cache") as mock_ckpt_cache,
-            patch("nodes.exit.check_full_model_cache", return_value=False) as mock_full_cache,
+            patch("nodes.exit.check_checkpoint_cache", return_value=False) as mock_ckpt_cache,
+            patch("nodes.exit.check_full_model_cache") as mock_full_cache,
             patch("nodes.exit.analyze_recipe") as mock_analyze,
             patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit.streaming_evaluation_to_sink"),
-            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.install_merged_patches") as mock_install,
+            patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
@@ -1461,14 +1484,14 @@ class TestCheckpointCacheRouting:
                 model_affected={str(id(model)): frozenset({affected_key})},
                 all_model_keys=frozenset({affected_key}),
             )
-            mock_load.return_value = mock_model_patcher.clone()
+            mock_install.return_value = mock_model_patcher.clone()
 
             node.execute(merge, save_model=True, model_name="model")
 
-            # Diffusion-only RecipeModel must use check_full_model_cache
-            mock_full_cache.assert_called_once()
-            # check_checkpoint_cache must NOT be used for diffusion-only models
-            mock_ckpt_cache.assert_not_called()
+            # Checkpoint base with diffusion RecipeModel still uses checkpoint cache
+            mock_ckpt_cache.assert_called_once()
+            # check_full_model_cache must NOT be called
+            mock_full_cache.assert_not_called()
 
     # AC: @exit-model-persistence ac-3
     def test_checkpoint_cache_called_without_manifest(self, mock_model_patcher, tmp_path):
