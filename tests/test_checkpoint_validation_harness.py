@@ -481,7 +481,8 @@ class TestMemoryModeNotChangedForSuccess:
              patch.object(harness, "query_object_info", return_value=mock_obj_info), \
              patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
                  name="test", accepted=True, prompt_id="p1",
-             )):
+             )), \
+             patch.object(harness, "check_cache_reuse", return_value=(True, "cached")):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -555,13 +556,16 @@ class TestReportSchema:
         required = harness._REQUIRED_REPORT_FIELDS
         assert "comfy_version" in required
         assert "memory_mode" in required
+        assert "terminal_save_workflow_shape" in required
         assert "terminal_save_result" in required
+        assert "checkpoint_save_workflow_shape" in required
         assert "saved_artifact_path" in required
         assert "saved_artifact_classification" in required
         assert "checkpoint_save_result" in required
         assert "checkpoint_loader_result" in required
         assert "downstream_result" in required
         assert "cache_reuse_result" in required
+        assert "cache_reuse_detail" in required
         assert "failure_categories" in required
 
 
@@ -697,9 +701,13 @@ class TestMockedRunValidation:
                 prompt_id=f"prompt_{call_count}",
             )
 
+        def mock_check_cache(base_url, first_pid, reuse_pid):
+            return True, f"WIDENExit node 3 cached in reuse prompt ({reuse_pid})"
+
         with patch.object(harness, "query_system_stats", return_value=mock_stats), \
              patch.object(harness, "query_object_info", return_value=mock_obj_info), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit):
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse", side_effect=mock_check_cache):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -720,6 +728,20 @@ class TestMockedRunValidation:
 
         # Verify artifact classification
         assert report.saved_artifact_classification == "checkpoint"
+        assert report.saved_artifact_path == "ecaj_checkpoint_validation_save.safetensors"
+
+        # Verify workflow shapes are recorded
+        assert report.terminal_save_workflow_shape
+        assert report.checkpoint_save_workflow_shape
+        assert "WIDENEntry" in str(report.terminal_save_workflow_shape)
+        assert "WIDENEntry" in str(report.checkpoint_save_workflow_shape)
+        # Verify CLIP+VAE wiring is visible in shapes
+        assert report.checkpoint_save_workflow_shape["2"]["inputs"]["clip"] == ["1", 1]
+        assert report.checkpoint_save_workflow_shape["2"]["inputs"]["vae"] == ["1", 2]
+
+        # Verify cache reuse detail is recorded
+        assert report.cache_reuse_detail
+        assert "cached" in report.cache_reuse_detail
 
         # Verify failure categories present
         assert "scheduling" in report.failure_categories
@@ -770,7 +792,8 @@ class TestMockedRunValidation:
 
         with patch.object(harness, "query_system_stats", return_value=mock_stats), \
              patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit):
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -797,10 +820,24 @@ class TestWorkflowBuilders:
         assert wf["3"]["class_type"] == "WIDENExit"
         assert wf["3"]["inputs"]["save_model"] is True
 
+    def test_terminal_exit_save_wires_clip_and_vae(self):
+        wf = harness.build_terminal_exit_save_workflow("test.safetensors")
+        entry_inputs = wf["2"]["inputs"]
+        assert entry_inputs["model"] == ["1", 0]
+        assert entry_inputs["clip"] == ["1", 1]
+        assert entry_inputs["vae"] == ["1", 2]
+
     def test_checkpoint_save_workflow_shape(self):
         wf = harness.build_checkpoint_save_workflow("test.safetensors")
         assert wf["1"]["class_type"] == "CheckpointLoaderSimple"
         assert wf["3"]["inputs"]["save_model"] is True
+
+    def test_checkpoint_save_wires_clip_and_vae(self):
+        wf = harness.build_checkpoint_save_workflow("test.safetensors")
+        entry_inputs = wf["2"]["inputs"]
+        assert entry_inputs["model"] == ["1", 0]
+        assert entry_inputs["clip"] == ["1", 1]
+        assert entry_inputs["vae"] == ["1", 2]
 
     def test_downstream_workflow_shape(self):
         wf = harness.build_downstream_workflow("test.safetensors")
@@ -841,10 +878,26 @@ class TestWorkflowBuilders:
         assert lat_node["inputs"]["width"] == 512
         assert lat_node["inputs"]["batch_size"] == 2
 
-    def test_cache_reuse_workflow_matches_save(self):
+    def test_cache_reuse_workflow_has_enable_cache(self):
+        cache_wf = harness.build_cache_reuse_workflow("test.safetensors")
+        exit_inputs = cache_wf["3"]["inputs"]
+        assert exit_inputs["enable_cache"] is True
+        assert exit_inputs["save_model"] is True
+
+    def test_cache_reuse_workflow_wires_clip_and_vae(self):
+        cache_wf = harness.build_cache_reuse_workflow("test.safetensors")
+        entry_inputs = cache_wf["2"]["inputs"]
+        assert entry_inputs["model"] == ["1", 0]
+        assert entry_inputs["clip"] == ["1", 1]
+        assert entry_inputs["vae"] == ["1", 2]
+
+    def test_cache_reuse_workflow_same_model_name_as_save(self):
         save_wf = harness.build_checkpoint_save_workflow("test.safetensors")
         cache_wf = harness.build_cache_reuse_workflow("test.safetensors")
-        assert save_wf == cache_wf
+        assert (
+            cache_wf["3"]["inputs"]["model_name"]
+            == save_wf["3"]["inputs"]["model_name"]
+        )
 
 
 # ===========================================================================
@@ -886,9 +939,11 @@ class TestReportJsonRoundtrip:
             comfy_api_url="http://localhost:8188",
             source_model="test.safetensors",
             node_classes=["WIDENEntry", "WIDENExit"],
+            terminal_save_workflow_shape={"1": {"class_type": "CheckpointLoaderSimple"}},
             terminal_save_result=harness.WorkflowResult(
                 name="terminal", accepted=True, prompt_id="t1",
             ),
+            checkpoint_save_workflow_shape={"1": {"class_type": "CheckpointLoaderSimple"}},
             checkpoint_save_result=harness.WorkflowResult(
                 name="save", accepted=True, prompt_id="s1",
             ),
@@ -903,6 +958,7 @@ class TestReportJsonRoundtrip:
             cache_reuse_result=harness.WorkflowResult(
                 name="cache", accepted=True, prompt_id="c1",
             ),
+            cache_reuse_detail="WIDENExit cached in reuse prompt",
             failure_categories={"scheduling": "none", "save": "none"},
             duration_seconds=2.5,
         )
@@ -915,4 +971,214 @@ class TestReportJsonRoundtrip:
         assert data["checkpoint_loader_result"]["prompt_id"] == "l1"
         assert data["downstream_result"]["prompt_id"] == "d1"
         assert data["cache_reuse_result"]["prompt_id"] == "c1"
+        terminal_shape = data["terminal_save_workflow_shape"]
+        assert terminal_shape["1"]["class_type"] == "CheckpointLoaderSimple"
+        ckpt_shape = data["checkpoint_save_workflow_shape"]
+        assert ckpt_shape["1"]["class_type"] == "CheckpointLoaderSimple"
+        assert data["cache_reuse_detail"] == "WIDENExit cached in reuse prompt"
         assert data["duration_seconds"] == 2.5
+
+
+# ===========================================================================
+# Cache reuse detection tests
+# ===========================================================================
+
+
+class TestCheckCacheReuse:
+    """check_cache_reuse correctly identifies cache hit/miss from history."""
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_cache_reused_when_exit_node_not_in_reuse_outputs(self):
+        """Cache reuse detected when WIDENExit is absent from reuse outputs."""
+        first_history = {
+            "outputs": {"3": {"result": "saved"}},
+            "status": {"messages": []},
+        }
+        reuse_history = {
+            "outputs": {},
+            "status": {"messages": []},
+        }
+
+        def mock_query(base_url, prompt_id, **kwargs):
+            if prompt_id == "first":
+                return first_history
+            return reuse_history
+
+        with patch.object(harness, "query_prompt_history", side_effect=mock_query):
+            reused, detail = harness.check_cache_reuse(
+                "http://fake:8188", "first", "reuse",
+            )
+        assert reused is True
+        assert "cached" in detail
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_cache_reused_via_execution_cached_message(self):
+        """Cache reuse detected via execution_cached status message."""
+        first_history = {
+            "outputs": {"3": {"result": "saved"}},
+            "status": {"messages": []},
+        }
+        reuse_history = {
+            "outputs": {"3": {"result": "saved"}},
+            "status": {
+                "messages": [
+                    ["execution_cached", {"nodes": ["1", "2", "3"]}],
+                ],
+            },
+        }
+
+        def mock_query(base_url, prompt_id, **kwargs):
+            if prompt_id == "first":
+                return first_history
+            return reuse_history
+
+        with patch.object(harness, "query_prompt_history", side_effect=mock_query):
+            reused, detail = harness.check_cache_reuse(
+                "http://fake:8188", "first", "reuse",
+            )
+        assert reused is True
+        assert "execution_cached" in detail
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_cache_not_reused_when_exit_re_executed(self):
+        """Cache NOT reused when WIDENExit produces outputs in both prompts."""
+        first_history = {
+            "outputs": {"3": {"result": "saved"}},
+            "status": {"messages": []},
+        }
+        reuse_history = {
+            "outputs": {"3": {"result": "saved_again"}},
+            "status": {"messages": []},
+        }
+
+        def mock_query(base_url, prompt_id, **kwargs):
+            if prompt_id == "first":
+                return first_history
+            return reuse_history
+
+        with patch.object(harness, "query_prompt_history", side_effect=mock_query):
+            reused, detail = harness.check_cache_reuse(
+                "http://fake:8188", "first", "reuse",
+            )
+        assert reused is False
+        assert "NOT reused" in detail
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_cache_check_handles_unavailable_history(self):
+        """Returns False with detail when history is unavailable."""
+        with patch.object(harness, "query_prompt_history", return_value={}):
+            reused, detail = harness.check_cache_reuse(
+                "http://fake:8188", "first", "reuse",
+            )
+        assert reused is False
+        assert "unavailable" in detail
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_cache_check_handles_exception(self):
+        """Returns False with detail when an exception occurs."""
+        with patch.object(
+            harness, "query_prompt_history",
+            side_effect=Exception("connection timeout"),
+        ):
+            reused, detail = harness.check_cache_reuse(
+                "http://fake:8188", "first", "reuse",
+            )
+        assert reused is False
+        assert "failed" in detail
+
+
+# ===========================================================================
+# Downstream loads saved artifact (not source)
+# ===========================================================================
+
+
+class TestDownstreamLoadsSavedArtifact:
+    """Downstream workflow must load the saved artifact, not the source model."""
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-loader-downstream-outcome
+    def test_downstream_uses_saved_artifact_filename(self):
+        """build_downstream_workflow with saved artifact loads it, not source."""
+        wf = harness.build_downstream_workflow(
+            "ecaj_checkpoint_validation_save.safetensors",
+        )
+        loader_node = wf["1"]
+        assert loader_node["class_type"] == "CheckpointLoaderSimple"
+        assert loader_node["inputs"]["ckpt_name"] == "ecaj_checkpoint_validation_save.safetensors"
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-loader-downstream-outcome
+    def test_run_validation_passes_saved_artifact_to_downstream(self):
+        """run_validation uses saved artifact filename in downstream workflow."""
+        mock_stats = {
+            "system": {"comfyui_version": "0.3.4"},
+            "devices": [{"vram_state": "normal"}],
+        }
+
+        submitted_workflows = []
+
+        def mock_submit(base_url, workflow, name):
+            submitted_workflows.append((name, workflow))
+            return harness.WorkflowResult(
+                name=name, accepted=True, prompt_id=f"p_{name}",
+            )
+
+        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse", return_value=(True, "cached")):
+            harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="source.safetensors",
+                report_output="/fake/report.json",
+            )
+
+        # Find the downstream workflow submission
+        downstream_submissions = [
+            (name, wf) for name, wf in submitted_workflows
+            if name == "downstream_ksampler"
+        ]
+        assert len(downstream_submissions) == 1
+        _, downstream_wf = downstream_submissions[0]
+        # The downstream workflow must load the saved artifact, NOT source.safetensors
+        loader_ckpt = downstream_wf["1"]["inputs"]["ckpt_name"]
+        assert loader_ckpt == "ecaj_checkpoint_validation_save.safetensors"
+        assert loader_ckpt != "source.safetensors"
+
+
+# ===========================================================================
+# Workflow shape recording tests
+# ===========================================================================
+
+
+class TestWorkflowShapeRecording:
+    """Report records the queued workflow shapes for save prompts."""
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-save-outcome
+    def test_report_json_includes_terminal_save_workflow_shape(self):
+        """Report JSON includes terminal_save_workflow_shape field."""
+        shape = harness.build_terminal_exit_save_workflow("test.safetensors")
+        report = harness.CheckpointValidationReport(
+            terminal_save_workflow_shape=shape,
+        )
+        data = json.loads(report.to_json())
+        assert "terminal_save_workflow_shape" in data
+        assert data["terminal_save_workflow_shape"]["2"]["inputs"]["clip"] == ["1", 1]
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-save-outcome
+    def test_report_json_includes_checkpoint_save_workflow_shape(self):
+        """Report JSON includes checkpoint_save_workflow_shape field."""
+        shape = harness.build_checkpoint_save_workflow("test.safetensors")
+        report = harness.CheckpointValidationReport(
+            checkpoint_save_workflow_shape=shape,
+        )
+        data = json.loads(report.to_json())
+        assert "checkpoint_save_workflow_shape" in data
+        assert data["checkpoint_save_workflow_shape"]["2"]["inputs"]["vae"] == ["1", 2]
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-save-outcome
+    def test_workflow_shapes_show_clip_vae_wiring(self):
+        """Workflow shapes prove MODEL+CLIP+VAE are wired correctly."""
+        save_shape = harness.build_checkpoint_save_workflow("test.safetensors")
+        entry_inputs = save_shape["2"]["inputs"]
+        assert entry_inputs["model"] == ["1", 0]
+        assert entry_inputs["clip"] == ["1", 1]
+        assert entry_inputs["vae"] == ["1", 2]

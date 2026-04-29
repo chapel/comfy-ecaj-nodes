@@ -185,13 +185,16 @@ class CheckpointValidationReport:
     comfy_api_url: str = ""
     source_model: str = ""
     node_classes: list[str] = field(default_factory=list)
+    terminal_save_workflow_shape: dict = field(default_factory=dict)
     terminal_save_result: WorkflowResult = field(default_factory=WorkflowResult)
+    checkpoint_save_workflow_shape: dict = field(default_factory=dict)
     checkpoint_save_result: WorkflowResult = field(default_factory=WorkflowResult)
     saved_artifact_path: str = ""
     saved_artifact_classification: str = ""
     checkpoint_loader_result: WorkflowResult = field(default_factory=WorkflowResult)
     downstream_result: WorkflowResult = field(default_factory=WorkflowResult)
     cache_reuse_result: WorkflowResult = field(default_factory=WorkflowResult)
+    cache_reuse_detail: str = ""
     failure_categories: dict[str, str] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
     duration_seconds: float = 0.0
@@ -206,13 +209,16 @@ class CheckpointValidationReport:
 _REQUIRED_REPORT_FIELDS = frozenset({
     "comfy_version",
     "memory_mode",
+    "terminal_save_workflow_shape",
     "terminal_save_result",
+    "checkpoint_save_workflow_shape",
     "saved_artifact_path",
     "saved_artifact_classification",
     "checkpoint_save_result",
     "checkpoint_loader_result",
     "downstream_result",
     "cache_reuse_result",
+    "cache_reuse_detail",
     "failure_categories",
 })
 
@@ -254,14 +260,26 @@ def format_report(report: CheckpointValidationReport) -> str:
         f"  Accepted:     {report.terminal_save_result.accepted}",
         f"  Prompt ID:    {report.terminal_save_result.prompt_id}",
         f"  Error:        {report.terminal_save_result.error or 'none'}",
-        "",
+    ])
+    if report.terminal_save_workflow_shape:
+        shape_json = json.dumps(report.terminal_save_workflow_shape)
+        lines.append(f"  Workflow Shape: {shape_json}")
+    lines.append("")
+
+    lines.extend([
         "--- Checkpoint Save ---",
         f"  Accepted:     {report.checkpoint_save_result.accepted}",
         f"  Prompt ID:    {report.checkpoint_save_result.prompt_id}",
         f"  Artifact:     {report.saved_artifact_path}",
         f"  Classification: {report.saved_artifact_classification}",
         f"  Error:        {report.checkpoint_save_result.error or 'none'}",
-        "",
+    ])
+    if report.checkpoint_save_workflow_shape:
+        shape_json = json.dumps(report.checkpoint_save_workflow_shape)
+        lines.append(f"  Workflow Shape: {shape_json}")
+    lines.append("")
+
+    lines.extend([
         "--- Checkpoint Loader ---",
         f"  Accepted:     {report.checkpoint_loader_result.accepted}",
         f"  Prompt ID:    {report.checkpoint_loader_result.prompt_id}",
@@ -275,6 +293,7 @@ def format_report(report: CheckpointValidationReport) -> str:
         "--- Cache Reuse ---",
         f"  Accepted:     {report.cache_reuse_result.accepted}",
         f"  Prompt ID:    {report.cache_reuse_result.prompt_id}",
+        f"  Detail:       {report.cache_reuse_detail or 'none'}",
         f"  Error:        {report.cache_reuse_result.error or 'none'}",
         "",
     ])
@@ -383,6 +402,86 @@ def extract_node_classes(object_info: dict) -> list[str]:
     return sorted(object_info.keys())
 
 
+def query_prompt_history(
+    base_url: str, prompt_id: str, *, timeout: float = 30.0, max_polls: int = 30,
+    poll_interval: float = 2.0,
+) -> dict:
+    """Poll /history/{prompt_id} until the prompt finishes or polls are exhausted.
+
+    Returns the history entry dict for the prompt.
+    """
+    for _ in range(max_polls):
+        data = _api_get(base_url, f"/history/{prompt_id}", timeout=timeout)
+        if prompt_id in data:
+            return data[prompt_id]
+        time.sleep(poll_interval)
+    return {}
+
+
+def check_cache_reuse(
+    base_url: str, first_prompt_id: str, reuse_prompt_id: str,
+) -> tuple[bool, str]:
+    """Check whether the reuse prompt reused cached node outputs.
+
+    Compares the history entries of the first save prompt and the reuse
+    prompt.  If the reuse prompt's WIDENExit node is absent from its
+    ``outputs`` (ComfyUI only records outputs for nodes that actually
+    executed), the node was served from cache.
+
+    Returns (cache_reused: bool, detail: str).
+    """
+    try:
+        first_hist = query_prompt_history(base_url, first_prompt_id)
+        reuse_hist = query_prompt_history(base_url, reuse_prompt_id)
+
+        if not first_hist or not reuse_hist:
+            return False, "history unavailable for one or both prompts"
+
+        first_outputs = first_hist.get("outputs", {})
+        reuse_outputs = reuse_hist.get("outputs", {})
+
+        # Find the WIDENExit node id (node "3" in our workflow builders)
+        exit_node_id = "3"
+
+        first_had_exit_output = exit_node_id in first_outputs
+        reuse_had_exit_output = exit_node_id in reuse_outputs
+
+        if first_had_exit_output and not reuse_had_exit_output:
+            return True, (
+                f"WIDENExit node {exit_node_id} executed in first prompt "
+                f"({first_prompt_id}) but was cached in reuse prompt "
+                f"({reuse_prompt_id})"
+            )
+
+        # Both executed or both cached — check status_str_type for cache hint
+        reuse_status = reuse_hist.get("status", {})
+        status_messages = reuse_status.get("messages", [])
+        cached_nodes = []
+        for msg in status_messages:
+            if isinstance(msg, list) and len(msg) >= 2:
+                if msg[0] == "execution_cached":
+                    cached_nodes.extend(msg[1].get("nodes", []))
+
+        if exit_node_id in cached_nodes:
+            return True, (
+                f"WIDENExit node {exit_node_id} reported as execution_cached "
+                f"in reuse prompt ({reuse_prompt_id})"
+            )
+
+        if reuse_had_exit_output:
+            return False, (
+                f"WIDENExit node {exit_node_id} re-executed in reuse prompt "
+                f"({reuse_prompt_id}) — cache was NOT reused"
+            )
+
+        return False, (
+            f"unable to determine cache status: first_exit_output="
+            f"{first_had_exit_output}, reuse_exit_output={reuse_had_exit_output}"
+        )
+    except Exception as exc:
+        return False, f"cache reuse check failed: {exc}"
+
+
 # ---------------------------------------------------------------------------
 # Workflow builders — construct ComfyUI API prompt dicts
 # ---------------------------------------------------------------------------
@@ -393,6 +492,9 @@ def build_terminal_exit_save_workflow(source_model: str) -> dict:
 
     This tests whether ComfyUI accepts a terminal Exit node with save_model=True
     when there is no downstream MODEL consumer (scheduler/no-output test).
+
+    Wires MODEL, CLIP, and VAE from CheckpointLoaderSimple into WIDENEntry
+    (outputs: MODEL=0, CLIP=1, VAE=2).
     """
     return {
         "1": {
@@ -401,7 +503,11 @@ def build_terminal_exit_save_workflow(source_model: str) -> dict:
         },
         "2": {
             "class_type": "WIDENEntry",
-            "inputs": {"model": ["1", 0]},
+            "inputs": {
+                "model": ["1", 0],
+                "clip": ["1", 1],
+                "vae": ["1", 2],
+            },
         },
         "3": {
             "class_type": "WIDENExit",
@@ -417,8 +523,9 @@ def build_terminal_exit_save_workflow(source_model: str) -> dict:
 def build_checkpoint_save_workflow(source_model: str) -> dict:
     """Build a checkpoint-style WIDEN save_model workflow using MODEL, CLIP, VAE.
 
-    Uses CheckpointLoaderSimple to load all three components, feeds MODEL
-    through WIDEN Entry/Exit with save_model=True.
+    Uses CheckpointLoaderSimple to load all three components, feeds MODEL,
+    CLIP, and VAE through WIDEN Entry/Exit with save_model=True.
+    (CheckpointLoaderSimple outputs: MODEL=0, CLIP=1, VAE=2.)
     """
     return {
         "1": {
@@ -427,7 +534,11 @@ def build_checkpoint_save_workflow(source_model: str) -> dict:
         },
         "2": {
             "class_type": "WIDENEntry",
-            "inputs": {"model": ["1", 0]},
+            "inputs": {
+                "model": ["1", 0],
+                "clip": ["1", 1],
+                "vae": ["1", 2],
+            },
         },
         "3": {
             "class_type": "WIDENExit",
@@ -441,7 +552,7 @@ def build_checkpoint_save_workflow(source_model: str) -> dict:
 
 
 def build_downstream_workflow(
-    source_model: str,
+    ckpt_name: str,
     *,
     width: int = 256,
     height: int = 256,
@@ -457,13 +568,19 @@ def build_downstream_workflow(
     CheckpointLoaderSimple -> CLIPTextEncode -> EmptyLatentImage ->
     KSampler -> VAEDecode -> SaveImage.
 
+    Args:
+        ckpt_name: Checkpoint filename to load. Should be the saved artifact
+            (e.g. ``ecaj_checkpoint_validation_save.safetensors``), NOT the
+            original source model, so downstream validation proves the
+            *saved* artifact is loadable and usable.
+
     Uses safe defaults: 256x256, batch_size 1, 1 step, cfg 1.0,
     euler/normal, deterministic seed.
     """
     return {
         "1": {
             "class_type": "CheckpointLoaderSimple",
-            "inputs": {"ckpt_name": source_model},
+            "inputs": {"ckpt_name": ckpt_name},
         },
         "2": {
             "class_type": "CLIPTextEncode",
@@ -520,13 +637,41 @@ def build_downstream_workflow(
 
 
 def build_cache_reuse_workflow(source_model: str) -> dict:
-    """Build a workflow that re-runs checkpoint save to test cache reuse.
+    """Build a workflow that re-runs checkpoint save to test cache/artifact reuse.
 
-    This is identical to build_checkpoint_save_workflow — running the same
-    save_model workflow a second time should reuse the cached artifact
-    without recomputing the WIDEN merge.
+    This workflow is structurally identical to build_checkpoint_save_workflow
+    but with enable_cache=True explicitly set on the WIDENExit node.  When
+    ComfyUI re-executes the same node graph, nodes whose inputs haven't
+    changed are served from ComfyUI's execution cache — so the WIDEN merge
+    should not recompute.
+
+    The caller should compare this prompt's execution against the first save
+    prompt via the /history API to determine whether the cached path was used
+    (e.g. by checking whether the WIDENExit node re-executed or was cached).
     """
-    return build_checkpoint_save_workflow(source_model)
+    return {
+        "1": {
+            "class_type": "CheckpointLoaderSimple",
+            "inputs": {"ckpt_name": source_model},
+        },
+        "2": {
+            "class_type": "WIDENEntry",
+            "inputs": {
+                "model": ["1", 0],
+                "clip": ["1", 1],
+                "vae": ["1", 2],
+            },
+        },
+        "3": {
+            "class_type": "WIDENExit",
+            "inputs": {
+                "widen": ["2", 0],
+                "save_model": True,
+                "enable_cache": True,
+                "model_name": "ecaj_checkpoint_validation_save",
+            },
+        },
+    }
 
 
 def submit_workflow(
@@ -640,6 +785,7 @@ def run_validation(
 
         # --- Submit terminal Exit save workflow ---
         terminal_wf = build_terminal_exit_save_workflow(source_model)
+        report.terminal_save_workflow_shape = terminal_wf
         report.terminal_save_result = submit_workflow(
             comfy_api_url, terminal_wf, "terminal_exit_save",
         )
@@ -649,6 +795,7 @@ def run_validation(
 
         # --- Submit checkpoint save_model workflow ---
         save_wf = build_checkpoint_save_workflow(source_model)
+        report.checkpoint_save_workflow_shape = save_wf
         report.checkpoint_save_result = submit_workflow(
             comfy_api_url, save_wf, "checkpoint_save",
         )
@@ -656,20 +803,23 @@ def run_validation(
             report.checkpoint_save_result,
         )
 
-        # Determine saved artifact path from checkpoint_save result
+        # Determine saved artifact path from checkpoint_save result.
+        # The WIDENExit node saves to: <model_name>.safetensors
+        saved_artifact_filename = ""
         if report.checkpoint_save_result.accepted:
-            pid = report.checkpoint_save_result.prompt_id
-            report.saved_artifact_path = (
-                f"ecaj_checkpoint_validation_save (prompt_id: {pid})"
-            )
+            saved_artifact_filename = "ecaj_checkpoint_validation_save.safetensors"
+            report.saved_artifact_path = saved_artifact_filename
             report.saved_artifact_classification = "checkpoint"
         else:
             report.saved_artifact_path = ""
             report.saved_artifact_classification = "not_saved"
 
-        # --- Submit downstream workflow to load and render ---
+        # --- Load saved artifact and run downstream workflow ---
+        # Use the saved artifact (not the source model) so we prove the
+        # *saved checkpoint* is loadable and produces valid downstream output.
+        loader_ckpt = saved_artifact_filename if saved_artifact_filename else source_model
         downstream_wf = build_downstream_workflow(
-            source_model,
+            loader_ckpt,
             width=width,
             height=height,
             steps=steps,
@@ -682,7 +832,7 @@ def run_validation(
         report.downstream_result = submit_workflow(
             comfy_api_url, downstream_wf, "downstream_ksampler",
         )
-        # Record loader + downstream together
+        # Record loader + downstream together (same prompt exercises both)
         report.checkpoint_loader_result = WorkflowResult(
             name="checkpoint_loader",
             accepted=report.downstream_result.accepted,
@@ -696,7 +846,7 @@ def run_validation(
             report.downstream_result,
         )
 
-        # --- Submit cache reuse workflow ---
+        # --- Submit cache reuse workflow and verify reuse ---
         cache_wf = build_cache_reuse_workflow(source_model)
         report.cache_reuse_result = submit_workflow(
             comfy_api_url, cache_wf, "cache_reuse",
@@ -704,6 +854,24 @@ def run_validation(
         report.failure_categories["cache"] = classify_failure(
             report.cache_reuse_result,
         )
+
+        # Check cache reuse by comparing execution history
+        if (report.checkpoint_save_result.accepted
+                and report.cache_reuse_result.accepted):
+            cache_reused, detail = check_cache_reuse(
+                comfy_api_url,
+                report.checkpoint_save_result.prompt_id,
+                report.cache_reuse_result.prompt_id,
+            )
+            report.cache_reuse_detail = detail
+            if not cache_reused:
+                report.failure_categories["cache"] = "cache_not_reused"
+        elif report.cache_reuse_result.accepted:
+            report.cache_reuse_detail = (
+                "first save was rejected; cannot verify reuse"
+            )
+        else:
+            report.cache_reuse_detail = "cache reuse prompt was rejected"
 
         # --- Memory mode failure check ---
         report.failure_categories["memory_mode"] = "none"
