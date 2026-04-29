@@ -624,6 +624,9 @@ features:
               Saved model output produces artifacts that can be loaded as the same ComfyUI
               model kind users expect from the source workflow, including checkpoint-style
               models whose usable workflow requires more than diffusion weights alone.
+            status:
+              maturity: draft
+              implementation: in_progress
             depends_on: []
             implements: []
             relates_to: []
