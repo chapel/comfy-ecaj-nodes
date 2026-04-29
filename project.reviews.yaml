@@ -14601,9 +14601,25 @@ reviews:
           kind: blocker
           thread_ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
         timestamp: 2026-04-29T11:35:28.085Z
+      - _ulid: 01KQCGBWNT2YC31TGVKRHCP1EA
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-29T11:35:38.938Z
+      - _ulid: 01KQCGBWNTKDP1Z01E76026X3Z
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T11:35:38.938Z
     examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -14690,7 +14706,14 @@ reviews:
               actually submitted, including whether MODEL/CLIP/VAE were wired correctly."
             created_at: 2026-04-29T11:35:27.964Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T11:35:38.938Z
     created_at: 2026-04-29T11:31:40.966Z
-    updated_at: 2026-04-29T11:35:27.964Z
+    updated_at: 2026-04-29T11:35:38.938Z
     notes: []
