@@ -72,6 +72,18 @@ class IncrementalWriter:
             metadata: Optional string->string metadata dict to embed in the
                 safetensors header.
         """
+        if metadata is not None:
+            for k, v in metadata.items():
+                if not isinstance(k, str):
+                    raise TypeError(
+                        f"metadata key must be str, got {type(k).__name__}: {k!r}"
+                    )
+                if not isinstance(v, str):
+                    raise TypeError(
+                        f"metadata value must be str, got {type(v).__name__}"
+                        f" for key {k!r}"
+                    )
+
         self._save_path = save_path
         self._poisoned = False
         self._finalized = False
@@ -207,8 +219,12 @@ class IncrementalWriter:
             )
 
         offset = self._data_start + self._tensor_offsets[name]
-        self._file.seek(offset)
-        self._file.write(_tensor_bytes(tensor))
+        try:
+            self._file.seek(offset)
+            self._file.write(_tensor_bytes(tensor))
+        except Exception as exc:
+            self._poison(f"write_tensor {name!r}: I/O error — {exc}")
+            raise
         self._written.add(name)
 
     def finalize(self) -> None:
@@ -228,7 +244,7 @@ class IncrementalWriter:
         if self._poisoned:
             raise RuntimeError("IncrementalWriter is poisoned — cannot finalize")
         if len(self._written) != self._total_count:
-            # Do NOT poison here — just fail finalize and clean up the temp file.
+            self._aborted = True
             self._cleanup_temp()
             raise RuntimeError(
                 f"Cannot finalize: wrote {len(self._written)}/{self._total_count} tensors"

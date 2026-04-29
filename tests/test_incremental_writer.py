@@ -11,6 +11,7 @@ AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
 import os
 import random
 import tempfile
+from unittest.mock import patch
 
 import pytest
 import torch
@@ -19,12 +20,20 @@ from safetensors import safe_open
 from lib.incremental_writer import IncrementalWriter
 
 
-def _make_manifest(tensors: dict[str, torch.Tensor]) -> dict[str, tuple[torch.dtype, tuple[int, ...]]]:
+def _make_manifest(
+    tensors: dict[str, torch.Tensor],
+) -> dict[str, tuple[torch.dtype, tuple[int, ...]]]:
     """Build a manifest from a dict of tensors."""
-    return {name: (t.dtype, tuple(t.shape)) for name, t in tensors.items()}
+    return {
+        name: (t.dtype, tuple(t.shape)) for name, t in tensors.items()
+    }
 
 
-def _write_valid_artifact(path: str, tensors: dict[str, torch.Tensor], metadata: dict[str, str] | None = None) -> None:
+def _write_valid_artifact(
+    path: str,
+    tensors: dict[str, torch.Tensor],
+    metadata: dict[str, str] | None = None,
+) -> None:
     """Write a valid safetensors artifact at path using the writer itself."""
     manifest = _make_manifest(tensors)
     w = IncrementalWriter(manifest, path, metadata=metadata)
@@ -362,7 +371,7 @@ class TestContextManager:
 
     # AC: @saved-model-artifact-safety ac-no-partial-publication
     def test_context_manager_normal_exit_does_not_auto_finalize(self):
-        """Normal exit from context manager does NOT auto-finalize — caller must finalize explicitly."""
+        """Normal exit from context manager does NOT auto-finalize."""
         tensors = {"a": torch.randn(4)}
         manifest = _make_manifest(tensors)
 
@@ -373,3 +382,187 @@ class TestContextManager:
                 w.finalize()
 
             assert os.path.exists(save_path)
+
+
+class TestWriteTimeExceptionPoisonsWriter:
+    """I/O or serialization errors during write poison the writer."""
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_serialization_error_poisons_and_cleans_temp(self):
+        """Serialization failure poisons writer and removes temp file."""
+        tensors = {"a": torch.randn(4)}
+        manifest = _make_manifest(tensors)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = os.path.join(tmpdir, "model.safetensors")
+            w = IncrementalWriter(manifest, save_path)
+
+            with patch(
+                "lib.incremental_writer._tensor_bytes",
+                side_effect=RuntimeError("serialization failed"),
+            ):
+                with pytest.raises(
+                    RuntimeError, match="serialization"
+                ):
+                    w.write_tensor("a", tensors["a"])
+
+            # Writer is poisoned — cannot finalize
+            with pytest.raises(RuntimeError, match="poisoned"):
+                w.finalize()
+
+            assert not os.path.exists(save_path)
+            remaining = [
+                f for f in os.listdir(tmpdir)
+                if f.startswith(".ecaj_tmp_")
+            ]
+            assert remaining == [], (
+                f"temp file not cleaned: {remaining}"
+            )
+
+    # AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
+    def test_serialization_error_preserves_existing(self):
+        """Serialization failure preserves a pre-existing artifact."""
+        original_tensors = {"x": torch.randn(4)}
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = os.path.join(tmpdir, "model.safetensors")
+            _write_valid_artifact(save_path, original_tensors)
+
+            with safe_open(
+                save_path, framework="pt", device="cpu"
+            ) as f:
+                original_x = f.get_tensor("x")
+
+            manifest = {"a": (torch.float32, (4,))}
+            w = IncrementalWriter(manifest, save_path)
+
+            with patch(
+                "lib.incremental_writer._tensor_bytes",
+                side_effect=RuntimeError("serialization failed"),
+            ):
+                with pytest.raises(RuntimeError):
+                    w.write_tensor("a", torch.randn(4))
+
+            # Original artifact is intact
+            assert os.path.exists(save_path)
+            with safe_open(
+                save_path, framework="pt", device="cpu"
+            ) as f:
+                assert set(f.keys()) == {"x"}
+                assert torch.equal(
+                    f.get_tensor("x"), original_x
+                )
+
+
+class TestMetadataValidation:
+    """Invalid metadata is rejected at construction time."""
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_non_string_metadata_value_rejected(self):
+        """Non-string metadata value raises TypeError."""
+        manifest = {"a": (torch.float32, (4,))}
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = os.path.join(tmpdir, "model.safetensors")
+            with pytest.raises(
+                TypeError, match="metadata value must be str"
+            ):
+                IncrementalWriter(
+                    manifest, save_path, metadata={"bad": 1}
+                )
+
+            # No temp file created
+            remaining = [
+                f for f in os.listdir(tmpdir)
+                if f.startswith(".ecaj_tmp_")
+            ]
+            assert remaining == []
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_non_string_metadata_key_rejected(self):
+        """Non-string metadata key raises TypeError."""
+        manifest = {"a": (torch.float32, (4,))}
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = os.path.join(tmpdir, "model.safetensors")
+            with pytest.raises(
+                TypeError, match="metadata key must be str"
+            ):
+                IncrementalWriter(
+                    manifest, save_path, metadata={42: "val"}
+                )
+
+    # AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
+    def test_invalid_metadata_does_not_corrupt_existing(self):
+        """Invalid metadata fails before touching existing artifact."""
+        original_tensors = {"x": torch.randn(4)}
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = os.path.join(tmpdir, "model.safetensors")
+            _write_valid_artifact(save_path, original_tensors)
+
+            with safe_open(
+                save_path, framework="pt", device="cpu"
+            ) as f:
+                original_x = f.get_tensor("x")
+
+            with pytest.raises(TypeError):
+                IncrementalWriter(
+                    {"a": (torch.float32, (4,))},
+                    save_path,
+                    metadata={"bad": 1},
+                )
+
+            # Original artifact is intact
+            assert os.path.exists(save_path)
+            with safe_open(
+                save_path, framework="pt", device="cpu"
+            ) as f:
+                assert torch.equal(
+                    f.get_tensor("x"), original_x
+                )
+
+
+class TestFailedFinalizeIsTerminal:
+    """Failed finalize makes the writer terminal (aborted)."""
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_write_after_failed_finalize_raises(self):
+        """write_tensor after failed finalize raises aborted error."""
+        tensors = {
+            "a": torch.randn(4),
+            "b": torch.randn(4),
+        }
+        manifest = _make_manifest(tensors)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = os.path.join(tmpdir, "model.safetensors")
+            w = IncrementalWriter(manifest, save_path)
+            w.write_tensor("a", tensors["a"])
+
+            with pytest.raises(RuntimeError, match="wrote 1/2"):
+                w.finalize()
+
+            # Writer is terminal — further writes must fail
+            with pytest.raises(RuntimeError, match="aborted"):
+                w.write_tensor("b", tensors["b"])
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_second_finalize_after_failed_raises(self):
+        """Second finalize after failure raises aborted error."""
+        tensors = {
+            "a": torch.randn(4),
+            "b": torch.randn(4),
+        }
+        manifest = _make_manifest(tensors)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = os.path.join(tmpdir, "model.safetensors")
+            w = IncrementalWriter(manifest, save_path)
+            w.write_tensor("a", tensors["a"])
+
+            with pytest.raises(RuntimeError, match="wrote 1/2"):
+                w.finalize()
+
+            with pytest.raises(RuntimeError, match="aborted"):
+                w.finalize()
