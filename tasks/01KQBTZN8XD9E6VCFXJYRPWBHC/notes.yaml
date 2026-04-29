@@ -37,3 +37,10 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-29T08:14:22.502Z
+  - _ulid: 01KQC5P4F3TRWENP72JEE8QNQF
+    content: Reviewer applied narrow lint cleanup in aaccd99 (removed unused imports/local and sorted
+      imports), pushed to dispatch/task/task-checkpoint-save-result-sink-handoff/01kqbtzn. Verified
+      targeted sink tests, streaming/memory/executor tests, ruff, and kspec validate --warnings-ok.
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-04-29T08:29:00.259Z
