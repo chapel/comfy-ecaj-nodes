@@ -78,7 +78,7 @@ tags:
   - checkpoint
   - comfy
 vcs_refs: []
-review_ref: "@01KQC8J4YZ9HZSV6SQTRB6S2E7"
+review_ref: "@01KQCAACHT2E0G4YMV5B61FB0W"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-checkpoint-save-artifact-format/01kqbtzn
@@ -243,6 +243,13 @@ history:
         previous: 2026-04-29T09:16:19.697Z
     command: task-submit
     timestamp: 2026-04-29T09:47:45.598Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KQCAACHT2E0G4YMV5B61FB0W"
+        previous: "@01KQC8J4YZ9HZSV6SQTRB6S2E7"
+    command: review-link
+    timestamp: 2026-04-29T09:49:58.692Z
 created_at: 2026-04-29T05:21:58.068Z
 started_at: 2026-04-29T09:41:02.508Z
 submitted_at: 2026-04-29T09:47:45.598Z
