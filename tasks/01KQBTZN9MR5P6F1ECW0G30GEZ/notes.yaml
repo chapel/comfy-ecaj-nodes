@@ -107,3 +107,14 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T09:56:18.304Z
+  - _ulid: 01KQCBTG6WAE5RVMMVB2956VZ4
+    content: "Fix cycle 3: addressed all 3 review blockers. (1) Broke long return in
+      _recipe_has_checkpoint_components into multi-line expression (E501). (2) Fixed all Ruff
+      violations across 7 files: unused imports (F401), import sorting (I001), unused variables
+      (F841), line length (E501). (3) Scoped validate_checkpoint_components to checkpoint-style
+      recipes only — guarded by base.checkpoint_components is not None so diffusion-only recipes
+      skip the check. Updated 4 tests to use explicit CheckpointComponents(clip=None, vae=None) for
+      checkpoint intent. All 1449 tests pass, ruff check clean, kspec validate passes."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T10:16:14.812Z
