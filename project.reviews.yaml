@@ -11153,6 +11153,12 @@ reviews:
         payload:
           thread_ulid: 01KQC197PHN01A5K51PAY37TVY
         timestamp: 2026-04-29T07:25:23.268Z
+      - _ulid: 01KQC21QG8GTWDMCP6E07Y12ZK
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQC19MWWMVTSVFZ9NRZDHGDN
+        timestamp: 2026-04-29T07:25:25.896Z
     examined_commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
     external_links: []
     lifecycle_state: closed
@@ -11217,6 +11223,8 @@ reviews:
               rejected as cache misses."
             created_at: 2026-04-29T07:25:13.324Z
         kind: blocker
+        resolved_at: 2026-04-29T07:25:25.790Z
+        resolved_by: "@claude"
       - _ulid: 01KQC1AEFS93RHY214A9QSN687
         anchor:
           type: code
@@ -11257,5 +11265,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T07:13:36.903Z
     created_at: 2026-04-29T07:08:39.641Z
-    updated_at: 2026-04-29T07:25:23.159Z
+    updated_at: 2026-04-29T07:25:25.790Z
     notes: []
