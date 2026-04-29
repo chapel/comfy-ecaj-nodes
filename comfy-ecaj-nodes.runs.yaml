@@ -7851,9 +7851,21 @@ runs:
     completed_at: 2026-04-29T12:21:24.869Z
   - _ulid: 01KQCKDRMR5CHZEGZAW81V5W5D
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T12:29:06.072Z
+        completed_at: 2026-04-29T12:30:12.135Z
+        notes: "Meaningful work occurred: reviewed @01KQBTZNB6KR4MXEYGT4PANG25, recorded review @01KQCK0V,
+          requested changes, and transitioned the task to needs_work. What worked: deterministic
+          gates plus a small mocked runtime probe exposed a behavioral reporting issue even though
+          targeted and full pytest passed."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T12:30:12.135Z
+        completed_at: 2026-04-29T12:30:12.135Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:29:06.072Z
