@@ -15106,7 +15106,17 @@ reviews:
     slugs: []
     title: Review checkpoint save live validation harness cycle 3
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_checkpoint_validation_harness.py -q passed: 83 tests passed."
+        name: targeted pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T12:12:36.014Z
+        completed_at: 2026-04-29T12:12:36.014Z
     events:
       - _ulid: 01KQCJARQDXZX0JRYBEAE4F9TV
         actor: Jacob Chapel
@@ -15121,6 +15131,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T12:10:15.742Z
+      - _ulid: 01KQCJFHX5R9APD6VK0NQB4YS8
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: targeted pytest
+        timestamp: 2026-04-29T12:12:36.133Z
     examined_commit: 3f36d68b94be306650b1eae189bcdf9c2caad793
     external_links: []
     lifecycle_state: open
@@ -15133,5 +15150,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T12:09:59.283Z
-    updated_at: 2026-04-29T12:10:15.627Z
+    updated_at: 2026-04-29T12:12:36.014Z
     notes: []
