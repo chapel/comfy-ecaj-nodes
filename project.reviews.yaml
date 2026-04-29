@@ -10230,9 +10230,25 @@ reviews:
           status: pass
           name: GitHub CI
         timestamp: 2026-04-29T06:02:45.334Z
+      - _ulid: 01KQBXAQXYBDT9RRNCN2XY8HY5
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: approve
+        timestamp: 2026-04-29T06:02:58.366Z
+      - _ulid: 01KQBXAQXYQ99CHXJ5J4Q9F18E
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T06:02:58.366Z
     examined_commit: 3af78183e8cfe148f9ade0dc28228675fe837c0b
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -10240,7 +10256,14 @@ reviews:
       ref: "@01KQBTZN5WS8K2ATSYJSYZBDM8"
       shadow_commit: ""
     threads: []
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: approve
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T06:02:58.366Z
     created_at: 2026-04-29T06:00:03.972Z
-    updated_at: 2026-04-29T06:02:45.243Z
+    updated_at: 2026-04-29T06:02:58.366Z
     notes: []
