@@ -773,14 +773,19 @@ class TestMockedRunValidation:
         assert report.comfy_version == ""
 
     # AC: @live-comfy-saved-output-validation ac-report-records-save-outcome
+    # AC: @live-comfy-saved-output-validation ac-report-records-loader-downstream-outcome
     def test_validation_with_rejected_save(self):
-        """When checkpoint save is rejected, artifact is not_saved."""
+        """When checkpoint save is rejected, artifact is not_saved and
+        loader/downstream are skipped — not run against the source model."""
         mock_stats = {
             "system": {"comfyui_version": "0.3.4"},
             "devices": [{"vram_state": "normal"}],
         }
 
+        submitted_names = []
+
         def mock_submit(base_url, workflow, name):
+            submitted_names.append(name)
             if name == "checkpoint_save":
                 return harness.WorkflowResult(
                     name=name, accepted=False,
@@ -796,12 +801,19 @@ class TestMockedRunValidation:
              patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
-                source_model="test.safetensors",
+                source_model="source.safetensors",
                 report_output="/fake/report.json",
             )
 
         assert not report.checkpoint_save_result.accepted
         assert report.saved_artifact_classification == "not_saved"
+        # Loader and downstream must NOT be submitted when save failed
+        assert "downstream_ksampler" not in submitted_names
+        # Loader/downstream results must indicate they were skipped
+        assert not report.checkpoint_loader_result.accepted
+        assert not report.downstream_result.accepted
+        assert "skipped" in report.checkpoint_loader_result.error
+        assert "skipped" in report.downstream_result.error
 
 
 # ===========================================================================
@@ -1182,3 +1194,211 @@ class TestWorkflowShapeRecording:
         assert entry_inputs["model"] == ["1", 0]
         assert entry_inputs["clip"] == ["1", 1]
         assert entry_inputs["vae"] == ["1", 2]
+
+
+# ===========================================================================
+# submit_workflow polls /history for execution completion
+# ===========================================================================
+
+
+class TestSubmitWorkflowHistoryPolling:
+    """submit_workflow waits for /history completion and detects runtime errors."""
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-save-outcome
+    def test_accepted_prompt_with_successful_execution(self):
+        """Prompt accepted and /history shows successful completion."""
+        mock_prompt_resp = {"prompt_id": "p1"}
+        mock_history = {
+            "outputs": {"3": {"result": "saved"}},
+            "status": {"status_str": "success", "messages": []},
+        }
+
+        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
+             patch.object(harness, "query_prompt_history", return_value=mock_history):
+            result = harness.submit_workflow("http://fake:8188", {}, "test_wf")
+
+        assert result.accepted is True
+        assert result.prompt_id == "p1"
+        assert result.error == ""
+        assert result.outputs == {"3": {"result": "saved"}}
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-save-outcome
+    def test_accepted_prompt_with_runtime_node_error(self):
+        """Prompt accepted but node error detected in /history — not accepted."""
+        mock_prompt_resp = {"prompt_id": "p1"}
+        mock_history = {
+            "outputs": {},
+            "status": {
+                "status_str": "error",
+                "messages": [
+                    ["execution_error", {
+                        "node_type": "WIDENExit",
+                        "exception_message": "save_model failed: disk full",
+                    }],
+                ],
+            },
+        }
+
+        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
+             patch.object(harness, "query_prompt_history", return_value=mock_history):
+            result = harness.submit_workflow("http://fake:8188", {}, "test_wf")
+
+        assert result.accepted is False
+        assert result.prompt_id == "p1"
+        assert "node_error(WIDENExit)" in result.error
+        assert "save_model failed" in result.error
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-save-outcome
+    def test_accepted_prompt_with_execution_timeout(self):
+        """Prompt accepted but /history never shows completion."""
+        mock_prompt_resp = {"prompt_id": "p1"}
+
+        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
+             patch.object(harness, "query_prompt_history", return_value={}):
+            result = harness.submit_workflow("http://fake:8188", {}, "test_wf")
+
+        assert result.accepted is False
+        assert result.prompt_id == "p1"
+        assert "execution_timeout" in result.error
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-save-outcome
+    def test_rejected_prompt_no_prompt_id(self):
+        """Prompt rejected at /prompt level (no prompt_id)."""
+        mock_prompt_resp = {
+            "error": {"message": "invalid workflow"},
+            "node_errors": {},
+        }
+
+        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp):
+            result = harness.submit_workflow("http://fake:8188", {}, "test_wf")
+
+        assert result.accepted is False
+        assert result.prompt_id == ""
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-loader-downstream-outcome
+    def test_runtime_ksampler_error_detected(self):
+        """Runtime KSampler error in /history is classified as failure."""
+        mock_prompt_resp = {"prompt_id": "p_ks"}
+        mock_history = {
+            "outputs": {},
+            "status": {
+                "status_str": "error",
+                "messages": [
+                    ["execution_error", {
+                        "node_type": "KSampler",
+                        "exception_message": "KSampler inference failed: NaN in latents",
+                    }],
+                ],
+            },
+        }
+
+        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
+             patch.object(harness, "query_prompt_history", return_value=mock_history):
+            result = harness.submit_workflow("http://fake:8188", {}, "downstream")
+
+        assert result.accepted is False
+        assert "KSampler" in result.error
+
+
+class TestExtractNodeErrors:
+    """_extract_node_errors_from_history classifies history entries."""
+
+    def test_successful_execution_returns_empty(self):
+        history = {
+            "outputs": {"3": {}},
+            "status": {"status_str": "success", "messages": []},
+        }
+        assert harness._extract_node_errors_from_history(history) == ""
+
+    def test_error_with_execution_error_message(self):
+        history = {
+            "outputs": {},
+            "status": {
+                "status_str": "error",
+                "messages": [
+                    ["execution_error", {
+                        "node_type": "SaveImage",
+                        "exception_message": "disk full",
+                    }],
+                ],
+            },
+        }
+        result = harness._extract_node_errors_from_history(history)
+        assert "node_error(SaveImage)" in result
+        assert "disk full" in result
+
+    def test_error_without_execution_error_message(self):
+        history = {
+            "outputs": {},
+            "status": {"status_str": "error", "messages": []},
+        }
+        result = harness._extract_node_errors_from_history(history)
+        assert "execution_error" in result
+
+    def test_no_status_returns_empty(self):
+        assert harness._extract_node_errors_from_history({}) == ""
+
+
+# ===========================================================================
+# Memory-mode failure propagation
+# ===========================================================================
+
+
+class TestMemoryModeFailurePropagation:
+    """memory_mode failure category propagates from per-workflow classifications."""
+
+    # AC: @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success
+    def test_memory_mode_failure_propagated_from_save(self):
+        """When save fails with VRAM error, memory_mode category is set."""
+        mock_stats = {
+            "system": {"comfyui_version": "0.3.4"},
+            "devices": [{"vram_state": "normal"}],
+        }
+
+        def mock_submit(base_url, workflow, name):
+            if name == "checkpoint_save":
+                return harness.WorkflowResult(
+                    name=name, accepted=False,
+                    error="VRAM out of memory during save",
+                )
+            return harness.WorkflowResult(
+                name=name, accepted=True, prompt_id="p1",
+            )
+
+        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="test.safetensors",
+                report_output="/fake/report.json",
+            )
+
+        # The save workflow was classified as memory_mode failure
+        assert report.failure_categories["save"] == "memory_mode"
+        # The top-level memory_mode category must NOT be "none"
+        assert report.failure_categories["memory_mode"] != "none"
+        assert "save" in report.failure_categories["memory_mode"]
+
+    # AC: @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success
+    def test_memory_mode_none_when_no_vram_failures(self):
+        """When no workflow has VRAM errors, memory_mode is 'none'."""
+        mock_stats = {
+            "system": {"comfyui_version": "0.3.4"},
+            "devices": [{"vram_state": "normal"}],
+        }
+
+        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
+                 name="test", accepted=True, prompt_id="p1",
+             )), \
+             patch.object(harness, "check_cache_reuse", return_value=(True, "cached")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="test.safetensors",
+                report_output="/fake/report.json",
+            )
+
+        assert report.failure_categories["memory_mode"] == "none"

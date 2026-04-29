@@ -674,20 +674,47 @@ def build_cache_reuse_workflow(source_model: str) -> dict:
     }
 
 
+def _extract_node_errors_from_history(history: dict) -> str:
+    """Extract node error details from a prompt history entry.
+
+    ComfyUI records per-node execution status in ``status.messages``.
+    If a node raised an exception during execution, the history entry
+    also contains ``outputs`` that may be empty or partial plus an
+    ``status.status_str`` of ``"error"``.
+    """
+    status = history.get("status", {})
+    status_str = status.get("status_str", "")
+    if status_str == "error":
+        messages = status.get("messages", [])
+        # Look for execution_error messages
+        for msg in messages:
+            if isinstance(msg, list) and len(msg) >= 2 and msg[0] == "execution_error":
+                err_data = msg[1] if isinstance(msg[1], dict) else {}
+                node_type = err_data.get("node_type", "unknown")
+                exception_message = err_data.get("exception_message", "unknown error")
+                return f"node_error({node_type}): {exception_message}"
+        return f"execution_error: status_str={status_str}"
+    return ""
+
+
 def submit_workflow(
     base_url: str,
     workflow: dict,
     name: str,
 ) -> WorkflowResult:
-    """Submit a workflow prompt and classify whether Comfy accepted or rejected it."""
+    """Submit a workflow prompt, wait for completion, and classify the result.
+
+    After /prompt returns a prompt_id, polls /history until execution
+    completes.  Runtime node errors (save failures, loader errors,
+    KSampler crashes) are detected from the history entry and reported
+    as failures — not silently marked accepted.
+    """
     result = WorkflowResult(name=name)
     try:
         resp = _api_post_prompt(base_url, workflow)
         prompt_id = resp.get("prompt_id", "")
         result.prompt_id = prompt_id
-        if prompt_id:
-            result.accepted = True
-        else:
+        if not prompt_id:
             result.accepted = False
             node_errors = resp.get("node_errors", {})
             error_msg = resp.get("error", {})
@@ -697,6 +724,23 @@ def submit_workflow(
                 result.error = f"api_error: {json.dumps(error_msg)}"
             else:
                 result.error = "rejected: no prompt_id returned"
+            return result
+
+        # Poll /history for actual execution completion
+        history = query_prompt_history(base_url, prompt_id)
+        if not history:
+            result.accepted = False
+            result.error = "execution_timeout: prompt accepted but never completed in /history"
+            return result
+
+        # Check for runtime node errors in the completed history
+        node_error = _extract_node_errors_from_history(history)
+        if node_error:
+            result.accepted = False
+            result.error = node_error
+        else:
+            result.accepted = True
+            result.outputs = history.get("outputs", {})
     except urllib.error.HTTPError as exc:
         result.accepted = False
         try:
@@ -815,36 +859,52 @@ def run_validation(
             report.saved_artifact_classification = "not_saved"
 
         # --- Load saved artifact and run downstream workflow ---
-        # Use the saved artifact (not the source model) so we prove the
-        # *saved checkpoint* is loadable and produces valid downstream output.
-        loader_ckpt = saved_artifact_filename if saved_artifact_filename else source_model
-        downstream_wf = build_downstream_workflow(
-            loader_ckpt,
-            width=width,
-            height=height,
-            steps=steps,
-            cfg=cfg,
-            seed=seed,
-            sampler_name=sampler_name,
-            scheduler=scheduler,
-            batch_size=batch_size,
-        )
-        report.downstream_result = submit_workflow(
-            comfy_api_url, downstream_wf, "downstream_ksampler",
-        )
-        # Record loader + downstream together (same prompt exercises both)
-        report.checkpoint_loader_result = WorkflowResult(
-            name="checkpoint_loader",
-            accepted=report.downstream_result.accepted,
-            prompt_id=report.downstream_result.prompt_id,
-            error=report.downstream_result.error,
-        )
-        report.failure_categories["loader"] = classify_failure(
-            report.checkpoint_loader_result,
-        )
-        report.failure_categories["downstream"] = classify_failure(
-            report.downstream_result,
-        )
+        # Only run loader/downstream if the checkpoint save succeeded.
+        # If save was rejected, there is no saved artifact to validate;
+        # falling back to the source model would give false confidence.
+        if saved_artifact_filename:
+            downstream_wf = build_downstream_workflow(
+                saved_artifact_filename,
+                width=width,
+                height=height,
+                steps=steps,
+                cfg=cfg,
+                seed=seed,
+                sampler_name=sampler_name,
+                scheduler=scheduler,
+                batch_size=batch_size,
+            )
+            report.downstream_result = submit_workflow(
+                comfy_api_url, downstream_wf, "downstream_ksampler",
+            )
+            # Record loader + downstream together (same prompt exercises both)
+            report.checkpoint_loader_result = WorkflowResult(
+                name="checkpoint_loader",
+                accepted=report.downstream_result.accepted,
+                prompt_id=report.downstream_result.prompt_id,
+                error=report.downstream_result.error,
+            )
+            report.failure_categories["loader"] = classify_failure(
+                report.checkpoint_loader_result,
+            )
+            report.failure_categories["downstream"] = classify_failure(
+                report.downstream_result,
+            )
+        else:
+            # Save failed — skip loader/downstream; record the skip reason.
+            skip_reason = "skipped: checkpoint save failed, no artifact to validate"
+            report.checkpoint_loader_result = WorkflowResult(
+                name="checkpoint_loader",
+                accepted=False,
+                error=skip_reason,
+            )
+            report.downstream_result = WorkflowResult(
+                name="downstream_ksampler",
+                accepted=False,
+                error=skip_reason,
+            )
+            report.failure_categories["loader"] = "save"
+            report.failure_categories["downstream"] = "save"
 
         # --- Submit cache reuse workflow and verify reuse ---
         cache_wf = build_cache_reuse_workflow(source_model)
@@ -874,7 +934,21 @@ def run_validation(
             report.cache_reuse_detail = "cache reuse prompt was rejected"
 
         # --- Memory mode failure check ---
-        report.failure_categories["memory_mode"] = "none"
+        # Scan all per-workflow failure categories for memory_mode
+        # failures. If any workflow was classified as a memory_mode
+        # failure, propagate that to the top-level category so the
+        # report correctly surfaces OOM/VRAM issues.
+        memory_mode_failures = [
+            wf_name
+            for wf_name, category in report.failure_categories.items()
+            if category == "memory_mode"
+        ]
+        if memory_mode_failures:
+            report.failure_categories["memory_mode"] = (
+                f"memory_mode failure in: {', '.join(memory_mode_failures)}"
+            )
+        else:
+            report.failure_categories["memory_mode"] = "none"
 
     except Exception as exc:
         report.errors.append(f"validation error: {exc}")
