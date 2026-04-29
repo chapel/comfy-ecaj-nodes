@@ -547,14 +547,18 @@ def _classify_temp_artifact(tmp_path: str, expected_kind: str) -> None:
     Reads the safetensors header and confirms:
     - ``__ecaj_version__`` is present
     - ``__ecaj_artifact_kind__`` matches ``expected_kind``
+    - For checkpoint artifacts: all required component prefixes are present
 
     Raises ``RuntimeError`` if classification fails, so the caller can
     clean up the temp file without publishing it.
     """
     from safetensors import safe_open
 
+    from ..lib.persistence import _has_checkpoint_component_prefixes
+
     with safe_open(tmp_path, framework="pt") as f:
         file_metadata = f.metadata()
+        tensor_keys = set(f.keys())
 
     if file_metadata is None or "__ecaj_version__" not in file_metadata:
         raise RuntimeError(
@@ -565,6 +569,17 @@ def _classify_temp_artifact(tmp_path: str, expected_kind: str) -> None:
     if stored_kind != expected_kind:
         raise RuntimeError(
             f"Temp artifact kind {stored_kind!r} != expected {expected_kind!r} "
+            f"— refusing to publish: {tmp_path}"
+        )
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    # Checkpoint artifacts must contain all three component groups.
+    if expected_kind == "checkpoint" and not _has_checkpoint_component_prefixes(
+        tensor_keys
+    ):
+        raise RuntimeError(
+            "Temp checkpoint artifact missing required component prefixes "
+            "(need model/diffusion, conditioning, and VAE keys) "
             f"— refusing to publish: {tmp_path}"
         )
 

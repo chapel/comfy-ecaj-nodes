@@ -33,6 +33,15 @@ from lib.recipe import (
 from nodes.exit import WIDENExitNode, save_comfy_checkpoint
 from tests.conftest import make_checkpoint_components
 
+# Representative Comfy checkpoint-style tensors for mock side effects.
+# Must include all three component groups to pass _classify_temp_artifact.
+_MOCK_CHECKPOINT_TENSORS = {
+    "model.diffusion_model.input_blocks.0.weight": torch.zeros(1),
+    "conditioner.embedders.0.weight": torch.zeros(1),
+    "first_stage_model.decoder.weight": torch.zeros(1),
+}
+
+
 # =============================================================================
 # save_comfy_checkpoint — unit tests
 # =============================================================================
@@ -55,7 +64,10 @@ class TestSaveComfyCheckpoint:
             # comfy.sd.save_checkpoint writes to the temp path — simulate by
             # creating the temp file so os.fsync/os.replace succeed.
             def side_effect(path, model_arg, **kwargs):
-                save_file({"dummy": torch.zeros(1)}, path, metadata=kwargs.get("metadata", {}))
+                save_file(
+                    _MOCK_CHECKPOINT_TENSORS, path,
+                    metadata=kwargs.get("metadata", {}),
+                )
             mock_save.side_effect = side_effect
 
             save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
@@ -85,7 +97,10 @@ class TestSaveComfyCheckpoint:
             temp_paths_seen.append(path)
             assert path != save_path, "Must write to temp path, not final target"
             assert ".ecaj_tmp_" in path, "Temp path should contain .ecaj_tmp_ prefix"
-            save_file({"dummy": torch.zeros(1)}, path, metadata=kwargs.get("metadata", {}))
+            save_file(
+                _MOCK_CHECKPOINT_TENSORS, path,
+                metadata=kwargs.get("metadata", {}),
+            )
 
         with patch("comfy.sd.save_checkpoint", side_effect=side_effect):
             save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
@@ -231,6 +246,39 @@ class TestSaveComfyCheckpoint:
                 save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
 
         assert not os.path.exists(save_path)
+
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    def test_incomplete_checkpoint_components_not_published(self, tmp_path):
+        """If temp checkpoint artifact is missing required component prefixes
+        (e.g. only conditioner.* keys), it must not be published."""
+        save_path = str(tmp_path / "model.safetensors")
+        model = MagicMock(name="model")
+        clip = MagicMock(name="clip")
+        vae = MagicMock(name="vae")
+        metadata = {"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"}
+
+        def side_effect(path, model_arg, **kwargs):
+            # Write a checkpoint-metadata-valid file but with only conditioner keys
+            save_file(
+                {"conditioner.embedders.0.weight": torch.zeros(4, 4)},
+                path,
+                metadata=kwargs.get("metadata", {}),
+            )
+
+        with patch("comfy.sd.save_checkpoint", side_effect=side_effect):
+            with pytest.raises(
+                RuntimeError, match="missing required component prefixes"
+            ):
+                save_comfy_checkpoint(
+                    save_path, model, clip=clip, vae=vae, metadata=metadata
+                )
+
+        assert not os.path.exists(save_path)
+        # No temp files should remain
+        tmp_files = [
+            f for f in os.listdir(str(tmp_path)) if f.startswith(".ecaj_tmp_")
+        ]
+        assert tmp_files == []
 
 
 # =============================================================================
@@ -668,6 +716,73 @@ class TestInternalFormatRejection:
         save_file({"weight": torch.randn(4, 4)}, str(path))
         with pytest.raises(ValueError, match="not an ecaj-saved model"):
             check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS)
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_conditioner_only_rejected(self, tmp_path):
+        """Metadata-valid artifact with only conditioner.* keys is rejected —
+        missing diffusion and VAE components."""
+        path = tmp_path / "model.safetensors"
+        self._make_file(path, {
+            "conditioner.embedders.0.weight": torch.randn(4, 4),
+        })
+        result = check_checkpoint_cache(
+            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_missing_vae_component_rejected(self, tmp_path):
+        """Artifact with diffusion + conditioning but no VAE keys is rejected."""
+        path = tmp_path / "model.safetensors"
+        self._make_file(path, {
+            "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
+            "conditioner.embedders.0.weight": torch.randn(4, 4),
+        })
+        result = check_checkpoint_cache(
+            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_missing_conditioning_component_rejected(self, tmp_path):
+        """Artifact with diffusion + VAE but no conditioning keys is rejected."""
+        path = tmp_path / "model.safetensors"
+        self._make_file(path, {
+            "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
+            "first_stage_model.decoder.weight": torch.randn(4, 4),
+        })
+        result = check_checkpoint_cache(
+            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_missing_diffusion_component_rejected(self, tmp_path):
+        """Artifact with conditioning + VAE but no diffusion keys is rejected."""
+        path = tmp_path / "model.safetensors"
+        self._make_file(path, {
+            "conditioner.embedders.0.weight": torch.randn(4, 4),
+            "first_stage_model.decoder.weight": torch.randn(4, 4),
+        })
+        result = check_checkpoint_cache(
+            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_comfy_style_full_checkpoint_accepted(self, tmp_path):
+        """Artifact with Comfy-style model.* + conditioner.* + first_stage_model.*
+        keys is accepted."""
+        path = tmp_path / "model.safetensors"
+        self._make_file(path, {
+            "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
+            "conditioner.embedders.0.weight": torch.randn(4, 4),
+            "first_stage_model.decoder.weight": torch.randn(4, 4),
+        })
+        result = check_checkpoint_cache(
+            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+        )
+        assert result is True
 
 
 # =============================================================================

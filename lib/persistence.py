@@ -609,6 +609,39 @@ def _is_internal_only_artifact(tensor_keys: set[str]) -> bool:
     )
 
 
+# Required checkpoint component prefix groups.  A valid checkpoint artifact
+# must contain at least one tensor key matching each group.  Each group is a
+# tuple of alternative prefixes (any one match suffices for that component).
+_CHECKPOINT_COMPONENT_PREFIXES: tuple[tuple[str, ...], ...] = (
+    # Diffusion / model weights — Comfy checkpoints use model.diffusion_model.*,
+    # older SD checkpoints use bare diffusion_model.*
+    ("model.diffusion_model.", "model.", "diffusion_model."),
+    # Conditioning / text encoder (SDXL uses conditioner.*, SD1 uses cond_stage_model.*)
+    ("conditioner.", "cond_stage_model."),
+    # VAE / decode
+    ("first_stage_model.",),
+)
+
+
+def _has_checkpoint_component_prefixes(tensor_keys: set[str]) -> bool:
+    """Return True if *tensor_keys* contain all required checkpoint components.
+
+    AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+
+    A checkpoint artifact must include diffusion-model, conditioning/text-
+    encoder, and VAE/decode content.  This function verifies that at least one
+    tensor key matches each required component prefix group.
+    """
+    if not tensor_keys:
+        return False
+    for prefix_group in _CHECKPOINT_COMPONENT_PREFIXES:
+        if not any(
+            k.startswith(p) for k in tensor_keys for p in prefix_group
+        ):
+            return False
+    return True
+
+
 def check_checkpoint_cache(
     save_path: str,
     expected_hash: str,
@@ -724,6 +757,14 @@ def check_checkpoint_cache(
 
     # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
     if _is_internal_only_artifact(artifact_keys):
+        return False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    # Positive component-prefix check: the artifact must contain keys for
+    # all three checkpoint components (diffusion, conditioning, VAE).
+    # A metadata-valid file that is missing one or more component groups
+    # (e.g. only conditioner.* tensors) must not be accepted.
+    if not _has_checkpoint_component_prefixes(artifact_keys):
         return False
 
     # Manifest validation (key/shape/dtype) — preserve existing pattern
