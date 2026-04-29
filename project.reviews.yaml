@@ -12598,6 +12598,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T09:19:34.850Z
+      - _ulid: 01KQC9236Z8QQYGCF5H9GBMFA7
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQC9233WRT128TE3KF8H19JP
+        timestamp: 2026-04-29T09:27:57.919Z
     examined_commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
     external_links: []
     lifecycle_state: open
@@ -12607,8 +12614,30 @@ reviews:
       content_hash: ""
       ref: "@01KQBTZN9MR5P6F1ECW0G30GEZ"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQC9233WRT128TE3KF8H19JP
+        anchor:
+          type: code
+          commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
+          line_end: 561
+          line_start: 561
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQC9233XVWXV2KAGZNC33ATE
+            author: Jacob Chapel
+            body: "MUST-FIX: checkpoint publication can still replace unsafe targets and does not classify the
+              temp artifact before publishing. The new checkpoint writer always calls
+              os.replace(tmp_path, save_path) after comfy.sd.save_checkpoint succeeds. On the
+              checkpoint save path, the only non-ecaj overwrite refusal happens through
+              check_checkpoint_cache, and that is skipped when enable_cache=False; the no-op
+              checkpoint path has the same pattern. I verified the helper will overwrite an existing
+              non-ecaj target when called with a successful mocked Comfy save. This violates the
+              task requirements to preserve refusal to overwrite non-ecaj files and to publish the
+              final target only after the temp artifact is classified and safe to reuse."
+            created_at: 2026-04-29T09:27:57.821Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T09:19:15.423Z
-    updated_at: 2026-04-29T09:19:34.744Z
+    updated_at: 2026-04-29T09:27:57.821Z
     notes: []
