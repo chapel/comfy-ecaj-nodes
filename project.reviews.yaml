@@ -9896,6 +9896,16 @@ reviews:
         runner: manual
         created_at: 2026-04-29T05:44:23.543Z
         completed_at: 2026-04-29T05:44:23.543Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "PR #99 statusCheckRollup: lint SUCCESS, test SUCCESS; mergeStateStatus CLEAN."
+        name: PR CI
+        required: true
+        runner: github-actions
+        created_at: 2026-04-29T05:44:23.904Z
+        completed_at: 2026-04-29T05:44:23.904Z
     events:
       - _ulid: 01KQBW5FCFGYGEJ4X1BSR3K0TN
         actor: Jacob Chapel
@@ -9924,6 +9934,13 @@ reviews:
           status: pass
           name: spec wording
         timestamp: 2026-04-29T05:44:23.641Z
+      - _ulid: 01KQBW8QP1DTBZMT9QXNMQRC00
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: PR CI
+        timestamp: 2026-04-29T05:44:24.001Z
     examined_commit: 01d93935ad79a1304bb9427f9027a33c4f7a9b14
     external_links: []
     lifecycle_state: open
@@ -9936,5 +9953,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T05:42:37.200Z
-    updated_at: 2026-04-29T05:44:23.543Z
+    updated_at: 2026-04-29T05:44:23.904Z
     notes: []
