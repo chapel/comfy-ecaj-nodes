@@ -1,1 +1,13 @@
-notes: []
+notes:
+  - _ulid: 01KQBVA35KXYCDS3W98QV6T48W
+    content: "Approach: Used kspec item set and kspec item ac set to update the @full-saved-model-output
+      spec description and all five ACs with model-kind-aware wording. Changes: (1) Description now
+      references 'model kind requested by the source workflow' instead of 'diffusion model
+      artifact', and explicitly states diffusion-weight-only is insufficient for checkpoint-style
+      output. (2) All five ACs updated to reference requested artifact kind and saved model kind.
+      (3) ac-complete-artifact now explicitly requires conditioning and decode components for
+      checkpoint-style. (4) kspec validate passes (warnings are pre-existing). (5) Verified no AC
+      implies diffusion-weight-only is sufficient for checkpoint-style output."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T05:27:39.956Z
