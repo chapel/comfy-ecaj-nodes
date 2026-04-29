@@ -15102,3 +15102,29 @@ reviews:
     created_at: 2026-04-29T11:52:15.167Z
     updated_at: 2026-04-29T12:06:13.625Z
     notes: []
+  - _ulid: 01KQCJARQKZXZ6EBDB31QK23TH
+    slugs: []
+    title: Review checkpoint save live validation harness cycle 3
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQCJARQDXZX0JRYBEAE4F9TV
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-29T12:09:59.277Z
+    examined_commit: 3f36d68b94be306650b1eae189bcdf9c2caad793
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQBTZNB6KR4MXEYGT4PANG25"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-29T12:09:59.283Z
+    updated_at: null
+    notes: []
