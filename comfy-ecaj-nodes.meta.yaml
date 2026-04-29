@@ -1252,6 +1252,18 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T13:31:34.991Z
+  - _ulid: 01KQCQQTDCEQ15EC6GH1S8X5D0
+    type: success
+    content: "Structured task notes as durable evidence for downstream reconciliation: the completed
+      dependency task (@task-checkpoint-save-live-validation-manual-run) had structured notes with
+      validation results (pass/fail per AC, environment details, artifact paths, timing evidence).
+      This made the reconciliation task (@task-checkpoint-save-final-spec-status-reconciliation)
+      trivial — no investigation needed, just apply the status map. Pattern: thorough notes on
+      evidence-producing tasks directly reduce effort in downstream reconciliation/status tasks."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T13:44:29.868Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
