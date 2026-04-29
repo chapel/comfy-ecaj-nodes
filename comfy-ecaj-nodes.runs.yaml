@@ -6105,7 +6105,7 @@ runs:
     completed_at: 2026-04-29T06:20:28.050Z
   - _ulid: 01KQBYCF83N1F5PZWH1FQZZMVV
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -6130,7 +6130,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T06:22:14.497Z
-        completed_at: 2026-04-29T06:22:14.497Z
+        completed_at: 2026-04-29T06:22:41.495Z
+        notes: "Decision/capture: skipped already-covered items: task-subject review refresh
+          (01KQ6MFM/01KQ6ZJF), PR publication detached merge command guidance (01KQ6R11), and review
+          CI/runtime-check successes (existing success observations). Captured one unique
+          high-confidence friction observation @01KQBYEH for kspec batch JSON shape confusion."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T06:22:41.495Z
+        completed_at: 2026-04-29T06:22:41.495Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:21:23.587Z
