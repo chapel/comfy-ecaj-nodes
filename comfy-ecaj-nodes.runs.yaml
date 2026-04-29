@@ -7676,7 +7676,7 @@ runs:
     started_at: 2026-04-29T11:50:21.190Z
     completed_at: 2026-04-29T11:51:27.197Z
   - _ulid: 01KQCHM17D8JDH0B90TJSM6YK7
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -7708,7 +7708,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T11:58:59.699Z
-        completed_at: 2026-04-29T11:58:59.699Z
+        completed_at: 2026-04-29T11:59:12.236Z
+        notes: Captured @01KQCHPD as a friction observation. No inbox/task was created because the issue is
+          currently process guidance rather than a scoped implementation request, and related
+          success patterns were already tracked.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T11:57:34.317Z
+    completed_at: 2026-04-29T11:59:12.236Z
