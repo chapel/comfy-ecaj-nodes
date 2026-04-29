@@ -10538,6 +10538,16 @@ reviews:
         runner: pytest
         created_at: 2026-04-29T06:25:40.489Z
         completed_at: 2026-04-29T06:25:40.489Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_full_model_streaming.py tests/test_exit_node.py -q: 93 passed"
+        name: pytest exit/full streaming
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T06:25:40.815Z
+        completed_at: 2026-04-29T06:25:40.815Z
     events:
       - _ulid: 01KQBYGDA297ZHYQ77JKD6TKPK
         actor: Jacob Chapel
@@ -10559,6 +10569,13 @@ reviews:
           status: pass
           name: pytest persistence
         timestamp: 2026-04-29T06:25:40.584Z
+      - _ulid: 01KQBYMAHFPT9F2B61YSBS7F09
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest exit/full streaming
+        timestamp: 2026-04-29T06:25:40.911Z
     examined_commit: b4fddba6ff319d353e122663560f4d502e28db0a
     external_links: []
     lifecycle_state: open
@@ -10571,5 +10588,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T06:23:32.674Z
-    updated_at: 2026-04-29T06:25:40.489Z
+    updated_at: 2026-04-29T06:25:40.815Z
     notes: []
