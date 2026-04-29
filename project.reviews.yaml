@@ -14653,6 +14653,12 @@ reviews:
         payload:
           thread_ulid: 01KQCGAVYV2CGY4JT7F17GC2KZ
         timestamp: 2026-04-29T11:48:55.312Z
+      - _ulid: 01KQCH48YHC97NX5QVCTPZFHED
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
+        timestamp: 2026-04-29T11:48:57.937Z
     examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
     external_links: []
     lifecycle_state: closed
@@ -14753,6 +14759,8 @@ reviews:
               Results are recorded in cache_reuse_detail."
             created_at: 2026-04-29T11:48:42.691Z
         kind: blocker
+        resolved_at: 2026-04-29T11:48:57.795Z
+        resolved_by: "@claude"
       - _ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
         anchor:
           type: code
@@ -14788,5 +14796,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T11:35:38.938Z
     created_at: 2026-04-29T11:31:40.966Z
-    updated_at: 2026-04-29T11:48:55.211Z
+    updated_at: 2026-04-29T11:48:57.795Z
     notes: []
