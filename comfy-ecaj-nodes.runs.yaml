@@ -6434,7 +6434,7 @@ runs:
     started_at: 2026-04-29T07:05:48.995Z
     completed_at: 2026-04-29T07:07:57.001Z
   - _ulid: 01KQC1DFRYTEPNY7JCW068BA2W
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -6469,7 +6469,10 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T07:16:55.341Z
-        completed_at: 2026-04-29T07:16:55.341Z
+        completed_at: 2026-04-29T07:17:00.538Z
+        notes: Captured @01KQC1HP as the only reflection item. No inbox/task created; no vague or duplicate
+          items captured.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:14:22.622Z
+    completed_at: 2026-04-29T07:17:00.538Z
