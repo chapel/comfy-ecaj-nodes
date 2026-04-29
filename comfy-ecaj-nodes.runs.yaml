@@ -6913,7 +6913,7 @@ runs:
     started_at: 2026-04-29T08:30:54.588Z
     completed_at: 2026-04-29T08:33:24.855Z
   - _ulid: 01KQC6K3SCZM4TSME4CJ4Z7XQG
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -6979,7 +6979,14 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T08:45:52.725Z
-        completed_at: 2026-04-29T08:45:52.725Z
+        completed_at: 2026-04-29T08:46:12.743Z
+        notes: |-
+          Captured 2 items:
+          1. Success observation: clean dependency chain in checkpoint-save plan
+          2. Friction observation: conftest stubs lag behind new ComfyUI imports
+
+          Skipped: implementation-coupled mock breakage (one-off, not systemic)
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T08:44:49.836Z
+    completed_at: 2026-04-29T08:46:12.744Z
