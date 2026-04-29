@@ -90,3 +90,15 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T09:30:43.563Z
+  - _ulid: 01KQCA664JM45T0HR7TAR6Z5DC
+    content: "Fix cycle 2: addressed both review blockers. (1) save_comfy_checkpoint now runs
+      _guard_non_ecaj_overwrite unconditionally before writing — refuses to overwrite non-ecaj files
+      even with enable_cache=False. After comfy.sd.save_checkpoint writes the temp file,
+      _classify_temp_artifact verifies ecaj metadata and artifact_kind before os.replace. Added 3
+      new tests: non-ecaj overwrite refusal, classification failure, and wrong artifact kind. (2)
+      Replaced save-only smoke test with behavioral save/load round-trip test that partitions loaded
+      artifact into MODEL/CLIP/VAE via CheckpointLoaderSimple-style key routing and verifies all
+      components. All 1449 tests pass."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T09:47:40.562Z
