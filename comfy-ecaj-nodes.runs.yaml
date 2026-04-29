@@ -5528,7 +5528,7 @@ runs:
     completed_at: 2026-04-27T21:34:39.799Z
   - _ulid: 01KQBVDC1YC0ZVWEM2RMW4XKCY
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5538,7 +5538,21 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T05:29:46.896Z
-        completed_at: 2026-04-29T05:29:46.896Z
+        completed_at: 2026-04-29T05:30:30.620Z
+        notes: >-
+          Baseline searched: observations list (50+), inbox list (18), searched "spec-only", "empty
+          commit", "shadow branch".
+
+
+          Key existing items found:
+
+          - @01KQ6JV5K [friction] Spec-only tasks cause PR creation failure — already tracked,
+          confirmed again this session with a slightly different workaround (--allow-empty commit
+          instead of .kspec-evidence/ marker file).
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T05:30:30.620Z
+        completed_at: 2026-04-29T05:30:30.620Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T05:29:27.359Z
