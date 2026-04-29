@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from lib.recipe import CheckpointComponents, RecipeBase, RecipeLoRA, RecipeMerge
+from lib.recipe import CheckpointComponents, RecipeBase, RecipeLoRA, RecipeMerge, RecipeModel
 from nodes.entry import WIDENEntryNode
 from nodes.exit import WIDENExitNode, validate_checkpoint_components
 from tests.conftest import MockModelPatcher
@@ -214,6 +214,32 @@ class TestMissingComponentsFailBeforeWork:
 
         # model_state_dict should NOT have been called
         patcher.model_state_dict.assert_not_called()
+
+    def test_checkpoint_recipe_model_without_base_components_fails_early(self):
+        """RecipeModel(source_dir='checkpoints') with base.checkpoint_components=None fails.
+
+        AC: @saved-model-artifact-safety ac-missing-components-fail-before-work
+
+        A recipe tree classified as checkpoint-style by _recipe_has_checkpoint_components
+        (via RecipeModel source_dir) must still fail validation when the base
+        has no checkpoint_components, rather than proceeding into merge work
+        and crashing with AttributeError.
+        """
+        patcher = MockModelPatcher()
+        base = RecipeBase(model_patcher=patcher, arch="sdxl")
+        model = RecipeModel(
+            path="clip.safetensors", strength=1.0, source_dir="checkpoints",
+        )
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=0.5)
+
+        node = WIDENExitNode()
+
+        with patch("nodes.exit.analyze_recipe") as mock_analyze:
+            with pytest.raises(ValueError, match=r"(?i)CLIP.*VAE|VAE.*CLIP"):
+                node.execute(merge, save_model=True, model_name="test.safetensors")
+
+            # analyze_recipe must NOT have been called — failure is before work
+            mock_analyze.assert_not_called()
 
 
 # =============================================================================

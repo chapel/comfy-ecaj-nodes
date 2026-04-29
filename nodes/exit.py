@@ -766,13 +766,21 @@ class WIDENExitNode:
         _validate_recipe_tree(widen)
 
         # AC: @saved-model-artifact-safety ac-missing-components-fail-before-work
-        # Validate checkpoint components before any expensive work — but only
-        # when the base carries checkpoint_components (meaning the user wired
-        # CLIP/VAE inputs, signalling checkpoint intent).  Diffusion-only
-        # recipes have checkpoint_components=None and must not be rejected.
+        # Validate checkpoint components before any expensive work when the
+        # recipe signals checkpoint intent.  Checkpoint intent is present when:
+        # - The base carries a checkpoint_components object (even with None
+        #   fields — the object's presence signals the user wired checkpoint
+        #   inputs), OR
+        # - The tree contains RecipeModel nodes from the "checkpoints" source
+        #   directory (detected by _recipe_has_checkpoint_components).
+        # Diffusion-only recipes skip this check entirely.
         if save_model:
             base = widen if isinstance(widen, RecipeBase) else walk_to_base(widen)
-            if base.checkpoint_components is not None:
+            has_checkpoint_intent = (
+                base.checkpoint_components is not None
+                or _recipe_has_checkpoint_components(widen)
+            )
+            if has_checkpoint_intent:
                 validate_checkpoint_components(base, save_model=True)
 
         # Quick check: must end in RecipeMerge for actual merging
