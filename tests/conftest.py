@@ -8,7 +8,7 @@ from types import ModuleType
 import pytest
 import torch
 
-from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+from lib.recipe import CheckpointComponents, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
 _DIFFUSION_PREFIX = "diffusion_model."
 
@@ -129,6 +129,18 @@ class MockModelPatcher:
             base = [(weight, lambda w: w)]
             result[k] = base + self.patches.get(k, [])
         return result
+
+
+# ---------------------------------------------------------------------------
+# Checkpoint component stubs — for save_model=True tests
+# ---------------------------------------------------------------------------
+
+
+def make_checkpoint_components() -> CheckpointComponents:
+    """Create stub CheckpointComponents with MagicMock CLIP and VAE."""
+    from unittest.mock import MagicMock
+
+    return CheckpointComponents(clip=MagicMock(name="clip"), vae=MagicMock(name="vae"))
 
 
 # ---------------------------------------------------------------------------

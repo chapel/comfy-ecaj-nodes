@@ -43,6 +43,7 @@ from ..lib.persistence import (
     validate_model_name,
 )
 from ..lib.recipe import (
+    CheckpointComponents,
     RecipeBase,
     RecipeCompose,
     RecipeLoRA,
@@ -198,6 +199,47 @@ def _validate_recipe_tree(node: RecipeNode, path: str = "root") -> None:
     else:
         raise ValueError(
             f"Unknown recipe node type at {path}: {type(node).__name__}"
+        )
+
+
+def validate_checkpoint_components(base: RecipeBase, save_model: bool) -> None:
+    """Validate that checkpoint companion components are present for save_model.
+
+    AC: @saved-model-artifact-safety ac-missing-components-fail-before-work
+    AC: @saved-model-artifact-safety ac-missing-component-diagnostic-names-requirement
+    AC: @saved-model-artifact-safety ac-missing-component-diagnostic-gives-guidance
+
+    Must be called before analyze_recipe, model_state_dict, GPU merge work,
+    cache publication, temp file creation, or artifact writing.
+
+    Args:
+        base: The RecipeBase at the root of the recipe tree.
+        save_model: Whether save_model mode is enabled.
+
+    Raises:
+        ValueError: If save_model=True and CLIP or VAE components are missing,
+            with diagnostic naming the missing requirement and connection guidance.
+    """
+    if not save_model:
+        return
+
+    cc = base.checkpoint_components
+    missing: list[str] = []
+
+    if cc is None or not isinstance(cc, CheckpointComponents):
+        missing = ["CLIP", "VAE"]
+    else:
+        if cc.clip is None:
+            missing.append("CLIP")
+        if cc.vae is None:
+            missing.append("VAE")
+
+    if missing:
+        missing_str = " and ".join(missing)
+        raise ValueError(
+            f"Checkpoint save_model requires {missing_str} components. "
+            f"Connect CheckpointLoaderSimple MODEL, CLIP, and VAE outputs "
+            f"to WIDEN Entry."
         )
 
 
@@ -541,6 +583,12 @@ class WIDENExitNode:
         """
         # AC-2: Validate recipe tree structure
         _validate_recipe_tree(widen)
+
+        # AC: @saved-model-artifact-safety ac-missing-components-fail-before-work
+        # Validate checkpoint components before any expensive work
+        if save_model:
+            base = widen if isinstance(widen, RecipeBase) else walk_to_base(widen)
+            validate_checkpoint_components(base, save_model=True)
 
         # Quick check: must end in RecipeMerge for actual merging
         if isinstance(widen, RecipeBase):

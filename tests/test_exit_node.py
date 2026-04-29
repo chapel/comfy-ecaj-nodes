@@ -7,6 +7,7 @@ import torch
 
 from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeModel
 from nodes.exit import WIDENExitNode, _recipe_has_checkpoint_components, _validate_recipe_tree
+from tests.conftest import make_checkpoint_components
 
 # =============================================================================
 # AC-1: Returns ComfyUI MODEL with set patches
@@ -906,7 +907,8 @@ class TestSaveModelCacheHit:
         """Cache hit should skip analyze_recipe and return patched model."""
         from safetensors.torch import save_file
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -970,7 +972,8 @@ class TestSaveModelCacheMiss:
     # AC: @exit-model-persistence ac-2
     def test_saves_after_gpu(self, mock_model_patcher, tmp_path):
         """Cache miss should run GPU pipeline and save result via MaterializationSink."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -997,6 +1000,7 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit._load_model_from_artifact") as mock_load,
             patch("nodes.exit.check_ram_preflight"),
         ):
+            affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
             mock_analyze.return_value = MagicMock(
@@ -1021,7 +1025,8 @@ class TestSaveModelCacheMiss:
     # AC: @exit-model-persistence ac-4
     def test_overwrites_stale_cache(self, mock_model_patcher, tmp_path):
         """Hash mismatch should overwrite the stale cached file via MaterializationSink."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1048,6 +1053,7 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit._load_model_from_artifact") as mock_load,
             patch("nodes.exit.check_ram_preflight"),
         ):
+            affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
             mock_analyze.return_value = MagicMock(
@@ -1189,10 +1195,14 @@ class TestRecipeHasCheckpointComponents:
         assert _recipe_has_checkpoint_components(merge) is False
 
     def test_mixed_diffusion_and_checkpoint_models(self):
-        """A recipe with both diffusion-only and checkpoint RecipeModel nodes IS checkpoint-style."""
+        """A recipe with diffusion-only and checkpoint RecipeModel nodes is checkpoint-style."""
         base = RecipeBase(model_patcher=object(), arch="sdxl")
-        diffusion_model = RecipeModel(path="flux.safetensors", strength=1.0, source_dir="diffusion_models")
-        checkpoint_model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        diffusion_model = RecipeModel(
+            path="flux.safetensors", strength=1.0, source_dir="diffusion_models",
+        )
+        checkpoint_model = RecipeModel(
+            path="clip.safetensors", strength=1.0, source_dir="checkpoints",
+        )
         compose = RecipeCompose(branches=(diffusion_model, checkpoint_model))
         merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=0.5)
         assert _recipe_has_checkpoint_components(merge) is True
@@ -1216,7 +1226,11 @@ class TestCheckpointCacheRouting:
     # AC: @exit-model-persistence ac-3
     def test_checkpoint_recipe_uses_check_checkpoint_cache(self, mock_model_patcher, tmp_path):
         """Checkpoint-style recipe must call check_checkpoint_cache, not check_full_model_cache."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
         compose = RecipeCompose(branches=(lora, model))
@@ -1276,7 +1290,11 @@ class TestCheckpointCacheRouting:
     # AC: @exit-model-persistence ac-6
     def test_checkpoint_recipe_writes_checkpoint_metadata(self, mock_model_patcher, tmp_path):
         """Checkpoint-style save must pass checkpoint metadata to build_metadata."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
         compose = RecipeCompose(branches=(lora, model))
@@ -1340,7 +1358,11 @@ class TestCheckpointCacheRouting:
     # AC: @full-saved-model-output ac-cache-reuses-artifact
     def test_non_checkpoint_recipe_uses_check_full_model_cache(self, mock_model_patcher, tmp_path):
         """Non-checkpoint (LoRA-only) recipe must use check_full_model_cache."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1393,7 +1415,11 @@ class TestCheckpointCacheRouting:
         not be classified as checkpoint-style and must not use checkpoint cache
         validation.
         """
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
         model = RecipeModel(path="flux.safetensors", strength=1.0, source_dir="diffusion_models")
         merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=1.0)
 
@@ -1458,7 +1484,11 @@ class TestCheckpointCacheRouting:
         metadata fields (recipe hash, artifact kind, base identity, dependency
         fingerprints) instead of manifest validation.
         """
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
         model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
         merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=1.0)
 
@@ -1484,7 +1514,6 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit._load_model_from_artifact") as mock_load,
             patch("nodes.exit.check_ram_preflight"),
         ):
-            affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
             mock_loader.loaded_bytes = 0

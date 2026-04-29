@@ -1,6 +1,6 @@
 """WIDEN Entry Node — Boundary from ComfyUI MODEL to WIDEN recipe world."""
 
-from ..lib.recipe import RecipeBase
+from ..lib.recipe import CheckpointComponents, RecipeBase
 
 
 class UnsupportedArchitectureError(ValueError):
@@ -82,6 +82,10 @@ class WIDENEntryNode:
             "required": {
                 "model": ("MODEL",),
             },
+            "optional": {
+                "clip": ("CLIP",),
+                "vae": ("VAE",),
+            },
         }
 
     RETURN_TYPES = ("WIDEN",)
@@ -89,13 +93,23 @@ class WIDENEntryNode:
     FUNCTION = "entry"
     CATEGORY = "ecaj/merge"
 
-    def entry(self, model) -> tuple[RecipeBase]:
+    def entry(self, model, clip=None, vae=None) -> tuple[RecipeBase]:
         """Execute entry node: detect architecture and wrap in RecipeBase.
 
         AC: @entry-node ac-1 — returns RecipeBase wrapping ModelPatcher
         AC: @entry-node ac-4 — no GPU memory allocated, no tensor copies
         """
         arch = detect_architecture(model)
+
+        # Store checkpoint companion components from visible optional inputs
+        checkpoint_components = None
+        if clip is not None or vae is not None:
+            checkpoint_components = CheckpointComponents(clip=clip, vae=vae)
+
         # Store reference only — no clone, no tensor ops (AC-4)
-        recipe = RecipeBase(model_patcher=model, arch=arch)
+        recipe = RecipeBase(
+            model_patcher=model,
+            arch=arch,
+            checkpoint_components=checkpoint_components,
+        )
         return (recipe,)
