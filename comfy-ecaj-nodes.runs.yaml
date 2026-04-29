@@ -7893,7 +7893,7 @@ runs:
     completed_at: 2026-04-29T12:31:25.630Z
   - _ulid: 01KQCM40YGNN56P12GWYWRN4EA
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -7912,7 +7912,35 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T12:41:51.460Z
-        completed_at: 2026-04-29T12:41:51.460Z
+        completed_at: 2026-04-29T12:42:37.558Z
+        notes: >-
+          Searched existing observations, inbox, and tasks. Found existing friction observation
+          @01KH6Y61 about mocks validating wrong behavior — directly related to this session's
+          blocker (mock tests passed while loader/downstream were indistinct). No duplicates found
+          for the specific patterns observed in this session.
+
+
+          High-confidence findings:
+
+
+          FRICTION 1: Single-workflow-submission pattern hides per-node outcomes. The downstream
+          workflow contains CheckpointLoaderSimple + KSampler + VAEDecode in one prompt, but the
+          harness treated the combined result as a single outcome for both loader and downstream.
+          This required 4 fix cycles to resolve. The pattern of submitting a composite workflow and
+          then retroactively splitting per-node outcomes from error strings is fragile — it depends
+          on ComfyUI consistently including the failing node type in error messages. NOT capturing
+          as new observation because @01KH6Y61 already covers the broader mock-based validation
+          issue.
+
+
+          SUCCESS 1: Review check as executable probe. The reviewer's 'loader/downstream distinction
+          probe' check provided a concrete mocked scenario that reproduced the bug mechanically.
+          This is a repeatable success pattern — review checks that run automated probes (not just
+          reading code) catch behavioral issues mocks miss.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T12:42:37.558Z
+        completed_at: 2026-04-29T12:42:37.558Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:41:15.472Z
