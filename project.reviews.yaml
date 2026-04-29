@@ -14163,6 +14163,12 @@ reviews:
         payload:
           thread_ulid: 01KQCD52PE1WDHFKPS2R9QV6S5
         timestamp: 2026-04-29T10:49:00.073Z
+      - _ulid: 01KQCDPNJJSY8MNG50Z4NF38VS
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQCD52PE1WDHFKPS2R9QV6S5
+        timestamp: 2026-04-29T10:49:06.387Z
     examined_commit: 7bcc9c2f7322b63ed8cb663b248d388f42694350
     external_links: []
     lifecycle_state: closed
@@ -14211,6 +14217,8 @@ reviews:
               realistic checkpoint tensors. All 1456 tests pass."
             created_at: 2026-04-29T10:48:59.962Z
         kind: blocker
+        resolved_at: 2026-04-29T10:49:06.284Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -14220,5 +14228,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T10:40:00.886Z
     created_at: 2026-04-29T10:36:06.249Z
-    updated_at: 2026-04-29T10:48:59.962Z
+    updated_at: 2026-04-29T10:49:06.284Z
     notes: []
