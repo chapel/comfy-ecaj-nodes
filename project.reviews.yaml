@@ -10023,6 +10023,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-29T05:52:20.847Z
         completed_at: 2026-04-29T05:52:20.847Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "kspec item get @comfy-memory-manager-compatibility: implementation status is in_progress
+          and description plus all six ACs match the task wording"
+        name: spec wording
+        required: true
+        runner: kspec
+        created_at: 2026-04-29T05:52:21.183Z
+        completed_at: 2026-04-29T05:52:21.183Z
     events:
       - _ulid: 01KQBWJX3DWJY6BVJH8V182VAD
         actor: Jacob Chapel
@@ -10051,6 +10062,13 @@ reviews:
           status: pass
           name: pytest
         timestamp: 2026-04-29T05:52:20.938Z
+      - _ulid: 01KQBWQ9RN0ZR101KDBN3C9BXD
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: spec wording
+        timestamp: 2026-04-29T05:52:21.270Z
     examined_commit: 26ba19e9cfd73da35baf5151989a28eb18931d2c
     external_links: []
     lifecycle_state: open
@@ -10063,5 +10081,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T05:49:57.229Z
-    updated_at: 2026-04-29T05:52:20.847Z
+    updated_at: 2026-04-29T05:52:21.183Z
     notes: []
