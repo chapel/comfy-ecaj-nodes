@@ -12048,7 +12048,17 @@ reviews:
     slugs: []
     title: Review atomic incremental writer fix cycle
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: 1382 passed in 10.44s
+        name: pytest full suite
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T08:10:10.268Z
+        completed_at: 2026-04-29T08:10:10.268Z
     events:
       - _ulid: 01KQC4HF923F9XS1G2M983PWJ4
         actor: Jacob Chapel
@@ -12063,6 +12073,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T08:09:35.710Z
+      - _ulid: 01KQC4KN217TK5WJ68HADDS1AH
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest full suite
+        timestamp: 2026-04-29T08:10:10.369Z
     examined_commit: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
     external_links: []
     lifecycle_state: open
@@ -12075,5 +12092,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T08:08:58.914Z
-    updated_at: 2026-04-29T08:09:35.603Z
+    updated_at: 2026-04-29T08:10:10.268Z
     notes: []
