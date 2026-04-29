@@ -1435,11 +1435,11 @@ workspaces:
     canonical_branch: dispatch/task/task-checkpoint-save-atomic-artifact-writer/01kqbtzn
     canonical_branch_head: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
     cleanup:
-      status: scheduled
-      detail: integrated-into-base-branch
+      status: blocked
+      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
-      reason: integrated-into-base-branch
-      updated_at: 2026-04-29T08:12:27.595Z
+      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
+      updated_at: 2026-04-29T08:12:27.975Z
     health:
       status: healthy
       issues: []
@@ -1453,7 +1453,7 @@ workspaces:
       target_branch: dev
       target_commit: 51eb583862d183e00229c9279268f4a645197ef6
       updated_at: 2026-04-29T08:12:27.595Z
-    lifecycle_state: closing
+    lifecycle_state: cleanup_blocked
     resolved_base_branch: dev
     task_ref: "@01KQBTZN83176W432HWKN1CTV4"
     task_slug: task-checkpoint-save-atomic-artifact-writer
@@ -1462,7 +1462,7 @@ workspaces:
       last_active_at: 2026-04-29T08:07:57.101Z
       last_reconciled_at: 2026-04-29T08:12:27.595Z
       created_at: 2026-04-29T07:41:29.896Z
-      updated_at: 2026-04-29T08:12:27.595Z
+      updated_at: 2026-04-29T08:12:27.975Z
     workspace_id: dispatch-workspace-01KQBTZN83176W432HWKN1CTV4
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
