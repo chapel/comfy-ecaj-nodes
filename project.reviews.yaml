@@ -14594,6 +14594,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
         timestamp: 2026-04-29T11:35:15.117Z
+      - _ulid: 01KQCGBJ2NWEWCAXH2N5ECYYH4
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
+        timestamp: 2026-04-29T11:35:28.085Z
     examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
     external_links: []
     lifecycle_state: open
@@ -14665,7 +14672,25 @@ reviews:
               build_checkpoint_save_workflow('source.safetensors') is True."
             created_at: 2026-04-29T11:35:15.013Z
         kind: blocker
+      - _ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
+        anchor:
+          type: code
+          commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
+          line_end: 196
+          line_start: 180
+          path: scripts/manual/real_comfy_checkpoint_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQCGBHYWXJW9SBJDCVG0S87Z
+            author: Jacob Chapel
+            body: "MUST-FIX: the report schema does not record the queued save workflow shape required by
+              ac-report-records-save-outcome. It stores terminal/checkpoint WorkflowResult objects
+              and artifact classification, but no workflow-shape data for the terminal save or
+              checkpoint save prompt. This leaves the report unable to show which node graph was
+              actually submitted, including whether MODEL/CLIP/VAE were wired correctly."
+            created_at: 2026-04-29T11:35:27.964Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T11:31:40.966Z
-    updated_at: 2026-04-29T11:35:15.013Z
+    updated_at: 2026-04-29T11:35:27.964Z
     notes: []
