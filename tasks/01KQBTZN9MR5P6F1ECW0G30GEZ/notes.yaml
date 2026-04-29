@@ -1,1 +1,41 @@
-notes: []
+notes:
+  - _ulid: 01KQC5Z0WVFC5W2TTSK573W6ZR
+    content: >-
+      Approach: For checkpoint-style save_model, replace MaterializationSink streaming with
+      Comfy-compatible checkpoint save.
+
+
+      1. Add save_checkpoint wrapper that calls comfy.sd.save_checkpoint with merged MODEL + CLIP +
+      VAE + ecaj metadata
+
+      2. In _execute_full_saved_model, when is_checkpoint: compute merged diffusion state, install
+      into ModelPatcher, call Comfy save_checkpoint to temp path, inject ecaj metadata,
+      atomic-replace to final target
+
+      3. Preserve non-checkpoint (diffusion-only) path unchanged - continues using
+      MaterializationSink
+
+      4. Preserve cache validation - check_checkpoint_cache already rejects internal-format
+      artifacts
+
+      5. Preserve save_model=False patch mode unchanged
+
+
+      Edge cases:
+
+      - comfy.sd.save_checkpoint failure must not clobber existing valid artifact
+
+      - temp file cleanup on failure
+
+      - ecaj metadata injection into Comfy-produced safetensors
+
+      - Internal-format artifacts rejected as checkpoint cache hits (already implemented in
+      persistence.py)
+
+
+      Test plan: 6+ tests covering Comfy save helper call, artifact-kind metadata, internal-format
+      rejection, missing/wrong metadata rejection, failed-save safety, and monkeypatched save/load
+      smoke test.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T08:33:51.515Z
