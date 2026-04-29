@@ -15887,7 +15887,17 @@ reviews:
     slugs: []
     title: Review task-checkpoint-save-live-validation-manual-run cycle 2
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_checkpoint_validation_harness.py: 101 passed in 1.84s."
+        name: pytest harness slice
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T13:34:43.255Z
+        completed_at: 2026-04-29T13:34:43.255Z
     events:
       - _ulid: 01KQCQ2MTCZ0M2JD45YC9JXC2Q
         actor: Jacob Chapel
@@ -15902,6 +15912,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T13:33:08.676Z
+      - _ulid: 01KQCQ5XNGXJ7HFCKW9F0Z7D2M
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest harness slice
+        timestamp: 2026-04-29T13:34:43.376Z
     examined_commit: 6688433eb367b01ef32a546a874febc170b13f5f
     external_links: []
     lifecycle_state: open
@@ -15914,5 +15931,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T13:32:56.012Z
-    updated_at: 2026-04-29T13:33:08.547Z
+    updated_at: 2026-04-29T13:34:43.255Z
     notes: []
