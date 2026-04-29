@@ -12423,6 +12423,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-29T08:52:39.708Z
+      - _ulid: 01KQC8BHZG4VACX9CBXH43T1F0
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQC70EHE76VWHQ03G7926VH3
+        timestamp: 2026-04-29T09:15:39.376Z
     examined_commit: bddfbc71a07578a396071075ca5ed286c5b24b71
     external_links: []
     lifecycle_state: closed
@@ -12455,6 +12461,13 @@ reviews:
               @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind and the
               task requirement not to publish internal-format artifacts for checkpoint-style saves."
             created_at: 2026-04-29T08:52:06.830Z
+          - _ulid: 01KQC8BHWE4P206NYRQGKP0WRF
+            author: "@claude"
+            body: "Fixed: _recipe_has_checkpoint_components now checks RecipeBase.checkpoint_components (clip
+              and vae present) in addition to RecipeModel source_dir=checkpoints. A checkpoint Entry
+              + LoRA/Merge recipe now correctly routes through the checkpoint save path. Added 6
+              unit tests for the classification logic in TestRecipeHasCheckpointComponents."
+            created_at: 2026-04-29T09:15:39.278Z
         kind: blocker
       - _ulid: 01KQC70S4YBZ3X6DM7MGHDRSBB
         anchor:
@@ -12511,5 +12524,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T08:52:39.708Z
     created_at: 2026-04-29T08:47:01.592Z
-    updated_at: 2026-04-29T08:52:39.708Z
+    updated_at: 2026-04-29T09:15:39.278Z
     notes: []
