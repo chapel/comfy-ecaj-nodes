@@ -7266,7 +7266,7 @@ runs:
     started_at: 2026-04-29T10:17:21.960Z
     completed_at: 2026-04-29T10:19:21.617Z
   - _ulid: 01KQCCAHB6A73AWS6CE1B1JG6D
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -7296,7 +7296,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T10:26:56.066Z
-        completed_at: 2026-04-29T10:26:56.066Z
+        completed_at: 2026-04-29T10:27:05.247Z
+        notes: "Captured one unique friction observation: @01KQCCBJ517HPF30AZ756T8YM0. No inbox items or
+          tasks were created because the improvement shape is not yet specified beyond the
+          observation; triage can decide whether this needs CLI/tooling work later."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T10:25:00.262Z
+    completed_at: 2026-04-29T10:27:05.248Z
