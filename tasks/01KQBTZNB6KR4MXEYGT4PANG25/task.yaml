@@ -74,7 +74,7 @@ tags:
   - comfy
   - memory
 vcs_refs: []
-review_ref: "@01KQCG4M9646BAJX4SSZX7AWFZ"
+review_ref: "@01KQCHA9HZEFFZ5VNW1SXG88GZ"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-checkpoint-save-live-validation-harness/01kqbtzn
@@ -182,6 +182,13 @@ history:
         previous: 2026-04-29T11:30:23.551Z
     command: task-submit
     timestamp: 2026-04-29T11:49:28.712Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KQCHA9HZEFFZ5VNW1SXG88GZ"
+        previous: "@01KQCG4M9646BAJX4SSZX7AWFZ"
+    command: review-link
+    timestamp: 2026-04-29T11:52:15.541Z
 created_at: 2026-04-29T05:21:58.118Z
 started_at: 2026-04-29T11:49:26.498Z
 submitted_at: 2026-04-29T11:49:28.712Z
