@@ -201,3 +201,25 @@ inbox:
       - testing
     added_by: Jacob Chapel
     created_at: 2026-04-29T09:37:22.810Z
+  - _ulid: 01KQCR3B5ZX4M54VD4RF3D27W5
+    text: "Improve kspec ref-type discoverability: when `kspec item get @plan-*` fails because the ref
+      is a plan, the CLI should hint to use `kspec plan get @ref` or provide a generic resolver for
+      common get operations. Encountered during review when verifying plan notes; current output was
+      only `Item not found`."
+    tags:
+      - reflection
+      - kspec
+      - cli
+    added_by: Jacob Chapel
+    created_at: 2026-04-29T13:50:47.488Z
+  - _ulid: 01KQCR3B6SMPSP2HAT2D5PEQYX
+    text: "Document PR-publication review behavior for self-owned PRs: `gh pr review --approve` can fail
+      with GitHub saying reviewers cannot approve their own pull request even after first-party
+      kspec review approval. Review/merge guidance should state whether approved kspec disposition
+      plus passing CI is the source of truth and what command to run next."
+    tags:
+      - reflection
+      - kspec
+      - review
+    added_by: Jacob Chapel
+    created_at: 2026-04-29T13:50:47.513Z
