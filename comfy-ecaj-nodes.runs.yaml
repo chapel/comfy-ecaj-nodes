@@ -7893,9 +7893,26 @@ runs:
     completed_at: 2026-04-29T12:31:25.630Z
   - _ulid: 01KQCM40YGNN56P12GWYWRN4EA
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T12:41:15.472Z
+        completed_at: 2026-04-29T12:41:51.460Z
+        notes: "What worked well: (1) The kspec review system provided clear, actionable blocker
+          descriptions — the cycle 4 review precisely identified the root cause (loader/downstream
+          indistinction) with evidence (a concrete mocked scenario). (2) The node_error(NodeType)
+          format already embedded in _extract_node_errors_from_history gave a clean parsing point
+          for distinguishing which node failed, avoiding the need for a separate loader-only
+          workflow submission. (3) The existing test infrastructure (mock_submit side_effect
+          pattern, WorkflowResult factories) made it straightforward to add 9 new targeted tests.
+          (4) Fix was surgical: 1 new helper + 1 control flow change in run_validation, no
+          structural refactoring needed."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T12:41:51.460Z
+        completed_at: 2026-04-29T12:41:51.460Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:41:15.472Z
