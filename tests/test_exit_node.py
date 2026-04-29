@@ -1160,6 +1160,38 @@ class TestRecipeHasCheckpointComponents:
         compose = RecipeCompose(branches=(lora_a, lora_b))
         assert _recipe_has_checkpoint_components(compose) is False
 
+    # AC: @exit-model-persistence ac-3
+    # AC: @exit-model-persistence ac-4
+    def test_diffusion_model_recipe_model_not_checkpoint(self):
+        """RecipeModel with source_dir='diffusion_models' is NOT checkpoint-style.
+
+        The diffusion model input node emits RecipeModel(source_dir='diffusion_models').
+        These are diffusion-only model merges and must not be classified as
+        checkpoint artifacts.
+        """
+        base = RecipeBase(model_patcher=object(), arch="sdxl")
+        model = RecipeModel(path="flux.safetensors", strength=1.0, source_dir="diffusion_models")
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=0.5)
+        assert _recipe_has_checkpoint_components(merge) is False
+
+    def test_diffusion_model_in_compose_not_checkpoint(self):
+        """RecipeModel with source_dir='diffusion_models' nested in Compose is NOT checkpoint."""
+        base = RecipeBase(model_patcher=object(), arch="sdxl")
+        lora = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
+        model = RecipeModel(path="flux.safetensors", strength=1.0, source_dir="diffusion_models")
+        compose = RecipeCompose(branches=(lora, model))
+        merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=0.5)
+        assert _recipe_has_checkpoint_components(merge) is False
+
+    def test_mixed_diffusion_and_checkpoint_models(self):
+        """A recipe with both diffusion-only and checkpoint RecipeModel nodes IS checkpoint-style."""
+        base = RecipeBase(model_patcher=object(), arch="sdxl")
+        diffusion_model = RecipeModel(path="flux.safetensors", strength=1.0, source_dir="diffusion_models")
+        checkpoint_model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        compose = RecipeCompose(branches=(diffusion_model, checkpoint_model))
+        merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=0.5)
+        assert _recipe_has_checkpoint_components(merge) is True
+
 
 # =============================================================================
 # Checkpoint-style cache routing and metadata
@@ -1346,3 +1378,133 @@ class TestCheckpointCacheRouting:
             mock_full_cache.assert_called_once()
             # check_checkpoint_cache must NOT have been called
             mock_ckpt_cache.assert_not_called()
+
+    # AC: @exit-model-persistence ac-3
+    # AC: @exit-model-persistence ac-4
+    def test_diffusion_model_recipe_uses_full_model_cache(self, mock_model_patcher, tmp_path):
+        """RecipeModel with source_dir='diffusion_models' must route to check_full_model_cache.
+
+        Diffusion-only model inputs are not checkpoint companions. They must
+        not be classified as checkpoint-style and must not use checkpoint cache
+        validation.
+        """
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        model = RecipeModel(path="flux.safetensors", strength=1.0, source_dir="diffusion_models")
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        mock_sink = MagicMock()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache") as mock_ckpt_cache,
+            patch("nodes.exit.check_full_model_cache", return_value=False) as mock_full_cache,
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.streaming_evaluation_to_sink"),
+            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
+            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            affected_key = "diffusion_model.input_blocks.0.0.weight"
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={},
+                affected_keys=set(),
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={str(id(model)): mock_model_loader},
+                model_affected={str(id(model)): frozenset({affected_key})},
+                all_model_keys=frozenset({affected_key}),
+            )
+            mock_load.return_value = mock_model_patcher.clone()
+
+            node.execute(merge, save_model=True, model_name="model")
+
+            # Diffusion-only RecipeModel must use check_full_model_cache
+            mock_full_cache.assert_called_once()
+            # check_checkpoint_cache must NOT be used for diffusion-only models
+            mock_ckpt_cache.assert_not_called()
+
+    # AC: @exit-model-persistence ac-3
+    def test_checkpoint_cache_called_without_manifest(self, mock_model_patcher, tmp_path):
+        """check_checkpoint_cache must be called without expected_manifest.
+
+        The base_manifest only reflects model_patcher.model_state_dict() keys
+        and may not include companion component keys (CLIP, VAE) that a
+        checkpoint artifact contains. Checkpoint cache validation relies on
+        metadata fields (recipe hash, artifact kind, base identity, dependency
+        fingerprints) instead of manifest validation.
+        """
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        model = RecipeModel(path="clip.safetensors", strength=1.0, source_dir="checkpoints")
+        merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=1.0)
+
+        save_path = str(tmp_path / "model.safetensors")
+        node = WIDENExitNode()
+
+        mock_sink = MagicMock()
+
+        with (
+            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False) as mock_ckpt_cache,
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit.streaming_evaluation_to_sink"),
+            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
+            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit.check_ram_preflight"),
+        ):
+            affected_key = "diffusion_model.input_blocks.0.0.weight"
+            mock_loader = MagicMock()
+            mock_loader.cleanup = MagicMock()
+            mock_loader.loaded_bytes = 0
+            mock_analyze.return_value = MagicMock(
+                model_patcher=mock_model_patcher,
+                arch="sdxl",
+                loader=mock_loader,
+                set_affected={},
+                affected_keys=set(),
+            )
+            mock_model_loader = MagicMock()
+            mock_model_loader.cleanup = MagicMock()
+            mock_model_loader.loaded_bytes = 0
+            mock_analyze_models.return_value = MagicMock(
+                model_loaders={str(id(model)): mock_model_loader},
+                model_affected={str(id(model)): frozenset()},
+                all_model_keys=frozenset(),
+            )
+            mock_load.return_value = mock_model_patcher.clone()
+
+            node.execute(merge, save_model=True, model_name="model")
+
+            mock_ckpt_cache.assert_called_once()
+            call_args = mock_ckpt_cache.call_args
+            # expected_manifest must NOT be passed (no positional or keyword)
+            assert "expected_manifest" not in call_args.kwargs
+            # Only 4 positional args: save_path, recipe_hash, base_identity, dep_fingerprints
+            assert len(call_args.args) == 4

@@ -410,14 +410,15 @@ def _resolve_checkpoints_path(model_name: str) -> str:
 
 
 def _recipe_has_checkpoint_components(node: RecipeNode) -> bool:
-    """Check if recipe tree contains RecipeModel nodes (checkpoint companion components).
+    """Check if recipe tree contains checkpoint-sourced RecipeModel nodes.
 
-    A RecipeModel node represents a companion model component (e.g. CLIP, VAE)
-    that is merged into the output. Its presence indicates a checkpoint-style
-    save requiring checkpoint-aware cache validation and metadata.
+    Only RecipeModel nodes with source_dir="checkpoints" represent checkpoint
+    companion components (e.g. CLIP, VAE). RecipeModel nodes with
+    source_dir="diffusion_models" are diffusion-only model inputs and do not
+    make a recipe checkpoint-style.
     """
     if isinstance(node, RecipeModel):
-        return True
+        return node.source_dir == "checkpoints"
     if isinstance(node, RecipeCompose):
         return any(_recipe_has_checkpoint_components(b) for b in node.branches)
     if isinstance(node, RecipeMerge):
@@ -695,14 +696,16 @@ class WIDENExitNode:
         # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
         # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
         # Checkpoint-style: validate artifact_kind, base identity, dependency
-        # fingerprints, and checkpoint component classification.
+        # fingerprints, and checkpoint component classification.  Manifest
+        # validation is skipped because base_manifest reflects only the base
+        # model's state dict and may not include companion component keys
+        # (CLIP, VAE) that a checkpoint artifact contains.
         # Non-checkpoint: validate full-model metadata and manifest.
         if enable_cache:
             if is_checkpoint:
                 cache_hit = check_checkpoint_cache(
                     save_path, recipe_hash, base_identity,
                     dependency_fingerprints_json,
-                    expected_manifest=base_manifest,
                 )
             else:
                 cache_hit = check_full_model_cache(
