@@ -346,12 +346,12 @@ features:
             then: Downstream nodes receive a MODEL backed by a complete saved model artifact for the selected
               recipe and requested saved model kind.
             when: The Exit node produces full saved model output for that recipe.
-          - given: A saved full model artifact matches the current recipe identity.
+          - given: A saved full model artifact matches the current recipe identity, requested artifact kind, and
+              required saved-model metadata.
             id: ac-cache-reuse-is-artifact-backed
-            then: |-
-              the reused result comes from the saved artifact rather than from a
-              process-resident affected weight payload.
-            when: the Exit node reuses cached full saved model output.
+            then: The reused result comes from the saved artifact rather than from a process-resident
+              affected-weight payload.
+            when: The Exit node reuses cached full saved model output.
         tags:
           - persistence
           - memory
