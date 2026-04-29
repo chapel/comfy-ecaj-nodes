@@ -2266,6 +2266,7 @@
   notes_count: 0
   todos_count: 0
   created_at: 2026-04-29T05:21:58.068Z
+  automation: eligible
 - _ulid: 01KQBTZNAFWDF3Z70RRYP87JQM
   slugs:
     - task-checkpoint-save-returned-model
