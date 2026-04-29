@@ -11820,6 +11820,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-29T07:57:37.198Z
+      - _ulid: 01KQC48TG2C92M543ZD2PFADP6
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQC3SSVW8GRKMKEW3CSP6342
+        timestamp: 2026-04-29T08:04:15.490Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: closed
@@ -11883,6 +11889,11 @@ reviews:
               Found 3 errors. reports E501 line-length errors in this file at lines 22, 27, and 365.
               Impact: the review gate is failing even though the focused and full pytest runs pass.
             created_at: 2026-04-29T07:56:03.324Z
+          - _ulid: 01KQC48TD3PMWWS3FKCJR94ZYM
+            author: "@claude"
+            body: "Fixed: reformatted _make_manifest, _write_valid_artifact, and the context manager docstring
+              to stay within 99-char line limit. ruff check now passes clean."
+            created_at: 2026-04-29T08:04:15.395Z
         kind: blocker
       - _ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
         anchor:
@@ -11959,5 +11970,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T07:57:37.197Z
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T07:57:37.198Z
+    updated_at: 2026-04-29T08:04:15.395Z
     notes: []
