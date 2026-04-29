@@ -33,7 +33,6 @@ from nodes.exit import (
     _incremental_cache,
     clear_incremental_cache,
 )
-from tests.conftest import make_checkpoint_components
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -1079,7 +1078,7 @@ class TestExitNodeIncrementalCache:
 
         recipe = RecipeMerge(
             base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                            checkpoint_components=make_checkpoint_components()),
+                            checkpoint_components=None),
             target=RecipeLoRA(
                 loras=({"path": "lora_a.safetensors", "strength": 1.0},),
                 block_config=bc_new,
@@ -1145,6 +1144,7 @@ class TestExitNodeIncrementalCache:
                   return_value='{"test": true}'),
             patch("nodes.exit.compute_recipe_hash",
                   return_value="recipe_hash"),
+            patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
             patch("nodes.exit.MaterializationSink", return_value=mock_sink),

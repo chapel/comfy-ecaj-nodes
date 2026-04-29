@@ -254,11 +254,17 @@ def _mock_comfyui_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     # Mock get_folder_paths — returns empty list
     folder_paths_mod.get_folder_paths = lambda folder: []
 
+    comfy_mod = _make_stub_module("comfy")
+    comfy_sd_mod = _make_stub_module("comfy.sd")
+    comfy_sd_mod.save_checkpoint = lambda *args, **kwargs: None
+    comfy_mod.sd = comfy_sd_mod
+
     stubs = {
         "folder_paths": folder_paths_mod,
-        "comfy": _make_stub_module("comfy"),
+        "comfy": comfy_mod,
         "comfy.utils": _make_stub_module("comfy.utils"),
         "comfy.model_management": _make_stub_module("comfy.model_management"),
+        "comfy.sd": comfy_sd_mod,
     }
     for name, mod in stubs.items():
         monkeypatch.setitem(sys.modules, name, mod)
