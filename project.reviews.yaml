@@ -15777,6 +15777,13 @@ reviews:
           status: fail
           name: live report cache reuse assertion
         timestamp: 2026-04-29T13:06:56.194Z
+      - _ulid: 01KQCNKKZY5QKW1K6WSEQTY0ZG
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCNKKW78QEGW19B78S1DZKK
+        timestamp: 2026-04-29T13:07:15.070Z
     examined_commit: 60842f5808796d60d59926b6ab58fc486aebfb3a
     external_links: []
     lifecycle_state: open
@@ -15786,8 +15793,30 @@ reviews:
       content_hash: ""
       ref: "@01KQBTZNC4NGZ7R5ZT37Z4GJQQ"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQCNKKW78QEGW19B78S1DZKK
+        anchor:
+          type: code
+          commit: 60842f5808796d60d59926b6ab58fc486aebfb3a
+          line_end: 1089
+          line_start: 1083
+          path: reports/checkpoint_validation_report.json
+          side: head
+        entries:
+          - _ulid: 01KQCNKKW7VP8W85M3B443W2RW
+            author: Jacob Chapel
+            body: "MUST-FIX: The submitted live validation report does not validate cache reuse. The task
+              requires evidence that a compatible cache reuse run avoids recomputing the merge and
+              returns/loads from the saved checkpoint artifact, but the report says
+              cache_reuse_detail is 'unable to determine cache status...' and classifies the cache
+              outcome as cache_not_reused. The commit message/task note claims timing evidence
+              confirms reuse, but that evidence is not present in the committed report and the
+              report's machine-readable outcome is a cache failure. Rerun/fix the harness so the
+              report records concrete cache reuse evidence, or record an explicit accepted deferral
+              instead of submitting this as validated."
+            created_at: 2026-04-29T13:07:14.951Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T13:04:55.279Z
-    updated_at: 2026-04-29T13:06:56.075Z
+    updated_at: 2026-04-29T13:07:14.951Z
     notes: []
