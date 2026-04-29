@@ -11462,6 +11462,18 @@ reviews:
         runner: git
         created_at: 2026-04-29T07:35:34.211Z
         completed_at: 2026-04-29T07:35:34.211Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Manual safetensors probe on merged head: valid checkpoint metadata hit=True;
+          checkpoint_components=false, missing __ecaj_recipe__, and diffusion-only tensors all
+          returned False."
+        name: metadata negative probes
+        required: true
+        runner: python
+        created_at: 2026-04-29T07:35:46.383Z
+        completed_at: 2026-04-29T07:35:46.383Z
     events:
       - _ulid: 01KQC2KR7R6QXEAF5K36P87PP8
         actor: Jacob Chapel
@@ -11497,6 +11509,13 @@ reviews:
           status: pass
           name: merge conflict resolution
         timestamp: 2026-04-29T07:35:34.329Z
+      - _ulid: 01KQC2MNHDY9KQDCHSH3QTH200
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: metadata negative probes
+        timestamp: 2026-04-29T07:35:46.478Z
     examined_commit: 2e59a99cdf62fd7d8a9535efb70e7cb7a3580938
     external_links: []
     lifecycle_state: open
@@ -11509,5 +11528,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T07:35:16.473Z
-    updated_at: 2026-04-29T07:35:34.211Z
+    updated_at: 2026-04-29T07:35:46.383Z
     notes: []
