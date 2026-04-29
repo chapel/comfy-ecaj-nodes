@@ -925,17 +925,23 @@ features:
           - exit-model-persistence
         title: Exit Model Persistence
         type: requirement
-        description: "Opt-in save/cache for merged model output in any Exit output mode. When save_model is
-          enabled, the exit node saves the fully-merged model as safetensors in the base model
-          directory. On subsequent runs, if the cached file metadata matches the current recipe
-          configuration, the node can load from disk instead of recomputing the GPU merge pipeline.
-          The saved file is a complete standalone model (all keys) loadable by ComfyUI standard
-          model loader. In the default in-memory patch output mode, a cache hit loads the saved
-          state and installs set patches. In full saved model output mode, the saved artifact serves
-          as both the cache and the returned MODEL. New inputs: save_model (boolean toggle, default
-          off) and model_name (string filename). Requires threading the base model checkpoint path
-          from Entry node through RecipeBase so the exit node can resolve the save directory and
-          base model identity for hashing."
+        description: >-
+          Opt-in save/cache for merged model output through the existing save_model boolean. When
+          save_model is enabled, the Exit node writes or reuses an ecaj-owned saved model artifact
+          for the current recipe and requested artifact kind using a safe model_name.
+
+
+          For checkpoint-style source workflows, the saved artifact must be loadable through the
+          appropriate ComfyUI checkpoint-style loader with the components required for normal
+          generation and decode use. A diffusion-weight-only internal state file is not a complete
+          checkpoint-style saved model artifact.
+
+
+          For model kinds that are truly diffusion-only, a diffusion-weight artifact may be valid
+          only when it is explicitly classified and validated as that artifact kind. Cache
+          validation uses ecaj metadata including recipe identity, artifact kind, base model
+          identity, and dependency fingerprints. The default save_model off path performs no file
+          I/O.
         status:
           maturity: draft
           implementation: in_progress
