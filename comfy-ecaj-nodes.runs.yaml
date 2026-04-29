@@ -5868,7 +5868,7 @@ runs:
     completed_at: 2026-04-29T05:57:12.932Z
   - _ulid: 01KQBX05CFH5G07C6TR12RB9KV
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5914,7 +5914,23 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T05:58:25.662Z
-        completed_at: 2026-04-29T05:58:25.662Z
+        completed_at: 2026-04-29T05:58:33.978Z
+        notes: >-
+          Evaluation:
+
+          1. Worktree guard CWD matching too broad — SKIP, already tracked as @01KQ7036. The broader
+          CWD matching (/.kspec matching .kspec-worktrees) is a refinement of the same issue.
+
+          2. Shell state corruption after hook block — SKIP, one-off/not systemic.
+
+          3. Success pattern (well-scoped task) — SKIP, not novel enough to capture as observation.
+
+
+          No new items to capture.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T05:58:33.978Z
+        completed_at: 2026-04-29T05:58:33.978Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T05:57:11.695Z
