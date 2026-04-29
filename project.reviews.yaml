@@ -10359,9 +10359,25 @@ reviews:
           status: pass
           name: full pytest
         timestamp: 2026-04-29T06:16:01.988Z
+      - _ulid: 01KQBY2TZ53B2EDF2RCGXPF8B4
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: approve
+        timestamp: 2026-04-29T06:16:07.909Z
+      - _ulid: 01KQBY2TZ5A56N127YJA0DMS6Y
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T06:16:07.909Z
     examined_commit: 611531b279ec6b891bf702639752dee1dbd1d724
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -10369,7 +10385,14 @@ reviews:
       ref: "@01KQBTZN6NJED5GTQPK3WD5P93"
       shadow_commit: ""
     threads: []
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: approve
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T06:16:07.908Z
     created_at: 2026-04-29T06:13:00.339Z
-    updated_at: 2026-04-29T06:16:01.918Z
+    updated_at: 2026-04-29T06:16:07.909Z
     notes: []
