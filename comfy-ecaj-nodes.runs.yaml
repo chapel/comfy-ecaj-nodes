@@ -8148,7 +8148,7 @@ runs:
     started_at: 2026-04-29T13:08:27.883Z
     completed_at: 2026-04-29T13:11:20.653Z
   - _ulid: 01KQCPWHJY951BFACBNHFG6WPZ
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -8182,7 +8182,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T13:31:24.399Z
-        completed_at: 2026-04-29T13:31:24.399Z
+        completed_at: 2026-04-29T13:32:16.946Z
+        notes: Captured 1 success observation (01KQCQ05). Resolved and deleted inbox item 01KQCNDD (cache
+          detection false negative — fixed this session). No new friction to capture; all identified
+          issues already tracked.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:29:36.094Z
+    completed_at: 2026-04-29T13:32:16.946Z
