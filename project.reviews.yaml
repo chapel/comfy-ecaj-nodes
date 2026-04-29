@@ -14374,6 +14374,16 @@ reviews:
         runner: pytest
         created_at: 2026-04-29T11:16:44.252Z
         completed_at: 2026-04-29T11:16:44.252Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: uv run pytest -> 1474 passed in 10.30s
+        name: full pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T11:16:44.639Z
+        completed_at: 2026-04-29T11:16:44.639Z
     events:
       - _ulid: 01KQCF4PKY1GHT8SJ36FYYSSA1
         actor: Jacob Chapel
@@ -14395,6 +14405,13 @@ reviews:
           status: pass
           name: targeted pytest
         timestamp: 2026-04-29T11:16:44.361Z
+      - _ulid: 01KQCF9925VQZYD6XRJ545E65N
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: full pytest
+        timestamp: 2026-04-29T11:16:44.741Z
     examined_commit: 3d931fc32a2e422067190f11008645ee3a0e2335
     external_links: []
     lifecycle_state: open
@@ -14407,5 +14424,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T11:14:14.783Z
-    updated_at: 2026-04-29T11:16:44.252Z
+    updated_at: 2026-04-29T11:16:44.639Z
     notes: []
