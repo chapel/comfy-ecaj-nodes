@@ -15580,6 +15580,17 @@ reviews:
         runner: rg
         created_at: 2026-04-29T12:48:38.191Z
         completed_at: 2026-04-29T12:48:38.191Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Ad hoc mocked run_validation probes passed for rejected save skipping downstream, KSampler
+          OOM keeping loader accepted, and memory_mode propagation.
+        name: prior blocker probes
+        required: true
+        runner: python
+        created_at: 2026-04-29T12:48:38.616Z
+        completed_at: 2026-04-29T12:48:38.616Z
     events:
       - _ulid: 01KQCM8FFXK77NWZ5C3KRH7973
         actor: Jacob Chapel
@@ -15615,6 +15626,13 @@ reviews:
           status: pass
           name: AC annotation scan
         timestamp: 2026-04-29T12:48:38.311Z
+      - _ulid: 01KQCMHHTMWGYT2FXR583FQ8HN
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: prior blocker probes
+        timestamp: 2026-04-29T12:48:38.740Z
     examined_commit: 37c7029f0288d8d6438a6d44a9dac519e9e50d3d
     external_links: []
     lifecycle_state: open
@@ -15627,5 +15645,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T12:43:41.438Z
-    updated_at: 2026-04-29T12:48:38.191Z
+    updated_at: 2026-04-29T12:48:38.616Z
     notes: []
