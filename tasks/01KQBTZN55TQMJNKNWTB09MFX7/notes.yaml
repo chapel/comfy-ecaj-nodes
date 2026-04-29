@@ -1,1 +1,15 @@
-notes: []
+notes:
+  - _ulid: 01KQBYFR10TPYFZBEA9FGPS885
+    content: "Approach: This is a preservation task. Both @streaming-full-model-materialization and
+      @manual-comfy-memory-validation are intentionally preserved unchanged because checkpoint
+      artifact loadability is covered by @checkpoint-loadable-saved-model-output,
+      @saved-model-artifact-safety, rewritten @full-saved-model-output, rewritten
+      @exit-model-persistence, and @live-comfy-saved-output-validation. These two specs remain
+      scoped to their original concerns: @streaming-full-model-materialization covers bounded
+      affected-weight handoff and avoiding resident affected-weight caches;
+      @manual-comfy-memory-validation covers opt-in/refusal/reporting for real Comfy memory
+      validation. Both specs retain implemented status. All existing ACs and test coverage remain
+      intact. No spec text or AC changes needed."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T06:23:10.880Z
