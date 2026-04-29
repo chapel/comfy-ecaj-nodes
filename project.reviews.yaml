@@ -12666,9 +12666,25 @@ reviews:
           status: pass
           name: targeted review probes
         timestamp: 2026-04-29T09:29:58.491Z
+      - _ulid: 01KQC974RWB2AGKPGKV18M8P97
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-29T09:30:43.356Z
+      - _ulid: 01KQC974RWY89CSN85Z3JYJB20
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T09:30:43.356Z
     examined_commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -12720,7 +12736,14 @@ reviews:
               components."
             created_at: 2026-04-29T09:28:30.876Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T09:30:43.356Z
     created_at: 2026-04-29T09:19:15.423Z
-    updated_at: 2026-04-29T09:29:58.393Z
+    updated_at: 2026-04-29T09:30:43.356Z
     notes: []
