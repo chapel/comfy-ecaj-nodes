@@ -1632,20 +1632,20 @@ workspaces:
     base_branch_point: 68277597047e874d5125e99c67b5c0bea3842f95
     bootstrap:
       status: succeeded
-      canonicalBranchHead: 68277597047e874d5125e99c67b5c0bea3842f95
+      canonicalBranchHead: 3d931fc32a2e422067190f11008645ee3a0e2335
       configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
       failureMessage: null
       invalidationReasons: []
-      lastRole: worker
-      lastRunAt: 2026-04-29T10:57:35.828Z
+      lastRole: reviewer
+      lastRunAt: 2026-04-29T11:13:52.395Z
       roleStates:
         reviewer:
-          status: not_run
-          canonicalBranchHead: null
-          configHash: null
+          status: succeeded
+          canonicalBranchHead: 3d931fc32a2e422067190f11008645ee3a0e2335
+          configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
           failureMessage: null
           invalidationReasons: []
-          lastRunAt: null
+          lastRunAt: 2026-04-29T11:13:52.395Z
           steps: []
         worker:
           status: succeeded
@@ -1693,7 +1693,7 @@ workspaces:
       last_active_at: 2026-04-29T10:57:36.278Z
       last_reconciled_at: 2026-04-29T11:13:52.105Z
       created_at: 2026-04-29T10:57:35.534Z
-      updated_at: 2026-04-29T11:13:52.105Z
+      updated_at: 2026-04-29T11:13:52.395Z
     workspace_id: dispatch-workspace-01KQBTZNAFWDF3Z70RRYP87JQM
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
