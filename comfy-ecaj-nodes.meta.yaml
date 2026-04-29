@@ -1164,6 +1164,16 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T11:13:27.662Z
+  - _ulid: 01KQCFEKWYVYNND89ZW4W2FVCF
+    type: friction
+    content: "Copied exact pytest node selectors in review handoffs are brittle: one stale selector
+      caused pytest to exit with code 4 and run no tests until the selector was manually corrected.
+      Prefer class/file-scoped selectors or verify node IDs with rg before delegating targeted test
+      commands."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T11:19:39.678Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
