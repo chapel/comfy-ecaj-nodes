@@ -7799,7 +7799,7 @@ runs:
     completed_at: 2026-04-29T12:15:17.043Z
   - _ulid: 01KQCJY0BBB6YGNT9SSRSJ09G8
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -7815,7 +7815,25 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T12:20:45.513Z
-        completed_at: 2026-04-29T12:20:45.513Z
+        completed_at: 2026-04-29T12:21:00.467Z
+        notes: >-
+          Identified patterns from this fix cycle:
+
+
+          SUCCESS (high confidence): Review probes that exercise the exact code path (memory-mode
+          classification probe check) catch bugs that unit tests miss. The reviewer's probe ran
+          classify_failure with realistic node_error strings and exposed the masking — none of the
+          83 existing tests caught it because they used clean error strings without mixed
+          node-context/OOM keywords. This is a reusable review technique.
+
+
+          FRICTION: None identified with high confidence. The fix cycle was straightforward — single
+          blocker, clear reproducer, minimal code change (reorder priority checks). No systemic
+          friction to report.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T12:21:00.467Z
+        completed_at: 2026-04-29T12:21:00.467Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:20:29.675Z
