@@ -10271,7 +10271,52 @@ reviews:
     slugs: []
     title: Review task-checkpoint-save-component-sourcing
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "kspec validate --warnings-ok: schema/references/skills OK; warnings are existing
+          alignment/completeness warnings."
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-29T06:16:01.218Z
+        completed_at: 2026-04-29T06:16:01.218Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found annotated tests for @saved-model-artifact-safety
+          ac-missing-components-fail-before-work, ac-missing-component-diagnostic-names-requirement,
+          and ac-missing-component-diagnostic-gives-guidance in tests/test_checkpoint_components.py.
+        name: AC annotations
+        required: true
+        runner: rg
+        created_at: 2026-04-29T06:16:01.482Z
+        completed_at: 2026-04-29T06:16:01.482Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "pytest tests/test_checkpoint_components.py tests/test_exit_node.py
+          tests/test_full_model_streaming.py tests/test_incremental_recompute.py
+          tests/test_memory_management.py: 220 passed in 3.46s."
+        name: focused pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T06:16:01.719Z
+        completed_at: 2026-04-29T06:16:01.719Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "pytest: 1309 passed in 9.70s."
+        name: full pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T06:16:01.918Z
+        completed_at: 2026-04-29T06:16:01.918Z
     events:
       - _ulid: 01KQBXX3SJX06F2K7WT42Y730R
         actor: Jacob Chapel
@@ -10286,6 +10331,34 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T06:13:06.103Z
+      - _ulid: 01KQBY2MGTCTA0GRQDH5HBAC35
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-29T06:16:01.306Z
+      - _ulid: 01KQBY2MSMDCMDC0AK8AJP0A09
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotations
+        timestamp: 2026-04-29T06:16:01.589Z
+      - _ulid: 01KQBY2N02NKNJ41N17MZ0HWGW
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: focused pytest
+        timestamp: 2026-04-29T06:16:01.794Z
+      - _ulid: 01KQBY2N63YZS9X38HNADESGSQ
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: full pytest
+        timestamp: 2026-04-29T06:16:01.988Z
     examined_commit: 611531b279ec6b891bf702639752dee1dbd1d724
     external_links: []
     lifecycle_state: open
@@ -10298,5 +10371,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T06:13:00.339Z
-    updated_at: 2026-04-29T06:13:06.005Z
+    updated_at: 2026-04-29T06:16:01.918Z
     notes: []
