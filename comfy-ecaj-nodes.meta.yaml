@@ -1232,6 +1232,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T13:03:52.333Z
+  - _ulid: 01KQCNS0XV9N29NZ4BF1466FPD
+    type: success
+    content: Reviewing the committed machine-readable report before relying on task notes exposed a
+      mismatch between narrative cache-reuse claims and the report's failure_categories/cache
+      detail; adding a small jq assertion made the review finding concrete and reproducible.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T13:10:12.155Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
