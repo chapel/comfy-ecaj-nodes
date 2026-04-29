@@ -79,3 +79,14 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T12:28:09.719Z
+  - _ulid: 01KQCM25ZABVAFXQJ8P2VY57XB
+    content: "Fix cycle 4: addressed the loader/downstream distinction blocker. The root cause was
+      run_validation copying the downstream_result wholesale into checkpoint_loader_result, so a
+      KSampler failure made the loader appear to have failed. Fix: added
+      _extract_failing_node_type() to parse the failing node class from node_error(NodeType) error
+      strings. Now: CheckpointLoaderSimple failure → loader failed + downstream skipped; any other
+      node failure → loader accepted + downstream failed. Added 9 new tests (96 total harness
+      tests). All 1570 project tests pass, ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T12:40:15.082Z
