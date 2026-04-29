@@ -11113,9 +11113,25 @@ reviews:
           status: fail
           name: metadata negative probes
         timestamp: 2026-04-29T07:13:28.956Z
+      - _ulid: 01KQC1C348BJQW7RH33RCYVY19
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-29T07:13:36.904Z
+      - _ulid: 01KQC1C348465CD3D811776ZK3
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T07:13:36.904Z
     examined_commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -11185,7 +11201,14 @@ reviews:
               rather than replacing it."
             created_at: 2026-04-29T07:12:43.001Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T07:13:36.903Z
     created_at: 2026-04-29T07:08:39.641Z
-    updated_at: 2026-04-29T07:13:28.862Z
+    updated_at: 2026-04-29T07:13:36.904Z
     notes: []
