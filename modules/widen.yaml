@@ -436,10 +436,11 @@ features:
               - comfy-memory-manager-compatibility
             title: Comfy Memory Manager Compatibility
             type: requirement
-            description: |-
-              Full saved model output remains compatible with ComfyUI's model memory
-              lifecycle across supported memory-management modes, including when Dynamic
-              VRAM is enabled and when it is not active.
+            description: Saved model output remains compatible with ComfyUI's model memory lifecycle across
+              supported memory-management modes for the requested saved model artifact kind. For
+              checkpoint-style saved output, compatibility requires that ComfyUI can load and use
+              the saved checkpoint-style artifact through normal loader and downstream workflow
+              paths without changing the active memory mode.
             status:
               maturity: draft
               implementation: in_progress
