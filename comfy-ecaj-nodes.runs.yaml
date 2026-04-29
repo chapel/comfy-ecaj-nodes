@@ -6602,9 +6602,35 @@ runs:
     completed_at: 2026-04-29T07:44:00.681Z
   - _ulid: 01KQC3BZHKK4M7H4PFCDWEQ4HQ
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T07:48:30.387Z
+        completed_at: 2026-04-29T07:49:16.623Z
+        notes: >-
+          Session: Completed task @task-checkpoint-save-atomic-artifact-writer. Single task, clean
+          execution.
+
+
+          What worked well:
+
+          - Task was well-scoped by the plan with precise implementation and testing requirements
+
+          - Existing MaterializationSink in streaming_save.py provided a proven pattern — the new
+          IncrementalWriter adds poison semantics on top of the same core approach
+
+          - Test-first approach: all 15 tests passed on first run, 1375 full suite clean
+
+          - Clear AC mapping in task description made test annotation straightforward
+
+
+          Friction: None significant. The task was well-defined and execution was linear.
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T07:49:16.623Z
+        completed_at: 2026-04-29T07:49:16.623Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:48:30.387Z
