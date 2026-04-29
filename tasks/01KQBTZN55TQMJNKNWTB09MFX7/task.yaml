@@ -48,8 +48,12 @@ description: |
 spec_ref: "@streaming-full-model-materialization"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Preservation verified: both @streaming-full-model-materialization (6 ACs,
+  implemented) and @manual-comfy-memory-validation (3 ACs, implemented) remain unchanged. All 1314
+  tests pass. No task claims these specs alone prove checkpoint readiness. No code or spec changes
+  needed — checkpoint artifact loadability is covered by the new dedicated specs."
 depends_on:
   - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
   - "@task-checkpoint-save-rewrite-comfy-memory-compatibility-spec"
@@ -110,8 +114,25 @@ history:
         previous: null
     command: task-submit
     timestamp: 2026-04-29T06:25:00.542Z
+  - author: "@claude"
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Preservation verified: both @streaming-full-model-materialization (6 ACs, implemented) and
+          @manual-comfy-memory-validation (3 ACs, implemented) remain unchanged. All 1314 tests
+          pass. No task claims these specs alone prove checkpoint readiness. No code or spec changes
+          needed — checkpoint artifact loadability is covered by the new dedicated specs."
+        previous: null
+      completed_at:
+        new: 2026-04-29T06:25:26.742Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-04-29T06:25:26.747Z
 created_at: 2026-04-29T05:21:57.925Z
 started_at: 2026-04-29T06:21:14.318Z
 submitted_at: 2026-04-29T06:25:00.542Z
+completed_at: 2026-04-29T06:25:26.742Z
 todos: []
 automation: eligible
