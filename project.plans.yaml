@@ -5877,8 +5877,8 @@ plans:
       replacement of diffusion-loader/deepcopy return behavior with checkpoint-compatible
 
       save and return semantics.
-    status: draft
-    approved_at: null
+    status: approved
+    approved_at: 2026-04-29T05:20:55.277Z
     derived_specs: []
     derived_tasks: []
     module_ref: null
