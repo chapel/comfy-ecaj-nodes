@@ -926,6 +926,7 @@ class TestFullArtifactCacheHit:
         for k in keys:
             artifact_tensors[k] = torch.ones(4, 4) * 42.0
 
+        dep_fps = json.dumps({}, sort_keys=True, separators=(",", ":"))
         save_file(
             artifact_tensors,
             save_path,
@@ -935,6 +936,9 @@ class TestFullArtifactCacheHit:
                 "__ecaj_recipe_hash__": "match",
                 "__ecaj_affected_keys__": json.dumps([affected_key]),
                 "__ecaj_output_mode__": "full",
+                "__ecaj_artifact_kind__": "diffusion",
+                "__ecaj_base_identity__": "base_id",
+                "__ecaj_dependency_fingerprints__": dep_fps,
             },
         )
 
