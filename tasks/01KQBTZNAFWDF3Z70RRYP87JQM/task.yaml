@@ -53,8 +53,11 @@ description: |
 spec_ref: "@checkpoint-loadable-saved-model-output"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Merged PR #107 into dev at 930b8de30c7e44c3fba57d026d63186cc2f639f0. Review
+  @01KQCF4P approved; CI lint/test, full local pytest, targeted pytest, and kspec validate gates
+  passed."
 depends_on:
   - "@task-checkpoint-save-artifact-format"
 context: []
@@ -122,8 +125,24 @@ history:
         previous: null
     command: review-link
     timestamp: 2026-04-29T11:14:15.133Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Merged PR #107 into dev at 930b8de30c7e44c3fba57d026d63186cc2f639f0. Review @01KQCF4P
+          approved; CI lint/test, full local pytest, targeted pytest, and kspec validate gates
+          passed."
+        previous: null
+      completed_at:
+        new: 2026-04-29T11:17:43.244Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-04-29T11:17:43.254Z
 created_at: 2026-04-29T05:21:58.095Z
 started_at: 2026-04-29T10:58:14.988Z
 submitted_at: 2026-04-29T11:11:00.994Z
+completed_at: 2026-04-29T11:17:43.244Z
 todos: []
 automation: eligible
