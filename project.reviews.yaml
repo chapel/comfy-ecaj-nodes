@@ -11302,6 +11302,18 @@ reviews:
         runner: pytest
         created_at: 2026-04-29T07:30:34.442Z
         completed_at: 2026-04-29T07:30:34.442Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: rg found annotated behavioral tests for @saved-model-artifact-safety and
+          @exit-model-persistence in tests/test_persistence.py, tests/test_exit_node.py, and
+          tests/test_full_model_streaming.py; no source-scanning AC tests found.
+        name: AC annotations
+        required: false
+        runner: rg
+        created_at: 2026-04-29T07:30:34.769Z
+        completed_at: 2026-04-29T07:30:34.769Z
     events:
       - _ulid: 01KQC27JJ43YMCXF1KPP8BNE8X
         actor: Jacob Chapel
@@ -11330,6 +11342,13 @@ reviews:
           status: pass
           name: full pytest
         timestamp: 2026-04-29T07:30:34.532Z
+      - _ulid: 01KQC2B57DGGEDANW738Q488YV
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC annotations
+        timestamp: 2026-04-29T07:30:34.861Z
     examined_commit: 2e59a99cdf62fd7d8a9535efb70e7cb7a3580938
     external_links: []
     lifecycle_state: open
@@ -11342,5 +11361,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T07:28:37.444Z
-    updated_at: 2026-04-29T07:30:34.442Z
+    updated_at: 2026-04-29T07:30:34.769Z
     notes: []
