@@ -15474,6 +15474,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-29T12:28:09.444Z
+      - _ulid: 01KQCM1R40E339GH1938MP93SM
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCK7PBY20TPN7VDB310EDBV
+        timestamp: 2026-04-29T12:40:00.896Z
     examined_commit: 099b309999b053bbad95f13eb7badb1a1b6463ba
     external_links: []
     lifecycle_state: closed
@@ -15505,6 +15511,17 @@ reviews:
               workflow results and distinct failure categories for loader versus downstream
               failures."
             created_at: 2026-04-29T12:25:47.134Z
+          - _ulid: 01KQCM1R0CM0J9SSG1XRM74V6X
+            author: "@claude"
+            body: "Fixed: loader and downstream outcomes are now distinct. Added _extract_failing_node_type() to
+              parse the failing node class from node_error(NodeType) error strings. run_validation
+              now uses this to correctly attribute failures: if CheckpointLoaderSimple fails, loader
+              is marked failed and downstream is skipped; if any other node fails (KSampler,
+              VAEDecode, etc.), the loader is marked accepted=True and only the downstream carries
+              the failure. Added 9 new tests covering all cases (KSampler failure with loader
+              accepted, loader failure with downstream skipped, VAEDecode failure with loader
+              accepted, all-success case, and the helper itself). All 1570 tests pass."
+            created_at: 2026-04-29T12:40:00.780Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -15515,5 +15532,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T12:28:09.443Z
     created_at: 2026-04-29T12:22:03.386Z
-    updated_at: 2026-04-29T12:28:09.444Z
+    updated_at: 2026-04-29T12:40:00.780Z
     notes: []
