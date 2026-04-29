@@ -12214,6 +12214,17 @@ reviews:
         runner: kspec
         created_at: 2026-04-29T08:28:49.887Z
         completed_at: 2026-04-29T08:28:49.887Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: python -m ruff check lib/result_sink.py lib/gpu_ops.py lib/executor.py nodes/exit.py
+          tests/test_result_sink.py tests/test_chunked_evaluation_to_sink.py -> All checks passed
+        name: ruff touched files
+        required: true
+        runner: ruff
+        created_at: 2026-04-29T08:28:50.226Z
+        completed_at: 2026-04-29T08:28:50.226Z
     events:
       - _ulid: 01KQC5FCQCGRMP55EJGAJTDC1Y
         actor: Jacob Chapel
@@ -12242,6 +12253,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-29T08:28:49.980Z
+      - _ulid: 01KQC5NTRK2S9Q516H4SHBN5HW
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff touched files
+        timestamp: 2026-04-29T08:28:50.324Z
     examined_commit: 5348166a85d36aa4e27cd8cf35a527c932a59085
     external_links: []
     lifecycle_state: open
@@ -12254,5 +12272,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T08:25:19.340Z
-    updated_at: 2026-04-29T08:28:49.887Z
+    updated_at: 2026-04-29T08:28:50.226Z
     notes: []
