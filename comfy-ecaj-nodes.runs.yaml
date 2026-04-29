@@ -7851,7 +7851,7 @@ runs:
     completed_at: 2026-04-29T12:21:24.869Z
   - _ulid: 01KQCKDRMR5CHZEGZAW81V5W5D
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7865,7 +7865,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T12:30:12.135Z
-        completed_at: 2026-04-29T12:30:12.135Z
+        completed_at: 2026-04-29T12:30:54.109Z
+        notes: "High-confidence items identified: (1) success: small mocked runtime probes are effective for
+          guarded Comfy workflow harness reviews when normal tests pass; already covered by
+          observations @01KQCGH0, @01KQ80PS, and @01KQ815T. (2) friction: live Comfy API validation
+          harnesses need distinct reporting/tests for each stage and failure category; already
+          covered by @01KQCHPD, and the current task now has a concrete review blocker. No new
+          capture proposed at this step."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T12:30:54.109Z
+        completed_at: 2026-04-29T12:30:54.109Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:29:06.072Z
