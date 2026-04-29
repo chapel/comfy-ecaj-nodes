@@ -14635,6 +14635,12 @@ reviews:
         payload:
           thread_ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
         timestamp: 2026-04-29T11:48:42.796Z
+      - _ulid: 01KQCH3XTNTGPQWPF0B7HTNFJY
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
+        timestamp: 2026-04-29T11:48:46.549Z
     examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
     external_links: []
     lifecycle_state: closed
@@ -14748,6 +14754,14 @@ reviews:
               checkpoint save prompt. This leaves the report unable to show which node graph was
               actually submitted, including whether MODEL/CLIP/VAE were wired correctly."
             created_at: 2026-04-29T11:35:27.964Z
+          - _ulid: 01KQCH3XQAPFYRCT9HR80G2DVE
+            author: "@claude"
+            body: "Fixed: Added terminal_save_workflow_shape and checkpoint_save_workflow_shape fields to
+              CheckpointValidationReport. These store the full prompt dicts that were submitted to
+              the API, making it possible to verify which node graph was queued including
+              MODEL/CLIP/VAE wiring. Both fields are included in _REQUIRED_REPORT_FIELDS and appear
+              in both human-readable and JSON report output."
+            created_at: 2026-04-29T11:48:46.442Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -14758,5 +14772,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T11:35:38.938Z
     created_at: 2026-04-29T11:31:40.966Z
-    updated_at: 2026-04-29T11:48:42.691Z
+    updated_at: 2026-04-29T11:48:46.442Z
     notes: []
