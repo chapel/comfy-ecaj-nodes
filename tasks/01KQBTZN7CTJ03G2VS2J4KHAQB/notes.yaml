@@ -80,3 +80,15 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T07:13:37.140Z
+  - _ulid: 01KQC2238EYS4Y4AV1MKQDSTNK
+    content: 'Fix cycle 3: addressed all 3 review blockers. 1. checkpoint_components validation:
+      check_checkpoint_cache now verifies value=="true" not just key existence — rejects
+      __ecaj_checkpoint_components__="false". 2. Recipe metadata: check_checkpoint_cache now
+      requires __ecaj_recipe__ before accepting hit. 3. Non-checkpoint classification: all save
+      paths (RecipeMerge non-checkpoint, RecipeBase/no-op) now write artifact_kind="diffusion",
+      base_identity, dependency_fingerprints; check_full_model_cache validates these when provided.
+      Added 9 new tests (2 checkpoint, 7 full-model classification). All 1339 tests pass. kspec
+      validate passes.'
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T07:25:37.934Z
