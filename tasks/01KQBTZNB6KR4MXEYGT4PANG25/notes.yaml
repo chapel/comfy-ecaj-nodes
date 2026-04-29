@@ -31,3 +31,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T11:35:39.188Z
+  - _ulid: 01KQCH4S7B0Z6FZSCVZBATDXCZ
+    content: "Fix cycle 1: addressed all 4 review blockers. (1) Wired CLIP+VAE from
+      CheckpointLoaderSimple into WIDENEntry for all workflow builders. (2) Downstream validation
+      now loads the saved artifact filename instead of source model. (3) Cache-reuse workflow uses
+      enable_cache=True and verifies via /history API that WIDENExit was cached rather than
+      re-executed. (4) Added terminal_save_workflow_shape and checkpoint_save_workflow_shape to
+      report schema. All 72 tests pass, ruff clean, kspec validate passes."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T11:49:14.603Z
