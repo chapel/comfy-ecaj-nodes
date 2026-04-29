@@ -11699,6 +11699,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T07:50:42.626Z
+      - _ulid: 01KQC3SSZDEB50HG1CPD200DWK
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQC3SSVW8GRKMKEW3CSP6342
+        timestamp: 2026-04-29T07:56:03.438Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: open
@@ -11708,8 +11715,62 @@ reviews:
       content_hash: ""
       ref: "@01KQBTZN83176W432HWKN1CTV4"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQC3SSVW8GRKMKEW3CSP6342
+        anchor:
+          type: code
+          commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+          line_end: 27
+          line_start: 22
+          path: tests/test_incremental_writer.py
+          side: head
+        entries:
+          - _ulid: 01KQC3SSVWCZN4BTFS7CXP2CE5
+            author: Jacob Chapel
+            body: >-
+              MUST-FIX: the submitted snapshot does not pass the configured lint gate. E501 Line too
+              long (103 > 99)
+                --> tests/test_incremental_writer.py:22:100
+                 |
+              22 | def _make_manifest(tensors: dict[str, torch.Tensor]) -> dict[str,
+              tuple[torch.dtype, tuple[int, ...]]]:
+                 |                                                                                                    ^^^^
+              23 |     """Build a manifest from a dict of tensors."""
+
+              24 |     return {name: (t.dtype, tuple(t.shape)) for name, t in tensors.items()}
+                 |
+
+              E501 Line too long (119 > 99)
+                --> tests/test_incremental_writer.py:27:100
+                 |
+              27 | def _write_valid_artifact(path: str, tensors: dict[str, torch.Tensor], metadata:
+              dict[str, str] | None = None) -> None:
+                 |                                                                                                    ^^^^^^^^^^^^^^^^^^^^
+              28 |     """Write a valid safetensors artifact at path using the writer itself."""
+
+              29 |     manifest = _make_manifest(tensors)
+                 |
+
+              E501 Line too long (104 > 99)
+                 --> tests/test_incremental_writer.py:365:100
+                  |
+              363 |     # AC: @saved-model-artifact-safety ac-no-partial-publication
+
+              364 |     def test_context_manager_normal_exit_does_not_auto_finalize(self):
+
+              365 |         """Normal exit from context manager does NOT auto-finalize — caller must
+              finalize explicitly."""
+                  |                                                                                                    ^^^^^
+              366 |         tensors = {"a": torch.randn(4)}
+
+              367 |         manifest = _make_manifest(tensors)
+                  |
+
+              Found 3 errors. reports E501 line-length errors in this file at lines 22, 27, and 365.
+              Impact: the review gate is failing even though the focused and full pytest runs pass.
+            created_at: 2026-04-29T07:56:03.324Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T07:50:42.515Z
+    updated_at: 2026-04-29T07:56:03.324Z
     notes: []
