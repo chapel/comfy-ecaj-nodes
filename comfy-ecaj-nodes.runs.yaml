@@ -6260,7 +6260,7 @@ runs:
     completed_at: 2026-04-29T06:28:31.949Z
   - _ulid: 01KQBZMQXVH2Q4C6SP7EXNV2J4
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -6292,7 +6292,36 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T06:43:42.367Z
-        completed_at: 2026-04-29T06:43:42.367Z
+        completed_at: 2026-04-29T06:44:18.714Z
+        notes: >-
+          Friction points identified (high confidence only):
+
+
+          1. **Review thread truncation (ALREADY TRACKED)**: kspec review get truncates thread
+          bodies. Had to use Explore subagent to find and read the YAML file directly. Already
+          tracked in observations 01KQ6SHQZ and 01KQ82107.
+
+
+          2. **Exit node save_model tests require heavy mocking**: When testing the cache routing
+          change, the test failed because the GPU pipeline (streaming_evaluation_to_sink,
+          execute_plan) ran with mock model_loaders and hit TypeError on torch.stack(MagicMock).
+          Required adding streaming_evaluation_to_sink to the patch set. This is a recurring pattern
+          — Exit node integration tests need many patches because the save_model path touches the
+          full GPU pipeline. Already partially covered by observation 01KH6Y61 ("Unit tests with
+          mocks can validate the wrong behavior").
+
+
+          No new untracked friction identified at high confidence. The session was clean — clear
+          review feedback, straightforward fix, tests passed.
+
+
+          Success: The _recipe_has_checkpoint_components approach of lightweight tree walk before
+          cache check (avoiding expensive model file I/O) was a good architectural decision. No
+          existing tracking for this pattern.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T06:44:18.714Z
+        completed_at: 2026-04-29T06:44:18.714Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:43:23.195Z
