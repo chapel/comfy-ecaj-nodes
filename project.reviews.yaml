@@ -11826,6 +11826,12 @@ reviews:
         payload:
           thread_ulid: 01KQC3SSVW8GRKMKEW3CSP6342
         timestamp: 2026-04-29T08:04:15.490Z
+      - _ulid: 01KQC48Y7Q75YTJEH747GC0AZW
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
+        timestamp: 2026-04-29T08:04:19.319Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: closed
@@ -11921,6 +11927,14 @@ reviews:
               os.listdir(tmpdir) still contains a .ecaj_tmp_* file and the writer remains neither
               aborted nor poisoned.'
             created_at: 2026-04-29T07:56:34.491Z
+          - _ulid: 01KQC48Y4RN41MQAQ2NV5QBMD2
+            author: "@claude"
+            body: "Fixed: wrapped the seek/write block in write_tensor with try/except. Any exception from
+              _tensor_bytes or file I/O now poisons the writer (removing the temp file) and
+              re-raises. Added two behavioral tests: one confirming monkeypatched _tensor_bytes
+              RuntimeError poisons and cleans temp, another confirming a pre-existing artifact is
+              preserved."
+            created_at: 2026-04-29T08:04:19.224Z
         kind: blocker
       - _ulid: 01KQC3V18YGQXS0W89YJ4NZ2PW
         anchor:
@@ -11970,5 +11984,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T07:57:37.197Z
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T08:04:15.395Z
+    updated_at: 2026-04-29T08:04:19.224Z
     notes: []
