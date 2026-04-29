@@ -14234,7 +14234,18 @@ reviews:
     slugs: []
     title: Review checkpoint save artifact format cycle 6
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: pytest -q tests/test_checkpoint_save_format.py tests/test_checkpoint_components.py
+          tests/test_exit_node.py completed at 100%
+        name: targeted checkpoint tests
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T10:55:45.036Z
+        completed_at: 2026-04-29T10:55:45.036Z
     events:
       - _ulid: 01KQCDWD8AP15KB25RW15MJ1SS
         actor: Jacob Chapel
@@ -14249,6 +14260,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T10:52:28.311Z
+      - _ulid: 01KQCE2TZVNJYWWK8PPYTBR4AF
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: targeted checkpoint tests
+        timestamp: 2026-04-29T10:55:45.147Z
     examined_commit: 11f3ee7902ee6d9969f6e092dcd9a2bbc75fbcfe
     external_links: []
     lifecycle_state: open
@@ -14261,5 +14279,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T10:52:14.475Z
-    updated_at: 2026-04-29T10:52:28.207Z
+    updated_at: 2026-04-29T10:55:45.036Z
     notes: []
