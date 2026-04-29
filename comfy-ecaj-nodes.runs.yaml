@@ -7394,7 +7394,7 @@ runs:
     completed_at: 2026-04-29T10:42:08.807Z
   - _ulid: 01KQCDRK1FH6FPW916MA65AV4K
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -7411,7 +7411,24 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T10:50:39.121Z
-        completed_at: 2026-04-29T10:50:39.121Z
+        completed_at: 2026-04-29T10:51:11.989Z
+        notes: >-
+          Friction: Mock side effects in save_comfy_checkpoint tests wrote generic {'dummy':
+          torch.zeros(1)} tensors that didn't match real comfy.sd.save_checkpoint output structure.
+          When component prefix validation was added, 2 existing tests broke because their mocks
+          didn't produce checkpoint-structured output. This is the same pattern as existing
+          observation 01KH6Y61 (mocks validating wrong behavior) and inbox item 01KQC9KA
+          (loadability ACs need behavioral tests). Already tracked — no new item needed.
+
+
+          Success: The reviewer's adversarial probe (crafting a metadata-valid artifact with only
+          conditioner.* tensors) was an exact reproduction scenario that translated directly into
+          the fix and primary test. Review check 'checkpoint cache component prefix probe' caught a
+          real gap that unit tests missed. Related to existing 01KQC9KA pattern.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T10:51:11.989Z
+        completed_at: 2026-04-29T10:51:11.989Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T10:50:09.327Z
