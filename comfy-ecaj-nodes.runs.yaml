@@ -7850,7 +7850,7 @@ runs:
     started_at: 2026-04-29T12:20:29.675Z
     completed_at: 2026-04-29T12:21:24.869Z
   - _ulid: 01KQCKDRMR5CHZEGZAW81V5W5D
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -7881,10 +7881,13 @@ runs:
           pattern is already represented by @01KQCHPD, and the immediate actionable fix is recorded
           as blocker thread/check on review @01KQCK0V. Capturing another inbox item or observation
           would duplicate existing state."
-      - status: completed
+      - status: skipped
         step_index: 3
         started_at: 2026-04-29T12:31:07.879Z
-        completed_at: 2026-04-29T12:31:07.879Z
+        completed_at: 2026-04-29T12:31:25.630Z
+        notes: No approved unique items to capture. All high-confidence reflections were already covered by
+          existing observations or by the current review blocker/check.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:29:06.072Z
+    completed_at: 2026-04-29T12:31:25.630Z
