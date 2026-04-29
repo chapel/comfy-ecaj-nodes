@@ -6478,7 +6478,7 @@ runs:
     completed_at: 2026-04-29T07:17:00.538Z
   - _ulid: 01KQC23NQH63M87AR7M1VNSBPM
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -6502,7 +6502,38 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T07:27:01.133Z
-        completed_at: 2026-04-29T07:27:01.133Z
+        completed_at: 2026-04-29T07:27:34.412Z
+        notes: >-
+          Step 2 - High-confidence friction and success patterns:
+
+
+          FRICTION (high confidence, systemic):
+
+          1. Integration tests that create real cached safetensors files with metadata break
+          silently when new required metadata fields are added to the validation path. Two tests
+          (test_exit_node::test_cache_hit_skips_analyze,
+          test_full_model_streaming::test_cache_hit_skips_gpu) created files without classification
+          metadata and relied on the cache hit path. When check_full_model_cache started requiring
+          new fields, these tests fell through to the merge path and failed with unrelated errors
+          (RecipeLoRA set_id mapping). The root cause (missing metadata in test fixture) was
+          non-obvious from the error message. This is the same pattern as existing observation
+          01KH6Y61 (unit tests with mocks can validate wrong behavior), but from the opposite angle:
+          real-file integration tests are brittle when metadata contracts expand.
+
+
+          ALREADY TRACKED: observation 01KH6Y61 covers the general pattern. Not a new capture.
+
+
+          SUCCESS (high confidence):
+
+          1. The review's metadata negative probes (behavioral tests with crafted edge-case files)
+          caught real bugs that passed the existing test suite. The pattern of creating files with
+          one specific metadata value wrong and checking the cache returns False is effective
+          quality gating. This is already the standard review approach — no capture needed.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T07:27:34.412Z
+        completed_at: 2026-04-29T07:27:34.412Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:26:29.617Z
