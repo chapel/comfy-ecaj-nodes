@@ -1549,7 +1549,7 @@ workspaces:
         head: 5348166a85d36aa4e27cd8cf35a527c932a59085
         last_seen_at: 2026-04-29T08:24:55.826Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-result-sink-handoff-01kqbtzn
-  - active_role: null
+  - active_role: worker
     base_branch_point: ed329ff56ffed09094d158debb91d83984ccef9e
     bootstrap:
       status: succeeded
@@ -1599,7 +1599,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T10:42:34.013Z
+      updated_at: 2026-04-29T10:42:34.646Z
     integration:
       status: pending
       detail: null
@@ -1608,16 +1608,16 @@ workspaces:
       target_branch: dev
       target_commit: ed329ff56ffed09094d158debb91d83984ccef9e
       updated_at: 2026-04-29T10:42:34.013Z
-    lifecycle_state: ready
+    lifecycle_state: active
     resolved_base_branch: dev
     task_ref: "@01KQBTZN9MR5P6F1ECW0G30GEZ"
     task_slug: task-checkpoint-save-artifact-format
     timestamps:
       closed_at: null
-      last_active_at: 2026-04-29T10:35:49.241Z
-      last_reconciled_at: 2026-04-29T10:42:34.013Z
+      last_active_at: 2026-04-29T10:42:34.646Z
+      last_reconciled_at: 2026-04-29T10:42:34.646Z
       created_at: 2026-04-29T08:30:30.371Z
-      updated_at: 2026-04-29T10:42:34.325Z
+      updated_at: 2026-04-29T10:42:34.646Z
     workspace_id: dispatch-workspace-01KQBTZN9MR5P6F1ECW0G30GEZ
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
