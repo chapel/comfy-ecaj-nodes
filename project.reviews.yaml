@@ -12823,6 +12823,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-29T09:54:38.620Z
         completed_at: 2026-04-29T09:54:38.620Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Full suite: uv run pytest -> 1449 passed in 11.84s. Targeted checkpoint tests: python -m
+          pytest -q tests/test_checkpoint_save_format.py tests/test_checkpoint_components.py
+          tests/test_exit_node.py -> passed."
+        name: pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T09:54:39.028Z
+        completed_at: 2026-04-29T09:54:39.028Z
     events:
       - _ulid: 01KQCAACHTBSCAJ0CNZ8AF898F
         actor: Jacob Chapel
@@ -12851,6 +12863,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-29T09:54:38.728Z
+      - _ulid: 01KQCAJYWK0P74W7HZXKRW5JW6
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest
+        timestamp: 2026-04-29T09:54:39.123Z
     examined_commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
     external_links: []
     lifecycle_state: open
@@ -12863,5 +12882,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T09:49:58.202Z
-    updated_at: 2026-04-29T09:54:38.620Z
+    updated_at: 2026-04-29T09:54:39.028Z
     notes: []
