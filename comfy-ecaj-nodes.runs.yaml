@@ -6260,9 +6260,39 @@ runs:
     completed_at: 2026-04-29T06:28:31.949Z
   - _ulid: 01KQBZMQXVH2Q4C6SP7EXNV2J4
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T06:43:23.195Z
+        completed_at: 2026-04-29T06:43:42.367Z
+        notes: >-
+          What worked well in this fix cycle session:
+
+
+          1. **Thorough review thread reading**: Reading both blocker threads fully before starting
+          any code changes gave clear direction — no false starts.
+
+
+          2. **Lightweight detection approach**: Instead of moving the expensive
+          analyze_recipe_models() call before the cache check, used a simple tree walk
+          (_recipe_has_checkpoint_components) to detect checkpoint-style recipes. This keeps the
+          fast path fast.
+
+
+          3. **Systematic fix approach**: Addressed both blockers in a single commit with clear
+          mapping: blocker 1 = cache routing, blocker 2 = metadata writing. Clean separation made
+          the fix easy to reason about.
+
+
+          4. **Existing test infrastructure**: The check_checkpoint_cache unit tests in
+          test_persistence.py already covered the library function thoroughly — only needed to add
+          integration tests for the Exit node routing.
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T06:43:42.367Z
+        completed_at: 2026-04-29T06:43:42.367Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:43:23.195Z
