@@ -11726,6 +11726,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQC3V18YGQXS0W89YJ4NZ2PW
         timestamp: 2026-04-29T07:56:43.775Z
+      - _ulid: 01KQC3VHWW3M6QAEVYR2CF7Q3Y
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQC3VHSQJ2NTVVT86E5R3P1Z
+        timestamp: 2026-04-29T07:57:00.700Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: open
@@ -11837,7 +11844,26 @@ reviews:
               without replacing the prior target.'
             created_at: 2026-04-29T07:56:43.679Z
         kind: blocker
+      - _ulid: 01KQC3VHSQJ2NTVVT86E5R3P1Z
+        anchor:
+          type: code
+          commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+          line_end: 233
+          line_start: 230
+          path: lib/incremental_writer.py
+          side: head
+        entries:
+          - _ulid: 01KQC3VHSQ6W1K2Q16JJNJPX3R
+            author: Jacob Chapel
+            body: "MUST-FIX: the missing-key finalize failure cleans up the temp file but leaves the writer
+              neither aborted nor poisoned. Repro evidence: after finalize raises Cannot finalize:
+              wrote 1/2 tensors, a later write_tensor for the missing key passes _check_writable and
+              then raises AttributeError because _cleanup_temp set self._file to None. Impact: a
+              failed lifecycle remains callable in an inconsistent state; make failed finalize
+              terminal (aborted/poisoned) and test the post-failure behavior."
+            created_at: 2026-04-29T07:57:00.599Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T07:56:43.679Z
+    updated_at: 2026-04-29T07:57:00.599Z
     notes: []
