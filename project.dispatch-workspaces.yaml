@@ -1509,18 +1509,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-checkpoint-save-result-sink-handoff/01kqbtzn
-    canonical_branch_head: 19ca07819855ba8123174ce77675dd51df0dc598
+    canonical_branch_head: 5348166a85d36aa4e27cd8cf35a527c932a59085
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-29T08:12:30.510Z
+      updated_at: 2026-04-29T08:22:28.626Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T08:12:31.103Z
+      updated_at: 2026-04-29T08:22:28.626Z
     integration:
       status: pending
       detail: null
@@ -1528,7 +1528,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 19ca07819855ba8123174ce77675dd51df0dc598
-      updated_at: 2026-04-29T08:12:30.510Z
+      updated_at: 2026-04-29T08:22:28.626Z
     lifecycle_state: active
     resolved_base_branch: dev
     task_ref: "@01KQBTZN8XD9E6VCFXJYRPWBHC"
@@ -1536,9 +1536,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T08:12:31.103Z
-      last_reconciled_at: 2026-04-29T08:12:31.103Z
+      last_reconciled_at: 2026-04-29T08:22:28.626Z
       created_at: 2026-04-29T08:12:30.510Z
-      updated_at: 2026-04-29T08:12:31.103Z
+      updated_at: 2026-04-29T08:22:28.626Z
     workspace_id: dispatch-workspace-01KQBTZN8XD9E6VCFXJYRPWBHC
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
