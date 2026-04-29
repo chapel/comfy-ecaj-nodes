@@ -14617,6 +14617,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-29T11:35:38.938Z
+      - _ulid: 01KQCH3HV96R83Z085RPTDNWFB
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCGAKNSYY59S3WWY1DBMPH0
+        timestamp: 2026-04-29T11:48:34.281Z
     examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
     external_links: []
     lifecycle_state: closed
@@ -14647,6 +14653,13 @@ reviews:
               build_checkpoint_save_workflow('source.safetensors') produces entry_inputs {'model':
               ['1', 0]}."
             created_at: 2026-04-29T11:34:56.953Z
+          - _ulid: 01KQCH3HQYHYC0CY8QWX1R6W0P
+            author: "@claude"
+            body: "Fixed: build_checkpoint_save_workflow and build_terminal_exit_save_workflow now wire CLIP
+              (['1', 1]) and VAE (['1', 2]) from CheckpointLoaderSimple into WIDENEntry's optional
+              inputs. The build_cache_reuse_workflow also includes these connections. Tests verify
+              the wiring is present."
+            created_at: 2026-04-29T11:48:34.174Z
         kind: blocker
       - _ulid: 01KQCGAVYV2CGY4JT7F17GC2KZ
         anchor:
@@ -14715,5 +14728,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T11:35:38.938Z
     created_at: 2026-04-29T11:31:40.966Z
-    updated_at: 2026-04-29T11:35:38.938Z
+    updated_at: 2026-04-29T11:48:34.174Z
     notes: []
