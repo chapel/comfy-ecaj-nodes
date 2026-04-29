@@ -39,3 +39,29 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-29T08:33:51.515Z
+  - _ulid: 01KQC6HATWE7RR9W8WQW7713KH
+    content: >-
+      Implementation complete. Key changes:
+
+
+      1. Added save_comfy_checkpoint() wrapper in nodes/exit.py that calls comfy.sd.save_checkpoint
+      with temp-file + atomic publication + ecaj metadata
+
+      2. Split _execute_full_saved_model into _execute_checkpoint_save (for checkpoint-style) and
+      _execute_diffusion_save (for diffusion-only)
+
+      3. Checkpoint path: chunked_evaluation → install_merged_patches → save_comfy_checkpoint
+
+      4. Diffusion path: unchanged MaterializationSink streaming
+
+      5. Added comfy.sd stub to test conftest for mockability
+
+      6. Updated 3 existing tests in test_exit_node.py to mock the new checkpoint code path
+
+      7. Added 20 new tests in test_checkpoint_save_format.py covering all task ACs
+
+
+      All 1434 tests pass. kspec validate passes.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T08:43:51.516Z
