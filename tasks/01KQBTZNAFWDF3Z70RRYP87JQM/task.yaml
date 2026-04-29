@@ -53,7 +53,7 @@ description: |
 spec_ref: "@checkpoint-loadable-saved-model-output"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-artifact-format"
@@ -64,6 +64,14 @@ tags:
   - comfy
   - memory
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-checkpoint-save-returned-model/01kqbtzn
+  captured_at: 2026-04-29T11:11:00.991Z
+  commit: 5506b80eaa38bf070dc56f32e822c2603cd7339e
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KQCE67ER5N4R8RGQPSNRVHSP
 history:
   - author: Jacob Chapel
@@ -86,7 +94,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-04-29T10:58:14.991Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-returned-model/01kqbtzn
+          captured_at: 2026-04-29T11:11:00.991Z
+          commit: 5506b80eaa38bf070dc56f32e822c2603cd7339e
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-04-29T11:11:00.994Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-04-29T11:11:00.994Z
 created_at: 2026-04-29T05:21:58.095Z
 started_at: 2026-04-29T10:58:14.988Z
+submitted_at: 2026-04-29T11:11:00.994Z
 todos: []
 automation: eligible
