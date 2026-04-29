@@ -6104,7 +6104,7 @@ runs:
     started_at: 2026-04-29T06:18:54.351Z
     completed_at: 2026-04-29T06:20:28.050Z
   - _ulid: 01KQBYCF83N1F5PZWH1FQZZMVV
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -6138,7 +6138,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T06:22:41.495Z
-        completed_at: 2026-04-29T06:22:41.495Z
+        completed_at: 2026-04-29T06:22:46.572Z
+        notes: "Capture complete: @01KQBYEH friction observation was created. No inbox items or tasks were
+          added because the actionable reviewer-fix/PR-merge issues are already tracked, and the
+          remaining note is process friction best handled as an observation for later triage."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:21:23.587Z
+    completed_at: 2026-04-29T06:22:46.572Z
