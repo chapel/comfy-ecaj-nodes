@@ -5643,7 +5643,7 @@ runs:
     completed_at: 2026-04-29T05:37:48.044Z
   - _ulid: 01KQBW0WDG9RN10GEAD2W7915Y
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5663,7 +5663,38 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T05:40:41.995Z
-        completed_at: 2026-04-29T05:40:41.995Z
+        completed_at: 2026-04-29T05:41:18.812Z
+        notes: >-
+          Friction points and successes identified:
+
+
+          SUCCESS (high confidence): kspec item patch with full AC array is the efficient pattern
+          for spec rewrites.
+
+          - Applied all 14 ACs in a single command vs 6 separate kspec item ac set calls
+
+          - Previous task (0542dc7) used individual AC set calls; this was faster
+
+          - Already partially covered by observation 01KQ6JV5N (kspec item ac set success) but patch
+          approach is superior for bulk rewrites
+
+
+          FRICTION (already tracked): Spec-only tasks need empty commits for PR creation.
+
+          - Observation 01KQ6JV5K already tracks this
+
+          - This session used git commit --allow-empty (following previous task's pattern) which is
+          cleaner than the .kspec-evidence/ marker file workaround mentioned in the observation
+
+          - Could update the observation with the empty-commit workaround as the preferred approach
+
+
+          No new untracked friction identified. Session was clean — task description had exact
+          wording, kspec CLI worked smoothly.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T05:41:18.812Z
+        completed_at: 2026-04-29T05:41:18.812Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T05:40:06.704Z
