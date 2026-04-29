@@ -14587,6 +14587,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQCGAVYV2CGY4JT7F17GC2KZ
         timestamp: 2026-04-29T11:35:05.535Z
+      - _ulid: 01KQCGB5DDZ1AZ41ATH619CWVG
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
+        timestamp: 2026-04-29T11:35:15.117Z
     examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
     external_links: []
     lifecycle_state: open
@@ -14638,7 +14645,27 @@ reviews:
               downstream_loader_ckpt source.safetensors."
             created_at: 2026-04-29T11:35:05.435Z
         kind: blocker
+      - _ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
+        anchor:
+          type: code
+          commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
+          line_end: 529
+          line_start: 522
+          path: scripts/manual/real_comfy_checkpoint_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQCGB5A5HNW3ATNTG780JB8C
+            author: Jacob Chapel
+            body: "MUST-FIX: the cache-reuse workflow does not prove cache reuse or compatible artifact reuse.
+              It returns the same save workflow and treats prompt acceptance as cache success, with
+              no observation that WIDEN work was skipped and no check that the saved checkpoint
+              artifact was reused. The requirement is to run or simulate cache reuse that proves
+              reuse without recomputing WIDEN. Evidence:
+              build_cache_reuse_workflow('source.safetensors') ==
+              build_checkpoint_save_workflow('source.safetensors') is True."
+            created_at: 2026-04-29T11:35:15.013Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T11:31:40.966Z
-    updated_at: 2026-04-29T11:35:05.435Z
+    updated_at: 2026-04-29T11:35:15.013Z
     notes: []
