@@ -967,6 +967,27 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T05:48:44.625Z
+  - _ulid: 01KQBWY9K1Z95STW9V4KTB0YRT
+    type: success
+    content: "Review verification worked when pytest temp files were redirected away from a full /tmp
+      tmpfs: after the default pytest run failed with ENOSPC during safetensors and pytest lockfile
+      creation, running TMPDIR=$PWD/.tmp-review pytest in the detached review workspace produced
+      1285 passing tests, and the temporary directory could be cleaned after recording evidence."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T05:56:10.465Z
+  - _ulid: 01KQBWY9MXQ78ZEPFPBPJBF4M7
+    type: friction
+    content: kspec task review reported 0/6 AC coverage for @comfy-memory-manager-compatibility during a
+      spec-rewrite review even though repository search found existing AC annotations for several of
+      those criteria in tests/test_full_model_streaming.py. Reviewers need to cross-check coverage
+      output against direct annotation search, especially for spec-only tasks or when coverage scan
+      paths are not configured.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T05:56:10.525Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
