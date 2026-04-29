@@ -57,6 +57,7 @@ tags:
   - comfy
   - memory
 vcs_refs: []
+review_ref: "@01KQCNFBFFHS7HJF0FRPQC1QQ5"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-checkpoint-save-live-validation-manual-run/01kqbtzn
@@ -107,6 +108,13 @@ history:
         previous: null
     command: task-submit
     timestamp: 2026-04-29T13:01:23.213Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KQCNFBFFHS7HJF0FRPQC1QQ5"
+        previous: null
+    command: review-link
+    timestamp: 2026-04-29T13:04:55.686Z
 created_at: 2026-04-29T05:21:58.148Z
 started_at: 2026-04-29T12:52:11.814Z
 submitted_at: 2026-04-29T13:01:23.212Z
