@@ -11706,6 +11706,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQC3SSVW8GRKMKEW3CSP6342
         timestamp: 2026-04-29T07:56:03.438Z
+      - _ulid: 01KQC3T4XASPY52BD7JJ06GN02
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
+        timestamp: 2026-04-29T07:56:14.634Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: open
@@ -11770,7 +11777,25 @@ reviews:
               Impact: the review gate is failing even though the focused and full pytest runs pass.
             created_at: 2026-04-29T07:56:03.324Z
         kind: blocker
+      - _ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
+        anchor:
+          type: code
+          commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+          line_end: 212
+          line_start: 209
+          path: lib/incremental_writer.py
+          side: head
+        entries:
+          - _ulid: 01KQC3T4T61TJ37WV1Y0D2KRWX
+            author: Jacob Chapel
+            body: "MUST-FIX: write-time serialization/file exceptions are not handled as abort/poison events.
+              The code seeks and writes  without a try/except; when  is monkeypatched to
+              raise,  propagates the error but leaves the same-directory  file behind and the writer
+              is not marked aborted/poisoned. Impact: the required exception-during-write safety
+              path is not implemented or behaviorally tested."
+            created_at: 2026-04-29T07:56:14.535Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T07:56:03.324Z
+    updated_at: 2026-04-29T07:56:14.535Z
     notes: []
