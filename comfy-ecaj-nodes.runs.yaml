@@ -5980,9 +5980,20 @@ runs:
     completed_at: 2026-04-29T06:06:23.427Z
   - _ulid: 01KQBXSR6J0Q84TZ7TABV11DJ4
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T06:11:10.162Z
+        completed_at: 2026-04-29T06:11:26.653Z
+        notes: "Session completed task @task-checkpoint-save-component-sourcing: added CheckpointComponents
+          dataclass, extended WIDEN Entry with optional CLIP/VAE inputs, added early validation in
+          Exit node for save_model=True, 24 new tests, all 1309 tests pass. PR #102 created."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T06:11:26.653Z
+        completed_at: 2026-04-29T06:11:26.653Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:11:10.162Z
