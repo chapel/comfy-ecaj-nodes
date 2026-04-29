@@ -11719,6 +11719,13 @@ reviews:
         payload:
           thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
         timestamp: 2026-04-29T07:56:34.584Z
+      - _ulid: 01KQC3V1BYTEYFQMQZQ10CK5X6
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQC3V18YGQXS0W89YJ4NZ2PW
+        timestamp: 2026-04-29T07:56:43.775Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: open
@@ -11810,7 +11817,27 @@ reviews:
               aborted nor poisoned.'
             created_at: 2026-04-29T07:56:34.491Z
         kind: blocker
+      - _ulid: 01KQC3V18YGQXS0W89YJ4NZ2PW
+        anchor:
+          type: code
+          commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+          line_end: 117
+          line_start: 113
+          path: lib/incremental_writer.py
+          side: head
+        entries:
+          - _ulid: 01KQC3V18ZMC8M50ZANMMVJ8MQ
+            author: Jacob Chapel
+            body: 'MUST-FIX: metadata is inserted into the safetensors header without runtime validation, so
+              invalid metadata can be atomically published over an existing valid artifact. Repro
+              evidence: writing with metadata {"bad": 1} finalizes successfully via os.replace, then
+              safetensors.safe_open rejects the target with SafetensorError invalid type integer
+              expected a string. Impact: the writer can report success while publishing a corrupt,
+              unreusable safetensors artifact; validate metadata before writing/publishing or fail
+              without replacing the prior target.'
+            created_at: 2026-04-29T07:56:43.679Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T07:56:34.491Z
+    updated_at: 2026-04-29T07:56:43.679Z
     notes: []
