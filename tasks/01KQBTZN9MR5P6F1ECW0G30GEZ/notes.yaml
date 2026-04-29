@@ -139,3 +139,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T10:40:01.123Z
+  - _ulid: 01KQCDQ066PKBGRRMB24QKHD4Z
+    content: "Fix cycle 5: addressed blocker. check_checkpoint_cache accepted metadata-valid artifacts
+      missing required checkpoint components (e.g. conditioner-only). Added
+      _has_checkpoint_component_prefixes() requiring all three component groups (diffusion,
+      conditioning, VAE) and applied it in both check_checkpoint_cache and _classify_temp_artifact.
+      Added 6 tests including the exact probe scenario. All 1456 tests pass, ruff clean, kspec
+      validate passes."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T10:49:17.254Z
