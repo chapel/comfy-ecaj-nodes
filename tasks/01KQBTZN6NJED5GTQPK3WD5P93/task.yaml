@@ -65,7 +65,7 @@ description: |
 spec_ref: "@saved-model-artifact-safety"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-rewrite-exit-model-persistence-spec"
@@ -77,6 +77,14 @@ tags:
   - checkpoint
   - comfy
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-checkpoint-save-component-sourcing/01kqbtzn
+  captured_at: 2026-04-29T06:10:21.827Z
+  commit: 611531b279ec6b891bf702639752dee1dbd1d724
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KQBX3R37JD48YWT367FDYCVA
 history:
   - author: Jacob Chapel
@@ -99,7 +107,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-04-29T05:59:54.573Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-component-sourcing/01kqbtzn
+          captured_at: 2026-04-29T06:10:21.827Z
+          commit: 611531b279ec6b891bf702639752dee1dbd1d724
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-04-29T06:10:21.830Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-04-29T06:10:21.831Z
 created_at: 2026-04-29T05:21:57.973Z
 started_at: 2026-04-29T05:59:54.573Z
+submitted_at: 2026-04-29T06:10:21.830Z
 todos: []
 automation: eligible
