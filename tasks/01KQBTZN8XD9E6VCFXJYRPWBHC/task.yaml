@@ -45,7 +45,7 @@ description: |
 spec_ref: "@streaming-full-model-materialization"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-atomic-artifact-writer"
@@ -56,6 +56,14 @@ tags:
   - persistence
   - streaming
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-checkpoint-save-result-sink-handoff/01kqbtzn
+  captured_at: 2026-04-29T08:22:28.389Z
+  commit: 5348166a85d36aa4e27cd8cf35a527c932a59085
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KQC4QYE531EZ12VAPPY97NPM
 history:
   - author: Jacob Chapel
@@ -78,7 +86,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-04-29T08:13:57.331Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-result-sink-handoff/01kqbtzn
+          captured_at: 2026-04-29T08:22:28.389Z
+          commit: 5348166a85d36aa4e27cd8cf35a527c932a59085
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-04-29T08:22:28.392Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-04-29T08:22:28.392Z
 created_at: 2026-04-29T05:21:58.045Z
 started_at: 2026-04-29T08:13:57.330Z
+submitted_at: 2026-04-29T08:22:28.392Z
 todos: []
 automation: eligible
