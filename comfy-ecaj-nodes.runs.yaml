@@ -7639,9 +7639,21 @@ runs:
     completed_at: 2026-04-29T11:38:46.496Z
   - _ulid: 01KQCH6T86C8EFY76QCBJK612Y
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T11:50:21.190Z
+        completed_at: 2026-04-29T11:51:04.519Z
+        notes: "Session: fix cycle on task-checkpoint-save-live-validation-harness. What worked: reading all
+          4 blocker threads comprehensively before coding, one-pass fix addressing all threads.
+          Friction: kspec review get truncates thread bodies (already tracked in observations
+          01KQ6SHQZ, 01KQ82107). No new items to capture — all patterns already observed."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T11:51:04.519Z
+        completed_at: 2026-04-29T11:51:04.519Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T11:50:21.190Z
