@@ -904,7 +904,7 @@ class TestSaveModelCacheHit:
 
     # AC: @exit-model-persistence ac-3
     def test_cache_hit_skips_analyze(self, mock_model_patcher, tmp_path):
-        """Cache hit should skip analyze_recipe and return patched model."""
+        """Cache hit should skip analyze_recipe and return loaded model."""
         from safetensors.torch import save_file
 
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
@@ -913,22 +913,17 @@ class TestSaveModelCacheHit:
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         # Create a fake cached checkpoint artifact with Comfy-style keys.
-        # Uses model.diffusion_model.* prefix (Comfy checkpoint format) so the
-        # loader correctly maps keys back to the patcher's diffusion_model.* keys.
         cached_path = tmp_path / "cached.safetensors"
         patcher_keys = list(mock_model_patcher.model_state_dict().keys())
-        # Map patcher keys (diffusion_model.*) to Comfy checkpoint keys (model.diffusion_model.*)
         cached_tensors = {f"model.{k}": torch.randn(4, 4) for k in patcher_keys}
-        # Also add checkpoint companion keys
         cached_tensors["conditioner.embedders.0.weight"] = torch.randn(4, 4)
         cached_tensors["first_stage_model.decoder.weight"] = torch.randn(4, 4)
-        patcher_key = patcher_keys[0]
         import json as _json
         cached_metadata = {
             "__ecaj_version__": "1",
             "__ecaj_recipe__": "{}",
             "__ecaj_recipe_hash__": "will_match",
-            "__ecaj_affected_keys__": _json.dumps([patcher_key]),
+            "__ecaj_affected_keys__": _json.dumps([patcher_keys[0]]),
             "__ecaj_output_mode__": "full",
             "__ecaj_artifact_kind__": "checkpoint",
             "__ecaj_base_identity__": "base_id",
@@ -941,6 +936,10 @@ class TestSaveModelCacheHit:
 
         node = WIDENExitNode()
 
+        # Mock the checkpoint loader — cache hit returns via Comfy's
+        # load_checkpoint_guess_config, not _load_model_from_artifact.
+        loaded_model = mock_model_patcher.clone()
+
         with (
             patch("nodes.exit.validate_model_name", return_value="cached.safetensors"),
             patch("nodes.exit._resolve_checkpoints_path", return_value=str(cached_path)),
@@ -950,6 +949,7 @@ class TestSaveModelCacheHit:
             patch("nodes.exit.serialize_recipe", return_value="{}"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit._load_checkpoint_artifact", return_value=loaded_model),
         ):
             (result,) = node.execute(
                 merge, save_model=True, model_name="cached"
@@ -958,10 +958,8 @@ class TestSaveModelCacheHit:
             # analyze_recipe should NOT have been called
             mock_analyze.assert_not_called()
 
-        # Result should be a model loaded from the artifact (no set patches).
-        assert result is not mock_model_patcher
-        result_sd = result.model_state_dict()
-        assert patcher_key in result_sd
+        # Result should be the Comfy-loaded model.
+        assert result is loaded_model
 
 
 # =============================================================================

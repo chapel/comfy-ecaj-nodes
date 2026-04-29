@@ -257,6 +257,7 @@ def _mock_comfyui_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     comfy_mod = _make_stub_module("comfy")
     comfy_sd_mod = _make_stub_module("comfy.sd")
     comfy_sd_mod.save_checkpoint = lambda *args, **kwargs: None
+    comfy_sd_mod.load_checkpoint_guess_config = lambda *args, **kwargs: [None, None, None]
     comfy_mod.sd = comfy_sd_mod
 
     stubs = {
