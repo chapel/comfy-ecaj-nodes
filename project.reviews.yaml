@@ -16034,7 +16034,17 @@ reviews:
     slugs: []
     title: Review checkpoint-save spec status reconciliation
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "python -m pytest: 1575 passed in 11.57s."
+        name: pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T13:47:14.291Z
+        completed_at: 2026-04-29T13:47:14.291Z
     events:
       - _ulid: 01KQCQSA6ZCWVADJM4PKC2QQJ5
         actor: Jacob Chapel
@@ -16049,6 +16059,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T13:45:42.640Z
+      - _ulid: 01KQCQWV3N3WWWBCME62702R3N
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest
+        timestamp: 2026-04-29T13:47:14.421Z
     examined_commit: 5422952696fec659c9655db6da3e892e0b48d72c
     external_links: []
     lifecycle_state: open
@@ -16061,5 +16078,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T13:45:18.815Z
-    updated_at: 2026-04-29T13:45:42.505Z
+    updated_at: 2026-04-29T13:47:14.291Z
     notes: []
