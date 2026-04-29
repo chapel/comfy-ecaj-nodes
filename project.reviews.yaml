@@ -16069,6 +16069,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-29T13:47:15.205Z
         completed_at: 2026-04-29T13:47:15.205Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Verified all eight named specs are implementation=implemented; prior full-saved-model plan
+          and reconciliation plan contain supersession notes; active task list has no competing
+          in-progress claims.
+        name: status and note reconciliation
+        required: true
+        runner: manual
+        created_at: 2026-04-29T13:47:15.658Z
+        completed_at: 2026-04-29T13:47:15.658Z
     events:
       - _ulid: 01KQCQSA6ZCWVADJM4PKC2QQJ5
         actor: Jacob Chapel
@@ -16104,6 +16116,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-29T13:47:15.359Z
+      - _ulid: 01KQCQWWF7NGE74JGH58K9FSRB
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: status and note reconciliation
+        timestamp: 2026-04-29T13:47:15.815Z
     examined_commit: 5422952696fec659c9655db6da3e892e0b48d72c
     external_links: []
     lifecycle_state: open
@@ -16116,5 +16135,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T13:45:18.815Z
-    updated_at: 2026-04-29T13:47:15.205Z
+    updated_at: 2026-04-29T13:47:15.658Z
     notes: []
