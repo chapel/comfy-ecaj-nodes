@@ -8321,7 +8321,7 @@ runs:
     completed_at: 2026-04-29T13:44:37.466Z
   - _ulid: 01KQCR08GVETND17GW24DQWDH7
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -8335,7 +8335,20 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T13:49:47.012Z
-        completed_at: 2026-04-29T13:49:47.012Z
+        completed_at: 2026-04-29T13:50:12.626Z
+        notes: "High-confidence items after baseline/search: (1) Successes are already covered by existing
+          observations: machine-readable reports make review efficient (@01KQCNS0), structured task
+          notes preserve durable evidence (@01KQCQQT), and executable review checks are useful
+          (@01KQCM72). (2) Friction already covered: detached PR merge command failure is tracked by
+          inbox @01KQ6R11; kspec validate warning exit behavior is tracked by observation @01KQC4S9.
+          (3) Untracked friction: using kspec item get on @plan-* refs returns Item not found with
+          no hint to use kspec plan get. (4) Untracked friction: in PR-publication review, gh pr
+          review --approve can fail for self-owned PRs even when kspec review is approved, so
+          workflow docs should clarify the source of truth and next action."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T13:50:12.626Z
+        completed_at: 2026-04-29T13:50:12.626Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:49:06.460Z
