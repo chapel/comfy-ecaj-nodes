@@ -7597,7 +7597,7 @@ runs:
     completed_at: 2026-04-29T11:19:55.702Z
   - _ulid: 01KQCGDSYX3MHRMQG4FBENYSDX
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7610,7 +7610,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T11:37:29.864Z
-        completed_at: 2026-04-29T11:37:29.864Z
+        completed_at: 2026-04-29T11:37:58.183Z
+        notes: "High-confidence success: direct probing of generated Comfy workflow dicts, then comparing
+          those prompts to adjacent node contracts, exposed issues missed by the new mock-heavy
+          tests. Existing coverage found: prior observations already track mock tests validating
+          wrong behavior and guarded manual harness review patterns; inbox @01KQC9KA already tracks
+          loadability ACs needing behavioral loader-path smoke tests. No new standalone friction
+          item identified."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T11:37:58.183Z
+        completed_at: 2026-04-29T11:37:58.183Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T11:36:41.694Z
