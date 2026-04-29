@@ -11718,6 +11718,16 @@ reviews:
         runner: ruff
         created_at: 2026-04-29T07:57:16.140Z
         completed_at: 2026-04-29T07:57:16.140Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: pytest tests/test_incremental_writer.py -q exited 0; 15 tests passed.
+        name: pytest incremental writer
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T07:57:16.500Z
+        completed_at: 2026-04-29T07:57:16.500Z
     events:
       - _ulid: 01KQC3FM8D1TWCZDE5E50GZXC9
         actor: Jacob Chapel
@@ -11787,6 +11797,13 @@ reviews:
           status: fail
           name: ruff check
         timestamp: 2026-04-29T07:57:16.231Z
+      - _ulid: 01KQC3W1E1FB53BVG3K2N2T683
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest incremental writer
+        timestamp: 2026-04-29T07:57:16.609Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: open
@@ -11919,5 +11936,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T07:57:16.140Z
+    updated_at: 2026-04-29T07:57:16.500Z
     notes: []
