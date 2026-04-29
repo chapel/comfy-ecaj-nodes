@@ -8149,9 +8149,22 @@ runs:
     completed_at: 2026-04-29T13:11:20.653Z
   - _ulid: 01KQCPWHJY951BFACBNHFG6WPZ
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T13:29:36.094Z
+        completed_at: 2026-04-29T13:30:34.959Z
+        notes: "Learnings: systematic root cause analysis through API, hashing, and cache layers caught both
+          detection failure and idempotency problem. Dual fix approach (timing detection + forced
+          fresh save) is robust. Friction: worktree guard blocks branch-update operations in mutable
+          worker branches. Review display truncates thread body, requiring json flag. ComfyUI
+          OUTPUT_NODE with non-UI return types silently omits nodes from history outputs."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T13:30:34.959Z
+        completed_at: 2026-04-29T13:30:34.959Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:29:36.094Z
