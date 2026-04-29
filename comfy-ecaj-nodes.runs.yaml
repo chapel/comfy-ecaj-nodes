@@ -6601,7 +6601,7 @@ runs:
     started_at: 2026-04-29T07:41:43.268Z
     completed_at: 2026-04-29T07:44:00.681Z
   - _ulid: 01KQC3BZHKK4M7H4PFCDWEQ4HQ
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -6664,7 +6664,10 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T07:49:35.752Z
-        completed_at: 2026-04-29T07:49:35.752Z
+        completed_at: 2026-04-29T07:49:42.732Z
+        notes: No items to capture — all potential observations were already tracked or did not meet the
+          high-confidence bar. Clean session with no new friction or patterns worth recording.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:48:30.387Z
+    completed_at: 2026-04-29T07:49:42.733Z
