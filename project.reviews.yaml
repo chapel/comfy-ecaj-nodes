@@ -13864,6 +13864,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-29T10:24:04.525Z
         completed_at: 2026-04-29T10:24:04.525Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Constructed RecipeBase(checkpoint_components=None) + RecipeModel(source_dir=checkpoints);
+          _recipe_has_checkpoint_components returned True, execute raised AttributeError after
+          analyze_recipe was called instead of failing component validation before work.
+        name: targeted checkpoint component probe
+        required: true
+        runner: python
+        created_at: 2026-04-29T10:24:04.927Z
+        completed_at: 2026-04-29T10:24:04.927Z
     events:
       - _ulid: 01KQCC1YMHY57EHVDEXSWAXK1N
         actor: Jacob Chapel
@@ -13912,6 +13924,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-29T10:24:04.626Z
+      - _ulid: 01KQCC8VE2DW1ZK69JPAZCV7QM
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: targeted checkpoint component probe
+        timestamp: 2026-04-29T10:24:05.058Z
     examined_commit: 369c96affe4e9809134217d949df55abbdaae28e
     external_links: []
     lifecycle_state: open
@@ -13956,5 +13975,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T10:20:18.962Z
-    updated_at: 2026-04-29T10:24:04.525Z
+    updated_at: 2026-04-29T10:24:04.927Z
     notes: []
