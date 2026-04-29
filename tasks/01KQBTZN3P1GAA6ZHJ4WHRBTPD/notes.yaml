@@ -1,1 +1,11 @@
-notes: []
+notes:
+  - _ulid: 01KQBVZ8NTVW8FTKWWJ4XRR31Q
+    content: "Approach: Updated @exit-model-persistence spec via kspec item set (description) and kspec
+      item patch (all 14 ACs in one patch). Replaced description and ACs 2, 3, 4, 6, 8, 10 with
+      exact wording from task description. Left ac-1, ac-5, ac-7, ac-9, ac-11-14 unchanged.
+      Verified: kspec validate passes (pre-existing alignment warnings only), all ACs match task
+      spec exactly, ac-9 still protects non-ecaj files, no AC treats diffusion-only loading as
+      checkpoint-style completion, no output_mode added."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T05:39:13.722Z
