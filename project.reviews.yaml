@@ -15458,9 +15458,25 @@ reviews:
           status: fail
           name: loader/downstream distinction probe
         timestamp: 2026-04-29T12:27:58.919Z
+      - _ulid: 01KQCKC1B4YMMJ6H05K3AR2NRM
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-29T12:28:09.444Z
+      - _ulid: 01KQCKC1B4J9NRR77V7P6C3JZN
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T12:28:09.444Z
     examined_commit: 099b309999b053bbad95f13eb7badb1a1b6463ba
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -15490,7 +15506,14 @@ reviews:
               failures."
             created_at: 2026-04-29T12:25:47.134Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T12:28:09.443Z
     created_at: 2026-04-29T12:22:03.386Z
-    updated_at: 2026-04-29T12:27:58.768Z
+    updated_at: 2026-04-29T12:28:09.444Z
     notes: []
