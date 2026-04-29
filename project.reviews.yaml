@@ -12044,3 +12044,29 @@ reviews:
     created_at: 2026-04-29T07:50:29.902Z
     updated_at: 2026-04-29T08:04:38.326Z
     notes: []
+  - _ulid: 01KQC4HF928JCTTJZGNB4SNFSG
+    slugs: []
+    title: Review atomic incremental writer fix cycle
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQC4HF923F9XS1G2M983PWJ4
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-29T08:08:58.914Z
+    examined_commit: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQBTZN83176W432HWKN1CTV4"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-29T08:08:58.914Z
+    updated_at: null
+    notes: []

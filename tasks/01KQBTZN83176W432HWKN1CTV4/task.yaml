@@ -57,7 +57,7 @@ tags:
   - checkpoint
   - safety
 vcs_refs: []
-review_ref: "@01KQC3FM8EKTS9SNMK0KFZJJW1"
+review_ref: "@01KQC4HF928JCTTJZGNB4SNFSG"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-checkpoint-save-atomic-artifact-writer/01kqbtzn
@@ -165,6 +165,13 @@ history:
         previous: 2026-04-29T07:47:20.333Z
     command: task-submit
     timestamp: 2026-04-29T08:05:14.446Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KQC4HF928JCTTJZGNB4SNFSG"
+        previous: "@01KQC3FM8EKTS9SNMK0KFZJJW1"
+    command: review-link
+    timestamp: 2026-04-29T08:08:59.261Z
 created_at: 2026-04-29T05:21:58.019Z
 started_at: 2026-04-29T08:01:39.605Z
 submitted_at: 2026-04-29T08:05:14.445Z
