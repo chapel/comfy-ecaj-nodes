@@ -1358,11 +1358,11 @@ workspaces:
     canonical_branch: dispatch/task/task-checkpoint-save-preserve-scoped-existing-specs/01kqbtzn
     canonical_branch_head: 3d1835ff431c4b586dc1382d7b8b0396847453b8
     cleanup:
-      status: scheduled
-      detail: integrated-into-base-branch
+      status: blocked
+      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
-      reason: integrated-into-base-branch
-      updated_at: 2026-04-29T06:26:24.508Z
+      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
+      updated_at: 2026-04-29T06:26:24.960Z
     health:
       status: healthy
       issues: []
@@ -1376,7 +1376,7 @@ workspaces:
       target_branch: dev
       target_commit: 3d1835ff431c4b586dc1382d7b8b0396847453b8
       updated_at: 2026-04-29T06:26:24.508Z
-    lifecycle_state: closing
+    lifecycle_state: cleanup_blocked
     resolved_base_branch: dev
     task_ref: "@01KQBTZN55TQMJNKNWTB09MFX7"
     task_slug: task-checkpoint-save-preserve-scoped-existing-specs
@@ -1385,7 +1385,7 @@ workspaces:
       last_active_at: 2026-04-29T06:20:50.674Z
       last_reconciled_at: 2026-04-29T06:26:24.508Z
       created_at: 2026-04-29T06:20:50.056Z
-      updated_at: 2026-04-29T06:26:24.508Z
+      updated_at: 2026-04-29T06:26:24.960Z
     workspace_id: dispatch-workspace-01KQBTZN55TQMJNKNWTB09MFX7
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
