@@ -7552,7 +7552,7 @@ runs:
     completed_at: 2026-04-29T11:13:37.475Z
   - _ulid: 01KQCFC7D78RW6RZMZD71TSA24
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7568,7 +7568,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T11:19:12.204Z
-        completed_at: 2026-04-29T11:19:12.204Z
+        completed_at: 2026-04-29T11:19:30.875Z
+        notes: "High-confidence items after baseline search: (1) New friction: copied exact pytest node
+          selectors are brittle in review handoffs; one stale selector made pytest exit with code 4
+          and no collection until corrected. (2) Duplicate/not capturing: GitHub same-account PR
+          approval failure is already covered by observation 01KHQDPF. (3) Duplicate/not capturing:
+          concrete review evidence patterns are already covered by observations such as 01KQ80PS and
+          related review-success observations."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T11:19:30.875Z
+        completed_at: 2026-04-29T11:19:30.875Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T11:18:21.351Z
