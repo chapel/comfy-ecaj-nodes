@@ -13832,7 +13832,17 @@ reviews:
     slugs: []
     title: Review checkpoint save artifact format cycle 4
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: ruff check . -> All checks passed!
+        name: ruff
+        required: true
+        runner: ruff
+        created_at: 2026-04-29T10:24:03.724Z
+        completed_at: 2026-04-29T10:24:03.724Z
     events:
       - _ulid: 01KQCC1YMHY57EHVDEXSWAXK1N
         actor: Jacob Chapel
@@ -13860,6 +13870,13 @@ reviews:
         payload:
           thread_ulid: 01KQCC7P9ZBMHRCNKQ1F0G1451
         timestamp: 2026-04-29T10:23:46.579Z
+      - _ulid: 01KQCC8T7HM5SC7JZXNKRVGJ3J
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff
+        timestamp: 2026-04-29T10:24:03.825Z
     examined_commit: 369c96affe4e9809134217d949df55abbdaae28e
     external_links: []
     lifecycle_state: open
@@ -13904,5 +13921,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T10:20:18.962Z
-    updated_at: 2026-04-29T10:23:46.475Z
+    updated_at: 2026-04-29T10:24:03.724Z
     notes: []
