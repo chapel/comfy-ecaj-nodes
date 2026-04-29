@@ -13828,3 +13828,29 @@ reviews:
     created_at: 2026-04-29T09:49:58.202Z
     updated_at: 2026-04-29T10:15:16.083Z
     notes: []
+  - _ulid: 01KQCC1YMJP3BH5NSYW95RWRQC
+    slugs: []
+    title: Review checkpoint save artifact format cycle 4
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQCC1YMHY57EHVDEXSWAXK1N
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-29T10:20:18.962Z
+    examined_commit: 369c96affe4e9809134217d949df55abbdaae28e
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQBTZN9MR5P6F1ECW0G30GEZ"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-29T10:20:18.962Z
+    updated_at: null
+    notes: []
