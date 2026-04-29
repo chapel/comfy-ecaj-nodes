@@ -6673,9 +6673,20 @@ runs:
     completed_at: 2026-04-29T07:49:42.733Z
   - _ulid: 01KQC3XXDFXJGGXCY3GYP0FJ2S
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T07:58:18.031Z
+        completed_at: 2026-04-29T07:59:06.565Z
+        notes: "Gate passed: this session performed a substantive review of @01KQBTZN83176W432HWKN1CTV4,
+          created review @01KQC3FM, recorded checks/findings, and transitioned the task to
+          needs_work. Working tree is clean in the detached review snapshot."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T07:59:06.565Z
+        completed_at: 2026-04-29T07:59:06.565Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:58:18.031Z
