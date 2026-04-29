@@ -15150,6 +15150,18 @@ reviews:
         runner: kspec
         created_at: 2026-04-29T12:12:37.264Z
         completed_at: 2026-04-29T12:12:37.264Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "classify_failure(WorkflowResult(accepted=False, error='node_error(KSampler): OOM: cannot
+          allocate')) returned downstream, and run_validation then reported memory_mode: none for a
+          downstream OOM."
+        name: memory-mode classification probe
+        required: true
+        runner: python
+        created_at: 2026-04-29T12:12:47.427Z
+        completed_at: 2026-04-29T12:12:47.427Z
     events:
       - _ulid: 01KQCJARQDXZX0JRYBEAE4F9TV
         actor: Jacob Chapel
@@ -15192,6 +15204,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-04-29T12:12:37.391Z
+      - _ulid: 01KQCJFX1THTENEAP3G0TG55A2
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: memory-mode classification probe
+        timestamp: 2026-04-29T12:12:47.546Z
     examined_commit: 3f36d68b94be306650b1eae189bcdf9c2caad793
     external_links: []
     lifecycle_state: open
@@ -15204,5 +15223,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T12:09:59.283Z
-    updated_at: 2026-04-29T12:12:37.264Z
+    updated_at: 2026-04-29T12:12:47.427Z
     notes: []
