@@ -5980,7 +5980,7 @@ runs:
     completed_at: 2026-04-29T06:06:23.427Z
   - _ulid: 01KQBXSR6J0Q84TZ7TABV11DJ4
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -6010,7 +6010,23 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T06:11:58.003Z
-        completed_at: 2026-04-29T06:11:58.003Z
+        completed_at: 2026-04-29T06:12:06.826Z
+        notes: >-
+          Friction (save_model test update burden): Partially covered by existing observation
+          01KH6Y61 about mock-based tests validating wrong behavior. The specific pattern here —
+          adding fields to RecipeBase breaks many save_model tests — is a narrower instance of the
+          broader mock fragility problem. Not unique enough to warrant a separate item. SKIP.
+
+
+          Success (comprehensive task description): This is a one-time observation about task
+          quality, not a systemic pattern worth capturing. SKIP.
+
+
+          No items to capture.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T06:12:06.826Z
+        completed_at: 2026-04-29T06:12:06.826Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:11:10.162Z
