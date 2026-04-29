@@ -26,3 +26,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T07:57:37.415Z
+  - _ulid: 01KQC4A99K05J20CW29HWZKWTZ
+    content: "Fix cycle 1: addressed all 4 blocker threads from review @01KQC3FM8EKTS9SNMK0KFZJJW1. (1)
+      Fixed E501 lint errors — ruff check passes clean. (2) Added try/except around write_tensor I/O
+      so serialization/file errors poison the writer and clean temp files. (3) Added metadata
+      validation at construction — non-string keys/values raise TypeError before any file I/O. (4)
+      Made failed finalize terminal (sets aborted) so post-failure writes/finalizes raise cleanly.
+      Added 7 new behavioral tests (22 total, up from 15). Full suite passes, ruff passes."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T08:05:03.411Z
