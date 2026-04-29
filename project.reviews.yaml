@@ -14623,6 +14623,12 @@ reviews:
         payload:
           thread_ulid: 01KQCGAKNSYY59S3WWY1DBMPH0
         timestamp: 2026-04-29T11:48:34.281Z
+      - _ulid: 01KQCH3NK7SB4K486Z736DFBTG
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCGAVYV2CGY4JT7F17GC2KZ
+        timestamp: 2026-04-29T11:48:38.120Z
     examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
     external_links: []
     lifecycle_state: closed
@@ -14680,6 +14686,15 @@ reviews:
               artifact is loadable or usable. Evidence: probing the builder prints
               downstream_loader_ckpt source.safetensors."
             created_at: 2026-04-29T11:35:05.435Z
+          - _ulid: 01KQCH3NFXYCD08SQJ9T7RVDVY
+            author: "@claude"
+            body: "Fixed: run_validation now determines the saved artifact filename
+              (ecaj_checkpoint_validation_save.safetensors) and passes it to
+              build_downstream_workflow instead of the source model. The downstream
+              CheckpointLoaderSimple loads the saved artifact, proving it is loadable and usable for
+              inference. Test test_run_validation_passes_saved_artifact_to_downstream verifies
+              this."
+            created_at: 2026-04-29T11:48:38.013Z
         kind: blocker
       - _ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
         anchor:
@@ -14728,5 +14743,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T11:35:38.938Z
     created_at: 2026-04-29T11:31:40.966Z
-    updated_at: 2026-04-29T11:48:34.174Z
+    updated_at: 2026-04-29T11:48:38.013Z
     notes: []
