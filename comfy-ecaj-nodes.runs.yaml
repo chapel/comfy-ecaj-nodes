@@ -8234,7 +8234,7 @@ runs:
     completed_at: 2026-04-29T13:38:26.324Z
   - _ulid: 01KQCQMQGGS6KDZ7H3RBJ7FVKK
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -8277,7 +8277,29 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T13:44:03.752Z
-        completed_at: 2026-04-29T13:44:03.752Z
+        completed_at: 2026-04-29T13:44:21.271Z
+        notes: >-
+          High-confidence friction points identified:
+
+
+          1. FRICTION: kspec validate status mismatch warnings are misleading for intentional
+          overrides.
+             When live validation evidence warrants setting a spec to 'implemented' but linked tasks haven't all completed, kspec validate reports 'status is implemented but should be in_progress based on task progress.' This creates noise — the status was intentionally set and the warning implies it's wrong.
+             Already tracked? Partially — @01KQ6JV5K covers spec-only tasks, @01KQBWY9M covers AC coverage gaps. But neither covers the specific 'validate status mismatch is a false positive when status was intentionally overridden' angle. However, this is a narrow edge case (only happens during reconciliation tasks) and LOW confidence that it's systemic. → SKIP, too narrow.
+
+          2. SUCCESS: Dependency task notes as evidence source.
+             The completed dependency task (@task-checkpoint-save-live-validation-manual-run) had thorough structured notes with all validation evidence, making the pass/fail determination for this reconciliation task trivial. This is the pattern working as designed — task notes as durable evidence.
+             Already tracked? @01KQCNS0 covers 'reviewing committed machine-readable report' as a success. Similar but not identical. Worth capturing as reinforcement. → CAPTURE.
+
+          3. FRICTION: kspec item set --status command not discoverable — first guess was
+          'set-implementation' which doesn't exist.
+             Already tracked? Not found in search. But this is a one-off learning, not systemic. → SKIP, one-off.
+
+          Net result: 1 item to capture (success pattern).
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T13:44:21.271Z
+        completed_at: 2026-04-29T13:44:21.271Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:42:48.592Z
