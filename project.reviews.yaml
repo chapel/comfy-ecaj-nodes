@@ -10527,7 +10527,17 @@ reviews:
     slugs: []
     title: Review checkpoint-aware artifact metadata and cache classification
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_persistence.py -q: 70 passed"
+        name: pytest persistence
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T06:25:40.489Z
+        completed_at: 2026-04-29T06:25:40.489Z
     events:
       - _ulid: 01KQBYGDA297ZHYQ77JKD6TKPK
         actor: Jacob Chapel
@@ -10542,6 +10552,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T06:23:43.467Z
+      - _ulid: 01KQBYMA77AWQ560HVEV0BV8GA
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest persistence
+        timestamp: 2026-04-29T06:25:40.584Z
     examined_commit: b4fddba6ff319d353e122663560f4d502e28db0a
     external_links: []
     lifecycle_state: open
@@ -10554,5 +10571,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T06:23:32.674Z
-    updated_at: 2026-04-29T06:23:43.369Z
+    updated_at: 2026-04-29T06:25:40.489Z
     notes: []
