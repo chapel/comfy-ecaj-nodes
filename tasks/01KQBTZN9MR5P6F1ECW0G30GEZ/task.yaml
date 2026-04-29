@@ -64,7 +64,7 @@ description: |
 spec_ref: "@checkpoint-loadable-saved-model-output"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-component-sourcing"
@@ -82,8 +82,8 @@ review_ref: "@01KQCAACHT2E0G4YMV5B61FB0W"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-checkpoint-save-artifact-format/01kqbtzn
-  captured_at: 2026-04-29T09:47:45.590Z
-  commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
+  captured_at: 2026-04-29T10:16:34.636Z
+  commit: 369c96affe4e9809134217d949df55abbdaae28e
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-artifact-format/01kqbtzn
@@ -273,8 +273,35 @@ history:
         previous: 2026-04-29T09:41:02.508Z
     command: task-start
     timestamp: 2026-04-29T10:16:28.442Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-artifact-format/01kqbtzn
+          captured_at: 2026-04-29T10:16:34.636Z
+          commit: 369c96affe4e9809134217d949df55abbdaae28e
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-artifact-format/01kqbtzn
+        previous:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-artifact-format/01kqbtzn
+          captured_at: 2026-04-29T09:47:45.590Z
+          commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-artifact-format/01kqbtzn
+      submitted_at:
+        new: 2026-04-29T10:16:34.646Z
+        previous: 2026-04-29T09:47:45.598Z
+    command: task-submit
+    timestamp: 2026-04-29T10:16:34.647Z
 created_at: 2026-04-29T05:21:58.068Z
 started_at: 2026-04-29T10:16:28.442Z
-submitted_at: 2026-04-29T09:47:45.598Z
+submitted_at: 2026-04-29T10:16:34.646Z
 todos: []
 automation: eligible
