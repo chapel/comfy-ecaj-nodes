@@ -1070,8 +1070,10 @@ observations:
       context because the worktree is not on a branch; gh pr merge failed until rerun with --repo,
       and gh pr review --approve failed because the authenticated user owned the PR.
     author: Jacob Chapel
-    resolution: null
-    resolved: false
+    resolution: "@01KQC5W4P"
+    resolved: true
+    resolved_at: 2026-04-29T08:32:51.139Z
+    resolved_by: Jacob Chapel
     created_at: 2026-04-29T08:32:17.064Z
   - _ulid: 01KQC5W4PYDCNJSGE9C2Q85NB3
     type: friction
