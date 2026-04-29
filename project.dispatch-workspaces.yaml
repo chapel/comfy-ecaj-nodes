@@ -1599,7 +1599,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T10:27:24.343Z
+      updated_at: 2026-04-29T10:27:24.669Z
     integration:
       status: pending
       detail: null
@@ -1608,25 +1608,20 @@ workspaces:
       target_branch: dev
       target_commit: ed329ff56ffed09094d158debb91d83984ccef9e
       updated_at: 2026-04-29T10:27:24.343Z
-    lifecycle_state: integrating
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@01KQBTZN9MR5P6F1ECW0G30GEZ"
     task_slug: task-checkpoint-save-artifact-format
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T10:19:39.776Z
-      last_reconciled_at: 2026-04-29T10:27:24.343Z
+      last_reconciled_at: 2026-04-29T10:27:24.669Z
       created_at: 2026-04-29T08:30:30.371Z
-      updated_at: 2026-04-29T10:27:24.343Z
+      updated_at: 2026-04-29T10:27:24.669Z
     workspace_id: dispatch-workspace-01KQBTZN9MR5P6F1ECW0G30GEZ
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer:
-        branch_mode: detached
-        branch_ref: null
-        head: 369c96affe4e9809134217d949df55abbdaae28e
-        last_seen_at: 2026-04-29T10:19:39.004Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-artifact-format-01kqbtzn-review
+      reviewer: null
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-checkpoint-save-artifact-format/01kqbtzn
