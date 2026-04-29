@@ -14073,6 +14073,18 @@ reviews:
         runner: uv run pytest -q
         created_at: 2026-04-29T10:39:44.481Z
         completed_at: 2026-04-29T10:39:44.481Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Created metadata-valid ecaj checkpoint safetensors with only conditioner.only tensor;
+          check_checkpoint_cache(path, 'h', 'b', deps) returned True, expected False because
+          model/diffusion and VAE prefixes were absent.
+        name: checkpoint cache component prefix probe
+        required: true
+        runner: python safetensors probe
+        created_at: 2026-04-29T10:39:52.861Z
+        completed_at: 2026-04-29T10:39:52.861Z
     events:
       - _ulid: 01KQCCYVQ87C8R0FG048W234XF
         actor: Jacob Chapel
@@ -14122,6 +14134,13 @@ reviews:
           status: pass
           name: pytest
         timestamp: 2026-04-29T10:39:44.619Z
+      - _ulid: 01KQCD5S488HAB2RR0SAR3VA45
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: checkpoint cache component prefix probe
+        timestamp: 2026-04-29T10:39:52.968Z
     examined_commit: 7bcc9c2f7322b63ed8cb663b248d388f42694350
     external_links: []
     lifecycle_state: open
@@ -14161,5 +14180,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T10:36:06.249Z
-    updated_at: 2026-04-29T10:39:44.481Z
+    updated_at: 2026-04-29T10:39:52.861Z
     notes: []
