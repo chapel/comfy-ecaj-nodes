@@ -7074,7 +7074,7 @@ runs:
     started_at: 2026-04-29T09:17:16.809Z
   - _ulid: 01KQC9C4Z90E742BT7G70G8T58
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7099,7 +7099,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T09:37:09.023Z
-        completed_at: 2026-04-29T09:37:09.023Z
+        completed_at: 2026-04-29T09:37:39.629Z
+        notes: Captured unique high-confidence improvement as inbox @01KQC9KA. Skipped duplicate success
+          capture because existing observations already cover parallel review/subagent and
+          runtime-probe review patterns. Skipped dead-code/diffusion-route note because inbox
+          @01KQC8GG already tracks it.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T09:37:39.629Z
+        completed_at: 2026-04-29T09:37:39.629Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T09:33:27.401Z
