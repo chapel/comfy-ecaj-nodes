@@ -5732,7 +5732,7 @@ runs:
     completed_at: 2026-04-29T05:41:43.153Z
   - _ulid: 01KQBWBWEFNQ401NWDB7RHPTNZ
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5755,7 +5755,19 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T05:46:46.757Z
-        completed_at: 2026-04-29T05:46:46.757Z
+        completed_at: 2026-04-29T05:47:39.283Z
+        notes: "Session baseline searched. Existing observations and inbox reviewed. High-confidence
+          friction: worktree guard blocks git branch-update operations in kspec worktrees, but
+          task-work step 4a instructs agents to update branch onto integration target before
+          starting work. For spec-only tasks this is harmless to skip, but for code tasks in
+          worktrees it creates a conflict. Not yet tracked but confidence is medium -- unclear if
+          systemic vs one-off. Skipping capture per high-confidence-only rule. High-confidence
+          successes: kspec item patch with JSON array already tracked as @01KQBW3K. No new items to
+          capture."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T05:47:39.283Z
+        completed_at: 2026-04-29T05:47:39.283Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T05:46:07.183Z
