@@ -7677,7 +7677,7 @@ runs:
     completed_at: 2026-04-29T11:51:27.197Z
   - _ulid: 01KQCHM17D8JDH0B90TJSM6YK7
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7700,7 +7700,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T11:58:34.091Z
-        completed_at: 2026-04-29T11:58:34.091Z
+        completed_at: 2026-04-29T11:58:59.699Z
+        notes: "Existing coverage checked: @01KQCGH0, @01KQ8BTT, and @01KQ80PS already cover the positive
+          review-probe pattern, so no success duplicate was captured. Unique friction captured as
+          @01KQCHPD: live ComfyUI API validation harnesses must distinguish /prompt queue acceptance
+          from completed execution/history success."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T11:58:59.699Z
+        completed_at: 2026-04-29T11:58:59.699Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T11:57:34.317Z
