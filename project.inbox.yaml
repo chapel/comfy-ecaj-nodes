@@ -201,26 +201,3 @@ inbox:
       - testing
     added_by: Jacob Chapel
     created_at: 2026-04-29T09:37:22.810Z
-  - _ulid: 01KQCNDDZR20B2CMY761EJD6W3
-    text: >-
-      Checkpoint validation harness cache reuse detection reports false negatives —
-      check_cache_reuse() in real_comfy_checkpoint_validation.py looks for ComfyUI execution_cached
-      messages and node outputs, but WIDEN enable_cache operates at application level (artifact
-      existence check on disk). Harness should also use timing comparison (first_save_duration vs
-      reuse_duration) or WIDEN-specific signals to detect application-level cache reuse. Every live
-      run with cache test will report cache_not_reused even when cache IS working.
-
-
-      ---
-
-
-      Resolved: Fixed in commit 6688433 on
-      dispatch/task/task-checkpoint-save-live-validation-manual-run/01kqbtzn. Harness now uses
-      timing-based detection as method 3, checkpoint_save workflow sets enable_cache=False. Report
-      shows 11.4x speedup, cache category is now none.
-    tags:
-      - reflection
-      - harness
-      - cache
-    added_by: "@claude"
-    created_at: 2026-04-29T13:03:52.312Z
