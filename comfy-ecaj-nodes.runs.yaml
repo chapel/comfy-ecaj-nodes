@@ -6759,7 +6759,7 @@ runs:
     completed_at: 2026-04-29T08:07:43.608Z
   - _ulid: 01KQC4QYF6ET9XSND9XW4X0ATW
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -6783,7 +6783,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T08:13:45.551Z
-        completed_at: 2026-04-29T08:13:45.551Z
+        completed_at: 2026-04-29T08:13:55.965Z
+        notes: "Decision: captured unique friction as observation @01KQC4S9. Skipped success capture because
+          existing observations already cover the effective patterns: @01KQ6K6S dispatch review
+          merge gate, @01KQ80PS concrete runtime evidence in checks, and @01KQ6YGM/@01KQ8ANJ
+          fix-cycle review flow."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T08:13:55.965Z
+        completed_at: 2026-04-29T08:13:55.965Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T08:12:31.078Z
