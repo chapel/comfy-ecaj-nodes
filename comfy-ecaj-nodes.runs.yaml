@@ -8192,7 +8192,7 @@ runs:
     completed_at: 2026-04-29T13:32:16.946Z
   - _ulid: 01KQCQAEMB43VCWSK823V6BGXZ
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -8217,7 +8217,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T13:38:07.927Z
-        completed_at: 2026-04-29T13:38:07.927Z
+        completed_at: 2026-04-29T13:38:17.717Z
+        notes: "Decision: skip all candidate captures. Each concrete reflection item has existing coverage:
+          01KQC4S9 for validate warning exits, 01KQ6R11 for detached PR merge command wrapping,
+          01KQCM72/01KQCNS0 for review probes and machine-readable report verification. No unique
+          high-confidence improvement remains after search."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T13:38:17.717Z
+        completed_at: 2026-04-29T13:38:17.717Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:37:11.819Z
