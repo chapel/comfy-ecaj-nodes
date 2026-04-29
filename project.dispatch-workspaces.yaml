@@ -1900,11 +1900,11 @@ workspaces:
     canonical_branch: dispatch/task/task-checkpoint-save-final-spec-status-reconciliation/01kqbtzn
     canonical_branch_head: 5422952696fec659c9655db6da3e892e0b48d72c
     cleanup:
-      status: scheduled
-      detail: integrated-into-base-branch
+      status: blocked
+      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
-      reason: integrated-into-base-branch
-      updated_at: 2026-04-29T13:48:36.046Z
+      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
+      updated_at: 2026-04-29T13:48:36.451Z
     health:
       status: healthy
       issues: []
@@ -1918,7 +1918,7 @@ workspaces:
       target_branch: dev
       target_commit: 7388f5c2d637aa18fa53e9633787de7ae7b71530
       updated_at: 2026-04-29T13:48:36.046Z
-    lifecycle_state: closing
+    lifecycle_state: cleanup_blocked
     resolved_base_branch: dev
     task_ref: "@01KQBTZNCWM8AP31SWX4FQEYJ7"
     task_slug: task-checkpoint-save-final-spec-status-reconciliation
@@ -1927,7 +1927,7 @@ workspaces:
       last_active_at: 2026-04-29T13:44:56.439Z
       last_reconciled_at: 2026-04-29T13:48:36.046Z
       created_at: 2026-04-29T13:36:38.427Z
-      updated_at: 2026-04-29T13:48:36.046Z
+      updated_at: 2026-04-29T13:48:36.451Z
     workspace_id: dispatch-workspace-01KQBTZNCWM8AP31SWX4FQEYJ7
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
