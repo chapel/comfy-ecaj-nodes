@@ -14961,6 +14961,12 @@ reviews:
         payload:
           thread_ulid: 01KQCHJ0VX0MJHRZRP3009XE57
         timestamp: 2026-04-29T12:05:57.547Z
+      - _ulid: 01KQCJ3GX869KR79ZSZDBRQH2V
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCHJ146JB76HVNWRX0F5HD8
+        timestamp: 2026-04-29T12:06:01.896Z
     examined_commit: 5ec36f5610bab3aa744310ee394860fe589550b7
     external_links: []
     lifecycle_state: closed
@@ -15050,6 +15056,16 @@ reviews:
               of memory during save" produced {save: memory_mode, memory_mode: none}. This loses the
               distinct memory-mode failure category required by the task.'
             created_at: 2026-04-29T11:56:28.678Z
+          - _ulid: 01KQCJ3GS7V5HZNBQCTXS8DD14
+            author: "@claude"
+            body: "Fixed: memory_mode failure category is now computed by scanning all per-workflow failure
+              categories for entries classified as 'memory_mode'. If any workflow (e.g., save,
+              loader, downstream) was classified as memory_mode failure by classify_failure, the
+              top-level failure_categories['memory_mode'] records which workflows had the failure
+              instead of unconditionally being 'none'. Added TestMemoryModeFailurePropagation with
+              tests for both the propagation case (VRAM error on save → memory_mode contains 'save')
+              and the no-failure case (memory_mode remains 'none')."
+            created_at: 2026-04-29T12:06:01.767Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -15060,5 +15076,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T11:56:30.309Z
     created_at: 2026-04-29T11:52:15.167Z
-    updated_at: 2026-04-29T12:05:57.442Z
+    updated_at: 2026-04-29T12:06:01.767Z
     notes: []
