@@ -13,3 +13,30 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-29T06:23:10.880Z
+  - _ulid: 01KQBYJKYWRA995W3DFQQTAJPZ
+    content: >-
+      Verification complete:
+
+      1. kspec validate passes (exit 6 = warnings only, no errors).
+
+      2. @streaming-full-model-materialization: all 6 ACs verified unchanged via kspec item get.
+      Status restored to implemented. 91 tests pass in test_full_model_streaming.py covering
+      ac-affected-results-released, ac-base-weight-bounded-copying, ac-incomplete-write-not-reused,
+      ac-direct-artifact-handoff, ac-full-cache-avoids-resident-payload,
+      ac-failed-materialization-releases-resident-payload.
+
+      3. @manual-comfy-memory-validation: all 3 ACs verified unchanged via kspec item get. Status
+      confirmed implemented. Tests pass in test_real_comfy_memory_harness.py covering
+      ac-explicit-opt-in-required, ac-refuses-before-comfy-work-without-opt-in,
+      ac-report-identifies-memory-mode.
+
+      4. No task claims these two specs alone prove checkpoint-style saved output readiness. Only
+      references are this preservation task and
+      @task-checkpoint-save-final-spec-status-reconciliation.
+
+      5. Full test suite: 1314 tests pass.
+
+      No code or spec changes required — this is a pure preservation verification.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T06:24:45.020Z
