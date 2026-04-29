@@ -7464,7 +7464,7 @@ runs:
     completed_at: 2026-04-29T10:51:28.899Z
   - _ulid: 01KQCE6WC7M5AWA4MY5BSQ6NMP
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7491,7 +7491,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T10:58:50.310Z
-        completed_at: 2026-04-29T10:58:50.310Z
+        completed_at: 2026-04-29T10:58:58.918Z
+        notes: "Decision: skip capture for all candidates. The self-approval PR friction matches existing
+          observation 01KHQDPF and related review-workflow inbox items, and the successful
+          review-gate/fix-cycle patterns match existing observations 01KQ6K6S and 01KQ8ANJ. No
+          unique high-confidence friction or success remains after search."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T10:58:58.918Z
+        completed_at: 2026-04-29T10:58:58.918Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T10:57:57.639Z
