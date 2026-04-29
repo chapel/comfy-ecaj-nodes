@@ -13947,6 +13947,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-29T10:24:21.366Z
+      - _ulid: 01KQCCS94GK16NJHSSREB0WF55
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCC7P9ZBMHRCNKQ1F0G1451
+        timestamp: 2026-04-29T10:33:03.376Z
     examined_commit: 369c96affe4e9809134217d949df55abbdaae28e
     external_links: []
     lifecycle_state: closed
@@ -13988,6 +13994,17 @@ reviews:
               `classified_checkpoint=True`, `AttributeError: NoneType object has no attribute clip`,
               and `analyze_called=True`.'
             created_at: 2026-04-29T10:23:46.475Z
+          - _ulid: 01KQCCS90M91VB8FVGG4TAR9AF
+            author: "@claude"
+            body: "Fixed: The validation gate in execute() now checks both base.checkpoint_components presence
+              (for explicit CheckpointComponents objects) AND _recipe_has_checkpoint_components()
+              tree classification (for RecipeModel source_dir). This means
+              RecipeModel(source_dir='checkpoints') with base.checkpoint_components=None now
+              triggers validate_checkpoint_components before any merge work, producing a clear
+              ValueError naming the missing CLIP and VAE components instead of an AttributeError.
+              Added a test that constructs this exact scenario and verifies: (1) ValueError is
+              raised with CLIP/VAE diagnostic, (2) analyze_recipe is never called."
+            created_at: 2026-04-29T10:33:03.252Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -13998,5 +14015,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T10:24:21.366Z
     created_at: 2026-04-29T10:20:18.962Z
-    updated_at: 2026-04-29T10:24:21.366Z
+    updated_at: 2026-04-29T10:33:03.252Z
     notes: []
