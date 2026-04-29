@@ -5980,7 +5980,7 @@ runs:
     completed_at: 2026-04-29T06:06:23.427Z
   - _ulid: 01KQBXSR6J0Q84TZ7TABV11DJ4
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -5993,7 +5993,24 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T06:11:26.653Z
-        completed_at: 2026-04-29T06:11:26.653Z
+        completed_at: 2026-04-29T06:11:58.003Z
+        notes: >-
+          Friction: When adding a new validation gate to execute() (checkpoint component
+          validation), 25 existing save_model=True tests broke because they construct RecipeBase
+          without the new required field. Each had to be manually updated with
+          checkpoint_components=make_checkpoint_components(). This is the same pattern as existing
+          friction observation 01KH6Y61 (mocks validate wrong behavior). The fix was adding a
+          conftest helper, but the real pattern is: adding new required-for-save fields to
+          RecipeBase requires touching many test files. Already partially tracked.
+
+
+          Success: Task description was comprehensive with explicit testing requirements, AC
+          mapping, and forbidden approaches — made implementation straightforward with no ambiguity
+          about what to build or test.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T06:11:58.003Z
+        completed_at: 2026-04-29T06:11:58.003Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:11:10.162Z
