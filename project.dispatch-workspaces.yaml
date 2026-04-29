@@ -977,12 +977,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-29T05:41:58.015Z
+      updated_at: 2026-04-29T05:42:00.409Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T05:41:58.015Z
+      updated_at: 2026-04-29T05:42:00.409Z
     integration:
       status: pending
       detail: null
@@ -990,24 +990,29 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 8ecc1dc574ad11b14c25b04f37f2d8771e6b3655
-      updated_at: 2026-04-29T05:41:58.015Z
-    lifecycle_state: ready
+      updated_at: 2026-04-29T05:42:00.409Z
+    lifecycle_state: integrating
     resolved_base_branch: dev
     task_ref: "@01KQBTZN3P1GAA6ZHJ4WHRBTPD"
     task_slug: task-checkpoint-save-rewrite-exit-model-persistence-spec
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T05:35:27.768Z
-      last_reconciled_at: 2026-04-29T05:41:58.015Z
+      last_reconciled_at: 2026-04-29T05:42:00.409Z
       created_at: 2026-04-29T05:35:27.102Z
-      updated_at: 2026-04-29T05:41:58.015Z
+      updated_at: 2026-04-29T05:42:00.409Z
     workspace_id: dispatch-workspace-01KQBTZN3P1GAA6ZHJ4WHRBTPD
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 01d93935ad79a1304bb9427f9027a33c4f7a9b14
+        last_seen_at: 2026-04-29T05:42:00.409Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-rewrite-exit-model-persistence-spec-01kqbtzn-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-checkpoint-save-rewrite-exit-model-persistence-spec/01kqbtzn
-        head: 8ecc1dc574ad11b14c25b04f37f2d8771e6b3655
-        last_seen_at: 2026-04-29T05:35:27.102Z
+        head: 01d93935ad79a1304bb9427f9027a33c4f7a9b14
+        last_seen_at: 2026-04-29T05:42:00.409Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-rewrite-exit-model-persistence-spec-01kqbtzn
