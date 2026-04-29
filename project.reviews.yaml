@@ -15162,6 +15162,16 @@ reviews:
         runner: python
         created_at: 2026-04-29T12:12:47.427Z
         completed_at: 2026-04-29T12:12:47.427Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: uv run pytest -q passed full project suite at snapshot 3f36d68b94be.
+        name: full pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T12:12:47.839Z
+        completed_at: 2026-04-29T12:12:47.839Z
     events:
       - _ulid: 01KQCJARQDXZX0JRYBEAE4F9TV
         actor: Jacob Chapel
@@ -15211,6 +15221,13 @@ reviews:
           status: fail
           name: memory-mode classification probe
         timestamp: 2026-04-29T12:12:47.546Z
+      - _ulid: 01KQCJFXEGNZJNH9TMFRPMDX5W
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: full pytest
+        timestamp: 2026-04-29T12:12:47.952Z
     examined_commit: 3f36d68b94be306650b1eae189bcdf9c2caad793
     external_links: []
     lifecycle_state: open
@@ -15223,5 +15240,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T12:09:59.283Z
-    updated_at: 2026-04-29T12:12:47.427Z
+    updated_at: 2026-04-29T12:12:47.839Z
     notes: []
