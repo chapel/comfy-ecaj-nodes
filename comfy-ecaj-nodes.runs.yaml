@@ -5732,9 +5732,30 @@ runs:
     completed_at: 2026-04-29T05:41:43.153Z
   - _ulid: 01KQBWBWEFNQ401NWDB7RHPTNZ
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T05:46:07.183Z
+        completed_at: 2026-04-29T05:46:46.757Z
+        notes: >-
+          What worked well:
+
+          1. Used kspec item set + kspec item patch --data (JSON) to update description and all 6
+          ACs in two commands. Efficient pattern for spec rewrites.
+
+          2. Checked previous similar task
+          (task-checkpoint-save-rewrite-full-saved-model-output-spec) via git show to learn the
+          empty-commit pattern for spec-only PRs. Prevented wasted time trying to find non-existent
+          file changes.
+
+          3. Task description had exact wording for all changes — no interpretation ambiguity
+          needed.
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T05:46:46.757Z
+        completed_at: 2026-04-29T05:46:46.757Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T05:46:07.183Z
