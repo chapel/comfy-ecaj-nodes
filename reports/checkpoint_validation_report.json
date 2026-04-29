@@ -1000,9 +1000,10 @@
   "terminal_save_result": {
     "name": "terminal_exit_save",
     "accepted": true,
-    "prompt_id": "3db1de68-f766-45a8-8ffd-04b3de59359d",
+    "prompt_id": "5ed35412-5f83-4805-ab3d-80ebf7d4c150",
     "error": "",
-    "outputs": {}
+    "outputs": {},
+    "elapsed_seconds": 2.0031999910715967
   },
   "checkpoint_save_workflow_shape": {
     "1": {
@@ -1036,6 +1037,7 @@
           0
         ],
         "save_model": true,
+        "enable_cache": false,
         "model_name": "ecaj_checkpoint_validation_save"
       }
     }
@@ -1043,52 +1045,56 @@
   "checkpoint_save_result": {
     "name": "checkpoint_save",
     "accepted": true,
-    "prompt_id": "cc113972-7beb-46a4-bfa1-13a7b5a429ea",
+    "prompt_id": "8b7ab50d-a2bd-4b19-9212-cefbb63de58f",
     "error": "",
-    "outputs": {}
+    "outputs": {},
+    "elapsed_seconds": 22.783620693953708
   },
   "saved_artifact_path": "ecaj_checkpoint_validation_save.safetensors",
   "saved_artifact_classification": "checkpoint",
   "checkpoint_loader_result": {
     "name": "checkpoint_loader",
     "accepted": true,
-    "prompt_id": "824668f6-5916-4cf1-93ac-704c8a28fa06",
+    "prompt_id": "627626e6-1d36-4ccd-8d6e-bd21e0d380b9",
     "error": "",
-    "outputs": {}
+    "outputs": {},
+    "elapsed_seconds": 0.0
   },
   "downstream_result": {
     "name": "downstream_ksampler",
     "accepted": true,
-    "prompt_id": "824668f6-5916-4cf1-93ac-704c8a28fa06",
+    "prompt_id": "627626e6-1d36-4ccd-8d6e-bd21e0d380b9",
     "error": "",
     "outputs": {
       "7": {
         "images": [
           {
-            "filename": "ecaj_checkpoint_validation_00001_.png",
+            "filename": "ecaj_checkpoint_validation_00003_.png",
             "subfolder": "",
             "type": "output"
           }
         ]
       }
-    }
+    },
+    "elapsed_seconds": 6.0101671169977635
   },
   "cache_reuse_result": {
     "name": "cache_reuse",
     "accepted": true,
-    "prompt_id": "261ed71e-aa56-46ee-813b-f4bbf67c0d1c",
+    "prompt_id": "f3fba350-fdd6-4697-856a-2b8456a615ce",
     "error": "",
-    "outputs": {}
+    "outputs": {},
+    "elapsed_seconds": 2.002752271015197
   },
-  "cache_reuse_detail": "unable to determine cache status: first_exit_output=False, reuse_exit_output=False",
+  "cache_reuse_detail": "application-level cache reuse confirmed via timing: first=22.784s, reuse=2.003s, speedup=11.4x (threshold: 2.0x)",
   "failure_categories": {
     "scheduling": "none",
     "save": "none",
     "loader": "none",
     "downstream": "none",
-    "cache": "cache_not_reused",
+    "cache": "none",
     "memory_mode": "none"
   },
   "errors": [],
-  "duration_seconds": 23.58943223953247
+  "duration_seconds": 33.670790910720825
 }

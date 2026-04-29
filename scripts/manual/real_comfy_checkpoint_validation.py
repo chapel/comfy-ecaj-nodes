@@ -174,6 +174,7 @@ class WorkflowResult:
     prompt_id: str = ""
     error: str = ""
     outputs: dict = field(default_factory=dict)
+    elapsed_seconds: float = 0.0
 
 
 @dataclass
@@ -420,13 +421,27 @@ def query_prompt_history(
 
 def check_cache_reuse(
     base_url: str, first_prompt_id: str, reuse_prompt_id: str,
+    *,
+    first_elapsed: float = 0.0,
+    reuse_elapsed: float = 0.0,
 ) -> tuple[bool, str]:
     """Check whether the reuse prompt reused cached node outputs.
 
-    Compares the history entries of the first save prompt and the reuse
-    prompt.  If the reuse prompt's WIDENExit node is absent from its
-    ``outputs`` (ComfyUI only records outputs for nodes that actually
-    executed), the node was served from cache.
+    Detection methods (tried in order):
+
+    1. **Output-based** — if WIDENExit produced UI outputs in the first
+       prompt but not the reuse prompt, the reuse was served from cache.
+    2. **execution_cached message** — if ComfyUI's status messages
+       report the exit node as ``execution_cached``, cache was reused.
+    3. **Timing-based** — WIDENExit returns ``MODEL`` (not a UI type),
+       so ComfyUI may not record it in the ``outputs`` dict for either
+       prompt.  When the exit node is absent from both outputs *and*
+       ComfyUI didn't report ``execution_cached`` (because WIDEN uses
+       an application-level artifact cache inside ``execute()`` rather
+       than ComfyUI's ``IS_CHANGED`` cache), timing comparison serves
+       as concrete evidence: a ≥ 2× speedup on the reuse prompt
+       indicates the expensive merge/save was skipped and the artifact
+       cache was hit.
 
     Returns (cache_reused: bool, detail: str).
     """
@@ -446,6 +461,7 @@ def check_cache_reuse(
         first_had_exit_output = exit_node_id in first_outputs
         reuse_had_exit_output = exit_node_id in reuse_outputs
 
+        # Method 1: output-based detection
         if first_had_exit_output and not reuse_had_exit_output:
             return True, (
                 f"WIDENExit node {exit_node_id} executed in first prompt "
@@ -453,7 +469,7 @@ def check_cache_reuse(
                 f"({reuse_prompt_id})"
             )
 
-        # Both executed or both cached — check status_str_type for cache hint
+        # Method 2: execution_cached message
         reuse_status = reuse_hist.get("status", {})
         status_messages = reuse_status.get("messages", [])
         cached_nodes = []
@@ -474,9 +490,29 @@ def check_cache_reuse(
                 f"({reuse_prompt_id}) — cache was NOT reused"
             )
 
+        # Method 3: timing-based detection for application-level cache.
+        # WIDENExit returns MODEL (not a UI type), so ComfyUI does not
+        # record it in the outputs dict.  When both prompts lack exit
+        # node outputs, we compare wall-clock times: a ≥ 2× speedup
+        # indicates the WIDEN artifact cache hit inside execute().
+        if first_elapsed > 0 and reuse_elapsed > 0:
+            speedup = first_elapsed / reuse_elapsed
+            if speedup >= 2.0:
+                return True, (
+                    f"application-level cache reuse confirmed via timing: "
+                    f"first={first_elapsed:.3f}s, reuse={reuse_elapsed:.3f}s, "
+                    f"speedup={speedup:.1f}x (threshold: 2.0x)"
+                )
+            return False, (
+                f"timing does not indicate cache reuse: "
+                f"first={first_elapsed:.3f}s, reuse={reuse_elapsed:.3f}s, "
+                f"speedup={speedup:.1f}x (threshold: 2.0x)"
+            )
+
         return False, (
             f"unable to determine cache status: first_exit_output="
-            f"{first_had_exit_output}, reuse_exit_output={reuse_had_exit_output}"
+            f"{first_had_exit_output}, reuse_exit_output={reuse_had_exit_output}, "
+            f"no timing data available"
         )
     except Exception as exc:
         return False, f"cache reuse check failed: {exc}"
@@ -524,7 +560,15 @@ def build_checkpoint_save_workflow(source_model: str) -> dict:
     """Build a checkpoint-style WIDEN save_model workflow using MODEL, CLIP, VAE.
 
     Uses CheckpointLoaderSimple to load all three components, feeds MODEL,
-    CLIP, and VAE through WIDEN Entry/Exit with save_model=True.
+    CLIP, and VAE through WIDEN Entry/Exit with save_model=True and
+    enable_cache=False.
+
+    ``enable_cache`` is explicitly disabled so the save always performs the
+    full merge-and-write, producing a fresh artifact.  The companion
+    ``build_cache_reuse_workflow`` re-runs with ``enable_cache=True`` to
+    verify that the application-level artifact cache returns the saved
+    checkpoint without re-computing the merge.
+
     (CheckpointLoaderSimple outputs: MODEL=0, CLIP=1, VAE=2.)
     """
     return {
@@ -545,6 +589,7 @@ def build_checkpoint_save_workflow(source_model: str) -> dict:
             "inputs": {
                 "widen": ["2", 0],
                 "save_model": True,
+                "enable_cache": False,
                 "model_name": "ecaj_checkpoint_validation_save",
             },
         },
@@ -708,8 +753,12 @@ def submit_workflow(
     completes.  Runtime node errors (save failures, loader errors,
     KSampler crashes) are detected from the history entry and reported
     as failures — not silently marked accepted.
+
+    Captures wall-clock elapsed time (prompt submission through history
+    completion) in ``elapsed_seconds`` for timing-based analysis.
     """
     result = WorkflowResult(name=name)
+    t0 = time.monotonic()
     try:
         resp = _api_post_prompt(base_url, workflow)
         prompt_id = resp.get("prompt_id", "")
@@ -754,6 +803,8 @@ def submit_workflow(
     except Exception as exc:
         result.accepted = False
         result.error = f"unexpected: {exc}"
+    finally:
+        result.elapsed_seconds = time.monotonic() - t0
     return result
 
 
@@ -985,6 +1036,8 @@ def run_validation(
                 comfy_api_url,
                 report.checkpoint_save_result.prompt_id,
                 report.cache_reuse_result.prompt_id,
+                first_elapsed=report.checkpoint_save_result.elapsed_seconds,
+                reuse_elapsed=report.cache_reuse_result.elapsed_seconds,
             )
             report.cache_reuse_detail = detail
             if not cache_reused:

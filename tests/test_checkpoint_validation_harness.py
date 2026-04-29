@@ -731,7 +731,7 @@ class TestMockedRunValidation:
                 prompt_id=f"prompt_{call_count}",
             )
 
-        def mock_check_cache(base_url, first_pid, reuse_pid):
+        def mock_check_cache(base_url, first_pid, reuse_pid, **kwargs):
             return True, f"WIDENExit node 3 cached in reuse prompt ({reuse_pid})"
 
         with patch.object(harness, "query_system_stats", return_value=mock_stats), \
@@ -919,6 +919,14 @@ class TestWorkflowBuilders:
         lat_node = next(v for v in wf.values() if v["class_type"] == "EmptyLatentImage")
         assert lat_node["inputs"]["width"] == 512
         assert lat_node["inputs"]["batch_size"] == 2
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_checkpoint_save_workflow_disables_cache(self):
+        """Checkpoint save workflow disables cache to force a fresh save."""
+        save_wf = harness.build_checkpoint_save_workflow("test.safetensors")
+        exit_inputs = save_wf["3"]["inputs"]
+        assert exit_inputs["enable_cache"] is False
+        assert exit_inputs["save_model"] is True
 
     def test_cache_reuse_workflow_has_enable_cache(self):
         cache_wf = harness.build_cache_reuse_workflow("test.safetensors")
@@ -1128,6 +1136,62 @@ class TestCheckCacheReuse:
         assert reused is False
         assert "failed" in detail
 
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_cache_reused_via_timing_speedup(self):
+        """Cache reuse detected via timing when exit node has no UI outputs."""
+        # WIDENExit returns MODEL (not a UI type), so neither prompt has
+        # exit node outputs.  Timing comparison detects application-level cache.
+        no_exit_outputs_history = {
+            "outputs": {},
+            "status": {"messages": []},
+        }
+
+        with patch.object(
+            harness, "query_prompt_history", return_value=no_exit_outputs_history,
+        ):
+            reused, detail = harness.check_cache_reuse(
+                "http://fake:8188", "first", "reuse",
+                first_elapsed=4.0, reuse_elapsed=0.7,
+            )
+        assert reused is True
+        assert "timing" in detail
+        assert "speedup=" in detail
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_cache_not_reused_when_timing_too_slow(self):
+        """Cache NOT reused when timing speedup is below threshold."""
+        no_exit_outputs_history = {
+            "outputs": {},
+            "status": {"messages": []},
+        }
+
+        with patch.object(
+            harness, "query_prompt_history", return_value=no_exit_outputs_history,
+        ):
+            reused, detail = harness.check_cache_reuse(
+                "http://fake:8188", "first", "reuse",
+                first_elapsed=4.0, reuse_elapsed=3.5,
+            )
+        assert reused is False
+        assert "timing does not indicate" in detail
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_cache_undetermined_without_timing_data(self):
+        """Returns False with descriptive detail when no timing data is available."""
+        no_exit_outputs_history = {
+            "outputs": {},
+            "status": {"messages": []},
+        }
+
+        with patch.object(
+            harness, "query_prompt_history", return_value=no_exit_outputs_history,
+        ):
+            reused, detail = harness.check_cache_reuse(
+                "http://fake:8188", "first", "reuse",
+            )
+        assert reused is False
+        assert "no timing data" in detail
+
 
 # ===========================================================================
 # Downstream loads saved artifact (not source)
@@ -1328,6 +1392,21 @@ class TestSubmitWorkflowHistoryPolling:
 
         assert result.accepted is False
         assert "KSampler" in result.error
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-cache-reuse-outcome
+    def test_submit_workflow_captures_elapsed_time(self):
+        """submit_workflow records wall-clock elapsed_seconds on the result."""
+        mock_prompt_resp = {"prompt_id": "p_elapsed"}
+        mock_history = {
+            "outputs": {},
+            "status": {"status_str": "success", "messages": []},
+        }
+
+        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
+             patch.object(harness, "query_prompt_history", return_value=mock_history):
+            result = harness.submit_workflow("http://fake:8188", {}, "test_wf")
+
+        assert result.elapsed_seconds > 0
 
 
 class TestExtractNodeErrors:
