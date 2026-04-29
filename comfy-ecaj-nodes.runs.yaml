@@ -7073,7 +7073,7 @@ runs:
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T09:17:16.809Z
   - _ulid: 01KQC9C4Z90E742BT7G70G8T58
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -7107,7 +7107,10 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T09:37:39.629Z
-        completed_at: 2026-04-29T09:37:39.629Z
+        completed_at: 2026-04-29T09:38:40.156Z
+        notes: "Capture complete: inbox @01KQC9KA records the loadability-AC loader-path testing guidance
+          gap. No additional observations captured to avoid duplicates/noise."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T09:33:27.401Z
+    completed_at: 2026-04-29T09:38:40.156Z
