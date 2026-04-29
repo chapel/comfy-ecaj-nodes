@@ -7969,7 +7969,7 @@ runs:
     completed_at: 2026-04-29T12:43:02.146Z
   - _ulid: 01KQCMQ28QVHF0596BQCDY3R2F
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7983,7 +7983,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T12:52:17.388Z
-        completed_at: 2026-04-29T12:52:17.388Z
+        completed_at: 2026-04-29T12:52:38.651Z
+        notes: "High-confidence items identified after baseline scan. Success: executable review probes
+          against prior blockers were effective, but this is already covered by existing
+          observations such as @01KQCM72 and related review-probe successes. Friction: kspec
+          validate exits nonzero on warnings and PR-publication merge commands from detached
+          snapshots need explicit guidance; both are already tracked by @01KQC4S9 and inbox
+          @01KQ6R11 respectively. No clearly new, untracked high-confidence item."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T12:52:38.651Z
+        completed_at: 2026-04-29T12:52:38.651Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:51:39.415Z
