@@ -46,7 +46,7 @@ description: |
 spec_ref: "@saved-model-artifact-safety"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-artifact-cache-classification"
@@ -61,11 +61,11 @@ review_ref: "@01KQC3FM8EKTS9SNMK0KFZJJW1"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-checkpoint-save-atomic-artifact-writer/01kqbtzn
-  captured_at: 2026-04-29T07:47:20.330Z
-  commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
-  remote: null
-  remote_url: null
-  upstream_ref: dev
+  captured_at: 2026-04-29T08:05:14.440Z
+  commit: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
+  remote: origin
+  remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+  upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-atomic-artifact-writer/01kqbtzn
 session_id: 01KQC414NVKB751DZFN2T9C55W
 history:
   - author: Jacob Chapel
@@ -138,8 +138,35 @@ history:
         previous: 2026-04-29T07:42:07.592Z
     command: task-start
     timestamp: 2026-04-29T08:01:39.605Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-atomic-artifact-writer/01kqbtzn
+          captured_at: 2026-04-29T08:05:14.440Z
+          commit: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-atomic-artifact-writer/01kqbtzn
+        previous:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-atomic-artifact-writer/01kqbtzn
+          captured_at: 2026-04-29T07:47:20.330Z
+          commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+      submitted_at:
+        new: 2026-04-29T08:05:14.445Z
+        previous: 2026-04-29T07:47:20.333Z
+    command: task-submit
+    timestamp: 2026-04-29T08:05:14.446Z
 created_at: 2026-04-29T05:21:58.019Z
 started_at: 2026-04-29T08:01:39.605Z
-submitted_at: 2026-04-29T07:47:20.333Z
+submitted_at: 2026-04-29T08:05:14.445Z
 todos: []
 automation: eligible
