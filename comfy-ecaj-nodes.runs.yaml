@@ -7394,7 +7394,7 @@ runs:
     completed_at: 2026-04-29T10:42:08.807Z
   - _ulid: 01KQCDRK1FH6FPW916MA65AV4K
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -7428,7 +7428,26 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T10:51:11.989Z
-        completed_at: 2026-04-29T10:51:11.989Z
+        completed_at: 2026-04-29T10:51:21.776Z
+        notes: >-
+          Evaluation against existing state:
+
+
+          1. Mock fidelity friction → SKIP. Already tracked as observation 01KH6Y61 ('Unit tests
+          with mocks can validate the wrong behavior') and inbox item 01KQC9KA (review/test guidance
+          gap for behavioral tests). No new capture needed.
+
+
+          2. Reviewer probe success → SKIP. This reinforces existing observation 01KH6Y61 and inbox
+          item 01KQC9KA from the opposite direction (reviewer probes catch what mock-based tests
+          miss). No new item needed — the existing tracking already covers this class of issue.
+
+
+          No new items to capture. Both identified patterns map to existing tracked items.
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T10:51:21.776Z
+        completed_at: 2026-04-29T10:51:21.776Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T10:50:09.327Z
