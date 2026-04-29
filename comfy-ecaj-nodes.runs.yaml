@@ -6561,7 +6561,7 @@ runs:
     completed_at: 2026-04-29T07:27:48.453Z
   - _ulid: 01KQC2ZHZ42H0V85KM0V62DHZ6
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -6575,7 +6575,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T07:42:43.076Z
-        completed_at: 2026-04-29T07:42:43.076Z
+        completed_at: 2026-04-29T07:43:07.589Z
+        notes: "Identified high-confidence items. Success: runtime safetensors probes plus full pytest/CI
+          gave strong evidence for cache-classification review and merge. Friction: reviewer-applied
+          merge fixes created a new head for a task-subject review, and missing local ruff before
+          first reviewer push caused a CI lint retry. Both are systemic enough to consider, but need
+          duplicate checks before capture."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T07:43:07.589Z
+        completed_at: 2026-04-29T07:43:07.589Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:41:43.268Z
