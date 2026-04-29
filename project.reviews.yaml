@@ -11159,6 +11159,12 @@ reviews:
         payload:
           thread_ulid: 01KQC19MWWMVTSVFZ9NRZDHGDN
         timestamp: 2026-04-29T07:25:25.896Z
+      - _ulid: 01KQC21SRS600K65PQVRF5RS0E
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQC1AEFS93RHY214A9QSN687
+        timestamp: 2026-04-29T07:25:28.218Z
     examined_commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
     external_links: []
     lifecycle_state: closed
@@ -11256,6 +11262,8 @@ reviews:
               RecipeBase call sites pass these expected values."
             created_at: 2026-04-29T07:25:16.571Z
         kind: blocker
+        resolved_at: 2026-04-29T07:25:28.110Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -11265,5 +11273,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T07:13:36.903Z
     created_at: 2026-04-29T07:08:39.641Z
-    updated_at: 2026-04-29T07:25:25.790Z
+    updated_at: 2026-04-29T07:25:28.110Z
     notes: []
