@@ -61,7 +61,7 @@ description: |
 spec_ref: "@live-comfy-saved-output-validation"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: needs_work
+status: in_progress
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-exit-ui-and-terminal-scheduling"
@@ -83,7 +83,7 @@ submission_linkage:
   remote: null
   remote_url: null
   upstream_ref: dev
-session_id: null
+session_id: 01KQCGJD1MFK1Z0HVZ2YPXDHHQ
 history:
   - author: Jacob Chapel
     changes:
@@ -142,8 +142,21 @@ history:
         previous: 01KQCFCPJ4WSKG4GB4WTCG5CGA
     command: review-verdict-needs-work
     timestamp: 2026-04-29T11:35:39.188Z
+  - author: "@claude"
+    changes:
+      status:
+        new: in_progress
+        previous: needs_work
+      session_id:
+        new: 01KQCGJD1MFK1Z0HVZ2YPXDHHQ
+        previous: null
+      started_at:
+        new: 2026-04-29T11:49:26.498Z
+        previous: 2026-04-29T11:19:00.536Z
+    command: task-start
+    timestamp: 2026-04-29T11:49:26.499Z
 created_at: 2026-04-29T05:21:58.118Z
-started_at: 2026-04-29T11:19:00.536Z
+started_at: 2026-04-29T11:49:26.498Z
 submitted_at: 2026-04-29T11:30:23.551Z
 todos: []
 automation: eligible
