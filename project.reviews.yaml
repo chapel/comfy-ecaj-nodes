@@ -11713,6 +11713,12 @@ reviews:
           kind: blocker
           thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
         timestamp: 2026-04-29T07:56:14.634Z
+      - _ulid: 01KQC3TRCRH8JG7M5M0FS6Y1M5
+        actor: Jacob Chapel
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
+        timestamp: 2026-04-29T07:56:34.584Z
     examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
     external_links: []
     lifecycle_state: open
@@ -11794,8 +11800,17 @@ reviews:
               is not marked aborted/poisoned. Impact: the required exception-during-write safety
               path is not implemented or behaviorally tested."
             created_at: 2026-04-29T07:56:14.535Z
+          - _ulid: 01KQC3TR9VDX6WP7SA79YXGNRC
+            author: Jacob Chapel
+            body: 'Clarification: the failing block is self._file.seek(offset);
+              self._file.write(_tensor_bytes(tensor)); self._written.add(name). Repro evidence:
+              monkeypatching lib.incremental_writer._tensor_bytes to raise
+              RuntimeError("serialization failed") makes write_tensor propagate the error while
+              os.listdir(tmpdir) still contains a .ecaj_tmp_* file and the writer remains neither
+              aborted nor poisoned.'
+            created_at: 2026-04-29T07:56:34.491Z
         kind: blocker
     verdicts: []
     created_at: 2026-04-29T07:50:29.902Z
-    updated_at: 2026-04-29T07:56:14.535Z
+    updated_at: 2026-04-29T07:56:34.491Z
     notes: []
