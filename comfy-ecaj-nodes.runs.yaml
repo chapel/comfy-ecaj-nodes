@@ -6395,7 +6395,7 @@ runs:
     completed_at: 2026-04-29T06:50:43.972Z
   - _ulid: 01KQC0XT63SEZQYF0RJH4DA0YX
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -6419,7 +6419,14 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-04-29T07:07:14.835Z
-        completed_at: 2026-04-29T07:07:14.835Z
+        completed_at: 2026-04-29T07:07:30.149Z
+        notes: "Friction 1 (worktree guard blocks branch updates in dispatch worktrees): SKIP — already
+          tracked as @01KQ7036. Success 1 (fix cycle workflow efficiency): CAPTURE as success
+          observation. No other items to capture."
+      - status: completed
+        step_index: 3
+        started_at: 2026-04-29T07:07:30.149Z
+        completed_at: 2026-04-29T07:07:30.149Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:05:48.995Z
