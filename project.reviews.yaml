@@ -14141,9 +14141,25 @@ reviews:
           status: fail
           name: checkpoint cache component prefix probe
         timestamp: 2026-04-29T10:39:52.968Z
+      - _ulid: 01KQCD60VPA7WCQ2PWTWT15WMJ
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-29T10:40:00.886Z
+      - _ulid: 01KQCD60VPFWZ74HG36D15B95D
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T10:40:00.886Z
     examined_commit: 7bcc9c2f7322b63ed8cb663b248d388f42694350
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -14178,7 +14194,14 @@ reviews:
               validation before publishing the temp checkpoint artifact."
             created_at: 2026-04-29T10:39:29.998Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T10:40:00.886Z
     created_at: 2026-04-29T10:36:06.249Z
-    updated_at: 2026-04-29T10:39:52.861Z
+    updated_at: 2026-04-29T10:40:00.886Z
     notes: []
