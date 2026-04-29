@@ -99,3 +99,11 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T07:35:16.570Z
+  - _ulid: 01KQC2VA4PGXNFEC1DYPPSMQNV
+    content: Reviewer fixed CI lint on refreshed PR head by wrapping long
+      TestRecipeHasCheckpointComponents lines and removing unused affected_key assignments. Local
+      ruff check . passed; focused pytest passed; full pytest passed (1360 passed). Force-pushed
+      amended head dc091be.
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-04-29T07:39:24.182Z
