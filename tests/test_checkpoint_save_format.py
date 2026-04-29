@@ -1186,53 +1186,39 @@ class TestCheckpointSaveReturnModel:
 
 class TestCheckpointCacheHitModelLoading:
     """AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
+    AC: @checkpoint-loadable-saved-model-output ac-generated-workflow-round-trip
     AC: @exit-model-persistence ac-8
 
-    Valid checkpoint cache hits must load merged weights from the artifact
-    into the returned MODEL, including when the artifact uses Comfy
-    checkpoint-style key prefixes (model.diffusion_model.*).
+    Valid checkpoint cache hits must load through Comfy's checkpoint loader,
+    not through _load_model_from_artifact with deep-copied model internals.
+    Diffusion-only artifacts continue using _load_model_from_artifact.
     """
 
-    # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
-    def test_load_model_from_checkpoint_artifact_updates_weights(
-        self, mock_model_patcher, tmp_path,
-    ):
-        """_load_model_from_artifact must load Comfy checkpoint keys
-        (model.diffusion_model.*) into the returned model's state dict."""
-        from nodes.exit import _load_model_from_artifact
+    # AC: @checkpoint-loadable-saved-model-output ac-generated-workflow-round-trip
+    def test_checkpoint_cache_hit_uses_comfy_loader(self, tmp_path):
+        """Checkpoint cache hit must call _load_checkpoint_artifact, which
+        uses comfy.sd.load_checkpoint_guess_config."""
+        from nodes.exit import _load_checkpoint_artifact
 
         save_path = str(tmp_path / "model.safetensors")
+        mock_model = MagicMock(name="loaded_model")
 
-        # Simulate a Comfy checkpoint artifact with model.diffusion_model.* keys
-        merged_weight = torch.randn(4, 4)
-        artifact_tensors = {
-            "model.diffusion_model.input_blocks.0.0.weight": merged_weight,
-            "model.diffusion_model.middle_block.0.weight": torch.randn(4, 4),
-            "conditioner.embedders.0.weight": torch.randn(4, 4),
-            "first_stage_model.decoder.weight": torch.randn(4, 4),
-        }
-        save_file(artifact_tensors, save_path)
+        load_result = [mock_model, None, None]
+        with patch(
+            "comfy.sd.load_checkpoint_guess_config",
+            return_value=load_result,
+        ) as mock_load:
+            result = _load_checkpoint_artifact(save_path)
 
-        original_weight = mock_model_patcher.model_state_dict()[
-            "diffusion_model.input_blocks.0.0.weight"
-        ].clone()
-
-        result = _load_model_from_artifact(save_path, mock_model_patcher, torch.float32)
-
-        # The returned model's state dict must reflect the artifact weights,
-        # not the original base weights.
-        loaded_weight = result.model_state_dict()["diffusion_model.input_blocks.0.0.weight"]
-        assert torch.equal(loaded_weight, merged_weight), (
-            "Checkpoint cache hit must load merged weights from model.diffusion_model.* keys"
-        )
-        assert not torch.equal(loaded_weight, original_weight), (
-            "Returned model must not still have the original base weights"
-        )
+            mock_load.assert_called_once_with(
+                save_path, output_vae=True, output_clip=True,
+            )
+            assert result is mock_model
 
     # AC: @exit-model-persistence ac-8
     def test_load_model_from_internal_artifact_still_works(self, mock_model_patcher, tmp_path):
         """_load_model_from_artifact must continue to work with internal-format
-        (diffusion_model.*) artifacts."""
+        (diffusion_model.*) artifacts for diffusion-only saves."""
         from nodes.exit import _load_model_from_artifact
 
         save_path = str(tmp_path / "model.safetensors")
@@ -1248,7 +1234,7 @@ class TestCheckpointCacheHitModelLoading:
 
         loaded_weight = result.model_state_dict()["diffusion_model.input_blocks.0.0.weight"]
         assert torch.equal(loaded_weight, merged_weight), (
-            "Internal-format artifact loading must still work"
+            "Internal-format artifact loading must still work for diffusion-only saves"
         )
 
 
@@ -1377,10 +1363,10 @@ class TestBaseOnlyCheckpointSave:
             patch("nodes.exit.check_full_model_cache") as mock_full_cache,
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit._load_checkpoint_artifact") as mock_ckpt_load,
             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
         ):
-            mock_load.return_value = mock_model_patcher.clone()
+            mock_ckpt_load.return_value = mock_model_patcher.clone()
 
             node.execute(base, save_model=True, model_name="model")
 
@@ -1389,8 +1375,8 @@ class TestBaseOnlyCheckpointSave:
             mock_full_cache.assert_not_called()
             # save_comfy_checkpoint must NOT be called (cache hit)
             mock_save_ckpt.assert_not_called()
-            # Model must be loaded from artifact
-            mock_load.assert_called_once()
+            # Model must be loaded from checkpoint artifact via Comfy loader
+            mock_ckpt_load.assert_called_once()
 
 
 # =============================================================================

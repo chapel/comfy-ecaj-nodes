@@ -451,6 +451,49 @@ def _load_model_from_artifact(
     return cloned
 
 
+def _load_checkpoint_artifact(save_path: str) -> object:
+    """Load a checkpoint artifact through Comfy's supported checkpoint load path.
+
+    AC: @checkpoint-loadable-saved-model-output ac-generated-workflow-round-trip
+    AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
+    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+
+    Uses comfy.sd.load_checkpoint_guess_config to load the saved checkpoint
+    artifact, returning only the MODEL component.  The returned MODEL is
+    Comfy-owned and compatible with Comfy's model memory lifecycle — no
+    deep-copied model internals, no transient WIDEN merge payload required.
+
+    Args:
+        save_path: Path to the saved checkpoint artifact.
+
+    Returns:
+        Comfy ModelPatcher loaded from the checkpoint artifact.
+
+    Raises:
+        RuntimeError: If the Comfy loader fails, with a message naming the
+            checkpoint path for diagnostics.
+    """
+    import comfy.sd
+
+    try:
+        result = comfy.sd.load_checkpoint_guess_config(
+            save_path, output_vae=True, output_clip=True,
+        )
+    except Exception as exc:
+        raise RuntimeError(
+            f"Failed to load checkpoint artifact: {save_path} — {exc}"
+        ) from exc
+
+    # load_checkpoint_guess_config returns [model, clip, vae, ...].
+    # Return only the MODEL for WIDEN Exit's MODEL output.
+    model = result[0]
+    if model is None:
+        raise RuntimeError(
+            f"Comfy checkpoint loader returned None MODEL for: {save_path}"
+        )
+    return model
+
+
 def _resolve_checkpoints_path(model_name: str) -> str:
     """Resolve a model name to a full path in the first checkpoints directory.
 
@@ -882,6 +925,13 @@ class WIDENExitNode:
                 if ProgressBar is not None:
                     pbar = ProgressBar(1)
                     pbar.update(1)
+                # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
+                # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+                # Checkpoint cache hit: load through Comfy's checkpoint loader
+                # so the returned MODEL is Comfy-owned (no deepcopy).
+                # Diffusion-only cache hit: load from artifact into clone.
+                if is_checkpoint:
+                    return (_load_checkpoint_artifact(save_path),)
                 return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
 
         # Evict in-memory cache when cache is disabled.
@@ -1031,6 +1081,13 @@ class WIDENExitNode:
                 if ProgressBar is not None:
                     pbar = ProgressBar(1)
                     pbar.update(1)
+                # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
+                # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+                # Checkpoint cache hit: load through Comfy's checkpoint loader
+                # so the returned MODEL is Comfy-owned (no deepcopy).
+                # Diffusion-only cache hit: load from artifact into clone.
+                if is_checkpoint:
+                    return (_load_checkpoint_artifact(save_path),)
                 return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
 
         # Branch: checkpoint-style saves use Comfy checkpoint save semantics;
