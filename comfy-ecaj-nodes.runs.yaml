@@ -6351,7 +6351,7 @@ runs:
     started_at: 2026-04-29T06:43:23.195Z
     completed_at: 2026-04-29T06:44:35.404Z
   - _ulid: 01KQC00MMR7Z3S6M92JDF1AMGT
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -6386,7 +6386,10 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T06:50:33.461Z
-        completed_at: 2026-04-29T06:50:33.461Z
+        completed_at: 2026-04-29T06:50:43.972Z
+        notes: No capture performed. All high-confidence reflection candidates were duplicates of existing
+          observations, and the loop mode bar favors capturing nothing over adding noise.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T06:49:53.048Z
+    completed_at: 2026-04-29T06:50:43.972Z
