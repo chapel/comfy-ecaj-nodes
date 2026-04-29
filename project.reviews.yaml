@@ -12605,6 +12605,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQC9233WRT128TE3KF8H19JP
         timestamp: 2026-04-29T09:27:57.919Z
+      - _ulid: 01KQC933G00DNAT0X0QPB24GH7
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQC933CVXWNSZ658EFER9WWV
+        timestamp: 2026-04-29T09:28:30.976Z
     examined_commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
     external_links: []
     lifecycle_state: open
@@ -12637,7 +12644,29 @@ reviews:
               final target only after the temp artifact is classified and safe to reuse."
             created_at: 2026-04-29T09:27:57.821Z
         kind: blocker
+      - _ulid: 01KQC933CVXWNSZ658EFER9WWV
+        anchor:
+          type: code
+          commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
+          line_end: 765
+          line_start: 734
+          path: tests/test_checkpoint_save_format.py
+          side: head
+        entries:
+          - _ulid: 01KQC933CWEYD1ZHGGGHZJR8ZA
+            author: Jacob Chapel
+            body: "MUST-FIX: the AC-8 smoke test does not exercise the load side of the saved checkpoint
+              contract. This test monkeypatches comfy.sd.save_checkpoint to write predetermined
+              checkpoint-shaped tensors, calls save_comfy_checkpoint directly, and only asserts
+              safetensors key prefixes. It never loads the artifact through a Comfy checkpoint
+              loader (or a monkeypatched equivalent) and therefore does not prove the required
+              save/load path selected by CheckpointLoaderSimple-style semantics. Replace or extend
+              it with a behavioral save/load smoke test that proves the produced artifact is
+              consumed through the checkpoint loader path with MODEL, CLIP, and VAE/decode
+              components."
+            created_at: 2026-04-29T09:28:30.876Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T09:19:15.423Z
-    updated_at: 2026-04-29T09:27:57.821Z
+    updated_at: 2026-04-29T09:28:30.876Z
     notes: []
