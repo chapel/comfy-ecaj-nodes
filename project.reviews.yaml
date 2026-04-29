@@ -14044,6 +14044,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-29T10:36:13.391Z
+      - _ulid: 01KQCD52SDT0JBBXBKCVDASZSC
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQCD52PE1WDHFKPS2R9QV6S5
+        timestamp: 2026-04-29T10:39:30.093Z
     examined_commit: 7bcc9c2f7322b63ed8cb663b248d388f42694350
     external_links: []
     lifecycle_state: open
@@ -14053,8 +14060,35 @@ reviews:
       content_hash: ""
       ref: "@01KQBTZN9MR5P6F1ECW0G30GEZ"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQCD52PE1WDHFKPS2R9QV6S5
+        anchor:
+          type: code
+          commit: 7bcc9c2f7322b63ed8cb663b248d388f42694350
+          line_end: 748
+          line_start: 725
+          path: lib/persistence.py
+          side: head
+        entries:
+          - _ulid: 01KQCD52PEP0E76HMWBSFJEYZW
+            author: Jacob Chapel
+            body: "MUST-FIX: checkpoint cache validation does not prove the artifact contains the required Comfy
+              checkpoint component content. After metadata checks, the only content guard is
+              rejecting artifacts where every key is internal-only; a metadata-valid file with only
+              a conditioner.* tensor is accepted as a checkpoint cache hit. I verified this by
+              writing a safetensors file with matching __ecaj_artifact_kind__=checkpoint,
+              __ecaj_checkpoint_components__=true, matching recipe/base/dependency metadata, and a
+              single conditioner.only tensor; check_checkpoint_cache(path, 'h', 'b', deps) returned
+              True. That violates the task requirement that checkpoint artifacts contain
+              diffusion/model, conditioning/text encoder, and VAE/decode content and means a
+              partial/corrupt ecaj artifact can skip recomputation and return a MODEL with missing
+              merged diffusion weights. Add behavioral validation for representative checkpoint
+              prefixes (for example model. or model.diffusion_model., conditioner., and
+              first_stage_model.) before accepting checkpoint cache hits, and use the same
+              validation before publishing the temp checkpoint artifact."
+            created_at: 2026-04-29T10:39:29.998Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T10:36:06.249Z
-    updated_at: 2026-04-29T10:36:13.283Z
+    updated_at: 2026-04-29T10:39:29.998Z
     notes: []
