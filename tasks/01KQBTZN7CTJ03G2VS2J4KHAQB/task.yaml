@@ -63,7 +63,7 @@ description: |
 spec_ref: "@saved-model-artifact-safety"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: pending_review
+status: needs_work
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-rewrite-exit-model-persistence-spec"
@@ -83,7 +83,7 @@ submission_linkage:
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-artifact-cache-classification/01kqbtzn
-session_id: 01KQBYTAW2A9MF9NW5DHJQ4SCN
+session_id: null
 history:
   - author: Jacob Chapel
     changes:
@@ -189,6 +189,16 @@ history:
         previous: "@01KQBYGDA2Q6K8519GP18FZZM0"
     command: review-link
     timestamp: 2026-04-29T06:45:15.990Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: needs_work
+        previous: pending_review
+      session_id:
+        new: null
+        previous: 01KQBYTAW2A9MF9NW5DHJQ4SCN
+    command: review-verdict-needs-work
+    timestamp: 2026-04-29T06:49:14.546Z
 created_at: 2026-04-29T05:21:57.996Z
 started_at: 2026-04-29T06:42:08.063Z
 submitted_at: 2026-04-29T06:42:12.861Z

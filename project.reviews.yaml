@@ -10854,9 +10854,25 @@ reviews:
           kind: blocker
           thread_ulid: 01KQBZZ53P4DG6E7YFWF377WGV
         timestamp: 2026-04-29T06:49:04.472Z
+      - _ulid: 01KQBZZETC15C7D7R1FHB8E4Z9
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-04-29T06:49:14.316Z
+      - _ulid: 01KQBZZETC0FPNG5VS1Y6NDXCX
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-04-29T06:49:14.316Z
     examined_commit: 58ee1cd21f036143cf551f1150523d0ed4e418c6
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -10909,7 +10925,14 @@ reviews:
               @exit-model-persistence ac-3/ac-4/ac-6."
             created_at: 2026-04-29T06:49:04.374Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-04-29T06:49:14.316Z
     created_at: 2026-04-29T06:45:15.637Z
-    updated_at: 2026-04-29T06:49:04.374Z
+    updated_at: 2026-04-29T06:49:14.316Z
     notes: []
