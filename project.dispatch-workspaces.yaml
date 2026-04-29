@@ -1163,7 +1163,7 @@ workspaces:
         head: 3af78183e8cfe148f9ade0dc28228675fe837c0b
         last_seen_at: 2026-04-29T05:59:07.144Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-exit-ui-and-terminal-scheduling-01kqbtzn
-  - active_role: worker
+  - active_role: null
     base_branch_point: 211c0e7e0a535c5ef4080059d7ae90d3015baf7e
     bootstrap:
       status: succeeded
@@ -1205,12 +1205,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-29T06:10:24.417Z
+      updated_at: 2026-04-29T06:12:26.051Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T06:10:24.417Z
+      updated_at: 2026-04-29T06:12:26.051Z
     integration:
       status: pending
       detail: null
@@ -1218,17 +1218,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 211c0e7e0a535c5ef4080059d7ae90d3015baf7e
-      updated_at: 2026-04-29T06:10:24.417Z
-    lifecycle_state: active
+      updated_at: 2026-04-29T06:12:26.051Z
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@01KQBTZN6NJED5GTQPK3WD5P93"
     task_slug: task-checkpoint-save-component-sourcing
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T05:59:09.220Z
-      last_reconciled_at: 2026-04-29T06:10:24.417Z
+      last_reconciled_at: 2026-04-29T06:12:26.051Z
       created_at: 2026-04-29T05:59:08.417Z
-      updated_at: 2026-04-29T06:10:24.417Z
+      updated_at: 2026-04-29T06:12:26.051Z
     workspace_id: dispatch-workspace-01KQBTZN6NJED5GTQPK3WD5P93
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
