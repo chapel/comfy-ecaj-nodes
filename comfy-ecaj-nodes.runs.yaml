@@ -8192,7 +8192,7 @@ runs:
     completed_at: 2026-04-29T13:32:16.946Z
   - _ulid: 01KQCQAEMB43VCWSK823V6BGXZ
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -8206,7 +8206,18 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T13:37:45.713Z
-        completed_at: 2026-04-29T13:37:45.713Z
+        completed_at: 2026-04-29T13:38:07.927Z
+        notes: "High-confidence candidates checked against baseline: (1) kspec validate warning-exit
+          friction is already tracked by observation 01KQC4S9, so no duplicate capture. (2)
+          PR-publication merge command support for detached reviewer snapshots is already tracked by
+          inbox 01KQ6R11, so no duplicate capture. (3) Success pattern for explicit executable
+          review checks and machine-readable live reports is already covered by observations
+          01KQCM72 and 01KQCNS0 plus the current task's review checks. No new untracked,
+          high-confidence item identified."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T13:38:07.927Z
+        completed_at: 2026-04-29T13:38:07.927Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:37:11.819Z
