@@ -15591,6 +15591,16 @@ reviews:
         runner: python
         created_at: 2026-04-29T12:48:38.616Z
         completed_at: 2026-04-29T12:48:38.616Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest passed: 1570 passed in 12.71s."
+        name: full pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T12:49:07.021Z
+        completed_at: 2026-04-29T12:49:07.021Z
     events:
       - _ulid: 01KQCM8FFXK77NWZ5C3KRH7973
         actor: Jacob Chapel
@@ -15633,6 +15643,13 @@ reviews:
           status: pass
           name: prior blocker probes
         timestamp: 2026-04-29T12:48:38.740Z
+      - _ulid: 01KQCMJDJW711M13WSJ72QF5E5
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: full pytest
+        timestamp: 2026-04-29T12:49:07.164Z
     examined_commit: 37c7029f0288d8d6438a6d44a9dac519e9e50d3d
     external_links: []
     lifecycle_state: open
@@ -15645,5 +15662,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T12:43:41.438Z
-    updated_at: 2026-04-29T12:48:38.616Z
+    updated_at: 2026-04-29T12:49:07.021Z
     notes: []
