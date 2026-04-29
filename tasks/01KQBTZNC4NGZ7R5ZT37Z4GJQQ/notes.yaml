@@ -19,3 +19,68 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-29T12:53:59.752Z
+  - _ulid: 01KQCN5VY8TNQHYE4H2SZAK4PA
+    content: >-
+      Live validation results — ALL PASS (except cache detection limitation):
+
+
+      Environment:
+
+      - ComfyUI 0.20.1, Python 3.14.4, PyTorch 2.9.1+cu130
+
+      - GPU: NVIDIA RTX 4090, 25.2GB VRAM
+
+      - Memory mode: default (no --lowvram/--highvram flags, vram_state='unknown' = normal mode)
+
+      - argv: ['main.py', '--listen', '--output-directory', '/mnt/big-data/AI/output',
+      '--reserve-vram', '5']
+
+      - Source model: sdxl/realismEngineSDXL_v30VAE.safetensors (SDXL checkpoint)
+
+
+      Results:
+
+      1. Terminal Save: PASS — WIDENExit accepted as executable output (prompt 3db1de68)
+
+      2. Checkpoint Save: PASS — artifact saved as checkpoint (prompt cc113972)
+
+      3. Checkpoint Loader: PASS — saved artifact loaded through CheckpointLoaderSimple (prompt
+      824668f6)
+
+      4. Downstream KSampler: PASS — KSampler+VAEDecode+SaveImage completed (prompt 824668f6)
+
+      5. Cache Reuse: PARTIAL — workflow accepted (prompt 261ed71e), but harness could not confirm
+      cache reuse through ComfyUI history API. Timing evidence shows 5.9x speedup (653ms vs 3830ms)
+      indicating WIDEN-level artifact cache was used. The harness checks ComfyUI's execution_cached
+      messages, but WIDEN's enable_cache operates at the application level.
+
+      6. Memory Mode: PASS — no memory/OOM failures, mode was not changed.
+
+
+      Artifacts:
+
+      - Saved checkpoint:
+      /mnt/big-data/AI/models/checkpoints/ecaj_checkpoint_validation_save.safetensors (6.5GB)
+
+      - Terminal checkpoint:
+      /mnt/big-data/AI/models/checkpoints/ecaj_checkpoint_validation_terminal.safetensors (6.5GB)
+
+      - Downstream image: /mnt/big-data/AI/output/ecaj_checkpoint_validation_00001_.png (73KB,
+      256x256)
+
+      - Report: reports/checkpoint_validation_report.json
+
+
+      Artifact classification: checkpoint (confirmed via safetensors metadata)
+
+      - Key prefixes: model (1680 keys), conditioner (587 keys), first_stage_model (248 keys)
+
+      - Metadata: __ecaj_artifact_kind__=checkpoint, __ecaj_checkpoint_components__=true, arch=sdxl
+
+
+      Note: ComfyUI required restart to pick up updated WIDENEntry node definitions (optional
+      clip/vae inputs). The source file was newer than the cached bytecode. This is an environment
+      setup detail, not a code issue.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T12:59:44.456Z
