@@ -10847,6 +10847,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQBZYTRTPEG96Q5ZXJAQ5ZRK
         timestamp: 2026-04-29T06:48:53.882Z
+      - _ulid: 01KQBZZ56R2HR6QC3T3Q3FPXWN
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQBZZ53P4DG6E7YFWF377WGV
+        timestamp: 2026-04-29T06:49:04.472Z
     examined_commit: 58ee1cd21f036143cf551f1150523d0ed4e418c6
     external_links: []
     lifecycle_state: open
@@ -10880,7 +10887,29 @@ reviews:
               checkpoint artifact kind plus matching metadata are accepted as a cache hit."
             created_at: 2026-04-29T06:48:53.787Z
         kind: blocker
+      - _ulid: 01KQBZZ53P4DG6E7YFWF377WGV
+        anchor:
+          type: code
+          commit: 58ee1cd21f036143cf551f1150523d0ed4e418c6
+          line_end: 420
+          line_start: 419
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQBZZ53PK2SJZMV4SX6KP770
+            author: Jacob Chapel
+            body: "MUST-FIX: _recipe_has_checkpoint_components treats every RecipeModel as checkpoint companion
+              metadata, but the diffusion-model input node also emits
+              RecipeModel(source_dir='diffusion_models'). Those diffusion-only model recipes are
+              therefore routed through check_checkpoint_cache and stamped with
+              artifact_kind='checkpoint' plus checkpoint_components=True, even though they are not
+              checkpoint artifacts with companion components. That misclassifies diffusion-only
+              artifacts and makes their save_model cache path a false miss under the new
+              internal-only rejection, violating the artifact-kind classification contract in
+              @exit-model-persistence ac-3/ac-4/ac-6."
+            created_at: 2026-04-29T06:49:04.374Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T06:45:15.637Z
-    updated_at: 2026-04-29T06:48:53.787Z
+    updated_at: 2026-04-29T06:49:04.374Z
     notes: []
