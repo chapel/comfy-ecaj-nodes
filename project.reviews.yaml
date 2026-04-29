@@ -12441,6 +12441,12 @@ reviews:
         payload:
           thread_ulid: 01KQC712WBKPC6B585RT0Q6Q5C
         timestamp: 2026-04-29T09:15:45.437Z
+      - _ulid: 01KQC8BZF7VG56GW089A68S3E4
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQC70EHE76VWHQ03G7926VH3
+        timestamp: 2026-04-29T09:15:53.192Z
     examined_commit: bddfbc71a07578a396071075ca5ed286c5b24b71
     external_links: []
     lifecycle_state: closed
@@ -12481,6 +12487,8 @@ reviews:
               unit tests for the classification logic in TestRecipeHasCheckpointComponents."
             created_at: 2026-04-29T09:15:39.278Z
         kind: blocker
+        resolved_at: 2026-04-29T09:15:53.091Z
+        resolved_by: "@claude"
       - _ulid: 01KQC70S4YBZ3X6DM7MGHDRSBB
         anchor:
           type: code
@@ -12553,5 +12561,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T08:52:39.708Z
     created_at: 2026-04-29T08:47:01.592Z
-    updated_at: 2026-04-29T09:15:45.333Z
+    updated_at: 2026-04-29T09:15:53.091Z
     notes: []
