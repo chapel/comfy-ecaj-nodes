@@ -484,7 +484,12 @@ def _recipe_has_checkpoint_components(node: RecipeNode) -> bool:
     """
     if isinstance(node, RecipeBase):
         cc = node.checkpoint_components
-        return cc is not None and isinstance(cc, CheckpointComponents) and cc.clip is not None and cc.vae is not None
+        return (
+            cc is not None
+            and isinstance(cc, CheckpointComponents)
+            and cc.clip is not None
+            and cc.vae is not None
+        )
     if isinstance(node, RecipeModel):
         return node.source_dir == "checkpoints"
     if isinstance(node, RecipeCompose):
@@ -761,10 +766,14 @@ class WIDENExitNode:
         _validate_recipe_tree(widen)
 
         # AC: @saved-model-artifact-safety ac-missing-components-fail-before-work
-        # Validate checkpoint components before any expensive work
+        # Validate checkpoint components before any expensive work — but only
+        # when the base carries checkpoint_components (meaning the user wired
+        # CLIP/VAE inputs, signalling checkpoint intent).  Diffusion-only
+        # recipes have checkpoint_components=None and must not be rejected.
         if save_model:
             base = widen if isinstance(widen, RecipeBase) else walk_to_base(widen)
-            validate_checkpoint_components(base, save_model=True)
+            if base.checkpoint_components is not None:
+                validate_checkpoint_components(base, save_model=True)
 
         # Quick check: must end in RecipeMerge for actual merging
         if isinstance(widen, RecipeBase):

@@ -14,18 +14,16 @@ from __future__ import annotations
 
 import json
 import os
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import torch
 from safetensors.torch import load_file, save_file
 
 from lib.persistence import (
-    build_metadata,
     check_checkpoint_cache,
 )
 from lib.recipe import (
-    CheckpointComponents,
     RecipeBase,
     RecipeCompose,
     RecipeLoRA,
@@ -34,7 +32,6 @@ from lib.recipe import (
 )
 from nodes.exit import WIDENExitNode, save_comfy_checkpoint
 from tests.conftest import make_checkpoint_components
-
 
 # =============================================================================
 # save_comfy_checkpoint — unit tests
@@ -304,7 +301,7 @@ class TestCheckpointSaveRouting:
             mock_install.return_value = merged_model
             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
 
-            result = node.execute(merge, save_model=True, model_name="model")
+            node.execute(merge, save_model=True, model_name="model")
 
             # save_comfy_checkpoint MUST have been called
             mock_save_ckpt.assert_called_once()
@@ -350,7 +347,7 @@ class TestCheckpointSaveRouting:
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation", return_value={}),
             patch("nodes.exit.install_merged_patches") as mock_install,
-            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.MaterializationSink") as mock_sink_cls,
             patch("nodes.exit.check_ram_preflight"),
         ):
@@ -501,7 +498,7 @@ class TestCheckpointSaveRouting:
             mock_install.return_value = mock_model_patcher.clone()
             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
 
-            result = node.execute(merge, save_model=True, model_name="model")
+            node.execute(merge, save_model=True, model_name="model")
 
             # save_comfy_checkpoint MUST be called (checkpoint-style)
             mock_save_ckpt.assert_called_once()
@@ -550,7 +547,7 @@ class TestCheckpointArtifactMetadata:
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation", return_value={}),
             patch("nodes.exit.install_merged_patches") as mock_install,
-            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.build_metadata") as mock_build_meta,
             patch("nodes.exit.check_ram_preflight"),
         ):
@@ -572,7 +569,10 @@ class TestCheckpointArtifactMetadata:
                 model_affected={str(id(model)): frozenset()},
                 all_model_keys=frozenset(),
             )
-            mock_build_meta.return_value = {"__ecaj_version__": "1", "__ecaj_artifact_kind__": "checkpoint"}
+            mock_build_meta.return_value = {
+                "__ecaj_version__": "1",
+                "__ecaj_artifact_kind__": "checkpoint",
+            }
             mock_install.return_value = mock_model_patcher.clone()
 
             node.execute(merge, save_model=True, model_name="model")
@@ -618,7 +618,10 @@ class TestInternalFormatRejection:
             "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
             "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
         })
-        assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS) is False
+        result = check_checkpoint_cache(
+            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+        )
+        assert result is False
 
     # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
     def test_noise_augmentor_only_keys_rejected(self, tmp_path):
@@ -629,7 +632,10 @@ class TestInternalFormatRejection:
             "noise_augmentor.weight": torch.randn(4, 4),
             "model_sampling.sigmas": torch.randn(4),
         })
-        assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS) is False
+        result = check_checkpoint_cache(
+            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+        )
+        assert result is False
 
     # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
     def test_checkpoint_with_vae_keys_accepted(self, tmp_path):
@@ -650,7 +656,10 @@ class TestInternalFormatRejection:
             "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
             "first_stage_model.decoder.weight": torch.randn(4, 4),
         }, artifact_kind="diffusion")
-        assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS) is False
+        result = check_checkpoint_cache(
+            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+        )
+        assert result is False
 
     # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
     def test_missing_metadata_rejected(self, tmp_path):
@@ -1070,7 +1079,9 @@ class TestCheckpointCacheHitModelLoading:
     """
 
     # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
-    def test_load_model_from_checkpoint_artifact_updates_weights(self, mock_model_patcher, tmp_path):
+    def test_load_model_from_checkpoint_artifact_updates_weights(
+        self, mock_model_patcher, tmp_path,
+    ):
         """_load_model_from_artifact must load Comfy checkpoint keys
         (model.diffusion_model.*) into the returned model's state dict."""
         from nodes.exit import _load_model_from_artifact
@@ -1219,7 +1230,7 @@ class TestBaseOnlyCheckpointSave:
         ):
             mock_load.return_value = mock_model_patcher.clone()
 
-            result = node.execute(base, save_model=True, model_name="model")
+            node.execute(base, save_model=True, model_name="model")
 
             # MaterializationSink MUST be used
             mock_sink_cls.assert_called_once()
@@ -1256,7 +1267,7 @@ class TestBaseOnlyCheckpointSave:
         ):
             mock_load.return_value = mock_model_patcher.clone()
 
-            result = node.execute(base, save_model=True, model_name="model")
+            node.execute(base, save_model=True, model_name="model")
 
             # check_checkpoint_cache MUST be called (not check_full_model_cache)
             mock_ckpt_cache.assert_called_once()

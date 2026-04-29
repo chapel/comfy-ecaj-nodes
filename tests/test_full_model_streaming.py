@@ -23,7 +23,6 @@ from nodes.exit import (
     WIDENExitNode,
     _incremental_cache,
 )
-from tests.conftest import make_checkpoint_components
 
 # ---------------------------------------------------------------------------
 # Shared helpers

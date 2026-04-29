@@ -33,7 +33,6 @@ from nodes.exit import (
     _incremental_cache,
     clear_incremental_cache,
 )
-from tests.conftest import make_checkpoint_components
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -119,10 +119,13 @@ class TestMissingComponentsFailBeforeWork:
     """
 
     def test_save_model_missing_both_clip_and_vae_raises_before_analyze(self):
-        """save_model=True with no CLIP/VAE raises ValueError before analyze_recipe."""
+        """save_model=True with checkpoint intent but no CLIP/VAE raises ValueError."""
         # AC: @saved-model-artifact-safety ac-missing-components-fail-before-work
+        # Use explicit CheckpointComponents(clip=None, vae=None) to signal
+        # checkpoint intent while having both components missing.
         patcher = MockModelPatcher()
-        base = RecipeBase(model_patcher=patcher, arch="sdxl")
+        cc = CheckpointComponents(clip=None, vae=None)
+        base = RecipeBase(model_patcher=patcher, arch="sdxl", checkpoint_components=cc)
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -162,10 +165,11 @@ class TestMissingComponentsFailBeforeWork:
             node.execute(merge, save_model=True, model_name="test.safetensors")
 
     def test_save_model_noop_recipe_missing_components_raises(self):
-        """save_model=True on RecipeBase (no-op) without CLIP/VAE raises ValueError."""
+        """save_model=True on RecipeBase (no-op) with checkpoint intent but no CLIP/VAE raises."""
         # AC: @saved-model-artifact-safety ac-missing-components-fail-before-work
         patcher = MockModelPatcher()
-        base = RecipeBase(model_patcher=patcher, arch="sdxl")
+        cc = CheckpointComponents(clip=None, vae=None)
+        base = RecipeBase(model_patcher=patcher, arch="sdxl", checkpoint_components=cc)
 
         node = WIDENExitNode()
 
@@ -176,7 +180,8 @@ class TestMissingComponentsFailBeforeWork:
         """Validation occurs before analyze_recipe is called."""
         # AC: @saved-model-artifact-safety ac-missing-components-fail-before-work
         patcher = MockModelPatcher()
-        base = RecipeBase(model_patcher=patcher, arch="sdxl")
+        cc = CheckpointComponents(clip=None, vae=None)
+        base = RecipeBase(model_patcher=patcher, arch="sdxl", checkpoint_components=cc)
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -197,7 +202,8 @@ class TestMissingComponentsFailBeforeWork:
         # AC: @saved-model-artifact-safety ac-missing-components-fail-before-work
         patcher = MockModelPatcher()
         patcher.model_state_dict = MagicMock(wraps=patcher.model_state_dict)
-        base = RecipeBase(model_patcher=patcher, arch="sdxl")
+        cc = CheckpointComponents(clip=None, vae=None)
+        base = RecipeBase(model_patcher=patcher, arch="sdxl", checkpoint_components=cc)
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 

@@ -1367,7 +1367,9 @@ class TestCheckpointCacheRouting:
             assert call_kwargs.kwargs.get("dependency_fingerprints") is not None
 
     # AC: @full-saved-model-output ac-cache-reuses-artifact
-    def test_checkpoint_sourced_lora_recipe_uses_checkpoint_cache(self, mock_model_patcher, tmp_path):
+    def test_checkpoint_sourced_lora_recipe_uses_checkpoint_cache(
+        self, mock_model_patcher, tmp_path,
+    ):
         """Checkpoint-sourced LoRA recipe (RecipeBase with checkpoint_components + LoRA)
         must use check_checkpoint_cache, not check_full_model_cache."""
         base = RecipeBase(
@@ -1427,7 +1429,9 @@ class TestCheckpointCacheRouting:
 
     # AC: @exit-model-persistence ac-3
     # AC: @exit-model-persistence ac-4
-    def test_diffusion_model_recipe_with_checkpoint_base_uses_checkpoint_cache(self, mock_model_patcher, tmp_path):
+    def test_diffusion_model_recipe_with_checkpoint_base_uses_checkpoint_cache(
+        self, mock_model_patcher, tmp_path,
+    ):
         """RecipeModel with source_dir='diffusion_models' merged onto a checkpoint
         base still uses check_checkpoint_cache, because the base has checkpoint_components.
 
@@ -1444,8 +1448,6 @@ class TestCheckpointCacheRouting:
 
         save_path = str(tmp_path / "model.safetensors")
         node = WIDENExitNode()
-
-        mock_sink = MagicMock()
 
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
