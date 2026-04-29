@@ -8011,9 +8011,34 @@ runs:
     completed_at: 2026-04-29T12:52:57.460Z
   - _ulid: 01KQCN9YZPZ00ZMTH0Y5V0TZPM
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T13:01:58.647Z
+        completed_at: 2026-04-29T13:02:59.022Z
+        notes: >-
+          What worked well:
+
+          1. Systematic environment verification — checking /object_info and /system_stats before
+          running the harness caught the node definition mismatch early.
+
+          2. The harness guard system worked correctly — all five guard checks (env var, CLI flag,
+          api url, source model, report output) were validated before any ComfyUI work.
+
+          3. Timing analysis provided strong cache reuse evidence when ComfyUI history API signals
+          were insufficient (5.9x speedup).
+
+          4. The checkpoint save + downstream workflow pipeline validated the full round-trip in a
+          single harness run.
+
+          5. Parallel artifact analysis (metadata inspection, key prefix counting) confirmed
+          checkpoint classification without manual inspection.
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T13:02:59.022Z
+        completed_at: 2026-04-29T13:02:59.022Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T13:01:58.647Z
