@@ -1,0 +1,64 @@
+_ulid: 01KQBTZN55TQMJNKNWTB09MFX7
+slugs:
+  - task-checkpoint-save-preserve-scoped-existing-specs
+title: Preserve scoped streaming and manual-validation specs unchanged
+type: task
+description: |
+  What: Explicitly preserve @streaming-full-model-materialization and
+  @manual-comfy-memory-validation as scoped existing specs instead of letting
+  an implementer decide whether to rewrite them.
+
+  Why: @streaming-full-model-materialization is about bounded affected-weight
+  handoff and avoiding resident affected-weight caches. @manual-comfy-memory-validation
+  is about opt-in/refusal/reporting for real Comfy memory validation. Neither
+  spec should be expanded to carry checkpoint component sourcing or artifact
+  loadability; this plan adds those requirements in the new checkpoint and live
+  validation specs.
+
+  Exact spec changes:
+  - Target spec: @streaming-full-model-materialization.
+    - Make no description or acceptance-criteria text changes.
+    - Keep implementation status implemented.
+  - Target spec: @manual-comfy-memory-validation.
+    - Make no description or acceptance-criteria text changes.
+    - Keep implementation status implemented.
+  - Add a task note, if task notes are used, stating that these specs are
+    intentionally preserved unchanged because checkpoint artifact loadability
+    is covered by @checkpoint-loadable-saved-model-output,
+    @saved-model-artifact-safety, rewritten @full-saved-model-output,
+    rewritten @exit-model-persistence, and @live-comfy-saved-output-validation.
+
+  Testing:
+  - Run kspec validate.
+  - Run kspec item get @streaming-full-model-materialization and verify all ACs
+    are unchanged.
+  - Run kspec item get @manual-comfy-memory-validation and verify all ACs are
+    unchanged.
+  - Verify no task claims these two specs alone prove checkpoint-style saved
+    output readiness.
+
+  Covers: @streaming-full-model-materialization ac-affected-results-released,
+    ac-base-weight-bounded-copying, ac-incomplete-write-not-reused,
+    ac-direct-artifact-handoff, ac-full-cache-avoids-resident-payload,
+    ac-failed-materialization-releases-resident-payload;
+    @manual-comfy-memory-validation ac-explicit-opt-in-required,
+    ac-refuses-before-comfy-work-without-opt-in,
+    ac-report-identifies-memory-mode;
+    @live-comfy-saved-output-validation ac-primitive-tests-do-not-substitute-for-live-validation.
+spec_ref: "@streaming-full-model-materialization"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
+  - "@task-checkpoint-save-rewrite-comfy-memory-compatibility-spec"
+context: []
+priority: 1
+tags:
+  - specs
+  - persistence
+  - validation
+vcs_refs: []
+created_at: 2026-04-29T05:21:57.925Z
+todos: []

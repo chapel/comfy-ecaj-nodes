@@ -1,0 +1,68 @@
+_ulid: 01KQBTZNAFWDF3Z70RRYP87JQM
+slugs:
+  - task-checkpoint-save-returned-model
+title: Return save_model results without deep-copying Comfy model internals
+type: task
+description: |
+  What: Replace the checkpoint save_model return path that deep-copies Comfy
+  model internals with an explicit cache-miss/cache-hit return contract.
+
+  Why: Live testing on current Comfy/Dynamic VRAM failed in
+  _load_model_from_artifact -> deepcopy(cloned.model). Deep-copying Comfy model
+  internals is not a supported ownership or memory-management boundary.
+
+  Required return contract:
+  - On SDXL/checkpoint-style save_model cache miss:
+      1. Compute the merged MODEL.
+      2. Save and publish a valid checkpoint artifact.
+      3. Return the merged Comfy MODEL from the in-memory WIDEN merge result.
+      4. Do not reload the just-saved artifact solely to produce the return
+         value.
+  - On SDXL/checkpoint-style save_model cache hit:
+      1. Validate checkpoint metadata and artifact kind.
+      2. Skip recipe analysis and WIDEN GPU merge computation.
+      3. Load the checkpoint artifact through Comfy's supported checkpoint load
+         path, using comfy.sd.load_checkpoint_guess_config or a project wrapper
+         around that function with output_vae=True and output_clip=True.
+      4. Return only the loaded MODEL as WIDEN Exit's MODEL output.
+  - Remove or bypass _load_model_from_artifact for checkpoint-style save_model.
+  - No checkpoint-style save_model path may call copy.deepcopy on cloned.model,
+    ModelPatcher.model, diffusion_model, CLIP internals, or VAE internals.
+  - If the cache-hit Comfy load path fails, raise a clear error naming the
+    saved checkpoint path and do not treat the artifact as successful reuse.
+  - save_model=False patch-mode return behavior remains unchanged.
+
+  Testing:
+  - Unit-test copy.deepcopy is not called anywhere in checkpoint-style
+    save_model return paths; monkeypatch copy.deepcopy to raise if necessary.
+  - Unit-test cache miss returns a usable merged MODEL and does not invoke the
+    checkpoint loader solely for the return value.
+  - Unit-test cache hit invokes Comfy's checkpoint load path and skips
+    analyze_recipe/GPU merge work.
+  - Unit-test loader failure on cache hit surfaces a clear diagnostic naming
+    the checkpoint path.
+  - Unit-test connected downstream MODEL consumers receive a non-None usable
+    MODEL from both cache-miss and cache-hit paths.
+  - Remove or rewrite diffusion-loader-only spike tests so they no longer prove
+    checkpoint-style saved output.
+
+  Covers: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable,
+    ac-generated-workflow-round-trip; @saved-model-artifact-safety
+    ac-missing-metadata-not-reused, ac-wrong-artifact-kind-not-reused;
+    @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory.
+spec_ref: "@checkpoint-loadable-saved-model-output"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-artifact-format"
+context: []
+priority: 2
+tags:
+  - exit-node
+  - comfy
+  - memory
+vcs_refs: []
+created_at: 2026-04-29T05:21:58.095Z
+todos: []

@@ -1,0 +1,60 @@
+_ulid: 01KQBTZN8XD9E6VCFXJYRPWBHC
+slugs:
+  - task-checkpoint-save-result-sink-handoff
+title: Adopt sink-based affected-result handoff for bounded merge memory
+type: task
+description: |
+  What: Adopt or rebuild the prior branch's result-sink evaluation handoff so
+  completed affected tensors can be handed to a sink incrementally without
+  accumulating a full affected-result payload.
+
+  Why: Dynamic VRAM does not manage arbitrary WIDEN merge intermediates. The
+  project still needs bounded merge-memory behavior for affected results, but
+  that behavior is separate from checkpoint loadability.
+
+  Required implementation:
+  - Add or rebuild lib/result_sink.py from the prior branch with a sink protocol
+    or class that receives each completed affected tensor by key.
+  - Add or rebuild the chunked evaluation-to-sink path in lib/gpu_ops.py or the
+    current equivalent execution layer.
+  - Keep the current dict-returning patch path as a wrapper around the sink path
+    or as an equivalent compatibility path so save_model=False behavior remains
+    unchanged.
+  - Preserve existing OOM retry behavior.
+  - Preserve storage dtype conversion semantics.
+  - Ensure sink outputs are CPU tensors when the existing patch path produces
+    CPU tensors.
+  - Ensure errors propagate and prevent sink finalization/publication.
+  - Do not describe this task as proving checkpoint-loadable saved output; it
+    only provides bounded affected-result handoff.
+
+  Testing:
+  - Add or adopt tests/test_result_sink.py.
+  - Add or adopt tests/test_chunked_evaluation_to_sink.py against the current
+    gpu_ops/executor API.
+  - Test sink output equals dict-returning output for representative batches.
+  - Test dtype conversion matches the existing patch path.
+  - Test OOM retry still writes all expected keys.
+  - Test the sink receives keys incrementally before later groups complete.
+  - Test errors propagate and do not finalize the sink.
+  - Test the dict-returning wrapper remains backward-compatible.
+
+  Covers: @streaming-full-model-materialization ac-affected-results-released,
+    ac-direct-artifact-handoff, ac-full-cache-avoids-resident-payload,
+    ac-failed-materialization-releases-resident-payload.
+spec_ref: "@streaming-full-model-materialization"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-atomic-artifact-writer"
+context: []
+priority: 1
+tags:
+  - memory
+  - persistence
+  - streaming
+vcs_refs: []
+created_at: 2026-04-29T05:21:58.045Z
+todos: []

@@ -1,0 +1,84 @@
+_ulid: 01KQBTZNCWM8AP31SWX4FQEYJ7
+slugs:
+  - task-checkpoint-save-final-spec-status-reconciliation
+title: Set checkpoint-save spec statuses after live validation
+type: task
+description: >
+  What: Apply an exact post-validation status map to the affected kspec specs
+
+  and add notes superseding the earlier primitive validation baseline.
+
+
+  Why: The older full-saved-model work left some specs marked implemented based
+
+  on primitive/helper validation. Checkpoint-style saved output must not be
+
+  marked implemented unless live checkpoint workflow evidence passes or the
+
+  deferral is explicit.
+
+
+  Exact status changes:
+
+  - If live validation passes all checkpoint-style saved-output requirements,
+    set these specs to implementation status implemented:
+      - @full-saved-model-output
+      - @checkpoint-loadable-saved-model-output
+      - @saved-model-artifact-safety
+      - @comfy-memory-manager-compatibility
+      - @live-comfy-saved-output-validation
+      - @exit-model-persistence
+      - @streaming-full-model-materialization
+      - @manual-comfy-memory-validation
+  - If live validation is deferred or fails, set these specs to implementation
+    status in_progress:
+      - @full-saved-model-output
+      - @checkpoint-loadable-saved-model-output
+      - @saved-model-artifact-safety
+      - @comfy-memory-manager-compatibility
+      - @live-comfy-saved-output-validation
+      - @exit-model-persistence
+    and keep these specs implementation status implemented:
+      - @streaming-full-model-materialization
+      - @manual-comfy-memory-validation
+  - Add notes to the prior full-saved-model plan or related tasks stating
+    exactly:
+      - Primitive helper validation was superseded by checkpoint-style live
+        validation.
+      - Diffusion-only loadability is not sufficient for checkpoint-style
+        models.
+      - This checkpoint-save reconciliation plan is now the authoritative
+        validation baseline for checkpoint-style saved output.
+  - Do not mark checkpoint-style saved output implemented if the only passing
+    evidence is primitive tests, fake ModelPatcher tests, or diffusion-only
+    loader success.
+
+  Testing:
+
+  - Run kspec validate.
+
+  - Verify the implementation status for all eight listed specs.
+
+  - Verify notes exist on the prior plan/tasks when the CLI supports notes for
+    those records.
+  - Verify no active task or completed prior-plan note claims checkpoint-style
+    saved output is done solely from primitive or diffusion-only validation.
+
+  Covers: @live-comfy-saved-output-validation
+  ac-primitive-tests-do-not-substitute-for-live-validation.
+spec_ref: "@live-comfy-saved-output-validation"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-live-validation-manual-run"
+context: []
+priority: 3
+tags:
+  - kspec
+  - specs
+  - reconciliation
+vcs_refs: []
+created_at: 2026-04-29T05:21:58.172Z
+todos: []

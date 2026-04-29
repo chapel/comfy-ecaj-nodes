@@ -1,0 +1,99 @@
+_ulid: 01KQBTZN4ERV4CK4S7AEWQ5VYK
+slugs:
+  - task-checkpoint-save-rewrite-comfy-memory-compatibility-spec
+title: Rewrite Comfy memory compatibility spec for checkpoint-loaded artifacts
+type: task
+description: |
+  What: Update @comfy-memory-manager-compatibility so Dynamic VRAM compatibility
+  is assessed through real saved artifacts and Comfy loader/downstream paths,
+  not primitive helper success.
+
+  Why: Dynamic VRAM manages Comfy-owned model loading and inference residency.
+  The compatibility claim must be about saved-output behavior running without
+  changing the active Comfy memory mode and without retaining transient merge
+  payloads or deep-copied model internals.
+
+  Exact spec changes:
+  - Target spec: @comfy-memory-manager-compatibility.
+  - Set implementation status to in_progress.
+  - Replace the description with exactly:
+    Saved model output remains compatible with ComfyUI's model memory lifecycle
+    across supported memory-management modes for the requested saved model
+    artifact kind. For checkpoint-style saved output, compatibility requires
+    that ComfyUI can load and use the saved checkpoint-style artifact through
+    normal loader and downstream workflow paths without changing the active
+    memory mode.
+  - Replace ac-no-dynamic-vram-opt-out with:
+    given: ComfyUI is running with its dynamic model memory management enabled.
+    when: A workflow uses saved model output for a supported artifact kind.
+    then: The workflow can run without requiring users to disable ComfyUI's
+      dynamic memory management. If checkpoint-style output is requested, the
+      saved artifact remains loadable through the appropriate checkpoint-style
+      ComfyUI loader in that memory mode.
+  - Replace ac-comfy-owns-returned-model-memory with:
+    given: The Exit node has returned a MODEL after producing or reusing saved
+      model output.
+    when: ComfyUI loads, unloads, partially loads, or prioritizes models for a
+      workflow.
+    then: The returned MODEL remains compatible with ComfyUI's model memory
+      lifecycle and does not require the transient WIDEN merge payload or a
+      deep-copied ComfyUI model object to remain resident solely because the
+      Exit node returned.
+  - Replace ac-measured-memory-report with:
+    given: A representative merge workflow is run in an explicitly selected
+      ComfyUI memory-management mode.
+    when: memory behavior is measured for patch output, first saved model
+      output, and saved artifact reuse.
+    then: The validation output reports the active memory mode, saved artifact
+      classification, loader and downstream workflow result when applicable,
+      returned-model behavior, artifact reuse behavior, and whether transient
+      merge outputs remain persistently resident after the Exit node returns.
+  - Replace ac-non-dynamic-memory-mode-supported with:
+    given: ComfyUI is running in a supported memory-management mode where
+      Dynamic VRAM is not active.
+    when: A workflow uses saved model output for a supported artifact kind.
+    then: The workflow can produce and return the saved model output without
+      requiring Dynamic VRAM to be enabled.
+  - Replace ac-memory-mode-preserved with:
+    given: ComfyUI has an active memory-management mode for the workflow.
+    when: A workflow uses saved model output.
+    then: The workflow does not require users or the node to change that memory
+      mode in order to produce, load, reuse, or return the saved model output.
+  - Replace ac-memory-validation-fails-on-mode-opt-out with:
+    given: A validation run is measuring saved model output under an explicitly
+      selected ComfyUI memory-management mode.
+    when: saved model output can only complete by changing or disabling that
+      selected memory mode.
+    then: The validation reports the run as failed rather than treating the
+      mode change as a successful compatibility result.
+
+  Testing:
+  - Run kspec validate.
+  - Run kspec item get @comfy-memory-manager-compatibility and verify the
+    description and six ACs above match the required wording.
+  - Verify the spec still supports Dynamic VRAM and non-Dynamic-VRAM modes.
+  - Verify primitive helper tests are not described as sufficient evidence for
+    release compatibility.
+
+  Covers: @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out,
+    ac-comfy-owns-returned-model-memory, ac-measured-memory-report,
+    ac-non-dynamic-memory-mode-supported, ac-memory-mode-preserved,
+    ac-memory-validation-fails-on-mode-opt-out;
+    @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success.
+spec_ref: "@comfy-memory-manager-compatibility"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
+context: []
+priority: 1
+tags:
+  - specs
+  - comfy
+  - memory
+  - validation
+vcs_refs: []
+created_at: 2026-04-29T05:21:57.902Z
+todos: []

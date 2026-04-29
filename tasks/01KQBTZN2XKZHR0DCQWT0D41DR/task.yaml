@@ -1,0 +1,97 @@
+_ulid: 01KQBTZN2XKZHR0DCQWT0D41DR
+slugs:
+  - task-checkpoint-save-rewrite-full-saved-model-output-spec
+title: Rewrite full saved model output spec for requested model kind
+type: task
+description: |
+  What: Update @full-saved-model-output so its existing full-saved-output
+  contract is model-kind aware and no longer treats diffusion weights alone as
+  sufficient for checkpoint-style source workflows.
+
+  Why: Live SDXL testing proved that a diffusion-only artifact is not a
+  checkpoint-style saved model. The existing spec currently says the saved
+  artifact contains every diffusion model weight and can be returned as a
+  normally loaded diffusion model, which leaves room for the old internal file
+  format to be treated as done.
+
+  Exact spec changes:
+  - Target spec: @full-saved-model-output.
+  - Set implementation status to in_progress.
+  - Replace the description with exactly:
+    The Exit node can produce a complete saved model artifact for a merge
+    recipe in the model kind requested by the source workflow and return a
+    MODEL that behaves like a normally loaded ComfyUI model for downstream
+    execution.
+
+    For checkpoint-style source workflows, complete means the saved artifact
+    remains loadable through the appropriate checkpoint-style ComfyUI loader
+    with the non-diffusion components needed for normal generation and decode
+    use. A diffusion-weight-only artifact is not sufficient for
+    checkpoint-style saved model output.
+  - Replace ac-complete-artifact with:
+    given: A valid merge recipe starts from a source workflow whose normal
+      ComfyUI use has a defined saved model kind.
+    when: The Exit node produces full saved model output for that recipe.
+    then: The saved artifact is complete for that same model kind and can be
+      loaded without relying on the original in-memory WIDEN merge payload.
+      For checkpoint-style source workflows, the artifact includes the
+      conditioning and decode components required by the appropriate
+      checkpoint-style ComfyUI loader, not only the merged diffusion weights.
+  - Replace ac-return-loaded-model with:
+    given: A full saved model artifact is produced or reused for the current
+      recipe and requested saved model kind.
+    when: The Exit node returns its MODEL output.
+    then: Downstream nodes receive a MODEL representing the saved merged
+      artifact through a supported return or load path for that artifact kind,
+      and the result remains usable after temporary merge outputs have been
+      released by the Exit node.
+  - Replace ac-cache-reuses-artifact with:
+    given: A saved full model artifact matches the current recipe identity,
+      requested artifact kind, and required saved-model metadata.
+    when: The Exit node executes with save_model enabled for that same saved
+      model kind.
+    then: The existing artifact is reused without recomputing the merged
+      weights.
+  - Replace ac-no-op-produces-full-artifact with:
+    given: A valid full saved model workflow selects a recipe that does not
+      change any diffusion model weights.
+    when: The Exit node produces full saved model output for that recipe.
+    then: Downstream nodes receive a MODEL backed by a complete saved model
+      artifact for the selected recipe and requested saved model kind.
+  - Replace ac-cache-reuse-is-artifact-backed with:
+    given: A saved full model artifact matches the current recipe identity,
+      requested artifact kind, and required saved-model metadata.
+    when: The Exit node reuses cached full saved model output.
+    then: The reused result comes from the saved artifact rather than from a
+      process-resident affected-weight payload.
+  - Keep the existing slug, title, type, tags, and relationships to
+    @exit-model-persistence, @memory-management, and @exit-patch-install.
+  - Do not add a new output mode or output-mode dropdown to this spec.
+
+  Testing:
+  - Run kspec validate.
+  - Run kspec item get @full-saved-model-output and verify the description and
+    five listed ACs exactly match the requested model-kind-aware wording.
+  - Verify no remaining @full-saved-model-output AC says or implies that a
+    diffusion-weight-only artifact satisfies checkpoint-style saved output.
+
+  Covers: @full-saved-model-output ac-complete-artifact,
+    ac-return-loaded-model, ac-cache-reuses-artifact,
+    ac-no-op-produces-full-artifact, ac-cache-reuse-is-artifact-backed;
+    @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind,
+    ac-downstream-return-remains-usable.
+spec_ref: "@full-saved-model-output"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - specs
+  - persistence
+  - checkpoint
+vcs_refs: []
+created_at: 2026-04-29T05:21:57.853Z
+todos: []

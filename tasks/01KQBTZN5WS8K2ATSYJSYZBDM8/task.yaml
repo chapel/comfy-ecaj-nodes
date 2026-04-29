@@ -1,0 +1,54 @@
+_ulid: 01KQBTZN5WS8K2ATSYJSYZBDM8
+slugs:
+  - task-checkpoint-save-exit-ui-and-terminal-scheduling
+title: Preserve save_model-only Exit UX and terminal scheduling
+type: task
+description: |
+  What: Make terminal WIDEN Exit saves executable and lock the public save UX to
+  the existing save_model boolean rather than adopting the prior branch's
+  output-mode dropdown.
+
+  Why: Live Comfy API testing showed terminal save workflows are rejected when
+  WIDENExitNode is not an output node. The prior branch also introduced
+  output_mode UI concepts that are outside approved scope.
+
+  Required implementation:
+  - In nodes/exit.py, set WIDENExitNode.OUTPUT_NODE = True.
+  - Keep WIDENExitNode.RETURN_TYPES exactly ("MODEL",).
+  - Keep save_model as the existing BOOLEAN optional input.
+  - Keep model_name, save_workflow, and enable_cache behavior as existing save
+    controls unless later tasks change their cache/artifact semantics.
+  - Do not add output_mode, OUTPUT_MODE_PATCHES, OUTPUT_MODE_FULL_MODEL, or any
+    output-mode dropdown to WIDENExitNode.INPUT_TYPES, IS_CHANGED, or execute.
+  - If any prior branch code is consulted, discard output-mode-specific code and
+    tests instead of porting them.
+
+  Testing:
+  - Add or update tests/test_exit_node.py to assert WIDENExitNode.OUTPUT_NODE is
+    True.
+  - Add or update tests/test_exit_node.py to assert RETURN_TYPES remains
+    ("MODEL",).
+  - Add or update tests/test_exit_node.py to assert optional inputs include
+    save_model and do not include output_mode.
+  - Run the existing Exit-node tests that cover save_model=False patch output.
+
+  Covers: @checkpoint-loadable-saved-model-output ac-terminal-save-executes;
+    @exit-model-persistence ac-1, ac-5.
+spec_ref: "@checkpoint-loadable-saved-model-output"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
+  - "@task-checkpoint-save-rewrite-exit-model-persistence-spec"
+context: []
+priority: 1
+tags:
+  - exit-node
+  - comfy
+  - ux
+  - persistence
+vcs_refs: []
+created_at: 2026-04-29T05:21:57.948Z
+todos: []

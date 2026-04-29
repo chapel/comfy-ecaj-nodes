@@ -1,0 +1,78 @@
+_ulid: 01KQBTZN7CTJ03G2VS2J4KHAQB
+slugs:
+  - task-checkpoint-save-artifact-cache-classification
+title: Implement checkpoint-aware artifact metadata and cache classification
+type: task
+description: |
+  What: Rebuild the useful metadata and cache-classification hardening from the
+  prior branch as checkpoint-aware persistence behavior.
+
+  Why: The prior branch contains useful artifact_kind and metadata schema work,
+  but checkpoint-style save_model must reject old internal/diffusion-only
+  artifacts even when recipe hashes match.
+
+  Required implementation:
+  - Extend ecaj safetensors metadata so saved artifacts include:
+      - __ecaj_version__
+      - __ecaj_recipe__
+      - __ecaj_recipe_hash__
+      - __ecaj_affected_keys__ when affected-key manifests are relevant
+      - __ecaj_artifact_kind__
+      - base model identity metadata used for cache validation
+      - dependency fingerprints used for cache validation
+  - For checkpoint-style artifacts, include checkpoint-specific classification
+    metadata that records the artifact kind as checkpoint and records that the
+    artifact was written with checkpoint companion components.
+  - In lib/persistence.py, update cache validation so a checkpoint-style
+    save_model request is a cache miss when:
+      - ecaj metadata is missing,
+      - ecaj metadata version is unsupported,
+      - artifact kind metadata is missing,
+      - artifact kind does not equal checkpoint,
+      - checkpoint component classification metadata is missing,
+      - recipe identity does not match,
+      - base model identity does not match,
+      - dependency fingerprints do not match,
+      - the file is an older ecaj internal-format or diffusion-only artifact.
+  - Keep current manifest/header validation for any artifact kind that depends
+    on key, shape, or dtype manifests; do not replace it with artifact_kind
+    checks alone.
+  - Preserve non-ecaj overwrite protection: an existing file at model_name that
+    lacks ecaj ownership metadata must raise/refuse instead of being overwritten
+    or accepted as a cache hit.
+  - Consult the prior branch's lib/persistence.py only for concrete metadata
+    hardening patterns; do not port output_mode behavior.
+
+  Testing:
+  - Keep or rewrite prior branch artifact-kind metadata tests in
+    tests/test_persistence.py.
+  - Test matching checkpoint artifact kind and matching metadata are accepted
+    as cache hit.
+  - Test missing artifact kind is cache miss.
+  - Test wrong artifact kind is cache miss.
+  - Test missing checkpoint component classification is cache miss.
+  - Test unsupported ecaj version is cache miss or a clear unsupported-version
+    result according to existing persistence conventions.
+  - Test older internal-format artifacts with diffusion_model/noise_augmentor/
+    model_sampling-only keys are rejected for checkpoint-style cache reuse.
+  - Test existing non-ecaj file raises/refuses overwrite.
+
+  Covers: @saved-model-artifact-safety ac-missing-metadata-not-reused,
+    ac-wrong-artifact-kind-not-reused, ac-internal-format-not-checkpoint-cache;
+    @exit-model-persistence ac-3, ac-4, ac-6, ac-9.
+spec_ref: "@saved-model-artifact-safety"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-rewrite-exit-model-persistence-spec"
+context: []
+priority: 1
+tags:
+  - persistence
+  - cache
+  - checkpoint
+vcs_refs: []
+created_at: 2026-04-29T05:21:57.996Z
+todos: []

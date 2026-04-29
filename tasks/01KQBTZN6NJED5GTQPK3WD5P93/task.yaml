@@ -1,0 +1,81 @@
+_ulid: 01KQBTZN6NJED5GTQPK3WD5P93
+slugs:
+  - task-checkpoint-save-component-sourcing
+title: Carry checkpoint CLIP and VAE through WIDEN Entry payload
+type: task
+description: |
+  What: Add the concrete graph-visible component contract for checkpoint-style
+  save_model: WIDEN Entry accepts optional CLIP and VAE inputs and stores them
+  in the WIDEN recipe payload for WIDEN Exit to validate and use.
+
+  Why: A WIDEN MODEL alone is not enough to write an SDXL/checkpoint-style
+  artifact. The task agent must not decide how users provide companion
+  components. The approved contract is explicit: users connect the MODEL, CLIP,
+  and VAE outputs from CheckpointLoaderSimple-style workflows to WIDEN Entry.
+
+  Required implementation:
+  - In lib/recipe.py, add an immutable payload type for checkpoint companion
+    components named CheckpointComponents or a similarly clear dataclass with:
+      - clip: object
+      - vae: object
+  - Extend RecipeBase with an optional checkpoint_components field defaulting
+    to None. Existing WIDEN recipes without checkpoint components must remain
+    valid.
+  - In nodes/entry.py, extend WIDENEntryNode.INPUT_TYPES so WIDEN Entry accepts:
+      required:
+        model: MODEL
+      optional:
+        clip: CLIP
+        vae: VAE
+  - In WIDENEntryNode.entry(), store checkpoint_components on the RecipeBase
+    only from those visible optional clip and vae inputs.
+  - Do not source CLIP or VAE from folder_paths, prompt JSON, current Comfy
+    globals, object_info, model filename guessing, or hidden module state.
+  - In nodes/exit.py, add an early validation helper for save_model=True
+    checkpoint-style saves that walks to the RecipeBase and requires both
+    checkpoint_components.clip and checkpoint_components.vae for SDXL
+    checkpoint-style saves.
+  - If CLIP, VAE, or both are missing for a checkpoint-style save, raise a
+    Comfy-visible ValueError before recipe analysis, model_state_dict reads,
+    GPU merge work, cache publication, temp file creation, or artifact writing.
+  - The missing-component error must name the missing requirement with wording
+    equivalent to: checkpoint save_model requires CLIP and VAE components.
+  - The same error must give connection guidance with wording equivalent to:
+    connect CheckpointLoaderSimple MODEL, CLIP, and VAE outputs to WIDEN Entry.
+  - save_model=False must not require CLIP or VAE and must preserve current
+    in-memory patch output behavior.
+  - Do not add a mode dropdown or let the task agent choose any alternate UX.
+
+  Testing:
+  - Unit-test WIDEN Entry accepts optional CLIP and VAE and stores them on
+    RecipeBase.checkpoint_components.
+  - Unit-test WIDEN Entry with no CLIP/VAE still returns a valid WIDEN recipe.
+  - Unit-test save_model=True checkpoint save fails before analyze_recipe,
+    model_state_dict, MaterializationSink, Comfy save calls, or temp file
+    creation when CLIP/VAE are missing.
+  - Unit-test partial component cases: CLIP without VAE and VAE without CLIP.
+  - Unit-test missing-component diagnostics name the missing requirement and
+    include connection guidance.
+  - Unit-test valid MODEL+CLIP+VAE proceeds to the checkpoint artifact writer
+    seam without performing real Comfy checkpoint I/O.
+
+  Covers: @saved-model-artifact-safety ac-missing-components-fail-before-work,
+    ac-missing-component-diagnostic-names-requirement,
+    ac-missing-component-diagnostic-gives-guidance.
+spec_ref: "@saved-model-artifact-safety"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-rewrite-exit-model-persistence-spec"
+context: []
+priority: 1
+tags:
+  - entry-node
+  - exit-node
+  - checkpoint
+  - comfy
+vcs_refs: []
+created_at: 2026-04-29T05:21:57.973Z
+todos: []

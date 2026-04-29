@@ -1,0 +1,61 @@
+_ulid: 01KQBTZN83176W432HWKN1CTV4
+slugs:
+  - task-checkpoint-save-atomic-artifact-writer
+title: Adopt atomic incremental writer for safe artifact publication
+type: task
+description: |
+  What: Adopt or rebuild the prior branch's incremental safetensors writer as
+  a low-level artifact lifecycle primitive for safe temporary writes, aborts,
+  and atomic publication.
+
+  Why: The prior branch has useful file-publication safety work. That safety
+  should be retained as a concrete primitive, but it must not be mistaken for
+  proving checkpoint-style output by itself.
+
+  Required implementation:
+  - Add or rebuild lib/incremental_writer.py from the prior branch as a writer
+    created from a manifest of expected tensor keys, shapes, and dtypes.
+  - The writer may accept tensor writes in any order.
+  - Unknown keys, duplicate keys, wrong shapes, and wrong dtypes must poison or
+    abort the writer so finalize cannot publish a public artifact.
+  - finalize() must succeed only after every manifest key has been written.
+  - Publication must use a temp file in the same directory as the target and
+    atomically replace the final path only after the temp file is complete.
+  - Explicit abort must remove the temp file.
+  - Failed finalize, exceptions during write, and abort must leave no partial
+    public artifact.
+  - If a valid artifact already exists at the final target, a failed later
+    write must leave that previous artifact untouched.
+  - The writer is a lifecycle primitive only. The checkpoint artifact task must
+    still use Comfy-compatible checkpoint save semantics for checkpoint files.
+
+  Testing:
+  - Add or adopt tests/test_incremental_writer.py.
+  - Test random write order round-trip.
+  - Test metadata is preserved.
+  - Test missing key prevents finalize.
+  - Test duplicate key aborts and prevents finalize.
+  - Test unknown key aborts and prevents finalize.
+  - Test wrong shape and wrong dtype abort and remove the temp file.
+  - Test explicit abort removes the temp file.
+  - Test failed write/finalize preserves a pre-existing valid artifact.
+
+  Covers: @saved-model-artifact-safety ac-no-partial-publication,
+    ac-existing-valid-artifact-preserved; @streaming-full-model-materialization
+    ac-incomplete-write-not-reused.
+spec_ref: "@saved-model-artifact-safety"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-artifact-cache-classification"
+context: []
+priority: 1
+tags:
+  - persistence
+  - checkpoint
+  - safety
+vcs_refs: []
+created_at: 2026-04-29T05:21:58.019Z
+todos: []

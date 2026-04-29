@@ -1,0 +1,78 @@
+_ulid: 01KQBTZNB6KR4MXEYGT4PANG25
+slugs:
+  - task-checkpoint-save-live-validation-harness
+title: Add guarded live Comfy checkpoint-save validation harness
+type: task
+description: |
+  What: Add a guarded validation harness that drives real Comfy API workflows
+  for checkpoint-style save_model only when a maintainer explicitly opts in.
+
+  Why: Existing primitive memory harnesses can pass while real Comfy scheduler,
+  checkpoint loader, Dynamic VRAM mode, or KSampler downstream behavior fails.
+  Release evidence must come from real workflow behavior or an explicit
+  documented deferral.
+
+  Required implementation:
+  - The harness must refuse to run unless the operator provides all required
+    opt-in inputs:
+      - explicit opt-in environment variable or flag,
+      - ComfyUI API URL,
+      - source checkpoint/model name or path,
+      - output/report path,
+      - safe resource settings for the run.
+  - Refusal must happen before importing ComfyUI modules, mutating a ComfyUI
+    installation, submitting API prompts, starting processes, or writing large
+    artifacts.
+  - When opted in, query ComfyUI system stats and object_info to record ComfyUI
+    version, active memory-management mode, and actual node class names.
+  - Submit a terminal WIDEN Exit save workflow and classify whether Comfy
+    accepted or rejected it for scheduler/no-output reasons.
+  - Submit a checkpoint-style WIDEN save_model workflow using MODEL, CLIP, and
+    VAE from the source checkpoint path.
+  - Load the saved artifact through the appropriate Comfy checkpoint loader.
+  - Run a bounded downstream workflow equivalent to CheckpointLoaderSimple ->
+    CLIPTextEncode -> EmptyLatentImage -> KSampler -> VAEDecode -> SaveImage.
+    Safe defaults are 256x256, batch_size 1, 1 step, cfg 1.0, euler/normal,
+    and deterministic seed unless the operator overrides them.
+  - Run or simulate a cache-reuse workflow that proves a compatible saved
+    checkpoint artifact is reused without recomputing the WIDEN merge.
+  - Produce report JSON recording: ComfyUI version, memory mode, terminal save
+    scheduling result, saved artifact path, saved artifact classification,
+    checkpoint loader result, downstream image-save result, cache-reuse result,
+    and distinct failure categories for scheduling, save, loader, downstream,
+    cache, and memory-mode failures.
+  - Keep the real Comfy run out of normal automated test execution.
+
+  Testing:
+  - Unit-test harness refusal with missing opt-in flag.
+  - Unit-test refusal with missing API URL, model name/path, or report path.
+  - Unit-test refusal happens before Comfy import or prompt submission.
+  - Unit-test report schema includes all required fields.
+  - Unit-test mocked API classifications for scheduler/no-output rejection,
+    save failure, loader failure, downstream failure, cache-reuse failure, and
+    memory-mode opt-out failure.
+
+  Covers: @live-comfy-saved-output-validation ac-explicit-real-comfy-opt-in,
+    ac-report-identifies-environment, ac-report-records-save-outcome,
+    ac-report-records-loader-downstream-outcome,
+    ac-report-records-cache-reuse-outcome,
+    ac-memory-mode-not-changed-for-success,
+    ac-primitive-tests-do-not-substitute-for-live-validation.
+spec_ref: "@live-comfy-saved-output-validation"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-exit-ui-and-terminal-scheduling"
+  - "@task-checkpoint-save-artifact-format"
+  - "@task-checkpoint-save-returned-model"
+context: []
+priority: 2
+tags:
+  - validation
+  - comfy
+  - memory
+vcs_refs: []
+created_at: 2026-04-29T05:21:58.118Z
+todos: []

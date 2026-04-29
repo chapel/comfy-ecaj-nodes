@@ -1,0 +1,61 @@
+_ulid: 01KQBTZNC4NGZ7R5ZT37Z4GJQQ
+slugs:
+  - task-checkpoint-save-live-validation-manual-run
+title: Manually validate checkpoint-style save_model in live ComfyUI
+type: task
+description: |
+  What: Run the guarded live validation harness against an explicitly approved
+  real ComfyUI environment and record the resulting evidence.
+
+  Why: The final release-relevant behavior depends on Comfy's live scheduler,
+  checkpoint loaders, active memory mode, artifact directories, and bounded
+  downstream KSampler/VAEDecode/SaveImage execution.
+
+  Required manual run contract:
+  - Do not run this task automatically. A human must explicitly authorize the
+    ComfyUI API/service target, model file, output directory, report path, and
+    resource limits.
+  - Run the harness in the selected Comfy memory-management mode without
+    changing or disabling that mode to make the test pass.
+  - Validate terminal WIDEN Exit save workflow acceptance and execution.
+  - Validate checkpoint-style save_model writes an artifact classified as a
+    checkpoint artifact.
+  - Validate the artifact loads through the appropriate Comfy checkpoint loader.
+  - Validate the loaded checkpoint completes the bounded KSampler, VAEDecode,
+    and SaveImage-style workflow.
+  - Validate a compatible cache reuse run avoids recomputing the merge and
+    returns/loads from the saved checkpoint artifact.
+  - Record in task notes: report path, ComfyUI version, memory mode, model name,
+    artifact path, output image path or downstream success evidence, cache
+    reuse evidence, and any failures or explicit deferrals.
+  - If the live run creates large artifacts, list them in task evidence and ask
+    a maintainer before deleting them.
+
+  Testing:
+  - Attach or reference the live validation report produced by the harness.
+  - Run focused unit and integration slices after the live run to confirm no
+    temporary probes or debug instrumentation are required for normal behavior.
+
+  Covers: @checkpoint-loadable-saved-model-output ac-terminal-save-executes,
+    ac-artifact-matches-source-model-kind, ac-generated-workflow-round-trip;
+    @live-comfy-saved-output-validation ac-report-identifies-environment,
+    ac-report-records-save-outcome, ac-report-records-loader-downstream-outcome,
+    ac-report-records-cache-reuse-outcome, ac-memory-mode-not-changed-for-success,
+    ac-primitive-tests-do-not-substitute-for-live-validation.
+spec_ref: "@live-comfy-saved-output-validation"
+plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-live-validation-harness"
+context: []
+priority: 3
+tags:
+  - manual
+  - validation
+  - comfy
+  - memory
+vcs_refs: []
+created_at: 2026-04-29T05:21:58.148Z
+todos: []

@@ -550,7 +550,229 @@ features:
                   - manual
                 created: 2026-04-27T16:11:47.607Z
                 notes: []
+              - _ulid: 01KQBTZN1XT5TTPY66J40A6XHK
+                slugs:
+                  - live-comfy-saved-output-validation
+                title: Live Comfy Saved Output Validation
+                type: requirement
+                description: |
+                  Real ComfyUI validation proves saved model output through the same scheduler,
+                  loader, memory-management mode, and downstream workflow shapes that users run.
+                depends_on: []
+                implements: []
+                relates_to: []
+                tests: []
+                traits: []
+                acceptance_criteria:
+                  - given: |
+                      a validation harness or command can interact with a real ComfyUI
+                      installation, service, model directory, or API.
+                    id: ac-explicit-real-comfy-opt-in
+                    then: |
+                      the real ComfyUI validation does not run unless an operator supplies
+                      explicit opt-in inputs for the target environment.
+                    when: |
+                      normal automated tests, CI, or automated task dispatch run.
+                  - given: |
+                      an operator intentionally runs saved-model validation against a real
+                      ComfyUI environment.
+                    id: ac-report-identifies-environment
+                    then: |
+                      it records the ComfyUI version and active memory-management mode.
+                    when: |
+                      the validation report is produced.
+                  - given: |
+                      an operator intentionally runs saved-model validation against a real
+                      ComfyUI environment.
+                    id: ac-report-records-save-outcome
+                    then: |
+                      it records the queued save workflow shape and saved artifact
+                      classification.
+                    when: |
+                      the validation report is produced.
+                  - given: |
+                      an operator intentionally runs saved-model validation against a real
+                      ComfyUI environment.
+                    id: ac-report-records-loader-downstream-outcome
+                    then: |
+                      it records the loader and downstream workflow results for the saved
+                      artifact.
+                    when: |
+                      the validation report is produced.
+                  - given: |
+                      an operator intentionally runs saved-model validation against a real
+                      ComfyUI environment.
+                    id: ac-report-records-cache-reuse-outcome
+                    then: |
+                      it records the cache-reuse result for the saved artifact.
+                    when: |
+                      the validation report is produced.
+                  - given: |
+                      ComfyUI is running in a supported memory-management mode.
+                    id: ac-memory-mode-not-changed-for-success
+                    then: |
+                      success does not require disabling or changing the active memory mode;
+                      if the save can only succeed after changing the mode, the report records
+                      that as a validation failure for the original mode.
+                    when: |
+                      saved model output is validated in that environment.
+                  - given: |
+                      lower-level tests prove artifact helpers, metadata checks, or mock model
+                      behavior.
+                    id: ac-primitive-tests-do-not-substitute-for-live-validation
+                    then: |
+                      those primitive tests are treated as supporting evidence only; release
+                      compatibility requires a live workflow validation result or an explicit
+                      documented deferral.
+                    when: |
+                      saved model output compatibility is assessed for release.
+                tags: []
+                created: 2026-04-29T05:21:57.821Z
+                notes: []
             created: 2026-04-27T04:04:27.630Z
+            notes: []
+          - _ulid: 01KQBTZMZ95P7Q0H68RCH0H3GA
+            slugs:
+              - checkpoint-loadable-saved-model-output
+            title: Checkpoint-Loadable Saved Model Output
+            type: requirement
+            description: |
+              Saved model output produces artifacts that can be loaded as the same ComfyUI
+              model kind users expect from the source workflow, including checkpoint-style
+              models whose usable workflow requires more than diffusion weights alone.
+            depends_on: []
+            implements: []
+            relates_to: []
+            tests: []
+            traits: []
+            acceptance_criteria:
+              - given: |
+                  A ComfyUI workflow ends at the WIDEN Exit node and the Exit node is
+                  configured to save the merged model.
+                id: ac-terminal-save-executes
+                then: |
+                  ComfyUI treats the Exit node as an executable side-effecting output and
+                  attempts the save instead of rejecting the workflow because it has no
+                  outputs.
+                when: |
+                  the workflow is queued without any downstream consumer of the Exit
+                  node's MODEL output.
+              - given: |
+                  A merge recipe starts from a checkpoint-style source model whose normal
+                  ComfyUI use depends on model, conditioning, and decode components.
+                id: ac-artifact-matches-source-model-kind
+                then: |
+                  the saved artifact is loadable through the appropriate checkpoint-style
+                  ComfyUI loader with the components required for that model kind, rather
+                  than being only a diffusion-weight artifact.
+                when: |
+                  the Exit node saves the merged result for that recipe.
+              - given: |
+                  A saved artifact was produced for a checkpoint-style merge recipe.
+                id: ac-generated-workflow-round-trip
+                then: |
+                  the workflow reaches the image-save output without relying on the
+                  original in-memory WIDEN merge payload.
+                when: |
+                  the artifact is loaded through the appropriate ComfyUI loader and used
+                  in a bounded KSampler, VAEDecode, and SaveImage-style workflow for that
+                  model kind.
+              - given: |
+                  A workflow both saves through the WIDEN Exit node and connects the Exit
+                  node's MODEL output to downstream nodes in the same queued execution.
+                id: ac-downstream-return-remains-usable
+                then: |
+                  downstream nodes receive a usable MODEL for the saved merge result.
+                when: |
+                  the save completes successfully.
+            tags: []
+            created: 2026-04-29T05:21:57.738Z
+            notes: []
+          - _ulid: 01KQBTZN0RD0GJGD7V003M2EV9
+            slugs:
+              - saved-model-artifact-safety
+            title: Saved Model Artifact Safety
+            type: requirement
+            description: |
+              Saved model output publishes and reuses only complete artifacts whose kind,
+              contents, and metadata match the requested saved-model behavior.
+            depends_on: []
+            implements: []
+            relates_to: []
+            tests: []
+            traits: []
+            acceptance_criteria:
+              - given: |
+                  A saved file has the same recipe identity as the current request but is
+                  missing required saved-model metadata.
+                id: ac-missing-metadata-not-reused
+                then: |
+                  the file is not accepted as a cache hit for the current saved-model
+                  behavior.
+                when: |
+                  saved model output checks whether it can reuse that file.
+              - given: |
+                  A saved file has the same recipe identity as the current request but was
+                  written for a different artifact kind.
+                id: ac-wrong-artifact-kind-not-reused
+                then: |
+                  the file is not accepted as a cache hit for the current saved-model
+                  behavior.
+                when: |
+                  saved model output checks whether it can reuse that file.
+              - given: |
+                  A saved file contains only internal diffusion-weight keys for a
+                  checkpoint-style source model.
+                id: ac-internal-format-not-checkpoint-cache
+                then: |
+                  the file is rejected or recomputed with a clear diagnostic rather than
+                  being treated as a usable checkpoint-style artifact.
+                when: |
+                  checkpoint-style saved model output checks whether it can reuse that
+                  file.
+              - given: |
+                  saved model artifact creation fails before every required component has
+                  been written and validated.
+                id: ac-no-partial-publication
+                then: |
+                  no newly incomplete artifact is published as a reusable saved model.
+                when: |
+                  the failed save returns control to ComfyUI.
+              - given: |
+                  a previously valid saved model artifact exists at the requested logical
+                  target.
+                id: ac-existing-valid-artifact-preserved
+                then: |
+                  the previously valid saved model artifact remains safe for later reuse.
+                when: |
+                  a later save to the same logical target fails before publication.
+              - given: |
+                  a checkpoint-style save is requested without the components required to
+                  create a loadable checkpoint-style artifact.
+                id: ac-missing-components-fail-before-work
+                then: |
+                  the workflow fails before expensive merge work or artifact publication
+                  begins.
+                when: |
+                  the Exit node validates the save request.
+              - given: |
+                  a checkpoint-style save is requested without the components required to
+                  create a loadable checkpoint-style artifact.
+                id: ac-missing-component-diagnostic-names-requirement
+                then: |
+                  the error names the missing requirement.
+                when: |
+                  the Exit node reports the validation failure.
+              - given: |
+                  a checkpoint-style save is requested without the components required to
+                  create a loadable checkpoint-style artifact.
+                id: ac-missing-component-diagnostic-gives-guidance
+                then: |
+                  the error explains how the workflow can provide the missing requirement.
+                when: |
+                  the Exit node reports the validation failure.
+            tags: []
+            created: 2026-04-29T05:21:57.784Z
             notes: []
         created: 2026-04-27T04:04:27.562Z
         notes: []

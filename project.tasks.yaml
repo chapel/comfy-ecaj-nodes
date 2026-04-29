@@ -2059,3 +2059,280 @@
   todos_count: 0
   created_at: 2026-04-27T16:11:48.341Z
   automation: manual_only
+- _ulid: 01KQBTZN2XKZHR0DCQWT0D41DR
+  slugs:
+    - task-checkpoint-save-rewrite-full-saved-model-output-spec
+  title: Rewrite full saved model output spec for requested model kind
+  type: task
+  spec_ref: "@full-saved-model-output"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  priority: 1
+  tags:
+    - specs
+    - persistence
+    - checkpoint
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:57.853Z
+- _ulid: 01KQBTZN3P1GAA6ZHJ4WHRBTPD
+  slugs:
+    - task-checkpoint-save-rewrite-exit-model-persistence-spec
+  title: Rewrite Exit model persistence spec for artifact-kind-safe save_model
+  type: task
+  spec_ref: "@exit-model-persistence"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
+  priority: 1
+  tags:
+    - specs
+    - persistence
+    - cache
+    - checkpoint
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:57.878Z
+- _ulid: 01KQBTZN4ERV4CK4S7AEWQ5VYK
+  slugs:
+    - task-checkpoint-save-rewrite-comfy-memory-compatibility-spec
+  title: Rewrite Comfy memory compatibility spec for checkpoint-loaded artifacts
+  type: task
+  spec_ref: "@comfy-memory-manager-compatibility"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
+  priority: 1
+  tags:
+    - specs
+    - comfy
+    - memory
+    - validation
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:57.902Z
+- _ulid: 01KQBTZN55TQMJNKNWTB09MFX7
+  slugs:
+    - task-checkpoint-save-preserve-scoped-existing-specs
+  title: Preserve scoped streaming and manual-validation specs unchanged
+  type: task
+  spec_ref: "@streaming-full-model-materialization"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
+    - "@task-checkpoint-save-rewrite-comfy-memory-compatibility-spec"
+  priority: 1
+  tags:
+    - specs
+    - persistence
+    - validation
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:57.925Z
+- _ulid: 01KQBTZN5WS8K2ATSYJSYZBDM8
+  slugs:
+    - task-checkpoint-save-exit-ui-and-terminal-scheduling
+  title: Preserve save_model-only Exit UX and terminal scheduling
+  type: task
+  spec_ref: "@checkpoint-loadable-saved-model-output"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
+    - "@task-checkpoint-save-rewrite-exit-model-persistence-spec"
+  priority: 1
+  tags:
+    - exit-node
+    - comfy
+    - ux
+    - persistence
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:57.948Z
+- _ulid: 01KQBTZN6NJED5GTQPK3WD5P93
+  slugs:
+    - task-checkpoint-save-component-sourcing
+  title: Carry checkpoint CLIP and VAE through WIDEN Entry payload
+  type: task
+  spec_ref: "@saved-model-artifact-safety"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-rewrite-exit-model-persistence-spec"
+  priority: 1
+  tags:
+    - entry-node
+    - exit-node
+    - checkpoint
+    - comfy
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:57.973Z
+- _ulid: 01KQBTZN7CTJ03G2VS2J4KHAQB
+  slugs:
+    - task-checkpoint-save-artifact-cache-classification
+  title: Implement checkpoint-aware artifact metadata and cache classification
+  type: task
+  spec_ref: "@saved-model-artifact-safety"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-rewrite-exit-model-persistence-spec"
+  priority: 1
+  tags:
+    - persistence
+    - cache
+    - checkpoint
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:57.996Z
+- _ulid: 01KQBTZN83176W432HWKN1CTV4
+  slugs:
+    - task-checkpoint-save-atomic-artifact-writer
+  title: Adopt atomic incremental writer for safe artifact publication
+  type: task
+  spec_ref: "@saved-model-artifact-safety"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-artifact-cache-classification"
+  priority: 1
+  tags:
+    - persistence
+    - checkpoint
+    - safety
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:58.019Z
+- _ulid: 01KQBTZN8XD9E6VCFXJYRPWBHC
+  slugs:
+    - task-checkpoint-save-result-sink-handoff
+  title: Adopt sink-based affected-result handoff for bounded merge memory
+  type: task
+  spec_ref: "@streaming-full-model-materialization"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-atomic-artifact-writer"
+  priority: 1
+  tags:
+    - memory
+    - persistence
+    - streaming
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:58.045Z
+- _ulid: 01KQBTZN9MR5P6F1ECW0G30GEZ
+  slugs:
+    - task-checkpoint-save-artifact-format
+  title: Save SDXL checkpoint artifacts through Comfy checkpoint semantics
+  type: task
+  spec_ref: "@checkpoint-loadable-saved-model-output"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-component-sourcing"
+    - "@task-checkpoint-save-artifact-cache-classification"
+    - "@task-checkpoint-save-atomic-artifact-writer"
+    - "@task-checkpoint-save-result-sink-handoff"
+  priority: 1
+  tags:
+    - persistence
+    - checkpoint
+    - comfy
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:58.068Z
+- _ulid: 01KQBTZNAFWDF3Z70RRYP87JQM
+  slugs:
+    - task-checkpoint-save-returned-model
+  title: Return save_model results without deep-copying Comfy model internals
+  type: task
+  spec_ref: "@checkpoint-loadable-saved-model-output"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-artifact-format"
+  priority: 2
+  tags:
+    - exit-node
+    - comfy
+    - memory
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:58.095Z
+- _ulid: 01KQBTZNB6KR4MXEYGT4PANG25
+  slugs:
+    - task-checkpoint-save-live-validation-harness
+  title: Add guarded live Comfy checkpoint-save validation harness
+  type: task
+  spec_ref: "@live-comfy-saved-output-validation"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-exit-ui-and-terminal-scheduling"
+    - "@task-checkpoint-save-artifact-format"
+    - "@task-checkpoint-save-returned-model"
+  priority: 2
+  tags:
+    - validation
+    - comfy
+    - memory
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:58.118Z
+- _ulid: 01KQBTZNC4NGZ7R5ZT37Z4GJQQ
+  slugs:
+    - task-checkpoint-save-live-validation-manual-run
+  title: Manually validate checkpoint-style save_model in live ComfyUI
+  type: task
+  spec_ref: "@live-comfy-saved-output-validation"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-live-validation-harness"
+  priority: 3
+  tags:
+    - manual
+    - validation
+    - comfy
+    - memory
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:58.148Z
+- _ulid: 01KQBTZNCWM8AP31SWX4FQEYJ7
+  slugs:
+    - task-checkpoint-save-final-spec-status-reconciliation
+  title: Set checkpoint-save spec statuses after live validation
+  type: task
+  spec_ref: "@live-comfy-saved-output-validation"
+  plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-checkpoint-save-live-validation-manual-run"
+  priority: 3
+  tags:
+    - kspec
+    - specs
+    - reconciliation
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-04-29T05:21:58.172Z
