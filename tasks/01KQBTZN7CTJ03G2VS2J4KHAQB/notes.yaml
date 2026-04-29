@@ -31,3 +31,21 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T06:26:07.760Z
+  - _ulid: 01KQBZJ21V3M1C6YQ849FXYMBG
+    content: >-
+      Fix cycle 1: addressed both review blockers.
+
+      1. Cache routing: checkpoint-style recipes (containing RecipeModel nodes) now call
+      check_checkpoint_cache instead of check_full_model_cache via
+      _recipe_has_checkpoint_components() detection.
+
+      2. Metadata writing: build_metadata now receives artifact_kind='checkpoint', base_identity,
+      dependency_fingerprints, and checkpoint_components=True for checkpoint-style saves.
+
+      Added 9 new tests: 6 for _recipe_has_checkpoint_components detection, 3 for checkpoint cache
+      routing and metadata writing in Exit path.
+
+      All 1322 tests pass. kspec validate passes.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T06:41:55.259Z
