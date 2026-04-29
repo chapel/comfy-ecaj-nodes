@@ -785,6 +785,60 @@ class TestExitNodePersistenceInputs:
 
 
 # =============================================================================
+# Terminal save scheduling and save_model-only UX
+# =============================================================================
+
+
+class TestTerminalSaveScheduling:
+    """AC: @checkpoint-loadable-saved-model-output ac-terminal-save-executes
+
+    Given: A ComfyUI workflow ends at the WIDEN Exit node and the Exit node is
+    configured to save the merged model.
+
+    When: the workflow is queued without any downstream consumer of the Exit
+    node's MODEL output.
+
+    Then: ComfyUI treats the Exit node as an executable side-effecting output
+    and attempts the save instead of rejecting the workflow because it has
+    no outputs.
+    """
+
+    # AC: @checkpoint-loadable-saved-model-output ac-terminal-save-executes
+    def test_output_node_is_true(self):
+        """WIDENExitNode.OUTPUT_NODE must be True for ComfyUI terminal scheduling."""
+        assert WIDENExitNode.OUTPUT_NODE is True
+
+    # AC: @checkpoint-loadable-saved-model-output ac-terminal-save-executes
+    def test_return_types_remains_model(self):
+        """RETURN_TYPES must remain exactly ("MODEL",)."""
+        assert WIDENExitNode.RETURN_TYPES == ("MODEL",)
+
+    # AC: @exit-model-persistence ac-1
+    def test_save_model_is_boolean_optional_input(self):
+        """save_model must be a BOOLEAN optional input (not output_mode)."""
+        optional = WIDENExitNode.INPUT_TYPES()["optional"]
+        assert "save_model" in optional
+        assert optional["save_model"][0] == "BOOLEAN"
+
+    # AC: @exit-model-persistence ac-1
+    def test_no_output_mode_in_inputs(self):
+        """output_mode must NOT appear in INPUT_TYPES."""
+        inputs = WIDENExitNode.INPUT_TYPES()
+        for section in ("required", "optional", "hidden"):
+            assert "output_mode" not in inputs.get(section, {}), (
+                f"output_mode found in {section} inputs"
+            )
+
+    # AC: @exit-model-persistence ac-5
+    def test_model_name_validation_on_empty(self):
+        """save_model=True with empty model_name should raise a clear error."""
+        from lib.persistence import validate_model_name
+
+        with pytest.raises(ValueError, match="[Mm]odel.name"):
+            validate_model_name("")
+
+
+# =============================================================================
 # AC-1: save_model=False — default behavior unchanged
 # =============================================================================
 

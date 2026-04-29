@@ -433,7 +433,7 @@ class WIDENExitNode:
     RETURN_NAMES = ("model",)
     FUNCTION = "execute"
     CATEGORY = "ecaj/merge"
-    OUTPUT_NODE = False
+    OUTPUT_NODE = True
 
     @classmethod
     def IS_CHANGED(
