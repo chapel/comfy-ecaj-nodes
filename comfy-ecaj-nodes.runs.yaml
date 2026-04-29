@@ -6874,7 +6874,7 @@ runs:
     completed_at: 2026-04-29T08:24:39.832Z
   - _ulid: 01KQC5SM3W9JZKZDVEFK710SVJ
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -6887,7 +6887,15 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T08:32:25.159Z
-        completed_at: 2026-04-29T08:32:25.159Z
+        completed_at: 2026-04-29T08:33:05.091Z
+        notes: "Identified candidates: detached PR CLI friction and task-review refresh friction were real
+          but already covered by existing inbox items, so duplicate observations were resolved. Kept
+          one distinct success pattern: narrow reviewer lint cleanup followed by targeted + relevant
+          broader verification before approval/merge."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T08:33:05.091Z
+        completed_at: 2026-04-29T08:33:05.091Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T08:30:54.588Z
