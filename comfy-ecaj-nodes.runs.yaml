@@ -7222,7 +7222,7 @@ runs:
     started_at: 2026-04-29T09:57:23.093Z
     completed_at: 2026-04-29T09:58:47.003Z
   - _ulid: 01KQCBWHS7Q9MHY3ENFBKB5GMH
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -7256,7 +7256,12 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-04-29T10:18:58.070Z
-        completed_at: 2026-04-29T10:18:58.070Z
+        completed_at: 2026-04-29T10:19:21.617Z
+        notes: "Captured 2 items: (1) friction 01KQCBZQ — fix cycles accumulate ruff violations when agents
+          skip global lint. (2) success 01KQCBZZ — running ruff project-wide caught extra violations
+          beyond review-flagged files. Skipped 2 already-tracked items (review thread truncation,
+          needs_work submit friction)."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T10:17:21.960Z
+    completed_at: 2026-04-29T10:19:21.617Z
