@@ -1020,6 +1020,19 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T07:07:49.966Z
+  - _ulid: 01KQC1HPYMM24K6TN0C4P9BDMQ
+    type: success
+    content: Cache/persistence reviews benefit from tiny safetensors metadata probes that mutate
+      required header fields independently of tensor payloads. In
+      @task-checkpoint-save-artifact-cache-classification cycle 3, probes with
+      checkpoint_components='false', missing __ecaj_recipe__, and missing
+      artifact-kind/base/dependency fields caught false cache hits after both focused and full
+      pytest passed.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KQC1DF"
+    created_at: 2026-04-29T07:16:41.044Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
