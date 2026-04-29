@@ -32,6 +32,7 @@ from ..lib.executor import (
 )
 from ..lib.persistence import (
     build_metadata,
+    check_checkpoint_cache,
     check_full_model_cache,
     collect_block_configs,
     compute_base_identity,
@@ -408,6 +409,26 @@ def _resolve_checkpoints_path(model_name: str) -> str:
     return os.path.join(dirs[0], model_name)
 
 
+def _recipe_has_checkpoint_components(node: RecipeNode) -> bool:
+    """Check if recipe tree contains RecipeModel nodes (checkpoint companion components).
+
+    A RecipeModel node represents a companion model component (e.g. CLIP, VAE)
+    that is merged into the output. Its presence indicates a checkpoint-style
+    save requiring checkpoint-aware cache validation and metadata.
+    """
+    if isinstance(node, RecipeModel):
+        return True
+    if isinstance(node, RecipeCompose):
+        return any(_recipe_has_checkpoint_components(b) for b in node.branches)
+    if isinstance(node, RecipeMerge):
+        if _recipe_has_checkpoint_components(node.target):
+            return True
+        if node.backbone is not None and _recipe_has_checkpoint_components(node.backbone):
+            return True
+        return _recipe_has_checkpoint_components(node.base)
+    return False
+
+
 class WIDENExitNode:
     """The only node that computes. Runs full batched GPU pipeline."""
 
@@ -662,17 +683,37 @@ class WIDENExitNode:
             k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()
         }
 
+        # Detect checkpoint-style save: recipe contains companion model components
+        is_checkpoint = _recipe_has_checkpoint_components(widen)
+        dependency_fingerprints_json = json.dumps(
+            lora_stats, sort_keys=True, separators=(",", ":"),
+        )
+
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
-        # Full-mode cache: validate artifact metadata, load from artifact, no tensor payload
-        if enable_cache and check_full_model_cache(
-            save_path, recipe_hash, expected_manifest=base_manifest,
-        ):
-            del base_state
-            if ProgressBar is not None:
-                pbar = ProgressBar(1)
-                pbar.update(1)
-            return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+        # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+        # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+        # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+        # Checkpoint-style: validate artifact_kind, base identity, dependency
+        # fingerprints, and checkpoint component classification.
+        # Non-checkpoint: validate full-model metadata and manifest.
+        if enable_cache:
+            if is_checkpoint:
+                cache_hit = check_checkpoint_cache(
+                    save_path, recipe_hash, base_identity,
+                    dependency_fingerprints_json,
+                    expected_manifest=base_manifest,
+                )
+            else:
+                cache_hit = check_full_model_cache(
+                    save_path, recipe_hash, expected_manifest=base_manifest,
+                )
+            if cache_hit:
+                del base_state
+                if ProgressBar is not None:
+                    pbar = ProgressBar(1)
+                    pbar.update(1)
+                return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
 
         # --- GPU pipeline for full saved model mode ---
         analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
@@ -732,9 +773,20 @@ class WIDENExitNode:
             workflow_json = (
                 json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
             )
+            # AC: @exit-model-persistence ac-6
+            # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+            # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+            # Checkpoint-style: include artifact_kind, base_identity,
+            # dependency_fingerprints, and checkpoint component classification.
             metadata = build_metadata(
                 serialized, recipe_hash, sorted(affected_key_set), workflow_json,
                 output_mode="full",
+                artifact_kind="checkpoint" if is_checkpoint else None,
+                base_identity=base_identity if is_checkpoint else None,
+                dependency_fingerprints=(
+                    dependency_fingerprints_json if is_checkpoint else None
+                ),
+                checkpoint_components=is_checkpoint,
             )
 
             # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
@@ -870,7 +922,7 @@ class WIDENExitNode:
 
             # AC: @streaming-full-model-materialization ac-full-cache-avoids-resident-payload
             # Full mode does NOT store affected tensor payload in _incremental_cache.
-            # Cache reuse is artifact-backed (check_full_model_cache).
+            # Cache reuse is artifact-backed (check_checkpoint_cache or check_full_model_cache).
             if not enable_cache:
                 _incremental_cache.clear()
 
