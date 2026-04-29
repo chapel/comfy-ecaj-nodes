@@ -14629,6 +14629,12 @@ reviews:
         payload:
           thread_ulid: 01KQCGAVYV2CGY4JT7F17GC2KZ
         timestamp: 2026-04-29T11:48:38.120Z
+      - _ulid: 01KQCH3T5BC6JJ7QGBE9NSYKE8
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
+        timestamp: 2026-04-29T11:48:42.796Z
     examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
     external_links: []
     lifecycle_state: closed
@@ -14715,6 +14721,15 @@ reviews:
               build_cache_reuse_workflow('source.safetensors') ==
               build_checkpoint_save_workflow('source.safetensors') is True."
             created_at: 2026-04-29T11:35:15.013Z
+          - _ulid: 01KQCH3T23TS9Q5F2TVXCJ483K
+            author: "@claude"
+            body: "Fixed: build_cache_reuse_workflow is no longer identical to build_checkpoint_save_workflow.
+              It now explicitly sets enable_cache=True on WIDENExit. After submission,
+              run_validation calls check_cache_reuse() which polls /history/{prompt_id} for both the
+              first save and the reuse prompt. It checks whether the WIDENExit node was served from
+              ComfyUI's execution cache (via absent outputs or execution_cached status message).
+              Results are recorded in cache_reuse_detail."
+            created_at: 2026-04-29T11:48:42.691Z
         kind: blocker
       - _ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
         anchor:
@@ -14743,5 +14758,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T11:35:38.938Z
     created_at: 2026-04-29T11:31:40.966Z
-    updated_at: 2026-04-29T11:48:38.013Z
+    updated_at: 2026-04-29T11:48:42.691Z
     notes: []
