@@ -12931,6 +12931,12 @@ reviews:
         payload:
           thread_ulid: 01KQCAKF3EPDZFMAYA4NCAYH9M
         timestamp: 2026-04-29T10:15:11.173Z
+      - _ulid: 01KQCBRMCGSKED1N959SPGHWMD
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQCAKFGCEQFDG62HSAMTJZ4V
+        timestamp: 2026-04-29T10:15:13.552Z
     examined_commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
     external_links: []
     lifecycle_state: closed
@@ -13768,6 +13774,8 @@ reviews:
               unused mock_sink variable."
             created_at: 2026-04-29T10:14:53.837Z
         kind: blocker
+        resolved_at: 2026-04-29T10:15:13.445Z
+        resolved_by: "@claude"
       - _ulid: 01KQCANPDW24RDY47HW98Y2T0Q
         anchor:
           type: code
@@ -13810,5 +13818,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T09:56:18.063Z
     created_at: 2026-04-29T09:49:58.202Z
-    updated_at: 2026-04-29T10:15:11.063Z
+    updated_at: 2026-04-29T10:15:13.445Z
     notes: []
