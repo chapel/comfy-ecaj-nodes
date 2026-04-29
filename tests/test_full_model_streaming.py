@@ -23,6 +23,7 @@ from nodes.exit import (
     WIDENExitNode,
     _incremental_cache,
 )
+from tests.conftest import make_checkpoint_components
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -201,7 +202,8 @@ class TestFullModeSucceedsWithoutDictPath:
         full mode still succeeds because it calls
         streaming_evaluation_to_sink instead.
         """
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -263,7 +265,8 @@ class TestFullModeSucceedsWithoutDictPath:
         that the actual sink constructor IS called (showing the streaming
         sink replaces the in-memory sink path).
         """
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -349,7 +352,8 @@ class TestPatchModePreserved:
     # AC: @streaming-full-model-materialization (patch mode unchanged)
     def test_patch_mode_returns_patched_model(self, mock_model_patcher):
         """Patch mode (save_model=False) returns a ModelPatcher with set patches."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -385,7 +389,8 @@ class TestPatchModePreserved:
     # AC: @streaming-full-model-materialization (patch mode cache preserved)
     def test_patch_mode_preserves_incremental_cache(self, mock_model_patcher):
         """Patch mode populates _incremental_cache with tensor payload."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -490,7 +495,8 @@ class TestFullModeEventOrder:
             return c
         mock_patcher.clone = _clone
 
-        base = RecipeBase(model_patcher=mock_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -662,7 +668,8 @@ class TestFailureAbortsMaterialization:
             return c
         mock_patcher.clone = _clone
 
-        base = RecipeBase(model_patcher=mock_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -756,7 +763,8 @@ class TestFailureAbortsMaterialization:
         self, mock_model_patcher, tmp_path
     ):
         """After failure, no full-mode tensor payload remains in _incremental_cache."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -821,7 +829,8 @@ class TestFinalizeFailure:
         """
         import os
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -901,7 +910,8 @@ class TestFullArtifactCacheHit:
     # AC: @full-saved-model-output ac-cache-reuses-artifact
     def test_cache_hit_skips_gpu(self, mock_model_patcher, tmp_path):
         """On full-model cache hit, GPU pipeline is skipped entirely."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1145,7 +1155,8 @@ class TestNoResidentPayload:
         self, mock_model_patcher, tmp_path
     ):
         """After full mode success, _incremental_cache has no tensor payload."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1168,7 +1179,8 @@ class TestNoResidentPayload:
         treated as a patch-mode tensor payload."""
         from nodes.exit import _CacheEntry
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1221,7 +1233,8 @@ class TestNoResidentPayload:
         (not reuse the full-mode artifact as a tensor payload) and populate
         _incremental_cache with its own tensor payload.
         """
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1299,7 +1312,8 @@ class TestEnableCacheFalseEvicts:
         """enable_cache=False in full mode should evict _incremental_cache entries."""
         from nodes.exit import _CacheEntry
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1338,7 +1352,8 @@ class TestNoOpFullMode:
         self, mock_model_patcher, tmp_path
     ):
         """RecipeBase-only recipe in full mode produces a valid full artifact."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         save_path = str(tmp_path / "noop.safetensors")
 
         with (
@@ -1373,7 +1388,8 @@ class TestNoOpFullMode:
     ):
         """Merge recipe that produces no affected diffusion keys still produces
         a full artifact in full mode."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1413,7 +1429,8 @@ class TestComfyMemoryCompatibility:
         import sys
         import types
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1734,7 +1751,8 @@ class TestNoopEnableCacheFalseEvicts:
         pre-populated _incremental_cache entries."""
         from nodes.exit import _CacheEntry
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         keys = list(mock_model_patcher.model_state_dict().keys())
         save_path = str(tmp_path / "noop_nocache.safetensors")
 
@@ -1917,7 +1935,8 @@ class TestNonEcajFileRaisesOnFullModeCache:
     ):
         """Runtime probe: a pre-existing non-safetensors file at the save path
         must cause the full-mode execution to raise, NOT silently overwrite."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 

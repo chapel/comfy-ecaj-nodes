@@ -24,6 +24,7 @@ from lib.recipe import (
     RecipeLoRA,
     RecipeMerge,
 )
+from tests.conftest import make_checkpoint_components
 from lib.recipe_eval import EvalPlan
 from nodes.exit import (
     WIDENExitNode,
@@ -800,7 +801,8 @@ class TestGpuOffloadAfterSave:
 
         keys = list(mock_model_patcher.model_state_dict().keys())
         recipe = RecipeMerge(
-            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                            checkpoint_components=make_checkpoint_components()),
             target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
             backbone=None,
             t_factor=1.0,
@@ -1843,7 +1845,8 @@ class TestBaseStateFreedBeforeSave:
         path uses base_state directly without re-acquiring."""
         keys = list(mock_model_patcher.model_state_dict().keys())
         recipe = RecipeMerge(
-            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                            checkpoint_components=make_checkpoint_components()),
             target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
             backbone=None,
             t_factor=1.0,

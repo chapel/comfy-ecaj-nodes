@@ -7,6 +7,7 @@ import torch
 
 from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 from nodes.exit import WIDENExitNode, _validate_recipe_tree
+from tests.conftest import make_checkpoint_components
 
 # =============================================================================
 # AC-1: Returns ComfyUI MODEL with set patches
@@ -852,7 +853,8 @@ class TestSaveModelCacheHit:
         """Cache hit should skip analyze_recipe and return patched model."""
         from safetensors.torch import save_file
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -911,7 +913,8 @@ class TestSaveModelCacheMiss:
     # AC: @exit-model-persistence ac-2
     def test_saves_after_gpu(self, mock_model_patcher, tmp_path):
         """Cache miss should run GPU pipeline and save result via MaterializationSink."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -962,7 +965,8 @@ class TestSaveModelCacheMiss:
     # AC: @exit-model-persistence ac-4
     def test_overwrites_stale_cache(self, mock_model_patcher, tmp_path):
         """Hash mismatch should overwrite the stale cached file via MaterializationSink."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
+        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
+                          checkpoint_components=make_checkpoint_components())
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
