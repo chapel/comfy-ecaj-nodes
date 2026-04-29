@@ -1206,6 +1206,21 @@ observations:
     resolved: false
     workflow_ref: "@01KQCJHS"
     created_at: 2026-04-29T12:15:04.709Z
+  - _ulid: 01KQCM72NVC86T3VTSZYN4ZRJ8
+    type: success
+    content: "Review checks as executable probes catch behavioral bugs mocks miss: The cycle 4 review of
+      the checkpoint validation harness included a 'loader/downstream distinction probe' that ran a
+      mocked scenario (downstream KSampler failure) and asserted that
+      checkpoint_loader_result.accepted should differ from downstream_result.accepted. This
+      mechanical check caught a real semantic bug that 87 unit tests missed — the unit tests
+      validated individual components but never tested the boundary where loader and downstream
+      outcomes must be distinct within a composite workflow submission. Pattern: for composite
+      operations, add review checks that execute the composed behavior and assert on per-component
+      outcomes."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T12:42:55.547Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
