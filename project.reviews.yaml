@@ -9906,6 +9906,16 @@ reviews:
         runner: github-actions
         created_at: 2026-04-29T05:44:23.904Z
         completed_at: 2026-04-29T05:44:23.904Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "python -m pytest: 1285 passed in 12.11s"
+        name: pytest
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T05:44:24.260Z
+        completed_at: 2026-04-29T05:44:24.260Z
     events:
       - _ulid: 01KQBW5FCFGYGEJ4X1BSR3K0TN
         actor: Jacob Chapel
@@ -9941,6 +9951,13 @@ reviews:
           status: pass
           name: PR CI
         timestamp: 2026-04-29T05:44:24.001Z
+      - _ulid: 01KQBW8R1HR69E79QPWTF08TA8
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest
+        timestamp: 2026-04-29T05:44:24.369Z
     examined_commit: 01d93935ad79a1304bb9427f9027a33c4f7a9b14
     external_links: []
     lifecycle_state: open
@@ -9953,5 +9970,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T05:42:37.200Z
-    updated_at: 2026-04-29T05:44:23.904Z
+    updated_at: 2026-04-29T05:44:24.260Z
     notes: []
