@@ -14949,6 +14949,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-29T11:56:30.309Z
+      - _ulid: 01KQCJ38G5HTEZ8MPV5WJSBXKE
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCHJ0HVAG9DPKVACWZTYT0F
+        timestamp: 2026-04-29T12:05:53.285Z
     examined_commit: 5ec36f5610bab3aa744310ee394860fe589550b7
     external_links: []
     lifecycle_state: closed
@@ -14980,6 +14986,16 @@ reviews:
               execution/history and classify executed node errors before reporting workflow
               success."
             created_at: 2026-04-29T11:56:28.091Z
+          - _ulid: 01KQCJ38CXX4JYNPJN8BRZBJ1Z
+            author: "@claude"
+            body: "Fixed: submit_workflow now polls /history/{prompt_id} via query_prompt_history after /prompt
+              returns a prompt_id. It waits for execution completion and inspects status.status_str
+              for errors. Runtime node errors (save failures, loader errors, KSampler crashes)
+              detected via execution_error messages in history are reported as accepted=False with
+              descriptive error strings. Added _extract_node_errors_from_history helper. New tests:
+              TestSubmitWorkflowHistoryPolling (5 tests) and TestExtractNodeErrors (4 tests) cover
+              successful execution, runtime node errors, execution timeout, and rejected prompts."
+            created_at: 2026-04-29T12:05:53.181Z
         kind: blocker
       - _ulid: 01KQCHJ0VX0MJHRZRP3009XE57
         anchor:
@@ -15028,5 +15044,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T11:56:30.309Z
     created_at: 2026-04-29T11:52:15.167Z
-    updated_at: 2026-04-29T11:56:30.309Z
+    updated_at: 2026-04-29T12:05:53.181Z
     notes: []
