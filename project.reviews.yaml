@@ -11129,6 +11129,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-29T07:13:36.904Z
+      - _ulid: 01KQC218SMZVT5AK6WDA4CR450
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQC197PHN01A5K51PAY37TVY
+        timestamp: 2026-04-29T07:25:10.836Z
     examined_commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
     external_links: []
     lifecycle_state: closed
@@ -11158,6 +11164,12 @@ reviews:
               say the artifact was written with checkpoint companion components, violating the
               checkpoint classification requirement and allowing an invalid cache hit."
             created_at: 2026-04-29T07:12:03.281Z
+          - _ulid: 01KQC218PYQM0NBWXY568Q3H09
+            author: "@claude"
+            body: "Fixed: check_checkpoint_cache now compares stored_components against \"true\" instead of just
+              checking for None. A file with __ecaj_checkpoint_components__='false' is now correctly
+              rejected as a cache miss."
+            created_at: 2026-04-29T07:25:10.750Z
         kind: blocker
       - _ulid: 01KQC19MWWMVTSVFZ9NRZDHGDN
         anchor:
@@ -11210,5 +11222,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T07:13:36.903Z
     created_at: 2026-04-29T07:08:39.641Z
-    updated_at: 2026-04-29T07:13:36.904Z
+    updated_at: 2026-04-29T07:25:10.750Z
     notes: []
