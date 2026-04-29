@@ -7179,7 +7179,7 @@ runs:
     completed_at: 2026-04-29T09:49:18.937Z
   - _ulid: 01KQCAQZ0NRBN9XYZ2VJNQ9A5P
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -7193,7 +7193,19 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T09:58:07.529Z
-        completed_at: 2026-04-29T09:58:07.529Z
+        completed_at: 2026-04-29T09:58:26.661Z
+        notes: "High-confidence items: (1) Ruff gate failures remained after pytest-only worker
+          verification; already covered by observation @01KQ8582 and inbox @01KQC334. (2) Tests that
+          patch out validation can make unreachable production paths look covered; this exact
+          checkpoint diffusion-save issue is already tracked by inbox @01KQC8GG, and the broader
+          mock false-confidence pattern is covered by observation @01KH6Y61. (3) Small runtime
+          review probes were effective for confirming the unreachable path; already covered by
+          review-probe success observations @01KQ80PS and @01KQ815T. No untracked high-confidence
+          item identified."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T09:58:26.661Z
+        completed_at: 2026-04-29T09:58:26.661Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T09:57:23.093Z
