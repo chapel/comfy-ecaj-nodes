@@ -6914,7 +6914,7 @@ runs:
     completed_at: 2026-04-29T08:33:24.855Z
   - _ulid: 01KQC6K3SCZM4TSME4CJ4Z7XQG
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -6926,7 +6926,37 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T08:45:04.848Z
-        completed_at: 2026-04-29T08:45:04.848Z
+        completed_at: 2026-04-29T08:45:31.039Z
+        notes: >-
+          High-confidence observations:
+
+
+          SUCCESS: Clean task decomposition in the checkpoint-save reconciliation plan. Each
+          dependency task delivered exactly what this task needed — CheckpointComponents on
+          RecipeBase, checkpoint-aware cache classification, atomic writer, and sink-based handoff.
+          The checkpoint artifact format task could focus purely on the Comfy save integration
+          without touching infrastructure.
+
+
+          FRICTION: When checkpoint-style tests needed to mock comfy.sd.save_checkpoint, the test
+          conftest only stubbed comfy, comfy.utils, and comfy.model_management. The missing comfy.sd
+          stub caused 6 test failures before being added. Each new ComfyUI import used in production
+          code requires a corresponding stub in conftest.py — this is a recurring pattern where test
+          infrastructure lags behind new ComfyUI API usage. ALREADY TRACKED: Observation @01KH6Y61
+          covers 'unit tests with mocks can validate the wrong behavior' which is related but not
+          the same pattern. The conftest stub gap is a separate issue.
+
+
+          FRICTION: Existing checkpoint cache routing tests in test_exit_node.py were tightly
+          coupled to MaterializationSink mocking. When the checkpoint path switched to
+          chunked_evaluation + install_merged_patches + save_comfy_checkpoint, 3 existing tests
+          broke because they mocked streaming_evaluation_to_sink and MaterializationSink instead of
+          the new code path. Tests that mock internal implementation details break when the
+          implementation changes even though behavior is preserved.
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T08:45:31.039Z
+        completed_at: 2026-04-29T08:45:31.039Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T08:44:49.836Z
