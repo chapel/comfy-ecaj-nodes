@@ -1033,6 +1033,18 @@ observations:
     resolved: false
     workflow_ref: "@01KQC1DF"
     created_at: 2026-04-29T07:16:41.044Z
+  - _ulid: 01KQC4EZNT3GR3RF448N4FAMHA
+    type: friction
+    content: Worktree guard hook blocks branch-sync operations (e.g. fetch+update) in dispatch
+      worktrees. The task-work workflow instructs agents to sync onto the integration target before
+      starting work, but the kspec-worktree-guard.sh hook pattern-matches and blocks these commands.
+      Dispatch workers must skip this step — which was safe in this session since the branch was
+      current — but creates a gap where a stale branch could start work without syncing. Tension
+      between workflow instruction (step 4a) and hook protection.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-04-29T08:07:37.402Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
