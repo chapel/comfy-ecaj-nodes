@@ -1,1 +1,52 @@
-notes: []
+notes:
+  - _ulid: 01KQBX8ZMBXPY0T6TKZJK6VDEH
+    content: >-
+      Approach: 
+
+      1. Add frozen CheckpointComponents dataclass to lib/recipe.py (clip, vae fields).
+
+      2. Add optional checkpoint_components: object = None field to RecipeBase.
+
+      3. Extend WIDENEntryNode.INPUT_TYPES with optional CLIP/VAE inputs.
+
+      4. In WIDENEntryNode.entry(), construct CheckpointComponents from provided clip/vae kwargs and
+      store on RecipeBase.
+
+      5. Add validate_checkpoint_components() helper in nodes/exit.py that walks to RecipeBase and
+      checks checkpoint_components for save_model=True.
+
+      6. Call validation early in execute() before analyze_recipe, model_state_dict reads, or any
+      GPU work.
+
+
+      Edge cases:
+
+      - CLIP only, no VAE → fail with diagnostic
+
+      - VAE only, no CLIP → fail with diagnostic
+
+      - Neither provided → fail with diagnostic
+
+      - save_model=False → no validation, existing behavior preserved
+
+      - RecipeBase at root (no-op recipe) with save_model=True → also validate
+
+
+      Test plan: 6 ACs mapped to tests:
+
+      - Entry accepts optional CLIP/VAE, stores on RecipeBase.checkpoint_components
+
+      - Entry without CLIP/VAE → valid recipe, checkpoint_components is None
+
+      - save_model=True missing both → ValueError before analyze_recipe
+
+      - Partial: CLIP without VAE, VAE without CLIP → ValueError
+
+      - Diagnostics name missing requirement
+
+      - Diagnostics give connection guidance
+
+      - Valid MODEL+CLIP+VAE proceeds to checkpoint artifact writer seam
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T06:02:00.715Z
