@@ -10748,3 +10748,29 @@ reviews:
     created_at: 2026-04-29T06:23:32.674Z
     updated_at: 2026-04-29T06:41:43.563Z
     notes: []
+  - _ulid: 01KQBZR5QNG24SVHXB5HNMBG8N
+    slugs: []
+    title: Review checkpoint-aware artifact metadata and cache classification cycle 2
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQBZR5QNGDCCF75BXJJAWKAS
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-29T06:45:15.637Z
+    examined_commit: 58ee1cd21f036143cf551f1150523d0ed4e418c6
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQBTZN7CTJ03G2VS2J4KHAQB"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-29T06:45:15.637Z
+    updated_at: null
+    notes: []
