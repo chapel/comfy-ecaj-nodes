@@ -12059,6 +12059,16 @@ reviews:
         runner: pytest
         created_at: 2026-04-29T08:10:10.268Z
         completed_at: 2026-04-29T08:10:10.268Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "tests/test_incremental_writer.py: 22 passed in 0.24s"
+        name: pytest incremental writer
+        required: true
+        runner: pytest
+        created_at: 2026-04-29T08:10:16.517Z
+        completed_at: 2026-04-29T08:10:16.517Z
     events:
       - _ulid: 01KQC4HF923F9XS1G2M983PWJ4
         actor: Jacob Chapel
@@ -12080,6 +12090,13 @@ reviews:
           status: pass
           name: pytest full suite
         timestamp: 2026-04-29T08:10:10.369Z
+      - _ulid: 01KQC4KV56YARVV3A89N9DWE6D
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest incremental writer
+        timestamp: 2026-04-29T08:10:16.614Z
     examined_commit: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
     external_links: []
     lifecycle_state: open
@@ -12092,5 +12109,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T08:08:58.914Z
-    updated_at: 2026-04-29T08:10:10.268Z
+    updated_at: 2026-04-29T08:10:16.517Z
     notes: []
