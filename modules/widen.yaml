@@ -542,6 +542,9 @@ features:
                 description: |
                   Real ComfyUI validation proves saved model output through the same scheduler,
                   loader, memory-management mode, and downstream workflow shapes that users run.
+                status:
+                  maturity: draft
+                  implementation: in_progress
                 depends_on: []
                 implements: []
                 relates_to: []
