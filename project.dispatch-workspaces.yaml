@@ -901,12 +901,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-29T05:31:08.241Z
+      updated_at: 2026-04-29T05:31:10.570Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T05:31:08.241Z
+      updated_at: 2026-04-29T05:31:10.570Z
     integration:
       status: pending
       detail: null
@@ -914,24 +914,29 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 51fbb8659c850c20e7f260ad1dde71794fb31422
-      updated_at: 2026-04-29T05:31:08.241Z
-    lifecycle_state: ready
+      updated_at: 2026-04-29T05:31:10.570Z
+    lifecycle_state: integrating
     resolved_base_branch: dev
     task_ref: "@01KQBTZN2XKZHR0DCQWT0D41DR"
     task_slug: task-checkpoint-save-rewrite-full-saved-model-output-spec
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T05:25:26.526Z
-      last_reconciled_at: 2026-04-29T05:31:08.241Z
+      last_reconciled_at: 2026-04-29T05:31:10.570Z
       created_at: 2026-04-29T05:25:25.101Z
-      updated_at: 2026-04-29T05:31:08.241Z
+      updated_at: 2026-04-29T05:31:10.570Z
     workspace_id: dispatch-workspace-01KQBTZN2XKZHR0DCQWT0D41DR
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 0542dc722a032a2f29e4a75e4c0dc45b5efbe52b
+        last_seen_at: 2026-04-29T05:31:10.570Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-rewrite-full-saved-model-output-spec-01kqbtzn-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-checkpoint-save-rewrite-full-saved-model-output-spec/01kqbtzn
-        head: 51fbb8659c850c20e7f260ad1dde71794fb31422
-        last_seen_at: 2026-04-29T05:25:25.101Z
+        head: 0542dc722a032a2f29e4a75e4c0dc45b5efbe52b
+        last_seen_at: 2026-04-29T05:31:10.570Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-rewrite-full-saved-model-output-spec-01kqbtzn
