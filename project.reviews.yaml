@@ -12937,6 +12937,12 @@ reviews:
         payload:
           thread_ulid: 01KQCAKFGCEQFDG62HSAMTJZ4V
         timestamp: 2026-04-29T10:15:13.552Z
+      - _ulid: 01KQCBRPZ3RR4V290WN97X5ND1
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQCANPDW24RDY47HW98Y2T0Q
+        timestamp: 2026-04-29T10:15:16.195Z
     examined_commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
     external_links: []
     lifecycle_state: closed
@@ -13809,6 +13815,8 @@ reviews:
               testing the missing-components AC."
             created_at: 2026-04-29T10:15:02.900Z
         kind: blocker
+        resolved_at: 2026-04-29T10:15:16.083Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -13818,5 +13826,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T09:56:18.063Z
     created_at: 2026-04-29T09:49:58.202Z
-    updated_at: 2026-04-29T10:15:13.445Z
+    updated_at: 2026-04-29T10:15:16.083Z
     notes: []
