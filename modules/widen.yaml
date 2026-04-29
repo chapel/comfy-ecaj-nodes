@@ -340,14 +340,12 @@ features:
             id: ac-cache-reuses-artifact
             then: The existing artifact is reused without recomputing the merged weights.
             when: The Exit node executes with save_model enabled for that same saved model kind.
-          - given: |-
-              A valid full saved model workflow selects a recipe that does not change any
-              diffusion model weights.
+          - given: A valid full saved model workflow selects a recipe that does not change any diffusion model
+              weights.
             id: ac-no-op-produces-full-artifact
-            then: |-
-              downstream nodes receive a MODEL loaded from a complete saved model artifact
-              for the selected recipe.
-            when: the Exit node produces full saved model output for that recipe.
+            then: Downstream nodes receive a MODEL backed by a complete saved model artifact for the selected
+              recipe and requested saved model kind.
+            when: The Exit node produces full saved model output for that recipe.
           - given: A saved full model artifact matches the current recipe identity.
             id: ac-cache-reuse-is-artifact-backed
             then: |-
