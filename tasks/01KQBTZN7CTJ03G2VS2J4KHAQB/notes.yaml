@@ -54,3 +54,24 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-04-29T06:49:14.546Z
+  - _ulid: 01KQC0VEQS0KG802YK7QFVX41H
+    content: >-
+      Fix cycle 2: addressed both review blockers.
+
+      1. Classification: _recipe_has_checkpoint_components now checks source_dir=="checkpoints" —
+      RecipeModel(source_dir="diffusion_models") from diffusion model input is no longer
+      misclassified as checkpoint-style.
+
+      2. Cache validation: check_checkpoint_cache no longer receives expected_manifest.
+      base_manifest only reflects base model state dict keys and may not include companion component
+      keys. Checkpoint cache relies on metadata fields (recipe hash, artifact kind, base identity,
+      dependency fingerprints, internal-only check) instead.
+
+      Added 5 new tests covering: diffusion-model RecipeModel not detected as checkpoint,
+      diffusion-model in Compose not detected, mixed diffusion+checkpoint detected, diffusion-model
+      routing to check_full_model_cache, checkpoint cache called without manifest.
+
+      All 1327 tests pass. kspec validate passes.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T07:04:31.737Z
