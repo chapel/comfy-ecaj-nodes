@@ -6478,9 +6478,31 @@ runs:
     completed_at: 2026-04-29T07:17:00.538Z
   - _ulid: 01KQC23NQH63M87AR7M1VNSBPM
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T07:26:29.617Z
+        completed_at: 2026-04-29T07:27:01.133Z
+        notes: >-
+          Step 1 - What worked well:
+
+          1. Fix cycle was efficient — all 3 review blockers were identified, understood, and fixed
+          in a single pass.
+
+          2. The review threads had very specific, reproducible probe descriptions which made
+          understanding exactly what to fix straightforward.
+
+          3. Backward-compatible approach to check_full_model_cache (keyword-only params with None
+          defaults) meant minimal test churn.
+
+          4. Existing test patterns in TestCheckCheckpointCache made it easy to add new tests
+          following the same helper pattern.
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T07:27:01.133Z
+        completed_at: 2026-04-29T07:27:01.133Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:26:29.617Z
