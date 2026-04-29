@@ -1184,6 +1184,17 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-04-29T11:38:26.234Z
+  - _ulid: 01KQCHPD8Q1P2G7WAHDZM9MMNG
+    type: friction
+    content: Live ComfyUI API validation harnesses need to distinguish prompt queue acceptance from
+      completed workflow execution. In this checkpoint-save review, /prompt returning prompt_id was
+      treated as save/load/downstream success without polling /history for runtime node errors,
+      which can make guarded live validation reports falsely pass.
+    author: codex
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KQCHM1"
+    created_at: 2026-04-29T11:58:52.184Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
