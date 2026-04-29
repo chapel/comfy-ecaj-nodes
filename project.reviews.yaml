@@ -12393,6 +12393,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQC70EHE76VWHQ03G7926VH3
         timestamp: 2026-04-29T08:52:06.928Z
+      - _ulid: 01KQC70S80714P7TNFYZ7WA4ZQ
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQC70S4YBZ3X6DM7MGHDRSBB
+        timestamp: 2026-04-29T08:52:17.793Z
     examined_commit: bddfbc71a07578a396071075ca5ed286c5b24b71
     external_links: []
     lifecycle_state: open
@@ -12426,7 +12433,31 @@ reviews:
               task requirement not to publish internal-format artifacts for checkpoint-style saves."
             created_at: 2026-04-29T08:52:06.830Z
         kind: blocker
+      - _ulid: 01KQC70S4YBZ3X6DM7MGHDRSBB
+        anchor:
+          type: code
+          commit: bddfbc71a07578a396071075ca5ed286c5b24b71
+          line_end: 851
+          line_start: 846
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQC70S4YJSHF5RAE648749K0
+            author: Jacob Chapel
+            body: "MUST-FIX: valid checkpoint cache hits return the wrong MODEL. On a checkpoint cache hit this
+              path calls _load_model_from_artifact, but that loader only updates exact
+              diffusion_model.* keys (or strips only the bare diffusion_model. prefix). Comfy
+              checkpoint artifacts store merged diffusion under model.diffusion_model.* along with
+              conditioner.* and first_stage_model.* keys, so the loader ignores the saved merged
+              weights and returns a clone with the original base weights. I confirmed this with a
+              safetensors containing model.diffusion_model.*, conditioner.*, and
+              first_stage_model.*: the returned model_state_dict stayed identical to the original.
+              This breaks cache reuse for checkpoint saves and violates @exit-model-persistence
+              ac-3/ac-8 and @checkpoint-loadable-saved-model-output
+              ac-downstream-return-remains-usable."
+            created_at: 2026-04-29T08:52:17.694Z
+        kind: blocker
     verdicts: []
     created_at: 2026-04-29T08:47:01.592Z
-    updated_at: 2026-04-29T08:52:06.830Z
+    updated_at: 2026-04-29T08:52:17.694Z
     notes: []
