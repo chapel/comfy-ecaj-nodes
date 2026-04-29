@@ -1058,7 +1058,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-29T05:54:23.864Z
+      updated_at: 2026-04-29T05:57:29.908Z
     integration:
       status: merged
       detail: integration:merged
@@ -1067,25 +1067,20 @@ workspaces:
       target_branch: dev
       target_commit: 8ecc1dc574ad11b14c25b04f37f2d8771e6b3655
       updated_at: 2026-04-29T05:54:23.864Z
-    lifecycle_state: cleanup_blocked
+    lifecycle_state: closing
     resolved_base_branch: dev
     task_ref: "@01KQBTZN4ERV4CK4S7AEWQ5VYK"
     task_slug: task-checkpoint-save-rewrite-comfy-memory-compatibility-spec
     timestamps:
       closed_at: null
       last_active_at: 2026-04-29T05:49:28.252Z
-      last_reconciled_at: 2026-04-29T05:57:29.612Z
+      last_reconciled_at: 2026-04-29T05:57:29.908Z
       created_at: 2026-04-29T05:42:02.126Z
-      updated_at: 2026-04-29T05:57:29.612Z
+      updated_at: 2026-04-29T05:57:29.908Z
     workspace_id: dispatch-workspace-01KQBTZN4ERV4CK4S7AEWQ5VYK
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer:
-        branch_mode: detached
-        branch_ref: null
-        head: 26ba19e9cfd73da35baf5151989a28eb18931d2c
-        last_seen_at: 2026-04-29T05:49:27.146Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-rewrite-comfy-memory-compatibility-spec-01kqbtzn-review
+      reviewer: null
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-checkpoint-save-rewrite-comfy-memory-compatibility-spec/01kqbtzn
