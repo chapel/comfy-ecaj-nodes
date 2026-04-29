@@ -6672,7 +6672,7 @@ runs:
     started_at: 2026-04-29T07:48:30.387Z
     completed_at: 2026-04-29T07:49:42.733Z
   - _ulid: 01KQC3XXDFXJGGXCY3GYP0FJ2S
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -6699,10 +6699,13 @@ runs:
         notes: "Decision: skip captures. Every concrete candidate matched existing tracking: 01KQ6WJX for
           shell quoting in review comments, 01KQ80PS/01KQ815T for runtime-probe review evidence, and
           inbox 01KQC334 for ruff/local lint coverage. No vague or speculative items captured."
-      - status: completed
+      - status: skipped
         step_index: 3
         started_at: 2026-04-29T07:59:34.565Z
-        completed_at: 2026-04-29T07:59:34.565Z
+        completed_at: 2026-04-29T07:59:41.753Z
+        notes: "No capture performed: no unique high-confidence items passed evaluation after search.
+          Existing tracking already covers the session patterns."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T07:58:18.031Z
+    completed_at: 2026-04-29T07:59:41.753Z
