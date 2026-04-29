@@ -12682,6 +12682,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-29T09:30:43.356Z
+      - _ulid: 01KQCA59T04Q51KEDJX55FQQT2
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQC9233WRT128TE3KF8H19JP
+        timestamp: 2026-04-29T09:47:11.552Z
     examined_commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
     external_links: []
     lifecycle_state: closed
@@ -12713,6 +12719,17 @@ reviews:
               task requirements to preserve refusal to overwrite non-ecaj files and to publish the
               final target only after the temp artifact is classified and safe to reuse."
             created_at: 2026-04-29T09:27:57.821Z
+          - _ulid: 01KQCA59Q4409CP1MESBFTGW4P
+            author: "@claude"
+            body: "Fixed: Added _guard_non_ecaj_overwrite() that runs unconditionally before any write in
+              save_comfy_checkpoint — checks safetensors header for __ecaj_version__ and raises
+              ValueError if missing, same pattern as check_checkpoint_cache/check_full_model_cache.
+              Added _classify_temp_artifact() that verifies ecaj metadata and artifact_kind on the
+              temp file after comfy.sd.save_checkpoint writes it, before the atomic os.replace. Both
+              guards fire regardless of enable_cache. Added test_refuses_overwrite_non_ecaj_file,
+              test_classification_failure_does_not_publish, and
+              test_wrong_artifact_kind_not_published."
+            created_at: 2026-04-29T09:47:11.460Z
         kind: blocker
       - _ulid: 01KQC933CVXWNSZ658EFER9WWV
         anchor:
@@ -12745,5 +12762,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T09:30:43.356Z
     created_at: 2026-04-29T09:19:15.423Z
-    updated_at: 2026-04-29T09:30:43.356Z
+    updated_at: 2026-04-29T09:47:11.460Z
     notes: []
