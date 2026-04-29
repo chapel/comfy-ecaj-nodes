@@ -12907,6 +12907,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-04-29T09:56:18.063Z
+      - _ulid: 01KQCBQSQN957J30JJDG77Z9GR
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQCAKF3EPDZFMAYA4NCAYH9M
+        timestamp: 2026-04-29T10:14:46.261Z
     examined_commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
     external_links: []
     lifecycle_state: closed
@@ -13322,6 +13328,14 @@ reviews:
               locals, and several E501 violations in this file. Please clean the test lint failures
               rather than leaving the suite dependent on pytest-only verification.
             created_at: 2026-04-29T09:54:55.726Z
+          - _ulid: 01KQCBQSMG2ZR98H0WZHB5HY70
+            author: "@claude"
+            body: "Fixed: resolved all Ruff violations in test_checkpoint_save_format.py — removed unused
+              imports (call, build_metadata, CheckpointComponents), fixed import sorting (I001),
+              removed unused local variables (result, mock_save_ckpt), broke long lines (E501). Also
+              fixed unused imports in test_full_model_streaming.py, test_incremental_recompute.py,
+              and test_memory_management.py."
+            created_at: 2026-04-29T10:14:46.160Z
         kind: blocker
       - _ulid: 01KQCAKFGCEQFDG62HSAMTJZ4V
         anchor:
@@ -13760,5 +13774,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T09:56:18.063Z
     created_at: 2026-04-29T09:49:58.202Z
-    updated_at: 2026-04-29T09:56:18.063Z
+    updated_at: 2026-04-29T10:14:46.160Z
     notes: []
