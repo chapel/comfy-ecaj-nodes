@@ -13953,6 +13953,12 @@ reviews:
         payload:
           thread_ulid: 01KQCC7P9ZBMHRCNKQ1F0G1451
         timestamp: 2026-04-29T10:33:03.376Z
+      - _ulid: 01KQCCSEJJEXT7EE9JYRT9547Q
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQCC7P9ZBMHRCNKQ1F0G1451
+        timestamp: 2026-04-29T10:33:08.946Z
     examined_commit: 369c96affe4e9809134217d949df55abbdaae28e
     external_links: []
     lifecycle_state: closed
@@ -14006,6 +14012,8 @@ reviews:
               raised with CLIP/VAE diagnostic, (2) analyze_recipe is never called."
             created_at: 2026-04-29T10:33:03.252Z
         kind: blocker
+        resolved_at: 2026-04-29T10:33:08.835Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -14015,5 +14023,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T10:24:21.366Z
     created_at: 2026-04-29T10:20:18.962Z
-    updated_at: 2026-04-29T10:33:03.252Z
+    updated_at: 2026-04-29T10:33:08.835Z
     notes: []
