@@ -14967,6 +14967,12 @@ reviews:
         payload:
           thread_ulid: 01KQCHJ146JB76HVNWRX0F5HD8
         timestamp: 2026-04-29T12:06:01.896Z
+      - _ulid: 01KQCJ3QGZVH1W55Z31HQZMGC7
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQCHJ0HVAG9DPKVACWZTYT0F
+        timestamp: 2026-04-29T12:06:08.671Z
     examined_commit: 5ec36f5610bab3aa744310ee394860fe589550b7
     external_links: []
     lifecycle_state: closed
@@ -15009,6 +15015,8 @@ reviews:
               successful execution, runtime node errors, execution timeout, and rejected prompts."
             created_at: 2026-04-29T12:05:53.181Z
         kind: blocker
+        resolved_at: 2026-04-29T12:06:08.556Z
+        resolved_by: "@claude"
       - _ulid: 01KQCHJ0VX0MJHRZRP3009XE57
         anchor:
           type: code
@@ -15076,5 +15084,5 @@ reviews:
         role: reviewer
         created_at: 2026-04-29T11:56:30.309Z
     created_at: 2026-04-29T11:52:15.167Z
-    updated_at: 2026-04-29T12:06:01.767Z
+    updated_at: 2026-04-29T12:06:08.556Z
     notes: []
