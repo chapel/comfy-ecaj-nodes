@@ -61,7 +61,7 @@ description: |
 spec_ref: "@live-comfy-saved-output-validation"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-exit-ui-and-terminal-scheduling"
@@ -78,8 +78,8 @@ review_ref: "@01KQCK0VVT62XZT93577ND2J2W"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-checkpoint-save-live-validation-harness/01kqbtzn
-  captured_at: 2026-04-29T12:20:01.879Z
-  commit: 099b309999b053bbad95f13eb7badb1a1b6463ba
+  captured_at: 2026-04-29T12:40:27.736Z
+  commit: 37c7029f0288d8d6438a6d44a9dac519e9e50d3d
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-live-validation-harness/01kqbtzn
@@ -326,8 +326,35 @@ history:
         previous: 2026-04-29T12:16:19.179Z
     command: task-start
     timestamp: 2026-04-29T12:40:23.236Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-live-validation-harness/01kqbtzn
+          captured_at: 2026-04-29T12:40:27.736Z
+          commit: 37c7029f0288d8d6438a6d44a9dac519e9e50d3d
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-live-validation-harness/01kqbtzn
+        previous:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-live-validation-harness/01kqbtzn
+          captured_at: 2026-04-29T12:20:01.879Z
+          commit: 099b309999b053bbad95f13eb7badb1a1b6463ba
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-checkpoint-save-live-validation-harness/01kqbtzn
+      submitted_at:
+        new: 2026-04-29T12:40:27.747Z
+        previous: 2026-04-29T12:20:01.889Z
+    command: task-submit
+    timestamp: 2026-04-29T12:40:27.747Z
 created_at: 2026-04-29T05:21:58.118Z
 started_at: 2026-04-29T12:40:23.235Z
-submitted_at: 2026-04-29T12:20:01.889Z
+submitted_at: 2026-04-29T12:40:27.747Z
 todos: []
 automation: eligible
