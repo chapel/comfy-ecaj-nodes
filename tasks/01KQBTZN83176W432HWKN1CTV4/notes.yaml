@@ -1,1 +1,23 @@
-notes: []
+notes:
+  - _ulid: 01KQC327ZQA09Y0R4DAG6EGJJY
+    content: >-
+      Approach: Creating lib/incremental_writer.py as a standalone atomic incremental safetensors
+      writer primitive. Reuses _DTYPE_MAP and _tensor_bytes from streaming_save.py. Key design:
+      constructor takes manifest + save_path + optional metadata. Validation errors (unknown key,
+      duplicate key, wrong shape, wrong dtype) poison the writer — poisoned writer auto-aborts on
+      finalize, cannot publish. Temp file lives in same dir as target, atomically replaces on
+      finalize. Abort removes temp file. Poisoned/failed writes never touch an existing valid
+      artifact at the target path.
+
+
+      Edge cases: poison on unknown key, poison on duplicate key, poison on wrong shape, poison on
+      wrong dtype, finalize with missing keys, abort after partial writes, finalize after abort,
+      write after finalize, pre-existing valid artifact preserved on failure.
+
+
+      Test plan: 9 test cases matching task testing requirements, annotated with AC refs for
+      @saved-model-artifact-safety ac-no-partial-publication, ac-existing-valid-artifact-preserved
+      and @streaming-full-model-materialization ac-incomplete-write-not-reused.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T07:43:11.352Z
