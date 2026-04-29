@@ -48,7 +48,7 @@ description: |
 spec_ref: "@streaming-full-model-materialization"
 plan_ref: "@plan-checkpoint-save-reconciliation-plan-2"
 origin: derived
-status: pending
+status: in_progress
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-rewrite-full-saved-model-output-spec"
@@ -60,6 +60,7 @@ tags:
   - persistence
   - validation
 vcs_refs: []
+session_id: 01KQBYBF1S45GQYG8KHJFP8DWZ
 history:
   - author: Jacob Chapel
     changes:
@@ -68,6 +69,20 @@ history:
         previous: null
     command: task-set
     timestamp: 2026-04-29T05:25:23.795Z
+  - author: "@claude"
+    changes:
+      status:
+        new: in_progress
+        previous: pending
+      session_id:
+        new: 01KQBYBF1S45GQYG8KHJFP8DWZ
+        previous: null
+      started_at:
+        new: 2026-04-29T06:21:14.318Z
+        previous: null
+    command: task-start
+    timestamp: 2026-04-29T06:21:14.319Z
 created_at: 2026-04-29T05:21:57.925Z
+started_at: 2026-04-29T06:21:14.318Z
 todos: []
 automation: eligible
