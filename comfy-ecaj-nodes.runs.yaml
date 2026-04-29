@@ -7718,9 +7718,21 @@ runs:
     completed_at: 2026-04-29T11:59:12.236Z
   - _ulid: 01KQCJ6P75AY320ENCWTJ2PHY2
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-04-29T12:07:45.637Z
+        completed_at: 2026-04-29T12:08:41.695Z
+        notes: "Session: fix cycle 2 for checkpoint validation harness. Worked well: review findings were
+          specific with evidence, fix cycle workflow was smooth, mock levels were appropriate.
+          Friction: review thread bodies truncated in kspec review get output — had to read raw YAML
+          for full content."
+      - status: completed
+        step_index: 1
+        started_at: 2026-04-29T12:08:41.695Z
+        completed_at: 2026-04-29T12:08:41.695Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T12:07:45.637Z
