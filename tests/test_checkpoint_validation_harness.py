@@ -637,6 +637,36 @@ class TestMockedApiClassifications:
         )
         assert harness.classify_failure(result) == "memory_mode"
 
+    # AC: @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success
+    def test_classify_oom_in_ksampler_node_is_memory_mode(self):
+        """OOM inside a KSampler node_error is memory_mode, not downstream."""
+        result = harness.WorkflowResult(
+            name="downstream",
+            accepted=False,
+            error="node_error(KSampler): OOM: cannot allocate",
+        )
+        assert harness.classify_failure(result) == "memory_mode"
+
+    # AC: @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success
+    def test_classify_cuda_oom_in_save_node_is_memory_mode(self):
+        """CUDA out of memory inside a WIDENExit save node_error is memory_mode, not save."""
+        result = harness.WorkflowResult(
+            name="save",
+            accepted=False,
+            error="node_error(WIDENExit): save_model failed: CUDA out of memory",
+        )
+        assert harness.classify_failure(result) == "memory_mode"
+
+    # AC: @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success
+    def test_classify_vram_in_loader_node_is_memory_mode(self):
+        """VRAM error inside a loader node_error is memory_mode, not loader."""
+        result = harness.WorkflowResult(
+            name="loader",
+            accepted=False,
+            error="node_error(CheckpointLoaderSimple): VRAM allocation failed",
+        )
+        assert harness.classify_failure(result) == "memory_mode"
+
     def test_classify_accepted_is_none(self):
         """Accepted workflow has no failure."""
         result = harness.WorkflowResult(
@@ -1380,6 +1410,45 @@ class TestMemoryModeFailurePropagation:
         # The top-level memory_mode category must NOT be "none"
         assert report.failure_categories["memory_mode"] != "none"
         assert "save" in report.failure_categories["memory_mode"]
+
+    # AC: @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success
+    def test_memory_mode_failure_propagated_from_downstream_oom(self):
+        """When downstream KSampler fails with OOM, memory_mode category is set.
+
+        Reproduces the exact reviewer scenario: node_error(KSampler): OOM
+        must be classified as memory_mode, not downstream — even though
+        'ksampler' appears in the error string.
+        """
+        mock_stats = {
+            "system": {"comfyui_version": "0.3.4"},
+            "devices": [{"vram_state": "normal"}],
+        }
+
+        def mock_submit(base_url, workflow, name):
+            if name == "downstream_ksampler":
+                return harness.WorkflowResult(
+                    name=name, accepted=False,
+                    error="node_error(KSampler): OOM: cannot allocate",
+                )
+            return harness.WorkflowResult(
+                name=name, accepted=True, prompt_id="p1",
+            )
+
+        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="test.safetensors",
+                report_output="/fake/report.json",
+            )
+
+        # The downstream workflow was classified as memory_mode, not downstream
+        assert report.failure_categories["downstream"] == "memory_mode"
+        # The top-level memory_mode category surfaces the failure
+        assert report.failure_categories["memory_mode"] != "none"
+        assert "downstream" in report.failure_categories["memory_mode"]
 
     # AC: @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success
     def test_memory_mode_none_when_no_vram_failures(self):

@@ -758,10 +758,22 @@ def submit_workflow(
 
 
 def classify_failure(result: WorkflowResult) -> str:
-    """Classify a workflow result into a failure category."""
+    """Classify a workflow result into a failure category.
+
+    Memory/VRAM/OOM errors are checked first because they represent resource
+    exhaustion — an orthogonal failure dimension that takes priority over
+    workflow-stage keywords.  Without this priority, an error like
+    ``node_error(KSampler): OOM: cannot allocate`` would match "ksampler"
+    and return "downstream", masking the real memory_mode failure.
+    """
     if result.accepted:
         return "none"
     error = result.error.lower()
+    # Memory/VRAM/OOM — check FIRST, before workflow-stage keywords.
+    # A KSampler OOM or a save CUDA-out-of-memory is fundamentally a
+    # memory issue, not a downstream or save issue.
+    if "memory" in error or "vram" in error or "oom" in error:
+        return "memory_mode"
     if "no output" in error or "scheduler" in error or "not executable" in error:
         return "scheduling"
     if "save" in error and ("fail" in error or "error" in error):
@@ -772,8 +784,6 @@ def classify_failure(result: WorkflowResult) -> str:
         return "downstream"
     if "cache" in error or "reuse" in error:
         return "cache"
-    if "memory" in error or "vram" in error or "oom" in error:
-        return "memory_mode"
     if "url_error" in error or "connection" in error:
         return "connection"
     return "unknown"
