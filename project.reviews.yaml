@@ -15719,6 +15719,17 @@ reviews:
         runner: pytest
         created_at: 2026-04-29T13:06:55.149Z
         completed_at: 2026-04-29T13:06:55.149Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Schema/references OK. Command reported validation passed but exited 6 due existing
+          alignment/completeness warnings: 4 alignment warnings, 12 completeness warnings."
+        name: kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-04-29T13:06:55.627Z
+        completed_at: 2026-04-29T13:06:55.627Z
     events:
       - _ulid: 01KQCNFBFFNMHVCMWVBK0SB9JV
         actor: Jacob Chapel
@@ -15740,6 +15751,13 @@ reviews:
           status: pass
           name: uv run pytest
         timestamp: 2026-04-29T13:06:55.272Z
+      - _ulid: 01KQCNK149EVMB96BWWGMZ7F97
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-04-29T13:06:55.753Z
     examined_commit: 60842f5808796d60d59926b6ab58fc486aebfb3a
     external_links: []
     lifecycle_state: open
@@ -15752,5 +15770,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-29T13:04:55.279Z
-    updated_at: 2026-04-29T13:06:55.149Z
+    updated_at: 2026-04-29T13:06:55.627Z
     notes: []
