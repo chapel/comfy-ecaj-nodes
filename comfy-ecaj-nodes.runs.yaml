@@ -7116,7 +7116,7 @@ runs:
     completed_at: 2026-04-29T09:38:40.156Z
   - _ulid: 01KQCA79ZDCABH9R7NS0EEM0H6
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -7129,7 +7129,15 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-04-29T09:48:33.268Z
-        completed_at: 2026-04-29T09:48:33.268Z
+        completed_at: 2026-04-29T09:48:45.166Z
+        notes: "Searched observations and inbox. 22 inbox items, many observations. Key existing items
+          relevant to this session: 01KQC9KA (loader-path smoke test guidance — directly matches
+          blocker 2 we fixed), 01KQC8GG (dead code in _execute_diffusion_save), 01KQ6VHS
+          (prompt-too-long for review dispatch). These cover the main patterns from this session."
+      - status: completed
+        step_index: 2
+        started_at: 2026-04-29T09:48:45.166Z
+        completed_at: 2026-04-29T09:48:45.166Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-04-29T09:48:17.261Z
