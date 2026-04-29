@@ -1,1 +1,39 @@
-notes: []
+notes:
+  - _ulid: 01KQC4VB956FCACMFDBE1Q178W
+    content: >-
+      Approach: The codebase already has streaming_evaluation_to_sink in gpu_ops.py and
+      MaterializationSink in streaming_save.py, but lacks a formal sink protocol in
+      lib/result_sink.py as specified.
+
+
+      Plan:
+
+      1. Create lib/result_sink.py with a ResultSink protocol (typing.Protocol) that defines
+      receive(key, tensor) and a DictResultSink wrapper that collects tensors into a dict for
+      backward compatibility with save_model=False.
+
+      2. Refactor streaming_evaluation_to_sink in gpu_ops.py to accept a ResultSink instead of a
+      bare write_fn callback - this gives the sink protocol a formal role in the evaluation path.
+
+      3. Add evaluate_to_sink() as the primary sink-based entry point, keep chunked_evaluation as
+      the dict-returning wrapper that uses DictResultSink internally.
+
+      4. Update exit.py to pass the MaterializationSink (which satisfies ResultSink) directly
+      instead of sink.write_tensor.
+
+      5. Update executor.py re-exports.
+
+
+      Tests:
+
+      - tests/test_result_sink.py: protocol conformance, DictResultSink output equals
+      chunked_evaluation output, dtype conversion, error propagation
+
+      - tests/test_chunked_evaluation_to_sink.py: sink receives keys incrementally, OOM retry writes
+      all keys, errors propagate, dict wrapper backward compat
+
+
+      Edge cases: OOM during sink.receive, sink that raises on receive, partial group completion.
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-29T08:14:22.502Z
