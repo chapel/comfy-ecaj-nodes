@@ -28,6 +28,7 @@ from .gpu_ops import (
     compute_batch_size,
     estimate_peak_ram,
     evaluate_affected_group,
+    evaluate_to_sink,
     get_available_ram_bytes,
     streaming_evaluation_to_sink,
 )
@@ -38,11 +39,14 @@ from .per_block import (
     _get_block_t_factors,
 )
 from .recipe_eval import EvalPlan, compile_plan, evaluate_recipe, execute_plan
+from .result_sink import DictResultSink, ResultSink
 
 __all__ = [
     "OpSignature",
     "DeltaSpec",
+    "DictResultSink",
     "EvalPlan",
+    "ResultSink",
     "check_ram_preflight",
     "compile_batch_groups",
     "compile_plan",
@@ -51,6 +55,7 @@ __all__ = [
     "apply_lora_batch_gpu",
     "chunked_evaluation",
     "evaluate_affected_group",
+    "evaluate_to_sink",
     "estimate_peak_ram",
     "evaluate_recipe",
     "execute_plan",
