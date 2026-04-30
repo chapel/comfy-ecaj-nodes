@@ -1938,7 +1938,7 @@ workspaces:
         head: 5422952696fec659c9655db6da3e892e0b48d72c
         last_seen_at: 2026-04-29T13:44:54.907Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-final-spec-status-reconciliation-01kqbtzn
-  - active_role: reviewer
+  - active_role: null
     base_branch_point: bb0e358d34c33d2ec80e31971b33dda94121e7dd
     bootstrap:
       status: succeeded
@@ -2001,9 +2001,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-30T21:55:47.691Z
-      last_reconciled_at: 2026-04-30T21:59:36.583Z
+      last_reconciled_at: 2026-04-30T22:02:19.963Z
       created_at: 2026-04-30T21:49:38.765Z
-      updated_at: 2026-04-30T21:59:36.964Z
+      updated_at: 2026-04-30T22:02:19.963Z
     workspace_id: dispatch-workspace-01KQG5V0WNWWZN45DG0AMYR2ZD
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
