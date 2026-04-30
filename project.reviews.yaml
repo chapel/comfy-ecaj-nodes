@@ -16203,6 +16203,16 @@ reviews:
         runner: gh
         created_at: 2026-04-30T21:57:57.333Z
         completed_at: 2026-04-30T21:57:57.333Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Full test suite exited 0; all tests passed.
+        name: pytest -q
+        required: true
+        runner: pytest
+        created_at: 2026-04-30T21:57:57.791Z
+        completed_at: 2026-04-30T21:57:57.791Z
     events:
       - _ulid: 01KQG694QF9RJP2B922QZPBDEA
         actor: Jacob Chapel
@@ -16231,6 +16241,13 @@ reviews:
           status: pass
           name: GitHub CI
         timestamp: 2026-04-30T21:57:57.466Z
+      - _ulid: 01KQG6C3J1SG0B6AZ2H6A8KMXD
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest -q
+        timestamp: 2026-04-30T21:57:57.953Z
     examined_commit: b442af3299de8b79a1882f2de3e459e1ee1f172a
     external_links: []
     lifecycle_state: open
@@ -16243,5 +16260,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-30T21:56:20.848Z
-    updated_at: 2026-04-30T21:57:57.333Z
+    updated_at: 2026-04-30T21:57:57.791Z
     notes: []
