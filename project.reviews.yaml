@@ -16192,6 +16192,17 @@ reviews:
         runner: ruff
         created_at: 2026-04-30T21:57:56.899Z
         completed_at: 2026-04-30T21:57:56.899Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "PR #111 head b442af3299de8b79a1882f2de3e459e1ee1f172a: lint SUCCESS, test SUCCESS;
+          mergeable into dev."
+        name: GitHub CI
+        required: true
+        runner: gh
+        created_at: 2026-04-30T21:57:57.333Z
+        completed_at: 2026-04-30T21:57:57.333Z
     events:
       - _ulid: 01KQG694QF9RJP2B922QZPBDEA
         actor: Jacob Chapel
@@ -16213,6 +16224,13 @@ reviews:
           status: pass
           name: ruff check .
         timestamp: 2026-04-30T21:57:57.023Z
+      - _ulid: 01KQG6C32TMY8N91YGN0NCTPZ9
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: GitHub CI
+        timestamp: 2026-04-30T21:57:57.466Z
     examined_commit: b442af3299de8b79a1882f2de3e459e1ee1f172a
     external_links: []
     lifecycle_state: open
@@ -16225,5 +16243,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-30T21:56:20.848Z
-    updated_at: 2026-04-30T21:57:56.899Z
+    updated_at: 2026-04-30T21:57:57.333Z
     notes: []
