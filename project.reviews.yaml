@@ -16181,7 +16181,17 @@ reviews:
     slugs: []
     title: Review task-bf16-streaming-raw-byte-materialization
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: All checks passed.
+        name: ruff check .
+        required: true
+        runner: ruff
+        created_at: 2026-04-30T21:57:56.899Z
+        completed_at: 2026-04-30T21:57:56.899Z
     events:
       - _ulid: 01KQG694QF9RJP2B922QZPBDEA
         actor: Jacob Chapel
@@ -16196,6 +16206,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-04-30T21:56:47.478Z
+      - _ulid: 01KQG6C2MZZT5TSYR00ET9VXK1
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff check .
+        timestamp: 2026-04-30T21:57:57.023Z
     examined_commit: b442af3299de8b79a1882f2de3e459e1ee1f172a
     external_links: []
     lifecycle_state: open
@@ -16208,5 +16225,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-30T21:56:20.848Z
-    updated_at: 2026-04-30T21:56:47.347Z
+    updated_at: 2026-04-30T21:57:56.899Z
     notes: []
