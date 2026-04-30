@@ -16177,3 +16177,29 @@ reviews:
     created_at: 2026-04-29T13:45:18.815Z
     updated_at: 2026-04-29T13:47:41.498Z
     notes: []
+  - _ulid: 01KQG694QGATW8MGCDCY181DF3
+    slugs: []
+    title: Review task-bf16-streaming-raw-byte-materialization
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQG694QF9RJP2B922QZPBDEA
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-04-30T21:56:20.848Z
+    examined_commit: b442af3299de8b79a1882f2de3e459e1ee1f172a
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQG5V0WNWWZN45DG0AMYR2ZD"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-04-30T21:56:20.848Z
+    updated_at: null
+    notes: []
