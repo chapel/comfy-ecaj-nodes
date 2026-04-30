@@ -370,7 +370,7 @@ features:
               a process-resident affected-weight cache.
             status:
               maturity: draft
-              implementation: implemented
+              implementation: in_progress
             depends_on: []
             implements: []
             relates_to:
@@ -426,6 +426,17 @@ features:
                   partial affected weight payloads from that failed full saved model output
                   are not retained as a reusable full-model cache.
                 when: the failure is reported to the workflow.
+              - given: |-
+                  Full saved model materialization includes a tensor using a
+                  safetensors-supported dtype such as BF16.
+                id: ac-raw-byte-dtype-preservation
+                then: |-
+                  The saved artifact reports the tensor's original dtype and shape, and the
+                  stored tensor data is bitwise-equivalent to the source tensor without
+                  numeric dtype conversion.
+                when: |-
+                  The tensor is written into the saved artifact by the streaming
+                  materialization path.
             tags:
               - persistence
               - memory

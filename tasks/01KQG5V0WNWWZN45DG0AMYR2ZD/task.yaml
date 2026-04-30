@@ -1,0 +1,91 @@
+_ulid: 01KQG5V0WNWWZN45DG0AMYR2ZD
+slugs:
+  - task-bf16-streaming-raw-byte-materialization
+title: Preserve BF16 raw bytes in streaming saved model materialization
+type: task
+description: |-
+  What:
+  - Implement `@streaming-full-model-materialization ac-raw-byte-dtype-preservation`.
+    This task assumes the spec AC already exists and must not make spec changes.
+  - Update `lib/streaming_save.py::_tensor_bytes` so tensors whose dtype is
+    supported by safetensors but not directly exportable through `Tensor.numpy()`
+    are serialized by reinterpreting the contiguous tensor memory as raw bytes.
+  - The BF16 path must preserve the safetensors header dtype as `BF16`; it must
+    not numerically convert tensor values to `torch.uint8` or any other dtype.
+  - Keep the existing streaming behavior: `stream_save_file()` and
+    `MaterializationSink.write_tensor()` write one tensor payload at a time and
+    do not accumulate a full model-sized payload in memory.
+  - Do not change artifact-kind selection, cache metadata semantics, checkpoint
+    component handling, ComfyUI loader selection, node inputs, or the
+    `save_model` boolean.
+
+  Why:
+  - Large diffusion-only models may store model weights as BF16 safetensors.
+    PyTorch BF16 tensors cannot be exported through `Tensor.numpy()` directly.
+    The current fallback path in `lib/streaming_save.py::_tensor_bytes` slices
+    `untyped_storage()` into Python bytes for those tensors, which can make
+    full saved model materialization appear stalled on large BF16 artifacts.
+  - Safetensors serialization only needs the exact raw payload bytes plus the
+    dtype and shape recorded in the header. A raw byte reinterpretation preserves
+    BF16 precision because it is a bit-level serialization step, not a numeric
+    dtype conversion.
+
+  How:
+  - In `_tensor_bytes`, normalize each tensor to the serialization layout before
+    extracting bytes:
+    - ensure the tensor is on CPU;
+    - make non-contiguous tensors contiguous;
+    - preserve the tensor's original dtype for header generation and validation.
+  - For the normal path where `t.numpy().tobytes()` succeeds, keep using it or an
+    equivalently exact byte extraction path.
+  - For `TypeError` caused by NumPy not supporting the tensor dtype, use a
+    scalar-safe raw byte view such as
+    `t.reshape(-1).view(torch.uint8).numpy().tobytes()` after CPU + contiguity
+    normalization. This is a bitcast/raw-memory view; do not use
+    `t.to(torch.uint8)`.
+  - Keep validation in `stream_save_file()` and `MaterializationSink.write_tensor()`
+    strict: unsupported layouts, unsupported dtypes, dtype mismatches, shape
+    mismatches, byte-length mismatches, duplicate writes, and incomplete
+    materialization must still fail as before.
+  - Update comments/docstrings near `_tensor_bytes` to explicitly state that the
+    uint8 view is raw-byte serialization and does not change the saved dtype.
+
+  Testing:
+  - Add or update unit tests in `tests/test_streaming_save.py` covering BF16
+    serialization through `stream_save_file()`. Add MaterializationSink-specific
+    BF16 coverage either by importing `MaterializationSink` in
+    `tests/test_streaming_save.py` or by extending the existing sink tests in
+    `tests/test_full_model_streaming.py`.
+  - Tests must assert that a saved BF16 tensor loads through `safetensors.safe_open`
+    with dtype `torch.bfloat16`, the original shape, and equal values.
+  - Add a direct byte-identity test for `_tensor_bytes` on a BF16 tensor comparing
+    its output to `tensor.contiguous().reshape(-1).view(torch.uint8).numpy().tobytes()`.
+  - Include BF16 scalar and non-contiguous or storage-offset view cases so the fix
+    preserves scalar safety and the existing view-safety behavior.
+  - Avoid brittle wall-clock performance assertions in unit tests. If a regression
+    guard is added, prefer deterministic evidence that the BF16 fallback uses raw
+    byte reinterpretation rather than element-wise numeric conversion.
+  - Run `pytest -q` and `ruff check .` from the repository root.
+  - If a local ComfyUI runtime and a BF16 diffusion model are available, run a
+    guarded live save-mode workflow using the diffusion model input node and
+    `WIDENExit(save_model=True)`, record whether it completes, and clean up any
+    temporary probe artifacts. If the live environment or model is unavailable,
+    document that deferral in the task notes rather than treating it as unit-test
+    coverage.
+
+  Covers: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+spec_ref: "@streaming-full-model-materialization"
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - persistence
+  - streaming-save
+  - safetensors
+vcs_refs: []
+created_at: 2026-04-30T21:48:38.165Z
+todos: []
