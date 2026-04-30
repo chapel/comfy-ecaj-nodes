@@ -16224,6 +16224,17 @@ reviews:
         runner: kspec
         created_at: 2026-04-30T21:58:11.969Z
         completed_at: 2026-04-30T21:58:11.969Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Verified _tensor_bytes equals contiguous uint8 view bytes for BF16 strided view;
+          stream_save_file and MaterializationSink round-trip BF16 dtype/shape/value.
+        name: BF16 byte path sanity
+        required: true
+        runner: python
+        created_at: 2026-04-30T21:58:12.417Z
+        completed_at: 2026-04-30T21:58:12.417Z
     events:
       - _ulid: 01KQG694QF9RJP2B922QZPBDEA
         actor: Jacob Chapel
@@ -16266,6 +16277,13 @@ reviews:
           status: pass
           name: kspec validate --warnings-ok
         timestamp: 2026-04-30T21:58:12.098Z
+      - _ulid: 01KQG6CHT01TCFY4PMTE3RNG83
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: BF16 byte path sanity
+        timestamp: 2026-04-30T21:58:12.544Z
     examined_commit: b442af3299de8b79a1882f2de3e459e1ee1f172a
     external_links: []
     lifecycle_state: open
@@ -16278,5 +16296,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-04-30T21:56:20.848Z
-    updated_at: 2026-04-30T21:58:11.969Z
+    updated_at: 2026-04-30T21:58:12.417Z
     notes: []
