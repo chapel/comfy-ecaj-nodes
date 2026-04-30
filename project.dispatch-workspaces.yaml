@@ -1938,7 +1938,7 @@ workspaces:
         head: 5422952696fec659c9655db6da3e892e0b48d72c
         last_seen_at: 2026-04-29T13:44:54.907Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-final-spec-status-reconciliation-01kqbtzn
-  - active_role: worker
+  - active_role: null
     base_branch_point: bb0e358d34c33d2ec80e31971b33dda94121e7dd
     bootstrap:
       status: succeeded
@@ -1980,12 +1980,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-30T21:54:36.519Z
+      updated_at: 2026-04-30T21:55:45.630Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-30T21:54:36.519Z
+      updated_at: 2026-04-30T21:55:45.630Z
     integration:
       status: pending
       detail: null
@@ -1993,17 +1993,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: bb0e358d34c33d2ec80e31971b33dda94121e7dd
-      updated_at: 2026-04-30T21:54:36.519Z
-    lifecycle_state: active
+      updated_at: 2026-04-30T21:55:45.630Z
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@01KQG5V0WNWWZN45DG0AMYR2ZD"
     task_slug: task-bf16-streaming-raw-byte-materialization
     timestamps:
       closed_at: null
       last_active_at: 2026-04-30T21:49:39.374Z
-      last_reconciled_at: 2026-04-30T21:54:36.519Z
+      last_reconciled_at: 2026-04-30T21:55:45.630Z
       created_at: 2026-04-30T21:49:38.765Z
-      updated_at: 2026-04-30T21:54:36.519Z
+      updated_at: 2026-04-30T21:55:45.630Z
     workspace_id: dispatch-workspace-01KQG5V0WNWWZN45DG0AMYR2ZD
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
