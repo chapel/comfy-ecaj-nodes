@@ -16,3 +16,21 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-04-30T21:54:32.652Z
+  - _ulid: 01KQG7F4EKMP2SS8TGYGZKHCYD
+    content: "Post-merge live validation by Hermes on local ComfyUI 0.20.1 / RTX 4090 after restarting
+      comfyui.service to load dev@9cdeb98. Static gates passed: pytest -q, ruff check ., kspec
+      validate --warnings-ok, and kspec validate --refs --warnings-ok. Live matrix report:
+      /tmp/bf16-live-matrix-report.json. SDXL checkpoint source
+      sdxl/realismEngineSDXL_v30VAE.safetensors passed save_model checkpoint save and real
+      downstream CheckpointLoaderSimple -> KSampler -> VAEDecode -> SaveImage. Z-Image and Flux
+      diffusion-only BF16 artifacts were written quickly and inspected as valid safetensors with
+      __ecaj_artifact_kind__=diffusion and BF16 tensor payloads preserved, but the Comfy prompts
+      were marked failed after publication because WIDENExit tried _load_model_from_artifact and hit
+      TypeError: 'NoneType' object is not callable during deepcopy(cloned.model). External
+      UNETLoader reload via temporary diffusion_models symlink also failed with Comfy model type
+      detection on the saved artifact. Validation conclusion: raw BF16 byte serialization appears
+      fixed, but end-to-end diffusion-only save/reload is not cleanly passing for Z-Image/Flux and
+      needs follow-up outside/adjacent to the raw-byte fix."
+    supersedes: null
+    author: Hermes
+    created_at: 2026-04-30T22:17:05.748Z
