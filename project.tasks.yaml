@@ -2411,7 +2411,7 @@
   title: Preserve BF16 raw bytes in streaming saved model materialization
   type: task
   spec_ref: "@streaming-full-model-materialization"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on: []
   priority: 1
@@ -2422,4 +2422,5 @@
   notes_count: 0
   todos_count: 0
   created_at: 2026-04-30T21:48:38.165Z
+  started_at: 2026-04-30T21:49:55.598Z
   automation: eligible
