@@ -77,7 +77,7 @@ description: |-
 spec_ref: "@streaming-full-model-materialization"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -87,6 +87,14 @@ tags:
   - streaming-save
   - safetensors
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-bf16-streaming-raw-byte-materialization/01kqg5v0
+  captured_at: 2026-04-30T21:54:11.976Z
+  commit: b442af3299de8b79a1882f2de3e459e1ee1f172a
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KQG5WWKPFPZ1CXQXPS8ENRGV
 history:
   - author: Jacob Chapel
@@ -109,7 +117,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-04-30T21:49:55.599Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-bf16-streaming-raw-byte-materialization/01kqg5v0
+          captured_at: 2026-04-30T21:54:11.976Z
+          commit: b442af3299de8b79a1882f2de3e459e1ee1f172a
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-04-30T21:54:11.979Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-04-30T21:54:11.979Z
 created_at: 2026-04-30T21:48:38.165Z
 started_at: 2026-04-30T21:49:55.598Z
+submitted_at: 2026-04-30T21:54:11.979Z
 todos: []
 automation: eligible
