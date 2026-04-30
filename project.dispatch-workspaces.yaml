@@ -1974,18 +1974,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-bf16-streaming-raw-byte-materialization/01kqg5v0
-    canonical_branch_head: bb0e358d34c33d2ec80e31971b33dda94121e7dd
+    canonical_branch_head: b442af3299de8b79a1882f2de3e459e1ee1f172a
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-04-30T21:49:38.765Z
+      updated_at: 2026-04-30T21:54:36.519Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-04-30T21:49:39.374Z
+      updated_at: 2026-04-30T21:54:36.519Z
     integration:
       status: pending
       detail: null
@@ -1993,7 +1993,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: bb0e358d34c33d2ec80e31971b33dda94121e7dd
-      updated_at: 2026-04-30T21:49:38.765Z
+      updated_at: 2026-04-30T21:54:36.519Z
     lifecycle_state: active
     resolved_base_branch: dev
     task_ref: "@01KQG5V0WNWWZN45DG0AMYR2ZD"
@@ -2001,9 +2001,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-04-30T21:49:39.374Z
-      last_reconciled_at: 2026-04-30T21:49:39.374Z
+      last_reconciled_at: 2026-04-30T21:54:36.519Z
       created_at: 2026-04-30T21:49:38.765Z
-      updated_at: 2026-04-30T21:49:39.374Z
+      updated_at: 2026-04-30T21:54:36.519Z
     workspace_id: dispatch-workspace-01KQG5V0WNWWZN45DG0AMYR2ZD
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
