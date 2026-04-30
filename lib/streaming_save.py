@@ -54,25 +54,26 @@ for _attr, _name in (
 
 
 def _tensor_bytes(t: torch.Tensor) -> bytes:
-    """Extract exact tensor bytes, safe for views with storage_offset.
+    """Extract exact tensor bytes for safetensors serialization.
 
-    Uses .numpy().tobytes() where possible (respects view bounds).
-    For dtypes that numpy doesn't support (bfloat16, float8), falls back
-    to slicing untyped_storage() with correct offset.
+    Normalizes to CPU + contiguous, then exports raw bytes. The BF16/F8
+    fallback uses a uint8 bitcast view — it does NOT change the saved dtype.
+    The safetensors header dtype is set from t.dtype by the caller, so the
+    file still records the original dtype with bit-identical data.
     """
-    if not t.is_contiguous():
-        t = t.contiguous()
     if t.device.type != "cpu":
         t = t.cpu()
+    if not t.is_contiguous():
+        t = t.contiguous()
     try:
         return t.numpy().tobytes()
     except TypeError:
-        # bfloat16, float8, complex64 etc. — numpy doesn't support these.
-        # Use explicit offset for safety even though contiguous() should
-        # produce offset=0.
-        nbytes = t.nelement() * t.element_size()
-        offset = t.storage_offset() * t.element_size()
-        return bytes(t.untyped_storage()[offset:offset + nbytes])
+        # NumPy doesn't support this dtype (BF16, F8 variants, complex, etc.).
+        # Reinterpret contiguous memory as uint8 — a bitcast view, not a
+        # numeric conversion. The element-wise Python loop implied by
+        # bytes(untyped_storage()[start:end]) stalls on large BF16 weights;
+        # this path produces the same raw bytes via a single buffer copy.
+        return t.reshape(-1).view(torch.uint8).numpy().tobytes()
 
 
 def stream_save_file(
