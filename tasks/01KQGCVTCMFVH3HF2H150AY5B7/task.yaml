@@ -128,5 +128,14 @@ tags:
   - diffusion-models
   - memory
 vcs_refs: []
+history:
+  - author: Jacob Chapel
+    changes:
+      automation:
+        new: eligible
+        previous: null
+    command: task-set
+    timestamp: 2026-04-30T23:51:28.266Z
 created_at: 2026-04-30T23:51:24.308Z
 todos: []
+automation: eligible
