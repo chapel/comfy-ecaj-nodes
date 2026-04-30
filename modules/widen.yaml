@@ -310,7 +310,7 @@ features:
           sufficient for checkpoint-style saved model output.
         status:
           maturity: draft
-          implementation: implemented
+          implementation: in_progress
         depends_on: []
         implements: []
         relates_to:
@@ -352,6 +352,24 @@ features:
             then: The reused result comes from the saved artifact rather than from a process-resident
               affected-weight payload.
             when: The Exit node reuses cached full saved model output.
+          - given: |-
+              A valid WIDEN save_model workflow starts from a source model that is
+              normally loaded in ComfyUI as a standalone diffusion model.
+            id: ac-diffusion-model-source-kind-round-trip
+            then: |-
+              The saved artifact is loadable in ComfyUI as a standalone diffusion model
+              of the same model kind as the source, without relying on the original
+              WIDEN workflow or an in-memory WIDEN merge payload.
+            when: The Exit node saves the merged result for that recipe.
+          - given: |-
+              A saved WIDEN artifact was produced from a source model that is normally
+              loaded in ComfyUI as a standalone diffusion model.
+            id: ac-diffusion-model-companion-separation
+            then: |-
+              Conditioning, text-encoder, and decode components are supplied by the
+              surrounding workflow rather than being required inside the saved diffusion
+              model artifact.
+            when: The artifact is used in a generation workflow for that model kind.
         tags:
           - persistence
           - memory

@@ -1,0 +1,132 @@
+_ulid: 01KQGCVTCMFVH3HF2H150AY5B7
+slugs:
+  - task-diffusion-model-saved-output-round-trip
+title: Save diffusion-model WIDEN outputs as Comfy-loadable diffusion model artifacts
+type: task
+description: |-
+  Implement the diffusion-model saved-output path for WIDEN Exit so a
+  save_model workflow that starts from a standalone ComfyUI diffusion model
+  produces a saved artifact that ComfyUI can load as the same standalone
+  diffusion model kind.
+
+  This task assumes the following acceptance criteria already exist on
+  @full-saved-model-output and must not make spec changes:
+  - ac-diffusion-model-source-kind-round-trip
+  - ac-diffusion-model-companion-separation
+
+  Why:
+  - Checkpoint-style models and standalone diffusion models have different
+    ComfyUI load contracts. Checkpoint-style artifacts may bundle model,
+    conditioning, and decode components. Standalone diffusion models are
+    loaded as diffusion-model files and use separately supplied surrounding
+    workflow components.
+  - WIDEN's saved output should preserve the external model kind users
+    started with. A workflow that starts from a standalone diffusion model
+    should save a standalone diffusion model artifact, not an internal WIDEN
+    payload that only WIDEN can understand.
+  - The returned MODEL from save_model should behave like a normally loaded
+    ComfyUI model for that artifact kind, so ComfyUI owns the model lifecycle
+    after the save instead of depending on transient merge intermediates.
+
+  What:
+  - Audit the current diffusion-model save and cache-hit path in
+    nodes/exit.py, including any helpers that classify artifact kind, choose
+    the output directory, write safetensors metadata, and return the saved
+    MODEL.
+  - Preserve the existing checkpoint-style save_model behavior for recipes
+    that include checkpoint components.
+  - Add or correct the diffusion-model save_model path for recipes that start
+    from WIDEN Diffusion Model Input or any equivalent standalone
+    diffusion-model source.
+  - Ensure the published diffusion-model artifact uses an external key layout
+    and metadata that ComfyUI recognizes as the same standalone diffusion
+    model kind as the source model.
+  - Ensure the saved artifact includes the merged diffusion weights and the
+    unaffected base diffusion weights needed for a complete standalone
+    diffusion-model file.
+  - Ensure companion components such as CLIP, text encoders, and VAE remain
+    outside the diffusion-model artifact and are provided by downstream
+    workflows in the same way ComfyUI normally uses that model kind.
+  - Ensure cache hits only reuse artifacts whose recipe identity, artifact
+    kind, source model kind, and required saved-output metadata match the
+    active diffusion-model save request.
+  - Ensure the MODEL returned by WIDEN Exit after a diffusion-model save or
+    cache hit is backed by the saved artifact through a supported ComfyUI
+    diffusion-model load/return path, not by a process-resident WIDEN merge
+    payload.
+  - Keep the existing save_model boolean UX unchanged.
+  - Keep incomplete temporary writes from becoming reusable cache artifacts.
+
+  How:
+  - Use ComfyUI's own diffusion-model loading and state-dict save conventions
+    as the compatibility target. In the local ComfyUI checkout, the relevant
+    references are nodes.py's diffusion-model loader node and comfy/sd.py's
+    diffusion-model load functions; model_base.py and supported_models.py
+    show how ComfyUI converts model state dicts for saved external files.
+  - Treat checkpoint-style and standalone diffusion-model recipes as separate
+    saved-output branches. Checkpoint recipes should continue to write
+    checkpoint-loadable artifacts. Standalone diffusion-model recipes should
+    write diffusion-model-loadable artifacts.
+  - When streaming materialization writes a standalone diffusion-model
+    artifact, map internal model keys to the same external key contract that
+    ComfyUI expects for that model kind before publishing the safetensors
+    file. Do not rely on an internal WIDEN-only `diffusion_model.*` file
+    shape unless ComfyUI's normal diffusion-model loader accepts that shape
+    for the source model kind.
+  - For returned MODEL values and cache hits, prefer reloading the published
+    diffusion-model artifact through ComfyUI's supported diffusion-model load
+    path. Avoid deep-copying ComfyUI model internals or retaining temporary
+    WIDEN merge payloads as the backing store for the saved result.
+  - Preserve the existing streaming/raw-byte behavior so BF16 and other
+    safetensors-supported dtypes keep their original dtype, shape, and bitwise
+    tensor data.
+  - Keep validation guarded: automated tests may use fakes, fixtures, or small
+    synthetic safetensors files; real ComfyUI workflows must require explicit
+    operator-provided inputs and must clean up generated artifacts.
+
+  Testing:
+  - Add focused unit tests around nodes/exit.py proving diffusion-model
+    recipes choose the diffusion-model saved-output branch while
+    checkpoint-style recipes keep the checkpoint branch.
+  - Add tests proving diffusion-model cache hits reject artifacts with the
+    wrong artifact kind, source model kind, or required metadata.
+  - Add tests or small fixture checks proving saved diffusion-model artifacts
+    are emitted with the external key layout expected by ComfyUI's
+    diffusion-model loader for representative diffusion-transformer model
+    kinds such as Flux-style, Z-Image-style, and Qwen-style state dicts.
+  - Add a guarded live-validation harness, or extend the existing guarded
+    harness, so a maintainer can explicitly validate that saved artifacts from
+    real standalone diffusion-model workflows load through ComfyUI's
+    diffusion-model loader and complete a bounded downstream generation path
+    with separately supplied companion components.
+  - Run the full project test suite, lint gate, and kspec validation after the
+    implementation.
+  - If a real model family is too large for the local validation guard, record
+    an explicit skip/deferral in the validation report instead of silently
+    treating it as covered.
+
+  Covers:
+  - @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+  - @full-saved-model-output ac-diffusion-model-companion-separation
+  - @full-saved-model-output ac-complete-artifact
+  - @full-saved-model-output ac-return-loaded-model
+  - @full-saved-model-output ac-cache-reuses-artifact
+  - @full-saved-model-output ac-cache-reuse-is-artifact-backed
+  - @streaming-full-model-materialization ac-incomplete-write-not-reused
+  - @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+spec_ref: "@full-saved-model-output"
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - persistence
+  - comfy
+  - diffusion-models
+  - memory
+vcs_refs: []
+created_at: 2026-04-30T23:51:24.308Z
+todos: []
