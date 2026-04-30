@@ -1,1 +1,12 @@
-notes: []
+notes:
+  - _ulid: 01KQG5YG5NSC6XHFG99D83341Q
+    content: "Approach: replace untyped_storage() byte slicing fallback in _tensor_bytes with
+      t.reshape(-1).view(torch.uint8).numpy().tobytes() — bitcast view, not numeric conversion.
+      Header dtype stays BF16 because dtype check on caller's tensor happens before _tensor_bytes is
+      called. Tests: extend test_streaming_save.py with stream_save_file BF16 round-trip (multi-dim,
+      scalar, non-contiguous/view), direct _tensor_bytes byte-identity test, and import
+      MaterializationSink to add a BF16 sink round-trip. Skip live ComfyUI run unless local
+      environment is set up — this is a worktree dispatch, no GPU/ComfyUI runtime here."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-04-30T21:50:32.118Z
