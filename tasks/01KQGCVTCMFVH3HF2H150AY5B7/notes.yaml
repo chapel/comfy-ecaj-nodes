@@ -130,3 +130,21 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-05-01T00:59:55.166Z
+  - _ulid: 01KQGHBFFE4CFQR2Q027327AYC
+    content: "Fix cycle 2 complete: addressed the single review blocker (diffusion live harness API
+      shape). Added weight_dtype='default' to every UNETLoader node built by the diffusion
+      live-validation harness — build_diffusion_save_workflow, build_diffusion_downstream_workflow,
+      and build_diffusion_cache_reuse_workflow — so the generated live prompts pass current
+      ComfyUI's required_input_missing validation. Added 3 new behavioral tests asserting
+      weight_dtype is present on every UNETLoader node (save run, downstream reload run, cache-reuse
+      run). Updated save-workflow docstring to document that both unet_name and weight_dtype are
+      required and that omitting weight_dtype causes required_input_missing prompt rejection.
+      Verified other ACs unchanged: diffusion saves still route through diffusion_models folder,
+      diffusion artifacts still emit external model.diffusion_model.* layout with
+      __ecaj_source_model_kind__='diffusion_model' metadata, cache hits still reject mismatched
+      source_model_kind/artifact_kind, returned MODEL still loads via comfy.sd.load_diffusion_model.
+      uv run pytest 1647 passed; uv run ruff check . clean; kspec validate has only pre-existing
+      warnings."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-05-01T01:09:51.726Z
