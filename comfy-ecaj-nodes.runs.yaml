@@ -8648,7 +8648,7 @@ runs:
     started_at: 2026-05-01T00:53:15.456Z
     completed_at: 2026-05-01T00:55:10.438Z
   - _ulid: 01KQGGV9CDXWH0BDTAAGEXZBYT
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -8677,10 +8677,13 @@ runs:
         notes: "Decision: skip capture. All high-confidence reflection items are already represented by
           existing observations or the active review blocker. Avoiding duplicate observations/inbox
           items per reflect-loop rule."
-      - status: completed
+      - status: skipped
         step_index: 3
         started_at: 2026-05-01T01:03:09.123Z
-        completed_at: 2026-05-01T01:03:09.123Z
+        completed_at: 2026-05-01T01:03:17.086Z
+        notes: "No approved items to capture. Existing refs cover the reflection outputs: @01KQCGH0,
+          @01KQCM72, @01KQCCBJ5, and review blocker @01KQGGQ4."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-01T01:01:01.197Z
+    completed_at: 2026-05-01T01:03:17.086Z
