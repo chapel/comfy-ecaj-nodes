@@ -8438,9 +8438,26 @@ runs:
     completed_at: 2026-04-30T22:01:58.530Z
   - _ulid: 01KQGEYQA8YMJ8CXG1PBTP53A2
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-01T00:27:56.617Z
+        completed_at: 2026-05-01T00:28:15.471Z
+        notes: "Worked well: (1) Reading ComfyUI source (sd.py, model_patcher.py, supported_models_base.py,
+          model_detection.py) to derive the exact prefix contract before designing the key remap —
+          avoided guessing. (2) Writing AC-annotated tests first (20 tests covering all 7 ACs across
+          SDXL/Flux/Z-Image/Qwen) before tweaking implementation; updated tests caught the
+          int-castable set_id assumption immediately. (3) Adding a minimal seam
+          (_comfy_load_diffusion_model indirection) made the test surface clean — patch one symbol,
+          no monkeypatching of comfy.sd. (4) MaterializationSink.finalize accepting a
+          pre_publish_check kwarg threaded the existing _classify_temp_artifact gate through the
+          streaming path without restructuring."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-01T00:28:15.471Z
+        completed_at: 2026-05-01T00:28:15.471Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-01T00:27:56.617Z
