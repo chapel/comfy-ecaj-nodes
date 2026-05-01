@@ -842,7 +842,7 @@ class TestGpuOffloadAfterSave:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="test.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value="/tmp/test.safetensors"),
+            patch("nodes.exit._resolve_save_path", return_value="/tmp/test.safetensors"),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
             patch("nodes.exit.validate_checkpoint_components"),
@@ -1869,7 +1869,7 @@ class TestBaseStateFreedBeforeSave:
             recipe, mock_model_patcher, keys,
             extra_patches={
                 "nodes.exit.validate_model_name": "test.safetensors",
-                "nodes.exit._resolve_checkpoints_path": "/tmp/test.safetensors",
+                "nodes.exit._resolve_save_path": "/tmp/test.safetensors",
                 "nodes.exit.serialize_recipe": "{}",
                 "nodes.exit.compute_recipe_hash": "hash",
                 "nodes.exit.validate_checkpoint_components": None,

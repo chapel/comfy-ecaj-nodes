@@ -116,7 +116,10 @@ def _run_full_mode(recipe, mock_model_patcher, keys, tmp_path,
         "nodes.exit.compute_base_identity": "base_id",
         "nodes.exit.compute_lora_stats": {},
         "nodes.exit.validate_model_name": f"{model_name}.safetensors",
-        "nodes.exit._resolve_checkpoints_path": save_path,
+        # Diffusion-only saves dispatch through _resolve_save_path which
+        # routes to _resolve_diffusion_models_path (not _resolve_checkpoints_path)
+        # for non-checkpoint recipes.
+        "nodes.exit._resolve_save_path": save_path,
         "nodes.exit.validate_checkpoint_components": None,
         "nodes.exit.check_full_model_cache": False,
         "nodes.exit.check_ram_preflight": None,
@@ -237,7 +240,7 @@ class TestFullModeSucceedsWithoutDictPath:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="test.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -315,7 +318,7 @@ class TestFullModeSucceedsWithoutDictPath:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="sink_test.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -558,7 +561,7 @@ class TestFullModeEventOrder:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="event_order.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -715,7 +718,7 @@ class TestFailureAbortsMaterialization:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="partial.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -794,7 +797,7 @@ class TestFailureAbortsMaterialization:
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="fail.safetensors"),
             patch(
-                "nodes.exit._resolve_checkpoints_path",
+                "nodes.exit._resolve_save_path",
                 return_value=str(tmp_path / "fail.safetensors"),
             ),
             patch("nodes.exit.validate_checkpoint_components"),
@@ -872,7 +875,7 @@ class TestFinalizeFailure:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="finalize_fail.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -956,7 +959,7 @@ class TestFullArtifactCacheHit:
 
         with (
             patch("nodes.exit.validate_model_name", return_value="cached.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="match"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
@@ -1374,7 +1377,7 @@ class TestNoOpFullMode:
 
         with (
             patch("nodes.exit.validate_model_name", return_value="noop.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="noop_hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
@@ -1788,7 +1791,7 @@ class TestNoopEnableCacheFalseEvicts:
 
         with (
             patch("nodes.exit.validate_model_name", return_value="noop_nocache.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="noop_hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
@@ -1987,7 +1990,7 @@ class TestNonEcajFileRaisesOnFullModeCache:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="user_file.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             # Do NOT mock check_full_model_cache — let the real one run.
             patch("nodes.exit.check_ram_preflight"),

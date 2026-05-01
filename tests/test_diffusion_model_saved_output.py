@@ -31,6 +31,8 @@ from nodes.exit import (
     WIDENExitNode,
     _classify_temp_artifact,
     _load_diffusion_model_artifact,
+    _resolve_diffusion_models_path,
+    _resolve_save_path,
     _to_external_diffusion_key,
 )
 from tests.conftest import MockModelPatcher
@@ -113,7 +115,11 @@ def _run_diffusion_save(
         "nodes.exit.compute_base_identity": "base_id",
         "nodes.exit.compute_lora_stats": {},
         "nodes.exit.validate_model_name": "model.safetensors",
-        "nodes.exit._resolve_checkpoints_path": save_path,
+        # Diffusion-only saves route through _resolve_save_path which dispatches
+        # to _resolve_diffusion_models_path (not _resolve_checkpoints_path) for
+        # non-checkpoint recipes.  Patch the router so diffusion-only tests
+        # never reach the checkpoint resolver.
+        "nodes.exit._resolve_save_path": save_path,
         "nodes.exit.validate_checkpoint_components": None,
         "nodes.exit.check_full_model_cache": False,
         "nodes.exit.check_ram_preflight": None,
@@ -389,7 +395,10 @@ class TestReturnedModelUsesComfyLoader:
 
         with (
             patch("nodes.exit.validate_model_name", return_value="cached.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            # Diffusion-only cache hit routes through _resolve_save_path,
+            # which dispatches to _resolve_diffusion_models_path.  Patching
+            # the router keeps this test off the real folder_paths config.
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="match"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
@@ -606,7 +615,10 @@ class TestIncompleteWritesNotReused:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="fail.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            # Diffusion-only failure path still uses _resolve_save_path —
+            # patch the router so the test never touches the real
+            # diffusion_models / unet folder configuration.
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -791,3 +803,314 @@ class TestComfyLoaderHelper:
         assert result is sentinel
         mock_loader.assert_called_once()
         assert mock_loader.call_args.args[0] == path
+
+
+# ===========================================================================
+# AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+# Diffusion-model save path is resolved through Comfy's diffusion_models
+# folder (UNETLoader discovery), not the checkpoints folder.  These tests
+# deliberately do NOT patch _resolve_checkpoints_path: a diffusion save that
+# silently routes through the checkpoint resolver is the bug they catch.
+# ===========================================================================
+
+
+class TestDiffusionModelsPathResolver:
+    """_resolve_diffusion_models_path uses folder_paths('diffusion_models')."""
+
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    def test_uses_diffusion_models_folder(self, monkeypatch, tmp_path):
+        """Resolver returns a path under the first diffusion_models directory."""
+        import folder_paths
+
+        diffusion_dir = tmp_path / "diffusion_models"
+        diffusion_dir.mkdir()
+        ckpt_dir = tmp_path / "checkpoints"
+        ckpt_dir.mkdir()
+
+        def get_folder_paths(folder: str):
+            if folder == "diffusion_models":
+                return [str(diffusion_dir)]
+            if folder == "checkpoints":
+                return [str(ckpt_dir)]
+            return []
+
+        monkeypatch.setattr(folder_paths, "get_folder_paths", get_folder_paths)
+        path = _resolve_diffusion_models_path("model.safetensors")
+        assert path == os.path.join(str(diffusion_dir), "model.safetensors")
+        # Critically, the diffusion resolver MUST NOT publish under the
+        # checkpoints folder — Comfy's standalone diffusion-model loader
+        # discovers files via folder_paths('diffusion_models').
+        assert str(ckpt_dir) not in path
+
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    def test_falls_back_to_unet_for_legacy_layouts(self, monkeypatch, tmp_path):
+        """Older ComfyUI installs use 'unet' for the same content.  When
+        'diffusion_models' is not configured, the resolver falls back to
+        'unet' so the saved artifact is still discoverable."""
+        import folder_paths
+
+        unet_dir = tmp_path / "unet"
+        unet_dir.mkdir()
+
+        def get_folder_paths(folder: str):
+            if folder == "diffusion_models":
+                return []
+            if folder == "unet":
+                return [str(unet_dir)]
+            return []
+
+        monkeypatch.setattr(folder_paths, "get_folder_paths", get_folder_paths)
+        path = _resolve_diffusion_models_path("model.safetensors")
+        assert path == os.path.join(str(unet_dir), "model.safetensors")
+
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    def test_raises_when_no_directory_configured(self, monkeypatch):
+        """If neither 'diffusion_models' nor 'unet' is configured, the
+        resolver raises ValueError so callers cannot accidentally publish to
+        the wrong folder."""
+        import folder_paths
+
+        monkeypatch.setattr(
+            folder_paths, "get_folder_paths", lambda folder: [],
+        )
+        with pytest.raises(ValueError, match=r"diffusion_models"):
+            _resolve_diffusion_models_path("model.safetensors")
+
+
+class TestSaveKindAwarePathRouter:
+    """_resolve_save_path picks the resolver matching the artifact kind."""
+
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    def test_diffusion_save_uses_diffusion_models_resolver(
+        self, monkeypatch, tmp_path,
+    ):
+        """is_checkpoint=False routes through the diffusion-models resolver,
+        not the checkpoints resolver — this is the bug from review."""
+        import folder_paths
+
+        diffusion_dir = tmp_path / "diffusion_models"
+        diffusion_dir.mkdir()
+        ckpt_dir = tmp_path / "checkpoints"
+        ckpt_dir.mkdir()
+
+        def get_folder_paths(folder: str):
+            if folder == "diffusion_models":
+                return [str(diffusion_dir)]
+            if folder == "checkpoints":
+                return [str(ckpt_dir)]
+            return []
+
+        monkeypatch.setattr(folder_paths, "get_folder_paths", get_folder_paths)
+        path = _resolve_save_path("model.safetensors", is_checkpoint=False)
+        assert path.startswith(str(diffusion_dir) + os.sep)
+        assert str(ckpt_dir) not in path
+
+    # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+    def test_checkpoint_save_uses_checkpoints_resolver(
+        self, monkeypatch, tmp_path,
+    ):
+        """is_checkpoint=True still routes through the checkpoints resolver."""
+        import folder_paths
+
+        ckpt_dir = tmp_path / "checkpoints"
+        ckpt_dir.mkdir()
+
+        monkeypatch.setattr(
+            folder_paths, "get_folder_paths",
+            lambda folder: [str(ckpt_dir)] if folder == "checkpoints" else [],
+        )
+        path = _resolve_save_path("model.safetensors", is_checkpoint=True)
+        assert path.startswith(str(ckpt_dir) + os.sep)
+
+
+class TestDiffusionSaveRoutingThroughFolderPaths:
+    """End-to-end: diffusion save_model routes through folder_paths
+    'diffusion_models' (not 'checkpoints'), without any test patching the
+    checkpoint resolver."""
+
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    def test_fresh_save_publishes_under_diffusion_models_folder(
+        self, mock_model_patcher, tmp_path, monkeypatch,
+    ):
+        """A diffusion-only save_model run resolves the artifact path through
+        folder_paths('diffusion_models').  We configure folder_paths to
+        return distinct directories for 'diffusion_models' and 'checkpoints'
+        and assert the artifact lands under diffusion_models."""
+        import folder_paths
+
+        diffusion_dir = tmp_path / "diffusion_models"
+        diffusion_dir.mkdir()
+        ckpt_dir = tmp_path / "checkpoints"
+        ckpt_dir.mkdir()
+
+        def get_folder_paths(folder: str):
+            if folder == "diffusion_models":
+                return [str(diffusion_dir)]
+            if folder == "checkpoints":
+                return [str(ckpt_dir)]
+            return []
+
+        monkeypatch.setattr(folder_paths, "get_folder_paths", get_folder_paths)
+
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl",
+            checkpoint_components=None,
+        )
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        mock_analyze, mock_model_analysis, mock_loader, plan = _make_full_mode_mocks(
+            mock_model_patcher, keys,
+        )
+        merged = {k: torch.randn(4, 4) for k in keys}
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        def streaming_eval_side_effect(**kwargs):
+            for k in kwargs.get("keys", []):
+                kwargs["write_fn"](k, merged[k])
+
+        # Note: we do NOT patch _resolve_checkpoints_path or _resolve_save_path.
+        # The system under test must route the diffusion save through
+        # _resolve_diffusion_models_path → folder_paths('diffusion_models').
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=plan),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.streaming_evaluation_to_sink",
+                  side_effect=streaming_eval_side_effect),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.validate_checkpoint_components"),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit._comfy_load_diffusion_model",
+                  return_value=MagicMock(name="loaded")),
+        ):
+            WIDENExitNode().execute(
+                merge, save_model=True, model_name="diffusion_only",
+            )
+
+        expected_path = diffusion_dir / "diffusion_only.safetensors"
+        assert expected_path.exists(), (
+            f"diffusion save did not publish under diffusion_models folder; "
+            f"contents: {list(diffusion_dir.iterdir())} / "
+            f"{list(ckpt_dir.iterdir())}"
+        )
+        # Artifact must NOT have been written to the checkpoints folder.
+        assert not (ckpt_dir / "diffusion_only.safetensors").exists()
+
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    # AC: @full-saved-model-output ac-no-op-produces-full-artifact
+    def test_noop_diffusion_save_publishes_under_diffusion_models_folder(
+        self, mock_model_patcher, tmp_path, monkeypatch,
+    ):
+        """A no-op diffusion save (RecipeBase, no merge) also publishes under
+        the diffusion_models folder, not under checkpoints."""
+        import folder_paths
+
+        diffusion_dir = tmp_path / "diffusion_models"
+        diffusion_dir.mkdir()
+        ckpt_dir = tmp_path / "checkpoints"
+        ckpt_dir.mkdir()
+
+        def get_folder_paths(folder: str):
+            if folder == "diffusion_models":
+                return [str(diffusion_dir)]
+            if folder == "checkpoints":
+                return [str(ckpt_dir)]
+            return []
+
+        monkeypatch.setattr(folder_paths, "get_folder_paths", get_folder_paths)
+
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl",
+            checkpoint_components=None,
+        )
+
+        with (
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit._comfy_load_diffusion_model",
+                  return_value=MagicMock(name="loaded")),
+        ):
+            WIDENExitNode().execute(
+                base, save_model=True, model_name="diffusion_noop",
+            )
+
+        assert (diffusion_dir / "diffusion_noop.safetensors").exists()
+        assert not (ckpt_dir / "diffusion_noop.safetensors").exists()
+
+    # AC: @full-saved-model-output ac-cache-reuses-artifact
+    # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    def test_diffusion_cache_hit_resolves_through_diffusion_models_folder(
+        self, mock_model_patcher, tmp_path, monkeypatch,
+    ):
+        """Diffusion cache validation must look in the diffusion_models
+        folder.  We pre-place a valid artifact there and assert that
+        check_full_model_cache is invoked with that path (so cache reuse
+        cannot accidentally reach into the checkpoints folder)."""
+        import folder_paths
+
+        diffusion_dir = tmp_path / "diffusion_models"
+        diffusion_dir.mkdir()
+        ckpt_dir = tmp_path / "checkpoints"
+        ckpt_dir.mkdir()
+
+        def get_folder_paths(folder: str):
+            if folder == "diffusion_models":
+                return [str(diffusion_dir)]
+            if folder == "checkpoints":
+                return [str(ckpt_dir)]
+            return []
+
+        monkeypatch.setattr(folder_paths, "get_folder_paths", get_folder_paths)
+
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl",
+            checkpoint_components=None,
+        )
+        lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+        keys = list(mock_model_patcher.model_state_dict().keys())
+
+        mock_analyze, mock_model_analysis, mock_loader, plan = _make_full_mode_mocks(
+            mock_model_patcher, keys,
+        )
+
+        sentinel = MagicMock(name="cached_model")
+        captured_paths: list[str] = []
+
+        def fake_check(save_path, *args, **kwargs):
+            captured_paths.append(save_path)
+            return True
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models",
+                  return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=plan),
+            patch("nodes.exit.compile_batch_groups", return_value={}),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.validate_checkpoint_components"),
+            patch("nodes.exit.check_full_model_cache", side_effect=fake_check),
+            patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit.ProgressBar", None),
+            patch("nodes.exit._comfy_load_diffusion_model", return_value=sentinel),
+        ):
+            (result,) = WIDENExitNode().execute(
+                merge, save_model=True, model_name="cached_artifact",
+            )
+
+        assert result is sentinel
+        assert len(captured_paths) == 1
+        cache_path = captured_paths[0]
+        assert cache_path.startswith(str(diffusion_dir) + os.sep), (
+            f"Diffusion cache check resolved path under {cache_path!r}; "
+            f"expected under {str(diffusion_dir)!r} (diffusion_models folder)"
+        )
+        assert str(ckpt_dir) not in cache_path

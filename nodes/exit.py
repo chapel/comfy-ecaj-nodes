@@ -574,6 +574,59 @@ def _resolve_checkpoints_path(model_name: str) -> str:
     return os.path.join(dirs[0], model_name)
 
 
+def _resolve_diffusion_models_path(model_name: str) -> str:
+    """Resolve a model name to a full path in the first diffusion-models directory.
+
+    AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    AC: @full-saved-model-output ac-diffusion-model-companion-separation
+
+    Standalone diffusion-model saves must publish under Comfy's
+    ``diffusion_models`` folder so Comfy's UNETLoader (which calls
+    ``folder_paths.get_full_path_or_raise('diffusion_models', ...)``) can
+    discover them.  Older ComfyUI installs use the legacy ``unet`` folder
+    name for the same content; we fall back to it when ``diffusion_models``
+    is not configured.
+
+    Args:
+        model_name: Validated model filename.
+
+    Returns:
+        Full path to the saved diffusion-model file.
+
+    Raises:
+        ValueError: If neither ``diffusion_models`` nor ``unet`` directories
+            are configured.
+    """
+    import folder_paths
+
+    dirs = folder_paths.get_folder_paths("diffusion_models")
+    if not dirs:
+        dirs = folder_paths.get_folder_paths("unet")
+    if not dirs:
+        raise ValueError(
+            "No diffusion_models (or unet) directory configured in ComfyUI"
+        )
+    return os.path.join(dirs[0], model_name)
+
+
+def _resolve_save_path(model_name: str, *, is_checkpoint: bool) -> str:
+    """Resolve the save path for a saved-model artifact based on its kind.
+
+    AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
+
+    Checkpoint-style artifacts publish under Comfy's ``checkpoints`` folder
+    (CheckpointLoaderSimple discovery).  Standalone diffusion-model
+    artifacts publish under Comfy's ``diffusion_models`` folder
+    (UNETLoader discovery).  Routing the path by artifact kind ensures
+    the saved file is reachable through the same Comfy load contract as
+    its source model kind, which is required for round-trip loadability.
+    """
+    if is_checkpoint:
+        return _resolve_checkpoints_path(model_name)
+    return _resolve_diffusion_models_path(model_name)
+
+
 def _recipe_has_checkpoint_components(node: RecipeNode) -> bool:
     """Check if recipe tree originates from a checkpoint-style source.
 
@@ -854,7 +907,16 @@ class WIDENExitNode:
         )
         try:
             validated = validate_model_name(model_name)
-            path = _resolve_checkpoints_path(validated)
+            # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+            # IS_CHANGED hashes file state at the same path that the save will
+            # publish to.  Standalone diffusion-model recipes save under the
+            # diffusion_models folder, so the cache-invalidation hash must
+            # stat that folder — not the checkpoints folder.
+            try:
+                is_checkpoint = _recipe_has_checkpoint_components(widen)
+            except Exception:
+                is_checkpoint = True
+            path = _resolve_save_path(validated, is_checkpoint=is_checkpoint)
             stat = os.stat(path)
             hasher.update(f"|mtime={stat.st_mtime}|size={stat.st_size}".encode())
         except (ValueError, OSError):
@@ -973,15 +1035,18 @@ class WIDENExitNode:
         lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
 
         validated_name = validate_model_name(model_name)
-        save_path = _resolve_checkpoints_path(validated_name)
+        # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+        # Detect artifact kind BEFORE resolving the save path: a no-op
+        # diffusion-only save must still publish under diffusion_models so
+        # Comfy's UNETLoader discovers it, not under checkpoints.
+        is_checkpoint = _recipe_has_checkpoint_components(widen)
+        save_path = _resolve_save_path(validated_name, is_checkpoint=is_checkpoint)
         serialized = serialize_recipe(widen, base_identity, lora_stats)
         recipe_hash = compute_recipe_hash(serialized)
         dependency_fingerprints_json = json.dumps(
             lora_stats, sort_keys=True, separators=(",", ":"),
         )
 
-        # Detect checkpoint-style source: RecipeBase with checkpoint_components
-        is_checkpoint = _recipe_has_checkpoint_components(widen)
 
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         # AC: @exit-model-persistence ac-4, ac-6
@@ -1141,7 +1206,13 @@ class WIDENExitNode:
         lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
 
         validated_name = validate_model_name(model_name)
-        save_path = _resolve_checkpoints_path(validated_name)
+        # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+        # Detect artifact kind BEFORE resolving the save path so diffusion-only
+        # saves publish under the diffusion_models folder (Comfy's UNETLoader
+        # discovery) and checkpoint saves publish under the checkpoints folder
+        # (CheckpointLoaderSimple discovery).
+        is_checkpoint = _recipe_has_checkpoint_components(widen)
+        save_path = _resolve_save_path(validated_name, is_checkpoint=is_checkpoint)
         serialized = serialize_recipe(widen, base_identity, lora_stats)
         recipe_hash = compute_recipe_hash(serialized)
 
@@ -1150,8 +1221,6 @@ class WIDENExitNode:
             k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()
         }
 
-        # Detect checkpoint-style save: recipe contains companion model components
-        is_checkpoint = _recipe_has_checkpoint_components(widen)
         dependency_fingerprints_json = json.dumps(
             lora_stats, sort_keys=True, separators=(",", ":"),
         )

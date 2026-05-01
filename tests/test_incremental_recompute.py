@@ -1138,7 +1138,7 @@ class TestExitNodeIncrementalCache:
                   return_value=new_results),
             patch("nodes.exit.validate_model_name",
                   return_value="test.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path",
+            patch("nodes.exit._resolve_save_path",
                   return_value="/tmp/test.safetensors"),
             patch("nodes.exit.serialize_recipe",
                   return_value='{"test": true}'),
