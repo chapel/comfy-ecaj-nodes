@@ -8509,7 +8509,7 @@ runs:
     completed_at: 2026-05-01T00:29:46.840Z
   - _ulid: 01KQGFAGVDW2YATJA8S4NDKFPZ
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -8536,7 +8536,16 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-05-01T00:35:12.482Z
-        completed_at: 2026-05-01T00:35:12.482Z
+        completed_at: 2026-05-01T00:35:24.074Z
+        notes: "Decision: skip new captures. Existing coverage found: inbox 01KQGF1X tracks the guarded
+          diffusion saved-output live harness; observation 01KH6Y61 tracks mock tests validating the
+          wrong behavior; inbox 01KQC9KA tracks loader-path behavioral smoke-test guidance;
+          observation 01KQGF1X tracks the success pattern of reading ComfyUI source during diffusion
+          load review. No unique high-confidence item remains after deduplication."
+      - status: completed
+        step_index: 3
+        started_at: 2026-05-01T00:35:24.074Z
+        completed_at: 2026-05-01T00:35:24.074Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-01T00:34:23.214Z
