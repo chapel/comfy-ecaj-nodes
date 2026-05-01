@@ -16592,3 +16592,29 @@ reviews:
     created_at: 2026-05-01T00:30:26.365Z
     updated_at: 2026-05-01T00:51:49.063Z
     notes: []
+  - _ulid: 01KQGGHSX9ZHNWK7HQGTSQ4YY9
+    slugs: []
+    title: Review diffusion-model saved-output round trip cycle 2
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KQGGHSX9T870ABX5FAFH38MP
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-05-01T00:55:50.441Z
+    examined_commit: 40de3e7e6d6ba4c65758de34bf8d21b7f157f11f
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KQGCVTCMFVH3HF2H150AY5B7"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-05-01T00:55:50.441Z
+    updated_at: null
+    notes: []
