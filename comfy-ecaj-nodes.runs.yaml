@@ -8554,9 +8554,26 @@ runs:
     completed_at: 2026-05-01T00:35:32.468Z
   - _ulid: 01KQGGD2HZ4C9VZDJYH3VKPB7T
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-01T00:53:15.456Z
+        completed_at: 2026-05-01T00:53:48.681Z
+        notes: "(1) Review blocker bodies were precise — line-anchored, named the broken file path resolver
+          and the missing test discipline ('tests that do not patch _resolve_checkpoints_path for
+          diffusion saves'). I could plan the fix from the review alone without ambiguity. (2)
+          Existing checkpoint harness was a near-complete template — reused guard structure,
+          submit_workflow, classify_failure, check_cache_reuse without modification. (3) Kind-aware
+          _resolve_save_path router was a clean refactor seam: one new function plus moving
+          is_checkpoint detection ahead of save-path resolution covered cache-miss + cache-hit +
+          no-op + IS_CHANGED uniformly. (4) Migrating test patches with replace_all (after
+          confirming all sites were diffusion-only) avoided dozens of manual edits."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-01T00:53:48.681Z
+        completed_at: 2026-05-01T00:53:48.681Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-01T00:53:15.456Z
