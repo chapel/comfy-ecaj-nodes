@@ -16618,6 +16618,12 @@ reviews:
           kind: blocker
           thread_ulid: 01KQGGQ4T73KF56QJMX8C7AZC5
         timestamp: 2026-05-01T00:58:45.621Z
+      - _ulid: 01KQGGQPM2ACR03W89KRE1DNWY
+        actor: Jacob Chapel
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQGGQ4T73KF56QJMX8C7AZC5
+        timestamp: 2026-05-01T00:59:03.682Z
     examined_commit: 40de3e7e6d6ba4c65758de34bf8d21b7f157f11f
     external_links: []
     lifecycle_state: open
@@ -16646,8 +16652,17 @@ reviews:
               the guarded live harness will be rejected before it can validate that saved diffusion
               artifacts reload through Comfy's standalone diffusion-model path."
             created_at: 2026-05-01T00:58:45.448Z
+          - _ulid: 01KQGGQPFMSNZ4NSS56FNW727G
+            author: Jacob Chapel
+            body: 'Clarifying the stripped identifiers: the generated UNETLoader nodes contain only unet_name,
+              but current ComfyUI requires both unet_name and weight_dtype. ComfyUI execution.py
+              reports required_input_missing for absent required inputs. The fix should add
+              weight_dtype, usually "default", to every UNETLoader node built by
+              build_diffusion_save_workflow, build_diffusion_downstream_workflow, and
+              build_diffusion_cache_reuse_workflow, and add tests that assert the input is present.'
+            created_at: 2026-05-01T00:59:03.540Z
         kind: blocker
     verdicts: []
     created_at: 2026-05-01T00:55:50.441Z
-    updated_at: 2026-05-01T00:58:45.448Z
+    updated_at: 2026-05-01T00:59:03.540Z
     notes: []
