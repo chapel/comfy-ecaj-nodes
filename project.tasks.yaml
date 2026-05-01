@@ -2433,7 +2433,7 @@
   title: Save diffusion-model WIDEN outputs as Comfy-loadable diffusion model artifacts
   type: task
   spec_ref: "@full-saved-model-output"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on: []
   priority: 1
@@ -2447,5 +2447,5 @@
   todos_count: 0
   created_at: 2026-04-30T23:51:24.308Z
   started_at: 2026-05-01T00:36:54.809Z
-  submitted_at: 2026-05-01T00:27:14.301Z
+  submitted_at: 2026-05-01T00:52:25.207Z
   automation: eligible
