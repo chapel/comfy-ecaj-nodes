@@ -8509,9 +8509,22 @@ runs:
     completed_at: 2026-05-01T00:29:46.840Z
   - _ulid: 01KQGFAGVDW2YATJA8S4NDKFPZ
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-01T00:34:23.214Z
+        completed_at: 2026-05-01T00:34:54.931Z
+        notes: "Worked well: independent review started from diff and local ComfyUI source rather than
+          worker notes. Running focused tests, full pytest, ruff, diff whitespace, and kspec
+          validation before verdict gave complete evidence. Checking ComfyUI
+          UNETLoader/load_diffusion_model behavior exposed that key layout alone was not the full
+          standalone diffusion-model contract."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-01T00:34:54.931Z
+        completed_at: 2026-05-01T00:34:54.931Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-01T00:34:23.214Z
