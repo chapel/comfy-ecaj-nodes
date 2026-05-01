@@ -8438,7 +8438,7 @@ runs:
     completed_at: 2026-04-30T22:01:58.530Z
   - _ulid: 01KQGEYQA8YMJ8CXG1PBTP53A2
     status: active
-    current_step: 4
+    current_step: 5
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -8491,10 +8491,16 @@ runs:
           explicitly mentioned this as guarded/deferral-tolerant, and I deferred it to keep this PR
           focused on spec ACs. Worth a follow-up task. No other untracked improvements warrant
           capture from this session."
-      - status: completed
+      - status: skipped
         step_index: 4
         started_at: 2026-05-01T00:29:18.700Z
-        completed_at: 2026-05-01T00:29:18.700Z
+        completed_at: 2026-05-01T00:29:24.657Z
+        notes: Skipping interactive discussion — autonomous dispatch run, no interactive user. One concrete
+          proposal (diffusion-model live-Comfy harness) will be captured in inbox for human triage.
+      - status: completed
+        step_index: 5
+        started_at: 2026-05-01T00:29:24.657Z
+        completed_at: 2026-05-01T00:29:24.657Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-01T00:27:56.617Z
