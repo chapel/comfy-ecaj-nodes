@@ -8438,7 +8438,7 @@ runs:
     completed_at: 2026-04-30T22:01:58.530Z
   - _ulid: 01KQGEYQA8YMJ8CXG1PBTP53A2
     status: active
-    current_step: 3
+    current_step: 4
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -8483,7 +8483,18 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-05-01T00:29:09.599Z
-        completed_at: 2026-05-01T00:29:09.599Z
+        completed_at: 2026-05-01T00:29:18.700Z
+        notes: "Proposed improvements (small, considered): (1) Live-Comfy validation harness for
+          diffusion-model saved output — analogous to the existing checkpoint-save manual harness,
+          would prove a real Flux/Z-Image/Qwen save loads via UNETLoader. Scope: small, mirrors
+          existing scripts/manual/checkpoint_save_validation.py pattern. The task description
+          explicitly mentioned this as guarded/deferral-tolerant, and I deferred it to keep this PR
+          focused on spec ACs. Worth a follow-up task. No other untracked improvements warrant
+          capture from this session."
+      - status: completed
+        step_index: 4
+        started_at: 2026-05-01T00:29:18.700Z
+        completed_at: 2026-05-01T00:29:18.700Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-01T00:27:56.617Z
