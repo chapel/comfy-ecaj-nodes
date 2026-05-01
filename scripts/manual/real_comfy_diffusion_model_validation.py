@@ -551,20 +551,25 @@ def build_diffusion_save_workflow(source_diffusion_model: str) -> dict:
     """Build a standalone diffusion-model WIDEN save_model workflow.
 
     Pipeline:
-      UNETLoader(unet_name=<source>)  -- standalone diffusion-model load
+      UNETLoader(unet_name=<source>, weight_dtype="default")
         -> WIDENEntry(model=...)       -- no clip/vae => diffusion-only
         -> WIDENExit(save_model=True, model_name=<saved>)
 
     ``enable_cache=False`` so the save always performs the full
     materialization, producing a fresh artifact under the diffusion_models
     folder.
+
+    Both ``unet_name`` and ``weight_dtype`` are required inputs of
+    ComfyUI's UNETLoader; omitting ``weight_dtype`` causes prompt
+    validation to reject the workflow with required_input_missing before
+    the diffusion-model load path executes.
     """
     return {
         "1": {
             "class_type": "UNETLoader",
             "inputs": {
                 "unet_name": source_diffusion_model,
-                # weight_dtype default exists in newer Comfy; let server pick.
+                "weight_dtype": "default",
             },
         },
         "2": {
@@ -640,6 +645,7 @@ def build_diffusion_downstream_workflow(
             "class_type": "UNETLoader",
             "inputs": {
                 "unet_name": saved_artifact_name,
+                "weight_dtype": "default",
             },
         },
         "2": clip_node,
@@ -715,6 +721,7 @@ def build_diffusion_cache_reuse_workflow(source_diffusion_model: str) -> dict:
             "class_type": "UNETLoader",
             "inputs": {
                 "unet_name": source_diffusion_model,
+                "weight_dtype": "default",
             },
         },
         "2": {

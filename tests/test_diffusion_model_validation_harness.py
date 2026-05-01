@@ -219,6 +219,23 @@ class TestDiffusionSaveWorkflowShape:
         assert len(unet_nodes) == 1
         assert unet_nodes[0]["inputs"]["unet_name"] == "flux1-schnell.safetensors"
 
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    def test_save_unet_loader_supplies_required_weight_dtype(self):
+        """Current ComfyUI UNETLoader declares both ``unet_name`` and
+        ``weight_dtype`` as required inputs; omitting ``weight_dtype``
+        causes prompt validation to reject the workflow before the
+        diffusion-model load executes (required_input_missing).
+        """
+        wf = harness.build_diffusion_save_workflow("flux1-schnell.safetensors")
+        unet_nodes = [n for n in wf.values() if n["class_type"] == "UNETLoader"]
+        assert len(unet_nodes) == 1
+        inputs = unet_nodes[0]["inputs"]
+        assert "weight_dtype" in inputs, (
+            "UNETLoader requires weight_dtype; without it Comfy's prompt "
+            "validation rejects the live save workflow"
+        )
+        assert inputs["weight_dtype"] == "default"
+
     # AC: @full-saved-model-output ac-diffusion-model-companion-separation
     def test_widen_entry_does_not_supply_clip_or_vae(self):
         """A diffusion-model recipe must not bundle CLIP/VAE through WIDEN
@@ -260,6 +277,23 @@ class TestDiffusionDownstreamWorkflowShape:
         producer = wf[model_ref[0]]
         assert producer["class_type"] == "UNETLoader"
         assert producer["inputs"]["unet_name"] == "saved.safetensors"
+
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    def test_downstream_unet_loader_supplies_required_weight_dtype(self):
+        """The downstream UNETLoader must include ``weight_dtype`` so the
+        live reload prompt is accepted by Comfy's prompt validator
+        (current ComfyUI marks ``weight_dtype`` as required).
+        """
+        wf = harness.build_diffusion_downstream_workflow(
+            "saved.safetensors",
+            companion_clip="clip.safetensors",
+            companion_vae="vae.safetensors",
+        )
+        unet_nodes = [n for n in wf.values() if n["class_type"] == "UNETLoader"]
+        assert len(unet_nodes) == 1
+        inputs = unet_nodes[0]["inputs"]
+        assert "weight_dtype" in inputs
+        assert inputs["weight_dtype"] == "default"
 
     # AC: @full-saved-model-output ac-diffusion-model-companion-separation
     def test_companion_clip_supplied_separately_from_unet_artifact(self):
@@ -355,6 +389,17 @@ class TestDiffusionCacheReuseWorkflowShape:
         class_types = {n["class_type"] for n in wf.values()}
         assert "UNETLoader" in class_types
         assert "CheckpointLoaderSimple" not in class_types
+
+    def test_cache_reuse_unet_loader_supplies_required_weight_dtype(self):
+        """The cache-reuse run must also include ``weight_dtype`` on
+        UNETLoader; Comfy validates the cache-reuse prompt the same way
+        as the initial save prompt and would reject it otherwise."""
+        wf = harness.build_diffusion_cache_reuse_workflow("model.safetensors")
+        unet_nodes = [n for n in wf.values() if n["class_type"] == "UNETLoader"]
+        assert len(unet_nodes) == 1
+        inputs = unet_nodes[0]["inputs"]
+        assert "weight_dtype" in inputs
+        assert inputs["weight_dtype"] == "default"
 
 
 # ===========================================================================
