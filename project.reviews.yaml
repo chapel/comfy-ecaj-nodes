@@ -16370,6 +16370,16 @@ reviews:
         runner: ruff
         created_at: 2026-05-01T00:32:48.174Z
         completed_at: 2026-05-01T00:32:48.174Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "git diff --check dev...HEAD: no output"
+        name: diff whitespace
+        required: true
+        runner: git
+        created_at: 2026-05-01T00:33:22.672Z
+        completed_at: 2026-05-01T00:33:22.672Z
     events:
       - _ulid: 01KQGF39HX48WWYNAM68EZB8PY
         actor: Jacob Chapel
@@ -16426,6 +16436,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
         timestamp: 2026-05-01T00:33:16.922Z
+      - _ulid: 01KQGF8NW3H972ARS2H6YBBZ3Q
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: diff whitespace
+        timestamp: 2026-05-01T00:33:22.819Z
     examined_commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
     external_links: []
     lifecycle_state: open
@@ -16484,5 +16501,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-05-01T00:30:26.365Z
-    updated_at: 2026-05-01T00:33:16.757Z
+    updated_at: 2026-05-01T00:33:22.672Z
     notes: []
