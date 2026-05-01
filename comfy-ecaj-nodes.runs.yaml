@@ -8688,7 +8688,7 @@ runs:
     started_at: 2026-05-01T01:01:01.197Z
     completed_at: 2026-05-01T01:03:17.086Z
   - _ulid: 01KQGHCW26R6K1PGRFTZ43PSH6
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -8730,7 +8730,13 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-05-01T01:13:02.138Z
-        completed_at: 2026-05-01T01:13:02.138Z
+        completed_at: 2026-05-01T01:13:08.919Z
+        notes: No items captured per step 3 evaluation. Loop-mode lower-volume principle applied; all
+          observed friction either duplicates existing tracked items (worktree-guard
+          01KQ7036/01KQC4EZ; review-thread truncation 01KQGGGDD; spec-coverage hook noise 01KQGGGDF)
+          or is too low-confidence (bash empty output) or out-of-scope (pre-existing test ordering
+          pollution).
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-01T01:10:37.382Z
+    completed_at: 2026-05-01T01:13:08.920Z
