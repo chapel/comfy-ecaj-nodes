@@ -16990,7 +16990,74 @@ reviews:
     slugs: []
     title: "Plan review: Saved Model Materialization Progress"
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Inspected @full-saved-model-output, @streaming-full-model-materialization,
+          @exit-model-persistence, @saved-model-artifact-safety, and
+          @live-comfy-saved-output-validation. The new requirement is correctly scoped as
+          saved-artifact materialization observability under the streaming materialization behavior
+          and does not redefine artifact kind, cache, publication, or live Comfy validation
+          semantics.
+        name: Existing spec alignment
+        required: true
+        created_at: 2026-05-01T19:27:35.050Z
+        completed_at: 2026-05-01T19:27:35.050Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: The proposed requirement has six observable ACs covering progress/status outcomes during
+          tensor writes, base-weight copy, affected tensor handoff, post-write phases, cache reuse,
+          and failure. ACs are behavioral and do not require implementation-specific mechanisms.
+        name: Spec quality
+        required: true
+        created_at: 2026-05-01T19:27:35.358Z
+        completed_at: 2026-05-01T19:27:35.358Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: The manual task includes What/Why/How/Testing/Covers sections, names relevant files and
+          code paths, and explicitly excludes output-mode controls, artifact semantic changes, and
+          real ComfyUI validation in automation.
+        name: Task standalone scope
+        required: true
+        created_at: 2026-05-01T19:27:35.669Z
+        completed_at: 2026-05-01T19:27:35.669Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: The single task claims all six ACs on @streaming-materialization-progress and its testing
+          section maps to each claimed behavior without overclaiming unrelated existing ACs.
+        name: Coverage mapping
+        required: true
+        created_at: 2026-05-01T19:27:35.969Z
+        completed_at: 2026-05-01T19:27:35.969Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: One focused P1 implementation task is appropriate for this follow-up. It has no
+          dependencies, and no plan-level/multi-task sequencing is needed for the stated scope.
+        name: Dependency and task shape
+        required: true
+        created_at: 2026-05-01T19:27:36.277Z
+        completed_at: 2026-05-01T19:27:36.277Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Parent @streaming-full-model-materialization exists; the task uses a local spec_ref that
+          plan derive resolves to the materialized spec; no depends_on refs are present; plan import
+          dry-run accepted the document shape.
+        name: Reference validation
+        required: true
+        created_at: 2026-05-01T19:27:36.581Z
+        completed_at: 2026-05-01T19:27:36.581Z
     events:
       - _ulid: 01KQJG43KD6TZ6AB8B9Y0ADNDS
         actor: Jacob Chapel
@@ -16998,9 +17065,74 @@ reviews:
         payload:
           to: draft
         timestamp: 2026-05-01T19:26:50.477Z
+      - _ulid: 01KQJG5EX6FEH4ZVAZ4CDVYTFQ
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          from: draft
+          to: open
+        timestamp: 2026-05-01T19:27:34.822Z
+      - _ulid: 01KQJG5F7XF5VH71XGWV46ND3H
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Existing spec alignment
+        timestamp: 2026-05-01T19:27:35.165Z
+      - _ulid: 01KQJG5FHGRDE662HHS68TX1SB
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Spec quality
+        timestamp: 2026-05-01T19:27:35.472Z
+      - _ulid: 01KQJG5FV44X52AHQKSGVR8YZN
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Task standalone scope
+        timestamp: 2026-05-01T19:27:35.780Z
+      - _ulid: 01KQJG5G4J46M0B7T3R5MQH72B
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Coverage mapping
+        timestamp: 2026-05-01T19:27:36.082Z
+      - _ulid: 01KQJG5GE6SWWXP1NWK0ZESDJ7
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Dependency and task shape
+        timestamp: 2026-05-01T19:27:36.390Z
+      - _ulid: 01KQJG5GQMVSBTXW4E98D6V7WX
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Reference validation
+        timestamp: 2026-05-01T19:27:36.692Z
+      - _ulid: 01KQJG5H16D1W7J8KZCG6T2DRE
+        actor: Jacob Chapel
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: approve
+        timestamp: 2026-05-01T19:27:36.998Z
+      - _ulid: 01KQJG5H16NVEH8W4ARP6MG8XF
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-05-01T19:27:36.998Z
     examined_commit: null
     external_links: []
-    lifecycle_state: draft
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: plan
@@ -17008,7 +17140,14 @@ reviews:
       ref: "@plan-saved-model-materialization-progress"
       shadow_commit: ""
     threads: []
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: approve
+        reviewer: Jacob Chapel
+        role: reviewer
+        created_at: 2026-05-01T19:27:36.998Z
     created_at: 2026-05-01T19:26:50.477Z
-    updated_at: null
+    updated_at: 2026-05-01T19:27:36.998Z
     notes: []
