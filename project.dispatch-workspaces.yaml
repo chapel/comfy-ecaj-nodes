@@ -2061,7 +2061,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-01T00:35:48.264Z
+      updated_at: 2026-05-01T00:35:48.511Z
     integration:
       status: pending
       detail: null
@@ -2070,25 +2070,20 @@ workspaces:
       target_branch: dev
       target_commit: 9cdeb981d3dfc888b0313da26e55f3e82db2da68
       updated_at: 2026-05-01T00:35:48.264Z
-    lifecycle_state: integrating
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@01KQGCVTCMFVH3HF2H150AY5B7"
     task_slug: task-diffusion-model-saved-output-round-trip
     timestamps:
       closed_at: null
       last_active_at: 2026-05-01T00:30:04.529Z
-      last_reconciled_at: 2026-05-01T00:35:48.264Z
+      last_reconciled_at: 2026-05-01T00:35:48.511Z
       created_at: 2026-05-01T00:04:15.463Z
-      updated_at: 2026-05-01T00:35:48.264Z
+      updated_at: 2026-05-01T00:35:48.511Z
     workspace_id: dispatch-workspace-01KQGCVTCMFVH3HF2H150AY5B7
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer:
-        branch_mode: detached
-        branch_ref: null
-        head: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
-        last_seen_at: 2026-05-01T00:30:03.886Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-diffusion-model-saved-output-round-trip-01kqgcvt-review
+      reviewer: null
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-diffusion-model-saved-output-round-trip/01kqgcvt
