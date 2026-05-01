@@ -8689,9 +8689,25 @@ runs:
     completed_at: 2026-05-01T01:03:17.086Z
   - _ulid: 01KQGHCW26R6K1PGRFTZ43PSH6
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-01T01:10:37.382Z
+        completed_at: 2026-05-01T01:11:17.390Z
+        notes: "What worked: (1) Review thread anchor + reviewer's clarifying second comment named the exact
+          missing input ('weight_dtype, usually default') and the exact builders to fix, so the fix
+          was localized and unambiguous. (2) Existing test file already had a behavioral pattern
+          (build the workflow dict, filter nodes by class_type, assert on inputs) so adding 3 mirror
+          tests was a copy-paste of an established pattern. (3) Running tests in isolation BEFORE
+          diagnosing as 'my failure' surfaced that 3 unrelated zimage failures are test-ordering
+          pollution (passes in isolation, passes without random ordering, and the prior review
+          snapshot also passed)."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-01T01:11:17.390Z
+        completed_at: 2026-05-01T01:11:17.390Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-01T01:10:37.382Z
