@@ -8437,7 +8437,7 @@ runs:
     started_at: 2026-04-30T21:59:56.046Z
     completed_at: 2026-04-30T22:01:58.530Z
   - _ulid: 01KQGEYQA8YMJ8CXG1PBTP53A2
-    status: active
+    status: completed
     current_step: 5
     initiated_by: "@claude"
     step_results:
@@ -8500,7 +8500,10 @@ runs:
       - status: completed
         step_index: 5
         started_at: 2026-05-01T00:29:24.657Z
-        completed_at: 2026-05-01T00:29:24.657Z
+        completed_at: 2026-05-01T00:29:46.840Z
+        notes: "Captured: 1 inbox item (diffusion-model live-Comfy harness), 2 success observations
+          (centralized stub strategy, ComfyUI source-first design)."
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-01T00:27:56.617Z
+    completed_at: 2026-05-01T00:29:46.840Z
