@@ -16336,6 +16336,18 @@ reviews:
         runner: pytest
         created_at: 2026-05-01T00:32:46.563Z
         completed_at: 2026-05-01T00:32:46.563Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_diffusion_model_saved_output.py
+          tests/test_full_model_streaming.py tests/test_incremental_recompute.py: 126 passed in
+          2.45s"
+        name: focused diffusion saved-output tests
+        required: true
+        runner: pytest
+        created_at: 2026-05-01T00:32:47.084Z
+        completed_at: 2026-05-01T00:32:47.084Z
     events:
       - _ulid: 01KQGF39HX48WWYNAM68EZB8PY
         actor: Jacob Chapel
@@ -16357,6 +16369,13 @@ reviews:
           status: pass
           name: pytest
         timestamp: 2026-05-01T00:32:46.712Z
+      - _ulid: 01KQGF7K42PVT7WAVY9QYK1JYH
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: focused diffusion saved-output tests
+        timestamp: 2026-05-01T00:32:47.234Z
     examined_commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
     external_links: []
     lifecycle_state: open
@@ -16369,5 +16388,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-01T00:30:26.365Z
-    updated_at: 2026-05-01T00:32:46.563Z
+    updated_at: 2026-05-01T00:32:47.084Z
     notes: []
