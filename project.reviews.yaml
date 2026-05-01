@@ -16419,6 +16419,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KQGF837GZS2FF3VQE5JNWGRP
         timestamp: 2026-05-01T00:33:03.886Z
+      - _ulid: 01KQGF8G3T5VHMVSE88H2H2JV4
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
+        timestamp: 2026-05-01T00:33:16.922Z
     examined_commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
     external_links: []
     lifecycle_state: open
@@ -16453,7 +16460,29 @@ reviews:
               _resolve_checkpoints_path for diffusion saves."
             created_at: 2026-05-01T00:33:03.728Z
         kind: blocker
+      - _ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
+        anchor:
+          type: code
+          commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
+          line_end: 596
+          line_start: 559
+          path: scripts/manual/real_comfy_checkpoint_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQGF8FYN95G9CYBVB9DJC8XP
+            author: Jacob Chapel
+            body: "MUST-FIX: the submitted task required a guarded live-validation harness, or an extension of
+              the existing guarded harness, for real standalone diffusion-model workflows. The only
+              guarded saved-output harness in scripts/manual remains checkpoint-specific: it accepts
+              checkpoint validation flags, builds CheckpointLoaderSimple workflows, and validates
+              reloading with CheckpointLoaderSimple. The worker note explicitly defers
+              diffusion-model live validation instead of adding a guarded diffusion loader path.
+              Impact: maintainers still cannot explicitly validate that a real saved standalone
+              diffusion-model artifact loads through ComfyUI's diffusion-model loader with companion
+              CLIP/VAE supplied separately, which was a required testing deliverable for this task."
+            created_at: 2026-05-01T00:33:16.757Z
+        kind: blocker
     verdicts: []
     created_at: 2026-05-01T00:30:26.365Z
-    updated_at: 2026-05-01T00:33:03.728Z
+    updated_at: 2026-05-01T00:33:16.757Z
     notes: []
