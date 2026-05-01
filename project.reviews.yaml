@@ -16471,6 +16471,12 @@ reviews:
         payload:
           thread_ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
         timestamp: 2026-05-01T00:51:40.788Z
+      - _ulid: 01KQGGABVKGVTJVZKBAFTG2T1Q
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQGF837GZS2FF3VQE5JNWGRP
+        timestamp: 2026-05-01T00:51:46.676Z
     examined_commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
     external_links: []
     lifecycle_state: closed
@@ -16525,6 +16531,8 @@ reviews:
               router) so they no longer mask the bug."
             created_at: 2026-05-01T00:51:31.393Z
         kind: blocker
+        resolved_at: 2026-05-01T00:51:46.478Z
+        resolved_by: "@claude"
       - _ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
         anchor:
           type: code
@@ -16574,5 +16582,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-01T00:33:31.813Z
     created_at: 2026-05-01T00:30:26.365Z
-    updated_at: 2026-05-01T00:51:40.632Z
+    updated_at: 2026-05-01T00:51:46.478Z
     notes: []
