@@ -16443,9 +16443,25 @@ reviews:
           status: pass
           name: diff whitespace
         timestamp: 2026-05-01T00:33:22.819Z
+      - _ulid: 01KQGF8YN6643GKW7P26E3HXD0
+        actor: jacob.chapel@gmail.com
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-05-01T00:33:31.814Z
+      - _ulid: 01KQGF8YN6GVTH62A62A1FT0A7
+        actor: jacob.chapel@gmail.com
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-05-01T00:33:31.814Z
     examined_commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -16499,7 +16515,14 @@ reviews:
               CLIP/VAE supplied separately, which was a required testing deliverable for this task."
             created_at: 2026-05-01T00:33:16.757Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: jacob.chapel@gmail.com
+        role: reviewer
+        created_at: 2026-05-01T00:33:31.813Z
     created_at: 2026-05-01T00:30:26.365Z
-    updated_at: 2026-05-01T00:33:22.672Z
+    updated_at: 2026-05-01T00:33:31.814Z
     notes: []
