@@ -94,3 +94,17 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-05-01T00:33:32.106Z
+  - _ulid: 01KQGFJWFKWAPGJT3WNC4N1F36
+    content: "Fix cycle 1 plan: (1) Add _resolve_diffusion_models_path that uses
+      folder_paths.get_folder_paths('diffusion_models') with 'unet' fallback; add a kind-aware
+      _resolve_save_path router. (2) Move is_checkpoint detection BEFORE save_path resolution in
+      _execute_full_saved_model and _execute_full_model_noop, and use the router. (3) Update
+      IS_CHANGED to pick the resolver based on widen recipe kind. (4) Update _run_diffusion_save
+      test helper to patch the diffusion resolver instead of _resolve_checkpoints_path; add new
+      tests proving diffusion saves resolve through diffusion_models folder without patching
+      _resolve_checkpoints_path. (5) Extend scripts/manual/ guarded harness to support a real
+      standalone diffusion-model workflow validating reload via UNETLoader/load_diffusion_model with
+      separately supplied CLIP+VAE."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-05-01T00:38:57.267Z
