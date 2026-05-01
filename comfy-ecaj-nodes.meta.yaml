@@ -1288,6 +1288,41 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-05-01T00:29:41.377Z
+  - _ulid: 01KQGGGD8DV2PNJFH2RRE8V78Q
+    type: friction
+    content: kspec review get @ref truncates thread bodies to ~one line. Fix-cycle agents fall back to
+      git show kspec-meta:project.reviews.yaml | grep to read review feedback. Hits every fix cycle.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-01T00:55:04.717Z
+  - _ulid: 01KQGGGDADWD50SVDTMJTY5BNG
+    type: friction
+    content: Tasks can submit-for-review with explicit deferrals on deliverables required by the task
+      description. In task 01KQGCVT cycle 0 a worker note said the live-validation harness was
+      deferred; reviewer flagged it MUST-FIX, costing a fix cycle.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-01T00:55:04.781Z
+  - _ulid: 01KQGGGDBK0MNQ7QK782QWKCYY
+    type: friction
+    content: UserPromptSubmit hook fires [kspec] check-spec-coverage reminder on every prompt including
+      pure reflection / triage / read-only commands. Pure noise outside of behavior-change prompts.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-01T00:55:04.819Z
+  - _ulid: 01KQGGGDCPE9DTHHENF7JWEVSD
+    type: success
+    content: "Kind-aware path-resolver router pattern: keep checkpoint resolver, add a parallel
+      diffusion resolver, plus a single _resolve_save_path(is_checkpoint=...) router. Detect kind
+      BEFORE resolving the path so cache-miss + cache-hit + no-op + IS_CHANGED all branch
+      consistently. Worked cleanly for the diffusion-vs-checkpoint split in nodes/exit.py."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-01T00:55:04.854Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows

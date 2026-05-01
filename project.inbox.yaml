@@ -237,3 +237,36 @@ inbox:
       - persistence
     added_by: "@claude"
     created_at: 2026-05-01T00:29:41.288Z
+  - _ulid: 01KQGGGDDYG4AKZ1MD6H09FHSV
+    text: Add kspec CLI affordance to read full review thread bodies (e.g. kspec review get @ref
+      --threads or kspec review thread show @ref). Currently kspec review get truncates each thread
+      entry to one line, forcing fix-cycle agents to git show kspec-meta:project.reviews.yaml | grep
+      -A N to read the actual review feedback. Hits every fix cycle.
+    tags:
+      - reflection
+      - kspec-cli
+      - review
+    added_by: "@claude"
+    created_at: 2026-05-01T00:55:04.894Z
+  - _ulid: 01KQGGGDEEMT2PK9G6ARHMSPRE
+    text: "Surface required-deliverable deferrals before kspec task submit. Pattern (task 01KQGCVT cycle
+      0): worker shipped with note that a deliverable required by the task description was deferred;
+      reviewer flagged MUST-FIX, costing a fix cycle. Options: warn on submit when latest worker
+      note contains defer/follow-up, or tag deliverables in task description so submit checks
+      coverage."
+    tags:
+      - reflection
+      - kspec-cli
+      - task-submit
+    added_by: "@claude"
+    created_at: 2026-05-01T00:55:04.911Z
+  - _ulid: 01KQGGGDF0CD68J83D1VCARNS1
+    text: Quiet UserPromptSubmit [kspec] spec-coverage hook for non-behavior-change prompts. Hook fires
+      on every prompt, including /kspec:reflect / /kspec:triage / read-only questions where no spec
+      coverage check is relevant. Consider matching prompt against a deny-list of slash commands or
+      moving the reminder to a more targeted trigger.
+    tags:
+      - reflection
+      - kspec-hook
+    added_by: "@claude"
+    created_at: 2026-05-01T00:55:04.928Z
