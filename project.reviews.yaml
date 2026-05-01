@@ -16412,6 +16412,13 @@ reviews:
           status: pass
           name: ruff
         timestamp: 2026-05-01T00:32:48.355Z
+      - _ulid: 01KQGF83CE7JFX15SC1552CTAP
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQGF837GZS2FF3VQE5JNWGRP
+        timestamp: 2026-05-01T00:33:03.886Z
     examined_commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
     external_links: []
     lifecycle_state: open
@@ -16421,8 +16428,32 @@ reviews:
       content_hash: ""
       ref: "@01KQGCVTCMFVH3HF2H150AY5B7"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQGF837GZS2FF3VQE5JNWGRP
+        anchor:
+          type: code
+          commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
+          line_end: 1144
+          line_start: 1144
+          path: nodes/exit.py
+          side: head
+        entries:
+          - _ulid: 01KQGF837GJ72RTND36PJ5S2KT
+            author: Jacob Chapel
+            body: "MUST-FIX: diffusion-model saves still resolve the output path through the checkpoints
+              directory. Comfy's standalone diffusion loader UI discovers files from folder_paths
+              'diffusion_models' (UNETLoader calls get_full_path_or_raise('diffusion_models',
+              unet_name)), while this path is used before artifact-kind routing and therefore both
+              diffusion cache validation and fresh diffusion saves publish under checkpoints.
+              Impact: a workflow that starts from WIDEN Diffusion Model Input can produce a file
+              with loadable tensor keys, but the saved artifact is not available through the normal
+              standalone diffusion-model load contract, so it does not round-trip as the same Comfy
+              model kind. Add a diffusion-model save path resolver, use it for non-checkpoint
+              recipes including cache checks, and cover it with tests that do not patch
+              _resolve_checkpoints_path for diffusion saves."
+            created_at: 2026-05-01T00:33:03.728Z
+        kind: blocker
     verdicts: []
     created_at: 2026-05-01T00:30:26.365Z
-    updated_at: 2026-05-01T00:32:48.174Z
+    updated_at: 2026-05-01T00:33:03.728Z
     notes: []
