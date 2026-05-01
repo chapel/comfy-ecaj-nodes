@@ -16638,6 +16638,17 @@ reviews:
         runner: uv run ruff check .
         created_at: 2026-05-01T00:59:23.680Z
         completed_at: 2026-05-01T00:59:23.680Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Schema and references passed; command reported only existing alignment/completeness
+          warnings and exited 6 because warnings are not warnings-ok.
+        name: kspec validate
+        required: false
+        runner: kspec validate
+        created_at: 2026-05-01T00:59:34.436Z
+        completed_at: 2026-05-01T00:59:34.436Z
     events:
       - _ulid: 01KQGGHSX9T870ABX5FAFH38MP
         actor: Jacob Chapel
@@ -16693,6 +16704,13 @@ reviews:
           status: pass
           name: ruff
         timestamp: 2026-05-01T00:59:24.069Z
+      - _ulid: 01KQGGRMSNPF9TXTEH467BJ2M5
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate
+        timestamp: 2026-05-01T00:59:34.581Z
     examined_commit: 40de3e7e6d6ba4c65758de34bf8d21b7f157f11f
     external_links: []
     lifecycle_state: open
@@ -16733,5 +16751,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-05-01T00:55:50.441Z
-    updated_at: 2026-05-01T00:59:23.680Z
+    updated_at: 2026-05-01T00:59:34.436Z
     notes: []
