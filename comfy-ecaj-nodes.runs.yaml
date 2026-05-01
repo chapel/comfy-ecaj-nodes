@@ -8509,7 +8509,7 @@ runs:
     completed_at: 2026-05-01T00:29:46.840Z
   - _ulid: 01KQGFAGVDW2YATJA8S4NDKFPZ
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -8524,7 +8524,19 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-01T00:34:54.931Z
-        completed_at: 2026-05-01T00:34:54.931Z
+        completed_at: 2026-05-01T00:35:12.482Z
+        notes: "High-confidence items from this review: (1) Success: verifying worker claims against local
+          ComfyUI source uncovered the missing diffusion_models save-location contract; already
+          covered by recent success observation 01KQGF1X about reading ComfyUI source. (2) Friction:
+          mocked tests can validate the wrong boundary when they patch the path resolver instead of
+          asserting artifact-kind-specific path selection; this is already covered by existing
+          friction 01KH6Y61 and related inbox 01KQC9KA about behavioral loader-path smoke tests. (3)
+          Missing diffusion live harness was already captured in inbox 01KQGF1X, so no duplicate
+          capture."
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-01T00:35:12.482Z
+        completed_at: 2026-05-01T00:35:12.482Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-01T00:34:23.214Z
