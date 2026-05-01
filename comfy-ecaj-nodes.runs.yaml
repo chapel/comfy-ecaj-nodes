@@ -8689,7 +8689,7 @@ runs:
     completed_at: 2026-05-01T01:03:17.086Z
   - _ulid: 01KQGHCW26R6K1PGRFTZ43PSH6
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -8720,7 +8720,17 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-05-01T01:12:54.716Z
-        completed_at: 2026-05-01T01:12:54.716Z
+        completed_at: 2026-05-01T01:13:02.138Z
+        notes: "Decision: capture nothing. (a) worktree-guard hook blocking branch-sync — duplicate of
+          01KQ7036 and 01KQC4EZ, skip. (b) bash empty-output friction — uncertain pattern (one-off
+          in this session, not reproducible enough to be systemic), skip. (c) zimage tests fail
+          under random ordering, pass without — pre-existing in suite at canonical head 40de3e7,
+          scope outside this task, not systemic agent friction; not worth capturing as observation,
+          and would need investigation before becoming a useful inbox item."
+      - status: completed
+        step_index: 3
+        started_at: 2026-05-01T01:13:02.138Z
+        completed_at: 2026-05-01T01:13:02.138Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-01T01:10:37.382Z
