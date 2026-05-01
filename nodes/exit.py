@@ -65,6 +65,66 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("ecaj.exit")
 
+# Internal merged-key prefix produced by ComfyUI BaseModel.state_dict():
+# `diffusion_model.X`.  ComfyUI's standalone diffusion-model loader
+# (comfy.sd.load_diffusion_model_state_dict) only recognizes one of the
+# `model.diffusion_model.`, `model.model.`, or `net.` prefixes, so saved
+# diffusion-model artifacts are written under `model.diffusion_model.X`
+# (matching what comfy_extras.nodes_model_merging.ModelSave produces via
+# BaseModel.process_unet_state_dict_for_saving).
+_INTERNAL_DIFFUSION_PREFIX = "diffusion_model."
+_EXTERNAL_DIFFUSION_PREFIX = "model.diffusion_model."
+
+# Source-model-kind metadata values
+_SOURCE_KIND_DIFFUSION_MODEL = "diffusion_model"
+_SOURCE_KIND_CHECKPOINT = "checkpoint"
+
+
+def _to_external_diffusion_key(key: str) -> str:
+    """Map an internal merged key to the external diffusion-model key layout.
+
+    `diffusion_model.X` -> `model.diffusion_model.X`.  Already-external keys
+    and unrelated keys (e.g. companion components) are returned unchanged.
+    """
+    if key.startswith(_EXTERNAL_DIFFUSION_PREFIX):
+        return key
+    if key.startswith(_INTERNAL_DIFFUSION_PREFIX):
+        return _EXTERNAL_DIFFUSION_PREFIX + key[len(_INTERNAL_DIFFUSION_PREFIX):]
+    return key
+
+
+def _comfy_load_diffusion_model(save_path: str, model_options: dict | None = None):
+    """Indirection over comfy.sd.load_diffusion_model so tests can patch it."""
+    import comfy.sd
+    return comfy.sd.load_diffusion_model(
+        save_path, model_options=model_options or {},
+    )
+
+
+def _load_diffusion_model_artifact(save_path: str) -> object:
+    """Load a saved diffusion-model artifact through Comfy's supported loader.
+
+    AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    AC: @full-saved-model-output ac-return-loaded-model
+    AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+
+    Calls comfy.sd.load_diffusion_model so the returned MODEL is Comfy-owned
+    and behaves like a normally loaded standalone diffusion model — no
+    deepcopy of WIDEN merge internals, no transient process-resident payload.
+    """
+    try:
+        result = _comfy_load_diffusion_model(save_path, model_options={})
+    except Exception as exc:
+        raise RuntimeError(
+            f"Failed to load diffusion-model artifact: {save_path} — {exc}"
+        ) from exc
+    if result is None:
+        raise RuntimeError(
+            f"Comfy diffusion-model loader returned None for: {save_path}"
+        )
+    return result
+
 
 def _log_memory(label: str) -> None:
     """Log current RAM and VRAM usage.
@@ -591,6 +651,9 @@ def _classify_temp_artifact(tmp_path: str, expected_kind: str) -> None:
     - ``__ecaj_version__`` is present
     - ``__ecaj_artifact_kind__`` matches ``expected_kind``
     - For checkpoint artifacts: all required component prefixes are present
+    - For diffusion artifacts: no internal-format ``diffusion_model.*`` keys
+      (every diffusion key must use the external ``model.diffusion_model.*``
+      layout that Comfy's diffusion-model loader recognizes).
 
     Raises ``RuntimeError`` if classification fails, so the caller can
     clean up the temp file without publishing it.
@@ -625,6 +688,22 @@ def _classify_temp_artifact(tmp_path: str, expected_kind: str) -> None:
             "(need model/diffusion, conditioning, and VAE keys) "
             f"— refusing to publish: {tmp_path}"
         )
+
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    # AC: @saved-model-artifact-safety ac-no-partial-publication
+    # Diffusion artifacts must use the external Comfy-loadable layout; an
+    # internal-format leak (bare diffusion_model.* without model. prefix)
+    # would not load through comfy.sd.load_diffusion_model.
+    if expected_kind == "diffusion":
+        for key in tensor_keys:
+            if (
+                key.startswith(_INTERNAL_DIFFUSION_PREFIX)
+                and not key.startswith(_EXTERNAL_DIFFUSION_PREFIX)
+            ):
+                raise RuntimeError(
+                    f"Temp diffusion artifact contains internal-format key "
+                    f"{key!r} — refusing to publish: {tmp_path}"
+                )
 
 
 def save_comfy_checkpoint(
@@ -880,6 +959,7 @@ class WIDENExitNode:
 
         AC: @full-saved-model-output ac-no-op-produces-full-artifact
         AC: @full-saved-model-output ac-complete-artifact
+        AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
         AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
         """
         model_patcher = widen.model_patcher
@@ -903,9 +983,6 @@ class WIDENExitNode:
         # Detect checkpoint-style source: RecipeBase with checkpoint_components
         is_checkpoint = _recipe_has_checkpoint_components(widen)
 
-        # Build manifest from base_state — all keys, no affected keys
-        manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
-
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         # AC: @exit-model-persistence ac-4, ac-6
         if enable_cache:
@@ -915,9 +992,17 @@ class WIDENExitNode:
                     dependency_fingerprints_json,
                 )
             else:
+                # Diffusion-only cache validation uses the EXTERNAL key
+                # layout (model.diffusion_model.*) — same shape we publish.
+                external_manifest = {
+                    _to_external_diffusion_key(k): (v.dtype, tuple(v.shape))
+                    for k, v in base_state.items()
+                }
                 cache_hit = check_full_model_cache(
-                    save_path, recipe_hash, expected_manifest=manifest,
+                    save_path, recipe_hash,
+                    expected_manifest=external_manifest,
                     expected_artifact_kind="diffusion",
+                    expected_source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
                     expected_base_identity=base_identity,
                     expected_dependency_fingerprints=dependency_fingerprints_json,
                 )
@@ -925,14 +1010,14 @@ class WIDENExitNode:
                 if ProgressBar is not None:
                     pbar = ProgressBar(1)
                     pbar.update(1)
-                # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
+                # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
                 # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-                # Checkpoint cache hit: load through Comfy's checkpoint loader
-                # so the returned MODEL is Comfy-owned (no deepcopy).
-                # Diffusion-only cache hit: load from artifact into clone.
+                # Checkpoint cache hit: load through Comfy's checkpoint loader.
+                # Diffusion-only cache hit: load through Comfy's diffusion-model
+                # loader so the returned MODEL is Comfy-owned.
                 if is_checkpoint:
                     return (_load_checkpoint_artifact(save_path),)
-                return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+                return (_load_diffusion_model_artifact(save_path),)
 
         # Evict in-memory cache when cache is disabled.
         # Full mode does not write to _incremental_cache, but pre-populated
@@ -954,6 +1039,7 @@ class WIDENExitNode:
             metadata = build_metadata(
                 serialized, recipe_hash, [], workflow_json, output_mode="full",
                 artifact_kind="checkpoint",
+                source_model_kind=_SOURCE_KIND_CHECKPOINT,
                 base_identity=base_identity,
                 dependency_fingerprints=dependency_fingerprints_json,
                 checkpoint_components=True,
@@ -974,20 +1060,35 @@ class WIDENExitNode:
 
             return (merged_model,)
         else:
-            # Diffusion-only no-op: write through MaterializationSink.
+            # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+            # AC: @full-saved-model-output ac-diffusion-model-companion-separation
+            # Diffusion-only no-op: write external Comfy-loadable layout via
+            # MaterializationSink.
             metadata = build_metadata(
                 serialized, recipe_hash, [], workflow_json, output_mode="full",
                 artifact_kind="diffusion",
+                source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
                 base_identity=base_identity,
                 dependency_fingerprints=dependency_fingerprints_json,
             )
 
+            external_manifest = {
+                _to_external_diffusion_key(k): (v.dtype, tuple(v.shape))
+                for k, v in base_state.items()
+            }
             sink = MaterializationSink()
             try:
-                sink.open(manifest, save_path, metadata)
+                sink.open(external_manifest, save_path, metadata)
                 for name in sorted(base_state.keys()):
-                    sink.write_tensor(name, base_state[name])
-                sink.finalize(save_path)
+                    sink.write_tensor(
+                        _to_external_diffusion_key(name), base_state[name],
+                    )
+                sink.finalize(
+                    save_path,
+                    pre_publish_check=lambda p: _classify_temp_artifact(
+                        p, expected_kind="diffusion",
+                    ),
+                )
             except BaseException:
                 sink.abort()
                 raise
@@ -996,7 +1097,10 @@ class WIDENExitNode:
                 pbar = ProgressBar(1)
                 pbar.update(1)
 
-            return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+            # AC: @full-saved-model-output ac-return-loaded-model
+            # Returned MODEL comes from the saved diffusion-model artifact
+            # via Comfy's supported diffusion-model loader.
+            return (_load_diffusion_model_artifact(save_path),)
 
     def _execute_full_saved_model(
         self,
@@ -1054,6 +1158,7 @@ class WIDENExitNode:
 
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+        # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
         # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
         # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
         # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
@@ -1062,7 +1167,8 @@ class WIDENExitNode:
         # validation is skipped because base_manifest reflects only the base
         # model's state dict and may not include companion component keys
         # (CLIP, VAE) that a checkpoint artifact contains.
-        # Non-checkpoint: validate full-model metadata and manifest.
+        # Non-checkpoint: validate full-model metadata and manifest using the
+        # external diffusion-model key layout (model.diffusion_model.*).
         if enable_cache:
             if is_checkpoint:
                 cache_hit = check_checkpoint_cache(
@@ -1070,9 +1176,15 @@ class WIDENExitNode:
                     dependency_fingerprints_json,
                 )
             else:
+                external_manifest = {
+                    _to_external_diffusion_key(k): v
+                    for k, v in base_manifest.items()
+                }
                 cache_hit = check_full_model_cache(
-                    save_path, recipe_hash, expected_manifest=base_manifest,
+                    save_path, recipe_hash,
+                    expected_manifest=external_manifest,
                     expected_artifact_kind="diffusion",
+                    expected_source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
                     expected_base_identity=base_identity,
                     expected_dependency_fingerprints=dependency_fingerprints_json,
                 )
@@ -1082,13 +1194,14 @@ class WIDENExitNode:
                     pbar = ProgressBar(1)
                     pbar.update(1)
                 # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
+                # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
                 # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-                # Checkpoint cache hit: load through Comfy's checkpoint loader
-                # so the returned MODEL is Comfy-owned (no deepcopy).
-                # Diffusion-only cache hit: load from artifact into clone.
+                # Checkpoint cache hit: load through Comfy's checkpoint loader.
+                # Diffusion-only cache hit: load through Comfy's diffusion-model
+                # loader so the returned MODEL is Comfy-owned.
                 if is_checkpoint:
                     return (_load_checkpoint_artifact(save_path),)
-                return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+                return (_load_diffusion_model_artifact(save_path),)
 
         # Branch: checkpoint-style saves use Comfy checkpoint save semantics;
         # non-checkpoint (diffusion-only) saves continue using MaterializationSink.
@@ -1303,6 +1416,7 @@ class WIDENExitNode:
                 serialized, recipe_hash, sorted(affected_key_set), workflow_json,
                 output_mode="full",
                 artifact_kind="checkpoint",
+                source_model_kind=_SOURCE_KIND_CHECKPOINT,
                 base_identity=base_identity,
                 dependency_fingerprints=dependency_fingerprints_json,
                 checkpoint_components=True,
@@ -1426,10 +1540,16 @@ class WIDENExitNode:
 
             plan = compile_plan(widen, set_id_map, arch, model_id_map)
 
-            # Build manifest for entire model (base + affected keys with final dtypes/shapes)
+            # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+            # AC: @full-saved-model-output ac-diffusion-model-companion-separation
+            # Build manifest for entire model in the EXTERNAL Comfy-loadable
+            # layout (model.diffusion_model.*) — the merged internal keys
+            # (diffusion_model.*) are remapped before the manifest and writes
+            # so the published artifact is loadable as a standalone diffusion
+            # model of the same kind as the source.
             manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] = {}
             for k, v in base_state.items():
-                manifest[k] = (v.dtype, tuple(v.shape))
+                manifest[_to_external_diffusion_key(k)] = (v.dtype, tuple(v.shape))
 
             workflow_json = (
                 json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
@@ -1438,6 +1558,7 @@ class WIDENExitNode:
                 serialized, recipe_hash, sorted(affected_key_set), workflow_json,
                 output_mode="full",
                 artifact_kind="diffusion",
+                source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
                 base_identity=base_identity,
                 dependency_fingerprints=dependency_fingerprints_json,
                 checkpoint_components=False,
@@ -1476,9 +1597,12 @@ class WIDENExitNode:
             for group_keys in batch_groups.values():
                 affected_key_set_lookup.update(group_keys)
 
-            for key in manifest:
+            # Unaffected base writes use the EXTERNAL key layout
+            for key in base_state:
                 if key not in affected_key_set_lookup:
-                    sink.write_tensor(key, base_state[key])
+                    sink.write_tensor(
+                        _to_external_diffusion_key(key), base_state[key],
+                    )
 
             def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
                 def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
@@ -1505,6 +1629,11 @@ class WIDENExitNode:
             pbar_count = len(batch_groups) if batch_groups else 0
             pbar = ProgressBar(pbar_count) if ProgressBar is not None and pbar_count else None
 
+            # streaming_evaluation_to_sink calls write_fn(name, tensor) using
+            # internal keys; remap to external keys at the boundary.
+            def _external_write(name: str, tensor: torch.Tensor) -> None:
+                sink.write_tensor(_to_external_diffusion_key(name), tensor)
+
             for sig, group_keys in batch_groups.items():
                 n_models = len(set_affected) + len(model_loaders)
                 batch_size = compute_batch_size(
@@ -1519,7 +1648,7 @@ class WIDENExitNode:
                     device=device,
                     dtype=compute_dtype,
                     storage_dtype=None,
-                    write_fn=sink.write_tensor,
+                    write_fn=_external_write,
                 )
 
                 del group_base
@@ -1534,7 +1663,12 @@ class WIDENExitNode:
 
             del base_state
 
-            sink.finalize(save_path)
+            sink.finalize(
+                save_path,
+                pre_publish_check=lambda p: _classify_temp_artifact(
+                    p, expected_kind="diffusion",
+                ),
+            )
             _log_memory("after-finalize-full")
 
             # Offload GPU models
@@ -1561,7 +1695,10 @@ class WIDENExitNode:
                 model_loader.cleanup()
 
         # AC: @full-saved-model-output ac-return-loaded-model
-        return (_load_model_from_artifact(save_path, model_patcher, storage_dtype),)
+        # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+        # Returned MODEL comes from the saved diffusion-model artifact via
+        # Comfy's supported diffusion-model loader (Comfy-owned memory).
+        return (_load_diffusion_model_artifact(save_path),)
 
     def _execute_patch_mode(
         self,

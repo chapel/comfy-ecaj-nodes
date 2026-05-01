@@ -1161,10 +1161,14 @@ class TestExitNodeIncrementalCache:
         mock_sink.finalize.assert_called_once()
 
         # All keys (base + affected) should have been written to the sink
+        # under the EXTERNAL Comfy-loadable layout (model.diffusion_model.*).
         base_keys = set(mock_model_patcher.model_state_dict().keys())
         for k in base_keys:
-            assert k in written_keys, (
-                f"Key {k} missing from MaterializationSink writes"
+            external = "model.diffusion_model." + k.removeprefix(
+                "diffusion_model.",
+            )
+            assert external in written_keys, (
+                f"Key {external} missing from MaterializationSink writes"
             )
 
 
