@@ -16730,9 +16730,25 @@ reviews:
           status: fail
           name: diffusion live harness API shape
         timestamp: 2026-05-01T00:59:45.797Z
+      - _ulid: 01KQGGS8N5KGGK0ZB3WB7P34Z0
+        actor: jacob.chapel@gmail.com
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-05-01T00:59:54.917Z
+      - _ulid: 01KQGGS8N5WDHTEK0GEGEGPWS5
+        actor: jacob.chapel@gmail.com
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-05-01T00:59:54.917Z
     examined_commit: 40de3e7e6d6ba4c65758de34bf8d21b7f157f11f
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -16768,7 +16784,14 @@ reviews:
               build_diffusion_cache_reuse_workflow, and add tests that assert the input is present.'
             created_at: 2026-05-01T00:59:03.540Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: jacob.chapel@gmail.com
+        role: reviewer
+        created_at: 2026-05-01T00:59:54.917Z
     created_at: 2026-05-01T00:55:50.441Z
-    updated_at: 2026-05-01T00:59:45.658Z
+    updated_at: 2026-05-01T00:59:54.917Z
     notes: []

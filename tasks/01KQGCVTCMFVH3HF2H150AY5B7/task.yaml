@@ -117,7 +117,7 @@ description: |-
 spec_ref: "@full-saved-model-output"
 meta_ref: null
 plan_ref: null
-status: pending_review
+status: needs_work
 blocked_by: []
 depends_on: []
 context: []
@@ -137,7 +137,7 @@ submission_linkage:
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-diffusion-model-saved-output-round-trip/01kqgcvt
-session_id: 01KQGFD6Q082AY67E1J7GJVH57
+session_id: null
 history:
   - author: Jacob Chapel
     changes:
@@ -243,6 +243,16 @@ history:
         previous: "@01KQGF39HXTEW0NFXR2TAGCAQP"
     command: review-link
     timestamp: 2026-05-01T00:55:50.874Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: needs_work
+        previous: pending_review
+      session_id:
+        new: null
+        previous: 01KQGFD6Q082AY67E1J7GJVH57
+    command: review-verdict-needs-work
+    timestamp: 2026-05-01T00:59:55.167Z
 created_at: 2026-04-30T23:51:24.308Z
 started_at: 2026-05-01T00:36:54.809Z
 submitted_at: 2026-05-01T00:52:25.207Z
