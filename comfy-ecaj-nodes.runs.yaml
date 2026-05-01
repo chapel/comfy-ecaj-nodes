@@ -8742,7 +8742,7 @@ runs:
     completed_at: 2026-05-01T01:13:08.920Z
   - _ulid: 01KQGJ0WZ5HP743M4RJNGT2GFJ
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -8758,7 +8758,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-01T01:23:09.561Z
-        completed_at: 2026-05-01T01:23:09.561Z
+        completed_at: 2026-05-01T01:23:18.571Z
+        notes: "Friction candidates: (1) GitHub rejected gh pr review --approve because the authenticated
+          account owns the PR, even though the kspec review was approved and CI was green. (2) kspec
+          workflow show required an explicit run ref, while the reflect skill docs imply show can be
+          run without one. (3) I attempted to record kspec validate as optional through batch args
+          with required=false, but review get still showed it required; likely a batch flag-shape
+          nuance, not enough evidence for a new item."
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-01T01:23:18.571Z
+        completed_at: 2026-05-01T01:23:18.571Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-01T01:21:33.669Z
