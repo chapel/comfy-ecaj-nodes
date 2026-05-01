@@ -16649,6 +16649,18 @@ reviews:
         runner: kspec validate
         created_at: 2026-05-01T00:59:34.436Z
         completed_at: 2026-05-01T00:59:34.436Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Harness builders produced UNETLoader inputs with only unet_name. Current ComfyUI requires
+          weight_dtype as a required input, so the generated live-validation prompts would be
+          rejected before exercising the diffusion-model load path.
+        name: diffusion live harness API shape
+        required: true
+        runner: manual review + harness builder inspection
+        created_at: 2026-05-01T00:59:45.658Z
+        completed_at: 2026-05-01T00:59:45.658Z
     events:
       - _ulid: 01KQGGHSX9T870ABX5FAFH38MP
         actor: Jacob Chapel
@@ -16711,6 +16723,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-05-01T00:59:34.581Z
+      - _ulid: 01KQGGRZR421AQN5XFPJCYP8PX
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: fail
+          name: diffusion live harness API shape
+        timestamp: 2026-05-01T00:59:45.797Z
     examined_commit: 40de3e7e6d6ba4c65758de34bf8d21b7f157f11f
     external_links: []
     lifecycle_state: open
@@ -16751,5 +16770,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-05-01T00:55:50.441Z
-    updated_at: 2026-05-01T00:59:34.436Z
+    updated_at: 2026-05-01T00:59:45.658Z
     notes: []
