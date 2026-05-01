@@ -2014,7 +2014,7 @@ workspaces:
         head: b442af3299de8b79a1882f2de3e459e1ee1f172a
         last_seen_at: 2026-04-30T21:55:46.819Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-bf16-streaming-raw-byte-materialization-01kqg5v0
-  - active_role: null
+  - active_role: reviewer
     base_branch_point: 9cdeb981d3dfc888b0313da26e55f3e82db2da68
     bootstrap:
       status: succeeded
@@ -2059,12 +2059,12 @@ workspaces:
       detail: integrated-into-base-branch
       eligible: true
       reason: integrated-into-base-branch
-      updated_at: 2026-05-01T01:20:33.897Z
+      updated_at: 2026-05-01T01:21:18.486Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-01T01:20:33.897Z
+      updated_at: 2026-05-01T01:21:18.486Z
     integration:
       status: merged
       detail: integration:merged
@@ -2072,7 +2072,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 9cdeb981d3dfc888b0313da26e55f3e82db2da68
-      updated_at: 2026-05-01T01:20:33.897Z
+      updated_at: 2026-05-01T01:21:18.486Z
     lifecycle_state: closing
     resolved_base_branch: dev
     task_ref: "@01KQGCVTCMFVH3HF2H150AY5B7"
@@ -2080,9 +2080,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-05-01T01:13:25.682Z
-      last_reconciled_at: 2026-05-01T01:20:33.897Z
+      last_reconciled_at: 2026-05-01T01:21:18.486Z
       created_at: 2026-05-01T00:04:15.463Z
-      updated_at: 2026-05-01T01:20:33.897Z
+      updated_at: 2026-05-01T01:21:18.486Z
     workspace_id: dispatch-workspace-01KQGCVTCMFVH3HF2H150AY5B7
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
