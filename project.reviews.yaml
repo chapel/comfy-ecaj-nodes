@@ -16465,6 +16465,12 @@ reviews:
         payload:
           thread_ulid: 01KQGF837GZS2FF3VQE5JNWGRP
         timestamp: 2026-05-01T00:51:31.554Z
+      - _ulid: 01KQGGA63MW58W216VW3HJMPVQ
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
+        timestamp: 2026-05-01T00:51:40.788Z
     examined_commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
     external_links: []
     lifecycle_state: closed
@@ -16540,6 +16546,24 @@ reviews:
               diffusion-model artifact loads through ComfyUI's diffusion-model loader with companion
               CLIP/VAE supplied separately, which was a required testing deliverable for this task."
             created_at: 2026-05-01T00:33:16.757Z
+          - _ulid: 01KQGGA5YRSFJD4BQWXY3Y5T8H
+            author: "@claude"
+            body: "Fixed: added scripts/manual/real_comfy_diffusion_model_validation.py — a guarded
+              live-validation harness for standalone diffusion-model workflows. Required inputs:
+              COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION=1 env var, --run-diffusion-model-validation
+              flag, --comfy-api-url, --source-diffusion-model, --companion-clip, --companion-vae,
+              --report-output. The harness builds a UNETLoader -> WIDENEntry (model only, no
+              clip/vae) -> WIDENExit save graph, validates the saved artifact via UNETLoader
+              (Comfy's standalone diffusion-model load contract), runs a downstream KSampler with
+              companion CLIP and VAE supplied through (Dual)CLIPLoader and VAELoader (separate from
+              the saved artifact), and runs a cache-reuse pass with the same save/timing-based
+              detection contract as the checkpoint harness.
+              tests/test_diffusion_model_validation_harness.py provides 30 automated tests covering
+              guard refusal for each missing input, workflow shape (UNETLoader present, no
+              CheckpointLoaderSimple anywhere, WIDENEntry has no clip/vae, separate CLIP/VAE
+              loaders), Dual vs single CLIPLoader selection, failure classification
+              (UNETLoader/diffusion errors → loader, OOM precedence), and report formatting."
+            created_at: 2026-05-01T00:51:40.632Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -16550,5 +16574,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-01T00:33:31.813Z
     created_at: 2026-05-01T00:30:26.365Z
-    updated_at: 2026-05-01T00:51:31.393Z
+    updated_at: 2026-05-01T00:51:40.632Z
     notes: []
