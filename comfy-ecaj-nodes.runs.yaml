@@ -8649,9 +8649,21 @@ runs:
     completed_at: 2026-05-01T00:55:10.438Z
   - _ulid: 01KQGGV9CDXWH0BDTAAGEXZBYT
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-01T01:01:01.197Z
+        completed_at: 2026-05-01T01:02:15.588Z
+        notes: "Worked well: comparing the submitted harness against actual ComfyUI loader definitions and
+          execution validation caught a real prompt-shape failure even though the unit suite was
+          green. Recording review checks as first-party kspec checks made the pass/fail state
+          auditable."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-01T01:02:15.588Z
+        completed_at: 2026-05-01T01:02:15.588Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-01T01:01:01.197Z
