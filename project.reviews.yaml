@@ -16611,6 +16611,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-05-01T00:56:06.724Z
+      - _ulid: 01KQGGQ4ZN6RK0FSWCBHE5ZW9E
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KQGGQ4T73KF56QJMX8C7AZC5
+        timestamp: 2026-05-01T00:58:45.621Z
     examined_commit: 40de3e7e6d6ba4c65758de34bf8d21b7f157f11f
     external_links: []
     lifecycle_state: open
@@ -16620,8 +16627,27 @@ reviews:
       content_hash: ""
       ref: "@01KQGCVTCMFVH3HF2H150AY5B7"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KQGGQ4T73KF56QJMX8C7AZC5
+        anchor:
+          type: code
+          commit: 40de3e7e6d6ba4c65758de34bf8d21b7f157f11f
+          line_end: 568
+          line_start: 563
+          path: scripts/manual/real_comfy_diffusion_model_validation.py
+          side: head
+        entries:
+          - _ulid: 01KQGGQ4T8ZFY4PTDH8YNEHMXZ
+            author: Jacob Chapel
+            body: "MUST-FIX: the diffusion live-validation harness builds UNETLoader API nodes with only  and
+              omits the required  input. Current ComfyUI declares  with required  and required , and
+              prompt validation emits  for absent required inputs. I confirmed the harness builders
+              produce UNETLoader inputs  for the save, downstream, and cache workflows. As written,
+              the guarded live harness will be rejected before it can validate that saved diffusion
+              artifacts reload through Comfy's standalone diffusion-model path."
+            created_at: 2026-05-01T00:58:45.448Z
+        kind: blocker
     verdicts: []
     created_at: 2026-05-01T00:55:50.441Z
-    updated_at: 2026-05-01T00:56:06.599Z
+    updated_at: 2026-05-01T00:58:45.448Z
     notes: []
