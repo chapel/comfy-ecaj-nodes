@@ -16752,6 +16752,12 @@ reviews:
         payload:
           thread_ulid: 01KQGGQ4T73KF56QJMX8C7AZC5
         timestamp: 2026-05-01T01:09:26.885Z
+      - _ulid: 01KQGHAW0GAX699QHK4RDX286D
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KQGGQ4T73KF56QJMX8C7AZC5
+        timestamp: 2026-05-01T01:09:31.792Z
     examined_commit: 40de3e7e6d6ba4c65758de34bf8d21b7f157f11f
     external_links: []
     lifecycle_state: closed
@@ -16803,6 +16809,8 @@ reviews:
               rejection. uv run pytest 1647 passed; uv run ruff check . clean.'
             created_at: 2026-05-01T01:09:26.750Z
         kind: blocker
+        resolved_at: 2026-05-01T01:09:31.656Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -16812,5 +16820,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-01T00:59:54.917Z
     created_at: 2026-05-01T00:55:50.441Z
-    updated_at: 2026-05-01T01:09:26.750Z
+    updated_at: 2026-05-01T01:09:31.656Z
     notes: []
