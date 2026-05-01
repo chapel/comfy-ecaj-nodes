@@ -8554,7 +8554,7 @@ runs:
     completed_at: 2026-05-01T00:35:32.468Z
   - _ulid: 01KQGGD2HZ4C9VZDJYH3VKPB7T
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -8573,7 +8573,27 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-01T00:53:48.681Z
-        completed_at: 2026-05-01T00:53:48.681Z
+        completed_at: 2026-05-01T00:54:02.330Z
+        notes: "(1) Reading review thread bodies required falling back to 'git show
+          kspec-meta:project.reviews.yaml | grep -A N' because kspec review get only summarizes
+          thread bodies (truncated to ~one line). To read the actual review feedback I had to read
+          the YAML file from the shadow branch. This same friction will hit every fix-cycle. (2)
+          Prior fix-cycle (cycle 0, separate session) shipped with a deferred live-harness note
+          ('this task does not extend the guarded harness... deferred to keep scope tight'). The
+          reviewer flagged that as MUST-FIX since the original task description explicitly required
+          a guarded live-validation harness. The deferral note didn't prevent submission and didn't
+          trigger a question. Pattern: tasks can submit-for-review with explicit deferrals on
+          required deliverables. (3) UserPromptSubmit hook fires '[kspec] Before implementing
+          behavior changes, check spec coverage. Update spec first if needed.' on every prompt,
+          including pure reflection runs where no behavior change is happening. Pure noise in this
+          context. (4) tests/conftest.py folder_paths.get_folder_paths stub returns [] for any
+          folder name. Each test that hits the new diffusion resolver had to patch
+          _resolve_save_path or set up folder_paths via monkeypatch — not painful, but the stub
+          could provide a default so the failure mode is clearer."
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-01T00:54:02.330Z
+        completed_at: 2026-05-01T00:54:02.330Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-01T00:53:15.456Z
