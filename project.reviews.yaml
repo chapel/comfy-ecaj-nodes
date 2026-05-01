@@ -16746,6 +16746,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-05-01T00:59:54.917Z
+      - _ulid: 01KQGHAQ7577EAJ5H8R3MTTK0X
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KQGGQ4T73KF56QJMX8C7AZC5
+        timestamp: 2026-05-01T01:09:26.885Z
     examined_commit: 40de3e7e6d6ba4c65758de34bf8d21b7f157f11f
     external_links: []
     lifecycle_state: closed
@@ -16783,6 +16789,19 @@ reviews:
               build_diffusion_save_workflow, build_diffusion_downstream_workflow, and
               build_diffusion_cache_reuse_workflow, and add tests that assert the input is present.'
             created_at: 2026-05-01T00:59:03.540Z
+          - _ulid: 01KQGHAQ2YYSBQB888MQ3KDXZ9
+            author: "@claude"
+            body: 'Fixed: added `weight_dtype: "default"` to every UNETLoader node built by the harness —
+              build_diffusion_save_workflow (line 564), build_diffusion_downstream_workflow (line
+              645), and build_diffusion_cache_reuse_workflow (line 720). Added 3 new behavioral
+              tests (test_save_unet_loader_supplies_required_weight_dtype,
+              test_downstream_unet_loader_supplies_required_weight_dtype,
+              test_cache_reuse_unet_loader_supplies_required_weight_dtype) that assert
+              `weight_dtype` is present and equals "default" on every UNETLoader node. Updated the
+              save-workflow docstring to document that both unet_name and weight_dtype are required
+              by current ComfyUI and that omitting weight_dtype causes required_input_missing prompt
+              rejection. uv run pytest 1647 passed; uv run ruff check . clean.'
+            created_at: 2026-05-01T01:09:26.750Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -16793,5 +16812,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-01T00:59:54.917Z
     created_at: 2026-05-01T00:55:50.441Z
-    updated_at: 2026-05-01T00:59:54.917Z
+    updated_at: 2026-05-01T01:09:26.750Z
     notes: []
