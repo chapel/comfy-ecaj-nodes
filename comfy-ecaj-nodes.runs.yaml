@@ -8553,7 +8553,7 @@ runs:
     started_at: 2026-05-01T00:34:23.214Z
     completed_at: 2026-05-01T00:35:32.468Z
   - _ulid: 01KQGGD2HZ4C9VZDJYH3VKPB7T
-    status: active
+    status: completed
     current_step: 5
     initiated_by: "@claude"
     step_results:
@@ -8640,7 +8640,10 @@ runs:
       - status: completed
         step_index: 5
         started_at: 2026-05-01T00:54:45.774Z
-        completed_at: 2026-05-01T00:54:45.774Z
+        completed_at: 2026-05-01T00:55:10.437Z
+        notes: Captured 4 observations (3 friction, 1 success) and 3 inbox items. No tasks created in
+          autonomous mode. Friction observations available for /kspec:triage observations promotion.
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-01T00:53:15.456Z
+    completed_at: 2026-05-01T00:55:10.438Z
