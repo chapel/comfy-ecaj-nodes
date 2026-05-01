@@ -108,3 +108,20 @@ notes:
     supersedes: null
     author: "@claude"
     created_at: 2026-05-01T00:38:57.267Z
+  - _ulid: 01KQGGAS00H3BQ8V24EHDRFBKE
+    content: "Fix cycle 1 complete: addressed both review blockers. Blocker 1 (diffusion saves under
+      checkpoints folder): added _resolve_diffusion_models_path + kind-aware _resolve_save_path
+      router in nodes/exit.py; moved is_checkpoint detection before save-path resolution in
+      _execute_full_saved_model, _execute_full_model_noop, and IS_CHANGED. Blocker 2 (no
+      diffusion-model live harness): added scripts/manual/real_comfy_diffusion_model_validation.py —
+      guarded harness building UNETLoader -> WIDENEntry -> WIDENExit save and downstream validation
+      via UNETLoader + separate (Dual)CLIPLoader + VAELoader. Added 8 new behavioral tests covering
+      the resolver/routing without patching _resolve_checkpoints_path, and 30 tests for the new
+      harness (guards, workflow shape, classification, report formatting). Migrated existing
+      diffusion-only tests across
+      test_full_model_streaming/test_incremental_recompute/test_memory_management/test_diffusion_mo\
+      del_saved_output to patch the new _resolve_save_path router. uv run pytest: 1644 passed; ruff
+      clean; kspec validate has only pre-existing warnings."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-05-01T00:52:00.128Z
