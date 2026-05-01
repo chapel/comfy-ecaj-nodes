@@ -258,6 +258,14 @@ def _mock_comfyui_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     comfy_sd_mod = _make_stub_module("comfy.sd")
     comfy_sd_mod.save_checkpoint = lambda *args, **kwargs: None
     comfy_sd_mod.load_checkpoint_guess_config = lambda *args, **kwargs: [None, None, None]
+    # Default stub returns a fresh MagicMock so callers that hit the diffusion
+    # loader path (e.g. WIDEN Exit's diffusion-only return) get a non-None
+    # MODEL.  Tests that need to assert on loader arguments patch
+    # nodes.exit._comfy_load_diffusion_model directly.
+    from unittest.mock import MagicMock as _MagicMock
+    comfy_sd_mod.load_diffusion_model = lambda *args, **kwargs: _MagicMock(
+        name="comfy_load_diffusion_model_stub",
+    )
     comfy_mod.sd = comfy_sd_mod
 
     stubs = {

@@ -377,6 +377,7 @@ def build_metadata(
     output_mode: str = "patch",
     *,
     artifact_kind: str | None = None,
+    source_model_kind: str | None = None,
     base_identity: str | None = None,
     dependency_fingerprints: str | None = None,
     checkpoint_components: bool = False,
@@ -385,6 +386,7 @@ def build_metadata(
 
     AC: @exit-model-persistence ac-6, ac-13, ac-14
     AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
     AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
     AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
 
@@ -395,6 +397,9 @@ def build_metadata(
         workflow_json: Optional workflow JSON string
         output_mode: "patch" or "full" — stored in metadata for cache validation
         artifact_kind: Artifact classification (e.g. "checkpoint", "diffusion")
+        source_model_kind: ComfyUI model kind the source workflow loads as
+            ("checkpoint", "diffusion_model"). Required for diffusion-model
+            round-trip cache validation.
         base_identity: SHA-256 identity of the base model for cache validation
         dependency_fingerprints: JSON string of dependency file stats for cache
             validation (e.g. LoRA mtimes/sizes)
@@ -415,6 +420,8 @@ def build_metadata(
         metadata["__ecaj_workflow__"] = workflow_json
     if artifact_kind is not None:
         metadata["__ecaj_artifact_kind__"] = artifact_kind
+    if source_model_kind is not None:
+        metadata["__ecaj_source_model_kind__"] = source_model_kind
     if base_identity is not None:
         metadata["__ecaj_base_identity__"] = base_identity
     if dependency_fingerprints is not None:
@@ -430,6 +437,7 @@ def check_full_model_cache(
     expected_manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] | None = None,
     *,
     expected_artifact_kind: str | None = None,
+    expected_source_model_kind: str | None = None,
     expected_base_identity: str | None = None,
     expected_dependency_fingerprints: str | None = None,
 ) -> bool:
@@ -531,11 +539,19 @@ def check_full_model_cache(
     # AC: @exit-model-persistence ac-4, ac-6
     # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
     # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
     # Validate artifact classification and cache identity metadata when
     # the caller provides expected values.
     if expected_artifact_kind is not None:
         stored_kind = metadata.get("__ecaj_artifact_kind__")
         if stored_kind is None or stored_kind != expected_artifact_kind:
+            return False
+    if expected_source_model_kind is not None:
+        stored_source_kind = metadata.get("__ecaj_source_model_kind__")
+        if (
+            stored_source_kind is None
+            or stored_source_kind != expected_source_model_kind
+        ):
             return False
     if expected_base_identity is not None:
         stored_base = metadata.get("__ecaj_base_identity__")

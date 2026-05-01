@@ -17,6 +17,7 @@ import logging
 import os
 import secrets
 import struct
+from collections.abc import Callable
 
 import torch
 
@@ -308,13 +309,23 @@ class MaterializationSink:
         self._file.write(_tensor_bytes(tensor))
         self._written.add(name)
 
-    def finalize(self, save_path: str) -> None:
+    def finalize(
+        self,
+        save_path: str,
+        *,
+        pre_publish_check: Callable[[str], None] | None = None,
+    ) -> None:
         """Flush, fsync, and atomically replace save_path with the completed file.
 
         AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+        AC: @saved-model-artifact-safety ac-no-partial-publication
 
         Args:
             save_path: Target file path to atomically replace.
+            pre_publish_check: Optional callable that runs against the temp
+                file path between fsync and atomic replace.  Raising in the
+                callback aborts the publication; the caller is responsible
+                for cleaning up the temp file via abort() in that case.
 
         Raises:
             RuntimeError: If not all tensors were written, or already finalized.
@@ -332,6 +343,10 @@ class MaterializationSink:
         os.fsync(self._file.fileno())
         self._file.close()
         self._file = None
+
+        if pre_publish_check is not None:
+            assert self._tmp_path is not None
+            pre_publish_check(self._tmp_path)
 
         os.replace(self._tmp_path, save_path)
         self._finalized = True

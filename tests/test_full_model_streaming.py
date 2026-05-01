@@ -116,7 +116,10 @@ def _run_full_mode(recipe, mock_model_patcher, keys, tmp_path,
         "nodes.exit.compute_base_identity": "base_id",
         "nodes.exit.compute_lora_stats": {},
         "nodes.exit.validate_model_name": f"{model_name}.safetensors",
-        "nodes.exit._resolve_checkpoints_path": save_path,
+        # Diffusion-only saves dispatch through _resolve_save_path which
+        # routes to _resolve_diffusion_models_path (not _resolve_checkpoints_path)
+        # for non-checkpoint recipes.
+        "nodes.exit._resolve_save_path": save_path,
         "nodes.exit.validate_checkpoint_components": None,
         "nodes.exit.check_full_model_cache": False,
         "nodes.exit.check_ram_preflight": None,
@@ -237,7 +240,7 @@ class TestFullModeSucceedsWithoutDictPath:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="test.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -315,7 +318,7 @@ class TestFullModeSucceedsWithoutDictPath:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="sink_test.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -545,9 +548,9 @@ class TestFullModeEventOrder:
                     events.append(f"write:base:{name}")
                 super().write_tensor(name, tensor)
 
-            def finalize(self, save_path):
+            def finalize(self, save_path, **kwargs):
                 events.append("finalize")
-                super().finalize(save_path)
+                super().finalize(save_path, **kwargs)
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
@@ -558,7 +561,7 @@ class TestFullModeEventOrder:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="event_order.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -715,7 +718,7 @@ class TestFailureAbortsMaterialization:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="partial.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -794,7 +797,7 @@ class TestFailureAbortsMaterialization:
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="fail.safetensors"),
             patch(
-                "nodes.exit._resolve_checkpoints_path",
+                "nodes.exit._resolve_save_path",
                 return_value=str(tmp_path / "fail.safetensors"),
             ),
             patch("nodes.exit.validate_checkpoint_components"),
@@ -856,7 +859,7 @@ class TestFinalizeFailure:
         original_sink = MaterializationSink
 
         class FailingFinalizeSink(original_sink):
-            def finalize(self, save_path):
+            def finalize(self, save_path, **kwargs):
                 # Raise WITHOUT self-cleanup.  The node's except path must
                 # call sink.abort() to clean up the temp file.
                 raise OSError("Simulated finalize failure")
@@ -872,7 +875,7 @@ class TestFinalizeFailure:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="finalize_fail.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
@@ -914,8 +917,11 @@ class TestFullArtifactCacheHit:
     """
 
     # AC: @full-saved-model-output ac-cache-reuses-artifact
+    # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
     def test_cache_hit_skips_gpu(self, mock_model_patcher, tmp_path):
-        """On full-model cache hit, GPU pipeline is skipped entirely."""
+        """On full-model cache hit, GPU pipeline is skipped entirely and
+        the returned MODEL comes from comfy.sd.load_diffusion_model."""
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
                           checkpoint_components=None)
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -925,12 +931,12 @@ class TestFullArtifactCacheHit:
         affected_key = keys[0]
         save_path = str(tmp_path / "cached.safetensors")
 
-        # Create a full artifact with ALL model keys (affected + unaffected).
-        # Use distinct values so we can verify the returned model loads from
-        # the artifact, not the original base.
-        artifact_tensors = {}
-        for k in keys:
-            artifact_tensors[k] = torch.ones(4, 4) * 42.0
+        # Cache artifacts use the EXTERNAL Comfy-loadable layout.
+        artifact_tensors = {
+            "model.diffusion_model." + k.removeprefix("diffusion_model."):
+                torch.ones(4, 4) * 42.0
+            for k in keys
+        }
 
         dep_fps = json.dumps({}, sort_keys=True, separators=(",", ":"))
         save_file(
@@ -943,14 +949,17 @@ class TestFullArtifactCacheHit:
                 "__ecaj_affected_keys__": json.dumps([affected_key]),
                 "__ecaj_output_mode__": "full",
                 "__ecaj_artifact_kind__": "diffusion",
+                "__ecaj_source_model_kind__": "diffusion_model",
                 "__ecaj_base_identity__": "base_id",
                 "__ecaj_dependency_fingerprints__": dep_fps,
             },
         )
 
+        sentinel_model = MagicMock(name="cached_comfy_model")
+
         with (
             patch("nodes.exit.validate_model_name", return_value="cached.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="match"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
@@ -958,23 +967,20 @@ class TestFullArtifactCacheHit:
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch(
+                "nodes.exit._comfy_load_diffusion_model",
+                return_value=sentinel_model,
+            ) as mock_load,
         ):
             (result,) = WIDENExitNode().execute(
                 merge, save_model=True, model_name="cached"
             )
             mock_analyze.assert_not_called()
 
-        assert result is not mock_model_patcher
-        # All keys must have artifact values (42.0) in model_state_dict —
-        # loaded into model-owned memory, not as set patches.
-        # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-        result_sd = result.model_state_dict()
-        for k in keys:
-            assert torch.allclose(result_sd[k], torch.ones(4, 4) * 42.0), (
-                f"Key {k} should have artifact value 42.0"
-            )
-        # No set patches — weights are model-owned, not patch-resident.
-        assert len(result.patches) == 0
+        assert result is sentinel_model
+        # Comfy-owned: returned via load_diffusion_model, not deepcopy.
+        mock_load.assert_called_once()
+        assert mock_load.call_args.args[0] == save_path
 
     # AC: @full-saved-model-output ac-return-loaded-model
     # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
@@ -1216,21 +1222,23 @@ class TestNoResidentPayload:
             chunked_eval_override=fresh_tensors,
         )
 
-        # The returned model's weights must come from the artifact (fresh
-        # computation, value 42.0), NOT from the sentinel (zeros).
-        result_sd = result.model_state_dict()
-        for k in keys:
-            assert not torch.allclose(result_sd[k], torch.zeros(4, 4)), (
-                f"Key {k} has sentinel zeros — full mode used the patch cache!"
-            )
-
-        # The artifact file itself must contain the fresh values, not zeros
+        # The artifact file itself must contain the fresh values (under the
+        # external Comfy-loadable layout), not zeros.  The returned MODEL is
+        # produced by Comfy's diffusion-model loader and is not exercised
+        # here (covered by dedicated tests).
         save_path = mocks["save_path"]
         with safe_open(save_path, framework="pt") as f:
             for k in keys:
-                loaded = f.get_tensor(k)
+                external_key = "model.diffusion_model." + k.removeprefix(
+                    "diffusion_model.",
+                )
+                loaded = f.get_tensor(external_key)
                 assert torch.allclose(loaded, torch.ones(4, 4) * fresh_value), (
-                    f"Artifact key {k} should have fresh value {fresh_value}"
+                    f"Artifact key {external_key} should have fresh value {fresh_value}"
+                )
+                assert not torch.allclose(loaded, torch.zeros(4, 4)), (
+                    f"Artifact key {external_key} has sentinel zeros — "
+                    "full mode used the patch cache!"
                 )
 
     # AC: @streaming-full-model-materialization ac-full-cache-avoids-resident-payload
@@ -1369,7 +1377,7 @@ class TestNoOpFullMode:
 
         with (
             patch("nodes.exit.validate_model_name", return_value="noop.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="noop_hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
@@ -1382,7 +1390,7 @@ class TestNoOpFullMode:
                 base, save_model=True, model_name="noop"
             )
 
-        # Artifact should exist with all base keys
+        # Artifact should exist with all base keys (in EXTERNAL Comfy layout)
         import os
         assert os.path.exists(save_path)
 
@@ -1391,8 +1399,11 @@ class TestNoOpFullMode:
             assert meta["__ecaj_output_mode__"] == "full"
             saved_keys = set(f.keys())
 
-        base_keys = set(mock_model_patcher.model_state_dict().keys())
-        assert saved_keys == base_keys
+        expected_external_keys = {
+            "model.diffusion_model." + k.removeprefix("diffusion_model.")
+            for k in mock_model_patcher.model_state_dict().keys()
+        }
+        assert saved_keys == expected_external_keys
 
     # AC: @full-saved-model-output ac-no-op-produces-full-artifact
     def test_merge_noop_produces_full_artifact(
@@ -1780,7 +1791,7 @@ class TestNoopEnableCacheFalseEvicts:
 
         with (
             patch("nodes.exit.validate_model_name", return_value="noop_nocache.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="noop_hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
@@ -1979,7 +1990,7 @@ class TestNonEcajFileRaisesOnFullModeCache:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="user_file.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             # Do NOT mock check_full_model_cache — let the real one run.
             patch("nodes.exit.check_ram_preflight"),

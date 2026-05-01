@@ -448,7 +448,9 @@ class TestCheckpointSaveRouting:
 
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            # Diffusion-only saves route through _resolve_save_path which
+            # internally dispatches to _resolve_diffusion_models_path.
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
@@ -1316,7 +1318,11 @@ class TestBaseOnlyCheckpointSave:
 
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+            # Diffusion-only no-op routes through _resolve_save_path which
+            # dispatches to _resolve_diffusion_models_path for non-checkpoint
+            # recipes — patch the router to keep tests off the real
+            # folder_paths configuration.
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),

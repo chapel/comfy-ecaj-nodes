@@ -1138,7 +1138,7 @@ class TestExitNodeIncrementalCache:
                   return_value=new_results),
             patch("nodes.exit.validate_model_name",
                   return_value="test.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path",
+            patch("nodes.exit._resolve_save_path",
                   return_value="/tmp/test.safetensors"),
             patch("nodes.exit.serialize_recipe",
                   return_value='{"test": true}'),
@@ -1161,10 +1161,14 @@ class TestExitNodeIncrementalCache:
         mock_sink.finalize.assert_called_once()
 
         # All keys (base + affected) should have been written to the sink
+        # under the EXTERNAL Comfy-loadable layout (model.diffusion_model.*).
         base_keys = set(mock_model_patcher.model_state_dict().keys())
         for k in base_keys:
-            assert k in written_keys, (
-                f"Key {k} missing from MaterializationSink writes"
+            external = "model.diffusion_model." + k.removeprefix(
+                "diffusion_model.",
+            )
+            assert external in written_keys, (
+                f"Key {external} missing from MaterializationSink writes"
             )
 
 
