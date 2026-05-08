@@ -2450,3 +2450,21 @@
   submitted_at: 2026-05-01T01:10:07.332Z
   completed_at: 2026-05-01T01:20:31.948Z
   automation: eligible
+- _ulid: 01KR4M7F3PVVBBD593P79WZPFS
+  slugs:
+    - task-streaming-materialization-progress
+  title: Report streaming saved-model materialization progress
+  type: task
+  spec_ref: "@streaming-materialization-progress"
+  plan_ref: "@plan-saved-model-materialization-progress"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  priority: 1
+  tags:
+    - exit-node
+    - persistence
+    - progress
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-05-08T20:24:54.646Z

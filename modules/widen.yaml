@@ -458,6 +458,70 @@ features:
             tags:
               - persistence
               - memory
+            requirements:
+              - _ulid: 01KR4M7F23PNWBBQP68HZTBVD0
+                slugs:
+                  - streaming-materialization-progress
+                title: Streaming Materialization Progress
+                type: requirement
+                description: |
+                  Streaming full-model materialization reports progress for long-running saved
+                  artifact work so ComfyUI users can distinguish active model saving from a
+                  stalled Exit node execution.
+                depends_on: []
+                implements: []
+                relates_to: []
+                tests: []
+                traits: []
+                acceptance_criteria:
+                  - given: |
+                      A valid WIDEN saved-model workflow is materializing tensor data through
+                      the streaming full-model materialization path.
+                    id: ac-progress-during-streaming-writes
+                    then: |
+                      ComfyUI-visible progress advances during the write phase.
+                    when: |
+                      tensor data is written into the saved artifact.
+                  - given: |
+                      A valid WIDEN saved-model workflow selects a recipe that does not change
+                      any source model weights.
+                    id: ac-no-op-save-progress
+                    then: |
+                      ComfyUI-visible progress advances during the base-weight copy phase.
+                    when: |
+                      the source model weights are copied into the saved artifact.
+                  - given: |
+                      A valid WIDEN saved-model workflow produces affected tensors from one or
+                      more merge evaluation groups.
+                    id: ac-affected-write-progress
+                    then: |
+                      ComfyUI-visible progress advances for that tensor handoff.
+                    when: |
+                      an affected tensor is handed to artifact materialization.
+                  - given: |
+                      all required tensor data has been written for a saved artifact.
+                    id: ac-finalization-status-visible
+                    then: |
+                      the reported save status identifies the active post-write phase.
+                    when: |
+                      the Exit node validates, publishes, or reloads the saved artifact.
+                  - given: |
+                      a valid saved artifact already satisfies the current saved-model request.
+                    id: ac-cache-reuse-status-visible
+                    then: |
+                      the reported save status identifies artifact reuse as the active phase.
+                    when: |
+                      the Exit node reuses that artifact instead of writing a new one.
+                  - given: |
+                      streaming full-model materialization fails before artifact publication.
+                    id: ac-failure-status-not-success
+                    then: |
+                      the reported save status does not present the artifact as published.
+                    when: |
+                      the failure is reported to the workflow.
+                tags: []
+                created: 2026-05-08T20:24:54.595Z
+                notes: []
             created: 2026-04-27T04:04:27.599Z
             notes: []
           - _ulid: 01KQ6HR9VECV6Q34JSTCRGWCDB
