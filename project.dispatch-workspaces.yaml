@@ -36,18 +36,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-streaming-materialization-progress/01kr4m7f
-    canonical_branch_head: 5299140a65223aee02beb3044a6f1671840c11c0
+    canonical_branch_head: 105b7e259a41dca6b482f16c9df1d4da95ec99be
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-05-08T20:26:24.380Z
+      updated_at: 2026-05-08T20:35:24.015Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-08T20:26:24.967Z
+      updated_at: 2026-05-08T20:35:24.015Z
     integration:
       status: pending
       detail: null
@@ -55,7 +55,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 5299140a65223aee02beb3044a6f1671840c11c0
-      updated_at: 2026-05-08T20:26:24.380Z
+      updated_at: 2026-05-08T20:35:24.015Z
     lifecycle_state: active
     resolved_base_branch: dev
     task_ref: "@01KR4M7F3PVVBBD593P79WZPFS"
@@ -63,9 +63,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-05-08T20:26:24.967Z
-      last_reconciled_at: 2026-05-08T20:26:24.967Z
+      last_reconciled_at: 2026-05-08T20:35:24.015Z
       created_at: 2026-05-08T20:26:24.380Z
-      updated_at: 2026-05-08T20:26:24.967Z
+      updated_at: 2026-05-08T20:35:24.015Z
     workspace_id: dispatch-workspace-01KR4M7F3PVVBBD593P79WZPFS
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
