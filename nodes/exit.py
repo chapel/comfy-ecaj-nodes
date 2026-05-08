@@ -1198,14 +1198,19 @@ class WIDENExitNode:
                     sink.write_tensor(external_key, base_state[name])
                     # AC: @streaming-materialization-progress ac-no-op-save-progress
                     progress.tensor_written(external_key)
+                # Enter finalize phase BEFORE sink.finalize so the visible
+                # status reports the active validation/fsync/atomic-replace
+                # phase while it is in flight, not only after it completes.
+                # AC: @streaming-materialization-progress ac-finalization-status-visible
+                progress.finalize()
                 sink.finalize(
                     save_path,
                     pre_publish_check=lambda p: _classify_temp_artifact(
                         p, expected_kind="diffusion",
                     ),
                 )
-                # AC: @streaming-materialization-progress ac-finalization-status-visible
-                progress.finalize()
+                # AC: @streaming-materialization-progress ac-failure-status-not-success
+                progress.mark_published()
             except BaseException as exc:
                 # AC: @streaming-materialization-progress ac-failure-status-not-success
                 progress.failure(type(exc).__name__)
@@ -1800,14 +1805,19 @@ class WIDENExitNode:
 
             del base_state
 
+            # Enter finalize phase BEFORE sink.finalize so the visible
+            # status reports the active validation/fsync/atomic-replace
+            # phase while it is in flight, not only after it completes.
+            # AC: @streaming-materialization-progress ac-finalization-status-visible
+            progress.finalize()
             sink.finalize(
                 save_path,
                 pre_publish_check=lambda p: _classify_temp_artifact(
                     p, expected_kind="diffusion",
                 ),
             )
-            # AC: @streaming-materialization-progress ac-finalization-status-visible
-            progress.finalize()
+            # AC: @streaming-materialization-progress ac-failure-status-not-success
+            progress.mark_published()
             _log_memory("after-finalize-full")
 
             # Offload GPU models

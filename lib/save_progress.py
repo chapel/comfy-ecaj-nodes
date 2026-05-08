@@ -15,10 +15,21 @@ status string per phase that can be inspected by tests and logs.
 Phases reported:
 - ``prepare``           — manifest open / artifact preparation (1 unit)
 - ``write_tensor``      — each successful tensor write (1 unit per tensor)
-- ``finalize``          — fsync + atomic publish (1 unit)
+- ``finalize``          — entered before fsync + atomic publish runs so the
+                          status is visible during the long publication
+                          phase (1 unit)
 - ``reload``            — reloading the published artifact through Comfy (1 unit)
 - ``cache_reuse``       — a saved artifact already satisfies the request
 - ``failure``           — materialization failed before publication
+
+The ``published`` flag is intentionally separate from the ``finalize`` phase
+entry: callers must invoke :meth:`SavedModelProgress.finalize` *before* the
+underlying sink's finalize/atomic-replace work begins (so users can see the
+finalization status while it is active), and only call
+:meth:`SavedModelProgress.mark_published` *after* publication actually
+succeeds.  This keeps "the artifact is published" from being reported while
+validation/fsync/atomic-replace is still running and avoids false success on
+a mid-publish failure.
 
 The helper does not log absolute paths; the caller already validates and
 formats user-facing names so messages stay free of sensitive filesystem
@@ -137,8 +148,25 @@ class SavedModelProgress:
         logger.debug("save progress: wrote tensor %s", name)
 
     def finalize(self) -> None:
+        """Enter the finalize phase BEFORE the sink's finalize work begins.
+
+        This is the point where users should see "finalizing artifact" while
+        validation, fsync, and atomic replacement are running.  Publication
+        success is reported separately via :meth:`mark_published` so the
+        ``published`` flag is never set while finalize is still in flight.
+        """
         self._enter("finalize", "finalizing artifact")
         self._tick()
+
+    def mark_published(self) -> None:
+        """Record that publication actually succeeded.
+
+        Must only be called after the underlying sink's ``finalize`` returns
+        without raising — i.e. after the temp artifact has been atomically
+        replaced into its target path.  Does not advance the bar or change
+        the visible phase: the visible status remains ``finalize`` until the
+        caller transitions to ``reload``.
+        """
         self._published = True
 
     def reload(self) -> None:

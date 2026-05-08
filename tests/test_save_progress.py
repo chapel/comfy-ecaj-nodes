@@ -78,18 +78,52 @@ class TestSavedModelProgressHelper:
         assert prog.phase == "write_tensor"
 
     # AC: @streaming-materialization-progress ac-finalization-status-visible
-    def test_helper_emits_finalize_and_reload_phases(self):
+    # AC: @streaming-materialization-progress ac-failure-status-not-success
+    def test_helper_emits_finalize_phase_without_marking_published(self):
+        """finalize() enters the finalize phase but must not set published.
+
+        Publication is only reported via mark_published() so a failure
+        between finalize() and mark_published() (e.g. inside the sink's
+        atomic-replace work) leaves published=False.
+        """
         prog = SavedModelProgress(
             total_units=3, progress_bar_factory=RecordingProgressBar,
         )
         prog.prepare()
         prog.finalize()
-        prog.reload()
 
+        assert prog.phase == "finalize"
+        # finalize() advances the bar but must NOT set published.
+        assert prog.published is False
+
+        prog.mark_published()
+        # mark_published flips the flag without changing the visible phase
+        # or advancing the bar — the user-visible status remains "finalize"
+        # until the caller transitions to reload.
+        assert prog.published is True
+        assert prog.phase == "finalize"
+
+        prog.reload()
         phases = [phase for phase, _ in prog.messages]
         assert phases == ["prepare", "finalize", "reload"]
-        # finalize marks the artifact as published; reload does not undo that.
         assert prog.published is True
+
+    # AC: @streaming-materialization-progress ac-failure-status-not-success
+    def test_helper_finalize_without_publish_keeps_published_false(self):
+        """A finalize() entry with no mark_published() (sink failure) must
+        leave the artifact reported as not-published."""
+        prog = SavedModelProgress(
+            total_units=3, progress_bar_factory=RecordingProgressBar,
+        )
+        prog.prepare()
+        prog.finalize()
+        # Simulate sink.finalize raising before mark_published is reached.
+        prog.failure("RuntimeError")
+
+        assert prog.published is False
+        assert prog.failed is True
+        phases = [phase for phase, _ in prog.messages]
+        assert phases[-1] == "failure"
 
     # AC: @streaming-materialization-progress ac-cache-reuse-status-visible
     def test_helper_cache_reuse_uses_distinct_phase(self):
@@ -128,10 +162,12 @@ class TestSavedModelProgressHelper:
         prog.prepare()
         prog.tensor_written("k1")
         prog.finalize()
+        prog.mark_published()
         prog.reload()
         # The bar is None; the helper still tracks logical advance/phase.
         assert prog.advanced > 0
         assert prog.phase == "reload"
+        assert prog.published is True
 
     def test_helper_swallows_progress_bar_construction_errors(self):
         """A broken ProgressBar must not break a save."""
@@ -142,6 +178,7 @@ class TestSavedModelProgressHelper:
         prog.prepare()
         prog.tensor_written("k1")
         prog.finalize()
+        prog.mark_published()
         prog.reload()
         assert prog.published is True
 
@@ -724,3 +761,327 @@ class TestExitNodeProgressBarAbsence:
         assert result is not None
         import os
         assert os.path.exists(save_path)
+
+
+class TestExitNodeFinalizationOrder:
+    """The reported phase must already be 'finalize' while sink.finalize()
+    is performing its long validation/fsync/atomic-replace work — not only
+    after that work completes.
+
+    AC: @streaming-materialization-progress ac-finalization-status-visible
+    AC: @streaming-materialization-progress ac-failure-status-not-success
+    """
+
+    # AC: @streaming-materialization-progress ac-finalization-status-visible
+    def test_noop_diffusion_save_phase_is_finalize_during_pre_publish_check(
+        self, mock_model_patcher, tmp_path,
+    ):
+        """During pre_publish_check (which runs inside sink.finalize, between
+        fsync and atomic replace), the no-op diffusion save's reported phase
+        must be 'finalize' and the artifact must NOT yet be marked
+        published.  After sink.finalize returns, mark_published flips the
+        flag without disturbing the visible phase.
+        """
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl",
+            checkpoint_components=None,
+        )
+        save_path = str(tmp_path / "noop_finalize_order.safetensors")
+
+        captured: list[SavedModelProgress] = []
+
+        def capture_progress(*, manifest_size: int, artifact_name: str):
+            prog = SavedModelProgress(
+                total_units=manifest_size + 3,
+                progress_bar_factory=None,
+                artifact_name=artifact_name,
+            )
+            captured.append(prog)
+            return prog
+
+        observed: dict[str, object] = {}
+
+        from nodes.exit import _classify_temp_artifact as _real_classify
+
+        def spy_classify(p, *, expected_kind):
+            prog = captured[0]
+            observed["phase_during_pre_publish"] = prog.phase
+            observed["published_during_pre_publish"] = prog.published
+            return _real_classify(p, expected_kind=expected_kind)
+
+        with (
+            patch("nodes.exit.validate_model_name",
+                  return_value="noop_finalize_order.safetensors"),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.validate_checkpoint_components"),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit._classify_temp_artifact",
+                  side_effect=spy_classify),
+            patch("nodes.exit._build_save_progress",
+                  side_effect=capture_progress),
+        ):
+            WIDENExitNode().execute(
+                base, save_model=True, model_name="noop_finalize_order",
+            )
+
+        # While sink.finalize was still running (validation/fsync done,
+        # atomic replace not yet executed), the user-visible phase was
+        # already 'finalize' and the artifact was NOT yet marked published.
+        assert observed["phase_during_pre_publish"] == "finalize"
+        assert observed["published_during_pre_publish"] is False
+
+        # After sink.finalize returned successfully, mark_published flipped.
+        prog = captured[0]
+        assert prog.published is True
+        # The visible phase progressed to 'reload' on the artifact reload.
+        assert prog.phase == "reload"
+
+    # AC: @streaming-materialization-progress ac-finalization-status-visible
+    def test_diffusion_merge_save_phase_is_finalize_during_pre_publish_check(
+        self, mock_model_patcher, tmp_path,
+    ):
+        """Same ordering invariant for the normal merge save path:
+        progress.finalize() precedes sink.finalize, so the reported phase
+        is 'finalize' while validation/fsync/atomic replace is in flight.
+        """
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl",
+            checkpoint_components=None,
+        )
+        lora = RecipeLoRA(
+            loras=({"path": "test.safetensors", "strength": 1.0},),
+        )
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        all_keys = list(mock_model_patcher.model_state_dict().keys())
+        affected_keys = all_keys[:1]
+        save_path = str(tmp_path / "merge_finalize_order.safetensors")
+
+        mock_analyze, mock_model_analysis, dummy_plan = _make_full_mode_mocks(
+            mock_model_patcher, affected_keys, recipe=merge,
+        )
+        merged = {k: torch.randn(4, 4) for k in affected_keys}
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        def streaming_eval(**kwargs):
+            for k in kwargs["keys"]:
+                kwargs["write_fn"](k, merged[k])
+
+        captured: list[SavedModelProgress] = []
+
+        def capture_progress(*, manifest_size: int, artifact_name: str):
+            prog = SavedModelProgress(
+                total_units=manifest_size + 3,
+                progress_bar_factory=None,
+                artifact_name=artifact_name,
+            )
+            captured.append(prog)
+            return prog
+
+        observed: dict[str, object] = {}
+
+        from nodes.exit import _classify_temp_artifact as _real_classify
+
+        def spy_classify(p, *, expected_kind):
+            prog = captured[0]
+            observed["phase_during_pre_publish"] = prog.phase
+            observed["published_during_pre_publish"] = prog.published
+            return _real_classify(p, expected_kind=expected_kind)
+
+        _incremental_cache.clear()
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models",
+                  return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups",
+                  return_value={sig: affected_keys}),
+            patch("nodes.exit.streaming_evaluation_to_sink",
+                  side_effect=streaming_eval),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.validate_model_name",
+                  return_value="merge_finalize_order.safetensors"),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
+            patch("nodes.exit.validate_checkpoint_components"),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._classify_temp_artifact",
+                  side_effect=spy_classify),
+            patch("nodes.exit._build_save_progress",
+                  side_effect=capture_progress),
+        ):
+            WIDENExitNode().execute(
+                merge, save_model=True, model_name="merge_finalize_order",
+            )
+
+        assert observed["phase_during_pre_publish"] == "finalize"
+        assert observed["published_during_pre_publish"] is False
+
+        prog = captured[0]
+        assert prog.published is True
+
+    # AC: @streaming-materialization-progress ac-failure-status-not-success
+    def test_noop_diffusion_save_pre_publish_failure_keeps_published_false(
+        self, mock_model_patcher, tmp_path,
+    ):
+        """A failure during sink.finalize (raised from pre_publish_check)
+        must leave the artifact reported as NOT published, even though the
+        finalize phase entry already happened — proving mark_published is
+        gated on actual publication success rather than mere phase entry.
+        """
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl",
+            checkpoint_components=None,
+        )
+        save_path = str(tmp_path / "noop_pre_publish_fail.safetensors")
+
+        captured: list[SavedModelProgress] = []
+
+        def capture_progress(*, manifest_size: int, artifact_name: str):
+            prog = SavedModelProgress(
+                total_units=manifest_size + 3,
+                progress_bar_factory=None,
+                artifact_name=artifact_name,
+            )
+            captured.append(prog)
+            return prog
+
+        phase_when_failed: dict[str, object] = {}
+
+        def failing_classify(p, *, expected_kind):
+            prog = captured[0]
+            phase_when_failed["phase"] = prog.phase
+            phase_when_failed["published"] = prog.published
+            raise RuntimeError("simulated pre_publish_check rejection")
+
+        with (
+            patch("nodes.exit.validate_model_name",
+                  return_value="noop_pre_publish_fail.safetensors"),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash"),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.validate_checkpoint_components"),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit._classify_temp_artifact",
+                  side_effect=failing_classify),
+            patch("nodes.exit._build_save_progress",
+                  side_effect=capture_progress),
+        ):
+            with pytest.raises(RuntimeError, match="pre_publish_check"):
+                WIDENExitNode().execute(
+                    base, save_model=True, model_name="noop_pre_publish_fail",
+                )
+
+        # The phase entry happened before sink.finalize started its work.
+        assert phase_when_failed["phase"] == "finalize"
+        assert phase_when_failed["published"] is False
+
+        # After the failure: published stays False, failure phase recorded.
+        prog = captured[0]
+        assert prog.failed is True
+        assert prog.published is False
+        phases = [phase for phase, _ in prog.messages]
+        assert phases[-1] == "failure"
+
+        # And no artifact was published or left behind as a temp file.
+        import os
+        assert not os.path.exists(save_path)
+        leftover = [f for f in os.listdir(tmp_path) if f.startswith(".ecaj_tmp_")]
+        assert leftover == []
+
+    # AC: @streaming-materialization-progress ac-failure-status-not-success
+    def test_diffusion_merge_save_pre_publish_failure_keeps_published_false(
+        self, mock_model_patcher, tmp_path,
+    ):
+        """Same publication-gating invariant on the normal merge save path."""
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl",
+            checkpoint_components=None,
+        )
+        lora = RecipeLoRA(
+            loras=({"path": "test.safetensors", "strength": 1.0},),
+        )
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
+
+        all_keys = list(mock_model_patcher.model_state_dict().keys())
+        affected_keys = all_keys[:1]
+        save_path = str(tmp_path / "merge_pre_publish_fail.safetensors")
+
+        mock_analyze, mock_model_analysis, dummy_plan = _make_full_mode_mocks(
+            mock_model_patcher, affected_keys, recipe=merge,
+        )
+        merged = {k: torch.randn(4, 4) for k in affected_keys}
+        sig = OpSignature(shape=(4, 4), ndim=2)
+
+        def streaming_eval(**kwargs):
+            for k in kwargs["keys"]:
+                kwargs["write_fn"](k, merged[k])
+
+        captured: list[SavedModelProgress] = []
+
+        def capture_progress(*, manifest_size: int, artifact_name: str):
+            prog = SavedModelProgress(
+                total_units=manifest_size + 3,
+                progress_bar_factory=None,
+                artifact_name=artifact_name,
+            )
+            captured.append(prog)
+            return prog
+
+        phase_when_failed: dict[str, object] = {}
+
+        def failing_classify(p, *, expected_kind):
+            prog = captured[0]
+            phase_when_failed["phase"] = prog.phase
+            phase_when_failed["published"] = prog.published
+            raise RuntimeError("simulated pre_publish_check rejection")
+
+        _incremental_cache.clear()
+
+        with (
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models",
+                  return_value=mock_model_analysis),
+            patch("nodes.exit.compile_plan", return_value=dummy_plan),
+            patch("nodes.exit.compile_batch_groups",
+                  return_value={sig: affected_keys}),
+            patch("nodes.exit.streaming_evaluation_to_sink",
+                  side_effect=streaming_eval),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.validate_model_name",
+                  return_value="merge_pre_publish_fail.safetensors"),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
+            patch("nodes.exit.validate_checkpoint_components"),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._classify_temp_artifact",
+                  side_effect=failing_classify),
+            patch("nodes.exit._build_save_progress",
+                  side_effect=capture_progress),
+        ):
+            with pytest.raises(RuntimeError, match="pre_publish_check"):
+                WIDENExitNode().execute(
+                    merge, save_model=True,
+                    model_name="merge_pre_publish_fail",
+                )
+
+        assert phase_when_failed["phase"] == "finalize"
+        assert phase_when_failed["published"] is False
+
+        prog = captured[0]
+        assert prog.failed is True
+        assert prog.published is False
+
+        import os
+        assert not os.path.exists(save_path)
+        leftover = [f for f in os.listdir(tmp_path) if f.startswith(".ecaj_tmp_")]
+        assert leftover == []
