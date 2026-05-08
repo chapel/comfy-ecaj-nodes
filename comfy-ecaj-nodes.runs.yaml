@@ -8922,9 +8922,23 @@ runs:
     completed_at: 2026-05-08T20:45:42.132Z
   - _ulid: 01KR4P8YSERR72DYZ4Z6GJ211W
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-08T21:00:40.623Z
+        completed_at: 2026-05-08T21:00:53.888Z
+        notes: "Gate passed: task @01KR4M7F3PVVBBD593P79WZPFS completed this session after review approval
+          and PR #113 merge. High-confidence successes: fresh per-cycle kspec review plus
+          deterministic checks gave a clean merge decision; behavioral tests observing
+          pre_publish_check provided strong evidence for the prior finalization-order blocker.
+          High-confidence friction candidates identified for search: detached PR merge command
+          failure in HEAD detached snapshot, and GitHub refusing approval on own PR."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-08T21:00:53.888Z
+        completed_at: 2026-05-08T21:00:53.888Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-08T21:00:40.623Z
