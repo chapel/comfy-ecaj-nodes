@@ -1344,6 +1344,32 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-05-08T20:38:06.795Z
+  - _ulid: 01KR4NBTZ3Z2V658TDBBW8K3ZZ
+    type: success
+    content: "Review workflow success: anchored kspec blocker threads plus recorded check evidence made
+      the requested-changes outcome durable and directly actionable for the follow-up worker."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-05-08T20:44:46.435Z
+  - _ulid: 01KR4NBV1KS8DPT79Z5TQS861W
+    type: friction
+    content: During self-authored GitHub PR reviews, gh pr review --request-changes fails because GitHub
+      does not allow requesting changes on your own PR; reviewers need to fall back to a PR comment
+      while relying on kspec as the authoritative review gate.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-05-08T20:44:46.515Z
+  - _ulid: 01KR4NBV31SCMRCTFEEAK68HVH
+    type: friction
+    content: kspec review verdict with a short review ref and bare reviewer name produced a daemon JSON
+      parse error, but retrying with the full review ULID and email-style reviewer succeeded; the
+      failure mode is opaque during automated review.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-05-08T20:44:46.561Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
