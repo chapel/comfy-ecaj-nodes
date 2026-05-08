@@ -42,12 +42,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-05-08T20:38:30.697Z
+      updated_at: 2026-05-08T20:38:38.291Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-08T20:38:30.697Z
+      updated_at: 2026-05-08T20:38:38.291Z
     integration:
       status: pending
       detail: null
@@ -55,24 +55,29 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 5299140a65223aee02beb3044a6f1671840c11c0
-      updated_at: 2026-05-08T20:38:30.697Z
-    lifecycle_state: ready
+      updated_at: 2026-05-08T20:38:38.291Z
+    lifecycle_state: integrating
     resolved_base_branch: dev
     task_ref: "@01KR4M7F3PVVBBD593P79WZPFS"
     task_slug: task-streaming-materialization-progress
     timestamps:
       closed_at: null
       last_active_at: 2026-05-08T20:26:24.967Z
-      last_reconciled_at: 2026-05-08T20:38:30.697Z
+      last_reconciled_at: 2026-05-08T20:38:38.291Z
       created_at: 2026-05-08T20:26:24.380Z
-      updated_at: 2026-05-08T20:38:30.697Z
+      updated_at: 2026-05-08T20:38:38.291Z
     workspace_id: dispatch-workspace-01KR4M7F3PVVBBD593P79WZPFS
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 105b7e259a41dca6b482f16c9df1d4da95ec99be
+        last_seen_at: 2026-05-08T20:38:38.291Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-streaming-materialization-progress-01kr4m7f-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-streaming-materialization-progress/01kr4m7f
-        head: 5299140a65223aee02beb3044a6f1671840c11c0
-        last_seen_at: 2026-05-08T20:26:24.380Z
+        head: 105b7e259a41dca6b482f16c9df1d4da95ec99be
+        last_seen_at: 2026-05-08T20:38:38.291Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-streaming-materialization-progress-01kr4m7f
