@@ -79,7 +79,7 @@ description: |
 spec_ref: "@streaming-materialization-progress"
 plan_ref: "@plan-saved-model-materialization-progress"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -93,11 +93,11 @@ review_ref: "@01KR4N1F6N5W37NGGSDZVJVM7T"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-streaming-materialization-progress/01kr4m7f
-  captured_at: 2026-05-08T20:35:05.523Z
-  commit: 105b7e259a41dca6b482f16c9df1d4da95ec99be
-  remote: null
-  remote_url: null
-  upstream_ref: dev
+  captured_at: 2026-05-08T20:52:35.626Z
+  commit: 34cffdeeef112df9ba368ca2fd111af985376b99
+  remote: origin
+  remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+  upstream_ref: refs/heads/dispatch/task/task-streaming-materialization-progress/01kr4m7f
 session_id: 01KR4NE5VHR2JSC3A0P3T8JZ2Q
 history:
   - author: Jacob Chapel
@@ -170,8 +170,35 @@ history:
         previous: 2026-05-08T20:26:51.269Z
     command: task-start
     timestamp: 2026-05-08T20:52:33.298Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-streaming-materialization-progress/01kr4m7f
+          captured_at: 2026-05-08T20:52:35.626Z
+          commit: 34cffdeeef112df9ba368ca2fd111af985376b99
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-streaming-materialization-progress/01kr4m7f
+        previous:
+          review_url: null
+          branch: dispatch/task/task-streaming-materialization-progress/01kr4m7f
+          captured_at: 2026-05-08T20:35:05.523Z
+          commit: 105b7e259a41dca6b482f16c9df1d4da95ec99be
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+      submitted_at:
+        new: 2026-05-08T20:52:35.633Z
+        previous: 2026-05-08T20:35:05.525Z
+    command: task-submit
+    timestamp: 2026-05-08T20:52:35.634Z
 created_at: 2026-05-08T20:24:54.646Z
 started_at: 2026-05-08T20:52:33.298Z
-submitted_at: 2026-05-08T20:35:05.525Z
+submitted_at: 2026-05-08T20:52:35.633Z
 todos: []
 automation: eligible
