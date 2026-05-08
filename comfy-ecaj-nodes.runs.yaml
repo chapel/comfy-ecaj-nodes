@@ -8922,7 +8922,7 @@ runs:
     completed_at: 2026-05-08T20:45:42.132Z
   - _ulid: 01KR4P8YSERR72DYZ4Z6GJ211W
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -8938,7 +8938,19 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-08T21:00:53.888Z
-        completed_at: 2026-05-08T21:00:53.888Z
+        completed_at: 2026-05-08T21:01:25.724Z
+        notes: "Baseline searches completed: kspec meta observations list, kspec inbox list, kspec tasks
+          list, plus targeted searches for detached PR merge, self-owned PR approval, and
+          pre_publish_check finalization. Friction findings were already tracked: detached gh pr
+          merge/current-branch failure is covered by inbox @01KQ6R11; self-owned GitHub PR approval
+          behavior is covered by inbox @01KQCR3B6 and observation @01KR4NBV. New high-confidence
+          success candidate: using MaterializationSink.pre_publish_check as an in-flight behavioral
+          probe let the review verify that progress.phase == finalize during sink.finalize work and
+          progress.published stayed false until atomic publication succeeded."
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-08T21:01:25.724Z
+        completed_at: 2026-05-08T21:01:25.724Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-08T21:00:40.623Z
