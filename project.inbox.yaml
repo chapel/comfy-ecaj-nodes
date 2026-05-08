@@ -270,3 +270,26 @@ inbox:
       - kspec-hook
     added_by: "@claude"
     created_at: 2026-05-01T00:55:04.928Z
+  - _ulid: 01KR4MZMJTGRGMKDKMWHB4559P
+    text: Tighten kspec-worktree-guard.sh pattern matching so it only blocks dangerous git verbs that
+      appear as actual git subcommands and not when those words appear inside quoted argument text
+      on unrelated commands like kspec workflow next --notes. Hit twice this session on
+      workflow-note bodies that merely mentioned the trigger word.
+    tags:
+      - reflection
+      - hooks
+      - tooling
+    added_by: "@claude"
+    created_at: 2026-05-08T20:38:06.682Z
+  - _ulid: 01KR4MZMKSPDCRTES1VC06GG3M
+    text: "Split nodes/exit.py (2031 lines) — file now exceeds the Read 25k-token limit and requires
+      offset chunks to read. Mirror the lib/executor.py split: extract patch-mode body, full-mode
+      checkpoint save, and full-mode diffusion save into sibling modules under nodes/exit_paths/ or
+      similar, leaving WIDENExitNode as a thin facade. Pure refactor; must preserve every public
+      method and AC annotation."
+    tags:
+      - reflection
+      - refactor
+      - exit-node
+    added_by: "@claude"
+    created_at: 2026-05-08T20:38:06.713Z
