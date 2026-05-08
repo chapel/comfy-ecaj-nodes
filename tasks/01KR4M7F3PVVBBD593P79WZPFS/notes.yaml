@@ -20,3 +20,19 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-05-08T20:42:33.520Z
+  - _ulid: 01KR4NSTX8VC252XC7C2J4YBPP
+    content: "Fix cycle 1: addressed both finalization-status ordering blockers. Split
+      SavedModelProgress.finalize() into finalize() (enter phase + tick) and mark_published() (set
+      flag only). Reordered both _execute_full_model_noop and _execute_diffusion_save to call
+      progress.finalize() BEFORE sink.finalize and progress.mark_published() AFTER it returns — so
+      users see the 'finalize' status during the active validation/fsync/atomic-replace phase, while
+      published is still gated on actual publication success. Added 5 new behavioral tests in
+      TestExitNodeFinalizationOrder that observe phase via a spy pre_publish_check (which runs
+      inside sink.finalize between fsync and atomic replace) for both save paths, plus failure
+      variants proving published stays False when pre_publish_check raises. 19/19 focused tests
+      pass, 1666/1666 full suite pass, ruff clean. Re-verified all six ACs against implementation:
+      progress advance, no-op base writes, affected handoffs, finalization visibility (now correctly
+      during the active phase), cache reuse, failure-not-success."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-05-08T20:52:25.128Z
