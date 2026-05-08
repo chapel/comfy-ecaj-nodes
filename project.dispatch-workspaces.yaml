@@ -1,6 +1,6 @@
 kynetic_dispatch_workspaces: "1.0"
 workspaces:
-  - active_role: reviewer
+  - active_role: null
     base_branch_point: 5299140a65223aee02beb3044a6f1671840c11c0
     bootstrap:
       status: succeeded
@@ -41,34 +41,34 @@ workspaces:
     canonical_branch: dispatch/task/task-streaming-materialization-progress/01kr4m7f
     canonical_branch_head: 34cffdeeef112df9ba368ca2fd111af985376b99
     cleanup:
-      status: not_scheduled
-      detail: null
-      eligible: false
-      reason: null
-      updated_at: 2026-05-08T20:54:16.903Z
+      status: scheduled
+      detail: integrated-into-base-branch
+      eligible: true
+      reason: integrated-into-base-branch
+      updated_at: 2026-05-08T20:59:48.577Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-08T20:54:17.848Z
+      updated_at: 2026-05-08T20:59:48.577Z
     integration:
-      status: pending
-      detail: null
-      outcome: pull_request
+      status: merged
+      detail: integration:merged
+      outcome: merged
       publication_mode: pull_request
       target_branch: dev
       target_commit: 5299140a65223aee02beb3044a6f1671840c11c0
-      updated_at: 2026-05-08T20:54:16.903Z
-    lifecycle_state: integrating
+      updated_at: 2026-05-08T20:59:48.577Z
+    lifecycle_state: closing
     resolved_base_branch: dev
     task_ref: "@01KR4M7F3PVVBBD593P79WZPFS"
     task_slug: task-streaming-materialization-progress
     timestamps:
       closed_at: null
       last_active_at: 2026-05-08T20:54:17.848Z
-      last_reconciled_at: 2026-05-08T20:54:17.848Z
+      last_reconciled_at: 2026-05-08T20:59:48.577Z
       created_at: 2026-05-08T20:26:24.380Z
-      updated_at: 2026-05-08T20:54:17.848Z
+      updated_at: 2026-05-08T20:59:48.577Z
     workspace_id: dispatch-workspace-01KR4M7F3PVVBBD593P79WZPFS
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
