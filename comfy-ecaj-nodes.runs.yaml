@@ -8801,7 +8801,7 @@ runs:
     completed_at: 2026-05-01T01:23:57.787Z
   - _ulid: 01KR4MVBVMTHEFH1YM6EG24CZZ
     status: active
-    current_step: 3
+    current_step: 4
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -8849,7 +8849,20 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-05-08T20:37:21.840Z
-        completed_at: 2026-05-08T20:37:21.840Z
+        completed_at: 2026-05-08T20:37:32.019Z
+        notes: "Proposals: 1) Tighten worktree-guard pattern matching so it matches dangerous git verbs only
+          when they appear as actual git subcommands (e.g. /\\bgit\\s+rebase\\b/) and never when
+          they appear inside quoted strings on unrelated commands like 'kspec workflow next'. Scope:
+          small — one shell script change in .claude/hooks/. 2) New task: split nodes/exit.py —
+          extract patch-mode and full-mode/diffusion-save bodies into sibling modules (mirroring the
+          lib/executor.py split). The file now exceeds the Read 25k-token limit and forces offset
+          reads. Scope: medium — pure refactor, must preserve all WIDENExitNode public surface and
+          AC annotations. Both as inbox items rather than tasks because each needs scoping/triage
+          before becoming a standalone task."
+      - status: completed
+        step_index: 4
+        started_at: 2026-05-08T20:37:32.019Z
+        completed_at: 2026-05-08T20:37:32.019Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-08T20:35:46.676Z
