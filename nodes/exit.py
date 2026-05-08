@@ -52,6 +52,7 @@ from ..lib.recipe import (
     RecipeModel,
     RecipeNode,
 )
+from ..lib.save_progress import SavedModelProgress
 from ..lib.streaming_save import MaterializationSink
 from ..lib.widen import WIDEN, WIDENConfig
 
@@ -98,6 +99,45 @@ def _comfy_load_diffusion_model(save_path: str, model_options: dict | None = Non
     import comfy.sd
     return comfy.sd.load_diffusion_model(
         save_path, model_options=model_options or {},
+    )
+
+
+def _build_save_progress(
+    *, manifest_size: int, artifact_name: str,
+) -> SavedModelProgress:
+    """Construct a SavedModelProgress for a diffusion-only save.
+
+    AC: @streaming-materialization-progress ac-progress-during-streaming-writes
+    AC: @streaming-materialization-progress ac-no-op-save-progress
+    AC: @streaming-materialization-progress ac-affected-write-progress
+    AC: @streaming-materialization-progress ac-finalization-status-visible
+
+    Total units = manifest_size (one per tensor write) + 3 phase units for
+    prepare, finalize, and reload.  ProgressBar is looked up off the module
+    namespace so tests can patch ``nodes.exit.ProgressBar`` to a recording
+    fake or to ``None`` to verify the no-ComfyUI path.
+    """
+    factory = ProgressBar if ProgressBar is not None else None
+    return SavedModelProgress(
+        total_units=manifest_size + 3,
+        progress_bar_factory=factory,
+        artifact_name=artifact_name,
+    )
+
+
+def _build_cache_reuse_progress(*, artifact_name: str) -> SavedModelProgress:
+    """Construct a 1-unit SavedModelProgress for cache-reuse status reporting.
+
+    AC: @streaming-materialization-progress ac-cache-reuse-status-visible
+
+    Cache hits never write tensors, so the progress only carries the
+    ``cache_reuse`` phase plus a single advance to fully complete the bar.
+    """
+    factory = ProgressBar if ProgressBar is not None else None
+    return SavedModelProgress(
+        total_units=1,
+        progress_bar_factory=factory,
+        artifact_name=artifact_name,
     )
 
 
@@ -1072,9 +1112,10 @@ class WIDENExitNode:
                     expected_dependency_fingerprints=dependency_fingerprints_json,
                 )
             if cache_hit:
-                if ProgressBar is not None:
-                    pbar = ProgressBar(1)
-                    pbar.update(1)
+                # AC: @streaming-materialization-progress ac-cache-reuse-status-visible
+                _build_cache_reuse_progress(
+                    artifact_name=validated_name,
+                ).cache_reuse()
                 # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
                 # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
                 # Checkpoint cache hit: load through Comfy's checkpoint loader.
@@ -1141,30 +1182,41 @@ class WIDENExitNode:
                 _to_external_diffusion_key(k): (v.dtype, tuple(v.shape))
                 for k, v in base_state.items()
             }
+            # AC: @streaming-materialization-progress ac-no-op-save-progress
+            # AC: @streaming-materialization-progress ac-finalization-status-visible
+            # AC: @streaming-materialization-progress ac-failure-status-not-success
+            progress = _build_save_progress(
+                manifest_size=len(external_manifest),
+                artifact_name=validated_name,
+            )
             sink = MaterializationSink()
             try:
+                progress.prepare()
                 sink.open(external_manifest, save_path, metadata)
                 for name in sorted(base_state.keys()):
-                    sink.write_tensor(
-                        _to_external_diffusion_key(name), base_state[name],
-                    )
+                    external_key = _to_external_diffusion_key(name)
+                    sink.write_tensor(external_key, base_state[name])
+                    # AC: @streaming-materialization-progress ac-no-op-save-progress
+                    progress.tensor_written(external_key)
                 sink.finalize(
                     save_path,
                     pre_publish_check=lambda p: _classify_temp_artifact(
                         p, expected_kind="diffusion",
                     ),
                 )
-            except BaseException:
+                # AC: @streaming-materialization-progress ac-finalization-status-visible
+                progress.finalize()
+            except BaseException as exc:
+                # AC: @streaming-materialization-progress ac-failure-status-not-success
+                progress.failure(type(exc).__name__)
                 sink.abort()
                 raise
 
-            if ProgressBar is not None:
-                pbar = ProgressBar(1)
-                pbar.update(1)
-
             # AC: @full-saved-model-output ac-return-loaded-model
+            # AC: @streaming-materialization-progress ac-finalization-status-visible
             # Returned MODEL comes from the saved diffusion-model artifact
             # via Comfy's supported diffusion-model loader.
+            progress.reload()
             return (_load_diffusion_model_artifact(save_path),)
 
     def _execute_full_saved_model(
@@ -1259,9 +1311,10 @@ class WIDENExitNode:
                 )
             if cache_hit:
                 del base_state
-                if ProgressBar is not None:
-                    pbar = ProgressBar(1)
-                    pbar.update(1)
+                # AC: @streaming-materialization-progress ac-cache-reuse-status-visible
+                _build_cache_reuse_progress(
+                    artifact_name=validated_name,
+                ).cache_reuse()
                 # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
                 # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
                 # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
@@ -1571,6 +1624,19 @@ class WIDENExitNode:
         )
 
         sink = MaterializationSink()
+        # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
+        # AC: @streaming-materialization-progress ac-affected-write-progress
+        # AC: @streaming-materialization-progress ac-no-op-save-progress
+        # AC: @streaming-materialization-progress ac-finalization-status-visible
+        # AC: @streaming-materialization-progress ac-failure-status-not-success
+        # Progress sized from the manifest (one tick per tensor write) plus
+        # explicit phase units for prepare, finalize, and reload.  Created
+        # before any sink work so a failure during `open()` still carries a
+        # progress object the except block can mark as failed.
+        progress = _build_save_progress(
+            manifest_size=len(base_state),
+            artifact_name=os.path.basename(save_path),
+        )
         try:
             loader = analysis.loader
             set_affected = analysis.set_affected
@@ -1633,6 +1699,7 @@ class WIDENExitNode:
                 checkpoint_components=False,
             )
 
+            progress.prepare()
             sink.open(manifest, save_path, metadata)
 
             if keys_to_process:
@@ -1667,11 +1734,13 @@ class WIDENExitNode:
                 affected_key_set_lookup.update(group_keys)
 
             # Unaffected base writes use the EXTERNAL key layout
+            # AC: @streaming-materialization-progress ac-no-op-save-progress
+            # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
             for key in base_state:
                 if key not in affected_key_set_lookup:
-                    sink.write_tensor(
-                        _to_external_diffusion_key(key), base_state[key],
-                    )
+                    external_key = _to_external_diffusion_key(key)
+                    sink.write_tensor(external_key, base_state[key])
+                    progress.tensor_written(external_key)
 
             def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
                 def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
@@ -1695,13 +1764,15 @@ class WIDENExitNode:
                 arch, widen_config, model_loaders, domain,
             )
 
-            pbar_count = len(batch_groups) if batch_groups else 0
-            pbar = ProgressBar(pbar_count) if ProgressBar is not None and pbar_count else None
-
             # streaming_evaluation_to_sink calls write_fn(name, tensor) using
-            # internal keys; remap to external keys at the boundary.
+            # internal keys; remap to external keys at the boundary and
+            # advance progress for each affected tensor handoff.
+            # AC: @streaming-materialization-progress ac-affected-write-progress
+            # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
             def _external_write(name: str, tensor: torch.Tensor) -> None:
-                sink.write_tensor(_to_external_diffusion_key(name), tensor)
+                external_key = _to_external_diffusion_key(name)
+                sink.write_tensor(external_key, tensor)
+                progress.tensor_written(external_key)
 
             for sig, group_keys in batch_groups.items():
                 n_models = len(set_affected) + len(model_loaders)
@@ -1725,9 +1796,6 @@ class WIDENExitNode:
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
 
-                if pbar is not None:
-                    pbar.update(1)
-
             _log_memory("after-streaming-full")
 
             del base_state
@@ -1738,6 +1806,8 @@ class WIDENExitNode:
                     p, expected_kind="diffusion",
                 ),
             )
+            # AC: @streaming-materialization-progress ac-finalization-status-visible
+            progress.finalize()
             _log_memory("after-finalize-full")
 
             # Offload GPU models
@@ -1755,7 +1825,9 @@ class WIDENExitNode:
             if not enable_cache:
                 _incremental_cache.clear()
 
-        except BaseException:
+        except BaseException as exc:
+            # AC: @streaming-materialization-progress ac-failure-status-not-success
+            progress.failure(type(exc).__name__)
             sink.abort()
             raise
         finally:
@@ -1765,8 +1837,10 @@ class WIDENExitNode:
 
         # AC: @full-saved-model-output ac-return-loaded-model
         # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+        # AC: @streaming-materialization-progress ac-finalization-status-visible
         # Returned MODEL comes from the saved diffusion-model artifact via
         # Comfy's supported diffusion-model loader (Comfy-owned memory).
+        progress.reload()
         return (_load_diffusion_model_artifact(save_path),)
 
     def _execute_patch_mode(
