@@ -79,7 +79,7 @@ description: |
 spec_ref: "@streaming-materialization-progress"
 plan_ref: "@plan-saved-model-materialization-progress"
 origin: derived
-status: needs_work
+status: in_progress
 blocked_by: []
 depends_on: []
 context: []
@@ -98,7 +98,7 @@ submission_linkage:
   remote: null
   remote_url: null
   upstream_ref: dev
-session_id: null
+session_id: 01KR4NE5VHR2JSC3A0P3T8JZ2Q
 history:
   - author: Jacob Chapel
     changes:
@@ -157,8 +157,21 @@ history:
         previous: 01KR4MA78QEPEPQD0DDQ68PNSJ
     command: review-verdict-needs-work
     timestamp: 2026-05-08T20:42:33.520Z
+  - author: "@claude"
+    changes:
+      status:
+        new: in_progress
+        previous: needs_work
+      session_id:
+        new: 01KR4NE5VHR2JSC3A0P3T8JZ2Q
+        previous: null
+      started_at:
+        new: 2026-05-08T20:52:33.298Z
+        previous: 2026-05-08T20:26:51.269Z
+    command: task-start
+    timestamp: 2026-05-08T20:52:33.298Z
 created_at: 2026-05-08T20:24:54.646Z
-started_at: 2026-05-08T20:26:51.269Z
+started_at: 2026-05-08T20:52:33.298Z
 submitted_at: 2026-05-08T20:35:05.525Z
 todos: []
 automation: eligible
