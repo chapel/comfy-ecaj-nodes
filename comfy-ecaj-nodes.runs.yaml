@@ -8921,7 +8921,7 @@ runs:
     started_at: 2026-05-08T20:43:33.498Z
     completed_at: 2026-05-08T20:45:42.132Z
   - _ulid: 01KR4P8YSERR72DYZ4Z6GJ211W
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -8959,7 +8959,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-05-08T21:01:52.499Z
-        completed_at: 2026-05-08T21:01:52.499Z
+        completed_at: 2026-05-08T21:01:59.921Z
+        notes: "Capture completed: created success observation @01KR4PAW. No friction captured because the
+          two concrete friction points from this session were already tracked. No inbox/task items
+          created."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-08T21:00:40.623Z
+    completed_at: 2026-05-08T21:01:59.921Z
