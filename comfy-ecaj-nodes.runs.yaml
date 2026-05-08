@@ -8801,9 +8801,26 @@ runs:
     completed_at: 2026-05-01T01:23:57.787Z
   - _ulid: 01KR4MVBVMTHEFH1YM6EG24CZZ
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-08T20:35:46.676Z
+        completed_at: 2026-05-08T20:36:09.627Z
+        notes: "What worked well: 1) Reading exit.py once then writing focused integration tests that patch
+          _build_save_progress factory to inject a recording instance — clean separation between
+          unit tests of the helper and integration tests of wiring. 2) Adding the helper as a small
+          dedicated module (lib/save_progress.py) with explicit phase methods rather than inlining
+          ad-hoc ProgressBar calls — made the test surface tight and the wiring obvious. 3) Reusing
+          existing test patterns from test_full_model_streaming.py (mock structure,
+          _make_full_mode_mocks shape) rather than inventing new fixtures. 4) Worktree-guard hook
+          fired on git replay-onto-target — easy to skip safely since worker branch was fresh from
+          main."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-08T20:36:09.627Z
+        completed_at: 2026-05-08T20:36:09.627Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-08T20:35:46.676Z
