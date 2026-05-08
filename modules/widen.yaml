@@ -468,6 +468,9 @@ features:
                   Streaming full-model materialization reports progress for long-running saved
                   artifact work so ComfyUI users can distinguish active model saving from a
                   stalled Exit node execution.
+                status:
+                  maturity: draft
+                  implementation: in_progress
                 depends_on: []
                 implements: []
                 relates_to: []
