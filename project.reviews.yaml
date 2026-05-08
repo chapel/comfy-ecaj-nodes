@@ -17155,7 +17155,17 @@ reviews:
     slugs: []
     title: Review task-streaming-materialization-progress
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run ruff check .: All checks passed"
+        name: ruff
+        required: true
+        runner: ruff
+        created_at: 2026-05-08T20:41:35.779Z
+        completed_at: 2026-05-08T20:41:35.779Z
     events:
       - _ulid: 01KR4N1F6MA73FVA66VDSY16KT
         actor: Jacob Chapel
@@ -17170,6 +17180,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-05-08T20:39:29.217Z
+      - _ulid: 01KR4N60Y4KY613MNP0R9RK2FM
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: ruff
+        timestamp: 2026-05-08T20:41:35.940Z
     examined_commit: 105b7e259a41dca6b482f16c9df1d4da95ec99be
     external_links: []
     lifecycle_state: open
@@ -17182,5 +17199,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-08T20:39:06.709Z
-    updated_at: 2026-05-08T20:39:29.003Z
+    updated_at: 2026-05-08T20:41:35.779Z
     notes: []
