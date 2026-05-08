@@ -8800,7 +8800,7 @@ runs:
     started_at: 2026-05-01T01:21:33.669Z
     completed_at: 2026-05-01T01:23:57.787Z
   - _ulid: 01KR4MVBVMTHEFH1YM6EG24CZZ
-    status: active
+    status: completed
     current_step: 5
     initiated_by: "@claude"
     step_results:
@@ -8869,7 +8869,13 @@ runs:
       - status: completed
         step_index: 5
         started_at: 2026-05-08T20:37:41.565Z
-        completed_at: 2026-05-08T20:37:41.565Z
+        completed_at: 2026-05-08T20:38:14.214Z
+        notes: "Captured 4 items: 2 inbox (worktree-guard pattern tightening, nodes/exit.py split) and 2
+          meta observations (friction: guard false-positive on argument text; success: helper-module
+          + factory-patching pattern). Real-world demonstration of the friction occurred
+          mid-reflection — the guard blocked the very batch that captured it because the argument
+          JSON contained the trigger word."
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-08T20:35:46.676Z
+    completed_at: 2026-05-08T20:38:14.214Z
