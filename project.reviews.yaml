@@ -17187,6 +17187,16 @@ reviews:
         runner: kspec
         created_at: 2026-05-08T20:41:36.900Z
         completed_at: 2026-05-08T20:41:36.900Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "uv run pytest tests/test_save_progress.py: 14 passed in 0.78s"
+        name: focused save progress tests
+        required: true
+        runner: pytest
+        created_at: 2026-05-08T20:41:37.444Z
+        completed_at: 2026-05-08T20:41:37.444Z
     events:
       - _ulid: 01KR4N1F6MA73FVA66VDSY16KT
         actor: Jacob Chapel
@@ -17222,6 +17232,13 @@ reviews:
           status: pass
           name: kspec validate
         timestamp: 2026-05-08T20:41:37.067Z
+      - _ulid: 01KR4N62JKBZ405EDHVDYX4754
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: focused save progress tests
+        timestamp: 2026-05-08T20:41:37.620Z
     examined_commit: 105b7e259a41dca6b482f16c9df1d4da95ec99be
     external_links: []
     lifecycle_state: open
@@ -17234,5 +17251,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-08T20:39:06.709Z
-    updated_at: 2026-05-08T20:41:36.900Z
+    updated_at: 2026-05-08T20:41:37.444Z
     notes: []
