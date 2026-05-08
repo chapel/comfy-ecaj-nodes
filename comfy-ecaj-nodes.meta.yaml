@@ -1370,6 +1370,18 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-05-08T20:44:46.561Z
+  - _ulid: 01KR4PAWC4SMNEY0XHMXW6E9WQ
+    type: success
+    content: "Testing long-running publication phases with an in-flight hook: using
+      MaterializationSink.pre_publish_check as a spy inside sink.finalize let the review verify the
+      user-visible finalize phase was active before atomic publish completed, while the published
+      flag stayed false until success. This is a strong pattern for save/materialization lifecycle
+      tests because it observes behavior during the critical section rather than only before/after
+      state."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-05-08T21:01:43.684Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
