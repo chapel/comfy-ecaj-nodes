@@ -2457,7 +2457,7 @@
   type: task
   spec_ref: "@streaming-materialization-progress"
   plan_ref: "@plan-saved-model-materialization-progress"
-  status: pending_review
+  status: completed
   blocked_by: []
   depends_on: []
   priority: 1
@@ -2471,4 +2471,5 @@
   created_at: 2026-05-08T20:24:54.646Z
   started_at: 2026-05-08T20:52:33.298Z
   submitted_at: 2026-05-08T20:52:35.633Z
+  completed_at: 2026-05-08T20:59:46.788Z
   automation: eligible

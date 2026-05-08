@@ -79,8 +79,11 @@ description: |
 spec_ref: "@streaming-materialization-progress"
 plan_ref: "@plan-saved-model-materialization-progress"
 origin: derived
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Approved in review @01KR4NYR and merged PR #113 to dev at
+  1b886134e0b0b88768419710d07a162ec7992a15. Verified focused progress tests, full pytest suite,
+  ruff, kspec validation, GitHub CI lint/test, and PR merge state."
 depends_on: []
 context: []
 priority: 1
@@ -204,8 +207,24 @@ history:
         previous: "@01KR4N1F6N5W37NGGSDZVJVM7T"
     command: review-link
     timestamp: 2026-05-08T20:55:07.289Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Approved in review @01KR4NYR and merged PR #113 to dev at
+          1b886134e0b0b88768419710d07a162ec7992a15. Verified focused progress tests, full pytest
+          suite, ruff, kspec validation, GitHub CI lint/test, and PR merge state."
+        previous: null
+      completed_at:
+        new: 2026-05-08T20:59:46.788Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-05-08T20:59:46.802Z
 created_at: 2026-05-08T20:24:54.646Z
 started_at: 2026-05-08T20:52:33.298Z
 submitted_at: 2026-05-08T20:52:35.633Z
+completed_at: 2026-05-08T20:59:46.788Z
 todos: []
 automation: eligible
