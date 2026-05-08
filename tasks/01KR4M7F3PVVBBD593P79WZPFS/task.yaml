@@ -89,7 +89,7 @@ tags:
   - persistence
   - progress
 vcs_refs: []
-review_ref: "@01KR4N1F6N5W37NGGSDZVJVM7T"
+review_ref: "@01KR4NYRSERB520K66FS2X2A2M"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-streaming-materialization-progress/01kr4m7f
@@ -197,6 +197,13 @@ history:
         previous: 2026-05-08T20:35:05.525Z
     command: task-submit
     timestamp: 2026-05-08T20:52:35.634Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KR4NYRSERB520K66FS2X2A2M"
+        previous: "@01KR4N1F6N5W37NGGSDZVJVM7T"
+    command: review-link
+    timestamp: 2026-05-08T20:55:07.289Z
 created_at: 2026-05-08T20:24:54.646Z
 started_at: 2026-05-08T20:52:33.298Z
 submitted_at: 2026-05-08T20:52:35.633Z
