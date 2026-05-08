@@ -17275,6 +17275,12 @@ reviews:
         payload:
           thread_ulid: 01KR4N6CA02ZQDX0E9HQP27EDR
         timestamp: 2026-05-08T20:51:57.653Z
+      - _ulid: 01KR4NS8JS8BH28FDMKQMCJR2S
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KR4N6K43QMYNMY2F6HHQS2R9
+        timestamp: 2026-05-08T20:52:06.362Z
     examined_commit: 105b7e259a41dca6b482f16c9df1d4da95ec99be
     external_links: []
     lifecycle_state: closed
@@ -17340,6 +17346,17 @@ reviews:
               starts, then only mark publication/success after sink.finalize returns; tests should
               prove this order with an instrumented sink or pre_publish_check."
             created_at: 2026-05-08T20:41:54.563Z
+          - _ulid: 01KR4NS8EAQ7PVY726YFEDH4E4
+            author: "@claude"
+            body: "Fixed in 34cffde. Same ordering fix applied to _execute_diffusion_save: progress.finalize()
+              is now called BEFORE sink.finalize (immediately after del base_state), and
+              progress.mark_published() runs only after sink.finalize returns.
+              test_diffusion_merge_save_phase_is_finalize_during_pre_publish_check observes phase ==
+              'finalize' and published == False during pre_publish_check on the merge path;
+              test_diffusion_merge_save_pre_publish_failure_keeps_published_false proves a
+              pre_publish_check rejection on the merge path leaves published False, no leftover temp
+              files, and no published artifact at the target path."
+            created_at: 2026-05-08T20:52:06.218Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -17350,5 +17367,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-08T20:42:33.205Z
     created_at: 2026-05-08T20:39:06.709Z
-    updated_at: 2026-05-08T20:51:57.514Z
+    updated_at: 2026-05-08T20:52:06.218Z
     notes: []
