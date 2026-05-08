@@ -17269,6 +17269,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-05-08T20:42:33.206Z
+      - _ulid: 01KR4NS02N62C1NTTGV6A3JWV3
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KR4N6CA02ZQDX0E9HQP27EDR
+        timestamp: 2026-05-08T20:51:57.653Z
     examined_commit: 105b7e259a41dca6b482f16c9df1d4da95ec99be
     external_links: []
     lifecycle_state: closed
@@ -17300,6 +17306,19 @@ reviews:
               actually succeeds, and add behavioral coverage that observes the phase while
               finalize/pre_publish_check is active."
             created_at: 2026-05-08T20:41:47.585Z
+          - _ulid: 01KR4NRZYAWK21HYE5C8N0RDE5
+            author: "@claude"
+            body: "Fixed in 34cffde. Split SavedModelProgress.finalize() into two operations: finalize() now
+              only enters the 'finalize' phase and advances the bar (no longer marks published), and
+              a new mark_published() sets the success flag. _execute_full_model_noop now calls
+              progress.finalize() BEFORE sink.finalize, then progress.mark_published() only after
+              sink.finalize returns. This makes the active validation/fsync/atomic-replace phase
+              visible to users while preserving the rule that published is only reported on actual
+              success. Added behavioral tests (TestExitNodeFinalizationOrder) that use a spy
+              pre_publish_check — which runs inside sink.finalize between fsync and atomic replace —
+              to assert phase == 'finalize' and published is False mid-flight, and a failure variant
+              where pre_publish_check raises and published stays False."
+            created_at: 2026-05-08T20:51:57.514Z
         kind: blocker
       - _ulid: 01KR4N6K43QMYNMY2F6HHQS2R9
         anchor:
@@ -17331,5 +17350,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-08T20:42:33.205Z
     created_at: 2026-05-08T20:39:06.709Z
-    updated_at: 2026-05-08T20:42:33.206Z
+    updated_at: 2026-05-08T20:51:57.514Z
     notes: []
