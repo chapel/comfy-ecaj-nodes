@@ -70,7 +70,7 @@ description: >-
 spec_ref: "@comfy-memory-manager-compatibility"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -81,6 +81,14 @@ tags:
   - memory
   - checkpoint-save
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g
+  captured_at: 2026-05-12T22:29:00.187Z
+  commit: 1b886134e0b0b88768419710d07a162ec7992a15
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 history:
   - author: Jacob Chapel
     changes:
@@ -92,7 +100,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-05-12T22:17:10.372Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g
+          captured_at: 2026-05-12T22:29:00.187Z
+          commit: 1b886134e0b0b88768419710d07a162ec7992a15
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-05-12T22:29:00.192Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-05-12T22:29:00.193Z
 created_at: 2026-05-12T22:16:57.702Z
 started_at: 2026-05-12T22:17:10.372Z
+submitted_at: 2026-05-12T22:29:00.192Z
 todos: []
 automation: manual_only
