@@ -51,3 +51,14 @@ notes:
     supersedes: null
     author: Hermes
     created_at: 2026-05-12T22:51:11.558Z
+  - _ulid: 01KRF66B8YF2HB40R00023A0EH
+    content: "[DISPATCH-WORKSPACE] Cannot adopt branch
+      \"dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g\" for task
+      @checkpoint-save-release-temp-model-return-artifact: it is currently checked out in the main
+      repository working tree (/home/chapel/Projects/comfy-ecaj-nodes). This usually means
+      submission linkage was captured from the wrong checkout. Suggested action: Repair the task's
+      submission linkage to reference the correct task branch: kspec task set
+      @checkpoint-save-release-temp-model-return-artifact --submission-linkage"
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-05-12T22:51:16.639Z
