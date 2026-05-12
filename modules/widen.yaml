@@ -730,6 +730,21 @@ features:
                 supersedes: null
                 author: "@claude"
                 created_at: 2026-04-29T13:39:25.412Z
+              - _ulid: 01KRF97VA4ZF0MQRBJ2QAVP314
+                content: "Retrospective from @task-checkpoint-save-release-temp-model-return-artifact found that the
+                  current memory compatibility ACs imply but do not explicitly require several
+                  behaviors exposed by live checkpoint cache-miss save_model validation: (1) a
+                  temporary checkpoint serialization ModelPatcher/payload is save-time state and
+                  must be released before returning the artifact-loaded MODEL; (2) validation should
+                  distinguish Python reference release from OS-visible native heap / anonymous swap
+                  retention; (3) repeated cache-miss runs in one ComfyUI process should show bounded
+                  post-release memory rather than accumulating temporary payloads; (4)
+                  save/publication/reload failure paths should release temporary save-time payloads.
+                  Detailed proposed AC wording is captured in
+                  plans/checkpoint-save-memory-retrospective-spec-gaps.md."
+                supersedes: null
+                author: Hermes
+                created_at: 2026-05-12T23:44:31.557Z
           - _ulid: 01KQBTZMZ95P7Q0H68RCH0H3GA
             slugs:
               - checkpoint-loadable-saved-model-output
