@@ -40,3 +40,14 @@ notes:
     supersedes: null
     author: Hermes
     created_at: 2026-05-12T22:47:02.430Z
+  - _ulid: 01KRF666A6VSHBGRAJP033MJFF
+    content: "Second live investigation finding: after user reran the workflow, Comfy RSS was low
+      (~96MB) but smaps_rollup showed ~18.5GB swapped anonymous memory in the Comfy process. Logs
+      showed RSS spikes during checkpoint save and then inactive native arenas being swapped rather
+      than returned. The previous patch also ran GC inside _release_temporary_checkpoint_model while
+      the caller still held merged_model, so cleanup needed to sever patch payload references
+      directly and trim the native heap. Follow-up patch clears temporary ModelPatcher patch
+      payloads, runs GC/cache cleanup, and calls glibc malloc_trim(0) best-effort."
+    supersedes: null
+    author: Hermes
+    created_at: 2026-05-12T22:51:11.558Z
