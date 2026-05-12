@@ -12,3 +12,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-05-12T22:17:08.127Z
+  - _ulid: 01KRF4XFX8Z0DXPFHHCG3FT7Q2
+    content: "Implemented reload-after-save checkpoint return behavior: after save_comfy_checkpoint
+      succeeds, WIDENExit releases the temporary dense checkpoint-save ModelPatcher, deletes it,
+      runs GC/cache cleanup, then returns _load_checkpoint_artifact(save_path) so the returned MODEL
+      follows Comfy loader/cache-hit ownership. Updated checkpoint return/save tests and existing
+      cache routing tests for the new contract. Validation passed: focused checkpoint/exit test set
+      and full pytest tests -q; kspec validate --refs passed."
+    supersedes: null
+    author: Hermes
+    created_at: 2026-05-12T22:28:57.897Z
