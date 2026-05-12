@@ -26,6 +26,56 @@ from lib.recipe import (
 from nodes.exit import WIDENExitNode
 from tests.conftest import make_checkpoint_components
 
+
+class TestTemporaryCheckpointModelRelease:
+    """Release of checkpoint-save temporaries must also return freed native
+    CPU arenas to the OS, not only drop Python references.
+
+    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    """
+
+    def test_release_trims_native_heap_after_python_gc(self):
+        """The live Comfy failure mode leaves large freed anonymous CPU arenas
+        swapped inside the process; cleanup should invoke native heap trim after
+        unpatching and Python GC."""
+        from nodes.exit import _release_temporary_checkpoint_model
+
+        temporary_model = object()
+        events: list[str] = []
+
+        with (
+            patch("nodes.exit._unpatch_loaded_clones", side_effect=lambda model: events.append("unpatch")),
+            patch("nodes.exit.gc.collect", side_effect=lambda: events.append("gc")),
+            patch("nodes.exit.torch.cuda.is_available", return_value=False),
+            patch("nodes.exit._trim_native_heap", create=True, side_effect=lambda: events.append("trim")),
+        ):
+            _release_temporary_checkpoint_model(temporary_model)
+
+        assert events == ["unpatch", "gc", "trim"]
+
+    def test_release_clears_temp_model_patch_payloads_before_gc(self):
+        """Because the caller still has a local reference while invoking the
+        release helper, the helper must sever patch-tensor references itself
+        before GC/trim can reclaim native CPU pages."""
+        from nodes.exit import _release_temporary_checkpoint_model
+
+        class TempModel:
+            def __init__(self):
+                self.patches = {"diffusion_model.k": [(1.0, ("set", (object(),)), 1.0, None, None)]}
+
+        temporary_model = TempModel()
+
+        with (
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.gc.collect"),
+            patch("nodes.exit.torch.cuda.is_available", return_value=False),
+            patch("nodes.exit._trim_native_heap", create=True),
+        ):
+            _release_temporary_checkpoint_model(temporary_model)
+
+        assert temporary_model.patches == {}
+
+
 # =============================================================================
 # No deepcopy on checkpoint-style save_model return paths
 # =============================================================================
