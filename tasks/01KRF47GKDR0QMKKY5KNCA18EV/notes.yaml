@@ -1,1 +1,14 @@
-notes: []
+notes:
+  - _ulid: 01KRF47TRZP4D56V37AF6TRC6J
+    content: "Investigation note: save_model=false stayed CPU-stable under recipe changes, while
+      save_model=true checkpoint cache misses retained high CPU RSS. The suspected durable owner is
+      the returned temporary merged ModelPatcher: install_merged_patches moves tensors from
+      merged_state into merged_model.patches as set-tensor payloads, then WIDENExit returns
+      merged_model and Comfy output-cache retention keeps that dense payload alive. Initial fix
+      direction is save with the temporary merged model, drop it and run GC after successful
+      checkpoint serialization, then return the just-saved artifact via
+      _load_checkpoint_artifact(save_path) so Comfy owns the returned model lifecycle like cache
+      hits do."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-05-12T22:17:08.127Z
