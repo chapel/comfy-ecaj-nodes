@@ -1,0 +1,86 @@
+_ulid: 01KRF47GKDR0QMKKY5KNCA18EV
+slugs:
+  - checkpoint-save-release-temp-model-return-artifact
+title: Release checkpoint save temporary model before returning artifact-loaded MODEL
+type: bug
+description: >-
+  What: Fix WIDENExit checkpoint save_model cache-miss behavior so the temporary dense merged
+  ModelPatcher used for checkpoint serialization is released after the save instead of being
+  returned to Comfy's output cache.
+
+
+  Why: Investigation of the ComfyUI Dynamic VRAM/memory-management behavior showed the current
+  save_model=true SDXL/checkpoint cache-miss path is the CPU RAM growth driver. save_model=false
+  stays CPU-stable under the same recipe changes. The cache-miss checkpoint path materializes merged
+  tensors, installs them into a cloned ModelPatcher via install_merged_patches(), saves the
+  checkpoint, and currently returns that same dense temporary clone. Deleting merged_state is
+  insufficient because the tensors have moved into merged_model.patches as ('set', tensor) payloads,
+  and returning merged_model lets Comfy retain that payload in the output cache.
+
+
+  Initial plan:
+
+  - Update nodes/exit.py checkpoint save path to treat the post-save merged ModelPatcher as a
+  temporary serialization object.
+
+  - After save_comfy_checkpoint(...) succeeds, explicitly drop/release the temporary merged_model
+  and collect Python garbage before returning.
+
+  - Return the just-saved checkpoint artifact through the existing
+  _load_checkpoint_artifact(save_path) Comfy loader path on cache miss, matching the existing
+  cache-hit behavior.
+
+  - Preserve save_model=False patch-output behavior.
+
+  - Preserve saved artifact semantics and MaterializationSink atomic publication behavior.
+
+  - Preserve WIDENExit(save_model=true) boolean UX; do not introduce output-mode dropdowns.
+
+  - Keep downstream MODEL output usable by returning the Comfy-loaded checkpoint MODEL.
+
+
+  Validation target:
+
+  - Unit tests should prove cache-miss checkpoint save calls the checkpoint artifact loader for the
+  returned MODEL after saving, does not return the temporary merged patch clone, and does not use
+  copy.deepcopy on Comfy internals.
+
+  - Existing checkpoint cache-hit and save_model=False tests should continue to pass.
+
+  - If practical, run or document the guarded real-Comfy memory validation path to compare repeated
+  save_model=true recipe changes before/after the fix.
+
+
+  Investigation details to preserve:
+
+  - Comfy's checkpoint save path builds a local state_dict for serialization and should be transient
+  after save_checkpoint returns.
+
+  - The durable reference after WIDENExit returns is the MODEL object cached by Comfy execution, so
+  retaining a dense WIDEN-owned patch clone there defeats the intended Comfy ownership boundary.
+
+  - This task intentionally revises the earlier cache-miss return contract from
+  @task-checkpoint-save-returned-model because the later CPU-memory evidence shows returning the
+  in-memory WIDEN merge result is not acceptable for current Comfy memory behavior.
+
+
+  Covers: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory,
+  ac-measured-memory-report; @checkpoint-loadable-saved-model-output
+  ac-generated-workflow-round-trip, ac-downstream-return-remains-usable.
+spec_ref: "@comfy-memory-manager-compatibility"
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - exit-node
+  - comfy
+  - memory
+  - checkpoint-save
+vcs_refs: []
+created_at: 2026-05-12T22:16:57.702Z
+todos: []
+automation: manual_only

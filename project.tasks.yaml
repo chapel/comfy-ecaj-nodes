@@ -2473,3 +2473,22 @@
   submitted_at: 2026-05-08T20:52:35.633Z
   completed_at: 2026-05-08T20:59:46.788Z
   automation: eligible
+- _ulid: 01KRF47GKDR0QMKKY5KNCA18EV
+  slugs:
+    - checkpoint-save-release-temp-model-return-artifact
+  title: Release checkpoint save temporary model before returning artifact-loaded MODEL
+  type: bug
+  spec_ref: "@comfy-memory-manager-compatibility"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  priority: 1
+  tags:
+    - exit-node
+    - comfy
+    - memory
+    - checkpoint-save
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-05-12T22:16:57.702Z
+  automation: manual_only
