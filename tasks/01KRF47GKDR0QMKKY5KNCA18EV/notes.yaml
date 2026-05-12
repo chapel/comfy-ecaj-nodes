@@ -62,3 +62,11 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-05-12T22:51:16.639Z
+  - _ulid: 01KRF8R58MH3X5RT2X33JSE6ZJ
+    content: "User live validation: after multiple repeated WIDENExit save_model=true tests, memory now
+      appears to clear once WIDENExit finishes. This confirms the temporary checkpoint model release
+      + patch-payload clearing + native heap trim path addresses the observed accumulation symptom
+      in the live Comfy run."
+    supersedes: null
+    author: Hermes
+    created_at: 2026-05-12T23:35:57.461Z
