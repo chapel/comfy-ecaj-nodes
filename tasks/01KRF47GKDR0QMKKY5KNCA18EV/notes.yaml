@@ -81,3 +81,13 @@ notes:
     supersedes: null
     author: Hermes
     created_at: 2026-05-12T23:37:10.731Z
+  - _ulid: 01KRF981J3RASFBJTPHC5HJWZ2
+    content: "Retrospective spec-gap audit completed. Detailed findings are in
+      plans/checkpoint-save-memory-retrospective-spec-gaps.md. Bottom line: current specs are
+      directionally correct but too implicit for the cache-miss checkpoint temporary serialization
+      payload, OS-visible native/swap retention, repeated-run validation evidence, and
+      cleanup-on-failure behavior. Added notes to @comfy-memory-manager-compatibility and
+      @streaming-materialization-progress for follow-up."
+    supersedes: null
+    author: Hermes
+    created_at: 2026-05-12T23:44:37.955Z
