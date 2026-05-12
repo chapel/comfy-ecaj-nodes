@@ -7,7 +7,7 @@ Covers @saved-model-artifact-safety ACs:
 """
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import DEFAULT, MagicMock, patch
 
 import pytest
 
@@ -433,7 +433,11 @@ class TestValidComponentsPassValidation:
              patch("nodes.exit.chunked_evaluation", return_value={}), \
              patch("nodes.exit.install_merged_patches", return_value=patcher.clone()), \
              patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt, \
-             patch("nodes.exit.check_ram_preflight"), \
+             patch.multiple(
+                 "nodes.exit",
+                 check_ram_preflight=DEFAULT,
+                 _load_checkpoint_artifact=MagicMock(return_value=patcher.clone()),
+             ), \
              patch("nodes.exit.ProgressBar", None):
 
             mock_lr.return_value = lambda name: None

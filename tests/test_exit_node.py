@@ -1002,6 +1002,7 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -1059,6 +1060,7 @@ class TestSaveModelCacheMiss:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -1269,6 +1271,7 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
@@ -1331,6 +1334,7 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
@@ -1398,6 +1402,7 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
@@ -1464,6 +1469,7 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
@@ -1530,6 +1536,7 @@ class TestCheckpointCacheRouting:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
