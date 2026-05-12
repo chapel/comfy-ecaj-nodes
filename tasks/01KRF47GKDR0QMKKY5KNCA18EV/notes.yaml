@@ -33,3 +33,10 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-05-12T22:29:09.069Z
+  - _ulid: 01KRF5YK0Y110NXXRMM0M0YAK8
+    content: "Live user validation failed after reload-after-save patch: CPU RSS still grew from ~40GB
+      to ~50GB to ~70GB across two save_model=true runs. Reopening for root-cause investigation;
+      previous temp-return-model hypothesis is insufficient or incomplete."
+    supersedes: null
+    author: Hermes
+    created_at: 2026-05-12T22:47:02.430Z
