@@ -70,3 +70,14 @@ notes:
     supersedes: null
     author: Hermes
     created_at: 2026-05-12T23:35:57.461Z
+  - _ulid: 01KRF8TCT8K691053WXNTZR1EW
+    content: "Live log verification: post-fix repeated WIDENExit save_model=true runs now spike during
+      checkpoint materialization and drop after temporary model release. Observed runs: 16:25:33
+      after-checkpoint-save RSS=15748MB -> 16:25:35 after-checkpoint-temp-model-release RSS=4629MB;
+      16:30:06 RSS=15646MB -> 16:30:09 RSS=3882MB; 16:34:39 RSS=16765MB -> 16:34:42 RSS=3753MB.
+      Current comfyui.service state after runs: Memory=1.1G, RSS=81300kB, Anonymous=3104kB,
+      Swap=2922620kB; service peak remains historical (43.3G memory, 37.5G swap) from earlier runs.
+      This confirms bounded checkpoint-save spikes with release after WIDENExit completion."
+    supersedes: null
+    author: Hermes
+    created_at: 2026-05-12T23:37:10.731Z
