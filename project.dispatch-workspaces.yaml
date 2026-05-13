@@ -269,11 +269,11 @@ workspaces:
     canonical_branch: dispatch/task/task-checkpoint-save-temp-payload-release-hardening/01krh2ym
     canonical_branch_head: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
     cleanup:
-      status: blocked
+      status: completed
       detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
       reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      updated_at: 2026-05-13T17:37:44.966Z
+      updated_at: 2026-05-13T17:37:46.836Z
     health:
       status: healthy
       issues: []
@@ -287,16 +287,16 @@ workspaces:
       target_branch: dev
       target_commit: 5b9807ed8cab3f6c9988639fc128a173c0610887
       updated_at: 2026-05-13T17:37:44.966Z
-    lifecycle_state: cleanup_blocked
+    lifecycle_state: closed
     resolved_base_branch: dev
     task_ref: "@01KRH2YMHPE7JQYJ734YWMRPAR"
     task_slug: task-checkpoint-save-temp-payload-release-hardening
     timestamps:
-      closed_at: null
+      closed_at: 2026-05-13T17:37:46.836Z
       last_active_at: 2026-05-13T17:31:46.890Z
       last_reconciled_at: 2026-05-13T17:37:44.966Z
       created_at: 2026-05-13T17:18:46.694Z
-      updated_at: 2026-05-13T17:37:44.966Z
+      updated_at: 2026-05-13T17:37:46.836Z
     workspace_id: dispatch-workspace-01KRH2YMHPE7JQYJ734YWMRPAR
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
