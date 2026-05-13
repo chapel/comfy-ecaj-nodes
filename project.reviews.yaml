@@ -17531,7 +17531,17 @@ reviews:
     slugs: []
     title: "Plan review: Checkpoint Save Memory Contract Hardening"
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Validation passed: schema OK, references OK across 132 files, 56 items, 129 tasks."
+        name: kspec validate --refs
+        required: true
+        runner: kspec
+        created_at: 2026-05-13T00:01:43.904Z
+        completed_at: 2026-05-13T00:01:43.904Z
     events:
       - _ulid: 01KRFA5HAGEAEZKVCJHKV8HD22
         actor: Jacob Chapel
@@ -17539,6 +17549,13 @@ reviews:
         payload:
           to: draft
         timestamp: 2026-05-13T00:00:44.368Z
+      - _ulid: 01KRFA7BX4YFH6XJR3S1KH2X9K
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate --refs
+        timestamp: 2026-05-13T00:01:44.362Z
     examined_commit: null
     external_links: []
     lifecycle_state: draft
@@ -17551,5 +17568,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-13T00:00:44.368Z
-    updated_at: null
+    updated_at: 2026-05-13T00:01:43.904Z
     notes: []
