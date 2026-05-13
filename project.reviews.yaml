@@ -18162,7 +18162,17 @@ reviews:
     slugs: []
     title: Review checkpoint save memory hardening ACs
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "kspec validate --refs passed: 136 files, 56 items, 133 tasks; schema OK; references OK."
+        name: kspec validate refs
+        required: true
+        runner: kspec
+        created_at: 2026-05-13T17:17:41.713Z
+        completed_at: 2026-05-13T17:17:41.713Z
     events:
       - _ulid: 01KRH5ANTS8E66FM3FTTP6PZ4C
         actor: Jacob Chapel
@@ -18177,6 +18187,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-05-13T17:15:25.183Z
+      - _ulid: 01KRH5G8KA2HH82YQG6SF63JFZ
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate refs
+        timestamp: 2026-05-13T17:17:41.866Z
     examined_commit: 6b172b7033446e42b767558da58978c501ce6c91
     external_links: []
     lifecycle_state: open
@@ -18189,5 +18206,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-13T17:14:38.809Z
-    updated_at: 2026-05-13T17:15:25.021Z
+    updated_at: 2026-05-13T17:17:41.713Z
     notes: []
