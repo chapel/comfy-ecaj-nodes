@@ -69,3 +69,10 @@ notes:
     supersedes: null
     author: Hermes
     created_at: 2026-05-13T20:38:19.536Z
+  - _ulid: 01KRHGZRSBVSAX8TPYDS5RK0S5
+    content: "Completed with --force from pending state. Reason: Manual repeated checkpoint memory
+      validation completed successfully; see reports/checkpoint-memory-validation-20260513T1335.json
+      and task/spec notes."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-05-13T20:38:24.299Z

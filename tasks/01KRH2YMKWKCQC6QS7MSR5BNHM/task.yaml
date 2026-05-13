@@ -69,8 +69,10 @@ description: |
 spec_ref: "@live-comfy-saved-output-validation"
 plan_ref: "@plan-checkpoint-save-memory-contract-hardening"
 origin: derived
-status: pending
+status: completed
 blocked_by: []
+closed_reason: Manual repeated checkpoint memory validation completed successfully; see
+  reports/checkpoint-memory-validation-20260513T1335.json and task/spec notes.
 depends_on:
   - "@task-checkpoint-save-memory-validation-reporting"
 context: []
@@ -81,5 +83,25 @@ tags:
   - memory
   - checkpoint
 vcs_refs: []
+history:
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending
+      closed_reason:
+        new: Manual repeated checkpoint memory validation completed successfully; see
+          reports/checkpoint-memory-validation-20260513T1335.json and task/spec notes.
+        previous: null
+      started_at:
+        new: 2026-05-13T20:38:24.291Z
+        previous: null
+      completed_at:
+        new: 2026-05-13T20:38:24.291Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-05-13T20:38:24.300Z
 created_at: 2026-05-13T16:33:07.196Z
+started_at: 2026-05-13T20:38:24.291Z
+completed_at: 2026-05-13T20:38:24.291Z
 todos: []
