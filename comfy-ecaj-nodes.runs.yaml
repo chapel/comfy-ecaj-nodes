@@ -9064,7 +9064,7 @@ runs:
     completed_at: 2026-05-13T17:21:06.084Z
   - _ulid: 01KRH65ZKNBQT8CF9W6KHCK95Q
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -9099,7 +9099,43 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-13T17:29:52.263Z
-        completed_at: 2026-05-13T17:29:52.263Z
+        completed_at: 2026-05-13T17:30:05.938Z
+        notes: >-
+          Friction points:
+
+
+          1. **Python statically-nested-blocks limit (20) hit by parenthesized 'with' patches** — A
+          test with ~21 unittest.mock.patch() context managers inside a parenthesized 'with (...)'
+          block raised 'SyntaxError: too many statically nested blocks'. Caught at pytest
+          collection, not at compose time. Had to refactor with contextlib.ExitStack. This is the
+          SECOND test in this file approaching the limit — the existing checkpoint tests already use
+          ~17-18 patches. Future failure-path tests in this area will hit the same wall.
+
+
+          2. **AC comment lines exceed ruff E501 (99 chars) at deep indentation** — AC annotation
+          comments like '# AC: @comfy-memory-manager-compatibility
+          ac-checkpoint-save-failure-releases-temp-payload' are 91 chars on their own. At 8-space
+          indent they fit (99); at 12-space indent (inside try blocks) they overflow. The spec slug
+          + AC slug is already near the limit. Repeated AC annotations in deeply-nested code blocks
+          are structurally lint-fragile.
+
+
+          3. **No 'enable_cache=False' fixture for cache-clearing failure path** — To exercise the
+          'post-save bookkeeping fails after temp exists' path, I had to know that
+          '_incremental_cache.clear()' only runs when enable_cache=False AND there is a sentinel
+          object I could patch with an ExplodingCache. That's specific knowledge that took a careful
+          read of _execute_checkpoint_save. A more direct hook (e.g. a single 'after-save
+          bookkeeping' helper) would have made the test trivial.
+
+
+          4. **AskUserQuestion not available in autonomous dispatch** — Mid-task, when deciding
+          whether to also surface the loader-cleanup-failure-after-temp-release scenario as a
+          separate test, I had no clean way to defer the judgment. Ended up not adding it (out of
+          scope per the task's stated test plan). In an interactive session I'd have asked.
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-13T17:30:05.938Z
+        completed_at: 2026-05-13T17:30:05.938Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-13T17:29:33.557Z
