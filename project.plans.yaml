@@ -6583,8 +6583,8 @@ plans:
       the harness, but the final live evidence task requires maintainer-provided local
 
       environment details.
-    status: draft
-    approved_at: null
+    status: approved
+    approved_at: 2026-05-13T16:32:58.678Z
     derived_specs: []
     derived_tasks: []
     module_ref: null
