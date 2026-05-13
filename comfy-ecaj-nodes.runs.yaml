@@ -9441,7 +9441,7 @@ runs:
     completed_at: 2026-05-13T18:13:25.388Z
   - _ulid: 01KRH9DSKTRH7SEY9XDYCH5KA2
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -9457,7 +9457,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-13T18:27:02.733Z
-        completed_at: 2026-05-13T18:27:02.733Z
+        completed_at: 2026-05-13T18:27:18.063Z
+        notes: "Friction (high confidence): kspec review get truncates the thread body in the listing to ~80
+          chars (e.g. ends with --repeat-ca...). To read the full reviewer text I read
+          project.reviews.yaml from the kspec-meta branch directly. This will recur on every fix
+          cycle. Improvement candidate: a --thread-detail flag on review get, or a review thread
+          subcommand that prints the full entry body."
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-13T18:27:18.063Z
+        completed_at: 2026-05-13T18:27:18.063Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T18:26:15.290Z
