@@ -9342,7 +9342,7 @@ runs:
     completed_at: 2026-05-13T17:56:25.728Z
   - _ulid: 01KRH856B83DHCQG2RPSC8ER4Q
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -9377,7 +9377,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-05-13T18:06:07.509Z
-        completed_at: 2026-05-13T18:06:07.509Z
+        completed_at: 2026-05-13T18:06:15.111Z
+        notes: "Decision: Both items pass the high-confidence + uniqueness gate. Item 1
+          (lifecycle-impossibility unavailable) is adjacent to but distinct from 01KRH796
+          (missing-input). Item 2 (permissive-stub call-assertion) is adjacent to but distinct from
+          01KH6Y61 (mocks reproducing prod bugs). Capture both as success observations."
+      - status: completed
+        step_index: 3
+        started_at: 2026-05-13T18:06:15.111Z
+        completed_at: 2026-05-13T18:06:15.111Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T18:04:04.841Z
