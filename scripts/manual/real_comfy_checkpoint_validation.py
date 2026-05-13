@@ -301,15 +301,21 @@ class LogMemoryObservation:
 
 
 @dataclass
-class RepeatedCacheMissRunReport:
-    """Per-run record for repeated checkpoint cache-miss validation.
+class CheckpointSaveRunReport:
+    """Per-run record for a checkpoint save with process-memory observations.
 
-    Each entry is one save-time run inside a single ComfyUI process, with
-    distinct ``cache_miss_identity`` so repeat runs cannot collapse into
-    artifact-cache hits.  Process-memory observations are recorded as
-    explicit unavailable entries when the operator did not supply
-    ``--comfy-pid``; log observations are recorded as unavailable when
-    ``--comfy-log-path`` is not supplied or the labels are missing.
+    Captures the save result and process/log memory observations around
+    one checkpoint-save run. Used both for the primary checkpoint save
+    in :func:`run_validation` and for each entry in the repeated
+    cache-miss accumulation series in :func:`run_repeated_cache_miss_runs`.
+
+    ``cache_miss_identity`` is a per-run discriminator that ensures
+    the save cannot be served by the artifact cache (repeat runs use
+    a fresh identity each iteration; the primary save uses
+    ``"primary-checkpoint-save"``). Process-memory observations are
+    recorded as explicit unavailable entries when the operator did not
+    supply ``--comfy-pid``; log observations are recorded as unavailable
+    when ``--comfy-log-path`` is not supplied or the labels are missing.
 
     ``process_memory_after_save`` is always recorded as unavailable from
     this external harness: ``submit_workflow`` blocks on ComfyUI's
@@ -341,6 +347,12 @@ class RepeatedCacheMissRunReport:
     log_after_checkpoint_temp_model_release: LogMemoryObservation = field(
         default_factory=LogMemoryObservation,
     )
+
+
+# Backwards-compatible alias for the previous name used during the
+# initial implementation cycle. Kept so external callers (tests, ad-hoc
+# operator scripts) that still import the old symbol continue to work.
+RepeatedCacheMissRunReport = CheckpointSaveRunReport
 
 
 def _read_proc_field_kb(path: str, key: str) -> int | None:
@@ -558,8 +570,82 @@ def unavailable_save_time_observation(
     )
 
 
+def begin_save_run_memory_observation(
+    comfy_pid: int | None,
+    comfy_log_path: str | None,
+) -> tuple[ProcessMemoryObservation, int]:
+    """Snapshot before-run process memory and the starting log offset.
+
+    Returns ``(before_run_observation, log_offset)``. Pair with
+    :func:`finalize_save_run_memory_observation` to record the
+    after-return and log observations after the workflow completes.
+    Both helpers are safe to call when no memory inputs were supplied:
+    the observations will be marked unavailable rather than crashing.
+    """
+    offset = current_log_offset(comfy_log_path)
+    before = collect_process_memory_observation(comfy_pid, "before-run")
+    return before, offset
+
+
+def finalize_save_run_memory_observation(
+    run: CheckpointSaveRunReport,
+    comfy_pid: int | None,
+    comfy_log_path: str | None,
+    before_offset: int,
+) -> None:
+    """Fill the after-save/after-return and log observations on ``run``.
+
+    Call after the save workflow's ``submit_workflow`` returns.
+    ``process_memory_after_save`` is always recorded as unavailable
+    because ``submit_workflow`` only returns once ComfyUI's
+    ``/history`` reports completion (i.e. after WIDENExit returned);
+    see :class:`CheckpointSaveRunReport`. When ``comfy_log_path`` is
+    supplied, the WIDEN ``[mem]`` labels appearing in the log segment
+    since ``before_offset`` are parsed for save-time evidence; missing
+    labels are recorded as unavailable rather than treated as a crash.
+    """
+    run.process_memory_after_save = unavailable_save_time_observation(comfy_pid)
+    run.process_memory_after_return = collect_process_memory_observation(
+        comfy_pid, "after-return",
+    )
+
+    if comfy_log_path:
+        segment, _end_offset, log_err = read_log_segment(
+            comfy_log_path, before_offset,
+        )
+        if log_err:
+            run.log_after_checkpoint_save = LogMemoryObservation(
+                label="after-checkpoint-save",
+                available=False,
+                error=log_err,
+            )
+            run.log_after_checkpoint_temp_model_release = LogMemoryObservation(
+                label="after-checkpoint-temp-model-release",
+                available=False,
+                error=log_err,
+            )
+        else:
+            parsed = parse_widen_memory_log(segment, _RUN_MEMORY_LABELS)
+            run.log_after_checkpoint_save = parsed["after-checkpoint-save"]
+            run.log_after_checkpoint_temp_model_release = parsed[
+                "after-checkpoint-temp-model-release"
+            ]
+    else:
+        unavailable_msg = "no --comfy-log-path supplied"
+        run.log_after_checkpoint_save = LogMemoryObservation(
+            label="after-checkpoint-save",
+            available=False,
+            error=unavailable_msg,
+        )
+        run.log_after_checkpoint_temp_model_release = LogMemoryObservation(
+            label="after-checkpoint-temp-model-release",
+            available=False,
+            error=unavailable_msg,
+        )
+
+
 def analyze_memory_accumulation(
-    runs: list[RepeatedCacheMissRunReport],
+    runs: list[CheckpointSaveRunReport],
     threshold_mb: int,
 ) -> dict[str, object]:
     """Decide whether repeated cache-miss runs show accumulating memory.
@@ -667,7 +753,10 @@ class CheckpointValidationReport:
     comfy_log_path: str = ""
     repeat_cache_miss_runs_requested: int = 0
     memory_accumulation_threshold_mb: int = DEFAULT_ACCUMULATION_THRESHOLD_MB
-    repeat_cache_miss_run_reports: list[RepeatedCacheMissRunReport] = field(
+    primary_checkpoint_save_run: CheckpointSaveRunReport = field(
+        default_factory=CheckpointSaveRunReport,
+    )
+    repeat_cache_miss_run_reports: list[CheckpointSaveRunReport] = field(
         default_factory=list,
     )
     repeated_cache_miss_memory_result: dict = field(default_factory=dict)
@@ -697,9 +786,21 @@ _REQUIRED_REPORT_FIELDS = frozenset({
     "comfy_log_path",
     "repeat_cache_miss_runs_requested",
     "memory_accumulation_threshold_mb",
+    "primary_checkpoint_save_run",
     "repeat_cache_miss_run_reports",
     "repeated_cache_miss_memory_result",
 })
+
+
+PRIMARY_CHECKPOINT_SAVE_IDENTITY = "primary-checkpoint-save"
+"""``cache_miss_identity`` recorded for the primary ``run_validation`` save.
+
+Distinguishes the primary checkpoint save's per-run memory observations
+from the repeated cache-miss series. The primary save uses the fixed
+``ecaj_checkpoint_validation_save`` model name (so the cache-reuse step
+can re-submit the same model_name); the identity recorded in the per-run
+report makes the role explicit when readers inspect the JSON.
+"""
 
 
 def report_has_required_fields(report_dict: dict) -> tuple[bool, list[str]]:
@@ -797,6 +898,47 @@ def format_report(report: CheckpointValidationReport) -> str:
         f"{report.memory_accumulation_threshold_mb}"
     )
     lines.append("")
+
+    primary_run = report.primary_checkpoint_save_run
+    if primary_run.cache_miss_identity or primary_run.model_name:
+        lines.append("--- Primary Checkpoint Save Memory ---")
+        lines.append(
+            f"  identity={primary_run.cache_miss_identity} "
+            f"model_name={primary_run.model_name} "
+            f"accepted={primary_run.save_result.accepted}"
+        )
+        for tag, obs in (
+            ("before", primary_run.process_memory_before),
+            ("after-save", primary_run.process_memory_after_save),
+            ("after-return", primary_run.process_memory_after_return),
+        ):
+            if obs.available:
+                extras = [f"RSS={obs.rss_kb}kB"]
+                if obs.swap_kb is not None:
+                    extras.append(f"Swap={obs.swap_kb}kB")
+                if obs.anonymous_kb is not None:
+                    extras.append(f"Anon={obs.anonymous_kb}kB")
+                extras.append(f"source={obs.source}")
+                lines.append(f"    {tag}: " + " ".join(extras))
+            else:
+                detail = obs.error or "unavailable"
+                lines.append(f"    {tag}: unavailable ({detail})")
+        for log_tag, log_obs in (
+            ("log after-checkpoint-save", primary_run.log_after_checkpoint_save),
+            (
+                "log after-checkpoint-temp-model-release",
+                primary_run.log_after_checkpoint_temp_model_release,
+            ),
+        ):
+            if log_obs.available:
+                parts = [f"RSS={log_obs.rss_mb}MB"]
+                if log_obs.vram_alloc_mb is not None:
+                    parts.append(f"VRAM={log_obs.vram_alloc_mb}MB")
+                lines.append(f"    {log_tag}: " + " ".join(parts))
+            else:
+                detail = log_obs.error or "unavailable"
+                lines.append(f"    {log_tag}: unavailable ({detail})")
+        lines.append("")
 
     if report.repeat_cache_miss_run_reports:
         lines.append("--- Repeated Cache-Miss Runs ---")
@@ -1463,7 +1605,7 @@ def run_repeated_cache_miss_runs(
     *,
     comfy_pid: int | None = None,
     comfy_log_path: str | None = None,
-) -> list[RepeatedCacheMissRunReport]:
+) -> list[CheckpointSaveRunReport]:
     """Run ``repeat_count`` cache-miss saves with distinct identities.
 
     Each iteration:
@@ -1490,69 +1632,24 @@ def run_repeated_cache_miss_runs(
     Inputs that are unavailable are recorded as unavailable observations
     rather than crashing the harness.
     """
-    results: list[RepeatedCacheMissRunReport] = []
+    results: list[CheckpointSaveRunReport] = []
     for run_index in range(repeat_count):
         identity, model_name = make_repeat_cache_miss_identity(run_index)
-        before_offset = current_log_offset(comfy_log_path)
-        run = RepeatedCacheMissRunReport(
+        run = CheckpointSaveRunReport(
             run_index=run_index,
             cache_miss_identity=identity,
             model_name=model_name,
         )
-        run.process_memory_before = collect_process_memory_observation(
-            comfy_pid, "before-run",
+        run.process_memory_before, before_offset = (
+            begin_save_run_memory_observation(comfy_pid, comfy_log_path)
         )
         workflow = build_repeat_cache_miss_workflow(source_model, model_name)
         run.save_result = submit_workflow(
             comfy_api_url, workflow, f"repeat_cache_miss_{run_index:03d}",
         )
-        # NOTE: do NOT call collect_process_memory_observation here. The
-        # only point at which the harness regains control is after
-        # /history reports completion, which is past WIDENExit's return.
-        # Any procfs read at this point would be another post-return
-        # sample mislabeled as save-time. The save-time evidence is
-        # captured by the WIDEN [mem] log labels parsed below.
-        run.process_memory_after_save = unavailable_save_time_observation(
-            comfy_pid,
+        finalize_save_run_memory_observation(
+            run, comfy_pid, comfy_log_path, before_offset,
         )
-        run.process_memory_after_return = collect_process_memory_observation(
-            comfy_pid, "after-return",
-        )
-
-        if comfy_log_path:
-            segment, _end_offset, log_err = read_log_segment(
-                comfy_log_path, before_offset,
-            )
-            if log_err:
-                run.log_after_checkpoint_save = LogMemoryObservation(
-                    label="after-checkpoint-save",
-                    available=False,
-                    error=log_err,
-                )
-                run.log_after_checkpoint_temp_model_release = LogMemoryObservation(
-                    label="after-checkpoint-temp-model-release",
-                    available=False,
-                    error=log_err,
-                )
-            else:
-                parsed = parse_widen_memory_log(segment, _RUN_MEMORY_LABELS)
-                run.log_after_checkpoint_save = parsed["after-checkpoint-save"]
-                run.log_after_checkpoint_temp_model_release = parsed[
-                    "after-checkpoint-temp-model-release"
-                ]
-        else:
-            unavailable_msg = "no --comfy-log-path supplied"
-            run.log_after_checkpoint_save = LogMemoryObservation(
-                label="after-checkpoint-save",
-                available=False,
-                error=unavailable_msg,
-            )
-            run.log_after_checkpoint_temp_model_release = LogMemoryObservation(
-                label="after-checkpoint-temp-model-release",
-                available=False,
-                error=unavailable_msg,
-            )
-
         results.append(run)
     return results
 
@@ -1629,9 +1726,34 @@ def run_validation(
         # --- Submit checkpoint save_model workflow ---
         save_wf = build_checkpoint_save_workflow(source_model)
         report.checkpoint_save_workflow_shape = save_wf
+
+        # Capture per-run process/log memory observations around the
+        # primary checkpoint save. The record is always populated so the
+        # JSON report has a stable shape; when the operator did not
+        # supply ``--comfy-pid``/``--comfy-log-path`` the observations
+        # are recorded as unavailable. This satisfies
+        # @live-comfy-saved-output-validation
+        # ac-report-records-process-memory-points for the normal
+        # (non-repeat) save path: whenever the operator supplies
+        # process-memory inputs, the primary save records before-run
+        # and after-return observations and any save-time WIDEN log
+        # labels — without requiring a non-zero --repeat-cache-miss-runs.
+        primary_run = CheckpointSaveRunReport(
+            run_index=0,
+            cache_miss_identity=PRIMARY_CHECKPOINT_SAVE_IDENTITY,
+            model_name="ecaj_checkpoint_validation_save",
+        )
+        primary_run.process_memory_before, primary_before_offset = (
+            begin_save_run_memory_observation(comfy_pid, comfy_log_path)
+        )
         report.checkpoint_save_result = submit_workflow(
             comfy_api_url, save_wf, "checkpoint_save",
         )
+        primary_run.save_result = report.checkpoint_save_result
+        finalize_save_run_memory_observation(
+            primary_run, comfy_pid, comfy_log_path, primary_before_offset,
+        )
+        report.primary_checkpoint_save_run = primary_run
         report.failure_categories["save"] = classify_failure(
             report.checkpoint_save_result,
         )

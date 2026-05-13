@@ -2053,6 +2053,7 @@ class TestReportIncludesProcessMemorySection:
         assert "comfy_log_path" in required
         assert "repeat_cache_miss_runs_requested" in required
         assert "memory_accumulation_threshold_mb" in required
+        assert "primary_checkpoint_save_run" in required
         assert "repeat_cache_miss_run_reports" in required
         assert "repeated_cache_miss_memory_result" in required
 
@@ -2512,22 +2513,23 @@ class TestRunValidationRepeatCacheMiss:
             "system": {"comfyui_version": "0.3.4"},
             "devices": [{"vram_state": "normal"}],
         }
-        # Fake monotonic growth across two repeat runs.
-        call_count = [0]
+        # Fake monotonic growth across the two *repeat* runs only.
+        # The primary checkpoint save also samples (before-run +
+        # after-return), so we discriminate by counting after-return
+        # calls: index 0 = primary save, 1 = repeat 0, 2 = repeat 1.
+        after_return_count = [0]
 
         def fake_collect(pid, label):
-            # Per-run sequence (after the after-save procfs read was
-            # removed because submit_workflow only returns post-history,
-            # i.e. after WIDENExit returned): before-run, after-return.
-            call_count[0] += 1
-            # Only return-after observations affect the accumulation check.
             if label != "after-return":
                 return harness.ProcessMemoryObservation(
                     label=label, available=True, source="smaps_rollup",
                     rss_kb=1_000_000, swap_kb=0, anonymous_kb=1_000_000,
                 )
-            # First "after-return" is small; second is way bigger.
-            if call_count[0] <= 2:  # first run's two observations
+            after_return_count[0] += 1
+            # Primary save (1) + first repeat (2) are small; second
+            # repeat (3) blows up by +4 GB so the repeat-window delta
+            # exceeds the 256 MB threshold.
+            if after_return_count[0] <= 2:
                 rss = 1_000_000
             else:
                 rss = 5_000_000  # +4 GB
@@ -2604,3 +2606,340 @@ class TestRunValidationRepeatCacheMiss:
         assert (
             report.failure_categories["repeated_cache_miss_memory"] == "ok"
         )
+
+
+# ===========================================================================
+# AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+# AC: @comfy-memory-manager-compatibility ac-report-os-memory-observations
+# Primary checkpoint-save memory observations — recorded even when
+# --repeat-cache-miss-runs is 0, so memory inputs are honored on the
+# normal save path.
+# ===========================================================================
+
+
+class TestRunValidationPrimarySaveMemory:
+    """``run_validation`` records per-run memory for the primary save.
+
+    Addresses the cycle-2 reviewer blocker: with ``--comfy-pid`` and/or
+    ``--comfy-log-path`` supplied but the default ``--repeat-cache-miss-
+    runs`` (0), the harness previously skipped both procfs reads and log
+    parsing entirely. The AC requires per-run memory observations
+    whenever the operator supplies explicit process-memory inputs — the
+    primary checkpoint save is one of those runs.
+    """
+
+    @staticmethod
+    def _mock_stats() -> dict:
+        return {
+            "system": {"comfyui_version": "0.3.4"},
+            "devices": [{"vram_state": "normal"}],
+        }
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    # AC: @comfy-memory-manager-compatibility ac-report-os-memory-observations
+    def test_primary_save_invokes_procfs_when_pid_supplied_zero_repeats(self):
+        """Reviewer reproducer: patching ``collect_process_memory_observation``
+        to raise when ``--comfy-pid`` is supplied (and repeats=0) must now
+        be observable — proving the primary save reads procfs.
+        """
+        called_labels: list[str] = []
+
+        def raising_collect(pid, label):
+            called_labels.append(label)
+            raise RuntimeError(
+                f"collect_process_memory_observation should not run "
+                f"for pid={pid} label={label}",
+            )
+
+        with patch.object(harness, "query_system_stats",
+                          return_value=self._mock_stats()), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
+                 name="r", accepted=True, prompt_id="p",
+             )), \
+             patch.object(harness, "check_cache_reuse",
+                          return_value=(True, "cached")), \
+             patch.object(harness, "collect_process_memory_observation",
+                          side_effect=raising_collect):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="src.safetensors",
+                report_output="/fake/r.json",
+                comfy_pid=12345,
+                comfy_log_path=None,
+                repeat_cache_miss_runs=0,
+            )
+        # The patched function was reached for the primary save's
+        # before-run lifecycle point — proving the primary save now
+        # honors the supplied process-memory inputs.
+        assert "before-run" in called_labels
+        # The validation error was caught by run_validation's outer
+        # try/except (the harness must not crash on observation
+        # failures — but it must still attempt them).
+        assert any(
+            "collect_process_memory_observation" in err
+            for err in report.errors
+        )
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_primary_save_records_procfs_observations_when_pid_supplied(self):
+        """With ``--comfy-pid`` supplied and zero repeats, the primary
+        save's ``before`` and ``after-return`` observations are
+        populated and ``after-save`` is recorded as unavailable.
+        """
+        def fake_collect(pid, label):
+            return harness.ProcessMemoryObservation(
+                label=label, available=True, source="smaps_rollup",
+                rss_kb=2_000_000, swap_kb=10, anonymous_kb=1_900_000,
+                pid=pid,
+            )
+
+        with patch.object(harness, "query_system_stats",
+                          return_value=self._mock_stats()), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
+                 name="r", accepted=True, prompt_id="p",
+             )), \
+             patch.object(harness, "check_cache_reuse",
+                          return_value=(True, "cached")), \
+             patch.object(harness, "collect_process_memory_observation",
+                          side_effect=fake_collect):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="src.safetensors",
+                report_output="/fake/r.json",
+                comfy_pid=12345,
+            )
+
+        primary = report.primary_checkpoint_save_run
+        assert (
+            primary.cache_miss_identity
+            == harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY
+        )
+        assert primary.model_name == "ecaj_checkpoint_validation_save"
+        assert primary.process_memory_before.available is True
+        assert primary.process_memory_before.rss_kb == 2_000_000
+        assert primary.process_memory_after_return.available is True
+        assert primary.process_memory_after_return.rss_kb == 2_000_000
+        # The save-time OS observation is always unavailable — the
+        # harness cannot sample procfs at the save-time lifecycle point
+        # because submit_workflow only returns after WIDENExit returned.
+        assert primary.process_memory_after_save.available is False
+        assert "save-time" in primary.process_memory_after_save.error.lower()
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_primary_save_records_log_observations_when_log_supplied(
+        self, tmp_path,
+    ):
+        """With ``--comfy-log-path`` supplied and zero repeats, the
+        primary save parses save-time and temp-release WIDEN labels.
+        """
+        log_path = tmp_path / "comfy.log"
+        log_path.write_text("")
+
+        def mock_submit(base_url, workflow, name):
+            # Emit WIDEN [mem] labels during the (faked) save.
+            if name == "checkpoint_save":
+                with log_path.open("a") as f:
+                    f.write(
+                        "2026-05-13 INFO [mem] after-checkpoint-save: "
+                        "RSS=8192MB VRAM=4096MB(reserved=5120MB)\n",
+                    )
+                    f.write(
+                        "2026-05-13 INFO [mem] "
+                        "after-checkpoint-temp-model-release: RSS=4096MB\n",
+                    )
+            return harness.WorkflowResult(
+                name=name, accepted=True, prompt_id=f"p_{name}",
+            )
+
+        with patch.object(harness, "query_system_stats",
+                          return_value=self._mock_stats()), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
+             patch.object(harness, "check_cache_reuse",
+                          return_value=(True, "cached")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="src.safetensors",
+                report_output="/fake/r.json",
+                comfy_log_path=str(log_path),
+            )
+
+        primary = report.primary_checkpoint_save_run
+        assert primary.log_after_checkpoint_save.available is True
+        assert primary.log_after_checkpoint_save.rss_mb == 8192
+        assert (
+            primary.log_after_checkpoint_temp_model_release.available is True
+        )
+        assert (
+            primary.log_after_checkpoint_temp_model_release.rss_mb == 4096
+        )
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_primary_save_records_unavailable_when_no_inputs_supplied(self):
+        """Without any process-memory inputs the primary save's record
+        is still present but every observation is recorded as
+        unavailable — the JSON shape is stable.
+        """
+        with patch.object(harness, "query_system_stats",
+                          return_value=self._mock_stats()), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
+                 name="r", accepted=True, prompt_id="p",
+             )), \
+             patch.object(harness, "check_cache_reuse",
+                          return_value=(True, "cached")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="src.safetensors",
+                report_output="/fake/r.json",
+            )
+
+        primary = report.primary_checkpoint_save_run
+        assert (
+            primary.cache_miss_identity
+            == harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY
+        )
+        assert primary.process_memory_before.available is False
+        assert primary.process_memory_after_save.available is False
+        assert primary.process_memory_after_return.available is False
+        assert primary.log_after_checkpoint_save.available is False
+        assert (
+            primary.log_after_checkpoint_temp_model_release.available is False
+        )
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_primary_save_run_serializes_in_json_report(self):
+        """The primary save record is part of the JSON report."""
+        with patch.object(harness, "query_system_stats",
+                          return_value=self._mock_stats()), \
+             patch.object(harness, "query_object_info", return_value={}), \
+             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
+                 name="r", accepted=True, prompt_id="p",
+             )), \
+             patch.object(harness, "check_cache_reuse",
+                          return_value=(True, "cached")):
+            report = harness.run_validation(
+                comfy_api_url="http://fake:8188",
+                source_model="src.safetensors",
+                report_output="/fake/r.json",
+                comfy_log_path="/nonexistent.log",
+            )
+        data = json.loads(report.to_json())
+        assert "primary_checkpoint_save_run" in data
+        primary = data["primary_checkpoint_save_run"]
+        assert (
+            primary["cache_miss_identity"]
+            == harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY
+        )
+        assert primary["model_name"] == "ecaj_checkpoint_validation_save"
+        # Every nested observation dict is present.
+        assert "process_memory_before" in primary
+        assert "process_memory_after_save" in primary
+        assert "process_memory_after_return" in primary
+        assert "log_after_checkpoint_save" in primary
+        assert "log_after_checkpoint_temp_model_release" in primary
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_format_report_renders_primary_save_section(self):
+        """``format_report`` shows the primary checkpoint save memory
+        section when the run is populated.
+        """
+        report = harness.CheckpointValidationReport()
+        report.primary_checkpoint_save_run = harness.CheckpointSaveRunReport(
+            run_index=0,
+            cache_miss_identity=harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY,
+            model_name="ecaj_checkpoint_validation_save",
+        )
+        report.primary_checkpoint_save_run.process_memory_before = (
+            harness.ProcessMemoryObservation(
+                label="before-run", available=True, source="smaps_rollup",
+                rss_kb=3000, swap_kb=0, anonymous_kb=2500,
+            )
+        )
+        text = harness.format_report(report)
+        assert "Primary Checkpoint Save Memory" in text
+        assert harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY in text
+        assert "RSS=3000kB" in text
+
+
+# ===========================================================================
+# AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+# Shared memory observation helpers — begin/finalize are pure helpers
+# reused by both the primary save and the repeated cache-miss series.
+# ===========================================================================
+
+
+class TestSaveRunMemoryHelpers:
+    """``begin_save_run_memory_observation`` /
+    ``finalize_save_run_memory_observation`` are pure helpers used by
+    both the primary save and the repeated cache-miss series.
+    """
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_begin_returns_unavailable_observation_when_pid_none(self):
+        before, offset = harness.begin_save_run_memory_observation(
+            None, None,
+        )
+        assert before.available is False
+        assert offset == 0
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_begin_captures_log_offset_when_log_path_supplied(
+        self, tmp_path,
+    ):
+        log_path = tmp_path / "comfy.log"
+        log_path.write_bytes(b"existing log content\n")
+        _before, offset = harness.begin_save_run_memory_observation(
+            None, str(log_path),
+        )
+        assert offset == len(b"existing log content\n")
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    # AC: @comfy-memory-manager-compatibility ac-report-os-memory-observations
+    def test_finalize_records_after_save_as_unavailable_even_with_pid(self):
+        run = harness.CheckpointSaveRunReport()
+
+        def fake_collect(pid, label):
+            return harness.ProcessMemoryObservation(
+                label=label, available=True, source="smaps_rollup",
+                rss_kb=1000, swap_kb=0,
+            )
+
+        with patch.object(harness, "collect_process_memory_observation",
+                          side_effect=fake_collect):
+            harness.finalize_save_run_memory_observation(
+                run, comfy_pid=4242, comfy_log_path=None, before_offset=0,
+            )
+        assert run.process_memory_after_save.available is False
+        assert "save-time" in run.process_memory_after_save.error.lower()
+        assert run.process_memory_after_return.available is True
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_finalize_parses_widen_labels_from_log_segment(self, tmp_path):
+        log_path = tmp_path / "comfy.log"
+        log_path.write_text(
+            "old line\n"
+            "[mem] after-checkpoint-save: RSS=7000MB\n"
+            "[mem] after-checkpoint-temp-model-release: RSS=3000MB\n",
+        )
+        run = harness.CheckpointSaveRunReport()
+        harness.finalize_save_run_memory_observation(
+            run, comfy_pid=None, comfy_log_path=str(log_path),
+            before_offset=0,
+        )
+        assert run.log_after_checkpoint_save.available is True
+        assert run.log_after_checkpoint_save.rss_mb == 7000
+        assert run.log_after_checkpoint_temp_model_release.available is True
+        assert run.log_after_checkpoint_temp_model_release.rss_mb == 3000
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_finalize_records_log_unavailable_when_no_log_path(self):
+        run = harness.CheckpointSaveRunReport()
+        harness.finalize_save_run_memory_observation(
+            run, comfy_pid=None, comfy_log_path=None, before_offset=0,
+        )
+        assert run.log_after_checkpoint_save.available is False
+        assert run.log_after_checkpoint_save.error
+        assert run.log_after_checkpoint_temp_model_release.available is False
