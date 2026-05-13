@@ -737,6 +737,12 @@ features:
                       documented deferral.
                     when: |
                       saved model output compatibility is assessed for release.
+                  - given: an operator intentionally runs checkpoint-style saved-output validation against a real
+                      ComfyUI environment and supplies explicit process-memory observation inputs.
+                    id: ac-report-records-process-memory-points
+                    then: it records per-run process-memory observations for before execution, after save-time
+                      checkpoint writing when available, and after the Exit node returns.
+                    when: the validation report is produced.
                 tags: []
                 created: 2026-04-29T05:21:57.821Z
                 notes:
