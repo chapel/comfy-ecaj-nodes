@@ -17971,6 +17971,17 @@ reviews:
         runner: pytest
         created_at: 2026-05-13T17:08:25.807Z
         completed_at: 2026-05-13T17:08:25.807Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "On reviewer fix head 3e18d0c9bd71cf446e368fa916db0470b3262fa0: kspec validate
+          --warnings-ok passed; only existing alignment/completeness warnings"
+        name: post-fix kspec validate
+        required: true
+        runner: kspec
+        created_at: 2026-05-13T17:08:26.298Z
+        completed_at: 2026-05-13T17:08:26.298Z
     events:
       - _ulid: 01KRH4P8EA3YJADJFQYAA078JM
         actor: Jacob Chapel
@@ -18013,6 +18024,13 @@ reviews:
           status: pass
           name: post-fix focused checkpoint pytest
         timestamp: 2026-05-13T17:08:25.956Z
+      - _ulid: 01KRH4ZA6HEFHBPFG2ATG1SH3N
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: post-fix kspec validate
+        timestamp: 2026-05-13T17:08:26.449Z
     examined_commit: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
     external_links: []
     lifecycle_state: open
@@ -18025,5 +18043,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-13T17:03:29.738Z
-    updated_at: 2026-05-13T17:08:25.807Z
+    updated_at: 2026-05-13T17:08:26.298Z
     notes: []
