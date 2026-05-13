@@ -121,12 +121,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-05-13T17:08:42.396Z
+      updated_at: 2026-05-13T17:14:08.992Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:08:42.396Z
+      updated_at: 2026-05-13T17:14:08.992Z
     integration:
       status: pending
       detail: null
@@ -134,7 +134,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 1b886134e0b0b88768419710d07a162ec7992a15
-      updated_at: 2026-05-13T17:08:42.396Z
+      updated_at: 2026-05-13T17:14:08.992Z
     lifecycle_state: integrating
     resolved_base_branch: dev
     task_ref: "@01KRH2YMF71BHP0WG62E1RDF1C"
@@ -142,18 +142,23 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-05-13T17:02:40.911Z
-      last_reconciled_at: 2026-05-13T17:08:42.396Z
+      last_reconciled_at: 2026-05-13T17:14:08.992Z
       created_at: 2026-05-13T17:02:40.126Z
-      updated_at: 2026-05-13T17:08:42.396Z
+      updated_at: 2026-05-13T17:14:08.992Z
     workspace_id: dispatch-workspace-01KRH2YMF71BHP0WG62E1RDF1C
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 6b172b7033446e42b767558da58978c501ce6c91
+        last_seen_at: 2026-05-13T17:14:08.992Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-memory-contract-ac-updates-01krh2ym-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-checkpoint-save-memory-contract-ac-updates/01krh2ym
-        head: 1b886134e0b0b88768419710d07a162ec7992a15
-        last_seen_at: 2026-05-13T17:02:40.126Z
+        head: 6b172b7033446e42b767558da58978c501ce6c91
+        last_seen_at: 2026-05-13T17:14:08.992Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-memory-contract-ac-updates-01krh2ym
   - active_role: null
     base_branch_point: 1b886134e0b0b88768419710d07a162ec7992a15
