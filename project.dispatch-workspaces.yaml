@@ -267,18 +267,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-checkpoint-save-temp-payload-release-hardening/01krh2ym
-    canonical_branch_head: 5b9807ed8cab3f6c9988639fc128a173c0610887
+    canonical_branch_head: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-05-13T17:18:46.694Z
+      updated_at: 2026-05-13T17:29:42.269Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:18:47.587Z
+      updated_at: 2026-05-13T17:29:42.269Z
     integration:
       status: pending
       detail: null
@@ -286,7 +286,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 5b9807ed8cab3f6c9988639fc128a173c0610887
-      updated_at: 2026-05-13T17:18:46.694Z
+      updated_at: 2026-05-13T17:29:42.269Z
     lifecycle_state: active
     resolved_base_branch: dev
     task_ref: "@01KRH2YMHPE7JQYJ734YWMRPAR"
@@ -294,9 +294,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-05-13T17:18:47.587Z
-      last_reconciled_at: 2026-05-13T17:18:47.587Z
+      last_reconciled_at: 2026-05-13T17:29:42.269Z
       created_at: 2026-05-13T17:18:46.694Z
-      updated_at: 2026-05-13T17:18:47.587Z
+      updated_at: 2026-05-13T17:29:42.269Z
     workspace_id: dispatch-workspace-01KRH2YMHPE7JQYJ734YWMRPAR
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
