@@ -18289,7 +18289,17 @@ reviews:
     slugs: []
     title: Review checkpoint save temp payload release hardening
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Validation passed: 136 files, 56 items, 133 tasks; schema and references OK."
+        name: kspec validate --refs
+        required: true
+        runner: kspec
+        created_at: 2026-05-13T17:34:15.360Z
+        completed_at: 2026-05-13T17:34:15.360Z
     events:
       - _ulid: 01KRH6B0JG1TEPDMHAK87B9TPV
         actor: Jacob Chapel
@@ -18304,6 +18314,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-05-13T17:32:28.025Z
+      - _ulid: 01KRH6EJZG8YY7DQEZCN2H7X2V
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate --refs
+        timestamp: 2026-05-13T17:34:15.537Z
     examined_commit: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
     external_links: []
     lifecycle_state: open
@@ -18316,5 +18333,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-13T17:32:18.385Z
-    updated_at: 2026-05-13T17:32:27.861Z
+    updated_at: 2026-05-13T17:34:15.360Z
     notes: []
