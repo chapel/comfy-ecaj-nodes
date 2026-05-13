@@ -81,6 +81,7 @@ tags:
   - memory
   - checkpoint-save
 vcs_refs: []
+review_ref: "@01KRH4P8EAVNEKRK3KQVN747YK"
 submission_linkage:
   review_url: null
   branch: dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g
@@ -291,6 +292,13 @@ history:
         previous: pending_review
     command: task-unblock
     timestamp: 2026-05-13T17:03:02.813Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KRH4P8EAVNEKRK3KQVN747YK"
+        previous: null
+    command: review-link
+    timestamp: 2026-05-13T17:03:30.186Z
 prior_status: null
 created_at: 2026-05-12T22:16:57.702Z
 started_at: 2026-05-12T22:17:10.372Z
