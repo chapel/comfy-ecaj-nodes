@@ -602,6 +602,11 @@ features:
                 id: ac-checkpoint-save-failure-releases-temp-payload
                 then: temporary save-time merge payloads are released before control returns to ComfyUI.
                 when: save, publication, or artifact reload fails before a usable MODEL is returned.
+              - given: checkpoint-style saved model output creates a new saved artifact in a real ComfyUI process.
+                id: ac-report-os-memory-observations
+                then: the validation output records process resident memory and swapped anonymous memory at the
+                  observed checkpoint-save lifecycle points.
+                when: memory behavior is validated with operating-system process memory observation available.
             tags:
               - comfy
               - memory
