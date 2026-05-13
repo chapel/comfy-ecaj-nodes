@@ -668,7 +668,7 @@ features:
                   loader, memory-management mode, and downstream workflow shapes that users run.
                 status:
                   maturity: draft
-                  implementation: implemented
+                  implementation: in_progress
                 depends_on: []
                 implements: []
                 relates_to: []
