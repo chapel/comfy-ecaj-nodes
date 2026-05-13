@@ -273,12 +273,12 @@ workspaces:
       detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
       eligible: true
       reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      updated_at: 2026-05-13T17:35:43.029Z
+      updated_at: 2026-05-13T17:37:44.966Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:37:38.225Z
+      updated_at: 2026-05-13T17:37:44.966Z
     integration:
       status: merged
       detail: integration:merged
@@ -286,17 +286,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 5b9807ed8cab3f6c9988639fc128a173c0610887
-      updated_at: 2026-05-13T17:35:42.515Z
-    lifecycle_state: closing
+      updated_at: 2026-05-13T17:37:44.966Z
+    lifecycle_state: cleanup_blocked
     resolved_base_branch: dev
     task_ref: "@01KRH2YMHPE7JQYJ734YWMRPAR"
     task_slug: task-checkpoint-save-temp-payload-release-hardening
     timestamps:
       closed_at: null
       last_active_at: 2026-05-13T17:31:46.890Z
-      last_reconciled_at: 2026-05-13T17:37:38.225Z
+      last_reconciled_at: 2026-05-13T17:37:44.966Z
       created_at: 2026-05-13T17:18:46.694Z
-      updated_at: 2026-05-13T17:37:38.225Z
+      updated_at: 2026-05-13T17:37:44.966Z
     workspace_id: dispatch-workspace-01KRH2YMHPE7JQYJ734YWMRPAR
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
