@@ -359,3 +359,15 @@ inbox:
       - testability
     added_by: "@claude"
     created_at: 2026-05-13T17:31:15.721Z
+  - _ulid: 01KRHA5PT76CQ54F3DB2YTCN6W
+    text: "kspec batch should preserve optional review checks: when a batch command for review check
+      includes required=false, it currently still creates a required failed check, which can poison
+      review disposition after an approval. Add boolean-false handling or an explicit no-required
+      mapping for review check batch args."
+    tags:
+      - reflection
+      - kspec
+      - review
+      - cli
+    added_by: Jacob Chapel
+    created_at: 2026-05-13T18:39:18.855Z
