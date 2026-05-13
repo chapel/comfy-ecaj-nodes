@@ -304,3 +304,28 @@ inbox:
       - checkpoint
     added_by: Jacob Chapel
     created_at: 2026-05-12T23:44:40.375Z
+  - _ulid: 01KRH4XRXTTSFDM7P9KB36JQAW
+    text: Add `kspec item ac add-batch` or `kspec item ac add --from-file <yaml>` for multi-AC spec
+      hardening tasks. Adding 7 ACs across 3 specs required 7 separate invocations with identical
+      CLI shape; YAML/JSON-driven bulk add would let the task description double as the input.
+    tags:
+      - cli
+      - kspec
+      - ergonomics
+      - reflection
+    added_by: "@claude"
+    created_at: 2026-05-13T17:07:35.994Z
+  - _ulid: 01KRH4XRYNAV27GBR1ZTBJZ09Q
+    text: "Document empty-commit convention for metadata-only spec dispatch tasks. Spec-only tasks
+      (e.g., AC additions, status flips) produce no application changes; their kspec edits land on
+      `kspec-meta`. To publish a PR per the dispatch publication_mode contract, a documenting empty
+      commit (`git commit --allow-empty`) is required on the dispatch branch (see PRs #98, #99,
+      #100). This convention was discovered by inspecting prior PRs — not documented in skills or
+      AGENTS.md."
+    tags:
+      - docs
+      - dispatch
+      - kspec
+      - reflection
+    added_by: "@claude"
+    created_at: 2026-05-13T17:07:36.021Z
