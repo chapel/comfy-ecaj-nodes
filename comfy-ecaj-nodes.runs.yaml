@@ -9211,7 +9211,7 @@ runs:
     completed_at: 2026-05-13T17:31:28.225Z
   - _ulid: 01KRH6HXPYKVEPXWA05MH2ZRM1
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9236,7 +9236,16 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-05-13T17:37:02.733Z
-        completed_at: 2026-05-13T17:37:02.733Z
+        completed_at: 2026-05-13T17:37:17.167Z
+        notes: Captured one success observation about durable kspec review-check evidence. Skipped
+          PR-publication detached merge friction because inbox @01KQ6R11 already tracks explicit PR
+          merge commands for detached reviewers. Skipped self-owned PR approval friction because
+          inbox @01KQCR3B6 already tracks GitHub self-approval behavior and source-of-truth
+          guidance.
+      - status: completed
+        step_index: 3
+        started_at: 2026-05-13T17:37:17.167Z
+        completed_at: 2026-05-13T17:37:17.167Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T17:36:04.830Z
