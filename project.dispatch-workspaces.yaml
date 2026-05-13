@@ -278,7 +278,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:35:42.515Z
+      updated_at: 2026-05-13T17:37:38.225Z
     integration:
       status: merged
       detail: integration:merged
@@ -287,25 +287,20 @@ workspaces:
       target_branch: dev
       target_commit: 5b9807ed8cab3f6c9988639fc128a173c0610887
       updated_at: 2026-05-13T17:35:42.515Z
-    lifecycle_state: cleanup_blocked
+    lifecycle_state: closing
     resolved_base_branch: dev
     task_ref: "@01KRH2YMHPE7JQYJ734YWMRPAR"
     task_slug: task-checkpoint-save-temp-payload-release-hardening
     timestamps:
       closed_at: null
       last_active_at: 2026-05-13T17:31:46.890Z
-      last_reconciled_at: 2026-05-13T17:37:37.670Z
+      last_reconciled_at: 2026-05-13T17:37:38.225Z
       created_at: 2026-05-13T17:18:46.694Z
-      updated_at: 2026-05-13T17:37:37.670Z
+      updated_at: 2026-05-13T17:37:38.225Z
     workspace_id: dispatch-workspace-01KRH2YMHPE7JQYJ734YWMRPAR
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer:
-        branch_mode: detached
-        branch_ref: null
-        head: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
-        last_seen_at: 2026-05-13T17:31:45.863Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-temp-payload-release-hardening-01krh2ym-review
+      reviewer: null
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-checkpoint-save-temp-payload-release-hardening/01krh2ym
