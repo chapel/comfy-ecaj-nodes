@@ -6273,6 +6273,8 @@ plans:
               it records each run's cache-miss identity and post-return memory
               observation so accumulation across runs can be assessed.
           - Target spec: @saved-model-artifact-safety.
+          - Set implementation status to in_progress because the successful-return
+            contract is being tightened.
           - Add AC ac-failed-return-not-successful:
             given: |
               saved model output writes an artifact but fails before returning a usable
@@ -6361,6 +6363,9 @@ plans:
               artifact load for the returned MODEL;
             - failure during checkpoint save releases the temporary model and propagates
               the original failure;
+            - failure during artifact publication or finalization after the temporary
+              model exists releases the temporary model and propagates the original
+              failure;
             - failure during artifact reload releases the temporary model and propagates
               the original failure;
             - `_clear_temporary_model_patch_payloads` clears `patches`,
@@ -6580,11 +6585,15 @@ plans:
       environment details.
     status: draft
     approved_at: null
-    branch: null
     derived_specs: []
     derived_tasks: []
     module_ref: null
     source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/checkpoint-save-memory-contract-hardening.md
     created_at: 2026-05-12T23:58:47.222Z
     completed_at: null
-    notes: []
+    notes:
+      - _ulid: 01KRFAACPHXX41YM8QMPF222XG
+        content: "Address review 01KRFA5H: set artifact safety status to in_progress and require
+          publication/finalization failure cleanup coverage"
+        author: Jacob Chapel
+        created_at: 2026-05-13T00:03:23.474Z
