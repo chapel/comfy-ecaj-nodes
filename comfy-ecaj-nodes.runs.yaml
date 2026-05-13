@@ -8969,7 +8969,7 @@ runs:
     completed_at: 2026-05-08T21:01:59.921Z
   - _ulid: 01KRH56VTEYG6D701XE0H95FJW
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -8985,7 +8985,19 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-13T17:13:04.782Z
-        completed_at: 2026-05-13T17:13:04.782Z
+        completed_at: 2026-05-13T17:13:26.975Z
+        notes: "High-confidence candidates checked against baseline and keyword searches. Friction:
+          reviewer-pushed fixes on task-subject reviews leave the review examined commit stale;
+          already covered by inbox items 01KQ6MFM and 01KQ6ZJF. Friction: self-owned GitHub PR
+          approval fails even when kspec review is approved; already covered by inbox 01KQCR3B6 and
+          related observations. Friction/success: reviewer-side edits should run ruff before push;
+          already covered by inbox 01KQC334 and observations 01KQCBZQ/01KQCBZZ. Success: durable
+          kspec checks plus GitHub CI evidence made the merge gate clear; similar review-check
+          success patterns already exist. No new high-confidence untracked item selected."
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-13T17:13:26.975Z
+        completed_at: 2026-05-13T17:13:26.975Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T17:12:33.870Z
