@@ -329,3 +329,33 @@ inbox:
       - reflection
     added_by: "@claude"
     created_at: 2026-05-13T17:07:36.021Z
+  - _ulid: 01KRH693BRVGWKRYRA1YCYXRED
+    text: Add a tests/conftest.py helper (or fixture) make_checkpoint_save_patches that enters the ~17
+      standard nodes.exit.* patches every checkpoint cache-miss test re-types (validate_model_name,
+      _resolve_checkpoints_path, compute_recipe_hash, compute_base_identity, compute_lora_stats,
+      serialize_recipe, validate_checkpoint_components, check_checkpoint_cache, analyze_recipe,
+      analyze_recipe_models, _unpatch_loaded_clones, ProgressBar, compile_plan, chunked_evaluation,
+      compile_batch_groups, install_merged_patches, check_ram_preflight). Yields a namespace of
+      mocks the test can override. Cuts per-test boilerplate, avoids Python's nested-with limit.
+      Suggested by reflect on @01KRH2YMHPE7JQYJ734YWMRPAR.
+    tags:
+      - reflection
+      - tests
+      - checkpoint
+      - tech-debt
+    added_by: "@claude"
+    created_at: 2026-05-13T17:31:15.704Z
+  - _ulid: 01KRH693C9NY7F9R20JBZRD7WR
+    text: Consider extracting WIDENExitNode._execute_checkpoint_save's post-save bookkeeping
+      (free_memory + soft_empty_cache + optional _incremental_cache.clear) into a single private
+      helper (_finalize_checkpoint_save). Gives failure-path tests a single seam to patch and makes
+      the try-body easier to read. Surfaced while writing a test that had to patch
+      _incremental_cache with an ExplodingCache to exercise 'failure during post-save finalization'.
+      Suggested by reflect on @01KRH2YMHPE7JQYJ734YWMRPAR.
+    tags:
+      - reflection
+      - refactor
+      - exit-node
+      - testability
+    added_by: "@claude"
+    created_at: 2026-05-13T17:31:15.721Z

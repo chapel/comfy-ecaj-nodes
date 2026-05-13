@@ -1412,6 +1412,38 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-05-13T17:20:55.503Z
+  - _ulid: 01KRH6937S33XV07SEG1MRVXAY
+    type: friction
+    content: Checkpoint cache-miss failure-path tests need ~18-21 nodes.exit.* patches each. The
+      parenthesized with-statement form hits Python's statically-nested-blocks ceiling (~20) and
+      breaks pytest collection with SyntaxError. Refactoring to contextlib.ExitStack solves it
+      per-test but is verbose. Pattern will recur as more failure-path tests are added in this area.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-13T17:31:15.577Z
+  - _ulid: 01KRH6939GA5J5Y7ZM1E80NV7Y
+    type: friction
+    content: "AC annotation comments like '# AC: @comfy-memory-manager-compatibility
+      ac-checkpoint-save-failure-releases-temp-payload' are 91 chars on their own. At >=12-space
+      indent they exceed ruff E501 (99). Forces either deleting prose context, line-breaking the
+      slug (hurts grep-ability), or moving the annotation to a shallower scope. Spec/AC slug pairs
+      are already near the limit before any indentation."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-13T17:31:15.632Z
+  - _ulid: 01KRH693AQYZKVGETBGFYVDDNM
+    type: success
+    content: For a task linked to one primary spec (@comfy-memory-manager-compatibility) but with task
+      description that also references ACs on a second spec (@saved-model-artifact-safety
+      ac-failed-return-not-successful), running kspec item get on the second spec BEFORE planning
+      surfaces the cross-linked AC and gets annotations right on the first pass. Worth doing
+      whenever the task description names ACs outside its primary spec.
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-13T17:31:15.671Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
