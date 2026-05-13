@@ -18639,7 +18639,18 @@ reviews:
     slugs: []
     title: Review task-checkpoint-save-memory-validation-reporting cycle 2
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "pytest tests/test_checkpoint_validation_harness.py
+          tests/test_real_comfy_memory_harness.py: 182 passed in 14.33s"
+        name: pytest targeted
+        required: true
+        runner: pytest
+        created_at: 2026-05-13T18:10:58.828Z
+        completed_at: 2026-05-13T18:10:58.828Z
     events:
       - _ulid: 01KRH8BVV2RKDSKQ6WQFXMGN19
         actor: Jacob Chapel
@@ -18661,6 +18672,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
         timestamp: 2026-05-13T18:10:27.245Z
+      - _ulid: 01KRH8HTZ7M5CCTHST3HDKFZ47
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest targeted
+        timestamp: 2026-05-13T18:10:59.175Z
     examined_commit: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
     external_links: []
     lifecycle_state: open
@@ -18700,5 +18718,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-05-13T18:07:43.459Z
-    updated_at: 2026-05-13T18:10:26.879Z
+    updated_at: 2026-05-13T18:10:58.828Z
     notes: []
