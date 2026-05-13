@@ -9064,9 +9064,42 @@ runs:
     completed_at: 2026-05-13T17:21:06.084Z
   - _ulid: 01KRH65ZKNBQT8CF9W6KHCK95Q
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-13T17:29:33.557Z
+        completed_at: 2026-05-13T17:29:52.263Z
+        notes: >-
+          What worked well in this session:
+
+
+          1. **Spec-first verification on entry** — I read the task's full spec context (kspec task
+          get @ref + kspec item get @saved-model-artifact-safety) BEFORE planning, surfacing the
+          'ac-failed-return-not-successful' AC from the cross-linked spec. That made the AC
+          annotations correct on the first pass.
+
+
+          2. **Mapping failure modes to ACs early** — I enumerated the four failure scenarios (save
+          fail, post-save finalize fail, reload fail, pre-install fail) from the task description
+          before writing any code, then designed the try/finally to handle them uniformly with a
+          sentinel. Plan note captured this approach.
+
+
+          3. **Test order vs. test placement** — Reusing the existing 'events list with side_effect'
+          pattern from the prior task's tests kept the new save/release/load-order test consistent
+          with what's already in the file.
+
+
+          4. **Lint feedback turning into doc cleanup** — When ruff E501 hit on three repeated AC
+          comment blocks, removing the redundant inner copies (and keeping the outer block above
+          try:) was a strictly better outcome than adding noqa. AC annotations live where coverage
+          is naturally documented, not where the line happens to be.
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-13T17:29:52.263Z
+        completed_at: 2026-05-13T17:29:52.263Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-13T17:29:33.557Z
