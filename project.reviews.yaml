@@ -17959,6 +17959,18 @@ reviews:
         runner: pytest
         created_at: 2026-05-13T17:05:57.365Z
         completed_at: 2026-05-13T17:05:57.365Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "On reviewer fix head 3e18d0c9bd71cf446e368fa916db0470b3262fa0: uv run pytest
+          tests/test_checkpoint_returned_model.py tests/test_checkpoint_save_format.py
+          tests/test_exit_node.py tests/test_checkpoint_components.py -q passed (141 tests)"
+        name: post-fix focused checkpoint pytest
+        required: true
+        runner: pytest
+        created_at: 2026-05-13T17:08:25.807Z
+        completed_at: 2026-05-13T17:08:25.807Z
     events:
       - _ulid: 01KRH4P8EA3YJADJFQYAA078JM
         actor: Jacob Chapel
@@ -17994,6 +18006,13 @@ reviews:
           status: pass
           name: full pytest
         timestamp: 2026-05-13T17:05:57.535Z
+      - _ulid: 01KRH4Z9Q4SA40D5Z4WXDS2ERA
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: post-fix focused checkpoint pytest
+        timestamp: 2026-05-13T17:08:25.956Z
     examined_commit: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
     external_links: []
     lifecycle_state: open
@@ -18006,5 +18025,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-13T17:03:29.738Z
-    updated_at: 2026-05-13T17:05:57.365Z
+    updated_at: 2026-05-13T17:08:25.807Z
     notes: []
