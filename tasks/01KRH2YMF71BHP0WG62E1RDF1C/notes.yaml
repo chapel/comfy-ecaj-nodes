@@ -1,1 +1,23 @@
-notes: []
+notes:
+  - _ulid: 01KRH4SKQ9XCZE9S24DDV4GK2Y
+    content: >-
+      Added 7 ACs across 3 specs:
+
+      - @comfy-memory-manager-compatibility (already in_progress):
+      ac-checkpoint-cache-miss-releases-save-payload,
+      ac-checkpoint-save-failure-releases-temp-payload, ac-report-os-memory-observations,
+      ac-repeated-cache-miss-memory-bounded
+
+      - @live-comfy-saved-output-validation (status set to in_progress):
+      ac-report-records-process-memory-points, ac-report-records-repeated-cache-miss-memory
+
+      - @saved-model-artifact-safety (status set to in_progress): ac-failed-return-not-successful
+
+
+      Verified via kspec item get for each target; each new AC ID appears exactly once. kspec
+      validate --refs OK; kspec validate --alignment --warnings-ok OK (4 prior warnings, including
+      expected new status mismatch on saved-model-artifact-safety that follow-up implementation
+      tasks will resolve).
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-05-13T17:05:19.593Z
