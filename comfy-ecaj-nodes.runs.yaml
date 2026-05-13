@@ -9253,7 +9253,7 @@ runs:
     started_at: 2026-05-13T17:36:04.830Z
     completed_at: 2026-05-13T17:37:24.758Z
   - _ulid: 01KRH74VDHPE915A0JGFD915BD
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -9288,7 +9288,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-05-13T17:48:31.501Z
-        completed_at: 2026-05-13T17:48:31.501Z
+        completed_at: 2026-05-13T17:48:54.835Z
+        notes: "Captured: meta observation 01KRH796 (success pattern — available/error observation
+          convention). Skipped: worktree-guard friction (already in inbox 01KR4MZMJ), harness file
+          size and test import duplication (low confidence per loop-mode rules)."
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T17:46:25.073Z
+    completed_at: 2026-05-13T17:48:54.835Z
