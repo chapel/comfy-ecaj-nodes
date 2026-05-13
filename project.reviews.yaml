@@ -18651,6 +18651,16 @@ reviews:
         runner: pytest
         created_at: 2026-05-13T18:10:58.828Z
         completed_at: 2026-05-13T18:10:58.828Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "pytest tests/test_checkpoint_returned_model.py: 30 passed in 1.71s"
+        name: pytest checkpoint returned model
+        required: true
+        runner: pytest
+        created_at: 2026-05-13T18:11:00.041Z
+        completed_at: 2026-05-13T18:11:00.041Z
     events:
       - _ulid: 01KRH8BVV2RKDSKQ6WQFXMGN19
         actor: Jacob Chapel
@@ -18679,6 +18689,13 @@ reviews:
           status: pass
           name: pytest targeted
         timestamp: 2026-05-13T18:10:59.175Z
+      - _ulid: 01KRH8HW5JBRZHZQDVZ2JFCB27
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest checkpoint returned model
+        timestamp: 2026-05-13T18:11:00.402Z
     examined_commit: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
     external_links: []
     lifecycle_state: open
@@ -18718,5 +18735,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-05-13T18:07:43.459Z
-    updated_at: 2026-05-13T18:10:58.828Z
+    updated_at: 2026-05-13T18:11:00.041Z
     notes: []
