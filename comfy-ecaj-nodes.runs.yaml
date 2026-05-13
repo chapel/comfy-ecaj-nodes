@@ -9441,9 +9441,23 @@ runs:
     completed_at: 2026-05-13T18:13:25.388Z
   - _ulid: 01KRH9DSKTRH7SEY9XDYCH5KA2
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-13T18:26:15.290Z
+        completed_at: 2026-05-13T18:27:02.733Z
+        notes: "What worked well: (1) Searched kspec-meta YAML directly to get the full reviewer thread body
+          — the truncated kspec review get output was not enough to understand the blocker. (2)
+          Re-read all ACs before implementing the fix, which kept the scope tight. (3) Refactored
+          duplicate logic (begin_/finalize_save_run_memory_observation) before extending it to the
+          new primary-save use case. (4) Used the reviewer's exact reproducer as a test case so the
+          failure they described is now a regression test."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-13T18:27:02.733Z
+        completed_at: 2026-05-13T18:27:02.733Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T18:26:15.290Z
