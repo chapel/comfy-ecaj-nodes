@@ -931,6 +931,11 @@ features:
                   the error explains how the workflow can provide the missing requirement.
                 when: |
                   the Exit node reports the validation failure.
+              - given: saved model output writes an artifact but fails before returning a usable MODEL for that
+                  execution.
+                id: ac-failed-return-not-successful
+                then: that execution is not reported as a successful returned saved model.
+                when: the failed execution returns control to ComfyUI.
             tags: []
             created: 2026-04-29T05:21:57.784Z
             notes: []
