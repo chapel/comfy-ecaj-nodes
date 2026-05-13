@@ -44,10 +44,17 @@ class TestTemporaryCheckpointModelRelease:
         events: list[str] = []
 
         with (
-            patch("nodes.exit._unpatch_loaded_clones", side_effect=lambda model: events.append("unpatch")),
+            patch(
+                "nodes.exit._unpatch_loaded_clones",
+                side_effect=lambda model: events.append("unpatch"),
+            ),
             patch("nodes.exit.gc.collect", side_effect=lambda: events.append("gc")),
             patch("nodes.exit.torch.cuda.is_available", return_value=False),
-            patch("nodes.exit._trim_native_heap", create=True, side_effect=lambda: events.append("trim")),
+            patch(
+                "nodes.exit._trim_native_heap",
+                create=True,
+                side_effect=lambda: events.append("trim"),
+            ),
         ):
             _release_temporary_checkpoint_model(temporary_model)
 
@@ -61,7 +68,11 @@ class TestTemporaryCheckpointModelRelease:
 
         class TempModel:
             def __init__(self):
-                self.patches = {"diffusion_model.k": [(1.0, ("set", (object(),)), 1.0, None, None)]}
+                self.patches = {
+                    "diffusion_model.k": [
+                        (1.0, ("set", (object(),)), 1.0, None, None),
+                    ],
+                }
 
         temporary_model = TempModel()
 
