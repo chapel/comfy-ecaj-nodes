@@ -9063,7 +9063,7 @@ runs:
     started_at: 2026-05-13T17:19:43.445Z
     completed_at: 2026-05-13T17:21:06.084Z
   - _ulid: 01KRH65ZKNBQT8CF9W6KHCK95Q
-    status: active
+    status: completed
     current_step: 5
     initiated_by: "@claude"
     step_results:
@@ -9199,7 +9199,13 @@ runs:
       - status: completed
         step_index: 5
         started_at: 2026-05-13T17:30:58.366Z
-        completed_at: 2026-05-13T17:30:58.366Z
+        completed_at: 2026-05-13T17:31:28.224Z
+        notes: "Captured 5 items: 2 friction observations (nested-with patches ceiling; AC comment
+          line-length at deep indent), 1 success observation (read cross-linked spec before planning
+          when task names out-of-spec ACs), 2 inbox items (checkpoint-save test patches helper;
+          extract _finalize_checkpoint_save). Skipped the AC-comment-as-noqa convention proposal —
+          needs human judgement on what becomes a convention vs. a per-call noqa decision."
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-13T17:29:33.557Z
+    completed_at: 2026-05-13T17:31:28.225Z
