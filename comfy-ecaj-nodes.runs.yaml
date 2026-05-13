@@ -9254,7 +9254,7 @@ runs:
     completed_at: 2026-05-13T17:37:24.758Z
   - _ulid: 01KRH74VDHPE915A0JGFD915BD
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -9270,7 +9270,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-13T17:48:11.446Z
-        completed_at: 2026-05-13T17:48:11.446Z
+        completed_at: 2026-05-13T17:48:24.014Z
+        notes: "Friction: kspec-worktree-guard hook blocked a git history-realign command that the
+          /kspec:task-work workflow step 4a explicitly instructs me to run (the integration-target
+          update verb). Also blocked kspec search calls containing the trigger word in a quoted
+          argument string. Both repros are already tracked by inbox item 01KR4MZMJ — existing item
+          is accurate and covers this case."
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-13T17:48:24.014Z
+        completed_at: 2026-05-13T17:48:24.014Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T17:46:25.073Z
