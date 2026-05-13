@@ -9015,7 +9015,7 @@ runs:
     completed_at: 2026-05-13T17:13:47.827Z
   - _ulid: 01KRH5KZANF5PDSYSC94AFZFJ6
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9029,7 +9029,20 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-13T17:20:05.587Z
-        completed_at: 2026-05-13T17:20:05.587Z
+        completed_at: 2026-05-13T17:20:29.788Z
+        notes: "High-confidence items after baseline search: (1) Success: metadata-only review of an empty
+          source commit was reliable when verified through target kspec item output plus the
+          kspec-meta shadow diff, rather than treating git diff dev...HEAD as the only evidence. (2)
+          Friction: detached review snapshots may not expose a local .kspec directory even though
+          kspec commands resolve the canonical project shadow worktree, so direct filesystem
+          inspection like rg .kspec/modules fails and reviewers need either kspec CLI output or
+          explicit canonical shadow worktree paths. Existing coverage found for GitHub self-approval
+          friction (@01KQCR3B6, @01KR4NBV) and metadata-only empty-commit convention (@01KRH4XRY),
+          so those will not be duplicated."
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-13T17:20:29.788Z
+        completed_at: 2026-05-13T17:20:29.788Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T17:19:43.445Z
