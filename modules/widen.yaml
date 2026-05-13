@@ -593,6 +593,11 @@ features:
                 then: The validation reports the run as failed rather than treating the mode change as a successful
                   compatibility result.
                 when: saved model output can only complete by changing or disabling that selected memory mode.
+              - given: Checkpoint-style saved model output creates a new saved artifact for a cache miss.
+                id: ac-checkpoint-cache-miss-releases-save-payload
+                then: the returned MODEL can be used without keeping the temporary save-time merge payload resident
+                  solely for serialization or return.
+                when: the Exit node returns its MODEL output after the save.
             tags:
               - comfy
               - memory
