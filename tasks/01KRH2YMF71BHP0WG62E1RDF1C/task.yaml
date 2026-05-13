@@ -1,0 +1,140 @@
+_ulid: 01KRH2YMF71BHP0WG62E1RDF1C
+slugs:
+  - task-checkpoint-save-memory-contract-ac-updates
+title: Add checkpoint save memory hardening ACs
+type: task
+description: |
+  What:
+  - Add explicit acceptance criteria for the checkpoint save_model=true memory
+    contracts that were previously only implied by broad memory-lifecycle
+    wording.
+  - Update implementation status on any tightened existing spec to in_progress
+    until the follow-up tasks and manual validation evidence are complete.
+  - Keep the existing public WIDEN node interface unchanged; this is a contract
+    hardening pass, not a new output mode or product-control change.
+
+  Why:
+  - Live SDXL checkpoint save_model=true runs exposed a failure mode where a
+    checkpoint cache-miss save could release Python references yet still retain
+    native anonymous CPU arenas or swap inside the ComfyUI process.
+  - The current @comfy-memory-manager-compatibility ACs say the returned MODEL
+    should be Comfy-owned, but they do not explicitly name the temporary
+    checkpoint serialization payload as save-time state that must be released.
+  - The current live validation ACs record model/memory-mode outcomes, but do
+    not require repeated-run process-memory observations that distinguish RSS
+    from anonymous swap where the platform exposes those fields.
+
+  Exact spec changes:
+  - Target spec: @comfy-memory-manager-compatibility.
+  - Ensure implementation status is in_progress.
+  - Add AC ac-checkpoint-cache-miss-releases-save-payload:
+    given: |
+      Checkpoint-style saved model output creates a new saved artifact for a
+      cache miss.
+    when: |
+      the Exit node returns its MODEL output after the save.
+    then: |
+      the returned MODEL can be used without keeping the temporary save-time
+      merge payload resident solely for serialization or return.
+  - Add AC ac-checkpoint-save-failure-releases-temp-payload:
+    given: |
+      checkpoint-style saved model output has created temporary save-time
+      merge payloads.
+    when: |
+      save, publication, or artifact reload fails before a usable MODEL is
+      returned.
+    then: |
+      temporary save-time merge payloads are released before control returns
+      to ComfyUI.
+  - Add AC ac-report-os-memory-observations:
+    given: |
+      checkpoint-style saved model output creates a new saved artifact in a
+      real ComfyUI process.
+    when: |
+      memory behavior is validated with operating-system process memory
+      observation available.
+    then: |
+      the validation output records process resident memory and swapped
+      anonymous memory at the observed checkpoint-save lifecycle points.
+  - Add AC ac-repeated-cache-miss-memory-bounded:
+    given: |
+      repeated checkpoint-style cache-miss saves are run in the same ComfyUI
+      process.
+    when: |
+      each run completes and the Exit node returns.
+    then: |
+      post-release memory observations do not show accumulating temporary
+      save-time payloads across runs.
+  - Target spec: @live-comfy-saved-output-validation.
+  - Set implementation status to in_progress because the live report contract
+    is being tightened.
+  - Add AC ac-report-records-process-memory-points:
+    given: |
+      an operator intentionally runs checkpoint-style saved-output validation
+      against a real ComfyUI environment and supplies explicit process-memory
+      observation inputs.
+    when: |
+      the validation report is produced.
+    then: |
+      it records per-run process-memory observations for before execution,
+      after save-time checkpoint writing when available, and after the Exit
+      node returns.
+  - Add AC ac-report-records-repeated-cache-miss-memory:
+    given: |
+      an operator intentionally runs repeated checkpoint-style cache-miss
+      saved-output validation in one ComfyUI process.
+    when: |
+      the validation report is produced.
+    then: |
+      it records each run's cache-miss identity and post-return memory
+      observation so accumulation across runs can be assessed.
+  - Target spec: @saved-model-artifact-safety.
+  - Set implementation status to in_progress because the successful-return
+    contract is being tightened.
+  - Add AC ac-failed-return-not-successful:
+    given: |
+      saved model output writes an artifact but fails before returning a usable
+      MODEL for that execution.
+    when: |
+      the failed execution returns control to ComfyUI.
+    then: |
+      that execution is not reported as a successful returned saved model.
+
+  How:
+  - Use `kspec item ac add` for new ACs and `kspec item set` for status
+    changes; do not create duplicate spec items.
+  - After applying spec updates, run `kspec item get` for each target spec and
+    verify the new AC IDs appear exactly once.
+  - Run `kspec validate --refs` and `kspec validate --alignment --warnings-ok`.
+
+  Testing:
+  - This task is a metadata/spec task. Validation is kspec metadata validation,
+    not Python runtime testing.
+  - Do not mark implementation complete in this task; the implementation and
+    validation tasks below provide the behavior/evidence for the new ACs.
+
+  Covers: @comfy-memory-manager-compatibility
+    ac-checkpoint-cache-miss-releases-save-payload,
+    ac-checkpoint-save-failure-releases-temp-payload,
+    ac-report-os-memory-observations,
+    ac-repeated-cache-miss-memory-bounded;
+    @live-comfy-saved-output-validation
+    ac-report-records-process-memory-points,
+    ac-report-records-repeated-cache-miss-memory;
+    @saved-model-artifact-safety ac-failed-return-not-successful.
+spec_ref: "@comfy-memory-manager-compatibility"
+plan_ref: "@plan-checkpoint-save-memory-contract-hardening"
+origin: derived
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - specs
+  - memory
+  - checkpoint
+  - validation
+vcs_refs: []
+created_at: 2026-05-13T16:33:07.047Z
+todos: []

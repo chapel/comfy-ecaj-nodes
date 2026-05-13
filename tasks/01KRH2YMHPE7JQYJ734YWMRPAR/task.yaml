@@ -1,0 +1,99 @@
+_ulid: 01KRH2YMHPE7JQYJ734YWMRPAR
+slugs:
+  - task-checkpoint-save-temp-payload-release-hardening
+title: Harden checkpoint save temporary payload release paths
+type: task
+description: >
+  What:
+
+  - Ensure checkpoint-style save_model=true cache-miss execution releases the
+    temporary save-time merge payload in both success and failure paths.
+  - Ensure the returned MODEL after a successful checkpoint save is loaded from
+    the saved artifact and is not the temporary checkpoint serialization clone.
+  - Ensure temporary ModelPatcher-style payload containers are explicitly
+    cleared before garbage collection and best-effort native heap trimming.
+
+  Why:
+
+  - The live failure was not only a returned-model ownership issue. A temporary
+    checkpoint serialization model could keep dense set-patch tensors alive
+    while cleanup ran, and freed native CPU arenas could remain committed or
+    swapped by the process allocator.
+  - The successful path needs to release the serialization payload before
+    loading/returning the artifact-backed MODEL. Failure paths need the same
+    release guarantee so a failed save, publication, or artifact reload does
+    not leave a dense temporary payload resident.
+
+  How:
+
+  - Inspect `nodes/exit.py`, especially `WIDENExitNode._execute_checkpoint_save`,
+    `_release_temporary_checkpoint_model`, `_clear_temporary_model_patch_payloads`,
+    `_trim_native_heap`, `_load_checkpoint_artifact`, and the loader cleanup
+    paths.
+  - Keep cache-hit behavior unchanged: checkpoint cache hits should load via
+    `_load_checkpoint_artifact` and must not run merge/materialization work.
+  - In the checkpoint cache-miss path, track the temporary merged checkpoint
+    serialization model separately from the artifact-loaded return model.
+  - Release the temporary model exactly once after it has been created and is
+    no longer needed, including when `save_comfy_checkpoint`, artifact
+    publication, or `_load_checkpoint_artifact` raises.
+  - Do not attempt to release a temporary model before it exists, and do not
+    release the artifact-loaded returned model.
+  - Keep `_release_temporary_checkpoint_model` best-effort for platform-specific
+    native heap behavior: unpatch loaded clones, clear patch-payload
+    containers, run Python GC, empty CUDA cache when available, and call native
+    heap trim only where supported.
+  - Clear all known temporary patch-payload containers on the ModelPatcher clone:
+    `patches`, `object_patches`, and `weight_wrapper_patches` when those
+    attributes exist and support `clear()`.
+  - Do not change saved artifact format, metadata, cache identity, atomic
+    publication semantics, or the boolean `save_model` node input.
+
+  Testing:
+
+  - Extend `tests/test_checkpoint_returned_model.py` with focused tests for:
+    - cache-miss success order: checkpoint save, temporary-model release, then
+      artifact load for the returned MODEL;
+    - failure during checkpoint save releases the temporary model and propagates
+      the original failure;
+    - failure during artifact publication or finalization after the temporary
+      model exists releases the temporary model and propagates the original
+      failure;
+    - failure during artifact reload releases the temporary model and propagates
+      the original failure;
+    - `_clear_temporary_model_patch_payloads` clears `patches`,
+      `object_patches`, and `weight_wrapper_patches` without requiring all
+      attributes to exist;
+    - `_release_temporary_checkpoint_model` still calls GC and native heap trim
+      after severing temporary patch payloads.
+  - Update AC annotations in the affected tests/source comments to reference
+    the new AC IDs from the spec-update task.
+  - Run `pytest tests/test_checkpoint_returned_model.py tests/test_checkpoint_save_format.py`.
+
+  - Run `pytest tests/test_real_comfy_memory_harness.py tests/test_checkpoint_validation_harness.py`
+  if validation helper changes are also present in the same branch.
+
+  - Run `kspec validate --refs` before submitting.
+
+
+  Covers: @comfy-memory-manager-compatibility
+    ac-checkpoint-cache-miss-releases-save-payload,
+    ac-checkpoint-save-failure-releases-temp-payload,
+    ac-comfy-owns-returned-model-memory;
+    @saved-model-artifact-safety ac-failed-return-not-successful.
+spec_ref: "@comfy-memory-manager-compatibility"
+plan_ref: "@plan-checkpoint-save-memory-contract-hardening"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-memory-contract-ac-updates"
+context: []
+priority: 1
+tags:
+  - exit-node
+  - memory
+  - checkpoint
+vcs_refs: []
+created_at: 2026-05-13T16:33:07.126Z
+todos: []

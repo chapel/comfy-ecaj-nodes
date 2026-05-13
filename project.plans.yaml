@@ -6583,10 +6583,14 @@ plans:
       the harness, but the final live evidence task requires maintainer-provided local
 
       environment details.
-    status: approved
+    status: active
     approved_at: 2026-05-13T16:32:58.678Z
     derived_specs: []
-    derived_tasks: []
+    derived_tasks:
+      - "@task-checkpoint-save-memory-contract-ac-updates"
+      - "@task-checkpoint-save-temp-payload-release-hardening"
+      - "@task-checkpoint-save-memory-validation-reporting"
+      - "@task-checkpoint-save-memory-manual-validation-run"
     module_ref: null
     source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/checkpoint-save-memory-contract-hardening.md
     created_at: 2026-05-12T23:58:47.222Z
@@ -6597,3 +6601,28 @@ plans:
           publication/finalization failure cleanup coverage"
         author: Jacob Chapel
         created_at: 2026-05-13T00:03:23.474Z
+      - _ulid: 01KRH2YMMYGHCTYD2V7MKW1PHQ
+        content: |-
+          This plan hardens the contracts around a discovered checkpoint-style
+          save_model=true memory failure. It does not add output-mode controls, does not
+          change the boolean `save_model` interface, and does not change saved artifact
+          semantics.
+
+          The cleanup progress/status idea from the retrospective is intentionally not in
+          scope. Existing progress specs already cover write, finalization, cache reuse,
+          and failure status. Add a separate UX plan only if post-save cleanup becomes
+          long-running enough that users need a visible cleanup/release phase.
+
+          The implementation tasks should remain small and ordered:
+
+          1. update the specs first so new code/tests can truthfully annotate the new ACs;
+          2. harden success and failure cleanup in `nodes/exit.py`;
+          3. extend the guarded live validation harness/report shape without running real
+             ComfyUI from automated tests;
+          4. run the real repeated-cache-miss validation manually with explicit inputs.
+
+          Real ComfyUI validation remains opt-in. Automated workers can implement and test
+          the harness, but the final live evidence task requires maintainer-provided local
+          environment details.
+        author: Jacob Chapel
+        created_at: 2026-05-13T16:33:07.230Z

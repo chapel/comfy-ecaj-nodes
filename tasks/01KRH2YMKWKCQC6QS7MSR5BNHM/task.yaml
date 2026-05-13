@@ -1,0 +1,85 @@
+_ulid: 01KRH2YMKWKCQC6QS7MSR5BNHM
+slugs:
+  - task-checkpoint-save-memory-manual-validation-run
+title: Run manual repeated checkpoint memory validation
+type: task
+description: |
+  What:
+  - Run the guarded live checkpoint validation harness against an explicitly
+    selected local ComfyUI environment and record evidence for repeated
+    checkpoint cache-miss save_model=true runs.
+  - This task is manual-only in practice. It requires a maintainer-selected
+    ComfyUI server, source checkpoint, process id, and optional log path.
+
+  Why:
+  - Pure tests can prove cleanup ordering and harness/report behavior, but they
+    do not prove that a real ComfyUI process running a representative SDXL
+    checkpoint workflow releases OS-visible native memory and avoids repeated
+    cache-miss accumulation.
+  - The manual evidence is the release-confidence check for the memory
+    compatibility ACs tightened by this plan.
+
+  How:
+  - Do not auto-discover or start ComfyUI. Use only explicit operator inputs.
+  - Ensure the current branch is installed or symlinked into the target ComfyUI
+    custom_nodes environment before the run.
+  - Identify the target ComfyUI API URL, source checkpoint name, process id,
+    and log path if log parsing is desired.
+  - Run a command in this shape, substituting explicit maintainer-selected
+    values:
+    COMFY_ECAJ_CHECKPOINT_VALIDATION=1 \
+      python scripts/manual/real_comfy_checkpoint_validation.py \
+      --run-checkpoint-validation \
+      --comfy-api-url http://127.0.0.1:8188 \
+      --source-model <checkpoint-name> \
+      --report-output reports/checkpoint-memory-validation.json \
+      --comfy-pid <pid> \
+      --comfy-log-path <path-to-comfy-log> \
+      --repeat-cache-miss-runs 3
+  - If a log path is not available, omit `--comfy-log-path` and document that
+    internal after-save/after-release log observations were unavailable.
+  - If `/proc/<pid>/smaps_rollup` is not available on the platform, document the
+    unavailable OS memory fields in the report rather than inventing values.
+  - Add a kspec note to @comfy-memory-manager-compatibility and to this task
+    summarizing the validation result, the ComfyUI version, active memory mode,
+    number of cache-miss repetitions, post-return RSS/swap observations, and
+    whether the run passed or was deferred.
+
+  Testing:
+  - Verify the generated report exists and includes the ComfyUI version, active
+    memory mode, checkpoint save outcome, loader/downstream outcome, cache-reuse
+    outcome, per-run cache-miss identities, and process-memory observations or
+    explicit unavailable markers.
+  - Verify the report marks the repeated cache-miss memory behavior as passed,
+    failed, or explicitly deferred; do not treat missing required live evidence
+    as a successful compatibility result.
+  - Run `kspec validate --refs` after recording notes.
+
+  Covers: @live-comfy-saved-output-validation
+    ac-report-identifies-environment,
+    ac-report-records-save-outcome,
+    ac-report-records-loader-downstream-outcome,
+    ac-report-records-cache-reuse-outcome,
+    ac-memory-mode-not-changed-for-success,
+    ac-primitive-tests-do-not-substitute-for-live-validation,
+    ac-report-records-process-memory-points,
+    ac-report-records-repeated-cache-miss-memory;
+    @comfy-memory-manager-compatibility ac-report-os-memory-observations,
+    ac-repeated-cache-miss-memory-bounded.
+spec_ref: "@live-comfy-saved-output-validation"
+plan_ref: "@plan-checkpoint-save-memory-contract-hardening"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-memory-validation-reporting"
+context: []
+priority: 2
+tags:
+  - manual
+  - validation
+  - memory
+  - checkpoint
+vcs_refs: []
+created_at: 2026-05-13T16:33:07.196Z
+todos: []

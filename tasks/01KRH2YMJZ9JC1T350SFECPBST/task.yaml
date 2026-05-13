@@ -1,0 +1,108 @@
+_ulid: 01KRH2YMJZ9JC1T350SFECPBST
+slugs:
+  - task-checkpoint-save-memory-validation-reporting
+title: Extend live checkpoint memory validation reporting
+type: task
+description: >
+  What:
+
+  - Extend the guarded live checkpoint validation harness so an operator can
+    collect process-memory evidence for repeated checkpoint cache-miss saves
+    in one ComfyUI process.
+  - Keep real ComfyUI validation manual/opt-in only. Normal tests, CI, and
+    automated dispatch must not contact a live ComfyUI server, inspect an
+    ambient process, mutate a ComfyUI install, or write large model artifacts.
+
+  Why:
+
+  - The observed bug required repeated runs and OS-visible memory inspection to
+    diagnose. A single functional checkpoint round-trip report can pass while
+    native anonymous memory or swap accumulates across cache-miss saves.
+  - The validation report needs enough evidence to distinguish supported
+    memory behavior from allocator retention that remains visible in the
+    ComfyUI process after WIDENExit returns.
+
+  How:
+
+  - Inspect `scripts/manual/real_comfy_checkpoint_validation.py`,
+    `scripts/manual/real_comfy_memory_validation.py`,
+    `tests/test_checkpoint_validation_harness.py`, and
+    `tests/test_real_comfy_memory_harness.py` before editing.
+  - Add explicit optional inputs to `real_comfy_checkpoint_validation.py`:
+    `--comfy-pid <pid>` for reading `/proc/<pid>/status` and
+    `/proc/<pid>/smaps_rollup` on Linux, `--comfy-log-path <path>` for parsing
+    WIDEN memory log labels when the operator chooses to provide a log, and
+    `--repeat-cache-miss-runs <n>` for repeated cache-miss validation.
+  - Do not auto-discover a ComfyUI pid, systemd unit, log file, model folder, or
+    process by default. The operator must supply every live-process/log input.
+  - Preserve the existing required guards:
+    `COMFY_ECAJ_CHECKPOINT_VALIDATION=1`, `--run-checkpoint-validation`,
+    `--comfy-api-url`, `--source-model`, and `--report-output`.
+  - Extend the JSON report schema with a per-run memory section that can record
+    unavailable observations explicitly. When `--comfy-pid` is supplied and
+    Linux procfs fields are readable, record at least RSS and Swap from
+    `/proc/<pid>/smaps_rollup`; also include Anonymous when available.
+  - When `--comfy-log-path` is supplied, parse the existing WIDEN memory labels
+    `after-checkpoint-save` and `after-checkpoint-temp-model-release` for the
+    runs covered by the validation report. If labels are missing, record that
+    the internal log observation was unavailable rather than treating missing
+    logs as a harness crash.
+  - Ensure repeated cache-miss runs use distinct saved artifact identities so
+    the requested repetitions do not collapse into artifact cache hits. Keep
+    the normal cache-reuse check as a separate reported outcome.
+  - Add a validation result field that marks repeated cache-miss memory behavior
+    as failed when provided post-return observations show accumulating
+    temporary save-time payloads across runs. The comparison threshold may be a
+    harness parameter or documented constant, but it must be recorded in the
+    report.
+  - Keep the harness pure-Python and safe to run without ComfyUI when guards are
+    missing; refusal must happen before API prompts or live-process reads.
+
+  Testing:
+
+  - Extend `tests/test_checkpoint_validation_harness.py` with pure unit tests
+    that do not contact ComfyUI:
+    - guard refusal still happens before API calls and before process/log reads;
+    - report formatting includes process-memory fields when supplied;
+    - unreadable procfs/log observations are recorded as unavailable rather than
+      crashing the harness;
+    - repeated cache-miss report entries preserve per-run identities;
+    - accumulation failure is reported when fake post-return observations exceed
+      the configured threshold.
+  - Add or update tests in `tests/test_real_comfy_memory_harness.py` only for
+    shared pure parsing/report helpers; do not run a real ComfyUI process from
+    automated tests.
+  - Run `pytest tests/test_checkpoint_validation_harness.py
+  tests/test_real_comfy_memory_harness.py`.
+
+  - Run `pytest tests/test_checkpoint_returned_model.py` if helper annotations
+    or shared memory-report structures are touched.
+  - Run `kspec validate --refs` before submitting.
+
+
+  Covers: @live-comfy-saved-output-validation
+    ac-report-records-process-memory-points,
+    ac-report-records-repeated-cache-miss-memory,
+    ac-explicit-real-comfy-opt-in;
+    @comfy-memory-manager-compatibility ac-report-os-memory-observations,
+    ac-repeated-cache-miss-memory-bounded;
+    @manual-comfy-memory-validation ac-explicit-opt-in-required,
+    ac-refuses-before-comfy-work-without-opt-in.
+spec_ref: "@live-comfy-saved-output-validation"
+plan_ref: "@plan-checkpoint-save-memory-contract-hardening"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-checkpoint-save-memory-contract-ac-updates"
+  - "@task-checkpoint-save-temp-payload-release-hardening"
+context: []
+priority: 1
+tags:
+  - validation
+  - memory
+  - checkpoint
+  - manual-harness
+vcs_refs: []
+created_at: 2026-05-13T16:33:07.167Z
+todos: []
