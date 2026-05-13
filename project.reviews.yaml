@@ -18248,9 +18248,25 @@ reviews:
           status: pass
           name: github actions ci
         timestamp: 2026-05-13T17:17:43.383Z
+      - _ulid: 01KRH5GKE678JX0ADHAVDMNF9R
+        actor: codex
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: approve
+        timestamp: 2026-05-13T17:17:52.966Z
+      - _ulid: 01KRH5GKE7NFPE2DH0DR0Q1TEX
+        actor: codex
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-05-13T17:17:52.967Z
     examined_commit: 6b172b7033446e42b767558da58978c501ce6c91
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -18258,7 +18274,14 @@ reviews:
       ref: "@01KRH2YMF71BHP0WG62E1RDF1C"
       shadow_commit: ""
     threads: []
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: approve
+        reviewer: codex
+        role: reviewer
+        created_at: 2026-05-13T17:17:52.966Z
     created_at: 2026-05-13T17:14:38.809Z
-    updated_at: 2026-05-13T17:17:43.221Z
+    updated_at: 2026-05-13T17:17:52.967Z
     notes: []
