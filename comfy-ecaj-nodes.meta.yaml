@@ -1468,6 +1468,34 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-05-13T17:48:47.556Z
+  - _ulid: 01KRH89H5975P5BRD6T73FAY82
+    type: success
+    content: "Lifecycle-impossibility unavailable observation: when a manual harness reports memory or
+      other observations at named lifecycle points, distinguish (a) observations missing because the
+      operator did not supply an input from (b) observations that are architecturally impossible to
+      sample from this vantage. The blocking-API case (e.g. submit_workflow synchronously waits on
+      /history, so the harness regains control only after WIDENExit returned) means an after-save
+      procfs read is always a post-return sample mislabeled as save-time. Mark such observations as
+      unavailable with an error string explaining the lifecycle constraint and pointing at the
+      instrumentation source that does cover the point (e.g. WIDEN [mem] log labels parsed from
+      --comfy-log-path). Distinct from 01KRH796 which covers missing-input modeling."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-13T18:06:26.985Z
+  - _ulid: 01KRH89H9QJT9FB2588E7T11QF
+    type: success
+    content: "Permissive-stub-and-assert-call-pattern test for negative-behavior contracts: when a
+      function must NOT call a helper at a specific point, do not stub the helper to return failures
+      (that only proves the function tolerates failure). Stub the helper to return *available/valid*
+      results for any label, then assert that the recorded call list omits the forbidden label. Used
+      in test_after_save_os_observation_is_always_unavailable: a procfs stub that would return
+      available observations for every label proves the harness never even asks for after-save.
+      Locks in the negative contract even if defaults later change."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-13T18:06:27.127Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
