@@ -1,1 +1,15 @@
-notes: []
+notes:
+  - _ulid: 01KRH6NDE4HGVD3WTMZ2HTM051
+    content: "Approach: extend real_comfy_checkpoint_validation.py with optional --comfy-pid,
+      --comfy-log-path, --repeat-cache-miss-runs args. Plan: add
+      ProcessMemoryObservation/LogMemoryObservation/RepeatedRunReport dataclasses, pure helpers
+      (read_proc_status, read_proc_smaps_rollup, collect_process_memory_observation,
+      parse_widen_memory_log, analyze_memory_accumulation), per-run memory section in
+      CheckpointValidationReport, distinct model_names like
+      ecaj_checkpoint_validation_save_repeat_<idx>_<token>, configurable threshold recorded in
+      report. New CLI args are all optional; existing guards untouched. Tests: extend
+      tests/test_checkpoint_validation_harness.py with guards-still-refuse-before-reads, procfs/log
+      parsing incl unavailable, per-run identities, accumulation failure threshold."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-05-13T17:37:59.236Z
