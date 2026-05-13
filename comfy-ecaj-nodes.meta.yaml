@@ -1393,6 +1393,25 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-05-13T17:07:36.041Z
+  - _ulid: 01KRH5P5M0AX3BHY6J87KFG876
+    type: success
+    content: "Metadata-only review pattern: when a dispatch branch carries an empty source commit for
+      kspec-meta changes, verify the submission through target `kspec item get` output plus the
+      kspec-meta shadow diff and review checks, instead of relying on `git diff dev...HEAD` alone."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-05-13T17:20:55.424Z
+  - _ulid: 01KRH5P5PFZ572DN914STWZDA0
+    type: friction
+    content: Detached review snapshots may not expose a local `.kspec/` directory even though `kspec`
+      commands resolve the canonical project shadow worktree. Direct filesystem inspection such as
+      `rg .kspec/modules` fails in that workspace shape; reviewers need kspec CLI output or explicit
+      canonical shadow worktree paths for metadata diffs.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-05-13T17:20:55.503Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
