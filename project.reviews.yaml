@@ -18300,6 +18300,17 @@ reviews:
         runner: kspec
         created_at: 2026-05-13T17:34:15.360Z
         completed_at: 2026-05-13T17:34:15.360Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "pytest tests/test_checkpoint_returned_model.py tests/test_checkpoint_save_format.py: 71
+          passed in 1.68s."
+        name: pytest focused checkpoint suites
+        required: true
+        runner: pytest
+        created_at: 2026-05-13T17:34:18.504Z
+        completed_at: 2026-05-13T17:34:18.504Z
     events:
       - _ulid: 01KRH6B0JG1TEPDMHAK87B9TPV
         actor: Jacob Chapel
@@ -18321,6 +18332,13 @@ reviews:
           status: pass
           name: kspec validate --refs
         timestamp: 2026-05-13T17:34:15.537Z
+      - _ulid: 01KRH6EP1XKTXTDJW4JKPCH2B3
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: pytest focused checkpoint suites
+        timestamp: 2026-05-13T17:34:18.685Z
     examined_commit: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
     external_links: []
     lifecycle_state: open
@@ -18333,5 +18351,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-13T17:32:18.385Z
-    updated_at: 2026-05-13T17:34:15.360Z
+    updated_at: 2026-05-13T17:34:18.504Z
     notes: []
