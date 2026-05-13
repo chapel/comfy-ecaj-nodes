@@ -9342,7 +9342,7 @@ runs:
     completed_at: 2026-05-13T17:56:25.728Z
   - _ulid: 01KRH856B83DHCQG2RPSC8ER4Q
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -9357,7 +9357,27 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-13T18:05:15.686Z
-        completed_at: 2026-05-13T18:05:15.686Z
+        completed_at: 2026-05-13T18:06:07.509Z
+        notes: >-
+          Two high-confidence success patterns identified:
+
+          1. Lifecycle-impossibility unavailable observation: even when all operator-supplied inputs
+          are valid (valid --comfy-pid, readable procfs), some lifecycle points cannot be sampled
+          from the harness's vantage. The fix is to mark the observation as unavailable with an
+          explanation of the architectural constraint, not just missing-input. Distinct from
+          01KRH796 (missing-input modeling).
+
+          2. Permissive-stub-and-assert-call-pattern test: for 'must not call X' requirements, use a
+          stub that would return *available* observations for every label, then assert the call list
+          omits X. This locks in negative-behavior even if helper defaults change. Distinct from
+          01KH6Y61 (mocks reproducing prod bugs).
+
+
+          No new friction patterns this session — fix cycle was clean and short.
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-13T18:06:07.509Z
+        completed_at: 2026-05-13T18:06:07.509Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T18:04:04.841Z
