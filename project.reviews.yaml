@@ -18541,6 +18541,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-05-13T17:52:48.284Z
+      - _ulid: 01KRH82DR0QJ1VM0EDBKFN8VKS
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KRH7FTJ55JKH0DQTZ64W5RJ1
+        timestamp: 2026-05-13T18:02:34.112Z
     examined_commit: b2f58236a8afeb92408d3ba1ef69386bd7a09486
     external_links: []
     lifecycle_state: closed
@@ -18575,6 +18581,40 @@ reviews:
               derive a correctly named save-time observation from instrumentation that runs at
               after-checkpoint-save."
             created_at: 2026-05-13T17:52:24.645Z
+          - _ulid: 01KRH82DK7S9RJ74B12G5QSJ8W
+            author: "@claude"
+            body: >-
+              Fixed by recording process_memory_after_save as always unavailable from the external
+              harness, with a lifecycle reason that points the reader to log_after_checkpoint_save
+              for save-time evidence.
+
+
+              Root cause confirmed: submit_workflow blocks on /history and only returns once ComfyUI
+              reports the prompt completed (i.e. after WIDENExit returned), so any procfs read after
+              that call is post-return.
+
+
+              Changes:
+
+              - scripts/manual/real_comfy_checkpoint_validation.py: removed the after-save procfs
+              read in run_repeated_cache_miss_runs. Introduced unavailable_save_time_observation()
+              helper that returns an explicit unavailable ProcessMemoryObservation with
+              label="after-save" and an error explaining the /history lifecycle constraint and
+              pointing at log_after_checkpoint_save as the save-time evidence source. Updated
+              docstrings on the module header, --comfy-pid CLI help, RepeatedCacheMissRunReport, and
+              run_repeated_cache_miss_runs to reflect that the OS save-time observation cannot be
+              sampled externally and that save-time evidence comes from the WIDEN [mem] log labels.
+
+              - tests/test_checkpoint_validation_harness.py: added
+              test_after_save_os_observation_is_always_unavailable which fakes a procfs collector
+              that would return available observations for every label and asserts (a) the harness
+              never asks for the "after-save" label, (b) the only labels sampled per run are
+              before-run and after-return, and (c) each run's process_memory_after_save is
+              unavailable with a save-time/history lifecycle reason. Added
+              test_unavailable_save_time_observation_helper_records_pid_and_reason for the helper.
+              Updated test_accumulation_failure_marks_failure_category fake to reflect two collects
+              per run instead of three.
+            created_at: 2026-05-13T18:02:33.958Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -18585,5 +18625,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-13T17:52:48.283Z
     created_at: 2026-05-13T17:50:14.518Z
-    updated_at: 2026-05-13T17:52:48.284Z
+    updated_at: 2026-05-13T18:02:33.958Z
     notes: []
