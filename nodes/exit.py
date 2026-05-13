@@ -1439,6 +1439,13 @@ class WIDENExitNode:
             widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
         )
 
+        # AC: @comfy-memory-manager-compatibility ac-checkpoint-save-failure-releases-temp-payload
+        # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
+        # AC: @saved-model-artifact-safety ac-failed-return-not-successful
+        # Track the temporary save-time merge payload separately from the
+        # artifact-loaded return model so release runs in finally on success
+        # and on save/publication/finalization failures, exactly once.
+        temporary_model: object | None = None
         try:
             loader = analysis.loader
             set_affected = analysis.set_affected
@@ -1573,11 +1580,14 @@ class WIDENExitNode:
 
             # Install merged diffusion weights into a cloned ModelPatcher.
             # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
-            merged_model = install_merged_patches(
+            # Assign to the function-scoped temporary_model so finally can
+            # release it on any subsequent failure (save, publication, cache
+            # bookkeeping) before control returns to ComfyUI.
+            temporary_model = install_merged_patches(
                 model_patcher, merged_state, storage_dtype,
             )
 
-            # Free merged_state — weights are now held as set patches on merged_model
+            # Free merged_state — weights are now held as set patches on temporary_model
             del merged_state
             gc.collect()
 
@@ -1607,7 +1617,7 @@ class WIDENExitNode:
             checkpoint_components = base.checkpoint_components
             save_comfy_checkpoint(
                 save_path,
-                merged_model,
+                temporary_model,
                 clip=checkpoint_components.clip,
                 vae=checkpoint_components.vae,
                 metadata=metadata,
@@ -1631,15 +1641,18 @@ class WIDENExitNode:
             if not enable_cache:
                 _incremental_cache.clear()
 
-            # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-            # The dense set-patch clone exists only to serialize the checkpoint.
-            # Release it before returning so Comfy's output cache retains only
-            # an artifact-loaded MODEL, matching checkpoint cache-hit behavior.
-            _release_temporary_checkpoint_model(merged_model)
-            del merged_model
-            _log_memory("after-checkpoint-temp-model-release")
-
         finally:
+            # See AC block above the try: release the temporary save-time
+            # merge payload before returning so Comfy's output cache retains
+            # only an artifact-loaded MODEL, matching checkpoint cache-hit
+            # behavior, and so failures during save/publication/finalization
+            # still drop the dense payload before control returns to ComfyUI.
+            # Guarded by `is not None` so we never attempt to release before
+            # the temporary model exists (e.g. failure during merge eval).
+            if temporary_model is not None:
+                _release_temporary_checkpoint_model(temporary_model)
+                temporary_model = None
+                _log_memory("after-checkpoint-temp-model-release")
             loader.cleanup()
             for model_loader in model_analysis.model_loaders.values():
                 model_loader.cleanup()
