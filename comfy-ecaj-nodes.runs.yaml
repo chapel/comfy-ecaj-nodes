@@ -9342,9 +9342,22 @@ runs:
     completed_at: 2026-05-13T17:56:25.728Z
   - _ulid: 01KRH856B83DHCQG2RPSC8ER4Q
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-13T18:04:04.841Z
+        completed_at: 2026-05-13T18:05:15.686Z
+        notes: "Searched existing observations and tasks. Found related ones: 01KRH796 (manual harness
+          observation pattern - success), 01KRH693 (AC annotations - friction), 01KH6Y61 (Unit tests
+          with mocks can validate the wrong behavior - friction). No existing observation captures
+          the specific friction of synchronous-API harnesses falsely claiming intra-execution
+          observations."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-13T18:05:15.686Z
+        completed_at: 2026-05-13T18:05:15.686Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T18:04:04.841Z
