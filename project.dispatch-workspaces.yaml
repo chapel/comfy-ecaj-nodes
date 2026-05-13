@@ -231,7 +231,7 @@ workspaces:
         head: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
         last_seen_at: 2026-05-13T17:03:06.153Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/checkpoint-save-release-temp-model-return-artifact-checkpoi
-  - active_role: worker
+  - active_role: null
     base_branch_point: 5b9807ed8cab3f6c9988639fc128a173c0610887
     bootstrap:
       status: succeeded
@@ -273,12 +273,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-05-13T17:29:42.269Z
+      updated_at: 2026-05-13T17:31:42.166Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:29:42.269Z
+      updated_at: 2026-05-13T17:31:42.166Z
     integration:
       status: pending
       detail: null
@@ -286,17 +286,17 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 5b9807ed8cab3f6c9988639fc128a173c0610887
-      updated_at: 2026-05-13T17:29:42.269Z
-    lifecycle_state: active
+      updated_at: 2026-05-13T17:31:42.166Z
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@01KRH2YMHPE7JQYJ734YWMRPAR"
     task_slug: task-checkpoint-save-temp-payload-release-hardening
     timestamps:
       closed_at: null
       last_active_at: 2026-05-13T17:18:47.587Z
-      last_reconciled_at: 2026-05-13T17:29:42.269Z
+      last_reconciled_at: 2026-05-13T17:31:42.166Z
       created_at: 2026-05-13T17:18:46.694Z
-      updated_at: 2026-05-13T17:29:42.269Z
+      updated_at: 2026-05-13T17:31:42.166Z
     workspace_id: dispatch-workspace-01KRH2YMHPE7JQYJ734YWMRPAR
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
