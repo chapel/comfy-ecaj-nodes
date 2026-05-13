@@ -1,1 +1,71 @@
-notes: []
+notes:
+  - _ulid: 01KRHGZM4GSH31ENHGHMVN1DHC
+    content: >-
+      Manual checkpoint memory validation completed by Hermes on 2026-05-13.
+
+
+      Environment:
+
+      - ComfyUI 0.20.1 at http://127.0.0.1:8188
+
+      - PID 2247990
+
+      - Device cuda:0 NVIDIA GeForce RTX 4090 : cudaMallocAsync
+
+      - Source checkpoint sdxl/realismEngineSDXL_v30VAE.safetensors
+
+
+      Report:
+
+      - reports/checkpoint-memory-validation-20260513T1335.json
+
+      - journal capture: reports/checkpoint-memory-validation-20260513T1335-journal.log
+
+
+      Result:
+
+      - terminal save: accepted
+
+      - checkpoint save: accepted
+
+      - saved artifact classification: checkpoint
+
+      - loader/downstream validation: accepted
+
+      - cache reuse: accepted; application-level cache reuse confirmed by timing, first=5.575s,
+      reuse=2.005s, speedup=2.8x
+
+      - repeated cache-miss runs requested: 3
+
+      - repeated cache-miss memory result: ok
+
+      - threshold: 256 MB
+
+      - post-return RSS+Swap delta run 0 to run 2: -3,820,872 kB (-3731.3 MB), within threshold
+
+      - failure categories: none for scheduling/save/loader/downstream/cache/memory_mode;
+      repeated_cache_miss_memory=ok
+
+
+      Memory observations:
+
+      - primary before-run: RSS=14,538,272 kB Swap=40 kB Anonymous=7,285,900 kB
+
+      - primary after-return: RSS=15,081,400 kB Swap=40 kB Anonymous=7,829,028 kB
+
+      - repeat 0 after-return: RSS=28,973,116 kB Swap=329,084 kB
+
+      - repeat 1 after-return: RSS=28,977,408 kB Swap=323,140 kB
+
+      - repeat 2 after-return: RSS=25,158,192 kB Swap=323,136 kB
+
+
+      Caveat:
+
+      - WIDEN internal after-checkpoint-save and after-checkpoint-temp-model-release log labels were
+      unavailable in the captured journald text, so save-time internal log observations are recorded
+      as unavailable. Procfs post-return observations were available and passed the repeated
+      cache-miss accumulation check.
+    supersedes: null
+    author: Hermes
+    created_at: 2026-05-13T20:38:19.536Z
