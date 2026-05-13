@@ -202,7 +202,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:14:05.746Z
+      updated_at: 2026-05-13T17:14:06.204Z
     integration:
       status: pending
       detail: null
@@ -211,25 +211,20 @@ workspaces:
       target_branch: dev
       target_commit: 1b886134e0b0b88768419710d07a162ec7992a15
       updated_at: 2026-05-13T17:14:05.746Z
-    lifecycle_state: integrating
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@checkpoint-save-release-temp-model-return-artifact"
     task_slug: checkpoint-save-release-temp-model-return-artifact
     timestamps:
       closed_at: null
       last_active_at: 2026-05-13T17:03:07.263Z
-      last_reconciled_at: 2026-05-13T17:14:05.746Z
+      last_reconciled_at: 2026-05-13T17:14:06.204Z
       created_at: 2026-05-13T17:03:06.153Z
-      updated_at: 2026-05-13T17:14:05.746Z
+      updated_at: 2026-05-13T17:14:06.204Z
     workspace_id: dispatch-workspace-checkpoint-save-release-temp-model-return-artifact
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer:
-        branch_mode: detached
-        branch_ref: null
-        head: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
-        last_seen_at: 2026-05-13T17:03:06.153Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/checkpoint-save-release-temp-model-return-artifact-checkpoi-review
+      reviewer: null
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g
