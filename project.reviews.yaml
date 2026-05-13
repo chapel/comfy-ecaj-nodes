@@ -17744,7 +17744,83 @@ reviews:
     slugs: []
     title: "Plan re-review: Checkpoint Save Memory Contract Hardening"
     author: Jacob Chapel
-    checks: []
+    checks:
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Ran kspec validate --refs: validation passed; schema and references OK."
+        name: kspec validate --refs
+        required: true
+        runner: kspec
+        created_at: 2026-05-13T00:05:43.656Z
+        completed_at: 2026-05-13T00:05:43.656Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Ran kspec validate --alignment --warnings-ok: validation passed with expected unrelated
+          warnings for orphaned foundation specs and Accurate RAM Preflight status mismatch."
+        name: kspec validate --alignment --warnings-ok
+        required: true
+        runner: kspec
+        created_at: 2026-05-13T00:05:43.971Z
+        completed_at: 2026-05-13T00:05:43.971Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Plan now sets @saved-model-artifact-safety implementation status to in_progress when
+          adding ac-failed-return-not-successful, and implementation testing explicitly covers
+          checkpoint save failure, artifact publication/finalization failure, and artifact reload
+          failure.
+        name: Prior blocker verification
+        required: true
+        created_at: 2026-05-13T00:05:44.290Z
+        completed_at: 2026-05-13T00:05:44.290Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Plan covers cache-miss save payload release, OS-visible resident/swap observations,
+          repeated cache-miss bounded-memory evidence, and cleanup on save/publication/reload
+          failure; optional cleanup progress/status remains intentionally out of scope.
+        name: Retrospective must-fill gaps
+        required: true
+        created_at: 2026-05-13T00:05:44.609Z
+        completed_at: 2026-05-13T00:05:44.609Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: New ACs are specific and testable; each new AC is claimed by at least one executable
+          follow-up task via Covers lines. Existing related specs were checked for overlap and
+          placement.
+        name: AC quality and coverage mapping
+        required: true
+        created_at: 2026-05-13T00:05:44.955Z
+        completed_at: 2026-05-13T00:05:44.955Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Tasks include what/why/how, concrete files, explicit scope exclusions, and exact
+          pytest/kspec commands or an explicit manual command shape for live validation.
+        name: Task standalone and validation commands
+        required: true
+        created_at: 2026-05-13T00:05:45.287Z
+        completed_at: 2026-05-13T00:05:45.287Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Plan preserves manual opt-in guards, prohibits live auto-discovery and CI/dispatch live
+          Comfy behavior, and excludes output-mode dropdowns, saved artifact semantic changes,
+          save_model interface changes, and cleanup progress/status scope.
+        name: Real Comfy safety and scope control
+        required: true
+        created_at: 2026-05-13T00:05:45.639Z
+        completed_at: 2026-05-13T00:05:45.639Z
     events:
       - _ulid: 01KRFADHWAKY11MB3KCD7CQSHJ
         actor: Jacob Chapel
@@ -17752,9 +17828,81 @@ reviews:
         payload:
           to: draft
         timestamp: 2026-05-13T00:05:07.082Z
+      - _ulid: 01KRFAENBCQJ4MYPRRGHJ728X3
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          from: draft
+          to: open
+        timestamp: 2026-05-13T00:05:43.404Z
+      - _ulid: 01KRFAENPHXFEJ91GD88B77GQP
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate --refs
+        timestamp: 2026-05-13T00:05:43.761Z
+      - _ulid: 01KRFAEP0T5EY4VK4ZJCKQNN3K
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate --alignment --warnings-ok
+        timestamp: 2026-05-13T00:05:44.090Z
+      - _ulid: 01KRFAEPATZEXRRFMG50759RV1
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Prior blocker verification
+        timestamp: 2026-05-13T00:05:44.410Z
+      - _ulid: 01KRFAEPMQ913MVF6CXCPKXBP8
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Retrospective must-fill gaps
+        timestamp: 2026-05-13T00:05:44.728Z
+      - _ulid: 01KRFAEQ053W8CJJ3R04N2DVA8
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: AC quality and coverage mapping
+        timestamp: 2026-05-13T00:05:45.093Z
+      - _ulid: 01KRFAEQAK3B30N2WE4GXMD6XK
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Task standalone and validation commands
+        timestamp: 2026-05-13T00:05:45.427Z
+      - _ulid: 01KRFAEQP64N7WQYH56BVNQZW7
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Real Comfy safety and scope control
+        timestamp: 2026-05-13T00:05:45.798Z
+      - _ulid: 01KRFAER0ETDHAF5B0KZPGF1EN
+        actor: Jacob Chapel
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: approve
+        timestamp: 2026-05-13T00:05:46.126Z
+      - _ulid: 01KRFAER0E35AQZKTHZFCNM19T
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-05-13T00:05:46.126Z
     examined_commit: null
     external_links: []
-    lifecycle_state: draft
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: plan
@@ -17762,7 +17910,14 @@ reviews:
       ref: "@plan-checkpoint-save-memory-contract-hardening"
       shadow_commit: ""
     threads: []
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: approve
+        reviewer: Jacob Chapel
+        role: reviewer
+        created_at: 2026-05-13T00:05:46.126Z
     created_at: 2026-05-13T00:05:07.082Z
-    updated_at: null
+    updated_at: 2026-05-13T00:05:46.126Z
     notes: []
