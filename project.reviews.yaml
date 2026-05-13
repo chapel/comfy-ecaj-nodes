@@ -18654,6 +18654,13 @@ reviews:
           from: draft
           to: open
         timestamp: 2026-05-13T18:07:51.827Z
+      - _ulid: 01KRH8GVSDA5KHY90ZEWT2Y94A
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
+        timestamp: 2026-05-13T18:10:27.245Z
     examined_commit: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
     external_links: []
     lifecycle_state: open
@@ -18663,8 +18670,35 @@ reviews:
       content_hash: ""
       ref: "@01KRH2YMJZ9JC1T350SFECPBST"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
+        anchor:
+          type: code
+          commit: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
+          line_end: 1802
+          line_start: 1768
+          path: scripts/manual/real_comfy_checkpoint_validation.py
+          side: head
+        entries:
+          - _ulid: 01KRH8GVDZ9HGDR9CBEPFK3BHD
+            author: Jacob Chapel
+            body: "MUST-FIX: process/log memory observations are only collected when --repeat-cache-miss-runs is
+              greater than zero. The task and @live-comfy-saved-output-validation
+              ac-report-records-process-memory-points require that when an operator supplies
+              explicit process-memory inputs for checkpoint validation, the report records per-run
+              memory observations for before execution, save-time when available, and after
+              WIDENExit returns. With --comfy-pid and --comfy-log-path supplied but the default
+              repeat count, this branch skips run_repeated_cache_miss_runs entirely, does not read
+              procfs or parse the log, and emits an empty repeat_cache_miss_run_reports plus a
+              not-requested result. Evidence: I patched collect_process_memory_observation to raise,
+              called run_validation(..., comfy_pid=12345, comfy_log_path='/tmp/comfy.log') with fake
+              API dependencies, and no exception was raised; the report contained repeat reports: 0
+              and result: not-requested. The normal checkpoint-save run needs its own per-run memory
+              record, or the CLI/report should otherwise require repeat runs before accepting those
+              memory inputs."
+            created_at: 2026-05-13T18:10:26.879Z
+        kind: blocker
     verdicts: []
     created_at: 2026-05-13T18:07:43.459Z
-    updated_at: 2026-05-13T18:07:51.455Z
+    updated_at: 2026-05-13T18:10:26.879Z
     notes: []
