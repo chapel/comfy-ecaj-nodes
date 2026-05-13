@@ -9064,7 +9064,7 @@ runs:
     completed_at: 2026-05-13T17:21:06.084Z
   - _ulid: 01KRH65ZKNBQT8CF9W6KHCK95Q
     status: active
-    current_step: 4
+    current_step: 5
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -9190,10 +9190,16 @@ runs:
              - How it helps: gives failure-path tests a single seam to patch; makes the try-body easier to read.
              - Scope: small. Refactor + matching test updates. Should not change behavior.
              - Risk: minor — touches a hot path; needs the existing checkpoint tests to all still pass.
-      - status: completed
+      - status: skipped
         step_index: 4
         started_at: 2026-05-13T17:30:44.710Z
-        completed_at: 2026-05-13T17:30:44.710Z
+        completed_at: 2026-05-13T17:30:58.366Z
+        notes: "Skipping discussion step: autonomous dispatch mode, no interactive user available. Applying
+          loop-mode bar in step 6 — high-confidence captures only, prefer inbox over task add."
+      - status: completed
+        step_index: 5
+        started_at: 2026-05-13T17:30:58.366Z
+        completed_at: 2026-05-13T17:30:58.366Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-13T17:29:33.557Z
