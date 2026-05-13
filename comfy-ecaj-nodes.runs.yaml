@@ -9440,7 +9440,7 @@ runs:
     started_at: 2026-05-13T18:12:24.093Z
     completed_at: 2026-05-13T18:13:25.388Z
   - _ulid: 01KRH9DSKTRH7SEY9XDYCH5KA2
-    status: active
+    status: completed
     current_step: 3
     initiated_by: "@claude"
     step_results:
@@ -9476,7 +9476,11 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-05-13T18:27:56.728Z
-        completed_at: 2026-05-13T18:27:56.728Z
+        completed_at: 2026-05-13T18:28:02.619Z
+        notes: Nothing new to capture. The single high-confidence friction (review thread truncation) is
+          already tracked twice (@01KQ82107, @01KQGGGD8); duplicating it would be noise. Successes
+          were generic engineering practices, not project-specific patterns worth observing.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T18:26:15.290Z
+    completed_at: 2026-05-13T18:28:02.619Z
