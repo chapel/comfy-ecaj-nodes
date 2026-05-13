@@ -17993,6 +17993,17 @@ reviews:
         runner: pytest
         created_at: 2026-05-13T17:08:27.076Z
         completed_at: 2026-05-13T17:08:27.076Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "On CI-fix head a4765996abcb73fa6eb2969981dbb3480bbe1219: uv run pytest tests -q passed
+          (1668 tests)"
+        name: post-ci-fix full pytest
+        required: true
+        runner: pytest
+        created_at: 2026-05-13T17:10:11.192Z
+        completed_at: 2026-05-13T17:10:11.192Z
     events:
       - _ulid: 01KRH4P8EA3YJADJFQYAA078JM
         actor: Jacob Chapel
@@ -18049,6 +18060,13 @@ reviews:
           status: pass
           name: post-fix full pytest
         timestamp: 2026-05-13T17:08:27.245Z
+      - _ulid: 01KRH52GKWF4QMD8MGP3YYZK7X
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: post-ci-fix full pytest
+        timestamp: 2026-05-13T17:10:11.324Z
     examined_commit: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
     external_links: []
     lifecycle_state: open
@@ -18061,5 +18079,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-13T17:03:29.738Z
-    updated_at: 2026-05-13T17:08:27.076Z
+    updated_at: 2026-05-13T17:10:11.192Z
     notes: []
