@@ -9486,7 +9486,7 @@ runs:
     completed_at: 2026-05-13T18:28:02.619Z
   - _ulid: 01KRHA2MER2MGJPRNTQA2WZYNT
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9502,7 +9502,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-05-13T18:38:11.829Z
-        completed_at: 2026-05-13T18:38:11.829Z
+        completed_at: 2026-05-13T18:38:39.590Z
+        notes: "High-confidence items after baseline/search: (1) friction, untracked by kspec search: kspec
+          batch accepted required=false for review check but still created a required failed check,
+          making an approved review compute as changes_requested/failing; direct kspec review check
+          --no-required behaved correctly. (2) success, untracked by kspec search: when default /tmp
+          tmpfs was 100% full and full pytest failed with safetensors ENOSPC, rerunning with TMPDIR
+          inside the workspace on /home let the full suite pass and preserved review signal."
+      - status: completed
+        step_index: 2
+        started_at: 2026-05-13T18:38:39.590Z
+        completed_at: 2026-05-13T18:38:39.590Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T18:37:38.136Z
