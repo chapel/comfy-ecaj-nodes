@@ -9064,7 +9064,7 @@ runs:
     completed_at: 2026-05-13T17:21:06.084Z
   - _ulid: 01KRH65ZKNBQT8CF9W6KHCK95Q
     status: active
-    current_step: 3
+    current_step: 4
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -9167,7 +9167,33 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-05-13T17:30:30.784Z
-        completed_at: 2026-05-13T17:30:30.784Z
+        completed_at: 2026-05-13T17:30:44.710Z
+        notes: >-
+          Proposed improvements for untracked friction:
+
+
+          1. **Test helper: `make_checkpoint_save_patches(...)` context manager**
+             - What: a single context manager (or pytest fixture) that enters all ~17 standard nodes.exit.* patches that every checkpoint cache-miss test re-types. Yields a namespace with the per-test sliders (e.g. .save, .release, .ckpt_load mocks; .analyze, .analyze_models mocks).
+             - How it helps: cuts per-test boilerplate from ~20 with-statements to ~2; sidesteps Python's nested-blocks ceiling; reduces drift across tests when a new patch needs to be added everywhere.
+             - Scope: small. One helper in tests/conftest.py + refactor of the ~6 affected tests in test_checkpoint_returned_model.py.
+             - Risk: minor — moves shared knowledge into one place. Existing tests stay working.
+
+          2. **Convention update: AC annotation comments may exceed E501 (with rationale)**
+             - What: extend a project convention/agents doc to say AC annotation comments (`# AC: @spec-ref ac-slug`) are an exception to E501 when slugs put them over 99 chars; suggest `# noqa: E501` rather than awkward line breaks that hurt grep-ability.
+             - How it helps: avoids the current 'shorten the prose to make AC ref fit' anti-pattern; keeps AC comments greppable by full slug.
+             - Scope: small. Doc-only change in an AGENTS or conventions file; no code change required.
+             - Risk: tiny.
+
+          3. **Refactor candidate: extract `_finalize_checkpoint_save` helper for the post-save
+          bookkeeping block**
+             - What: pull lines 1619-1633 of _execute_checkpoint_save (free_memory, soft_empty_cache, optional _incremental_cache.clear) into a private method.
+             - How it helps: gives failure-path tests a single seam to patch; makes the try-body easier to read.
+             - Scope: small. Refactor + matching test updates. Should not change behavior.
+             - Risk: minor — touches a hot path; needs the existing checkpoint tests to all still pass.
+      - status: completed
+        step_index: 4
+        started_at: 2026-05-13T17:30:44.710Z
+        completed_at: 2026-05-13T17:30:44.710Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-13T17:29:33.557Z
