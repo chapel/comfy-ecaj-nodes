@@ -17588,6 +17588,18 @@ reviews:
         required: true
         created_at: 2026-05-13T00:02:14.588Z
         completed_at: 2026-05-13T00:02:14.588Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "Validation passed with --warnings-ok. Existing warnings: orphaned Foundation/WIDEN Merge
+          specs and Accurate RAM Preflight status mismatch; none are introduced by this plan
+          review."
+        name: kspec validate --alignment --warnings-ok
+        required: true
+        runner: kspec
+        created_at: 2026-05-13T00:02:22.302Z
+        completed_at: 2026-05-13T00:02:22.302Z
     events:
       - _ulid: 01KRFA5HAGEAEZKVCJHKV8HD22
         actor: Jacob Chapel
@@ -17651,6 +17663,13 @@ reviews:
           status: pass
           name: Real Comfy safety and scope control
         timestamp: 2026-05-13T00:02:15.053Z
+      - _ulid: 01KRFA8HC7WZJPA3ZTSXS7PNNN
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: kspec validate --alignment --warnings-ok
+        timestamp: 2026-05-13T00:02:22.727Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -17696,5 +17715,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-05-13T00:00:44.368Z
-    updated_at: 2026-05-13T00:02:14.588Z
+    updated_at: 2026-05-13T00:02:22.302Z
     notes: []
