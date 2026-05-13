@@ -17582,6 +17582,13 @@ reviews:
           status: pass
           name: Existing spec update shape
         timestamp: 2026-05-13T00:01:45.833Z
+      - _ulid: 01KRFA7E32QQ521Q4YXG6YXF9K
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KRFA7BK0F08QVRJ0FDCZCHNB
+        timestamp: 2026-05-13T00:01:46.594Z
     examined_commit: null
     external_links: []
     lifecycle_state: draft
@@ -17608,7 +17615,24 @@ reviews:
               @saved-model-artifact-safety to the status update list in the spec-update task.
             created_at: 2026-05-13T00:01:43.985Z
         kind: blocker
+      - _ulid: 01KRFA7BK0F08QVRJ0FDCZCHNB
+        anchor:
+          type: structured
+          field: testing
+          ref: "@comfy-memory-manager-compatibility"
+          section: tasks
+        entries:
+          - _ulid: 01KRFA7BK1BRSS56GV5950DQEK
+            author: Jacob Chapel
+            body: The cleanup-on-failure contract explicitly covers save, publication, and artifact reload
+              failures, and the task How section says release must happen when artifact publication
+              raises. The Testing section only lists save failure and artifact reload failure. A
+              worker could satisfy the listed tests while still leaking the temporary checkpoint
+              save payload if publication fails. Add a focused publication-failure release test, or
+              split/adjust the AC so every named failure point has explicit coverage.
+            created_at: 2026-05-13T00:01:44.033Z
+        kind: blocker
     verdicts: []
     created_at: 2026-05-13T00:00:44.368Z
-    updated_at: 2026-05-13T00:01:43.905Z
+    updated_at: 2026-05-13T00:01:44.033Z
     notes: []
