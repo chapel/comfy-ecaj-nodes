@@ -607,6 +607,11 @@ features:
                 then: the validation output records process resident memory and swapped anonymous memory at the
                   observed checkpoint-save lifecycle points.
                 when: memory behavior is validated with operating-system process memory observation available.
+              - given: repeated checkpoint-style cache-miss saves are run in the same ComfyUI process.
+                id: ac-repeated-cache-miss-memory-bounded
+                then: post-release memory observations do not show accumulating temporary save-time payloads across
+                  runs.
+                when: each run completes and the Exit node returns.
             tags:
               - comfy
               - memory
