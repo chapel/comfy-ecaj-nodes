@@ -18016,6 +18016,16 @@ reviews:
         runner: pytest
         created_at: 2026-05-13T17:10:11.648Z
         completed_at: 2026-05-13T17:10:11.648Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "On CI-fix head a4765996abcb73fa6eb2969981dbb3480bbe1219: uv run ruff check passed"
+        name: post-ci-fix ruff
+        required: true
+        runner: ruff
+        created_at: 2026-05-13T17:10:12.141Z
+        completed_at: 2026-05-13T17:10:12.141Z
     events:
       - _ulid: 01KRH4P8EA3YJADJFQYAA078JM
         actor: Jacob Chapel
@@ -18086,6 +18096,13 @@ reviews:
           status: pass
           name: post-ci-fix focused checkpoint pytest
         timestamp: 2026-05-13T17:10:11.780Z
+      - _ulid: 01KRH52HHZMHZWJTVS00CN8A78
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: post-ci-fix ruff
+        timestamp: 2026-05-13T17:10:12.288Z
     examined_commit: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
     external_links: []
     lifecycle_state: open
@@ -18098,5 +18115,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-13T17:03:29.738Z
-    updated_at: 2026-05-13T17:10:11.648Z
+    updated_at: 2026-05-13T17:10:12.141Z
     notes: []
