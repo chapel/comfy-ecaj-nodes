@@ -18195,6 +18195,17 @@ reviews:
         runner: kspec
         created_at: 2026-05-13T17:17:42.716Z
         completed_at: 2026-05-13T17:17:42.716Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: "PR #114 CI passed: lint SUCCESS, test SUCCESS for head
+          dispatch/task/task-checkpoint-save-memory-contract-ac-updates/01krh2ym into dev."
+        name: github actions ci
+        required: true
+        runner: github-actions
+        created_at: 2026-05-13T17:17:43.221Z
+        completed_at: 2026-05-13T17:17:43.221Z
     events:
       - _ulid: 01KRH5ANTS8E66FM3FTTP6PZ4C
         actor: Jacob Chapel
@@ -18230,6 +18241,13 @@ reviews:
           status: pass
           name: kspec validate alignment
         timestamp: 2026-05-13T17:17:42.877Z
+      - _ulid: 01KRH5GA2QVJ7E9W61WAKK75Y9
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: github actions ci
+        timestamp: 2026-05-13T17:17:43.383Z
     examined_commit: 6b172b7033446e42b767558da58978c501ce6c91
     external_links: []
     lifecycle_state: open
@@ -18242,5 +18260,5 @@ reviews:
     threads: []
     verdicts: []
     created_at: 2026-05-13T17:14:38.809Z
-    updated_at: 2026-05-13T17:17:42.716Z
+    updated_at: 2026-05-13T17:17:43.221Z
     notes: []
