@@ -40,3 +40,17 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-05-13T18:11:24.195Z
+  - _ulid: 01KRH9BTB7JKTHM6QB0JTRMWPZ
+    content: "Fix cycle 2: addressed codex blocker on missing memory observations when
+      --comfy-pid/--comfy-log-path are supplied with zero repeats. Extracted
+      begin_/finalize_save_run_memory_observation helpers; the primary checkpoint save inside
+      run_validation now records its own CheckpointSaveRunReport (always populated with
+      PRIMARY_CHECKPOINT_SAVE_IDENTITY) using the same pre/post lifecycle the repeat loop uses.
+      process_memory_after_save remains explicit unavailable per cycle-1. Renamed
+      RepeatedCacheMissRunReport -> CheckpointSaveRunReport with a backwards-compatible alias. New
+      tests: TestRunValidationPrimarySaveMemory (5) + TestSaveRunMemoryHelpers (5), including the
+      exact reviewer reproducer (patching collect_process_memory_observation to raise with repeats=0
+      now triggers the raise via the primary save). 1731 tests pass; ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-05-13T18:25:10.503Z
