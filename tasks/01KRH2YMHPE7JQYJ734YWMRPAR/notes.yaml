@@ -1,1 +1,12 @@
-notes: []
+notes:
+  - _ulid: 01KRH5PXQ81K71QVJXYQ8WJP02
+    content: "Approach: refactor _execute_checkpoint_save to track temporary_model with None sentinel;
+      release in finally clause guarded by 'is not None'. Release order in finally: temp first, then
+      loader, then model_loaders. _load_checkpoint_artifact stays outside try/finally so reload
+      failure also propagates after temp has been released. Tests: add coverage for save failure,
+      post-save (e.g. cache clear) failure, reload failure, multi-attribute clearing in
+      _clear_temporary_model_patch_payloads (patches/object_patches/weight_wrapper_patches,
+      including absent attrs), and gc+trim still firing after attribute-clearing."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-05-13T17:21:20.104Z
