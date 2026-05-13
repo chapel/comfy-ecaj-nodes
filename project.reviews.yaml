@@ -17565,6 +17565,17 @@ reviews:
         required: true
         created_at: 2026-05-13T00:01:57.789Z
         completed_at: 2026-05-13T00:01:57.789Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Spec-update task is first; implementation depends on spec updates; harness/reporting
+          depends on spec updates and cleanup hardening; manual live validation is last and depends
+          on harness/reporting.
+        name: Dependency ordering
+        required: true
+        created_at: 2026-05-13T00:02:05.285Z
+        completed_at: 2026-05-13T00:02:05.285Z
     events:
       - _ulid: 01KRFA5HAGEAEZKVCJHKV8HD22
         actor: Jacob Chapel
@@ -17614,6 +17625,13 @@ reviews:
           status: fail
           name: Spec completeness and AC coverage
         timestamp: 2026-05-13T00:01:58.216Z
+      - _ulid: 01KRFA80RWBHB6HK9RZNNRGR7F
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Dependency ordering
+        timestamp: 2026-05-13T00:02:05.725Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -17659,5 +17677,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-05-13T00:00:44.368Z
-    updated_at: 2026-05-13T00:01:57.789Z
+    updated_at: 2026-05-13T00:02:05.285Z
     notes: []
