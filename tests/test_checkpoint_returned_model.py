@@ -26,6 +26,67 @@ from lib.recipe import (
 from nodes.exit import WIDENExitNode
 from tests.conftest import make_checkpoint_components
 
+
+class TestTemporaryCheckpointModelRelease:
+    """Release of checkpoint-save temporaries must also return freed native
+    CPU arenas to the OS, not only drop Python references.
+
+    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    """
+
+    def test_release_trims_native_heap_after_python_gc(self):
+        """The live Comfy failure mode leaves large freed anonymous CPU arenas
+        swapped inside the process; cleanup should invoke native heap trim after
+        unpatching and Python GC."""
+        from nodes.exit import _release_temporary_checkpoint_model
+
+        temporary_model = object()
+        events: list[str] = []
+
+        with (
+            patch(
+                "nodes.exit._unpatch_loaded_clones",
+                side_effect=lambda model: events.append("unpatch"),
+            ),
+            patch("nodes.exit.gc.collect", side_effect=lambda: events.append("gc")),
+            patch("nodes.exit.torch.cuda.is_available", return_value=False),
+            patch(
+                "nodes.exit._trim_native_heap",
+                create=True,
+                side_effect=lambda: events.append("trim"),
+            ),
+        ):
+            _release_temporary_checkpoint_model(temporary_model)
+
+        assert events == ["unpatch", "gc", "trim"]
+
+    def test_release_clears_temp_model_patch_payloads_before_gc(self):
+        """Because the caller still has a local reference while invoking the
+        release helper, the helper must sever patch-tensor references itself
+        before GC/trim can reclaim native CPU pages."""
+        from nodes.exit import _release_temporary_checkpoint_model
+
+        class TempModel:
+            def __init__(self):
+                self.patches = {
+                    "diffusion_model.k": [
+                        (1.0, ("set", (object(),)), 1.0, None, None),
+                    ],
+                }
+
+        temporary_model = TempModel()
+
+        with (
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit.gc.collect"),
+            patch("nodes.exit.torch.cuda.is_available", return_value=False),
+            patch("nodes.exit._trim_native_heap", create=True),
+        ):
+            _release_temporary_checkpoint_model(temporary_model)
+
+        assert temporary_model.patches == {}
+
+
 # =============================================================================
 # No deepcopy on checkpoint-style save_model return paths
 # =============================================================================
@@ -83,6 +144,7 @@ class TestNoDeepCopyOnCheckpointReturn:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
             patch("copy.deepcopy", side_effect=deepcopy_trap),
         ):
             mock_loader = MagicMock()
@@ -197,22 +259,27 @@ class TestNoDeepCopyOnCheckpointReturn:
 
 
 # =============================================================================
-# Cache miss returns merged MODEL without invoking checkpoint loader
+# Cache miss releases temporary merged MODEL and reloads saved checkpoint
 # =============================================================================
 
 
-class TestCacheMissReturnsInMemoryModel:
-    """Cache-miss checkpoint save must return the merged MODEL from the
-    in-memory WIDEN merge result. It must not reload the just-saved artifact
-    solely to produce the return value.
+class TestCacheMissReloadsSavedCheckpoint:
+    """Cache-miss checkpoint save returns a Comfy-loaded artifact MODEL, not
+    the temporary dense ModelPatcher used only for checkpoint serialization.
 
     AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
+    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
     """
 
     # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
-    def test_cache_miss_returns_install_merged_patches_result(self, mock_model_patcher, tmp_path):
-        """The returned MODEL must be the result of install_merged_patches,
-        not a model loaded from the artifact."""
+    # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
+    def test_cache_miss_returns_loaded_checkpoint_artifact_not_temp_model(
+        self, mock_model_patcher, tmp_path,
+    ):
+        """After a fresh checkpoint save, the returned MODEL must come from
+        _load_checkpoint_artifact so Comfy owns the returned model lifecycle."""
         cc = make_checkpoint_components()
         base = RecipeBase(
             model_patcher=mock_model_patcher,
@@ -225,7 +292,8 @@ class TestCacheMissReturnsInMemoryModel:
         save_path = str(tmp_path / "model.safetensors")
         node = WIDENExitNode()
 
-        expected_model = mock_model_patcher.clone()
+        temp_model = mock_model_patcher.clone()
+        loaded_model = mock_model_patcher.clone()
 
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
@@ -245,10 +313,15 @@ class TestCacheMissReturnsInMemoryModel:
             patch("nodes.exit.compile_batch_groups", return_value={}),
             patch(
                 "nodes.exit.install_merged_patches",
-                return_value=expected_model,
+                return_value=temp_model,
             ) as mock_install,
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._release_temporary_checkpoint_model") as mock_release,
+            patch(
+                "nodes.exit._load_checkpoint_artifact",
+                return_value=loaded_model,
+            ) as mock_ckpt_load,
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -268,16 +341,19 @@ class TestCacheMissReturnsInMemoryModel:
 
             result = node.execute(merge, save_model=True, model_name="model")
 
-            assert result[0] is expected_model, (
-                "Cache miss must return the in-memory merged MODEL from "
-                "install_merged_patches, not reload from artifact"
-            )
+            assert result[0] is loaded_model
+            assert result[0] is not temp_model
             mock_install.assert_called_once()
+            mock_release.assert_called_once_with(temp_model)
+            mock_ckpt_load.assert_called_once_with(save_path)
 
-    # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
-    def test_cache_miss_does_not_invoke_checkpoint_loader(self, mock_model_patcher, tmp_path):
-        """Cache miss must not call _load_checkpoint_artifact or
-        load_checkpoint_guess_config solely for the return value."""
+    # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
+    def test_cache_miss_releases_temp_model_before_loading_checkpoint_artifact(
+        self, mock_model_patcher, tmp_path,
+    ):
+        """The temporary merged ModelPatcher is released after checkpoint save
+        and before the artifact-backed MODEL is loaded for the return value."""
         cc = make_checkpoint_components()
         base = RecipeBase(
             model_patcher=mock_model_patcher,
@@ -289,6 +365,21 @@ class TestCacheMissReturnsInMemoryModel:
 
         save_path = str(tmp_path / "model.safetensors")
         node = WIDENExitNode()
+        temp_model = mock_model_patcher.clone()
+        loaded_model = mock_model_patcher.clone()
+        events: list[str] = []
+
+        def save_checkpoint(*args, **kwargs):
+            events.append("save")
+
+        def release_temp(model):
+            assert model is temp_model
+            events.append("release")
+
+        def load_checkpoint(path):
+            assert path == save_path
+            events.append("load")
+            return loaded_model
 
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
@@ -306,11 +397,14 @@ class TestCacheMissReturnsInMemoryModel:
             patch("nodes.exit.compile_plan", return_value=MagicMock()),
             patch("nodes.exit.chunked_evaluation", return_value={}),
             patch("nodes.exit.compile_batch_groups", return_value={}),
-            patch("nodes.exit.install_merged_patches", return_value=mock_model_patcher.clone()),
-            patch("nodes.exit.save_comfy_checkpoint"),
+            patch("nodes.exit.install_merged_patches", return_value=temp_model),
+            patch("nodes.exit.save_comfy_checkpoint", side_effect=save_checkpoint),
             patch("nodes.exit.check_ram_preflight"),
-            patch("nodes.exit._load_checkpoint_artifact") as mock_ckpt_load,
-            patch("nodes.exit._load_model_from_artifact") as mock_diffusion_load,
+            patch(
+                "nodes.exit._release_temporary_checkpoint_model",
+                side_effect=release_temp,
+            ),
+            patch("nodes.exit._load_checkpoint_artifact", side_effect=load_checkpoint),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -328,10 +422,10 @@ class TestCacheMissReturnsInMemoryModel:
                 all_model_keys=frozenset(),
             )
 
-            node.execute(merge, save_model=True, model_name="model")
+            result = node.execute(merge, save_model=True, model_name="model")
 
-            mock_ckpt_load.assert_not_called()
-            mock_diffusion_load.assert_not_called()
+            assert result[0] is loaded_model
+            assert events == ["save", "release", "load"]
 
 
 # =============================================================================
@@ -581,6 +675,7 @@ class TestDownstreamModelUsability:
             patch("nodes.exit.install_merged_patches", return_value=mock_model_patcher.clone()),
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()

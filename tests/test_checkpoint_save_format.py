@@ -325,6 +325,7 @@ class TestCheckpointSaveRouting:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
@@ -398,6 +399,7 @@ class TestCheckpointSaveRouting:
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.MaterializationSink") as mock_sink_cls,
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -525,6 +527,7 @@ class TestCheckpointSaveRouting:
             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
             patch("nodes.exit.MaterializationSink") as mock_sink_cls,
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             affected_key = "diffusion_model.input_blocks.0.0.weight"
             mock_loader = MagicMock()
@@ -600,6 +603,7 @@ class TestCheckpointArtifactMetadata:
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.build_metadata") as mock_build_meta,
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -1115,7 +1119,7 @@ class TestPatchModePreserved:
 
 
 # =============================================================================
-# Checkpoint save returns usable merged MODEL
+# Checkpoint save returns usable artifact-loaded MODEL
 # =============================================================================
 
 
@@ -1123,8 +1127,9 @@ class TestCheckpointSaveReturnModel:
     """AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable —
     checkpoint save must return a usable MODEL for downstream consumers."""
 
-    def test_checkpoint_save_returns_merged_model(self, mock_model_patcher, tmp_path):
-        """Checkpoint save must return the in-memory merged MODEL, not None."""
+    def test_checkpoint_save_returns_loaded_checkpoint_model(self, mock_model_patcher, tmp_path):
+        """Checkpoint save must return the artifact-loaded MODEL, not None or
+        the temporary merged serialization clone."""
         cc = make_checkpoint_components()
         base = RecipeBase(
             model_patcher=mock_model_patcher,
@@ -1137,7 +1142,8 @@ class TestCheckpointSaveReturnModel:
         save_path = str(tmp_path / "model.safetensors")
         node = WIDENExitNode()
 
-        expected_model = mock_model_patcher.clone()
+        temp_model = mock_model_patcher.clone()
+        loaded_model = mock_model_patcher.clone()
 
         with (
             patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
@@ -1152,9 +1158,10 @@ class TestCheckpointSaveReturnModel:
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.chunked_evaluation", return_value={}),
-            patch("nodes.exit.install_merged_patches", return_value=expected_model),
+            patch("nodes.exit.install_merged_patches", return_value=temp_model),
             patch("nodes.exit.save_comfy_checkpoint"),
             patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit._load_checkpoint_artifact", return_value=loaded_model),
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()
@@ -1178,7 +1185,8 @@ class TestCheckpointSaveReturnModel:
             result = node.execute(merge, save_model=True, model_name="model")
 
             assert len(result) == 1
-            assert result[0] is expected_model
+            assert result[0] is loaded_model
+            assert result[0] is not temp_model
 
 
 # =============================================================================

@@ -551,6 +551,55 @@ def _load_model_from_artifact(
     return cloned
 
 
+def _trim_native_heap() -> None:
+    """Ask the platform allocator to return freed native CPU arenas to the OS.
+
+    Large torch CPU tensors are native allocations.  After Python refs are
+    dropped and GC runs, glibc can still keep those arenas committed inside the
+    process; under memory pressure Linux may move them to swap, which looks like
+    repeated save_model=true CPU growth even when RSS falls.  malloc_trim is a
+    best-effort Linux/glibc release hook and is intentionally a no-op elsewhere.
+    """
+    try:
+        import ctypes
+
+        libc = ctypes.CDLL(None)
+        malloc_trim = getattr(libc, "malloc_trim", None)
+        if malloc_trim is None:
+            return
+        malloc_trim.argtypes = [ctypes.c_size_t]
+        malloc_trim.restype = ctypes.c_int
+        malloc_trim(0)
+    except Exception as exc:  # pragma: no cover - platform best effort
+        logger.debug("native heap trim skipped: %s", exc)
+
+
+def _clear_temporary_model_patch_payloads(temporary_model: object) -> None:
+    """Sever patch-payload references held by a temporary ModelPatcher clone."""
+    for attr in ("patches", "object_patches", "weight_wrapper_patches"):
+        payload = getattr(temporary_model, attr, None)
+        if hasattr(payload, "clear"):
+            payload.clear()
+
+
+def _release_temporary_checkpoint_model(temporary_model: object) -> None:
+    """Release temporary checkpoint-save clones before returning loaded artifacts.
+
+    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+
+    Checkpoint saves use a cloned ModelPatcher with dense set-patch tensors as a
+    serialization vehicle.  Once the checkpoint is written, that clone must not
+    remain in Comfy's loaded-model registry or WIDEN's return value; otherwise
+    Comfy's output cache can keep the transient merge payload resident.
+    """
+    _unpatch_loaded_clones(temporary_model)
+    _clear_temporary_model_patch_payloads(temporary_model)
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    _trim_native_heap()
+
+
 def _load_checkpoint_artifact(save_path: str) -> object:
     """Load a checkpoint artifact through Comfy's supported checkpoint load path.
 
@@ -1582,15 +1631,25 @@ class WIDENExitNode:
             if not enable_cache:
                 _incremental_cache.clear()
 
+            # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+            # The dense set-patch clone exists only to serialize the checkpoint.
+            # Release it before returning so Comfy's output cache retains only
+            # an artifact-loaded MODEL, matching checkpoint cache-hit behavior.
+            _release_temporary_checkpoint_model(merged_model)
+            del merged_model
+            _log_memory("after-checkpoint-temp-model-release")
+
         finally:
             loader.cleanup()
             for model_loader in model_analysis.model_loaders.values():
                 model_loader.cleanup()
 
         # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
-        # Return the in-memory merged MODEL for downstream consumers.
-        # Cache-miss return: the merged model from the in-memory WIDEN merge.
-        return (merged_model,)
+        # Cache-miss return: reload the saved checkpoint through Comfy's loader
+        # so downstream consumers get a Comfy-owned MODEL rather than the
+        # transient dense WIDEN serialization clone.
+        loaded_model = _load_checkpoint_artifact(save_path)
+        return (loaded_model,)
 
     def _execute_diffusion_save(
         self,
