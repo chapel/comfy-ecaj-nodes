@@ -32,8 +32,14 @@ Optional:
 Optional process-memory observation inputs (operator must supply explicitly):
     --comfy-pid <pid>: Linux pid of the running ComfyUI server. When
         supplied, the harness reads /proc/<pid>/status and
-        /proc/<pid>/smaps_rollup at the before/after-save/after-return
+        /proc/<pid>/smaps_rollup at the before-run and after-return
         lifecycle points to record RSS, Swap, and Anonymous memory.
+        OS-level "after save-time checkpoint writing" cannot be sampled
+        from an external harness because the harness only regains
+        control once ComfyUI's /history reports the prompt completed
+        (i.e. after WIDENExit returned); the save-time evidence in the
+        report therefore comes from the internal WIDEN ``[mem]`` log
+        labels supplied via ``--comfy-log-path``, not from procfs.
     --comfy-log-path <path>: path to a ComfyUI log file that captures
         WIDEN memory log lines (``[mem] <label>: RSS=...``). When
         supplied, the harness parses the ``after-checkpoint-save`` and
@@ -188,7 +194,10 @@ def parse_validated_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=(
             "Linux pid of the running ComfyUI process. When supplied, the "
             "report records RSS/Swap/Anonymous from procfs at each run's "
-            "before/after-save/after-return lifecycle points."
+            "before-run and after-return lifecycle points. The OS-level "
+            "save-time observation is recorded as unavailable because the "
+            "external harness only regains control after WIDENExit returns; "
+            "save-time evidence comes from --comfy-log-path."
         ),
     )
     parser.add_argument(
@@ -301,6 +310,16 @@ class RepeatedCacheMissRunReport:
     explicit unavailable entries when the operator did not supply
     ``--comfy-pid``; log observations are recorded as unavailable when
     ``--comfy-log-path`` is not supplied or the labels are missing.
+
+    ``process_memory_after_save`` is always recorded as unavailable from
+    this external harness: ``submit_workflow`` blocks on ComfyUI's
+    ``/history`` endpoint and only returns once the prompt has fully
+    completed (i.e. after WIDENExit returned), so the harness has no
+    opportunity to sample procfs at the actual save-time lifecycle
+    point. The report therefore exposes the save-time evidence through
+    ``log_after_checkpoint_save`` (populated from the WIDEN ``[mem]``
+    log labels in ``--comfy-log-path``) rather than fabricating a
+    save-time OS observation from a post-return procfs read.
     """
 
     run_index: int = 0
@@ -507,6 +526,36 @@ _RUN_MEMORY_LABELS: tuple[str, ...] = (
     "after-checkpoint-save",
     "after-checkpoint-temp-model-release",
 )
+
+
+_AFTER_SAVE_UNAVAILABLE_REASON = (
+    "OS-level save-time observation cannot be sampled from an external "
+    "harness: submit_workflow blocks on /history and only returns after "
+    "WIDENExit returned, so any procfs read here would be a post-return "
+    "sample. See log_after_checkpoint_save for save-time evidence."
+)
+
+
+def unavailable_save_time_observation(
+    pid: int | None = None,
+) -> ProcessMemoryObservation:
+    """Return an explicit unavailable save-time OS memory observation.
+
+    The harness never samples procfs at the actual save-time lifecycle
+    point because ``submit_workflow`` only returns after ComfyUI's
+    ``/history`` endpoint reports completion (i.e. after WIDENExit
+    returned). To prevent reports from falsely claiming save-time OS
+    memory was observed, ``process_memory_after_save`` is always
+    populated with this unavailable record, regardless of whether
+    ``--comfy-pid`` is supplied.
+    """
+    return ProcessMemoryObservation(
+        label="after-save",
+        available=False,
+        pid=pid,
+        error=_AFTER_SAVE_UNAVAILABLE_REASON,
+        timestamp=time.time(),
+    )
 
 
 def analyze_memory_accumulation(
@@ -1422,13 +1471,21 @@ def run_repeated_cache_miss_runs(
     1. Snapshots process memory ``before`` the run (when ``comfy_pid`` is
        supplied) and captures the current log offset.
     2. Submits a checkpoint-save workflow whose ``model_name`` is unique
-       so the artifact cache cannot serve it.
-    3. Snapshots process memory immediately ``after_save`` (still inside
-       ComfyUI's execution lifecycle, before the operator polls).
-    4. Snapshots process memory once more ``after_return`` (one final
-       poll, used by ``analyze_memory_accumulation``).
+       so the artifact cache cannot serve it. ``submit_workflow`` blocks
+       on ``/history`` until ComfyUI reports the prompt completed, so
+       control returns to this loop only after WIDENExit returned.
+    3. Records ``process_memory_after_save`` as unavailable: the harness
+       cannot sample procfs at the actual save-time lifecycle point
+       from outside ComfyUI. Save-time evidence is taken from the WIDEN
+       ``[mem]`` log labels instead (step 5).
+    4. Snapshots process memory once ``after_return`` (used by
+       ``analyze_memory_accumulation``).
     5. Parses the WIDEN ``[mem]`` log labels that appeared since the
-       starting offset (when ``comfy_log_path`` is supplied).
+       starting offset (when ``comfy_log_path`` is supplied). The
+       ``after-checkpoint-save`` label captures save-time memory from
+       inside the WIDENExit process; the ``after-checkpoint-temp-model
+       -release`` label captures memory after the temp save payload was
+       released, both before WIDENExit returned.
 
     Inputs that are unavailable are recorded as unavailable observations
     rather than crashing the harness.
@@ -1449,8 +1506,14 @@ def run_repeated_cache_miss_runs(
         run.save_result = submit_workflow(
             comfy_api_url, workflow, f"repeat_cache_miss_{run_index:03d}",
         )
-        run.process_memory_after_save = collect_process_memory_observation(
-            comfy_pid, "after-save",
+        # NOTE: do NOT call collect_process_memory_observation here. The
+        # only point at which the harness regains control is after
+        # /history reports completion, which is past WIDENExit's return.
+        # Any procfs read at this point would be another post-return
+        # sample mislabeled as save-time. The save-time evidence is
+        # captured by the WIDEN [mem] log labels parsed below.
+        run.process_memory_after_save = unavailable_save_time_observation(
+            comfy_pid,
         )
         run.process_memory_after_return = collect_process_memory_observation(
             comfy_pid, "after-return",

@@ -2266,6 +2266,91 @@ class TestRunRepeatedCacheMissRuns:
         assert run.log_after_checkpoint_save.available is False
         assert run.log_after_checkpoint_save.error
 
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    # AC: @comfy-memory-manager-compatibility ac-report-os-memory-observations
+    def test_after_save_os_observation_is_always_unavailable(self):
+        """submit_workflow blocks on /history, so the harness regains control
+        only after WIDENExit returned. Any procfs read at that point would
+        be another post-return sample mislabeled as save-time, so
+        process_memory_after_save must always be recorded as unavailable
+        — even when --comfy-pid is supplied and procfs is fully readable.
+        """
+        # fake_collect would return *available* observations for every
+        # label it's asked for. If the harness ever calls
+        # collect_process_memory_observation with "after-save" or returns
+        # an available after-save observation, this test will fail.
+        def fake_collect(pid, label):
+            return harness.ProcessMemoryObservation(
+                label=label, available=True, source="smaps_rollup",
+                rss_kb=1_000_000, swap_kb=0, anonymous_kb=900_000,
+            )
+
+        seen_labels: list[str] = []
+
+        def tracking_collect(pid, label):
+            seen_labels.append(label)
+            return fake_collect(pid, label)
+
+        with patch.object(harness, "collect_process_memory_observation",
+                          side_effect=tracking_collect), \
+             patch.object(
+                 harness, "submit_workflow",
+                 return_value=harness.WorkflowResult(
+                     name="r", accepted=True, prompt_id="x",
+                 ),
+             ):
+            runs = harness.run_repeated_cache_miss_runs(
+                comfy_api_url="http://fake:8188",
+                source_model="src.safetensors",
+                repeat_count=2,
+                comfy_pid=4242,
+                comfy_log_path=None,
+            )
+
+        # The harness must NEVER sample procfs with the "after-save" label
+        # because it cannot be at the save-time lifecycle point.
+        assert "after-save" not in seen_labels
+        # The labels it *does* sample are the legitimate before-run /
+        # after-return points (× 2 runs).
+        assert seen_labels == [
+            "before-run", "after-return",
+            "before-run", "after-return",
+        ]
+
+        for run in runs:
+            # after-save is recorded as explicit unavailable.
+            assert run.process_memory_after_save.available is False
+            assert run.process_memory_after_save.label == "after-save"
+            # The error message explains the lifecycle reason so the
+            # report cannot be confused for a real save-time sample.
+            err = run.process_memory_after_save.error
+            assert "save-time" in err.lower()
+            assert "history" in err.lower() or "post-return" in err.lower()
+            # before-run and after-return remain available (pid was valid).
+            assert run.process_memory_before.available is True
+            assert run.process_memory_after_return.available is True
+
+    # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
+    def test_unavailable_save_time_observation_helper_records_pid_and_reason(
+        self,
+    ):
+        """The shared helper used by run_repeated_cache_miss_runs records
+        the supplied pid (for auditability) but still marks the
+        observation as unavailable with the lifecycle reason.
+        """
+        obs = harness.unavailable_save_time_observation(pid=12345)
+        assert obs.available is False
+        assert obs.label == "after-save"
+        assert obs.pid == 12345
+        assert "save-time" in obs.error.lower()
+        assert "log_after_checkpoint_save" in obs.error
+
+        # Also valid with no pid supplied.
+        obs_no_pid = harness.unavailable_save_time_observation()
+        assert obs_no_pid.available is False
+        assert obs_no_pid.pid is None
+        assert obs_no_pid.error
+
 
 # ===========================================================================
 # AC: @comfy-memory-manager-compatibility ac-repeated-cache-miss-memory-bounded
@@ -2431,7 +2516,9 @@ class TestRunValidationRepeatCacheMiss:
         call_count = [0]
 
         def fake_collect(pid, label):
-            # Per-run sequence: before, after-save, after-return × N runs.
+            # Per-run sequence (after the after-save procfs read was
+            # removed because submit_workflow only returns post-history,
+            # i.e. after WIDENExit returned): before-run, after-return.
             call_count[0] += 1
             # Only return-after observations affect the accumulation check.
             if label != "after-return":
@@ -2440,7 +2527,7 @@ class TestRunValidationRepeatCacheMiss:
                     rss_kb=1_000_000, swap_kb=0, anonymous_kb=1_000_000,
                 )
             # First "after-return" is small; second is way bigger.
-            if call_count[0] <= 3:  # first run's three observations
+            if call_count[0] <= 2:  # first run's two observations
                 rss = 1_000_000
             else:
                 rss = 5_000_000  # +4 GB
