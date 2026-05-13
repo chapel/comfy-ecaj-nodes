@@ -17670,9 +17670,25 @@ reviews:
           status: pass
           name: kspec validate --alignment --warnings-ok
         timestamp: 2026-05-13T00:02:22.727Z
+      - _ulid: 01KRFA8RZPR7VW0S6ZB7TDBDCV
+        actor: Jacob Chapel
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: request_changes
+        timestamp: 2026-05-13T00:02:30.518Z
+      - _ulid: 01KRFA8RZP47CFEB47XVBQVN8V
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-05-13T00:02:30.518Z
     examined_commit: null
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: plan
@@ -17713,7 +17729,14 @@ reviews:
               split/adjust the AC so every named failure point has explicit coverage.
             created_at: 2026-05-13T00:01:44.033Z
         kind: blocker
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: request_changes
+        reviewer: Jacob Chapel
+        role: reviewer
+        created_at: 2026-05-13T00:02:30.517Z
     created_at: 2026-05-13T00:00:44.368Z
-    updated_at: 2026-05-13T00:02:22.302Z
+    updated_at: 2026-05-13T00:02:30.518Z
     notes: []
