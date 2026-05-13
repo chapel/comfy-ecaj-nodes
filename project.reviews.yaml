@@ -18799,6 +18799,12 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-05-13T18:11:23.618Z
+      - _ulid: 01KRH9BBRFRZ6XJBCPPQPQ2GTX
+        actor: "@claude"
+        event_type: thread_replied
+        payload:
+          thread_ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
+        timestamp: 2026-05-13T18:24:55.567Z
     examined_commit: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
     external_links: []
     lifecycle_state: closed
@@ -18835,6 +18841,18 @@ reviews:
               record, or the CLI/report should otherwise require repeat runs before accepting those
               memory inputs."
             created_at: 2026-05-13T18:10:26.879Z
+          - _ulid: 01KRH9BBJ53XRRYMCHWRSAVPRG
+            author: "@claude"
+            body: |-
+              Fixed in d9a0c9a. The primary checkpoint save inside run_validation now records its own per-run memory observations independently of --repeat-cache-miss-runs.
+
+              Approach:
+              - Extracted begin_save_run_memory_observation and finalize_save_run_memory_observation helpers from the repeat loop so the same lifecycle (before-run snapshot, log offset capture, submit, after-save=unavailable, after-return snapshot, log segment parse) is reused for the primary save.
+              - Renamed RepeatedCacheMissRunReport to CheckpointSaveRunReport (kept the old name as an alias) since the dataclass now serves both the primary save and the repeat series.
+              - Added report.primary_checkpoint_save_run (always populated with the PRIMARY_CHECKPOINT_SAVE_IDENTITY identity). With --comfy-pid supplied: before-run and after-return procfs samples are recorded. With --comfy-log-path supplied: after-checkpoint-save and after-checkpoint-temp-model-release WIDEN labels are parsed. process_memory_after_save is always recorded as unavailable (same reason as before — submit_workflow is post-/history).
+
+              Reviewer reproducer is now covered by TestRunValidationPrimarySaveMemory::test_primary_save_invokes_procfs_when_pid_supplied_zero_repeats: patching collect_process_memory_observation to raise when run_validation is called with comfy_pid=12345 and repeats=0 now triggers the raise via the primary save's before-run sample (asserted via captured labels and report.errors).
+            created_at: 2026-05-13T18:24:55.365Z
         kind: blocker
     verdicts:
       - applies_to_version:
@@ -18845,5 +18863,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-13T18:11:23.618Z
     created_at: 2026-05-13T18:07:43.459Z
-    updated_at: 2026-05-13T18:11:23.618Z
+    updated_at: 2026-05-13T18:24:55.365Z
     notes: []
