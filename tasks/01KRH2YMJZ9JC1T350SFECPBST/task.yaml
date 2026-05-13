@@ -91,8 +91,12 @@ description: >
 spec_ref: "@live-comfy-saved-output-validation"
 plan_ref: "@plan-checkpoint-save-memory-contract-hardening"
 origin: derived
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Approved review @01KRH9JM and merged PR #117 into dev at
+  07de32823ab2458eaca988d1b2be5e16fc369502. Extended live checkpoint validation reporting with
+  explicit process/log memory inputs, primary and repeated save-run memory records, unavailable
+  save-time OS observations, and repeated cache-miss accumulation result reporting."
 depends_on:
   - "@task-checkpoint-save-memory-contract-ac-updates"
   - "@task-checkpoint-save-temp-payload-release-hardening"
@@ -276,8 +280,26 @@ history:
         previous: "@01KRH8BVV3ZAPVYDX76BMSHYTR"
     command: review-link
     timestamp: 2026-05-13T18:28:54.566Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Approved review @01KRH9JM and merged PR #117 into dev at
+          07de32823ab2458eaca988d1b2be5e16fc369502. Extended live checkpoint validation reporting
+          with explicit process/log memory inputs, primary and repeated save-run memory records,
+          unavailable save-time OS observations, and repeated cache-miss accumulation result
+          reporting."
+        previous: null
+      completed_at:
+        new: 2026-05-13T18:35:00.975Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-05-13T18:35:00.997Z
 created_at: 2026-05-13T16:33:07.167Z
 started_at: 2026-05-13T18:25:24.043Z
 submitted_at: 2026-05-13T18:25:26.870Z
+completed_at: 2026-05-13T18:35:00.975Z
 todos: []
 automation: eligible
