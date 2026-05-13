@@ -91,7 +91,7 @@ description: >
 spec_ref: "@live-comfy-saved-output-validation"
 plan_ref: "@plan-checkpoint-save-memory-contract-hardening"
 origin: derived
-status: pending
+status: in_progress
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-memory-contract-ac-updates"
@@ -104,6 +104,7 @@ tags:
   - checkpoint
   - manual-harness
 vcs_refs: []
+session_id: 01KRH6HBSA1B2KSY89876Y573D
 history:
   - author: Jacob Chapel
     changes:
@@ -112,6 +113,20 @@ history:
         previous: null
     command: task-set
     timestamp: 2026-05-13T16:33:30.001Z
+  - author: "@claude"
+    changes:
+      status:
+        new: in_progress
+        previous: pending
+      session_id:
+        new: 01KRH6HBSA1B2KSY89876Y573D
+        previous: null
+      started_at:
+        new: 2026-05-13T17:36:12.607Z
+        previous: null
+    command: task-start
+    timestamp: 2026-05-13T17:36:12.607Z
 created_at: 2026-05-13T16:33:07.167Z
+started_at: 2026-05-13T17:36:12.607Z
 todos: []
 automation: eligible
