@@ -743,6 +743,12 @@ features:
                     then: it records per-run process-memory observations for before execution, after save-time
                       checkpoint writing when available, and after the Exit node returns.
                     when: the validation report is produced.
+                  - given: an operator intentionally runs repeated checkpoint-style cache-miss saved-output validation
+                      in one ComfyUI process.
+                    id: ac-report-records-repeated-cache-miss-memory
+                    then: it records each run's cache-miss identity and post-return memory observation so accumulation
+                      across runs can be assessed.
+                    when: the validation report is produced.
                 tags: []
                 created: 2026-04-29T05:21:57.821Z
                 notes:
