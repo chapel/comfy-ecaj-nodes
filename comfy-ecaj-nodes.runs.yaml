@@ -9064,7 +9064,7 @@ runs:
     completed_at: 2026-05-13T17:21:06.084Z
   - _ulid: 01KRH65ZKNBQT8CF9W6KHCK95Q
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: "@claude"
     step_results:
       - status: completed
@@ -9135,7 +9135,39 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-05-13T17:30:05.938Z
-        completed_at: 2026-05-13T17:30:05.938Z
+        completed_at: 2026-05-13T17:30:30.784Z
+        notes: >-
+          Coverage check results:
+
+
+          - 'nested with patch' / 'patches per test' / 'test boilerplate' / 'checkpoint test
+          scaffolding' / 'mock patch helper' — no matches in specs, tasks, or inbox.
+
+          - 'ExitStack' — only my own task note from this session.
+
+          - 'AC annotation line length' / 'line too long AC' / 'cache clear failure' — no matches.
+
+
+          Conclusion: None of the four friction points are tracked. All four are candidates for
+          capture — but they have different scopes:
+
+
+          1. Statically-nested-blocks limit on with-patches: concrete, repeating pattern across this
+          test file. → friction observation; potentially a test-helper task.
+
+          2. AC comment lines hitting E501: concrete, structural. → friction observation;
+          potentially convention update (AC comments allowed to exceed 99 chars, with rationale).
+
+          3. No clean post-save bookkeeping hook for failure-path testing: design observation about
+          exit.py shape. → friction observation; possibly an inbox idea to factor a finalize helper
+          if more failure-path tests are needed.
+
+          4. AskUserQuestion gap in autonomous dispatch: more of a meta-process issue. → skip;
+          tangential to project state and likely already known.
+      - status: completed
+        step_index: 3
+        started_at: 2026-05-13T17:30:30.784Z
+        completed_at: 2026-05-13T17:30:30.784Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-05-13T17:29:33.557Z
