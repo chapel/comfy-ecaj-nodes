@@ -18805,6 +18805,12 @@ reviews:
         payload:
           thread_ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
         timestamp: 2026-05-13T18:24:55.567Z
+      - _ulid: 01KRH9BHJ7Q3DB7Y2E6X7D5K9G
+        actor: "@claude"
+        event_type: thread_resolved
+        payload:
+          thread_ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
+        timestamp: 2026-05-13T18:25:01.511Z
     examined_commit: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
     external_links: []
     lifecycle_state: closed
@@ -18854,6 +18860,8 @@ reviews:
               Reviewer reproducer is now covered by TestRunValidationPrimarySaveMemory::test_primary_save_invokes_procfs_when_pid_supplied_zero_repeats: patching collect_process_memory_observation to raise when run_validation is called with comfy_pid=12345 and repeats=0 now triggers the raise via the primary save's before-run sample (asserted via captured labels and report.errors).
             created_at: 2026-05-13T18:24:55.365Z
         kind: blocker
+        resolved_at: 2026-05-13T18:25:01.310Z
+        resolved_by: "@claude"
     verdicts:
       - applies_to_version:
           type: entity_version
@@ -18863,5 +18871,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-13T18:11:23.618Z
     created_at: 2026-05-13T18:07:43.459Z
-    updated_at: 2026-05-13T18:24:55.365Z
+    updated_at: 2026-05-13T18:25:01.310Z
     notes: []
