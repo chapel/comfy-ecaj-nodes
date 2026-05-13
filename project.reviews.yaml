@@ -17542,6 +17542,18 @@ reviews:
         runner: kspec
         created_at: 2026-05-13T00:01:43.904Z
         completed_at: 2026-05-13T00:01:43.904Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Plan intentionally defines no new spec items and targets existing
+          @comfy-memory-manager-compatibility, @live-comfy-saved-output-validation, and
+          @saved-model-artifact-safety, which match the existing spec neighborhood for memory
+          compatibility, live validation, and artifact safety.
+        name: Existing spec update shape
+        required: true
+        created_at: 2026-05-13T00:01:43.905Z
+        completed_at: 2026-05-13T00:01:43.905Z
     events:
       - _ulid: 01KRFA5HAGEAEZKVCJHKV8HD22
         actor: Jacob Chapel
@@ -17563,6 +17575,13 @@ reviews:
           kind: blocker
           thread_ulid: 01KRFA7BHHNBGXNHDWZH0T92DE
         timestamp: 2026-05-13T00:01:45.089Z
+      - _ulid: 01KRFA7DB9J593CS43YAC4R9ZZ
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Existing spec update shape
+        timestamp: 2026-05-13T00:01:45.833Z
     examined_commit: null
     external_links: []
     lifecycle_state: draft
@@ -17591,5 +17610,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-05-13T00:00:44.368Z
-    updated_at: 2026-05-13T00:01:43.985Z
+    updated_at: 2026-05-13T00:01:43.905Z
     notes: []
