@@ -2479,8 +2479,15 @@
   title: Release checkpoint save temporary model before returning artifact-loaded MODEL
   type: bug
   spec_ref: "@comfy-memory-manager-compatibility"
-  status: pending_review
-  blocked_by: []
+  status: blocked
+  blocked_by:
+    - 'Dispatch workspace provisioning failed: Cannot provision workspace for
+      @01KRF47GKDR0QMKKY5KNCA18EV in pending_review: no existing workspace record and no recoverable
+      branch lineage. Submission linkage references branch
+      "dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g" but it could not
+      be found locally or on any remote.. Suggested action: Ensure the task has submission linkage
+      with a valid branch (kspec task set @01KRF47GKDR0QMKKY5KNCA18EV --submission-linkage), or
+      manually create the workspace branch and re-submit.'
   depends_on: []
   priority: 1
   tags:

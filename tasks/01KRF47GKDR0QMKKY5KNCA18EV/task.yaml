@@ -70,8 +70,15 @@ description: >-
 spec_ref: "@comfy-memory-manager-compatibility"
 meta_ref: null
 plan_ref: null
-status: pending_review
-blocked_by: []
+status: blocked
+blocked_by:
+  - 'Dispatch workspace provisioning failed: Cannot provision workspace for
+    @01KRF47GKDR0QMKKY5KNCA18EV in pending_review: no existing workspace record and no recoverable
+    branch lineage. Submission linkage references branch
+    "dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g" but it could not be
+    found locally or on any remote.. Suggested action: Ensure the task has submission linkage with a
+    valid branch (kspec task set @01KRF47GKDR0QMKKY5KNCA18EV --submission-linkage), or manually
+    create the workspace branch and re-submit.'
 depends_on: []
 context: []
 priority: 1
@@ -248,7 +255,27 @@ history:
         previous: pending_review
     command: task-unblock
     timestamp: 2026-05-13T17:02:26.323Z
-prior_status: null
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: blocked
+        previous: pending_review
+      blocked_by:
+        new:
+          - 'Dispatch workspace provisioning failed: Cannot provision workspace for
+            @01KRF47GKDR0QMKKY5KNCA18EV in pending_review: no existing workspace record and no
+            recoverable branch lineage. Submission linkage references branch
+            "dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g" but it could
+            not be found locally or on any remote.. Suggested action: Ensure the task has submission
+            linkage with a valid branch (kspec task set @01KRF47GKDR0QMKKY5KNCA18EV
+            --submission-linkage), or manually create the workspace branch and re-submit.'
+        previous: []
+      prior_status:
+        new: pending_review
+        previous: null
+    command: task-block
+    timestamp: 2026-05-13T17:02:37.718Z
+prior_status: pending_review
 created_at: 2026-05-12T22:16:57.702Z
 started_at: 2026-05-12T22:17:10.372Z
 submitted_at: 2026-05-12T22:29:00.192Z
