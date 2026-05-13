@@ -17556,6 +17556,13 @@ reviews:
           status: pass
           name: kspec validate --refs
         timestamp: 2026-05-13T00:01:44.362Z
+      - _ulid: 01KRFA7CM1VAMK65VXWFCTX4KF
+        actor: Jacob Chapel
+        event_type: thread_created
+        payload:
+          kind: blocker
+          thread_ulid: 01KRFA7BHHNBGXNHDWZH0T92DE
+        timestamp: 2026-05-13T00:01:45.089Z
     examined_commit: null
     external_links: []
     lifecycle_state: draft
@@ -17565,8 +17572,24 @@ reviews:
       content_hash: ""
       ref: "@plan-checkpoint-save-memory-contract-hardening"
       shadow_commit: ""
-    threads: []
+    threads:
+      - _ulid: 01KRFA7BHHNBGXNHDWZH0T92DE
+        anchor:
+          type: structured
+          field: implementation_status
+          ref: "@saved-model-artifact-safety"
+          section: specs
+        entries:
+          - _ulid: 01KRFA7BHHAD03PGJ1YQQ3QTXS
+            author: Jacob Chapel
+            body: The plan adds ac-failed-return-not-successful to @saved-model-artifact-safety but the exact
+              spec-change list does not set that spec's implementation status to in_progress.
+              Because this is a tightened existing implemented spec, leaving it implemented during
+              the follow-up work would misrepresent the unimplemented new contract. Add
+              @saved-model-artifact-safety to the status update list in the spec-update task.
+            created_at: 2026-05-13T00:01:43.985Z
+        kind: blocker
     verdicts: []
     created_at: 2026-05-13T00:00:44.368Z
-    updated_at: 2026-05-13T00:01:43.904Z
+    updated_at: 2026-05-13T00:01:43.985Z
     notes: []
