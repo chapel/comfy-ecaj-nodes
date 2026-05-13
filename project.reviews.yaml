@@ -18390,9 +18390,25 @@ reviews:
           status: pass
           name: GitHub CI
         timestamp: 2026-05-13T17:34:27.146Z
+      - _ulid: 01KRH6F8M1FS705E6CQFWH45TS
+        actor: jacob.chapel@gmail.com
+        event_type: verdict_submitted
+        payload:
+          applies_to_version:
+            type: entity_version
+            content_hash: ""
+          decision: approve
+        timestamp: 2026-05-13T17:34:37.697Z
+      - _ulid: 01KRH6F8M1CW0YJEGTK1JKVEYQ
+        actor: jacob.chapel@gmail.com
+        event_type: lifecycle_change
+        payload:
+          from: open
+          to: closed
+        timestamp: 2026-05-13T17:34:37.697Z
     examined_commit: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
     external_links: []
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -18400,7 +18416,14 @@ reviews:
       ref: "@01KRH2YMHPE7JQYJ734YWMRPAR"
       shadow_commit: ""
     threads: []
-    verdicts: []
+    verdicts:
+      - applies_to_version:
+          type: entity_version
+          content_hash: ""
+        decision: approve
+        reviewer: jacob.chapel@gmail.com
+        role: reviewer
+        created_at: 2026-05-13T17:34:37.697Z
     created_at: 2026-05-13T17:32:18.385Z
-    updated_at: 2026-05-13T17:34:26.967Z
+    updated_at: 2026-05-13T17:34:37.697Z
     notes: []
