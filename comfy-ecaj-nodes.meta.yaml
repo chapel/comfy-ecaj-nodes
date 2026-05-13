@@ -1444,6 +1444,16 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-05-13T17:31:15.671Z
+  - _ulid: 01KRH6M1Q6N0M05HDAM2Z0VZMH
+    type: success
+    content: "Recording kspec review checks for validation, focused tests, full pytest, ruff, and GitHub
+      CI before verdict created durable merge evidence for @01KRH2YMHPE7JQYJ734YWMRPAR; this made PR
+      #116 approval, merge, and task completion auditable even though GitHub would not allow
+      self-approval of the PR."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-05-13T17:37:14.470Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
