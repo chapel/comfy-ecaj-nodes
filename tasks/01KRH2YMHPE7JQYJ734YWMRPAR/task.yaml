@@ -84,7 +84,7 @@ description: >
 spec_ref: "@comfy-memory-manager-compatibility"
 plan_ref: "@plan-checkpoint-save-memory-contract-hardening"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-checkpoint-save-memory-contract-ac-updates"
@@ -95,6 +95,14 @@ tags:
   - memory
   - checkpoint
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-checkpoint-save-temp-payload-release-hardening/01krh2ym
+  captured_at: 2026-05-13T17:28:59.379Z
+  commit: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KRH5J8PPM1VB1A1XHN4YKVMA
 history:
   - author: Jacob Chapel
@@ -117,7 +125,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-05-13T17:19:12.861Z
+  - author: "@claude"
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-checkpoint-save-temp-payload-release-hardening/01krh2ym
+          captured_at: 2026-05-13T17:28:59.379Z
+          commit: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-05-13T17:28:59.383Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-05-13T17:28:59.383Z
 created_at: 2026-05-13T16:33:07.126Z
 started_at: 2026-05-13T17:19:12.861Z
+submitted_at: 2026-05-13T17:28:59.383Z
 todos: []
 automation: eligible
