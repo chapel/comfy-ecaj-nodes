@@ -115,18 +115,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-checkpoint-save-memory-contract-ac-updates/01krh2ym
-    canonical_branch_head: 1b886134e0b0b88768419710d07a162ec7992a15
+    canonical_branch_head: 6b172b7033446e42b767558da58978c501ce6c91
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-05-13T17:02:40.126Z
+      updated_at: 2026-05-13T17:06:42.307Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:02:40.911Z
+      updated_at: 2026-05-13T17:06:42.307Z
     integration:
       status: pending
       detail: null
@@ -134,7 +134,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 1b886134e0b0b88768419710d07a162ec7992a15
-      updated_at: 2026-05-13T17:02:40.126Z
+      updated_at: 2026-05-13T17:06:42.307Z
     lifecycle_state: active
     resolved_base_branch: dev
     task_ref: "@01KRH2YMF71BHP0WG62E1RDF1C"
@@ -142,9 +142,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-05-13T17:02:40.911Z
-      last_reconciled_at: 2026-05-13T17:02:40.911Z
+      last_reconciled_at: 2026-05-13T17:06:42.307Z
       created_at: 2026-05-13T17:02:40.126Z
-      updated_at: 2026-05-13T17:02:40.911Z
+      updated_at: 2026-05-13T17:06:42.307Z
     workspace_id: dispatch-workspace-01KRH2YMF71BHP0WG62E1RDF1C
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
