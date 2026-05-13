@@ -18,3 +18,20 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-05-13T17:52:48.525Z
+  - _ulid: 01KRH82Z22MT3BJ3PVE142Y7WB
+    content: "Fix cycle 1: addressed codex blocker on process_memory_after_save mislabeling.
+      submit_workflow is synchronous on /history, so the post-call sample is post-return, not
+      save-time. Removed the after-save procfs read; process_memory_after_save is now always an
+      unavailable observation built by a new unavailable_save_time_observation() helper that points
+      the reader at log_after_checkpoint_save for save-time evidence. Updated docstrings (module,
+      --comfy-pid help, RepeatedCacheMissRunReport, run_repeated_cache_miss_runs). Added two new
+      tests: test_after_save_os_observation_is_always_unavailable verifies the harness never samples
+      procfs with the after-save label even with a valid pid;
+      test_unavailable_save_time_observation_helper_records_pid_and_reason covers the helper.
+      Re-verified all ACs: ac-report-records-process-memory-points reads 'after save-time checkpoint
+      writing when available' - the OS observation is genuinely unavailable from this external
+      harness, and log_after_checkpoint_save provides the save-time evidence when --comfy-log-path
+      is supplied. 1720 tests pass; ruff clean."
+    supersedes: null
+    author: "@claude"
+    created_at: 2026-05-13T18:02:51.842Z
