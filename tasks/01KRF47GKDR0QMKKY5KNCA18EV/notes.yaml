@@ -91,3 +91,14 @@ notes:
     supersedes: null
     author: Hermes
     created_at: 2026-05-12T23:44:37.955Z
+  - _ulid: 01KRH4MK6VFX8GH2KWEYCBMMGA
+    content: '[DISPATCH-WORKSPACE] Cannot provision workspace for @01KRF47GKDR0QMKKY5KNCA18EV in
+      pending_review: no existing workspace record and no recoverable branch lineage. Submission
+      linkage references branch
+      "dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g" but it could not
+      be found locally or on any remote. Suggested action: Ensure the task has submission linkage
+      with a valid branch (kspec task set @01KRF47GKDR0QMKKY5KNCA18EV --submission-linkage), or
+      manually create the workspace branch and re-submit.'
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-05-13T17:02:35.228Z
