@@ -258,10 +258,12 @@ class TestCacheMissReloadsSavedCheckpoint:
 
     AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
     AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
     """
 
     # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
     # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
     def test_cache_miss_returns_loaded_checkpoint_artifact_not_temp_model(
         self, mock_model_patcher, tmp_path,
     ):
@@ -335,6 +337,7 @@ class TestCacheMissReloadsSavedCheckpoint:
             mock_ckpt_load.assert_called_once_with(save_path)
 
     # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
+    # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
     def test_cache_miss_releases_temp_model_before_loading_checkpoint_artifact(
         self, mock_model_patcher, tmp_path,
     ):
