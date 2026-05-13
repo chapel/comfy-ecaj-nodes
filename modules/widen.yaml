@@ -598,6 +598,10 @@ features:
                 then: the returned MODEL can be used without keeping the temporary save-time merge payload resident
                   solely for serialization or return.
                 when: the Exit node returns its MODEL output after the save.
+              - given: checkpoint-style saved model output has created temporary save-time merge payloads.
+                id: ac-checkpoint-save-failure-releases-temp-payload
+                then: temporary save-time merge payloads are released before control returns to ComfyUI.
+                when: save, publication, or artifact reload fails before a usable MODEL is returned.
             tags:
               - comfy
               - memory
