@@ -9254,9 +9254,23 @@ runs:
     completed_at: 2026-05-13T17:37:24.758Z
   - _ulid: 01KRH74VDHPE915A0JGFD915BD
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: "@claude"
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-05-13T17:46:25.073Z
+        completed_at: 2026-05-13T17:48:11.446Z
+        notes: "What worked: extending the existing checkpoint harness was clean because its structure
+          separates frozen dataclasses, pure stateless helpers (procfs/log parsing), and the
+          run_validation orchestrator. New optional inputs slotted in without touching the guard
+          layer or the existing AC tests, and the 'available=False + error' convention on
+          observations let unavailable data flow through the report without harness crashes.
+          Confirmed by all 1718 prior tests staying green after adding 40 new AC-annotated tests."
+      - status: completed
+        step_index: 1
+        started_at: 2026-05-13T17:48:11.446Z
+        completed_at: 2026-05-13T17:48:11.446Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-05-13T17:46:25.073Z
