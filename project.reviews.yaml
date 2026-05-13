@@ -17527,3 +17527,29 @@ reviews:
     created_at: 2026-05-08T20:55:06.797Z
     updated_at: 2026-05-08T20:58:30.145Z
     notes: []
+  - _ulid: 01KRFA5HAHWFJ3TGW544CB9RXG
+    slugs: []
+    title: "Plan review: Checkpoint Save Memory Contract Hardening"
+    author: Jacob Chapel
+    checks: []
+    events:
+      - _ulid: 01KRFA5HAGEAEZKVCJHKV8HD22
+        actor: Jacob Chapel
+        event_type: lifecycle_change
+        payload:
+          to: draft
+        timestamp: 2026-05-13T00:00:44.368Z
+    examined_commit: null
+    external_links: []
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: plan
+      content_hash: ""
+      ref: "@plan-checkpoint-save-memory-contract-hardening"
+      shadow_commit: ""
+    threads: []
+    verdicts: []
+    created_at: 2026-05-13T00:00:44.368Z
+    updated_at: null
+    notes: []
