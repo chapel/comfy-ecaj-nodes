@@ -357,7 +357,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T18:13:43.266Z
+      updated_at: 2026-05-13T18:13:48.305Z
     integration:
       status: pending
       detail: null
@@ -366,25 +366,20 @@ workspaces:
       target_branch: dev
       target_commit: 242589deff9dfa4775521e93934d8e99d7e61deb
       updated_at: 2026-05-13T18:13:43.266Z
-    lifecycle_state: integrating
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_ref: "@01KRH2YMJZ9JC1T350SFECPBST"
     task_slug: task-checkpoint-save-memory-validation-reporting
     timestamps:
       closed_at: null
       last_active_at: 2026-05-13T18:06:54.902Z
-      last_reconciled_at: 2026-05-13T18:13:43.266Z
+      last_reconciled_at: 2026-05-13T18:13:48.305Z
       created_at: 2026-05-13T17:35:45.826Z
-      updated_at: 2026-05-13T18:13:43.266Z
+      updated_at: 2026-05-13T18:13:48.305Z
     workspace_id: dispatch-workspace-01KRH2YMJZ9JC1T350SFECPBST
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer:
-        branch_mode: detached
-        branch_ref: null
-        head: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
-        last_seen_at: 2026-05-13T18:06:51.694Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-memory-validation-reporting-01krh2ym-review
+      reviewer: null
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-checkpoint-save-memory-validation-reporting/01krh2ym
