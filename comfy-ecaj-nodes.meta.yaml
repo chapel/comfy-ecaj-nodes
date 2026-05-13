@@ -1454,6 +1454,20 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-05-13T17:37:14.470Z
+  - _ulid: 01KRH796J445YFHQHSZPR92SSS
+    type: success
+    content: "Manual harness observation pattern: for optional process/log inputs the operator may omit,
+      model each observation as a dataclass with available:bool + error:str fields and never raise
+      from the reader helpers. Helpers populate available=False and a descriptive error string when
+      the input is missing or the source is unreadable; the report formatter prints 'unavailable
+      (<reason>)' and the JSON schema is identical regardless of input availability. Used in
+      real_comfy_checkpoint_validation.py for ProcessMemoryObservation and LogMemoryObservation —
+      keeps the harness running even when --comfy-pid or --comfy-log-path are not supplied or procfs
+      is locked down."
+    author: "@claude"
+    resolution: null
+    resolved: false
+    created_at: 2026-05-13T17:48:47.556Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
