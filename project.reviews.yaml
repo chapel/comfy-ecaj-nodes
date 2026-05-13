@@ -17576,6 +17576,18 @@ reviews:
         required: true
         created_at: 2026-05-13T00:02:05.285Z
         completed_at: 2026-05-13T00:02:05.285Z
+      - status: pass
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Harness and manual tasks preserve explicit opt-in, forbid auto-discovery/process
+          starts/live CI dispatch, and the implementation notes explicitly exclude output-mode
+          dropdowns, saved artifact semantic changes, save_model interface changes, and cleanup
+          progress/status scope.
+        name: Real Comfy safety and scope control
+        required: true
+        created_at: 2026-05-13T00:02:14.588Z
+        completed_at: 2026-05-13T00:02:14.588Z
     events:
       - _ulid: 01KRFA5HAGEAEZKVCJHKV8HD22
         actor: Jacob Chapel
@@ -17632,6 +17644,13 @@ reviews:
           status: pass
           name: Dependency ordering
         timestamp: 2026-05-13T00:02:05.725Z
+      - _ulid: 01KRFA89WDXZP7SNFJQ6KF2CSP
+        actor: Jacob Chapel
+        event_type: check_added
+        payload:
+          status: pass
+          name: Real Comfy safety and scope control
+        timestamp: 2026-05-13T00:02:15.053Z
     examined_commit: null
     external_links: []
     lifecycle_state: open
@@ -17677,5 +17696,5 @@ reviews:
         kind: blocker
     verdicts: []
     created_at: 2026-05-13T00:00:44.368Z
-    updated_at: 2026-05-13T00:02:05.285Z
+    updated_at: 2026-05-13T00:02:14.588Z
     notes: []
