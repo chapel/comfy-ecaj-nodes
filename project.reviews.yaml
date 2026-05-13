@@ -18952,6 +18952,17 @@ reviews:
         runner: kspec
         created_at: 2026-05-13T18:33:39.290Z
         completed_at: 2026-05-13T18:33:39.290Z
+      - status: fail
+        applies_to_version:
+          type: entity_version
+          content_hash: ""
+        evidence: Optional plain kspec validate exits 6 with existing alignment/completeness warnings;
+          schema and references OK. Required gate is kspec validate --refs, which passed.
+        name: kspec validate
+        required: false
+        runner: kspec
+        created_at: 2026-05-13T18:35:35.902Z
+        completed_at: 2026-05-13T18:35:35.902Z
     events:
       - _ulid: 01KRH9JMMCG3321YWJ8HTBP7V6
         actor: Jacob Chapel
@@ -19031,6 +19042,13 @@ reviews:
           from: open
           to: closed
         timestamp: 2026-05-13T18:33:55.332Z
+      - _ulid: 01KRH9YX9PJRC7C3KGP5ERCCWY
+        actor: codex
+        event_type: check_added
+        payload:
+          status: fail
+          name: kspec validate
+        timestamp: 2026-05-13T18:35:36.118Z
     examined_commit: d9a0c9a479c72e14d8fe85d0ba5b337cdb66d6c9
     external_links: []
     lifecycle_state: closed
@@ -19050,5 +19068,5 @@ reviews:
         role: reviewer
         created_at: 2026-05-13T18:33:55.332Z
     created_at: 2026-05-13T18:28:54.029Z
-    updated_at: 2026-05-13T18:33:55.332Z
+    updated_at: 2026-05-13T18:35:35.902Z
     notes: []
