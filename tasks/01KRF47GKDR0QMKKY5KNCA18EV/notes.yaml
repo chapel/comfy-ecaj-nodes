@@ -102,3 +102,11 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-05-13T17:02:35.228Z
+  - _ulid: 01KRH4ZAFP5XAJ4NZMTMGGYBKE
+    content: "Reviewer pushed commit 3e18d0c to annotate @comfy-memory-manager-compatibility
+      ac-checkpoint-cache-miss-releases-save-payload coverage after verifying the submitted
+      behavior. Post-fix validation passed: focused checkpoint pytest, full pytest, and kspec
+      validate --warnings-ok. PR: https://github.com/chapel/comfy-ecaj-nodes/pull/115"
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-05-13T17:08:26.742Z
