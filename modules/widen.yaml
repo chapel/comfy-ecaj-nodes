@@ -926,7 +926,7 @@ features:
               contents, and metadata match the requested saved-model behavior.
             status:
               maturity: draft
-              implementation: in_progress
+              implementation: implemented
             depends_on: []
             implements: []
             relates_to: []
@@ -1009,7 +1009,15 @@ features:
                 when: the failed execution returns control to ComfyUI.
             tags: []
             created: 2026-04-29T05:21:57.784Z
-            notes: []
+            notes:
+              - _ulid: 01KS0BBZT2N8PHKCJDZ7J18EGA
+                content: "Validation pass 2026-05-19: all linked tasks for checkpoint artifact safety are completed
+                  and full non-Comfy gates passed. Marked implemented to clear stale alignment for
+                  @plan-checkpoint-save-reconciliation-plan-2. No live Comfy/GPU run was performed
+                  in this pass."
+                supersedes: null
+                author: Jacob Chapel
+                created_at: 2026-05-19T14:48:49.730Z
         created: 2026-04-27T04:04:27.562Z
         notes:
           - _ulid: 01KQCQECMG74ZNTMF5WCF00TXB

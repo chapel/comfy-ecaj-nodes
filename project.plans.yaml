@@ -4160,6 +4160,15 @@ plans:
           full checkpoint loader and downstream workflow is required.
         author: "@claude"
         created_at: 2026-04-29T13:38:41.727Z
+      - _ulid: 01KS0BBZZZY6KGWX2P4ENYMPAX
+        content: "Validation pass 2026-05-19: all 9 derived tasks are completed and derived
+          full-output/streaming specs are implemented; non-Comfy gates passed (full pytest 1731,
+          ruff, kspec refs). Leaving plan active because derived @comfy-memory-manager-compatibility
+          remains in_progress due pending manual_only
+          @task-full-model-real-comfy-memory-validation-manual-run, and Jacob asked not to run
+          Comfy/GPU right now."
+        author: Jacob Chapel
+        created_at: 2026-05-19T14:48:49.919Z
   - _ulid: 01KQ5ZSQ13857R9CGT36JXYK91
     slugs:
       - plan-disk-backed-patch-output-plan
@@ -5885,7 +5894,7 @@ plans:
       replacement of diffusion-loader/deepcopy return behavior with checkpoint-compatible
 
       save and return semantics.
-    status: active
+    status: completed
     approved_at: 2026-04-29T05:20:55.277Z
     derived_specs:
       - "@checkpoint-loadable-saved-model-output"
@@ -5955,6 +5964,16 @@ plans:
           treated as supporting evidence only.
         author: "@claude"
         created_at: 2026-04-29T13:39:11.282Z
+      - _ulid: 01KS0BBZVTFPVF7ZMY45GB7MH2
+        content: "Validation pass 2026-05-19: all 14 derived tasks completed; derived specs
+          @checkpoint-loadable-saved-model-output, @saved-model-artifact-safety, and
+          @live-comfy-saved-output-validation are implemented after stale artifact-safety status
+          cleanup. Evidence: checkpoint tests passed 264; full pytest passed 1731 with
+          CUDA_VISIBLE_DEVICES=''; ruff passed; kspec validate --refs passed; prior live report
+          reports/checkpoint-memory-validation-20260513T1335.json remains available. No Comfy/GPU
+          run was performed in this pass. Plan is closure-eligible."
+        author: Jacob Chapel
+        created_at: 2026-05-19T14:48:49.786Z
   - _ulid: 01KQJFYGXFN9QEJXEXYN3NC7RZ
     slugs:
       - plan-saved-model-materialization-progress
@@ -6119,7 +6138,7 @@ plans:
       The task should remain automation-eligible after approval because it can be
       validated with mocked/fake progress objects and normal unit tests. Real ComfyUI
       validation is optional maintainer evidence and must remain explicitly invoked.
-    status: active
+    status: completed
     approved_at: 2026-05-08T20:24:32.510Z
     derived_specs:
       - "@streaming-materialization-progress"
@@ -6143,6 +6162,14 @@ plans:
           validation is optional maintainer evidence and must remain explicitly invoked.
         author: Jacob Chapel
         created_at: 2026-05-08T20:24:54.684Z
+      - _ulid: 01KS0BBZ4XW2VH7APMXAW7E4H4
+        content: "Validation pass 2026-05-19: all derived tasks completed;
+          @streaming-materialization-progress is implemented; no Comfy/GPU run was performed.
+          Evidence: CUDA_VISIBLE_DEVICES='' python -m pytest tests/test_save_progress.py and
+          active-plan subset passed; full pytest passed 1731 tests; ruff passed; kspec validate
+          --refs passed. Plan is closure-eligible."
+        author: Jacob Chapel
+        created_at: 2026-05-19T14:48:49.053Z
   - _ulid: 01KRFA1YXPGE7THP7AD3NVVWQK
     slugs:
       - plan-checkpoint-save-memory-contract-hardening
@@ -6583,7 +6610,7 @@ plans:
       the harness, but the final live evidence task requires maintainer-provided local
 
       environment details.
-    status: active
+    status: completed
     approved_at: 2026-05-13T16:32:58.678Z
     derived_specs: []
     derived_tasks:
@@ -6626,3 +6653,12 @@ plans:
           environment details.
         author: Jacob Chapel
         created_at: 2026-05-13T16:33:07.230Z
+      - _ulid: 01KS0BBZXNPPER1N7AE0B0WY5B
+        content: "Validation pass 2026-05-19: all 4 derived tasks completed including the manual repeated
+          checkpoint memory validation report. I fixed a Python collection blocker in
+          tests/test_checkpoint_returned_model.py by converting long multi-with patches to
+          contextlib.ExitStack, then verified py_compile, checkpoint tests (264), active-plan subset
+          (577), full pytest (1731), ruff, and kspec validate --refs. No Comfy/GPU run was performed
+          in this pass. Plan is closure-eligible."
+        author: Jacob Chapel
+        created_at: 2026-05-19T14:48:49.845Z
