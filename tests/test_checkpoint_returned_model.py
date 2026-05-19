@@ -946,34 +946,47 @@ class TestCheckpointSaveFailureReleasesTempPayload:
         temp_model = mock_model_patcher.clone()
         release_calls: list[object] = []
 
-        with (
-            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
-            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
-            patch("nodes.exit.compute_base_identity", return_value="base_id"),
-            patch("nodes.exit.compute_lora_stats", return_value={}),
-            patch("nodes.exit.serialize_recipe", return_value="{}"),
-            patch("nodes.exit.validate_checkpoint_components"),
-            patch("nodes.exit.check_checkpoint_cache", return_value=False),
-            patch("nodes.exit.analyze_recipe") as mock_analyze,
-            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
-            patch("nodes.exit._unpatch_loaded_clones"),
-            patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit.compile_plan", return_value=MagicMock()),
-            patch("nodes.exit.chunked_evaluation", return_value={}),
-            patch("nodes.exit.compile_batch_groups", return_value={}),
-            patch("nodes.exit.install_merged_patches", return_value=temp_model),
-            patch(
-                "nodes.exit.save_comfy_checkpoint",
-                side_effect=RuntimeError("save failed: disk full"),
-            ),
-            patch("nodes.exit.check_ram_preflight"),
-            patch(
-                "nodes.exit._release_temporary_checkpoint_model",
-                side_effect=release_calls.append,
-            ),
-            patch("nodes.exit._load_checkpoint_artifact") as mock_ckpt_load,
-        ):
+        # Keep this setup in ExitStack form rather than a large parenthesized
+        # multi-`with`: CPython rejects very long statically nested `with`
+        # blocks before pytest can collect the file.
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(
+                patch("nodes.exit.validate_model_name", return_value="model.safetensors")
+            )
+            stack.enter_context(
+                patch("nodes.exit._resolve_checkpoints_path", return_value=save_path)
+            )
+            stack.enter_context(patch("nodes.exit.compute_recipe_hash", return_value="hash1"))
+            stack.enter_context(patch("nodes.exit.compute_base_identity", return_value="base_id"))
+            stack.enter_context(patch("nodes.exit.compute_lora_stats", return_value={}))
+            stack.enter_context(patch("nodes.exit.serialize_recipe", return_value="{}"))
+            stack.enter_context(patch("nodes.exit.validate_checkpoint_components"))
+            stack.enter_context(patch("nodes.exit.check_checkpoint_cache", return_value=False))
+            mock_analyze = stack.enter_context(patch("nodes.exit.analyze_recipe"))
+            mock_analyze_models = stack.enter_context(patch("nodes.exit.analyze_recipe_models"))
+            stack.enter_context(patch("nodes.exit._unpatch_loaded_clones"))
+            stack.enter_context(patch("nodes.exit.ProgressBar", None))
+            stack.enter_context(patch("nodes.exit.compile_plan", return_value=MagicMock()))
+            stack.enter_context(patch("nodes.exit.chunked_evaluation", return_value={}))
+            stack.enter_context(patch("nodes.exit.compile_batch_groups", return_value={}))
+            stack.enter_context(
+                patch("nodes.exit.install_merged_patches", return_value=temp_model)
+            )
+            stack.enter_context(
+                patch(
+                    "nodes.exit.save_comfy_checkpoint",
+                    side_effect=RuntimeError("save failed: disk full"),
+                )
+            )
+            stack.enter_context(patch("nodes.exit.check_ram_preflight"))
+            stack.enter_context(
+                patch(
+                    "nodes.exit._release_temporary_checkpoint_model",
+                    side_effect=release_calls.append,
+                )
+            )
+            mock_ckpt_load = stack.enter_context(patch("nodes.exit._load_checkpoint_artifact"))
+
             _stub_analyze(mock_analyze, mock_analyze_models, mock_model_patcher)
 
             with pytest.raises(RuntimeError, match="save failed: disk full"):
@@ -1083,31 +1096,35 @@ class TestCheckpointSaveFailureReleasesTempPayload:
             events.append("load-attempt")
             raise RuntimeError("reload failed: cannot read artifact")
 
-        with (
-            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
-            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
-            patch("nodes.exit.compute_base_identity", return_value="base_id"),
-            patch("nodes.exit.compute_lora_stats", return_value={}),
-            patch("nodes.exit.serialize_recipe", return_value="{}"),
-            patch("nodes.exit.validate_checkpoint_components"),
-            patch("nodes.exit.check_checkpoint_cache", return_value=False),
-            patch("nodes.exit.analyze_recipe") as mock_analyze,
-            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
-            patch("nodes.exit._unpatch_loaded_clones"),
-            patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit.compile_plan", return_value=MagicMock()),
-            patch("nodes.exit.chunked_evaluation", return_value={}),
-            patch("nodes.exit.compile_batch_groups", return_value={}),
-            patch("nodes.exit.install_merged_patches", return_value=temp_model),
-            patch("nodes.exit.save_comfy_checkpoint"),
-            patch("nodes.exit.check_ram_preflight"),
-            patch(
-                "nodes.exit._release_temporary_checkpoint_model",
-                side_effect=release_temp,
-            ),
-            patch("nodes.exit._load_checkpoint_artifact", side_effect=load_checkpoint),
-        ):
+        with contextlib.ExitStack() as stack:
+            for cm in [
+                patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+                patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+                patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+                patch("nodes.exit.compute_base_identity", return_value="base_id"),
+                patch("nodes.exit.compute_lora_stats", return_value={}),
+                patch("nodes.exit.serialize_recipe", return_value="{}"),
+                patch("nodes.exit.validate_checkpoint_components"),
+                patch("nodes.exit.check_checkpoint_cache", return_value=False),
+                patch("nodes.exit._unpatch_loaded_clones"),
+                patch("nodes.exit.ProgressBar", None),
+                patch("nodes.exit.compile_plan", return_value=MagicMock()),
+                patch("nodes.exit.chunked_evaluation", return_value={}),
+                patch("nodes.exit.compile_batch_groups", return_value={}),
+                patch("nodes.exit.install_merged_patches", return_value=temp_model),
+                patch("nodes.exit.save_comfy_checkpoint"),
+                patch("nodes.exit.check_ram_preflight"),
+                patch(
+                    "nodes.exit._release_temporary_checkpoint_model",
+                    side_effect=release_temp,
+                ),
+                patch("nodes.exit._load_checkpoint_artifact", side_effect=load_checkpoint),
+            ]:
+                stack.enter_context(cm)
+            mock_analyze = stack.enter_context(patch("nodes.exit.analyze_recipe"))
+            mock_analyze_models = stack.enter_context(
+                patch("nodes.exit.analyze_recipe_models")
+            )
             _stub_analyze(mock_analyze, mock_analyze_models, mock_model_patcher)
 
             with pytest.raises(RuntimeError, match="reload failed"):
@@ -1134,33 +1151,37 @@ class TestCheckpointSaveFailureReleasesTempPayload:
         save_path = str(tmp_path / "model.safetensors")
         node = WIDENExitNode()
 
-        with (
-            patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
-            patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
-            patch("nodes.exit.compute_base_identity", return_value="base_id"),
-            patch("nodes.exit.compute_lora_stats", return_value={}),
-            patch("nodes.exit.serialize_recipe", return_value="{}"),
-            patch("nodes.exit.validate_checkpoint_components"),
-            patch("nodes.exit.check_checkpoint_cache", return_value=False),
-            patch("nodes.exit.analyze_recipe") as mock_analyze,
-            patch("nodes.exit.analyze_recipe_models") as mock_analyze_models,
-            patch("nodes.exit._unpatch_loaded_clones"),
-            patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit.compile_plan", return_value=MagicMock()),
-            patch("nodes.exit.chunked_evaluation", return_value={}),
-            patch("nodes.exit.compile_batch_groups", return_value={}),
-            patch(
-                "nodes.exit.install_merged_patches",
-                side_effect=RuntimeError("install failed: no model"),
-            ),
-            patch("nodes.exit.save_comfy_checkpoint") as mock_save,
-            patch("nodes.exit.check_ram_preflight"),
-            patch(
-                "nodes.exit._release_temporary_checkpoint_model",
-            ) as mock_release,
-            patch("nodes.exit._load_checkpoint_artifact") as mock_ckpt_load,
-        ):
+        with contextlib.ExitStack() as stack:
+            for cm in [
+                patch("nodes.exit.validate_model_name", return_value="model.safetensors"),
+                patch("nodes.exit._resolve_checkpoints_path", return_value=save_path),
+                patch("nodes.exit.compute_recipe_hash", return_value="hash1"),
+                patch("nodes.exit.compute_base_identity", return_value="base_id"),
+                patch("nodes.exit.compute_lora_stats", return_value={}),
+                patch("nodes.exit.serialize_recipe", return_value="{}"),
+                patch("nodes.exit.validate_checkpoint_components"),
+                patch("nodes.exit.check_checkpoint_cache", return_value=False),
+                patch("nodes.exit._unpatch_loaded_clones"),
+                patch("nodes.exit.ProgressBar", None),
+                patch("nodes.exit.compile_plan", return_value=MagicMock()),
+                patch("nodes.exit.chunked_evaluation", return_value={}),
+                patch("nodes.exit.compile_batch_groups", return_value={}),
+                patch(
+                    "nodes.exit.install_merged_patches",
+                    side_effect=RuntimeError("install failed: no model"),
+                ),
+                patch("nodes.exit.check_ram_preflight"),
+            ]:
+                stack.enter_context(cm)
+            mock_analyze = stack.enter_context(patch("nodes.exit.analyze_recipe"))
+            mock_analyze_models = stack.enter_context(
+                patch("nodes.exit.analyze_recipe_models")
+            )
+            mock_save = stack.enter_context(patch("nodes.exit.save_comfy_checkpoint"))
+            mock_release = stack.enter_context(
+                patch("nodes.exit._release_temporary_checkpoint_model")
+            )
+            mock_ckpt_load = stack.enter_context(patch("nodes.exit._load_checkpoint_artifact"))
             _stub_analyze(mock_analyze, mock_analyze_models, mock_model_patcher)
 
             with pytest.raises(RuntimeError, match="install failed: no model"):
