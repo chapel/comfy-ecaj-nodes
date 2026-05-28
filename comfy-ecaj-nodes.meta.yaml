@@ -1521,7 +1521,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9ATCYGMFWHQJGMA9KSC
     description: Capture and act on systemic patterns — friction, successes, questions, and ideas. The
       feedback loop that drives process improvement.
@@ -1537,7 +1537,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9B84SRK4E2EFMPMK8B7
     description: Structured reflection at the end of work sessions. Identifies learnings, friction
       points, and improvements for system evolution.
@@ -1553,7 +1553,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9BNF2CK6VNZEEWZ9M7Q
     description: Triage inbox items systematically. Records decisions with audit trail, then executes
       actions. Supports inbox, observations, and automation eligibility triage.
@@ -1569,7 +1569,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9C7DE0ESP7KNABZYEQE
     description: Process inbox items using the record-act pattern. Categorize, promote to spec/task,
       merge duplicates, defer, or delete stale items with full audit trail.
@@ -1585,7 +1585,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9CP5EGS5S71DWHPCC5E
     description: Assess and prepare tasks for automation eligibility. Verify spec coverage, acceptance
       criteria, and task readiness for automated agents.
@@ -1601,7 +1601,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9D6PNZ4PJ3XFAXJZP09
     description: Create and maintain specification items — modules, features, requirements, acceptance
       criteria, and traits. The source of truth for what to build.
@@ -1617,7 +1617,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9DKBSWA8D4E6V6GKFD2
     description: Translate approved plans into specs and tasks. Import structured documents or create
       incrementally. Plans persist as durable artifacts with audit trail.
@@ -1633,7 +1633,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9E11TH3M9R94QH838J0
     description: Structured task lifecycle — start, work, note, submit, complete. AC annotations, fix
       cycle handling via review records, scope management, and quality checks.
@@ -1649,7 +1649,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9ECDPGEGETSCD0PT0DW
     description: How to review work and use kspec review records. Covers both reviewer and worker
       perspectives — creating reviews, structuring findings, AC coverage verification, review
@@ -1666,7 +1666,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9ERGXRE7VPNY8RY9TV8
     description: Merge approved work into an integration branch. Local-first git merge with gates based
       on kspec review disposition — approved status, passing checks, and resolved blocker threads.
@@ -1682,7 +1682,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9F46SCV2ME4J8RA9D0M
     description: Review a plan document for quality, completeness, and readiness. Checks spec quality,
       task standalone-ness, dependency ordering, and alignment with existing specs.
@@ -1698,7 +1698,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
   - _ulid: 01KQ62Q9FHFNNKCTHF196R7KVB
     description: Formalize repeatable patterns into trackable kspec workflows. Design steps, choose
       triggers, create loop variants, and integrate with skills.
@@ -1714,7 +1714,7 @@ skills:
       - claude-code
       - codex
       - droid
-    version: 0.13.0
+    version: 0.14.0
 workflows:
   - _ulid: 01KH4D2G8XEYKRQNNZR9HC6S8A
     description: Core pattern for working on a task. Full lifecycle from start through PR merge.
