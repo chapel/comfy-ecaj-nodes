@@ -3,228 +3,229 @@ slugs:
   - foundation
 title: Foundation
 type: module
+description: Project-level infrastructure shared by all node packs
 status:
   maturity: draft
   implementation: not_started
-description: Project-level infrastructure shared by all node packs
-tags: []
 depends_on: []
 implements: []
 relates_to: []
 tests: []
 traits: []
-notes: []
+tags: []
 features:
   - _ulid: 01KH4H1VQ7C0N628PHPV5815P2
     slugs:
       - comfyui-packaging
     title: ComfyUI Packaging
     type: feature
-    tags: []
     description: |
       Node registration, Python packaging, and ComfyUI integration infrastructure.
       Covers __init__.py NODE_CLASS_MAPPINGS, pyproject.toml with [tool.comfy],
       requirements.txt, and CATEGORY namespace (ecaj/*).
-    acceptance_criteria:
-      - id: ac-1
-        given: comfy-ecaj-nodes is installed in ComfyUI custom_nodes
-        when: ComfyUI starts
-        then: all registered nodes appear under the ecaj category in the node menu
-      - id: ac-2
-        given: a new node class is added to a nodes/ module
-        when: it is added to NODE_CLASS_MAPPINGS in __init__.py
-        then: ComfyUI discovers it without changes to other files
-      - id: ac-3
-        given: pyproject.toml defines [tool.comfy] metadata
-        when: the package is published to the ComfyUI registry
-        then: it displays as ecaj nodes with publisher ecaj
-      - id: ac-4
-        given: the CATEGORY namespace uses ecaj/merge for WIDEN nodes
-        when: future non-merge nodes are added
-        then: they use ecaj/<domain> following the established lowercase pattern
+    status:
+      maturity: draft
+      implementation: implemented
     depends_on: []
     implements: []
     relates_to: []
     tests: []
     traits: []
-    notes: []
+    acceptance_criteria:
+      - given: comfy-ecaj-nodes is installed in ComfyUI custom_nodes
+        id: ac-1
+        then: all registered nodes appear under the ecaj category in the node menu
+        when: ComfyUI starts
+      - given: a new node class is added to a nodes/ module
+        id: ac-2
+        then: ComfyUI discovers it without changes to other files
+        when: it is added to NODE_CLASS_MAPPINGS in __init__.py
+      - given: pyproject.toml defines [tool.comfy] metadata
+        id: ac-3
+        then: it displays as ecaj nodes with publisher ecaj
+        when: the package is published to the ComfyUI registry
+      - given: the CATEGORY namespace uses ecaj/merge for WIDEN nodes
+        id: ac-4
+        then: they use ecaj/<domain> following the established lowercase pattern
+        when: future non-merge nodes are added
+    tags: []
     created: 2026-02-10T19:39:32.455Z
-    status:
-      maturity: draft
-      implementation: implemented
+    notes: []
   - _ulid: 01KH4H1VQBN1XN9AY8BN31W9GV
     slugs:
       - testing-infrastructure
     title: Testing Infrastructure
     type: feature
-    tags: []
     description: |
       pytest configuration, ComfyUI mocking strategy, and test fixtures for
       recipe tree construction. Must support testing nodes without a running
       ComfyUI instance.
-    acceptance_criteria:
-      - id: ac-1
-        given: a developer runs pytest from the project root
-        when: tests execute
-        then: all tests pass without requiring a running ComfyUI instance
-      - id: ac-2
-        given: a test needs a ModelPatcher-like object
-        when: it uses the mock fixture
-        then: |
-          the mock provides model_state_dict(), clone(), add_patches(),
-          get_key_patches(), patches_uuid, and model.diffusion_model state
-          dict access
-      - id: ac-3
-        given: a test needs a recipe tree
-        when: it uses recipe fixtures
-        then: |
-          pre-built recipe trees for single-LoRA, multi-LoRA set, compose,
-          and chain patterns are available
-      - id: ac-4
-        given: tests for nodes that use ComfyUI APIs like folder_paths
-        when: they run without ComfyUI installed
-        then: the APIs are mocked via conftest.py fixtures
+    status:
+      maturity: draft
+      implementation: implemented
     depends_on: []
     implements: []
     relates_to: []
     tests: []
     traits: []
-    notes: []
-    created: 2026-02-10T19:39:32.459Z
+    acceptance_criteria:
+      - given: a developer runs pytest from the project root
+        id: ac-1
+        then: all tests pass without requiring a running ComfyUI instance
+        when: tests execute
+      - given: a test needs a ModelPatcher-like object
+        id: ac-2
+        then: |
+          the mock provides model_state_dict(), clone(), add_patches(),
+          get_key_patches(), patches_uuid, and model.diffusion_model state
+          dict access
+        when: it uses the mock fixture
+      - given: a test needs a recipe tree
+        id: ac-3
+        then: |
+          pre-built recipe trees for single-LoRA, multi-LoRA set, compose,
+          and chain patterns are available
+        when: it uses recipe fixtures
+      - given: tests for nodes that use ComfyUI APIs like folder_paths
+        id: ac-4
+        then: the APIs are mocked via conftest.py fixtures
+        when: they run without ComfyUI installed
+    tags: []
     requirements:
       - _ulid: 01KH508VCWZRE8Q6NT56X3MXD7
         slugs:
           - comfyui-mocking
         title: ComfyUI Mocking and Fixtures
         type: requirement
-        tags: []
         description: |
           pytest conftest.py with sys.modules mocking for ComfyUI imports,
           MockModelPatcher class, and recipe tree fixtures. The base layer that
           all other tests depend on.
-        acceptance_criteria:
-          - id: ac-1
-            given: a test needs a ModelPatcher-like object
-            when: it uses the mock_model_patcher fixture
-            then: |
-              the mock provides model_state_dict(filter_prefix) returning a dict
-              of small fake tensors keyed like diffusion_model.input_blocks.0.0.weight,
-              clone() returning a new MockModelPatcher, add_patches() storing patches,
-              get_key_patches() returning patch data, and patches_uuid property
-          - id: ac-2
-            given: a test needs a recipe tree
-            when: it uses recipe fixtures
-            then: |
-              pre-built recipe trees are available for single-LoRA, multi-LoRA set,
-              compose (2 branches), chain (2 sequential merges), and full
-              (compose + chain) patterns
-          - id: ac-3
-            given: tests for nodes that import ComfyUI modules like folder_paths
-            when: they run without ComfyUI installed
-            then: |
-              ComfyUI modules are mocked via sys.modules patching in conftest.py
-              before any node module is imported
-          - id: ac-4
-            given: a test needs fake SDXL or Z-Image state dict keys
-            when: it uses arch-specific fixtures
-            then: |
-              fixture provides a dict with representative key patterns for each
-              supported architecture (input_blocks for SDXL, layers + noise_refiner
-              for Z-Image)
+        status:
+          maturity: draft
+          implementation: implemented
         depends_on: []
         implements: []
         relates_to: []
         tests: []
         traits: []
-        notes: []
+        acceptance_criteria:
+          - given: a test needs a ModelPatcher-like object
+            id: ac-1
+            then: |
+              the mock provides model_state_dict(filter_prefix) returning a dict
+              of small fake tensors keyed like diffusion_model.input_blocks.0.0.weight,
+              clone() returning a new MockModelPatcher, add_patches() storing patches,
+              get_key_patches() returning patch data, and patches_uuid property
+            when: it uses the mock_model_patcher fixture
+          - given: a test needs a recipe tree
+            id: ac-2
+            then: |
+              pre-built recipe trees are available for single-LoRA, multi-LoRA set,
+              compose (2 branches), chain (2 sequential merges), and full
+              (compose + chain) patterns
+            when: it uses recipe fixtures
+          - given: tests for nodes that import ComfyUI modules like folder_paths
+            id: ac-3
+            then: |
+              ComfyUI modules are mocked via sys.modules patching in conftest.py
+              before any node module is imported
+            when: they run without ComfyUI installed
+          - given: a test needs fake SDXL or Z-Image state dict keys
+            id: ac-4
+            then: |
+              fixture provides a dict with representative key patterns for each
+              supported architecture (input_blocks for SDXL, layers + noise_refiner
+              for Z-Image)
+            when: it uses arch-specific fixtures
+        tags: []
         created: 2026-02-11T00:05:30.140Z
-        status:
-          maturity: draft
-          implementation: implemented
+        notes: []
       - _ulid: 01KH508VD63383F1GR9V1X9F9K
         slugs:
           - node-graph-testing
         title: Node Graph Testing
         type: requirement
-        tags: []
         description: |
           Integration tests that validate the recipe graph building pipeline.
           Uses mock entry node to feed RecipeBase into the node chain, validates
           recipe tree structure through LoRA/Compose/Merge, and uses a mock
           executor path in Exit to verify the tree would produce correct operation
           sequences (filter_delta vs merge_weights) without GPU execution.
-        acceptance_criteria:
-          - id: ac-1
-            given: a mock Entry node producing a RecipeBase with arch sdxl
-            when: wired to LoRA node then to Merge node
-            then: |
-              the resulting RecipeMerge contains the correct base (RecipeBase)
-              and target (RecipeLoRA with the specified LoRA) and t_factor
-          - id: ac-2
-            given: a recipe graph with compose target containing 3 branches
-            when: the mock executor analyzes the tree
-            then: it identifies this as a merge_weights operation (not filter_delta)
-          - id: ac-3
-            given: a recipe graph with single LoRA target
-            when: the mock executor analyzes the tree
-            then: it identifies this as a filter_delta operation
-          - id: ac-4
-            given: a chain of two Merge nodes (inner merge feeds outer base)
-            when: the mock executor walks the tree
-            then: it identifies inner merge must evaluate first and feeds into outer
-          - id: ac-5
-            given: an invalid recipe graph (e.g. RecipeBase wired to compose branch)
-            when: validation runs
-            then: a clear error is raised naming the invalid type and position
-          - id: ac-6
-            given: a complete graph matching the hyphoria workflow from design doc 6.5
-            when: built and validated through the node chain
-            then: the recipe tree structure matches the expected compose-merge-chain pattern
+        status:
+          maturity: draft
+          implementation: implemented
         depends_on: []
         implements: []
         relates_to: []
         tests: []
         traits: []
-        notes: []
+        acceptance_criteria:
+          - given: a mock Entry node producing a RecipeBase with arch sdxl
+            id: ac-1
+            then: |
+              the resulting RecipeMerge contains the correct base (RecipeBase)
+              and target (RecipeLoRA with the specified LoRA) and t_factor
+            when: wired to LoRA node then to Merge node
+          - given: a recipe graph with compose target containing 3 branches
+            id: ac-2
+            then: it identifies this as a merge_weights operation (not filter_delta)
+            when: the mock executor analyzes the tree
+          - given: a recipe graph with single LoRA target
+            id: ac-3
+            then: it identifies this as a filter_delta operation
+            when: the mock executor analyzes the tree
+          - given: a chain of two Merge nodes (inner merge feeds outer base)
+            id: ac-4
+            then: it identifies inner merge must evaluate first and feeds into outer
+            when: the mock executor walks the tree
+          - given: an invalid recipe graph (e.g. RecipeBase wired to compose branch)
+            id: ac-5
+            then: a clear error is raised naming the invalid type and position
+            when: validation runs
+          - given: a complete graph matching the hyphoria workflow from design doc 6.5
+            id: ac-6
+            then: the recipe tree structure matches the expected compose-merge-chain pattern
+            when: built and validated through the node chain
+        tags: []
         created: 2026-02-11T00:05:30.150Z
-        status:
-          maturity: draft
-          implementation: implemented
+        notes: []
       - _ulid: 01KH508VDJJNRN312NV7Y260HZ
         slugs:
           - ci-pipeline
         title: CI Pipeline
         type: requirement
-        tags: []
         description: |
           GitHub Actions workflow for automated testing. Initial scope is
           unit tests with CPU-only torch and ruff linting on push/PR. Designed
           to be extended later with comfy-test registration and workflow smoke tests.
-        acceptance_criteria:
-          - id: ac-1
-            given: a push to any branch or a PR is opened
-            when: GitHub Actions runs
-            then: |
-              pytest executes with CPU-only PyTorch on ubuntu-latest and all
-              tests pass
-          - id: ac-2
-            given: the CI workflow
-            when: linting step runs
-            then: ruff check passes with no errors
-          - id: ac-3
-            given: CI completes
-            when: results are reported
-            then: PR shows green check for both test and lint jobs
+        status:
+          maturity: draft
+          implementation: implemented
         depends_on: []
         implements: []
         relates_to: []
         tests: []
         traits: []
-        notes: []
+        acceptance_criteria:
+          - given: a push to any branch or a PR is opened
+            id: ac-1
+            then: |
+              pytest executes with CPU-only PyTorch on ubuntu-latest and all
+              tests pass
+            when: GitHub Actions runs
+          - given: the CI workflow
+            id: ac-2
+            then: ruff check passes with no errors
+            when: linting step runs
+          - given: CI completes
+            id: ac-3
+            then: PR shows green check for both test and lint jobs
+            when: results are reported
+        tags: []
         created: 2026-02-11T00:05:30.162Z
-        status:
-          maturity: draft
-          implementation: implemented
-    status:
-      maturity: draft
-      implementation: implemented
+        notes: []
+    created: 2026-02-10T19:39:32.459Z
+    notes: []
+created: 2026-05-28T20:34:29.156Z
+notes: []
