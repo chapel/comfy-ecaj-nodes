@@ -1,0 +1,237 @@
+_ulid: 01KRH4P8EAVNEKRK3KQVN747YK
+slugs: []
+title: Review checkpoint save temp model release
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_checkpoint_returned_model.py
+      tests/test_checkpoint_save_format.py tests/test_exit_node.py
+      tests/test_checkpoint_components.py -q: 141 passed"
+    name: focused checkpoint pytest
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T17:05:56.334Z
+    completed_at: 2026-05-13T17:05:56.334Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok: schema/references/skills OK; warnings only for pre-existing
+      alignment/completeness items"
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-05-13T17:05:56.858Z
+    completed_at: 2026-05-13T17:05:56.858Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests -q: 1668 passed"
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T17:05:57.365Z
+    completed_at: 2026-05-13T17:05:57.365Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "On reviewer fix head 3e18d0c9bd71cf446e368fa916db0470b3262fa0: uv run pytest
+      tests/test_checkpoint_returned_model.py tests/test_checkpoint_save_format.py
+      tests/test_exit_node.py tests/test_checkpoint_components.py -q passed (141 tests)"
+    name: post-fix focused checkpoint pytest
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T17:08:25.807Z
+    completed_at: 2026-05-13T17:08:25.807Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "On reviewer fix head 3e18d0c9bd71cf446e368fa916db0470b3262fa0: kspec validate
+      --warnings-ok passed; only existing alignment/completeness warnings"
+    name: post-fix kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-05-13T17:08:26.298Z
+    completed_at: 2026-05-13T17:08:26.298Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "On reviewer fix head 3e18d0c9bd71cf446e368fa916db0470b3262fa0: uv run pytest tests -q
+      passed (1668 tests)"
+    name: post-fix full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T17:08:27.076Z
+    completed_at: 2026-05-13T17:08:27.076Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "On CI-fix head a4765996abcb73fa6eb2969981dbb3480bbe1219: uv run pytest tests -q passed
+      (1668 tests)"
+    name: post-ci-fix full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T17:10:11.192Z
+    completed_at: 2026-05-13T17:10:11.192Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "On CI-fix head a4765996abcb73fa6eb2969981dbb3480bbe1219: uv run pytest
+      tests/test_checkpoint_returned_model.py tests/test_checkpoint_save_format.py
+      tests/test_exit_node.py tests/test_checkpoint_components.py -q passed (141 tests)"
+    name: post-ci-fix focused checkpoint pytest
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T17:10:11.648Z
+    completed_at: 2026-05-13T17:10:11.648Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "On CI-fix head a4765996abcb73fa6eb2969981dbb3480bbe1219: uv run ruff check passed"
+    name: post-ci-fix ruff
+    required: true
+    runner: ruff
+    created_at: 2026-05-13T17:10:12.141Z
+    completed_at: 2026-05-13T17:10:12.141Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "PR #115 at head a4765996abcb73fa6eb2969981dbb3480bbe1219: lint success, test success;
+      mergeStateStatus CLEAN"
+    name: github actions ci
+    required: true
+    runner: github-actions
+    created_at: 2026-05-13T17:11:31.188Z
+    completed_at: 2026-05-13T17:11:31.188Z
+events:
+  - _ulid: 01KRH4P8EA3YJADJFQYAA078JM
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-05-13T17:03:29.738Z
+  - _ulid: 01KRH4PNEHW73R2QCTP2QBQ0JS
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-05-13T17:03:43.057Z
+  - _ulid: 01KRH4TQQYT4YMZ0Y5XM1WHZDZ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused checkpoint pytest
+    timestamp: 2026-05-13T17:05:56.478Z
+  - _ulid: 01KRH4TR8YP1RW4B5QEJ62B82N
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-05-13T17:05:57.022Z
+  - _ulid: 01KRH4TRRZW8NWYJ2G8H81NEC5
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-05-13T17:05:57.535Z
+  - _ulid: 01KRH4Z9Q4SA40D5Z4WXDS2ERA
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: post-fix focused checkpoint pytest
+    timestamp: 2026-05-13T17:08:25.956Z
+  - _ulid: 01KRH4ZA6HEFHBPFG2ATG1SH3N
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: post-fix kspec validate
+    timestamp: 2026-05-13T17:08:26.449Z
+  - _ulid: 01KRH4ZAZCR8038MDVJW595T9M
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: post-fix full pytest
+    timestamp: 2026-05-13T17:08:27.245Z
+  - _ulid: 01KRH52GKWF4QMD8MGP3YYZK7X
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: post-ci-fix full pytest
+    timestamp: 2026-05-13T17:10:11.324Z
+  - _ulid: 01KRH52H2346J81RJTNRQFD704
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: post-ci-fix focused checkpoint pytest
+    timestamp: 2026-05-13T17:10:11.780Z
+  - _ulid: 01KRH52HHZMHZWJTVS00CN8A78
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: post-ci-fix ruff
+    timestamp: 2026-05-13T17:10:12.288Z
+  - _ulid: 01KRH54YRFWQA3EEQQTX4EZN7D
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: github actions ci
+    timestamp: 2026-05-13T17:11:31.344Z
+  - _ulid: 01KRH557BCABNT7Z0X8BPQCDYN
+    actor: jacob.chapel@gmail.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-05-13T17:11:40.141Z
+  - _ulid: 01KRH557BD64XG6QJ1HH5NR0F9
+    actor: jacob.chapel@gmail.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-05-13T17:11:40.141Z
+examined_commit: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@checkpoint-save-release-temp-model-return-artifact"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: jacob.chapel@gmail.com
+    role: reviewer
+    created_at: 2026-05-13T17:11:40.140Z
+created_at: 2026-05-13T17:03:29.738Z
+updated_at: 2026-05-13T17:11:40.141Z
+notes: []

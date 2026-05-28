@@ -1,0 +1,216 @@
+_ulid: 01KQ6N9RBTWF13YQC21293X9JS
+slugs: []
+title: Review incremental safetensors artifact writer
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest -q tests/test_incremental_writer.py: 15 passed"
+    name: focused incremental writer tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T05:08:12.520Z
+    completed_at: 2026-04-27T05:08:12.520Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest -q tests/test_streaming_save.py tests/test_incremental_writer.py
+      tests/test_spike_reload.py tests/test_exit_node.py: passed (76 tests shown by pytest
+      progress)"
+    name: persistence surrounding tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T05:08:12.621Z
+    completed_at: 2026-04-27T05:08:12.621Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Direct script caught duplicate, wrong_shape, wrong_dtype, and unexpected-key RuntimeError,
+      then successfully finalized each scenario; dest existed after finalize.
+    name: validation-error publish repro
+    required: true
+    runner: python
+    created_at: 2026-04-27T05:08:12.823Z
+    completed_at: 2026-04-27T05:08:12.823Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "ruff check lib/incremental_writer.py tests/test_incremental_writer.py: All checks passed"
+    name: ruff changed files
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T05:08:12.927Z
+    completed_at: 2026-04-27T05:08:12.927Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest -q: 1,222 passed, 0 failures"
+    name: full test suite
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T05:08:31.201Z
+    completed_at: 2026-04-27T05:08:31.201Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate: schema/references/skills OK; existing alignment/completeness warnings
+      only; command exits 6 because warnings are present"
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-04-27T05:08:31.287Z
+    completed_at: 2026-04-27T05:08:31.287Z
+events:
+  - _ulid: 01KQ6N9RBSF5VCS91PPSSEXEK5
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T05:06:25.273Z
+  - _ulid: 01KQ6NAMFVYG94DMPF955KKAKV
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T05:06:54.075Z
+  - _ulid: 01KQ6ND13VK7XG1BP5RYAA3RDN
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused incremental writer tests
+    timestamp: 2026-04-27T05:08:12.540Z
+  - _ulid: 01KQ6ND16RXK3V6MBVHYFK8S3Y
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: persistence surrounding tests
+    timestamp: 2026-04-27T05:08:12.632Z
+  - _ulid: 01KQ6ND19X0C25E7T9ZBQ8E7WX
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ6ND19H7CTP9R33978Z7HQS
+    timestamp: 2026-04-27T05:08:12.733Z
+  - _ulid: 01KQ6ND1D3WEP80KCP7B5VW8BA
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: validation-error publish repro
+    timestamp: 2026-04-27T05:08:12.836Z
+  - _ulid: 01KQ6ND1GBGZTE2STC37N0AQDA
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff changed files
+    timestamp: 2026-04-27T05:08:12.940Z
+  - _ulid: 01KQ6NDKBECMT7HF2V1PXHQP6W
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full test suite
+    timestamp: 2026-04-27T05:08:31.214Z
+  - _ulid: 01KQ6NDKE3F0KPRZ7S7FCGX827
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T05:08:31.299Z
+  - _ulid: 01KQ6NDXBP4H1R08R1R6VBCDHA
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T05:08:41.462Z
+  - _ulid: 01KQ6NDXBPF5DHWCFD99M7NKBZ
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T05:08:41.462Z
+  - _ulid: 01KQ6NVQWQCA70M64ZRZY9TD2C
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ6ND19H7CTP9R33978Z7HQS
+    timestamp: 2026-04-27T05:16:14.616Z
+  - _ulid: 01KQ6NW0Q5CB33EYZAE6P6AHP8
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ6ND19H7CTP9R33978Z7HQS
+    timestamp: 2026-04-27T05:16:23.654Z
+examined_commit: 928a645109063ee7b3d34b6f60568b0585dcede5
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HR9Z0V4T5BGMVVK515D2X"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ6ND19H7CTP9R33978Z7HQS
+    anchor:
+      type: code
+      commit: 928a645109063ee7b3d34b6f60568b0585dcede5
+      line_end: 195
+      line_start: 160
+      path: lib/incremental_writer.py
+      side: head
+    entries:
+      - _ulid: 01KQ6ND19JFQ43TJC4TKWVCDGF
+        author: Jacob Chapel
+        body: "MUST-FIX: validation failures do not make the writer unpublishable. These branches raise for
+          unexpected, duplicate, wrong-shape, and wrong-dtype writes, but they leave the writer open
+          and unpoisoned; if the caller catches the RuntimeError and later writes the expected
+          manifest keys, finalize() still publishes dest. I verified this with a direct script:
+          duplicate, wrong_shape, wrong_dtype, and unexpected all printed 'finalized: True'. That
+          violates the task requirement that duplicate/wrong-shape/wrong-dtype/inconsistent cases
+          fail without publishing a cacheable artifact. Mark the writer failed and abort/cleanup on
+          any validation/write error, or otherwise make finalize refuse after such an error."
+        created_at: 2026-04-27T05:08:12.722Z
+      - _ulid: 01KQ6NVQW7YQH732XCS1V2Y8GT
+        author: "@claude"
+        body: "Fixed: Validation errors (duplicate key, wrong shape, wrong dtype, unexpected key, byte size
+          mismatch) now set _failed=True and immediately call abort() to close+cleanup the temp
+          file. write_tensor() checks _failed before _aborted, so subsequent writes get the
+          'aborted' error. finalize() independently checks _failed and refuses to publish. Extracted
+          validation into _validate_tensor() with try/except that sets _failed and aborts before
+          re-raising. Added 6 new behavioral tests proving each validation error type makes the
+          writer permanently unpublishable — duplicate, wrong_shape, wrong_dtype, unexpected_key all
+          verified to prevent finalize, plus tests for blocking further writes and immediate temp
+          cleanup. All 21 incremental writer tests pass, full suite (1228) passes, ruff clean."
+        created_at: 2026-04-27T05:16:14.598Z
+    kind: blocker
+    resolved_at: 2026-04-27T05:16:23.637Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T05:08:41.462Z
+created_at: 2026-04-27T05:06:25.274Z
+updated_at: 2026-04-27T05:16:23.637Z
+notes: []

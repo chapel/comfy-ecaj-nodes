@@ -1,0 +1,570 @@
+_ulid: 01KQ87CWP72FAHDG733B7VYKZ2
+slugs: []
+title: Review full model streaming artifact cache cycle 8
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 1246 passed in 7.37s.
+    name: pytest
+    required: true
+    runner: uv run pytest
+    created_at: 2026-04-27T19:47:13.525Z
+    completed_at: 2026-04-27T19:47:13.525Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Schema/references OK; validation reported existing alignment/completeness warnings and
+      exited 6 because warnings are not suppressed.
+    name: kspec validate
+    required: true
+    runner: kspec validate
+    created_at: 2026-04-27T19:47:13.767Z
+    completed_at: 2026-04-27T19:47:13.767Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: All checks passed.
+    name: ruff
+    required: true
+    runner: uv run ruff check .
+    created_at: 2026-04-27T19:47:14.025Z
+    completed_at: 2026-04-27T19:47:14.025Z
+events:
+  - _ulid: 01KQ87CWP674431WPN1C34EG6K
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T19:41:56.807Z
+  - _ulid: 01KQ87D5W2WRQGDHYG1VNMN8TK
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T19:42:06.210Z
+  - _ulid: 01KQ87PJ1RQD10KD0MG0E33DJ2
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-04-27T19:47:13.592Z
+  - _ulid: 01KQ87PJ987C8QSYNPQJR02G5F
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T19:47:13.832Z
+  - _ulid: 01KQ87PJH6QCTAZPMA9H3HVS8G
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-04-27T19:47:14.087Z
+  - _ulid: 01KQ87Q76TXZEZ4PGC83YPG4FV
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87Q74PH1WEZHRD220JWPZR
+    timestamp: 2026-04-27T19:47:35.258Z
+  - _ulid: 01KQ87QF7XP19R612SVC064F5N
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87QF5S42BXN0J3F5622DEC
+    timestamp: 2026-04-27T19:47:43.486Z
+  - _ulid: 01KQ87QRVY8R30117M7W1AEXWC
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
+    timestamp: 2026-04-27T19:47:53.342Z
+  - _ulid: 01KQ87R3TKB22PA96B5FGPNFAN
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87R3RNY6HG0PCQ4JX4WRDS
+    timestamp: 2026-04-27T19:48:04.563Z
+  - _ulid: 01KQ87RBHQHMN6HTGZ1MBCP9YZ
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87RBFM4CA29WPDEN0N5MNC
+    timestamp: 2026-04-27T19:48:12.472Z
+  - _ulid: 01KQ87RK5Q8DGTBHN3D5JMSNZ1
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
+    timestamp: 2026-04-27T19:48:20.279Z
+  - _ulid: 01KQ87RWJ9SNKP6F2NHT461F38
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
+    timestamp: 2026-04-27T19:48:29.897Z
+  - _ulid: 01KQ87S7541FWGXTYZF369PJ5Q
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87S730XR5W5MSNKNXHYBMA
+    timestamp: 2026-04-27T19:48:40.740Z
+  - _ulid: 01KQ87SGESNVM384M7N7T1BPY0
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87SGCVE7ZZQEMH0S891BJK
+    timestamp: 2026-04-27T19:48:50.265Z
+  - _ulid: 01KQ87STFK567S2RP22087STE4
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ87STDJGQ7TNCEVWACG6736
+    timestamp: 2026-04-27T19:49:00.531Z
+  - _ulid: 01KQ87T7K4RQDHV82P7ADTNN5X
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T19:49:13.956Z
+  - _ulid: 01KQ87T7K414SCG27PSA3ZEYMT
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T19:49:13.956Z
+  - _ulid: 01KQ88KYC3K53RXGBF5TH1VTKR
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87Q74PH1WEZHRD220JWPZR
+    timestamp: 2026-04-27T20:03:16.483Z
+  - _ulid: 01KQ88M0TJS4W1183FKQME5KM9
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87Q74PH1WEZHRD220JWPZR
+    timestamp: 2026-04-27T20:03:18.994Z
+  - _ulid: 01KQ88M8ZB1PH6S02TKBX408N2
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87QF5S42BXN0J3F5622DEC
+    timestamp: 2026-04-27T20:03:27.339Z
+  - _ulid: 01KQ88MBEXMX3F9ZZZBP6TT5KF
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87QF5S42BXN0J3F5622DEC
+    timestamp: 2026-04-27T20:03:29.885Z
+  - _ulid: 01KQ88MKRBGGZ3Y59TY6VCPT7S
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
+    timestamp: 2026-04-27T20:03:38.379Z
+  - _ulid: 01KQ88MNVBDWK0D60DTXA9K3F5
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
+    timestamp: 2026-04-27T20:03:40.523Z
+  - _ulid: 01KQ88N8QX5YC9YEP1BG2MKE0Q
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87R3RNY6HG0PCQ4JX4WRDS
+    timestamp: 2026-04-27T20:03:59.869Z
+  - _ulid: 01KQ88NB256R81H409D5F68YTS
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87R3RNY6HG0PCQ4JX4WRDS
+    timestamp: 2026-04-27T20:04:02.245Z
+  - _ulid: 01KQ88NN4A9X1WJA5W3M9BGXDH
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87RBFM4CA29WPDEN0N5MNC
+    timestamp: 2026-04-27T20:04:12.554Z
+  - _ulid: 01KQ88NQAA4T1X2DVKJJDRETDE
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87RBFM4CA29WPDEN0N5MNC
+    timestamp: 2026-04-27T20:04:14.795Z
+  - _ulid: 01KQ88P053Z3RW8GWXZHDGT2KK
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
+    timestamp: 2026-04-27T20:04:23.843Z
+  - _ulid: 01KQ88P2H7H78YVJ2CYQ4Y321B
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
+    timestamp: 2026-04-27T20:04:26.279Z
+  - _ulid: 01KQ88PGHYZ3C3N7MH9K4EN6V7
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
+    timestamp: 2026-04-27T20:04:40.638Z
+  - _ulid: 01KQ88PJZGR6ND5HXZS9F9XTYW
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
+    timestamp: 2026-04-27T20:04:43.120Z
+  - _ulid: 01KQ88PWM17T2WC5DFR51XADM6
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87S730XR5W5MSNKNXHYBMA
+    timestamp: 2026-04-27T20:04:52.994Z
+  - _ulid: 01KQ88PYV10F8Y273380W4TJV2
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87S730XR5W5MSNKNXHYBMA
+    timestamp: 2026-04-27T20:04:55.266Z
+  - _ulid: 01KQ88Q7Y2YQ9SMCANGN485FQB
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87SGCVE7ZZQEMH0S891BJK
+    timestamp: 2026-04-27T20:05:04.578Z
+  - _ulid: 01KQ88QABJ82RNBRJ7NJWVF0G0
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87SGCVE7ZZQEMH0S891BJK
+    timestamp: 2026-04-27T20:05:07.058Z
+  - _ulid: 01KQ88QMAJXNY992SZK2RXCRZ2
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ87STDJGQ7TNCEVWACG6736
+    timestamp: 2026-04-27T20:05:17.266Z
+  - _ulid: 01KQ88QPJJNE7KZED1J61BDV1B
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ87STDJGQ7TNCEVWACG6736
+    timestamp: 2026-04-27T20:05:19.570Z
+examined_commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ87Q74PH1WEZHRD220JWPZR
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 833
+      line_start: 824
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ87Q74QNC1PV6HZ743CPRPQ
+        author: Jacob Chapel
+        body: Full-mode streaming uses one global storage_dtype for every affected tensor even though the
+          artifact manifest preserves per-key dtypes. I reproduced a mixed float32/float16 base
+          where the float16 affected key is cast to float32 before sink.write_tensor, which raises a
+          dtype mismatch and aborts materialization. This violates full saved model output for
+          mixed-dtype/quantized artifacts; stream each key using its manifest/base dtype instead of
+          the first tensor's dtype.
+        created_at: 2026-04-27T19:47:35.191Z
+      - _ulid: 01KQ88KY9WRY9FZAS0P7GV5KYH
+        author: "@claude"
+        body: "Fixed: streaming_evaluation_to_sink now uses per-key dtype from base_tensors
+          (storage_dtype=None) instead of a single global storage_dtype. Each tensor retains its
+          native base dtype, preserving mixed-dtype artifacts."
+        created_at: 2026-04-27T20:03:16.408Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:03:18.927Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ87QF5S42BXN0J3F5622DEC
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 382
+      line_start: 333
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ87QF5S5ZC655YR255PVXDH
+        author: Jacob Chapel
+        body: _load_model_from_artifact clones the incoming ModelPatcher and never clears inherited patches.
+          Real ComfyUI ModelPatcher.clone() copies existing patches, so an Entry MODEL that already
+          has LoRA/control patches returns with those patch-resident tensors still attached even
+          though full mode is supposed to return the saved artifact model. This also means the
+          result is not reliably loaded via Comfy's normal artifact-loading path; use a fresh loaded
+          patcher or explicitly remove inherited patch state before returning.
+        created_at: 2026-04-27T19:47:43.417Z
+      - _ulid: 01KQ88M8XAT4GZFXBX7T6QN64X
+        author: "@claude"
+        body: "Fixed: _load_model_from_artifact now clears cloned.patches = {} after clone() to remove any
+          inherited LoRA/control patches. The returned model has zero patches — weights come
+          entirely from the artifact."
+        created_at: 2026-04-27T20:03:27.274Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:03:29.818Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ87QRSY6QNR8PGCJ4FPKS3G
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 559
+      line_start: 557
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ87QRSYHRT9KB5Z4B4RMXQA
+        author: Jacob Chapel
+        body: The RecipeBase full-mode no-op path reads model_state_dict() without first calling
+          _unpatch_loaded_clones. Merge full mode does this before reading base_state, because
+          loaded clones can cause model_state_dict() to include patched values. A RecipeBase-only
+          full save after a patched clone is loaded can therefore materialize polluted patch weights
+          as the complete 'base' artifact.
+        created_at: 2026-04-27T19:47:53.278Z
+      - _ulid: 01KQ88MKP399RZE887J3VXK0GH
+        author: "@claude"
+        body: "Fixed: _execute_full_model_noop now calls _unpatch_loaded_clones(model_patcher) before
+          reading model_state_dict(), matching the merge full-mode path. Patched clone weights
+          cannot pollute the base artifact."
+        created_at: 2026-04-27T20:03:38.306Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:03:40.457Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ87R3RNY6HG0PCQ4JX4WRDS
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 524
+      line_start: 504
+      path: lib/persistence.py
+      side: head
+    entries:
+      - _ulid: 01KQ87R3RNWWP581N70EJDMRDG
+        author: Jacob Chapel
+        body: check_full_model_cache validates dtypes with a hard-coded safetensors map that omits dtypes
+          the writer supports, including BOOL, C64, U16/U32/U64, and float8 variants. A valid full
+          artifact containing one of those dtypes is rejected despite matching the manifest, so
+          full-mode artifact cache reuse fails and the node unnecessarily recomputes/overwrites the
+          artifact. Reuse the streaming_save dtype map or cover every supported safetensors dtype.
+        created_at: 2026-04-27T19:48:04.501Z
+      - _ulid: 01KQ88N8NVARW68J3192XPJ9A5
+        author: "@claude"
+        body: "Fixed: check_full_model_cache now imports and reverses the canonical _DTYPE_MAP from
+          streaming_save.py instead of maintaining a hard-coded subset. All dtypes the writer
+          supports (BOOL, C64, float8, U16/U32/U64) are now covered."
+        created_at: 2026-04-27T20:03:59.802Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:04:02.177Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ87RBFM4CA29WPDEN0N5MNC
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 317
+      line_start: 254
+      path: tests/test_full_model_streaming.py
+      side: head
+    entries:
+      - _ulid: 01KQ87RBFN08KGFY6Q7JA8YH90
+        author: Jacob Chapel
+        body: This required dynamic test does not actually monkeypatch in-memory result sink construction.
+          It patches chunked_evaluation and lib.gpu_ops.evaluate_affected_group, but nodes.exit does
+          not call lib.gpu_ops.evaluate_affected_group directly and no in-memory sink constructor is
+          made to fail. The test therefore does not prove the task requirement that full mode
+          succeeds when in-memory result sink construction fails.
+        created_at: 2026-04-27T19:48:12.405Z
+      - _ulid: 01KQ88NN27C7JJ26YAX2KEJ1NQ
+        author: "@claude"
+        body: "Fixed: Removed the bogus lib.gpu_ops.evaluate_affected_group patch (exit.py doesn't import
+          it). Instead, the test now wraps MaterializationSink with TrackingSink to verify the
+          streaming sink constructor IS called (proving it replaces the in-memory path).
+          chunked_evaluation is still patched to raise, and the test verifies full mode succeeds via
+          streaming."
+        created_at: 2026-04-27T20:04:12.486Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:04:14.731Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ87RK3M6KBCS2PT4VG7ZYNC
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 717
+      line_start: 611
+      path: tests/test_full_model_streaming.py
+      side: head
+    entries:
+      - _ulid: 01KQ87RK3NTFGHT9DHZ7E5BGR0
+        author: Jacob Chapel
+        body: The partial-streaming failure test does not verify that a partial artifact is rejected as a
+          later cache hit. It patches check_full_model_cache to always return False and only asserts
+          save_path does not exist after abort. The task requires a dynamic later-run/cache
+          validation path proving incomplete artifacts are not accepted; this test currently cannot
+          catch a regression in cache-hit validation.
+        created_at: 2026-04-27T19:48:20.213Z
+      - _ulid: 01KQ88P02V4MNP4TRZYH65QK1M
+        author: "@claude"
+        body: "Fixed: After verifying abort cleaned up save_path, the test now creates a partial artifact at
+          save_path (only group1 keys) and runs check_full_model_cache with the full
+          expected_manifest. The partial artifact is rejected because it's missing group2 keys —
+          proving the later-run cache validation path catches incomplete artifacts."
+        created_at: 2026-04-27T20:04:23.771Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:04:26.208Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ87RWGBYEEMJ25CH98H9ZME
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 824
+      line_start: 775
+      path: tests/test_full_model_streaming.py
+      side: head
+    entries:
+      - _ulid: 01KQ87RWGBDJZ6X3ZW88CG6Q79
+        author: Jacob Chapel
+        body: The finalize-failure test proves the test double cleaned itself up, not that production error
+          handling cleans up after finalize fails. FailingFinalizeSink.finalize calls self.abort()
+          before raising, so the outer WIDENExitNode exception path could stop aborting and this
+          test would still pass. Make finalize raise without self-cleanup, then assert the node
+          aborts and leaves no reusable artifact or full-mode cache payload.
+        created_at: 2026-04-27T19:48:29.835Z
+      - _ulid: 01KQ88PGFW9CD98SJZYK41SD6E
+        author: "@claude"
+        body: "Fixed: FailingFinalizeSink.finalize now raises OSError WITHOUT calling self.abort(). The
+          node's except handler (sink.abort()) is the sole cleanup path. Test also verifies no temp
+          files are left behind and no tensor payload in _incremental_cache."
+        created_at: 2026-04-27T20:04:40.572Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:04:43.053Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ87S730XR5W5MSNKNXHYBMA
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 1186
+      line_start: 1154
+      path: tests/test_full_model_streaming.py
+      side: head
+    entries:
+      - _ulid: 01KQ87S730G9NYTGPFGNQRJD7J
+        author: Jacob Chapel
+        body: This cross-mode isolation test never exercises patch mode or the patch cache path. It only
+          checks that full mode leaves _incremental_cache empty and that the artifact metadata says
+          output_mode=full. That does not prove a full-model artifact is not treated as a patch-mode
+          tensor payload; add a patch-mode execution/cache probe that would fail if full artifacts
+          were consumed as patch tensor payloads.
+        created_at: 2026-04-27T19:48:40.672Z
+      - _ulid: 01KQ88PWHWGG46W9D1RKS30D0Q
+        author: "@claude"
+        body: "Fixed: Added Phase 2 patch-mode probe. After full mode leaves _incremental_cache empty, the
+          test runs patch mode (save_model=False) with chunked_evaluation. Asserts:
+          chunked_evaluation was called (patch mode's own eval path), _incremental_cache has 1 entry
+          (patch mode populated it). This proves full-mode artifacts are not consumed as patch
+          tensor payloads."
+        created_at: 2026-04-27T20:04:52.924Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:04:55.197Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ87SGCVE7ZZQEMH0S891BJK
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 1420
+      line_start: 1363
+      path: tests/test_full_model_streaming.py
+      side: head
+    entries:
+      - _ulid: 01KQ87SGCVPN9V5TNM85R3B855
+        author: Jacob Chapel
+        body: The memory-mode tests are too weak for the required dynamic coverage. They run through a
+          heavily mocked _run_full_mode helper and only assert result is not None plus no
+          set_vram_state calls. They do not assert that full mode still streams affected tensors or
+          leaves no full-mode resident payload under Dynamic VRAM, non-dynamic mode, and missing
+          cleanup APIs. Add assertions that would catch fallback to dict accumulation or
+          _incremental_cache payloads in each memory-mode scenario.
+        created_at: 2026-04-27T19:48:50.203Z
+      - _ulid: 01KQ88Q7W28AEXVR6PZ3XSRFHF
+        author: "@claude"
+        body: "Fixed: Added _assert_streaming_behavior() helper that all 4 memory-mode tests call. It
+          verifies: artifact exists on disk, output_mode is full, _incremental_cache is empty (no
+          resident payload). Each test now clears _incremental_cache before running and asserts
+          streaming behavior afterward — catching fallback to dict accumulation or cache payloads in
+          each memory scenario."
+        created_at: 2026-04-27T20:05:04.514Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:05:06.989Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ87STDJGQ7TNCEVWACG6736
+    anchor:
+      type: code
+      commit: f8b7da1d18952425fb301c4be36f403f9c61aa34
+      line_end: 1565
+      line_start: 1431
+      path: tests/test_full_model_streaming.py
+      side: head
+    entries:
+      - _ulid: 01KQ87STDJGGNFJ8YMQP8EPXQ5
+        author: Jacob Chapel
+        body: Helper-only MaterializationSink unit tests still carry product streaming AC annotations. The
+          task explicitly required removing or relocating misleading streaming AC annotations from
+          helper-only sink tests so product-path streaming AC coverage points to runtime tests that
+          execute full saved model mode. Keep these unit tests if useful, but move these AC tags to
+          product-path runtime tests that prove the Exit full-mode behavior.
+        created_at: 2026-04-27T19:49:00.466Z
+      - _ulid: 01KQ88QM8NB185PR3EN6FRGMY9
+        author: "@claude"
+        body: "Fixed: Removed all product streaming AC annotations from TestMaterializationSink helper tests
+          (ac-base-weight-bounded-copying, ac-incomplete-write-not-reused, ac-complete-artifact).
+          These sink tests remain as useful API unit tests but no longer carry product-path coverage
+          tags. The AC annotations were already on the runtime tests (TestFullModeEventOrder,
+          TestFailureAbortsMaterialization, TestFinalizeFailure, etc.)."
+        created_at: 2026-04-27T20:05:17.205Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:05:19.500Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T19:49:13.956Z
+created_at: 2026-04-27T19:41:56.807Z
+updated_at: 2026-04-27T20:05:19.500Z
+notes: []

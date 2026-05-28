@@ -1,0 +1,163 @@
+_ulid: 01KQGHJVEFVYY399SSJ02TW20P
+slugs: []
+title: Review diffusion-model saved-output round trip cycle 3
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run pytest tests/test_diffusion_model_saved_output.py
+      tests/test_diffusion_model_validation_harness.py tests/test_full_model_streaming.py
+      tests/test_incremental_recompute.py tests/test_memory_management.py
+      tests/test_checkpoint_save_format.py -> 262 passed
+    name: focused diffusion saved-output tests
+    required: true
+    runner: pytest
+    created_at: 2026-05-01T01:19:41.920Z
+    completed_at: 2026-05-01T01:19:41.920Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run pytest -> 1647 passed
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-05-01T01:19:42.297Z
+    completed_at: 2026-05-01T01:19:42.297Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run ruff check . -> All checks passed
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-05-01T01:19:42.607Z
+    completed_at: 2026-05-01T01:19:42.607Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: git diff --check
+      9cdeb981d3dfc888b0313da26e55f3e82db2da68...f2eec4a363a26dece4aad1d66aecfbded50a40d1 -> clean
+    name: diff whitespace
+    required: true
+    runner: git
+    created_at: 2026-05-01T01:19:42.918Z
+    completed_at: 2026-05-01T01:19:42.918Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok exited 0; schema/references OK, only existing
+      alignment/completeness warnings
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-05-01T01:19:43.197Z
+    completed_at: 2026-05-01T01:19:43.197Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "PR #112 lint and test checks completed successfully for f2eec4a"
+    name: GitHub CI
+    required: true
+    runner: github-actions
+    created_at: 2026-05-01T01:19:43.504Z
+    completed_at: 2026-05-01T01:19:43.504Z
+events:
+  - _ulid: 01KQGHJVEEDWMJMEQPX8NH3PXG
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-05-01T01:13:53.358Z
+  - _ulid: 01KQGHK3ZSPW6TXSP070TVMGFV
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-05-01T01:14:02.105Z
+  - _ulid: 01KQGHXFZEQ5C7M1YDQ0RZ2TET
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused diffusion saved-output tests
+    timestamp: 2026-05-01T01:19:42.062Z
+  - _ulid: 01KQGHXGACW14AEB31YKQHP5SW
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-05-01T01:19:42.412Z
+  - _ulid: 01KQGHXGM3MT9WEDB29RJJYHJY
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-05-01T01:19:42.723Z
+  - _ulid: 01KQGHXGXDBF0H1F07M937EKWP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: diff whitespace
+    timestamp: 2026-05-01T01:19:43.022Z
+  - _ulid: 01KQGHXH6HTTGXYAJQ4FMNAZ0M
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-05-01T01:19:43.313Z
+  - _ulid: 01KQGHXHGVXZX0FKDSHSCD1H2Z
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: GitHub CI
+    timestamp: 2026-05-01T01:19:43.643Z
+  - _ulid: 01KQGHXHT17493J4FZV705TZXR
+    actor: jacob.chapel@gmail.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-05-01T01:19:43.937Z
+  - _ulid: 01KQGHXHT18KYTZ9TXEMKECVV3
+    actor: jacob.chapel@gmail.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-05-01T01:19:43.937Z
+examined_commit: f2eec4a363a26dece4aad1d66aecfbded50a40d1
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQGCVTCMFVH3HF2H150AY5B7"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: jacob.chapel@gmail.com
+    role: reviewer
+    created_at: 2026-05-01T01:19:43.937Z
+created_at: 2026-05-01T01:13:53.359Z
+updated_at: 2026-05-01T01:19:43.937Z
+notes: []

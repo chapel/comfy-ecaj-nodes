@@ -1,0 +1,128 @@
+_ulid: 01KQ6Y5XG7QC3JYATHZG1XP868
+slugs: []
+title: Review task-full-model-cache-metadata cycle 3
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate reports Schema OK and References OK; plain command exits 6 only for
+      existing alignment/completeness warnings, and kspec validate --warnings-ok exits 0.
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T07:43:33.266Z
+    completed_at: 2026-04-27T07:43:33.266Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found behavioral test annotations for @full-saved-model-output ac-cache-reuses-artifact
+      in tests/test_persistence.py and tests/test_exit_node.py; no @trait AC annotations
+      required/found for this spec.
+    name: AC annotation coverage
+    required: true
+    runner: rg
+    created_at: 2026-04-27T07:43:33.415Z
+    completed_at: 2026-04-27T07:43:33.415Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_persistence.py tests/test_exit_node.py
+      tests/test_spike_reload.py: 110 passed in 0.73s."
+    name: persistence and exit save/cache tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T07:43:33.569Z
+    completed_at: 2026-04-27T07:43:33.569Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest: 1291 passed in 8.45s."
+    name: full pytest suite
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T07:43:33.729Z
+    completed_at: 2026-04-27T07:43:33.729Z
+events:
+  - _ulid: 01KQ6Y5XG70479PY7JPSE1SW4D
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T07:41:36.647Z
+  - _ulid: 01KQ6Y6599FSE3Q2SPCFA41S0M
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T07:41:44.617Z
+  - _ulid: 01KQ6Y9FDJXV2YV56HEHPTA58T
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T07:43:33.299Z
+  - _ulid: 01KQ6Y9FJ52BEEFWWJBMXTR4R1
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation coverage
+    timestamp: 2026-04-27T07:43:33.445Z
+  - _ulid: 01KQ6Y9FPW66PK9QVPXKDCSZK7
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: persistence and exit save/cache tests
+    timestamp: 2026-04-27T07:43:33.597Z
+  - _ulid: 01KQ6Y9FVWK7ZB5C40P8EFHB7M
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest suite
+    timestamp: 2026-04-27T07:43:33.756Z
+  - _ulid: 01KQ6Y9SFCTXXC56JB121JMVXH
+    actor: jacob.chapel@gmail.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-27T07:43:43.596Z
+  - _ulid: 01KQ6Y9SFCXQMHMNWBA3JB0C1F
+    actor: jacob.chapel@gmail.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T07:43:43.596Z
+examined_commit: 0dcfeeb44ea7938c1905ddd085700eb1ccbb2068
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HRA0DXES7K03VX0RCDXQ2"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: jacob.chapel@gmail.com
+    role: reviewer
+    created_at: 2026-04-27T07:43:43.595Z
+created_at: 2026-04-27T07:41:36.647Z
+updated_at: 2026-04-27T07:43:43.596Z
+notes: []

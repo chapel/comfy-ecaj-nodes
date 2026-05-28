@@ -1,0 +1,325 @@
+_ulid: 01KQ7Z2XTECTF1KDNSSQASJ0SS
+slugs: []
+title: Review full model streaming artifact cache
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Schema and references passed. Command exited 6 because of existing warnings only: 4
+      alignment warnings and 12 completeness warnings."
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T17:21:08.934Z
+    completed_at: 2026-04-27T17:21:08.934Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run pytest tests/test_full_model_streaming.py tests/test_exit_node.py
+      tests/test_incremental_recompute.py tests/test_memory_management.py => 172 passed in 2.56s
+    name: focused pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T17:21:15.920Z
+    completed_at: 2026-04-27T17:21:15.920Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found AC annotations for @streaming-full-model-materialization,
+      @full-saved-model-output, and @comfy-memory-manager-compatibility in
+      tests/test_full_model_streaming.py; review found two annotations/tests do not prove the
+      required behavior and recorded blockers.
+    name: AC annotation grep
+    required: true
+    runner: rg
+    created_at: 2026-04-27T17:21:23.751Z
+    completed_at: 2026-04-27T17:21:23.751Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: A two-batch runtime probe recorded ['open', 'eval:g1', 'eval:g2', 'write:g1', 'write:g1',
+      'write:g2', 'write:g2', 'finalize']; group 2 is evaluated before group 1 is handed to
+      MaterializationSink.
+    name: streaming event probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T17:21:33.971Z
+    completed_at: 2026-04-27T17:21:33.971Z
+events:
+  - _ulid: 01KQ7Z2XTD01GE88Q74D7SCQ4V
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T17:16:41.678Z
+  - _ulid: 01KQ7Z3KM7RC1BZR0VE8CG8D1Y
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T17:17:04.007Z
+  - _ulid: 01KQ7ZB2VJAAMS640NCJF54GHD
+    actor: codex
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T17:21:08.978Z
+  - _ulid: 01KQ7ZB9NWEAKWBCPS1M1SY34H
+    actor: codex
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-04-27T17:21:15.964Z
+  - _ulid: 01KQ7ZBHAFYZD24QBFBYYQH2E8
+    actor: codex
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation grep
+    timestamp: 2026-04-27T17:21:23.791Z
+  - _ulid: 01KQ7ZBV9TFM28ZNQMFMMEP873
+    actor: codex
+    event_type: check_added
+    payload:
+      status: fail
+      name: streaming event probe
+    timestamp: 2026-04-27T17:21:34.010Z
+  - _ulid: 01KQ7ZC45W1CSE3AJGBQY3A2EW
+    actor: codex
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ7ZC44GSWEREFTGHK1SV7R5
+    timestamp: 2026-04-27T17:21:43.100Z
+  - _ulid: 01KQ7ZCCK7Y2HCGTPFE5SNYF0P
+    actor: codex
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ7ZCCJ16XM39HK9QHVJP135
+    timestamp: 2026-04-27T17:21:51.719Z
+  - _ulid: 01KQ7ZCNPXEKZSPC3HWDPZ2V1X
+    actor: codex
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ7ZCNNGZXA6W7862KWQBAT8
+    timestamp: 2026-04-27T17:22:01.053Z
+  - _ulid: 01KQ7ZD05VY7XWZAG02VHKG4MM
+    actor: codex
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ7ZD04R3QK2EM511ZDE8CNT
+    timestamp: 2026-04-27T17:22:11.771Z
+  - _ulid: 01KQ7ZD8SBYHQERQJB7RXCYZ7Q
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T17:22:20.587Z
+  - _ulid: 01KQ7ZD8SB4GGF6914D1EBTGNM
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T17:22:20.587Z
+  - _ulid: 01KQ80CWW8NCSSWYZQYJF7SE48
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ7ZC44GSWEREFTGHK1SV7R5
+    timestamp: 2026-04-27T17:39:36.968Z
+  - _ulid: 01KQ80D4WHJPG5SBJZQDE8H432
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ7ZC44GSWEREFTGHK1SV7R5
+    timestamp: 2026-04-27T17:39:45.169Z
+  - _ulid: 01KQ80D83YA51D4VW995ZWJ8TZ
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ7ZCCJ16XM39HK9QHVJP135
+    timestamp: 2026-04-27T17:39:48.479Z
+  - _ulid: 01KQ80DF8TDDT9NZKNZ44934MY
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ7ZCCJ16XM39HK9QHVJP135
+    timestamp: 2026-04-27T17:39:55.802Z
+  - _ulid: 01KQ80DK00SCB46BSD4MDZ4PBN
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ7ZCNNGZXA6W7862KWQBAT8
+    timestamp: 2026-04-27T17:39:59.616Z
+  - _ulid: 01KQ80DW1JA3C8TE4ZVQFY8T4X
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ7ZCNNGZXA6W7862KWQBAT8
+    timestamp: 2026-04-27T17:40:08.883Z
+  - _ulid: 01KQ80DZ7PV3EBXXMQXFJSV9YH
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ7ZD04R3QK2EM511ZDE8CNT
+    timestamp: 2026-04-27T17:40:12.150Z
+  - _ulid: 01KQ80E72X4WPTAH6VHHDP1V6H
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ7ZD04R3QK2EM511ZDE8CNT
+    timestamp: 2026-04-27T17:40:20.189Z
+examined_commit: e368231141abc45a6dce0314c147a15369756c00
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ7ZC44GSWEREFTGHK1SV7R5
+    anchor:
+      type: code
+      commit: e368231141abc45a6dce0314c147a15369756c00
+      line_end: 759
+      line_start: 706
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ7ZC44GDREQA765TXT74WFH
+        author: codex
+        body: "MUST-FIX: full saved model mode still accumulates all affected groups before materialization.
+          The loop stores every group in affected_results and only writes to MaterializationSink
+          after the GPU loop completes. That violates ac-direct-artifact-handoff and
+          ac-affected-results-released: completed group tensors are not handed to materialization
+          before later groups evaluate. I confirmed with a two-group runtime probe: ['open',
+          'eval:g1', 'eval:g2', 'write:g1', 'write:g1', 'write:g2', 'write:g2', 'finalize']."
+        created_at: 2026-04-27T17:21:43.056Z
+      - _ulid: 01KQ80CWV27KC891V4WD88QQ6F
+        author: "@claude"
+        body: "Fixed: restructured the full mode GPU loop to evaluate groups lazily during sorted-key
+          iteration. Each group is evaluated when its first affected key is encountered, and its
+          results are written to the sink immediately. Group results are freed once all their keys
+          are written. The old accumulate-all-then-write pattern is gone. Confirmed by updated
+          TestFullModeEventOrder which uses two groups (4x4, 8x8) and asserts group 1 writes
+          complete before group 2 evaluation begins."
+        created_at: 2026-04-27T17:39:36.929Z
+    kind: blocker
+    resolved_at: 2026-04-27T17:39:45.127Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ7ZCCJ16XM39HK9QHVJP135
+    anchor:
+      type: code
+      commit: e368231141abc45a6dce0314c147a15369756c00
+      line_end: 207
+      line_start: 173
+      path: tests/test_full_model_streaming.py
+      side: head
+    entries:
+      - _ulid: 01KQ7ZCCJ1ZE8FWC2MASJ80YY1
+        author: codex
+        body: "MUST-FIX: this test is named/described as monkeypatching the dict-returning evaluation path
+          to fail, but it patches nodes.exit.chunked_evaluation to return affected_tensors. The task
+          explicitly requires a dynamic test where full mode succeeds when the dict-returning
+          evaluation path is monkeypatched to fail. As written, the test passes while production
+          still calls chunked_evaluation in full mode, so it gives false AC coverage."
+        created_at: 2026-04-27T17:21:51.681Z
+      - _ulid: 01KQ80D82NS0MEB7F51CP3HNG3
+        author: "@claude"
+        body: "Fixed: extracted shared chunked eval logic into _chunked_eval_impl, created
+          evaluate_affected_group as the full-mode entry point (separate from chunked_evaluation).
+          Full mode now calls evaluate_affected_group, not chunked_evaluation. The test now
+          monkeypatches chunked_evaluation to raise RuntimeError and patches evaluate_affected_group
+          with normal behavior — full mode succeeds, proving it doesn't depend on the dict-returning
+          path."
+        created_at: 2026-04-27T17:39:48.437Z
+    kind: blocker
+    resolved_at: 2026-04-27T17:39:55.766Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ7ZCNNGZXA6W7862KWQBAT8
+    anchor:
+      type: code
+      commit: e368231141abc45a6dce0314c147a15369756c00
+      line_end: 427
+      line_start: 350
+      path: tests/test_full_model_streaming.py
+      side: head
+    entries:
+      - _ulid: 01KQ7ZCNNGHN8CBR499KH01Y30
+        author: codex
+        body: "MUST-FIX: the direct-handoff/event-order coverage does not exercise multiple affected groups
+          or assert that group 1 is written before group 2 starts evaluation. The test uses one
+          OpSignature mapping all keys to one group and only checks that all affected writes happen
+          before finalize. The required dynamic test is specifically base weights written, first
+          group handed to materialization, later group handed to materialization, finalize, load;
+          this test would not catch the current all-groups accumulation bug."
+        created_at: 2026-04-27T17:22:01.008Z
+      - _ulid: 01KQ80DJYNB6Q3XDYD5NC25V7D
+        author: "@claude"
+        body: "Fixed: rewrote TestFullModeEventOrder to use two affected groups with different OpSignatures
+          — group 1 (4x4 tensors) and group 2 (8x8 tensors). Also added a base-only key to verify
+          interleaving. The test records per-group eval and write events and asserts: (1) group 1
+          writes complete before group 2 evaluation begins, (2) all writes precede finalize, (3)
+          finalize precedes load. This directly catches the accumulation bug."
+        created_at: 2026-04-27T17:39:59.573Z
+    kind: blocker
+    resolved_at: 2026-04-27T17:40:08.848Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ7ZD04R3QK2EM511ZDE8CNT
+    anchor:
+      type: code
+      commit: e368231141abc45a6dce0314c147a15369756c00
+      line_end: 447
+      line_start: 430
+      path: lib/persistence.py
+      side: head
+    entries:
+      - _ulid: 01KQ7ZD04RHAY8FT1JVJ5KJY0B
+        author: codex
+        body: "MUST-FIX: check_full_model_cache accepts malformed full artifacts that the loader cannot use.
+          It only checks ecaj version, recipe hash, and output_mode; an artifact missing
+          __ecaj_affected_keys__ returns True, then _load_model_from_artifact raises KeyError when
+          it reads that metadata. The task requires incomplete/invalid artifacts to be treated as
+          non-reusable full-model cache misses. I confirmed with a safetensors file containing
+          version/hash/output_mode=full but no affected-keys metadata: check_full_model_cache(path,
+          hash) returned True."
+        created_at: 2026-04-27T17:22:11.736Z
+      - _ulid: 01KQ80DZ6GT38JDFFQNWZ2FG6S
+        author: "@claude"
+        body: "Fixed: check_full_model_cache now validates __ecaj_affected_keys__ is present and is a valid
+          JSON list. Without this metadata, the function returns False (cache miss). Added two new
+          tests: test_missing_affected_keys_not_accepted and
+          test_malformed_affected_keys_not_accepted. Both confirm that artifacts missing or having
+          invalid affected_keys metadata are rejected."
+        created_at: 2026-04-27T17:40:12.112Z
+    kind: blocker
+    resolved_at: 2026-04-27T17:40:20.149Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T17:22:20.587Z
+created_at: 2026-04-27T17:16:41.678Z
+updated_at: 2026-04-27T17:40:20.149Z
+notes: []

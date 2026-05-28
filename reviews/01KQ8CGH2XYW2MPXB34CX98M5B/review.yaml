@@ -1,0 +1,260 @@
+_ulid: 01KQ8CGH2XYW2MPXB34CX98M5B
+slugs: []
+title: Review guarded manual real-Comfy memory harness cycle 4
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Validation passed; only existing alignment/completeness warnings were reported.
+    name: kspec validate --warnings-ok
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T21:15:48.086Z
+    completed_at: 2026-04-27T21:15:48.086Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found @manual-comfy-memory-validation annotations for ac-explicit-opt-in-required,
+      ac-refuses-before-comfy-work-without-opt-in, and ac-report-identifies-memory-mode in
+      tests/test_real_comfy_memory_harness.py.
+    name: AC annotations
+    required: true
+    runner: rg
+    created_at: 2026-04-27T21:15:49.046Z
+    completed_at: 2026-04-27T21:15:49.046Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m ruff check scripts/manual/real_comfy_memory_validation.py
+      tests/test_real_comfy_memory_harness.py: All checks passed."
+    name: ruff changed files
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T21:16:07.723Z
+    completed_at: 2026-04-27T21:16:07.723Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest tests/test_real_comfy_memory_harness.py -q: 36 passed."
+    name: targeted harness tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T21:16:07.969Z
+    completed_at: 2026-04-27T21:16:07.969Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest -q exited 1: 18 failures, concentrated in
+      tests/test_incremental_recompute.py and tests/test_memory_management.py; common cause was
+      check_ram_preflight RuntimeError for insufficient system RAM (~1.0-1.5GB available vs ~1587MB
+      needed)."
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T21:16:08.237Z
+    completed_at: 2026-04-27T21:16:08.237Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Explicit opt-in subprocess against fake Comfy root matching local ComfyUI ModelPatcher
+      state_dict contract exited 0 but report contained install_merged_patches error and
+      _load_model_from_artifact error: '_HarnessModel' object has no attribute 'state_dict';
+      report.errors was empty."
+    name: Comfy-shaped intentional-run probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T21:16:08.490Z
+    completed_at: 2026-04-27T21:16:08.490Z
+events:
+  - _ulid: 01KQ8CGH2WXWZ3Z6666VBE80DT
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T21:11:18.877Z
+  - _ulid: 01KQ8CGQ0CW7H9ZRYD55VHQ20X
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T21:11:24.941Z
+  - _ulid: 01KQ8CRR2PC5ZGKS2F3Y9Z5F3C
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --warnings-ok
+    timestamp: 2026-04-27T21:15:48.182Z
+  - _ulid: 01KQ8CRRD82WWPGH4MX3KV62WW
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ8CRRAXTH65D884C7E6P0X2
+    timestamp: 2026-04-27T21:15:48.520Z
+  - _ulid: 01KQ8CRRQ0N1ZCWPCDTWF8SFKC
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
+    timestamp: 2026-04-27T21:15:48.832Z
+  - _ulid: 01KQ8CRRZVM6YN6JS67MGENERD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotations
+    timestamp: 2026-04-27T21:15:49.116Z
+  - _ulid: 01KQ8CSB7EBM6CWDZXX395NCGB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff changed files
+    timestamp: 2026-04-27T21:16:07.790Z
+  - _ulid: 01KQ8CSBF9MARFX8STFHYD5358
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted harness tests
+    timestamp: 2026-04-27T21:16:08.042Z
+  - _ulid: 01KQ8CSBQPS01NPG8PNKASKACM
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: full pytest
+    timestamp: 2026-04-27T21:16:08.310Z
+  - _ulid: 01KQ8CSBZH9YMKKD56XB48MZ7T
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: Comfy-shaped intentional-run probe
+    timestamp: 2026-04-27T21:16:08.561Z
+  - _ulid: 01KQ8CSMHBTQRXXYW2GRRERQHP
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T21:16:17.323Z
+  - _ulid: 01KQ8CSMHBQ50KSAY61YPGEEP9
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T21:16:17.323Z
+  - _ulid: 01KQ8D9Z5PYY9T0WADRBKX2FE5
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ8CRRAXTH65D884C7E6P0X2
+    timestamp: 2026-04-27T21:25:12.502Z
+  - _ulid: 01KQ8DA1YBPY3QFCY33Z4D6XNV
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
+    timestamp: 2026-04-27T21:25:15.339Z
+  - _ulid: 01KQ8DA6EPFSVQVME0DE3TPY1P
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ8CRRAXTH65D884C7E6P0X2
+    timestamp: 2026-04-27T21:25:19.958Z
+  - _ulid: 01KQ8DA8V3TDKGDZH3JAA4ZABW
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
+    timestamp: 2026-04-27T21:25:22.403Z
+examined_commit: bc595d85033c2b23ff040c97d038437aa987ba13
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ8CRRAXTH65D884C7E6P0X2
+    anchor:
+      type: code
+      commit: bc595d85033c2b23ff040c97d038437aa987ba13
+      line_end: 617
+      line_start: 616
+      path: scripts/manual/real_comfy_memory_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQ8CRRAX17H7PW3YKAQR3FD6
+        author: Jacob Chapel
+        body: "MUST-FIX: critical workflow probe exceptions are written only into behavior strings, not
+          report.errors. main returns 0 whenever report.errors is empty, so patch install,
+          materialization, cache, or returned-model failures can be reported as a successful
+          validation. The fake Comfy-shaped probe produced install_merged_patches and
+          _load_model_from_artifact errors with exit code 0 and an empty errors list."
+        created_at: 2026-04-27T21:15:48.445Z
+      - _ulid: 01KQ8D9Z3EJP2J8EN1HJCSJ500
+        author: "@claude"
+        body: "Fixed: all four workflow probe exception handlers (install_merged_patches,
+          MaterializationSink, check_full_model_cache, _load_model_from_artifact) now append errors
+          to report.errors in addition to recording them in behavior strings. main() will return
+          exit code 2 when any probe fails."
+        created_at: 2026-04-27T21:25:12.421Z
+    kind: blocker
+    resolved_at: 2026-04-27T21:25:19.888Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ8CRRMDYPJB38C09M4PCQKA
+    anchor:
+      type: code
+      commit: bc595d85033c2b23ff040c97d038437aa987ba13
+      line_end: 581
+      line_start: 576
+      path: scripts/manual/real_comfy_memory_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQ8CRRMDJ9ASVV84J0YMRRQW
+        author: Jacob Chapel
+        body: "MUST-FIX: _HarnessModel only exposes diffusion_model, but real ComfyUI
+          ModelPatcher.add_patches/model_state_dict call self.model.state_dict(). The intentional
+          path passes _HarnessModel into ModelPatcher, so install_merged_patches and
+          _load_model_from_artifact fail before validating patch-mode or returned-model behavior.
+          Verified with a fake ModelPatcher matching the local ComfyUI contract: the report
+          contained '_HarnessModel' object has no attribute 'state_dict'."
+        created_at: 2026-04-27T21:15:48.749Z
+      - _ulid: 01KQ8DA1W1M4VNZ55BEK5541DK
+        author: "@claude"
+        body: "Fixed: replaced bare torch.nn.Module with _HarnessDiffusionModel that exposes state_dict()
+          and load_state_dict(). _HarnessModel now also implements state_dict() and
+          load_state_dict() returning the full prefixed tensor dict, matching the contract that real
+          ComfyUI ModelPatcher.clone() and model_state_dict() rely on."
+        created_at: 2026-04-27T21:25:15.265Z
+    kind: blocker
+    resolved_at: 2026-04-27T21:25:22.330Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T21:16:17.323Z
+created_at: 2026-04-27T21:11:18.877Z
+updated_at: 2026-04-27T21:25:22.330Z
+notes: []

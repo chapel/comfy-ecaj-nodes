@@ -1,0 +1,197 @@
+_ulid: 01KQ6NN8D58EGNR09GHNWFYJH0
+slugs: []
+title: Review task-full-model-result-sink-interface fix cycle
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m ruff check lib/result_sink.py nodes/exit.py tests/test_result_sink.py: All
+      checks passed"
+    name: ruff changed files
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T05:14:39.929Z
+    completed_at: 2026-04-27T05:14:39.929Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok: validation passed; pre-existing project warnings reported,
+      exit 0"
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T05:14:40.030Z
+    completed_at: 2026-04-27T05:14:40.030Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest tests/test_result_sink.py: 15 passed in 0.21s"
+    name: pytest result sink
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T05:14:40.130Z
+    completed_at: 2026-04-27T05:14:40.130Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest: 1222 passed in 6.75s"
+    name: pytest full suite
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T05:14:40.250Z
+    completed_at: 2026-04-27T05:14:40.250Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest tests/test_exit_node.py tests/test_exit_patch_install.py: 67 passed in 0.90s"
+    name: pytest exit node integration
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T05:14:56.529Z
+    completed_at: 2026-04-27T05:14:56.529Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: tests/test_result_sink.py contains no source-reading assertions; tests exercise
+      InMemorySink behavior directly
+    name: source-scanning test check
+    required: true
+    runner: rg
+    created_at: 2026-04-27T05:14:56.631Z
+    completed_at: 2026-04-27T05:14:56.631Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Verified nodes/exit.py now creates InMemorySink, writes group result tensors via
+      write_tensor(), finalizes into merged_state, and aborts/re-raises on errors
+    name: prior blocker verification
+    required: true
+    runner: manual
+    created_at: 2026-04-27T05:14:56.631Z
+    completed_at: 2026-04-27T05:14:56.631Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found behavioral tests annotated for @streaming-full-model-materialization
+      ac-affected-results-released in tests/test_result_sink.py
+    name: AC annotation coverage
+    required: true
+    runner: rg
+    created_at: 2026-04-27T05:14:56.730Z
+    completed_at: 2026-04-27T05:14:56.730Z
+events:
+  - _ulid: 01KQ6NN8D5PQHVJE220WG63JS7
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T05:12:42.149Z
+  - _ulid: 01KQ6NNZJN5WDR10Y1BBFV7QFY
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T05:13:05.877Z
+  - _ulid: 01KQ6NRVE9HG6TDY0WJT000KDT
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff changed files
+    timestamp: 2026-04-27T05:14:39.946Z
+  - _ulid: 01KQ6NRVHAYE6BN6WDX4CKT2B3
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T05:14:40.043Z
+  - _ulid: 01KQ6NRVMHESQ2XJBE45C4CZEQ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest result sink
+    timestamp: 2026-04-27T05:14:40.145Z
+  - _ulid: 01KQ6NRVRA43Z0TY9Q6V3ZPHBW
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest full suite
+    timestamp: 2026-04-27T05:14:40.266Z
+  - _ulid: 01KQ6NSBN0293X5HQ217Y57FFT
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest exit node integration
+    timestamp: 2026-04-27T05:14:56.544Z
+  - _ulid: 01KQ6NSBR64CGHHRP08SFQHY19
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: source-scanning test check
+    timestamp: 2026-04-27T05:14:56.646Z
+  - _ulid: 01KQ6NSBSSWSZRRCCKWJ7DB0X3
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: prior blocker verification
+    timestamp: 2026-04-27T05:14:56.697Z
+  - _ulid: 01KQ6NSBVB01NKGV5RRAF03TFQ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation coverage
+    timestamp: 2026-04-27T05:14:56.747Z
+  - _ulid: 01KQ6NSPPDEEEF44FEZ2X2288G
+    actor: codex-reviewer
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-27T05:15:07.853Z
+  - _ulid: 01KQ6NSPPD3CP0NSD02TEKE9D5
+    actor: codex-reviewer
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T05:15:07.853Z
+examined_commit: 41033cd9a31e8404dfbc9fc6a3c709e6a7900be4
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HR9XP4F7PGP4ZDYNSEPFG"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex-reviewer
+    role: reviewer
+    created_at: 2026-04-27T05:15:07.852Z
+created_at: 2026-04-27T05:12:42.149Z
+updated_at: 2026-04-27T05:15:07.853Z
+notes: []

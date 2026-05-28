@@ -1,0 +1,109 @@
+_ulid: 01KQ6JYCYN2WHWGXW0BK73DAQQ
+slugs: []
+title: Review task-full-model-update-existing-specs
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 1194 passed in 6.87s
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T04:26:43.027Z
+    completed_at: 2026-04-27T04:26:43.027Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok: Schema OK, References OK; existing alignment/completeness
+      warnings remain (orphaned specs/status mismatch/missing descriptions)."
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T04:26:43.139Z
+    completed_at: 2026-04-27T04:26:43.139Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "PR #87 targeting plan/plan-full-saved-model-output-plan/01kq5zsk: lint SUCCESS, test
+      SUCCESS; mergeStateStatus CLEAN."
+    name: GitHub PR CI
+    required: true
+    runner: gh
+    created_at: 2026-04-27T04:26:59.048Z
+    completed_at: 2026-04-27T04:26:59.048Z
+events:
+  - _ulid: 01KQ6JYCYMCFZ50ZR0F47J1Q9T
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T04:25:15.989Z
+  - _ulid: 01KQ6JZ6DC77YB3ZD1RNYMQ7NF
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T04:25:42.060Z
+  - _ulid: 01KQ6K11YYSANM5Z8PHJX854DH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-04-27T04:26:43.038Z
+  - _ulid: 01KQ6K12289A7F28TRP98A27DB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T04:26:43.144Z
+  - _ulid: 01KQ6K1HKC62ESSKJNZS53PX7K
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: GitHub PR CI
+    timestamp: 2026-04-27T04:26:59.052Z
+  - _ulid: 01KQ6K1X0PB2GQPSFAAHWPBJ9C
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-27T04:27:10.742Z
+  - _ulid: 01KQ6K1X0PY51CMRR18BMGS935
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T04:27:10.742Z
+examined_commit: b1a3ef80ad93ded4cd5c5a820b9ec2e10a76b0bb
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HR9WASF8QJDCAVKH4PR14"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T04:27:10.742Z
+created_at: 2026-04-27T04:25:15.989Z
+updated_at: 2026-04-27T04:27:10.742Z
+notes: []

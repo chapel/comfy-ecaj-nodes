@@ -1,0 +1,212 @@
+_ulid: 01KQAX3JYGSTEJA91ZX10KVSMJ
+slugs: []
+title: "Plan review: Checkpoint Save Reconciliation Plan v3"
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Verified @01KQAW7P blockers are addressed: cache metadata/artifact-kind ACs split;
+      missing-component diagnostics split; live report AC split; visible graph component-source
+      contract decided; existing-spec coverage added; primitive-test coverage moved off the harness
+      task. Verified @01KQAWTK blocker is addressed by ac-generated-workflow-round-trip requiring
+      bounded KSampler, VAEDecode, and SaveImage-style workflow success, and the prior-branch
+      ordering question is addressed by moving reconciliation before checkpoint artifact
+      format/return implementation."
+    name: Prior blocker regression
+    required: true
+    created_at: 2026-04-28T20:40:46.143Z
+    completed_at: 2026-04-28T20:40:46.143Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Specs are behavioral and testable for checkpoint-loadable artifacts, artifact safety, and
+      live Comfy validation. ACs are split enough for independent tests, including separate
+      metadata/kind cache rejection, separate diagnostic name/guidance, split live report outcomes,
+      and explicit downstream image-save round trip for checkpoint-style artifacts.
+    name: Spec quality
+    required: true
+    created_at: 2026-04-28T20:40:46.389Z
+    completed_at: 2026-04-28T20:40:46.389Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Inspected @full-saved-model-output, @streaming-full-model-materialization,
+      @comfy-memory-manager-compatibility, @manual-comfy-memory-validation, @exit-model-persistence,
+      and prior plan @01KQ5ZSK. The draft places new requirements under the expected parents and
+      starts with a P1 spec-alignment task to reconcile old diffusion-only wording before
+      implementation.
+    name: Existing spec neighborhood
+    required: true
+    created_at: 2026-04-28T20:40:46.652Z
+    completed_at: 2026-04-28T20:40:46.652Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Tasks include what/why/how/testing sections, explicit files or areas to inspect where
+      needed, real-Comfy opt-in boundaries, the no output-mode dropdown constraint, and concrete
+      verification expectations. Fresh agents should not need chat history to execute them.
+    name: Task standalone executability
+    required: true
+    created_at: 2026-04-28T20:40:46.858Z
+    completed_at: 2026-04-28T20:40:46.858Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Every new-plan AC is claimed by at least one task. Existing specs explicitly touched by
+      the plan have coverage in the spec-alignment task, and release-relevant live validation is
+      covered by the harness/manual-run/state-reconciliation tasks instead of primitive unit tests
+      alone.
+    name: AC coverage mapping
+    required: true
+    created_at: 2026-04-28T20:40:47.045Z
+    completed_at: 2026-04-28T20:40:47.045Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Task graph is acyclic and priority-aligned: spec alignment first; terminal output and
+      component sourcing unblock artifact work; prior-branch reconciliation now precedes checkpoint
+      artifact format; returned model follows artifact format; harness precedes manual run; kspec
+      state reconciliation is last."
+    name: Dependency ordering
+    required: true
+    created_at: 2026-04-28T20:40:47.248Z
+    completed_at: 2026-04-28T20:40:47.248Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Plan preserves save_model as the boolean save control and repeatedly rejects an
+      output-mode dropdown. Checkpoint-style behavior is expressed through component source
+      validation, artifact kind safety, and live workflow validation rather than a new user mode
+      selector.
+    name: Scope discipline
+    required: true
+    created_at: 2026-04-28T20:40:47.444Z
+    completed_at: 2026-04-28T20:40:47.444Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Ran kspec validate and kspec validate --alignment. Both passed schema/reference
+      validation with warnings only: orphan Foundation/WIDEN Merge specs, existing status mismatches
+      for Full Saved Model Output and Accurate RAM Preflight Estimation, and pre-existing missing
+      descriptions."
+    name: kspec validation
+    required: true
+    runner: kspec
+    created_at: 2026-04-28T20:40:47.646Z
+    completed_at: 2026-04-28T20:40:47.646Z
+events:
+  - _ulid: 01KQAX3JYGRNJC7MW606QT9RN3
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-28T20:39:49.456Z
+  - _ulid: 01KQAX3X70X4N3C8M580TK4YWP
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-28T20:39:59.968Z
+  - _ulid: 01KQAX5ACW935K47960BF25YZ2
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Prior blocker regression
+    timestamp: 2026-04-28T20:40:46.236Z
+  - _ulid: 01KQAX5ANA5S51FKE6E8JDQ4T0
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Spec quality
+    timestamp: 2026-04-28T20:40:46.506Z
+  - _ulid: 01KQAX5AW6X7H73X620MC1561X
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Existing spec neighborhood
+    timestamp: 2026-04-28T20:40:46.726Z
+  - _ulid: 01KQAX5B2FKEDFTS7DQVBQNB9C
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Task standalone executability
+    timestamp: 2026-04-28T20:40:46.927Z
+  - _ulid: 01KQAX5B8H3A09M840592T4D5S
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC coverage mapping
+    timestamp: 2026-04-28T20:40:47.121Z
+  - _ulid: 01KQAX5BEP5VVJPG6FW45PCZRA
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Dependency ordering
+    timestamp: 2026-04-28T20:40:47.318Z
+  - _ulid: 01KQAX5BMSGNW8KF17AE5A35G8
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Scope discipline
+    timestamp: 2026-04-28T20:40:47.513Z
+  - _ulid: 01KQAX5BVBS9M91JGF3JADH0NP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validation
+    timestamp: 2026-04-28T20:40:47.723Z
+  - _ulid: 01KQAX5C1APZYPDWV868F4006J
+    actor: Jacob Chapel
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-28T20:40:47.914Z
+  - _ulid: 01KQAX5C1A65RRG0V94B5729EZ
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-28T20:40:47.914Z
+examined_commit: null
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: plan
+  content_hash: ""
+  ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: Jacob Chapel
+    role: reviewer
+    created_at: 2026-04-28T20:40:47.914Z
+created_at: 2026-04-28T20:39:49.456Z
+updated_at: 2026-04-28T20:40:47.914Z
+notes: []

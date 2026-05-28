@@ -1,0 +1,35 @@
+notes:
+  - _ulid: 01KHDHEGJP2B4YRB9JRG8KC4CF
+    content: |-
+      Implementation notes:
+
+      Implementation order: Qwen first (simpler, no QKV fusion, has reference impl in
+      ../merge-router), then Flux Klein (complex QKV fusing in both block types).
+
+      Within each architecture, 3 tasks can run in parallel (detect-classify, model-loader,
+      and then lora-loader + block-config after classify completes).
+
+      Key reference files:
+      - Qwen reference: ../merge-router/src/models/qwen_key_mapper.py (compound names)
+      - Qwen reference: ../merge-router/scripts/qwen_merge.py (LoRA formats, lines 90-308)
+      - QKV fusion pattern: lib/lora/zimage.py (lines 34-44, _QKV_OFFSETS)
+      - Block config factory: nodes/block_config.py (make_block_config_node)
+      - LoRA base class: lib/lora/base.py (LoRALoader abstract)
+      - Current detection: nodes/entry.py (detect_architecture, _SUPPORTED_ARCHITECTURES)
+
+      Existing architecture patterns (SDXL + Z-Image) serve as templates. Each new
+      architecture adds: one classifier function, one set of layer type patterns, one
+      LoRA loader module, one block config node module, and registry entries.
+
+      Executor change for Flux linear1: lib/gpu_ops.py line 200 currently handles
+      qkv_q/qkv_k/qkv_v kinds with offset-based slicing. Flux single_block linear1
+      4-way split reuses qkv_* for Q/K/V and adds one new kind (e.g. "offset_mlp")
+      to the same elif branch. This is a one-line tuple extension, not a new code
+      path. The offset=(start, length) mechanism is already general-purpose.
+
+      No changes needed to: lib/analysis.py (dispatches via registry), lib/per_block.py
+      (dispatches via classify_key/classify_layer_type registries), nodes/exit.py
+      (architecture-agnostic), lib/persistence.py (recipe serialization is
+      architecture-agnostic).
+    author: "@claude"
+    created_at: 2026-02-14T07:39:36.918Z

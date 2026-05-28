@@ -1,0 +1,14 @@
+_ulid: 01KQJFYGXFN9QEJXEXYN3NC7RZ
+slugs:
+  - plan-saved-model-materialization-progress
+title: Saved Model Materialization Progress
+status: completed
+approved_at: 2026-05-08T20:24:32.510Z
+derived_specs:
+  - "@streaming-materialization-progress"
+derived_tasks:
+  - "@task-streaming-materialization-progress"
+module_ref: null
+source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/saved-model-materialization-progress.md
+created_at: 2026-05-01T19:23:47.503Z
+completed_at: null

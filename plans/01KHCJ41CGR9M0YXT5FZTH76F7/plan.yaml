@@ -1,0 +1,19 @@
+_ulid: 01KHCJ41CGR9M0YXT5FZTH76F7
+slugs:
+  - plan-full-model-merging-widen-on-full-checkpoints
+title: Full Model Merging — WIDEN on Full Checkpoints
+status: completed
+approved_at: null
+derived_specs:
+  - "@full-model-recipe"
+  - "@model-input-node"
+  - "@full-model-loader"
+  - "@full-model-execution"
+derived_tasks:
+  - "@implement-full-model-recipe-type"
+  - "@implement-model-input-node"
+  - "@implement-full-model-loader"
+  - "@implement-full-model-execution"
+source_path: /home/chapel/.claude/plans/cheeky-squishing-kahan.md
+created_at: 2026-02-13T22:32:07.824Z
+completed_at: null

@@ -1,0 +1,147 @@
+_ulid: 01KQCQ2MTCTAW8XBW63JYA7XGE
+slugs: []
+title: Review task-checkpoint-save-live-validation-manual-run cycle 2
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_checkpoint_validation_harness.py: 101 passed in 1.84s."
+    name: pytest harness slice
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T13:34:43.255Z
+    completed_at: 2026-04-29T13:34:43.255Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Full suite passed: 1575 passed, 0 failed, 0 skipped in 13.08s."
+    name: uv run pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T13:34:43.678Z
+    completed_at: 2026-04-29T13:34:43.678Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Validation passed with pre-existing alignment/completeness warnings; --warnings-ok exit 0.
+      Schema/references OK; skills OK.
+    name: kspec validate --warnings-ok
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T13:34:44.112Z
+    completed_at: 2026-04-29T13:34:44.112Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "reports/checkpoint_validation_report.json has failure_categories.cache=none and
+      cache_reuse_detail='application-level cache reuse confirmed via timing: first=22.784s,
+      reuse=2.003s, speedup=11.4x (threshold: 2.0x)'."
+    name: live report cache reuse assertion
+    required: true
+    runner: manual
+    created_at: 2026-04-29T13:34:44.545Z
+    completed_at: 2026-04-29T13:34:44.545Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Verified @live-comfy-saved-output-validation ACs against task notes,
+      reports/checkpoint_validation_report.json, and annotated behavioral tests. Also checked
+      @checkpoint-loadable-saved-model-output AC evidence for terminal save, checkpoint
+      classification, loader, and downstream image workflow.
+    name: AC coverage inspection
+    required: true
+    runner: reviewer
+    created_at: 2026-04-29T13:35:06.180Z
+    completed_at: 2026-04-29T13:35:06.180Z
+events:
+  - _ulid: 01KQCQ2MTCZ0M2JD45YC9JXC2Q
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T13:32:56.012Z
+  - _ulid: 01KQCQ31649X9D59BP5R0R0C7J
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T13:33:08.676Z
+  - _ulid: 01KQCQ5XNGXJ7HFCKW9F0Z7D2M
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest harness slice
+    timestamp: 2026-04-29T13:34:43.376Z
+  - _ulid: 01KQCQ5Y2VZ39B7F0BKNNN8KCJ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: uv run pytest
+    timestamp: 2026-04-29T13:34:43.803Z
+  - _ulid: 01KQCQ5YH9CW6PWP72JYYW9DQM
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --warnings-ok
+    timestamp: 2026-04-29T13:34:44.265Z
+  - _ulid: 01KQCQ5YYZ0734XDSK83P6XNK2
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: live report cache reuse assertion
+    timestamp: 2026-04-29T13:34:44.703Z
+  - _ulid: 01KQCQ6M1VBVFEDH41YCXQM1WJ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC coverage inspection
+    timestamp: 2026-04-29T13:35:06.300Z
+  - _ulid: 01KQCQ6MFZV34GFN6S5A83YV9Y
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-29T13:35:06.751Z
+  - _ulid: 01KQCQ6MFZ6CS3234012AC743B
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T13:35:06.751Z
+examined_commit: 6688433eb367b01ef32a546a874febc170b13f5f
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZNC4NGZ7R5ZT37Z4GJQQ"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T13:35:06.750Z
+created_at: 2026-04-29T13:32:56.012Z
+updated_at: 2026-04-29T13:35:06.751Z
+notes: []

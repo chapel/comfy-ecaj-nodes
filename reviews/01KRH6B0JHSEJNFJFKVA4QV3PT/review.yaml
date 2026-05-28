@@ -1,0 +1,142 @@
+_ulid: 01KRH6B0JHSEJNFJFKVA4QV3PT
+slugs: []
+title: Review checkpoint save temp payload release hardening
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Validation passed: 136 files, 56 items, 133 tasks; schema and references OK."
+    name: kspec validate --refs
+    required: true
+    runner: kspec
+    created_at: 2026-05-13T17:34:15.360Z
+    completed_at: 2026-05-13T17:34:15.360Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest tests/test_checkpoint_returned_model.py tests/test_checkpoint_save_format.py: 71
+      passed in 1.68s."
+    name: pytest focused checkpoint suites
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T17:34:18.504Z
+    completed_at: 2026-05-13T17:34:18.504Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest: 1678 passed in 17.31s."
+    name: pytest full suite
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T17:34:21.169Z
+    completed_at: 2026-05-13T17:34:21.169Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "ruff check .: All checks passed."
+    name: ruff check
+    required: true
+    runner: ruff
+    created_at: 2026-05-13T17:34:24.119Z
+    completed_at: 2026-05-13T17:34:24.119Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "PR #116 lint and test check runs completed successfully; mergeStateStatus CLEAN."
+    name: GitHub CI
+    required: true
+    runner: github-actions
+    created_at: 2026-05-13T17:34:26.967Z
+    completed_at: 2026-05-13T17:34:26.967Z
+events:
+  - _ulid: 01KRH6B0JG1TEPDMHAK87B9TPV
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-05-13T17:32:18.385Z
+  - _ulid: 01KRH6B9ZS5T0A94YTKVAKPY1A
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-05-13T17:32:28.025Z
+  - _ulid: 01KRH6EJZG8YY7DQEZCN2H7X2V
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --refs
+    timestamp: 2026-05-13T17:34:15.537Z
+  - _ulid: 01KRH6EP1XKTXTDJW4JKPCH2B3
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest focused checkpoint suites
+    timestamp: 2026-05-13T17:34:18.685Z
+  - _ulid: 01KRH6ERMT68SXTRXKWNYA1KEN
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest full suite
+    timestamp: 2026-05-13T17:34:21.338Z
+  - _ulid: 01KRH6EVH6NK11MFMVBW03PANK
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check
+    timestamp: 2026-05-13T17:34:24.296Z
+  - _ulid: 01KRH6EYAAPJH2V0MSYJ3GAGPW
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: GitHub CI
+    timestamp: 2026-05-13T17:34:27.146Z
+  - _ulid: 01KRH6F8M1FS705E6CQFWH45TS
+    actor: jacob.chapel@gmail.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-05-13T17:34:37.697Z
+  - _ulid: 01KRH6F8M1CW0YJEGTK1JKVEYQ
+    actor: jacob.chapel@gmail.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-05-13T17:34:37.697Z
+examined_commit: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KRH2YMHPE7JQYJ734YWMRPAR"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: jacob.chapel@gmail.com
+    role: reviewer
+    created_at: 2026-05-13T17:34:37.697Z
+created_at: 2026-05-13T17:32:18.385Z
+updated_at: 2026-05-13T17:34:37.697Z
+notes: []

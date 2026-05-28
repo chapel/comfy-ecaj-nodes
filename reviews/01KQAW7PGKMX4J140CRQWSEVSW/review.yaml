@@ -1,0 +1,324 @@
+_ulid: 01KQAW7PGKMX4J140CRQWSEVSW
+slugs: []
+title: "Plan review: Checkpoint Save Reconciliation Plan"
+author: Jacob Chapel
+checks:
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "@task-checkpoint-save-component-sourcing leaves the public checkpoint component graph
+      contract to implementation-time choice, which requires conversation/product context to decide
+      safely."
+    name: Task standalone executability
+    required: true
+    created_at: 2026-04-28T20:26:24.838Z
+    completed_at: 2026-04-28T20:26:24.838Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Found compound/multi-case ACs in @saved-model-artifact-safety and
+      @live-comfy-saved-output-validation; see blocker threads on
+      ac-incompatible-artifact-not-reused, ac-missing-components-diagnostic, and
+      ac-report-captures-live-behavior.
+    name: Spec quality
+    required: true
+    created_at: 2026-04-28T20:26:24.839Z
+    completed_at: 2026-04-28T20:26:24.839Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Covers lines omit existing @full-saved-model-output ACs explicitly edited by
+      @task-checkpoint-save-spec-alignment, and @task-checkpoint-save-live-validation-harness
+      overclaims release-assessment coverage.
+    name: AC coverage mapping
+    required: true
+    created_at: 2026-04-28T20:26:24.842Z
+    completed_at: 2026-04-28T20:26:24.842Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Plan repeatedly preserves the existing save_model boolean and explicitly rejects an
+      output-mode dropdown/product mode selector.
+    name: Scope discipline
+    required: true
+    created_at: 2026-04-28T20:26:39.120Z
+    completed_at: 2026-04-28T20:26:39.120Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Task graph is acyclic: spec alignment precedes implementation; terminal output and
+      component sourcing unblock artifact format/return behavior; guarded harness and prior-branch
+      reconciliation precede the manual live run; kspec-state reconciliation is last."
+    name: Dependency ordering
+    required: true
+    created_at: 2026-04-28T20:26:39.122Z
+    completed_at: 2026-04-28T20:26:39.122Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Ran kspec validate: schema/references passed; existing repository warnings remain for
+      orphan modules, status mismatches, and missing descriptions unrelated to this draft plan."
+    name: kspec validation
+    required: false
+    created_at: 2026-04-28T20:26:39.179Z
+    completed_at: 2026-04-28T20:26:39.179Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Plan covers terminal WIDEN Exit queueability, checkpoint-style SDXL artifact loadability,
+      downstream generation/decode round-trip, Dynamic VRAM/live Comfy validation, and selective
+      reconciliation of branch plan/plan-full-saved-model-output-plan/01kq5zsk.
+    name: Investigation gap coverage
+    required: true
+    created_at: 2026-04-28T20:26:39.136Z
+    completed_at: 2026-04-28T20:26:39.136Z
+events:
+  - _ulid: 01KQAW7PGKETRKK5QC9YZ74TZA
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-28T20:24:35.603Z
+  - _ulid: 01KQAW813CX686C2PWPMKJJF80
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-28T20:24:46.444Z
+  - _ulid: 01KQAW8X9MCBVB5HKFHDCN08PV
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQAW8X733EG2K86W0G03DB3W
+    timestamp: 2026-04-28T20:25:15.316Z
+  - _ulid: 01KQAW9APFG3WTV1DS3J342A22
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQAW9AM3P1Q6NYM9DFYBNC66
+    timestamp: 2026-04-28T20:25:29.039Z
+  - _ulid: 01KQAW9AVJJDJWNFNAP0M2ZKD4
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQAW9AM9N9HCVESC65Z7EHNV
+    timestamp: 2026-04-28T20:25:29.202Z
+  - _ulid: 01KQAW9B0K8NMBXAV22JYDRD9A
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQAW9AMTVQBYYZJZD6JMV618
+    timestamp: 2026-04-28T20:25:29.363Z
+  - _ulid: 01KQAW9ZAERN2BYGZWYSD96PBW
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQAW9Z83WGSHNBDMF19ZXDT6
+    timestamp: 2026-04-28T20:25:50.158Z
+  - _ulid: 01KQAWAHHTF7G1V36J8FCM7YHP
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQAWAHFA7TTPCA2AMYXHZFMF
+    timestamp: 2026-04-28T20:26:08.826Z
+  - _ulid: 01KQAWB18MZJXN0WJ5VRT9XEEG
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: Task standalone executability
+    timestamp: 2026-04-28T20:26:24.917Z
+  - _ulid: 01KQAWB1DCWE7M6KME4H9G6ETE
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: Spec quality
+    timestamp: 2026-04-28T20:26:25.069Z
+  - _ulid: 01KQAWB1J5JQVTNY05H5EJTDAD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: AC coverage mapping
+    timestamp: 2026-04-28T20:26:25.222Z
+  - _ulid: 01KQAWBF70AEFAMJJN1Z8J0BRD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Scope discipline
+    timestamp: 2026-04-28T20:26:39.201Z
+  - _ulid: 01KQAWBFBN15H8A6ZHBNB5833P
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Dependency ordering
+    timestamp: 2026-04-28T20:26:39.349Z
+  - _ulid: 01KQAWBFGQA9VJJZFKEAF6266T
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validation
+    timestamp: 2026-04-28T20:26:39.511Z
+  - _ulid: 01KQAWBFNPPPZYMJ9K0D6ZAE60
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Investigation gap coverage
+    timestamp: 2026-04-28T20:26:39.671Z
+  - _ulid: 01KQAWBPQZZ2262W9DMB3H3MYS
+    actor: Jacob Chapel
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-28T20:26:46.912Z
+  - _ulid: 01KQAWBPR03EBA6KQ33H3FFA91
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-28T20:26:46.912Z
+examined_commit: null
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: plan
+  content_hash: ""
+  ref: "@plan-checkpoint-save-reconciliation-plan"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQAW8X733EG2K86W0G03DB3W
+    anchor:
+      type: structured
+      field: ac-incompatible-artifact-not-reused
+      ref: "@saved-model-artifact-safety"
+      section: acceptance_criteria
+    entries:
+      - _ulid: 01KQAW8X743ECZNH37Z3MCTFWS
+        author: Jacob Chapel
+        body: "MUST-FIX: This AC bundles two independently testable cache-rejection cases in the Given
+          clause: missing required saved-model metadata and a different artifact kind. A task/test
+          could satisfy the AC by covering only one case while leaving the other unimplemented.
+          Split this into separate ACs, or rewrite it as one generalized behavioral contract and
+          keep the concrete metadata/artifact-kind cases enumerated in task testing."
+        created_at: 2026-04-28T20:25:15.236Z
+    kind: blocker
+  - _ulid: 01KQAW9AM3P1Q6NYM9DFYBNC66
+    anchor:
+      type: structured
+      field: ac-missing-components-diagnostic
+      ref: "@saved-model-artifact-safety"
+      section: acceptance_criteria
+    entries:
+      - _ulid: 01KQAW9AM34J60N5E25BKBGN1B
+        author: Jacob Chapel
+        body: "MUST-FIX: The Then clause contains two separate assertions: the diagnostic names the missing
+          requirement, and it explains how the workflow can provide it. Because these can pass or
+          fail independently, split them into two ACs or replace the Then with a single observable
+          standard such as 'the diagnostic is actionable for the missing checkpoint components' and
+          put the exact content expectations in task tests."
+        created_at: 2026-04-28T20:25:28.963Z
+    kind: blocker
+  - _ulid: 01KQAW9AM9N9HCVESC65Z7EHNV
+    anchor:
+      type: structured
+      field: ac-report-captures-live-behavior
+      ref: "@live-comfy-saved-output-validation"
+      section: acceptance_criteria
+    entries:
+      - _ulid: 01KQAW9AM9RT8754P3D8VPAYW9
+        author: Jacob Chapel
+        body: "MUST-FIX: This AC's Then clause is a report schema checklist covering environment identity,
+          workflow shape, save result, artifact classification, loader result, downstream result,
+          and cache-reuse result. That is too many independently testable outcomes for one AC and
+          makes task coverage ambiguous. Split it into smaller ACs, for example environment/memory
+          identification, saved-artifact outcome, loader/downstream outcome, and cache-reuse
+          outcome."
+        created_at: 2026-04-28T20:25:28.969Z
+    kind: blocker
+  - _ulid: 01KQAW9AMTVQBYYZJZD6JMV618
+    anchor:
+      type: structured
+      ref: "@task-checkpoint-save-component-sourcing"
+      section: description
+    entries:
+      - _ulid: 01KQAW9AMTMM67ERSZMB4H5QP1
+        author: Jacob Chapel
+        body: "MUST-FIX: The task leaves the checkpoint component graph contract as an implementation-time
+          choice ('Choose the least confusing graph contract ... optional inputs ... or equivalent
+          source'). That contract changes the public node surface and determines whether SDXL-style
+          checkpoint saves can be satisfied. Patch the plan so the contract is decided here, or
+          split out an explicit design/decision task whose output is required before implementation
+          tasks depend on it. A fresh agent should not have to infer this from prior chat or
+          live-investigation context."
+        created_at: 2026-04-28T20:25:28.986Z
+    kind: blocker
+  - _ulid: 01KQAW9Z83WGSHNBDMF19ZXDT6
+    anchor:
+      type: structured
+      field: covers
+      ref: "@task-checkpoint-save-spec-alignment"
+      section: tasks
+    entries:
+      - _ulid: 01KQAW9Z83PXRD63QX80FES24T
+        author: Jacob Chapel
+        body: "MUST-FIX: The task explicitly says it will refine existing @full-saved-model-output ACs
+          ac-complete-artifact and ac-return-loaded-model, and may update @exit-model-persistence if
+          it still describes saved files broadly, but its Covers line only lists new-plan ACs. Add
+          the existing ACs this task is responsible for updating/validating, or narrow the task so
+          it no longer claims to modify those specs. Without that, the plan's coverage map is
+          incomplete and a fresh agent cannot tell which existing behavioral contracts must be
+          reconciled."
+        created_at: 2026-04-28T20:25:50.083Z
+    kind: blocker
+  - _ulid: 01KQAWAHFA7TTPCA2AMYXHZFMF
+    anchor:
+      type: structured
+      field: covers
+      ref: "@task-checkpoint-save-live-validation-harness"
+      section: tasks
+    entries:
+      - _ulid: 01KQAWAHFB73SW7MQX4ZJEXJ47
+        author: Jacob Chapel
+        body: "MUST-FIX: The Covers line claims @live-comfy-saved-output-validation
+          ac-primitive-tests-do-not-substitute-for-live-validation, but this task mainly builds a
+          guarded harness and mock/report tests. The AC is about release compatibility assessment
+          not accepting primitive tests as sufficient. Move that coverage to the manual
+          validation/state-reconciliation task, or add explicit release-assessment behavior to this
+          task so the Covers claim is true."
+        created_at: 2026-04-28T20:26:08.747Z
+    kind: blocker
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: Jacob Chapel
+    role: reviewer
+    created_at: 2026-04-28T20:26:46.911Z
+created_at: 2026-04-28T20:24:35.603Z
+updated_at: 2026-04-28T20:26:46.912Z
+notes: []

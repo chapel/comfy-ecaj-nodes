@@ -1,0 +1,268 @@
+_ulid: 01KQGF39HXTEW0NFXR2TAGCAQP
+slugs: []
+title: Review diffusion-model saved-output round trip
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest: 1606 passed in 17.35s"
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-05-01T00:32:46.563Z
+    completed_at: 2026-05-01T00:32:46.563Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_diffusion_model_saved_output.py
+      tests/test_full_model_streaming.py tests/test_incremental_recompute.py: 126 passed in 2.45s"
+    name: focused diffusion saved-output tests
+    required: true
+    runner: pytest
+    created_at: 2026-05-01T00:32:47.084Z
+    completed_at: 2026-05-01T00:32:47.084Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate: schema/references/skills OK; command exited 6 because of existing
+      alignment/completeness warnings (2 orphaned specs, 2 status mismatches, 11 missing
+      descriptions), not new task-specific failures"
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-05-01T00:32:47.619Z
+    completed_at: 2026-05-01T00:32:47.619Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run ruff check .: All checks passed"
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-05-01T00:32:48.174Z
+    completed_at: 2026-05-01T00:32:48.174Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "git diff --check dev...HEAD: no output"
+    name: diff whitespace
+    required: true
+    runner: git
+    created_at: 2026-05-01T00:33:22.672Z
+    completed_at: 2026-05-01T00:33:22.672Z
+events:
+  - _ulid: 01KQGF39HX48WWYNAM68EZB8PY
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-05-01T00:30:26.365Z
+  - _ulid: 01KQGF3GXMPEMBTE5QKT720D8J
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-05-01T00:30:33.908Z
+  - _ulid: 01KQGF7JKQS8Y5C82GKG3NQKHC
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-05-01T00:32:46.712Z
+  - _ulid: 01KQGF7K42PVT7WAVY9QYK1JYH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused diffusion saved-output tests
+    timestamp: 2026-05-01T00:32:47.234Z
+  - _ulid: 01KQGF7KP26F7XBV6KTYFBQBP0
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-05-01T00:32:47.810Z
+  - _ulid: 01KQGF7M73TJSMC8GBP6BN96ED
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-05-01T00:32:48.355Z
+  - _ulid: 01KQGF83CE7JFX15SC1552CTAP
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQGF837GZS2FF3VQE5JNWGRP
+    timestamp: 2026-05-01T00:33:03.886Z
+  - _ulid: 01KQGF8G3T5VHMVSE88H2H2JV4
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
+    timestamp: 2026-05-01T00:33:16.922Z
+  - _ulid: 01KQGF8NW3H972ARS2H6YBBZ3Q
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: diff whitespace
+    timestamp: 2026-05-01T00:33:22.819Z
+  - _ulid: 01KQGF8YN6643GKW7P26E3HXD0
+    actor: jacob.chapel@gmail.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-05-01T00:33:31.814Z
+  - _ulid: 01KQGF8YN6GVTH62A62A1FT0A7
+    actor: jacob.chapel@gmail.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-05-01T00:33:31.814Z
+  - _ulid: 01KQGG9X32ZMNVWZ97GVREBZ9P
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQGF837GZS2FF3VQE5JNWGRP
+    timestamp: 2026-05-01T00:51:31.554Z
+  - _ulid: 01KQGGA63MW58W216VW3HJMPVQ
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
+    timestamp: 2026-05-01T00:51:40.788Z
+  - _ulid: 01KQGGABVKGVTJVZKBAFTG2T1Q
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQGF837GZS2FF3VQE5JNWGRP
+    timestamp: 2026-05-01T00:51:46.676Z
+  - _ulid: 01KQGGAEAY8A0S8RTCA58JX8AZ
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
+    timestamp: 2026-05-01T00:51:49.214Z
+examined_commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQGCVTCMFVH3HF2H150AY5B7"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQGF837GZS2FF3VQE5JNWGRP
+    anchor:
+      type: code
+      commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
+      line_end: 1144
+      line_start: 1144
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQGF837GJ72RTND36PJ5S2KT
+        author: Jacob Chapel
+        body: "MUST-FIX: diffusion-model saves still resolve the output path through the checkpoints
+          directory. Comfy's standalone diffusion loader UI discovers files from folder_paths
+          'diffusion_models' (UNETLoader calls get_full_path_or_raise('diffusion_models',
+          unet_name)), while this path is used before artifact-kind routing and therefore both
+          diffusion cache validation and fresh diffusion saves publish under checkpoints. Impact: a
+          workflow that starts from WIDEN Diffusion Model Input can produce a file with loadable
+          tensor keys, but the saved artifact is not available through the normal standalone
+          diffusion-model load contract, so it does not round-trip as the same Comfy model kind. Add
+          a diffusion-model save path resolver, use it for non-checkpoint recipes including cache
+          checks, and cover it with tests that do not patch _resolve_checkpoints_path for diffusion
+          saves."
+        created_at: 2026-05-01T00:33:03.728Z
+      - _ulid: 01KQGG9WY1SXTC70KFJAADBMF6
+        author: "@claude"
+        body: "Fixed: added _resolve_diffusion_models_path (uses
+          folder_paths.get_folder_paths('diffusion_models') with 'unet' fallback) plus a kind-aware
+          _resolve_save_path router in nodes/exit.py:577. Detection of is_checkpoint now happens
+          BEFORE save_path resolution in _execute_full_saved_model, _execute_full_model_noop, and
+          IS_CHANGED so diffusion-only recipes (cache-miss + cache-hit + no-op + IS_CHANGED hash)
+          publish under the diffusion_models folder where Comfy's UNETLoader / load_diffusion_model
+          can discover them. New behavioral tests in tests/test_diffusion_model_saved_output.py
+          cover: TestDiffusionModelsPathResolver (uses_diffusion_models_folder,
+          falls_back_to_unet_for_legacy_layouts, raises_when_no_directory_configured),
+          TestSaveKindAwarePathRouter (diffusion vs checkpoint routing), and
+          TestDiffusionSaveRoutingThroughFolderPaths (fresh save, no-op save, and cache-hit all
+          resolve through folder_paths('diffusion_models'), no _resolve_checkpoints_path patches in
+          these tests). Existing diffusion-only tests across test_full_model_streaming.py /
+          test_incremental_recompute.py / test_memory_management.py /
+          test_diffusion_model_saved_output.py were migrated from patching _resolve_checkpoints_path
+          to patching _resolve_save_path (the kind-aware router) so they no longer mask the bug."
+        created_at: 2026-05-01T00:51:31.393Z
+    kind: blocker
+    resolved_at: 2026-05-01T00:51:46.478Z
+    resolved_by: "@claude"
+  - _ulid: 01KQGF8FYNF35Y329FZ15ZKTPZ
+    anchor:
+      type: code
+      commit: 593b59161291ad55d4a49ae32e7cc7509c5abbdb
+      line_end: 596
+      line_start: 559
+      path: scripts/manual/real_comfy_checkpoint_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQGF8FYN95G9CYBVB9DJC8XP
+        author: Jacob Chapel
+        body: "MUST-FIX: the submitted task required a guarded live-validation harness, or an extension of
+          the existing guarded harness, for real standalone diffusion-model workflows. The only
+          guarded saved-output harness in scripts/manual remains checkpoint-specific: it accepts
+          checkpoint validation flags, builds CheckpointLoaderSimple workflows, and validates
+          reloading with CheckpointLoaderSimple. The worker note explicitly defers diffusion-model
+          live validation instead of adding a guarded diffusion loader path. Impact: maintainers
+          still cannot explicitly validate that a real saved standalone diffusion-model artifact
+          loads through ComfyUI's diffusion-model loader with companion CLIP/VAE supplied
+          separately, which was a required testing deliverable for this task."
+        created_at: 2026-05-01T00:33:16.757Z
+      - _ulid: 01KQGGA5YRSFJD4BQWXY3Y5T8H
+        author: "@claude"
+        body: "Fixed: added scripts/manual/real_comfy_diffusion_model_validation.py — a guarded
+          live-validation harness for standalone diffusion-model workflows. Required inputs:
+          COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION=1 env var, --run-diffusion-model-validation flag,
+          --comfy-api-url, --source-diffusion-model, --companion-clip, --companion-vae,
+          --report-output. The harness builds a UNETLoader -> WIDENEntry (model only, no clip/vae)
+          -> WIDENExit save graph, validates the saved artifact via UNETLoader (Comfy's standalone
+          diffusion-model load contract), runs a downstream KSampler with companion CLIP and VAE
+          supplied through (Dual)CLIPLoader and VAELoader (separate from the saved artifact), and
+          runs a cache-reuse pass with the same save/timing-based detection contract as the
+          checkpoint harness. tests/test_diffusion_model_validation_harness.py provides 30 automated
+          tests covering guard refusal for each missing input, workflow shape (UNETLoader present,
+          no CheckpointLoaderSimple anywhere, WIDENEntry has no clip/vae, separate CLIP/VAE
+          loaders), Dual vs single CLIPLoader selection, failure classification
+          (UNETLoader/diffusion errors → loader, OOM precedence), and report formatting."
+        created_at: 2026-05-01T00:51:40.632Z
+    kind: blocker
+    resolved_at: 2026-05-01T00:51:49.063Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: jacob.chapel@gmail.com
+    role: reviewer
+    created_at: 2026-05-01T00:33:31.813Z
+created_at: 2026-05-01T00:30:26.365Z
+updated_at: 2026-05-01T00:51:49.063Z
+notes: []

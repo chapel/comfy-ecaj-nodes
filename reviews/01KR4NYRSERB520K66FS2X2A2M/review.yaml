@@ -1,0 +1,142 @@
+_ulid: 01KR4NYRSERB520K66FS2X2A2M
+slugs: []
+title: Review task-streaming-materialization-progress cycle 2
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run pytest tests/test_save_progress.py -> 19 passed in 0.87s
+    name: focused save progress tests
+    required: true
+    runner: pytest
+    created_at: 2026-05-08T20:58:26.541Z
+    completed_at: 2026-05-08T20:58:26.541Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run pytest -> 1666 passed in 20.43s
+    name: python test suite
+    required: true
+    runner: pytest
+    created_at: 2026-05-08T20:58:27.239Z
+    completed_at: 2026-05-08T20:58:27.239Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run ruff check . -> All checks passed
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-05-08T20:58:28.770Z
+    completed_at: 2026-05-08T20:58:28.770Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok -> schema/references OK; existing alignment/completeness
+      warnings only
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-05-08T20:58:29.205Z
+    completed_at: 2026-05-08T20:58:29.205Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: git diff --check dev...HEAD -> no output
+    name: diff whitespace
+    required: true
+    runner: git
+    created_at: 2026-05-08T20:58:29.612Z
+    completed_at: 2026-05-08T20:58:29.612Z
+events:
+  - _ulid: 01KR4NYRSDKF7R4JVYSB9VXW65
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-05-08T20:55:06.797Z
+  - _ulid: 01KR4NZ094Z567TVQY9J501BN9
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-05-08T20:55:14.468Z
+  - _ulid: 01KR4P4W3SZK2EKRQPAAHTKTD4
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused save progress tests
+    timestamp: 2026-05-08T20:58:26.809Z
+  - _ulid: 01KR4P4WNZEF2GADP7YRT41K68
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: python test suite
+    timestamp: 2026-05-08T20:58:27.391Z
+  - _ulid: 01KR4P4Y6HKA0JMRM7QYWSYVM8
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-05-08T20:58:28.945Z
+  - _ulid: 01KR4P4YKYPYW9EA1S0TB23N7K
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-05-08T20:58:29.374Z
+  - _ulid: 01KR4P4Z09EE4WDCZTBGM6AC24
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: diff whitespace
+    timestamp: 2026-05-08T20:58:29.770Z
+  - _ulid: 01KR4P4ZC1S2KPDZN8NS88SGMT
+    actor: codex@openai.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-05-08T20:58:30.145Z
+  - _ulid: 01KR4P4ZC1CZ0R47FWWN0KAF2N
+    actor: codex@openai.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-05-08T20:58:30.145Z
+examined_commit: 34cffdeeef112df9ba368ca2fd111af985376b99
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KR4M7F3PVVBBD593P79WZPFS"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex@openai.com
+    role: reviewer
+    created_at: 2026-05-08T20:58:30.145Z
+created_at: 2026-05-08T20:55:06.797Z
+updated_at: 2026-05-08T20:58:30.145Z
+notes: []

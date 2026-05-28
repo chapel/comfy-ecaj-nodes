@@ -1,0 +1,251 @@
+_ulid: 01KQ80R37N9P1P1NV0GMN83AXR
+slugs: []
+title: Review full model streaming artifact cache fix cycle
+author: Jacob Chapel
+checks:
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Runtime probe with group1 keys a/z and group2 keys b/c produced events: eval:g1,
+      write:g1:a, eval:g2, write:g2:b, write:g2:c, write:g1:z. Later group evaluation begins before
+      the first group is fully written."
+    name: interleaved streaming probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T17:50:03.272Z
+    completed_at: 2026-04-27T17:50:03.272Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found annotations for @streaming-full-model-materialization, @full-saved-model-output,
+      and @comfy-memory-manager-compatibility in tests/test_full_model_streaming.py; no
+      source-scanning test patterns found in changed tests.
+    name: AC annotation grep
+    required: true
+    runner: rg
+    created_at: 2026-04-27T17:50:03.466Z
+    completed_at: 2026-04-27T17:50:03.466Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Schema/references validation passed; command exited 6 only because existing
+      alignment/completeness warnings remain.
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T17:50:03.679Z
+    completed_at: 2026-04-27T17:50:03.679Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest: 1224 passed in 9.62s."
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T17:50:03.890Z
+    completed_at: 2026-04-27T17:50:03.890Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Runtime probe created a full artifact with unaffected weight b=20 and original base b=2;
+      _load_model_from_artifact returned a model whose unaffected base remained 2 and whose affected
+      key was installed as a set patch, proving it is not loaded from the full artifact.
+    name: artifact load probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T17:50:13.624Z
+    completed_at: 2026-04-27T17:50:13.624Z
+events:
+  - _ulid: 01KQ80R37MDD6ZDPGAB73XR9J3
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T17:45:43.924Z
+  - _ulid: 01KQ80R96JBP9DCAMP2RTXQXKN
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T17:45:50.034Z
+  - _ulid: 01KQ8100HFW61TZWQQP8K57FQS
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: interleaved streaming probe
+    timestamp: 2026-04-27T17:50:03.312Z
+  - _ulid: 01KQ8100QTCYDFS95HFWE4TMEG
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation grep
+    timestamp: 2026-04-27T17:50:03.514Z
+  - _ulid: 01KQ8100YEW9GBRTK96AGY70V5
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T17:50:03.727Z
+  - _ulid: 01KQ8101538FX2N95JM1GVXMYK
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-27T17:50:03.939Z
+  - _ulid: 01KQ810AN2BDSP1J4NQD3XN8C0
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: artifact load probe
+    timestamp: 2026-04-27T17:50:13.666Z
+  - _ulid: 01KQ810Q653BDE9CM4MN0JPJ9N
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ810Q4W2A0FFC2B7RHK3MG5
+    timestamp: 2026-04-27T17:50:26.501Z
+  - _ulid: 01KQ8113X9540M1TTQ9HYEBJ5K
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ8113VT6G7D7QWXZSH5N5NY
+    timestamp: 2026-04-27T17:50:39.529Z
+  - _ulid: 01KQ811FQW42TV6ATVYY733XKZ
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T17:50:51.645Z
+  - _ulid: 01KQ811FQXENJ9BN3PZES3ZJS2
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T17:50:51.645Z
+  - _ulid: 01KQ81VRJTP3FXZWZYH5T6RJRB
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ810Q4W2A0FFC2B7RHK3MG5
+    timestamp: 2026-04-27T18:05:12.666Z
+  - _ulid: 01KQ81VWZ3MPP9X922TD6K5WAW
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ8113VT6G7D7QWXZSH5N5NY
+    timestamp: 2026-04-27T18:05:17.155Z
+  - _ulid: 01KQ81W1T4R6AC8PRN0KS5RHZB
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ810Q4W2A0FFC2B7RHK3MG5
+    timestamp: 2026-04-27T18:05:22.116Z
+  - _ulid: 01KQ81W47A2Q0VZ0YJ7ND279FC
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ8113VT6G7D7QWXZSH5N5NY
+    timestamp: 2026-04-27T18:05:24.586Z
+examined_commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ810Q4W2A0FFC2B7RHK3MG5
+    anchor:
+      type: code
+      commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
+      line_end: 783
+      line_start: 757
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ810Q4X5ED1DB0YB4JAH8J1
+        author: Jacob Chapel
+        body: "MUST-FIX: full-mode streaming still retains an evaluated group across later group evaluation
+          when that group's keys are interleaved in sorted safetensors order. The loop evaluates an
+          entire OpSignature at the first key, writes only the current key, and keeps the rest in
+          evaluated_groups until their sorted keys appear. A runtime probe with group1 keys a/z and
+          group2 keys b/c produced eval:g1, write:g1:a, eval:g2, write:g2:b, write:g2:c, write:g1:z.
+          That violates ac-direct-artifact-handoff/ac-affected-results-released because group1's
+          completed tensors remain resident while group2 is evaluated, and the current test only
+          covers non-interleaved key names."
+        created_at: 2026-04-27T17:50:26.461Z
+      - _ulid: 01KQ81VRHBXKZVHHAA2ADJXXKX
+        author: "@claude"
+        body: "Fixed: Restructured the streaming loop to process groups one at a time instead of iterating
+          sorted keys with lazy group evaluation. The sink now supports random-access writes via
+          seek to pre-computed byte offsets, so group keys can be written in evaluation order
+          regardless of sorted-name interleaving. Base weights are written first, then each group is
+          evaluated, ALL its keys are written, and the group is freed before the next group is
+          evaluated. Test updated to use interleaved key names (group1: a/z, group2: b/c) that would
+          have failed under the old approach."
+        created_at: 2026-04-27T18:05:12.619Z
+    kind: blocker
+    resolved_at: 2026-04-27T18:05:22.075Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ8113VT6G7D7QWXZSH5N5NY
+    anchor:
+      type: code
+      commit: 3b4acdbc824149321a4e3c2602b44fb26d6ee282
+      line_end: 334
+      line_start: 306
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ8113VT26SRA87G975CZKE7
+        author: Jacob Chapel
+        body: "MUST-FIX: _load_model_from_artifact does not load or return a MODEL backed by the full saved
+          artifact. It reads only __ecaj_affected_keys__, loads those tensors, and installs them as
+          set patches on a clone of the original model_patcher. A runtime probe with an artifact
+          containing unaffected key b=20 and the original base b=2 returned a model whose b base was
+          still 2, with only the affected key installed as a patch. This misses the task requirement
+          and @full-saved-model-output ac-return-loaded-model/ac-cache-reuse-is-artifact-backed:
+          full-mode success and cache hits still return a patch-backed clone rather than a model
+          loaded from the complete artifact."
+        created_at: 2026-04-27T17:50:39.482Z
+      - _ulid: 01KQ81VWXXEW7YZK5ZW5F9NH1Y
+        author: "@claude"
+        body: "Fixed: _load_model_from_artifact now loads ALL keys from the artifact using safe_open and
+          f.keys(), not just the affected keys listed in metadata. All keys (base + affected) are
+          installed as set patches on the cloned ModelPatcher, so the returned model's weights come
+          entirely from the saved artifact. Added a test that creates an artifact with distinctive
+          values (20.0) for all keys and verifies the returned model's patches contain those values,
+          not the original base values."
+        created_at: 2026-04-27T18:05:17.117Z
+    kind: blocker
+    resolved_at: 2026-04-27T18:05:24.537Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T17:50:51.644Z
+created_at: 2026-04-27T17:45:43.925Z
+updated_at: 2026-04-27T18:05:24.537Z
+notes: []

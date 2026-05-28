@@ -1,0 +1,109 @@
+_ulid: 01KQC2V9GGK0KZ60QVXZ8X8RK6
+slugs: []
+title: Review checkpoint-aware artifact metadata and cache classification cycle 6
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "ruff check .: passed on pushed head dc091be"
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-04-29T07:39:40.081Z
+    completed_at: 2026-04-29T07:39:40.081Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest tests/test_persistence.py::TestCheckCheckpointCache
+      tests/test_persistence.py::TestCheckFullModelCacheClassification tests/test_exit_node.py
+      tests/test_checkpoint_components.py -q: passed on pushed head dc091be"
+    name: focused pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T07:39:40.793Z
+    completed_at: 2026-04-29T07:39:40.793Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest: 1360 passed in 8.02s on pushed head dc091be"
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T07:39:41.158Z
+    completed_at: 2026-04-29T07:39:41.158Z
+events:
+  - _ulid: 01KQC2V9GF22FF9STE27AF6HQB
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T07:39:23.536Z
+  - _ulid: 01KQC2VSRNSSXMQ4S7G4E34KFW
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-04-29T07:39:40.181Z
+  - _ulid: 01KQC2VT3WRVQSA4VW66M05TJK
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T07:39:40.540Z
+  - _ulid: 01KQC2VTEYEN879C1SZMBT6ET7
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-04-29T07:39:40.894Z
+  - _ulid: 01KQC2VTT8TYQM8S33EJ7JRQMQ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-29T07:39:41.256Z
+  - _ulid: 01KQC2W3M09HFQCD0RCXSAW4MR
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-29T07:39:50.272Z
+  - _ulid: 01KQC2W3M0MBT3Q48D932ZQ34M
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T07:39:50.272Z
+examined_commit: 2e59a99cdf62fd7d8a9535efb70e7cb7a3580938
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN7CTJ03G2VS2J4KHAQB"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T07:39:50.272Z
+created_at: 2026-04-29T07:39:23.536Z
+updated_at: 2026-04-29T07:39:50.272Z
+notes: []

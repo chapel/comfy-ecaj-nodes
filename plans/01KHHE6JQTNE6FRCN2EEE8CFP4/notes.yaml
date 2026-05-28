@@ -1,0 +1,75 @@
+notes:
+  - _ulid: 01KHHE6JQV8KEBZS5K6Y3CZAJC
+    content: >-
+      Implementation notes:
+
+
+      ### Enhancement 1: Diffusion Model Input
+
+      Small scope. Add source_dir field to RecipeModel, create new node file, update exit path
+      resolver and all serialization/hashing call sites. Rename existing node display name. The
+      ComfyUI folder name may be "diffusion_models" or "unet" depending on version -- use whichever
+      folder_paths supports (check at runtime with try/except fallback). Cache invalidation from the
+      new source_dir field is expected and acceptable (silent cache miss, clean re-evaluation).
+
+
+      ### Enhancement 2: CLIP Merging
+
+      Larger scope but leverages existing infrastructure heavily. Key architectural addition: the
+      `domain` field on RecipeBase enables (arch, domain) dispatch throughout the pipeline without
+      changing arch strings.
+
+
+      **Domain-based routing:**
+
+      - RecipeBase gets `domain: str = "diffusion"` (backward compat default)
+
+      - CLIP Entry sets `domain="clip"`
+
+      - `get_loader(arch, domain)` selects correct LoRA loader
+
+      - `classify_key(key, arch, domain)` selects correct block classifier
+
+      - `analyze_recipe()` / `analyze_recipe_models()` pass domain through
+
+      - Persistence serialization includes domain in hashes
+
+
+      **Reusable infrastructure (no changes needed):**
+
+      - recipe_eval.py: operates on arbitrary key sets, domain-agnostic
+
+      - gpu_ops.py: DeltaSpec, apply_lora_batch_gpu, chunked_evaluation
+
+      - per_block.py: uses classify_key() which handles domain dispatch
+
+      - batch_groups.py: uses classify_key() which handles domain dispatch
+
+
+      **Architecture-specific new code:**
+
+      1. Entry/Exit nodes (CLIP object wrapping and patching)
+
+      2. LoRA key mapping (te1/te2 prefix handling)
+
+      3. Model loader key filtering (include CLIP, exclude UNet)
+
+      4. Block classification (CLIP-L and CLIP-G block patterns)
+
+
+      The CLIP graph nodes (LoRA, Compose, Merge, ModelInput) are thin wrappers via a
+      make_clip_variant() factory that swaps WIDEN for WIDEN_CLIP.
+
+
+      **Risk areas:**
+
+      - CLIP patching: highest risk. Spike task investigates API before implementation.
+
+      - Key mapping verification: CLIP-L/CLIP-G embedder ordering in checkpoints and LoRA te1/te2
+      mapping need verification against real files.
+
+      - v1 scope: no incremental block recompute for CLIP Exit (add later).
+
+      - v1 scope: no persistence cache for CLIP Exit (add later).
+    author: "@claude"
+    created_at: 2026-02-15T19:59:48.987Z

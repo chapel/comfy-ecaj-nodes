@@ -1,0 +1,362 @@
+_ulid: 01KQC3FM8EKTS9SNMK0KFZJJW1
+slugs: []
+title: Review atomic incremental writer
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: pytest -q exited 0; full suite completed successfully with progress reaching 100% and no
+      failures/errors.
+    name: pytest full suite
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T07:57:15.432Z
+    completed_at: 2026-04-29T07:57:15.432Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate reported Schema OK and References OK, but exited 6 because of existing
+      alignment/completeness warnings; no trait coverage blocker was identified for this task.
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-04-29T07:57:15.785Z
+    completed_at: 2026-04-29T07:57:15.785Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: ruff check . exited 1 with E501 line-too-long errors in tests/test_incremental_writer.py
+      at lines 22, 27, and 365.
+    name: ruff check
+    required: true
+    runner: ruff
+    created_at: 2026-04-29T07:57:16.140Z
+    completed_at: 2026-04-29T07:57:16.140Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: pytest tests/test_incremental_writer.py -q exited 0; 15 tests passed.
+    name: pytest incremental writer
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T07:57:16.500Z
+    completed_at: 2026-04-29T07:57:16.500Z
+events:
+  - _ulid: 01KQC3FM8D1TWCZDE5E50GZXC9
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T07:50:29.902Z
+  - _ulid: 01KQC3G0P2KJ3C53WWYKRNZ065
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T07:50:42.626Z
+  - _ulid: 01KQC3SSZDEB50HG1CPD200DWK
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC3SSVW8GRKMKEW3CSP6342
+    timestamp: 2026-04-29T07:56:03.438Z
+  - _ulid: 01KQC3T4XASPY52BD7JJ06GN02
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
+    timestamp: 2026-04-29T07:56:14.634Z
+  - _ulid: 01KQC3TRCRH8JG7M5M0FS6Y1M5
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
+    timestamp: 2026-04-29T07:56:34.584Z
+  - _ulid: 01KQC3V1BYTEYFQMQZQ10CK5X6
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC3V18YGQXS0W89YJ4NZ2PW
+    timestamp: 2026-04-29T07:56:43.775Z
+  - _ulid: 01KQC3VHWW3M6QAEVYR2CF7Q3Y
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC3VHSQJ2NTVVT86E5R3P1Z
+    timestamp: 2026-04-29T07:57:00.700Z
+  - _ulid: 01KQC3W0C5PQVCX4N7J30F0GJP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest full suite
+    timestamp: 2026-04-29T07:57:15.525Z
+  - _ulid: 01KQC3W0Q2YRDPQDSYMBHA8XKB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: kspec validate
+    timestamp: 2026-04-29T07:57:15.874Z
+  - _ulid: 01KQC3W127NVTZBSCMAYN50R2S
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: ruff check
+    timestamp: 2026-04-29T07:57:16.231Z
+  - _ulid: 01KQC3W1E1FB53BVG3K2N2T683
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest incremental writer
+    timestamp: 2026-04-29T07:57:16.609Z
+  - _ulid: 01KQC3WNHDR2X8K59DWHEKF7QR
+    actor: jacob.chapel@gmail.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T07:57:37.197Z
+  - _ulid: 01KQC3WNHES13BZYDXC9WD3P5N
+    actor: jacob.chapel@gmail.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T07:57:37.198Z
+  - _ulid: 01KQC48TG2C92M543ZD2PFADP6
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC3SSVW8GRKMKEW3CSP6342
+    timestamp: 2026-04-29T08:04:15.490Z
+  - _ulid: 01KQC48Y7Q75YTJEH747GC0AZW
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
+    timestamp: 2026-04-29T08:04:19.319Z
+  - _ulid: 01KQC4912XMA0GKR2PQ2313HMA
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC3V18YGQXS0W89YJ4NZ2PW
+    timestamp: 2026-04-29T08:04:22.237Z
+  - _ulid: 01KQC493ZF8RM4TCM098AZ0ZE4
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC3VHSQJ2NTVVT86E5R3P1Z
+    timestamp: 2026-04-29T08:04:25.199Z
+  - _ulid: 01KQC499T07DWQ4FMB6DKB1HDC
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC3SSVW8GRKMKEW3CSP6342
+    timestamp: 2026-04-29T08:04:31.168Z
+  - _ulid: 01KQC49CB9863G6NH6Q2FYCMQB
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
+    timestamp: 2026-04-29T08:04:33.769Z
+  - _ulid: 01KQC49EP5H07SRKVGG8HX2NE3
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC3V18YGQXS0W89YJ4NZ2PW
+    timestamp: 2026-04-29T08:04:36.165Z
+  - _ulid: 01KQC49GWSN3ZPXDXC0VAKSH8F
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC3VHSQJ2NTVVT86E5R3P1Z
+    timestamp: 2026-04-29T08:04:38.425Z
+examined_commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN83176W432HWKN1CTV4"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQC3SSVW8GRKMKEW3CSP6342
+    anchor:
+      type: code
+      commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+      line_end: 27
+      line_start: 22
+      path: tests/test_incremental_writer.py
+      side: head
+    entries:
+      - _ulid: 01KQC3SSVWCZN4BTFS7CXP2CE5
+        author: Jacob Chapel
+        body: >-
+          MUST-FIX: the submitted snapshot does not pass the configured lint gate. E501 Line too
+          long (103 > 99)
+            --> tests/test_incremental_writer.py:22:100
+             |
+          22 | def _make_manifest(tensors: dict[str, torch.Tensor]) -> dict[str, tuple[torch.dtype,
+          tuple[int, ...]]]:
+             |                                                                                                    ^^^^
+          23 |     """Build a manifest from a dict of tensors."""
+
+          24 |     return {name: (t.dtype, tuple(t.shape)) for name, t in tensors.items()}
+             |
+
+          E501 Line too long (119 > 99)
+            --> tests/test_incremental_writer.py:27:100
+             |
+          27 | def _write_valid_artifact(path: str, tensors: dict[str, torch.Tensor], metadata:
+          dict[str, str] | None = None) -> None:
+             |                                                                                                    ^^^^^^^^^^^^^^^^^^^^
+          28 |     """Write a valid safetensors artifact at path using the writer itself."""
+
+          29 |     manifest = _make_manifest(tensors)
+             |
+
+          E501 Line too long (104 > 99)
+             --> tests/test_incremental_writer.py:365:100
+              |
+          363 |     # AC: @saved-model-artifact-safety ac-no-partial-publication
+
+          364 |     def test_context_manager_normal_exit_does_not_auto_finalize(self):
+
+          365 |         """Normal exit from context manager does NOT auto-finalize — caller must
+          finalize explicitly."""
+              |                                                                                                    ^^^^^
+          366 |         tensors = {"a": torch.randn(4)}
+
+          367 |         manifest = _make_manifest(tensors)
+              |
+
+          Found 3 errors. reports E501 line-length errors in this file at lines 22, 27, and 365.
+          Impact: the review gate is failing even though the focused and full pytest runs pass.
+        created_at: 2026-04-29T07:56:03.324Z
+      - _ulid: 01KQC48TD3PMWWS3FKCJR94ZYM
+        author: "@claude"
+        body: "Fixed: reformatted _make_manifest, _write_valid_artifact, and the context manager docstring
+          to stay within 99-char line limit. ruff check now passes clean."
+        created_at: 2026-04-29T08:04:15.395Z
+    kind: blocker
+    resolved_at: 2026-04-29T08:04:31.071Z
+    resolved_by: "@claude"
+  - _ulid: 01KQC3T4T6EF256SWK7JPMAHDQ
+    anchor:
+      type: code
+      commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+      line_end: 212
+      line_start: 209
+      path: lib/incremental_writer.py
+      side: head
+    entries:
+      - _ulid: 01KQC3T4T61TJ37WV1Y0D2KRWX
+        author: Jacob Chapel
+        body: "MUST-FIX: write-time serialization/file exceptions are not handled as abort/poison events.
+          The code seeks and writes  without a try/except; when  is monkeypatched to
+          raise,  propagates the error but leaves the same-directory  file behind and the writer is
+          not marked aborted/poisoned. Impact: the required exception-during-write safety path is
+          not implemented or behaviorally tested."
+        created_at: 2026-04-29T07:56:14.535Z
+      - _ulid: 01KQC3TR9VDX6WP7SA79YXGNRC
+        author: Jacob Chapel
+        body: 'Clarification: the failing block is self._file.seek(offset);
+          self._file.write(_tensor_bytes(tensor)); self._written.add(name). Repro evidence:
+          monkeypatching lib.incremental_writer._tensor_bytes to raise RuntimeError("serialization
+          failed") makes write_tensor propagate the error while os.listdir(tmpdir) still contains a
+          .ecaj_tmp_* file and the writer remains neither aborted nor poisoned.'
+        created_at: 2026-04-29T07:56:34.491Z
+      - _ulid: 01KQC48Y4RN41MQAQ2NV5QBMD2
+        author: "@claude"
+        body: "Fixed: wrapped the seek/write block in write_tensor with try/except. Any exception from
+          _tensor_bytes or file I/O now poisons the writer (removing the temp file) and re-raises.
+          Added two behavioral tests: one confirming monkeypatched _tensor_bytes RuntimeError
+          poisons and cleans temp, another confirming a pre-existing artifact is preserved."
+        created_at: 2026-04-29T08:04:19.224Z
+    kind: blocker
+    resolved_at: 2026-04-29T08:04:33.674Z
+    resolved_by: "@claude"
+  - _ulid: 01KQC3V18YGQXS0W89YJ4NZ2PW
+    anchor:
+      type: code
+      commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+      line_end: 117
+      line_start: 113
+      path: lib/incremental_writer.py
+      side: head
+    entries:
+      - _ulid: 01KQC3V18ZMC8M50ZANMMVJ8MQ
+        author: Jacob Chapel
+        body: 'MUST-FIX: metadata is inserted into the safetensors header without runtime validation, so
+          invalid metadata can be atomically published over an existing valid artifact. Repro
+          evidence: writing with metadata {"bad": 1} finalizes successfully via os.replace, then
+          safetensors.safe_open rejects the target with SafetensorError invalid type integer
+          expected a string. Impact: the writer can report success while publishing a corrupt,
+          unreusable safetensors artifact; validate metadata before writing/publishing or fail
+          without replacing the prior target.'
+        created_at: 2026-04-29T07:56:43.679Z
+      - _ulid: 01KQC490ZNA68Z28AWHH6Z3FFM
+        author: "@claude"
+        body: "Fixed: added metadata validation in __init__ before any file I/O. Non-string keys or values
+          raise TypeError immediately — no temp file is created and no existing artifact is touched.
+          Added three tests: non-string value rejected, non-string key rejected, and invalid
+          metadata does not corrupt an existing artifact."
+        created_at: 2026-04-29T08:04:22.133Z
+    kind: blocker
+    resolved_at: 2026-04-29T08:04:36.067Z
+    resolved_by: "@claude"
+  - _ulid: 01KQC3VHSQJ2NTVVT86E5R3P1Z
+    anchor:
+      type: code
+      commit: 0fe8052b1e25ca1781102da5269864b031b6acc7
+      line_end: 233
+      line_start: 230
+      path: lib/incremental_writer.py
+      side: head
+    entries:
+      - _ulid: 01KQC3VHSQ6W1K2Q16JJNJPX3R
+        author: Jacob Chapel
+        body: "MUST-FIX: the missing-key finalize failure cleans up the temp file but leaves the writer
+          neither aborted nor poisoned. Repro evidence: after finalize raises Cannot finalize: wrote
+          1/2 tensors, a later write_tensor for the missing key passes _check_writable and then
+          raises AttributeError because _cleanup_temp set self._file to None. Impact: a failed
+          lifecycle remains callable in an inconsistent state; make failed finalize terminal
+          (aborted/poisoned) and test the post-failure behavior."
+        created_at: 2026-04-29T07:57:00.599Z
+      - _ulid: 01KQC493WHEMTVBHM8D6ZTCN5R
+        author: "@claude"
+        body: "Fixed: the missing-key finalize branch now sets self._aborted = True before cleanup, making
+          the writer terminal. Subsequent write_tensor or finalize calls get 'already aborted'.
+          Added two tests: write_tensor after failed finalize raises 'aborted', and second finalize
+          after failure raises 'aborted'."
+        created_at: 2026-04-29T08:04:25.105Z
+    kind: blocker
+    resolved_at: 2026-04-29T08:04:38.326Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: jacob.chapel@gmail.com
+    role: reviewer
+    created_at: 2026-04-29T07:57:37.197Z
+created_at: 2026-04-29T07:50:29.902Z
+updated_at: 2026-04-29T08:04:38.326Z
+notes: []

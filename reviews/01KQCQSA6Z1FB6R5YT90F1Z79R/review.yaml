@@ -1,0 +1,147 @@
+_ulid: 01KQCQSA6Z1FB6R5YT90F1Z79R
+slugs: []
+title: Review checkpoint-save spec status reconciliation
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest: 1575 passed in 11.57s."
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T13:47:14.291Z
+    completed_at: 2026-04-29T13:47:14.291Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: reports/checkpoint_spec_status_reconciliation.json is valid JSON, records
+      live_validation_result=pass, contains 8 status_changes, and includes the required supersession
+      statement.
+    name: report artifact
+    required: true
+    runner: jq
+    created_at: 2026-04-29T13:47:14.741Z
+    completed_at: 2026-04-29T13:47:14.741Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok passed: schema OK, references OK; warnings are
+      alignment/completeness warnings including expected status-inference mismatches for the
+      live-validation override."
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T13:47:15.205Z
+    completed_at: 2026-04-29T13:47:15.205Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Verified all eight named specs are implementation=implemented; prior full-saved-model plan
+      and reconciliation plan contain supersession notes; active task list has no competing
+      in-progress claims.
+    name: status and note reconciliation
+    required: true
+    runner: manual
+    created_at: 2026-04-29T13:47:15.658Z
+    completed_at: 2026-04-29T13:47:15.658Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: git diff --check 7388f5c2d637aa18fa53e9633787de7ae7b71530..HEAD passed.
+    name: diff check
+    required: true
+    runner: git
+    created_at: 2026-04-29T13:47:28.173Z
+    completed_at: 2026-04-29T13:47:28.173Z
+events:
+  - _ulid: 01KQCQSA6ZCWVADJM4PKC2QQJ5
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T13:45:18.815Z
+  - _ulid: 01KQCQT1FG1QT4TMQCPPTQAYV7
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T13:45:42.640Z
+  - _ulid: 01KQCQWV3N3WWWBCME62702R3N
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-04-29T13:47:14.421Z
+  - _ulid: 01KQCQWVHPB5TA5VX0WCQCVC75
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: report artifact
+    timestamp: 2026-04-29T13:47:14.870Z
+  - _ulid: 01KQCQWW0Z1TSH6TENFV77BC2P
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T13:47:15.359Z
+  - _ulid: 01KQCQWWF7NGE74JGH58K9FSRB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: status and note reconciliation
+    timestamp: 2026-04-29T13:47:15.815Z
+  - _ulid: 01KQCQX8NN0XQ9ZPY90T4PNBYR
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: diff check
+    timestamp: 2026-04-29T13:47:28.310Z
+  - _ulid: 01KQCQXNHSQ2BJQWQSPVJVHM83
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-29T13:47:41.498Z
+  - _ulid: 01KQCQXNHTG238J82J4YWZ30HV
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T13:47:41.498Z
+examined_commit: 5422952696fec659c9655db6da3e892e0b48d72c
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZNCWM8AP31SWX4FQEYJ7"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T13:47:41.497Z
+created_at: 2026-04-29T13:45:18.815Z
+updated_at: 2026-04-29T13:47:41.498Z
+notes: []

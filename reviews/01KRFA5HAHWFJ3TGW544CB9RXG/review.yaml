@@ -1,0 +1,212 @@
+_ulid: 01KRFA5HAHWFJ3TGW544CB9RXG
+slugs: []
+title: "Plan review: Checkpoint Save Memory Contract Hardening"
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Validation passed: schema OK, references OK across 132 files, 56 items, 129 tasks."
+    name: kspec validate --refs
+    required: true
+    runner: kspec
+    created_at: 2026-05-13T00:01:43.904Z
+    completed_at: 2026-05-13T00:01:43.904Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Plan intentionally defines no new spec items and targets existing
+      @comfy-memory-manager-compatibility, @live-comfy-saved-output-validation, and
+      @saved-model-artifact-safety, which match the existing spec neighborhood for memory
+      compatibility, live validation, and artifact safety.
+    name: Existing spec update shape
+    required: true
+    created_at: 2026-05-13T00:01:43.905Z
+    completed_at: 2026-05-13T00:01:43.905Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Two blockers remain: @saved-model-artifact-safety status is not reset to in_progress
+      despite a new AC, and cleanup-on-failure testing omits the artifact-publication failure point
+      named by the plan."
+    name: Spec completeness and AC coverage
+    required: true
+    created_at: 2026-05-13T00:01:57.789Z
+    completed_at: 2026-05-13T00:01:57.789Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Spec-update task is first; implementation depends on spec updates; harness/reporting
+      depends on spec updates and cleanup hardening; manual live validation is last and depends on
+      harness/reporting.
+    name: Dependency ordering
+    required: true
+    created_at: 2026-05-13T00:02:05.285Z
+    completed_at: 2026-05-13T00:02:05.285Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Harness and manual tasks preserve explicit opt-in, forbid auto-discovery/process
+      starts/live CI dispatch, and the implementation notes explicitly exclude output-mode
+      dropdowns, saved artifact semantic changes, save_model interface changes, and cleanup
+      progress/status scope.
+    name: Real Comfy safety and scope control
+    required: true
+    created_at: 2026-05-13T00:02:14.588Z
+    completed_at: 2026-05-13T00:02:14.588Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Validation passed with --warnings-ok. Existing warnings: orphaned Foundation/WIDEN Merge
+      specs and Accurate RAM Preflight status mismatch; none are introduced by this plan review."
+    name: kspec validate --alignment --warnings-ok
+    required: true
+    runner: kspec
+    created_at: 2026-05-13T00:02:22.302Z
+    completed_at: 2026-05-13T00:02:22.302Z
+events:
+  - _ulid: 01KRFA5HAGEAEZKVCJHKV8HD22
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-05-13T00:00:44.368Z
+  - _ulid: 01KRFA7BX4YFH6XJR3S1KH2X9K
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --refs
+    timestamp: 2026-05-13T00:01:44.362Z
+  - _ulid: 01KRFA7CM1VAMK65VXWFCTX4KF
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KRFA7BHHNBGXNHDWZH0T92DE
+    timestamp: 2026-05-13T00:01:45.089Z
+  - _ulid: 01KRFA7DB9J593CS43YAC4R9ZZ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Existing spec update shape
+    timestamp: 2026-05-13T00:01:45.833Z
+  - _ulid: 01KRFA7E32QQ521Q4YXG6YXF9K
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KRFA7BK0F08QVRJ0FDCZCHNB
+    timestamp: 2026-05-13T00:01:46.594Z
+  - _ulid: 01KRFA7ESQV3P2HHVCAD53JXPR
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-05-13T00:01:47.319Z
+  - _ulid: 01KRFA7SE8SHBXQ4AC6FZ32M2Y
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: Spec completeness and AC coverage
+    timestamp: 2026-05-13T00:01:58.216Z
+  - _ulid: 01KRFA80RWBHB6HK9RZNNRGR7F
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Dependency ordering
+    timestamp: 2026-05-13T00:02:05.725Z
+  - _ulid: 01KRFA89WDXZP7SNFJQ6KF2CSP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Real Comfy safety and scope control
+    timestamp: 2026-05-13T00:02:15.053Z
+  - _ulid: 01KRFA8HC7WZJPA3ZTSXS7PNNN
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --alignment --warnings-ok
+    timestamp: 2026-05-13T00:02:22.727Z
+  - _ulid: 01KRFA8RZPR7VW0S6ZB7TDBDCV
+    actor: Jacob Chapel
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-05-13T00:02:30.518Z
+  - _ulid: 01KRFA8RZP47CFEB47XVBQVN8V
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-05-13T00:02:30.518Z
+examined_commit: null
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: plan
+  content_hash: ""
+  ref: "@plan-checkpoint-save-memory-contract-hardening"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KRFA7BHHNBGXNHDWZH0T92DE
+    anchor:
+      type: structured
+      field: implementation_status
+      ref: "@saved-model-artifact-safety"
+      section: specs
+    entries:
+      - _ulid: 01KRFA7BHHAD03PGJ1YQQ3QTXS
+        author: Jacob Chapel
+        body: The plan adds ac-failed-return-not-successful to @saved-model-artifact-safety but the exact
+          spec-change list does not set that spec's implementation status to in_progress. Because
+          this is a tightened existing implemented spec, leaving it implemented during the follow-up
+          work would misrepresent the unimplemented new contract. Add @saved-model-artifact-safety
+          to the status update list in the spec-update task.
+        created_at: 2026-05-13T00:01:43.985Z
+    kind: blocker
+  - _ulid: 01KRFA7BK0F08QVRJ0FDCZCHNB
+    anchor:
+      type: structured
+      field: testing
+      ref: "@comfy-memory-manager-compatibility"
+      section: tasks
+    entries:
+      - _ulid: 01KRFA7BK1BRSS56GV5950DQEK
+        author: Jacob Chapel
+        body: The cleanup-on-failure contract explicitly covers save, publication, and artifact reload
+          failures, and the task How section says release must happen when artifact publication
+          raises. The Testing section only lists save failure and artifact reload failure. A worker
+          could satisfy the listed tests while still leaking the temporary checkpoint save payload
+          if publication fails. Add a focused publication-failure release test, or split/adjust the
+          AC so every named failure point has explicit coverage.
+        created_at: 2026-05-13T00:01:44.033Z
+    kind: blocker
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: Jacob Chapel
+    role: reviewer
+    created_at: 2026-05-13T00:02:30.517Z
+created_at: 2026-05-13T00:00:44.368Z
+updated_at: 2026-05-13T00:02:30.518Z
+notes: []

@@ -1,0 +1,335 @@
+_ulid: 01KQCG4M9646BAJX4SSZX7AWFZ
+slugs: []
+title: Review checkpoint save live validation harness
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok: validation passed; existing alignment/completeness warnings
+      only."
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T11:34:15.075Z
+    completed_at: 2026-04-29T11:34:15.075Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found annotations for all seven @live-comfy-saved-output-validation ACs in
+      tests/test_checkpoint_validation_harness.py.
+    name: AC annotation scan
+    required: true
+    runner: rg
+    created_at: 2026-04-29T11:34:22.230Z
+    completed_at: 2026-04-29T11:34:22.230Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest tests/test_checkpoint_validation_harness.py -q: 58 passed."
+    name: targeted pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T11:34:30.022Z
+    completed_at: 2026-04-29T11:34:30.022Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest -q: full project suite passed with exit code 0."
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T11:34:38.132Z
+    completed_at: 2026-04-29T11:34:38.132Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "ruff check .: All checks passed."
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-04-29T11:34:45.306Z
+    completed_at: 2026-04-29T11:34:45.306Z
+events:
+  - _ulid: 01KQCG4M96RCMBJBFVWX7DCBTM
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T11:31:40.966Z
+  - _ulid: 01KQCG4YS31649FVNMW0S3M92R
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T11:31:51.715Z
+  - _ulid: 01KQCG9AW6QXXJXPBBD6WEW7X9
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T11:34:15.175Z
+  - _ulid: 01KQCG9HVSPB6WC8Y95VN5SDQA
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation scan
+    timestamp: 2026-04-29T11:34:22.329Z
+  - _ulid: 01KQCG9SFPSZ5KBZZZWP9KYV4A
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted pytest
+    timestamp: 2026-04-29T11:34:30.135Z
+  - _ulid: 01KQCGA1CPZ9TWX0ME5YDXDFGD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-29T11:34:38.230Z
+  - _ulid: 01KQCGA8D18CP10NXJAYBBN590
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-04-29T11:34:45.410Z
+  - _ulid: 01KQCGAKS2QNSQMF464QRBHA4Z
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQCGAKNSYY59S3WWY1DBMPH0
+    timestamp: 2026-04-29T11:34:57.058Z
+  - _ulid: 01KQCGAW1ZKGVN1K0JAA0N37A5
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQCGAVYV2CGY4JT7F17GC2KZ
+    timestamp: 2026-04-29T11:35:05.535Z
+  - _ulid: 01KQCGB5DDZ1AZ41ATH619CWVG
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
+    timestamp: 2026-04-29T11:35:15.117Z
+  - _ulid: 01KQCGBJ2NWEWCAXH2N5ECYYH4
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
+    timestamp: 2026-04-29T11:35:28.085Z
+  - _ulid: 01KQCGBWNT2YC31TGVKRHCP1EA
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T11:35:38.938Z
+  - _ulid: 01KQCGBWNTKDP1Z01E76026X3Z
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T11:35:38.938Z
+  - _ulid: 01KQCH3HV96R83Z085RPTDNWFB
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQCGAKNSYY59S3WWY1DBMPH0
+    timestamp: 2026-04-29T11:48:34.281Z
+  - _ulid: 01KQCH3NK7SB4K486Z736DFBTG
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQCGAVYV2CGY4JT7F17GC2KZ
+    timestamp: 2026-04-29T11:48:38.120Z
+  - _ulid: 01KQCH3T5BC6JJ7QGBE9NSYKE8
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
+    timestamp: 2026-04-29T11:48:42.796Z
+  - _ulid: 01KQCH3XTNTGPQWPF0B7HTNFJY
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
+    timestamp: 2026-04-29T11:48:46.549Z
+  - _ulid: 01KQCH441B201BPRR9ZKE9MCSX
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQCGAKNSYY59S3WWY1DBMPH0
+    timestamp: 2026-04-29T11:48:52.907Z
+  - _ulid: 01KQCH46CFWRRYX6KJA3S08DNY
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQCGAVYV2CGY4JT7F17GC2KZ
+    timestamp: 2026-04-29T11:48:55.312Z
+  - _ulid: 01KQCH48YHC97NX5QVCTPZFHED
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
+    timestamp: 2026-04-29T11:48:57.937Z
+  - _ulid: 01KQCH4BG1HEVXN6JSTWXBDWAM
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
+    timestamp: 2026-04-29T11:49:00.545Z
+examined_commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZNB6KR4MXEYGT4PANG25"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQCGAKNSYY59S3WWY1DBMPH0
+    anchor:
+      type: code
+      commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
+      line_end: 438
+      line_start: 428
+      path: scripts/manual/real_comfy_checkpoint_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQCGAKNS4Z44AV75ZAACW6MK
+        author: Jacob Chapel
+        body: "MUST-FIX: the checkpoint save workflow does not wire the source checkpoint CLIP and VAE into
+          WIDENEntry. The current prompt only passes MODEL to node 2, but nodes/entry.py exposes
+          optional clip/vae inputs and nodes/exit.py validates those components for checkpoint-style
+          save_model. This means the live checkpoint-save validation either exercises a
+          diffusion-only path or fails before proving the required MODEL+CLIP+VAE checkpoint
+          artifact path. Evidence: build_checkpoint_save_workflow('source.safetensors') produces
+          entry_inputs {'model': ['1', 0]}."
+        created_at: 2026-04-29T11:34:56.953Z
+      - _ulid: 01KQCH3HQYHYC0CY8QWX1R6W0P
+        author: "@claude"
+        body: "Fixed: build_checkpoint_save_workflow and build_terminal_exit_save_workflow now wire CLIP
+          (['1', 1]) and VAE (['1', 2]) from CheckpointLoaderSimple into WIDENEntry's optional
+          inputs. The build_cache_reuse_workflow also includes these connections. Tests verify the
+          wiring is present."
+        created_at: 2026-04-29T11:48:34.174Z
+    kind: blocker
+    resolved_at: 2026-04-29T11:48:52.806Z
+    resolved_by: "@claude"
+  - _ulid: 01KQCGAVYV2CGY4JT7F17GC2KZ
+    anchor:
+      type: code
+      commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
+      line_end: 683
+      line_start: 659
+      path: scripts/manual/real_comfy_checkpoint_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQCGAVYVGRR1JJCHCCNN29NA
+        author: Jacob Chapel
+        body: "MUST-FIX: the loader/downstream validation never loads the saved artifact. After
+          checkpoint_save, saved_artifact_path is only a synthesized label containing the prompt id,
+          and build_downstream_workflow is called with source_model, so CheckpointLoaderSimple loads
+          the original source checkpoint. A passing downstream prompt would prove the source model
+          can render, not that the saved WIDEN checkpoint artifact is loadable or usable. Evidence:
+          probing the builder prints downstream_loader_ckpt source.safetensors."
+        created_at: 2026-04-29T11:35:05.435Z
+      - _ulid: 01KQCH3NFXYCD08SQJ9T7RVDVY
+        author: "@claude"
+        body: "Fixed: run_validation now determines the saved artifact filename
+          (ecaj_checkpoint_validation_save.safetensors) and passes it to build_downstream_workflow
+          instead of the source model. The downstream CheckpointLoaderSimple loads the saved
+          artifact, proving it is loadable and usable for inference. Test
+          test_run_validation_passes_saved_artifact_to_downstream verifies this."
+        created_at: 2026-04-29T11:48:38.013Z
+    kind: blocker
+    resolved_at: 2026-04-29T11:48:55.211Z
+    resolved_by: "@claude"
+  - _ulid: 01KQCGB5A5VPT7JG6PVGT67VX9
+    anchor:
+      type: code
+      commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
+      line_end: 529
+      line_start: 522
+      path: scripts/manual/real_comfy_checkpoint_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQCGB5A5HNW3ATNTG780JB8C
+        author: Jacob Chapel
+        body: "MUST-FIX: the cache-reuse workflow does not prove cache reuse or compatible artifact reuse.
+          It returns the same save workflow and treats prompt acceptance as cache success, with no
+          observation that WIDEN work was skipped and no check that the saved checkpoint artifact
+          was reused. The requirement is to run or simulate cache reuse that proves reuse without
+          recomputing WIDEN. Evidence: build_cache_reuse_workflow('source.safetensors') ==
+          build_checkpoint_save_workflow('source.safetensors') is True."
+        created_at: 2026-04-29T11:35:15.013Z
+      - _ulid: 01KQCH3T23TS9Q5F2TVXCJ483K
+        author: "@claude"
+        body: "Fixed: build_cache_reuse_workflow is no longer identical to build_checkpoint_save_workflow.
+          It now explicitly sets enable_cache=True on WIDENExit. After submission, run_validation
+          calls check_cache_reuse() which polls /history/{prompt_id} for both the first save and the
+          reuse prompt. It checks whether the WIDENExit node was served from ComfyUI's execution
+          cache (via absent outputs or execution_cached status message). Results are recorded in
+          cache_reuse_detail."
+        created_at: 2026-04-29T11:48:42.691Z
+    kind: blocker
+    resolved_at: 2026-04-29T11:48:57.795Z
+    resolved_by: "@claude"
+  - _ulid: 01KQCGBHYWGN3WXG9V5HR73GRP
+    anchor:
+      type: code
+      commit: 7acca9f5883454eb955b938cf2c48c82cec804b0
+      line_end: 196
+      line_start: 180
+      path: scripts/manual/real_comfy_checkpoint_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQCGBHYWXJW9SBJDCVG0S87Z
+        author: Jacob Chapel
+        body: "MUST-FIX: the report schema does not record the queued save workflow shape required by
+          ac-report-records-save-outcome. It stores terminal/checkpoint WorkflowResult objects and
+          artifact classification, but no workflow-shape data for the terminal save or checkpoint
+          save prompt. This leaves the report unable to show which node graph was actually
+          submitted, including whether MODEL/CLIP/VAE were wired correctly."
+        created_at: 2026-04-29T11:35:27.964Z
+      - _ulid: 01KQCH3XQAPFYRCT9HR80G2DVE
+        author: "@claude"
+        body: "Fixed: Added terminal_save_workflow_shape and checkpoint_save_workflow_shape fields to
+          CheckpointValidationReport. These store the full prompt dicts that were submitted to the
+          API, making it possible to verify which node graph was queued including MODEL/CLIP/VAE
+          wiring. Both fields are included in _REQUIRED_REPORT_FIELDS and appear in both
+          human-readable and JSON report output."
+        created_at: 2026-04-29T11:48:46.442Z
+    kind: blocker
+    resolved_at: 2026-04-29T11:49:00.437Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T11:35:38.938Z
+created_at: 2026-04-29T11:31:40.966Z
+updated_at: 2026-04-29T11:49:00.437Z
+notes: []

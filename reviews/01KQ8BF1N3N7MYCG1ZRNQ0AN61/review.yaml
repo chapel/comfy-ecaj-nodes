@@ -1,0 +1,218 @@
+_ulid: 01KQ8BF1N3N7MYCG1ZRNQ0AN61
+slugs: []
+title: Review guarded manual real-Comfy memory harness cycle 3
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: pytest -q passed with exit code 0.
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T20:56:40.473Z
+    completed_at: 2026-04-27T20:56:40.473Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "ruff check scripts/manual/real_comfy_memory_validation.py
+      tests/test_real_comfy_memory_harness.py: All checks passed."
+    name: ruff changed files
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T20:56:40.767Z
+    completed_at: 2026-04-27T20:56:40.767Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest tests/test_real_comfy_memory_harness.py -q passed: 33 tests."
+    name: targeted harness tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T20:56:41.072Z
+    completed_at: 2026-04-27T20:56:41.072Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Validation passed; existing alignment/completeness warnings tolerated with --warnings-ok.
+    name: kspec validate --warnings-ok
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T20:56:41.372Z
+    completed_at: 2026-04-27T20:56:41.372Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: run_validation reports availability strings for patch/full/returned-model behavior and
+      does not execute or compare patch output, first full saved model output, returned-model
+      loading, or artifact reuse workflow behavior.
+    name: manual validation behavior completeness
+    required: true
+    runner: code-review
+    created_at: 2026-04-27T20:57:10.162Z
+    completed_at: 2026-04-27T20:57:10.162Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Fake Comfy root plus ecaj safetensors artifact exited 0; report identified FAKE_LOWVRAM,
+      cache_hit=true, recipe_hash='probe_hash', and no errors.
+    name: manual harness Comfy-shaped root probe
+    required: false
+    runner: manual-probe
+    created_at: 2026-04-27T20:57:10.465Z
+    completed_at: 2026-04-27T20:57:10.465Z
+events:
+  - _ulid: 01KQ8BF1N3GHD5KFWSHGH6C7KQ
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T20:53:01.731Z
+  - _ulid: 01KQ8BFEH0EVMZG82NCSC1ETX6
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T20:53:14.915Z
+  - _ulid: 01KQ8BNQBCGC4T06MMRJ8ANFE9
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-27T20:56:40.556Z
+  - _ulid: 01KQ8BNQMC9QW8WJ3MGC0E22ST
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff changed files
+    timestamp: 2026-04-27T20:56:40.844Z
+  - _ulid: 01KQ8BNQY4DGJT6TBVXE59F3C8
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted harness tests
+    timestamp: 2026-04-27T20:56:41.156Z
+  - _ulid: 01KQ8BNR785DAWMWWDKNWSBSH5
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --warnings-ok
+    timestamp: 2026-04-27T20:56:41.448Z
+  - _ulid: 01KQ8BP9GMWRXG7KRH0F1D7C6H
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ8BP9E38JY463DSREBEMCSC
+    timestamp: 2026-04-27T20:56:59.156Z
+  - _ulid: 01KQ8BPMB5XPNMK1GXYKGTE0E2
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: manual validation behavior completeness
+    timestamp: 2026-04-27T20:57:10.245Z
+  - _ulid: 01KQ8BPMMM1W8H9GT3K4C134B8
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: manual harness Comfy-shaped root probe
+    timestamp: 2026-04-27T20:57:10.548Z
+  - _ulid: 01KQ8BPW9ENXPJKEMR1ZFZ7XEA
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T20:57:18.382Z
+  - _ulid: 01KQ8BPW9FN48PKZE9Q2TDES4E
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T20:57:18.383Z
+  - _ulid: 01KQ8C9R1S5WFP6AYNCT4P46A2
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ8BP9E38JY463DSREBEMCSC
+    timestamp: 2026-04-27T21:07:36.633Z
+  - _ulid: 01KQ8C9X4GRPTB3Z5AG8WF5K2X
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ8BP9E38JY463DSREBEMCSC
+    timestamp: 2026-04-27T21:07:41.840Z
+examined_commit: e8da6173778d6762451b3acb794f838f376da6c2
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ8BP9E38JY463DSREBEMCSC
+    anchor:
+      type: code
+      commit: e8da6173778d6762451b3acb794f838f376da6c2
+      line_end: 598
+      line_start: 533
+      path: scripts/manual/real_comfy_memory_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQ8BP9E3JYBF4K249X2AAF5E
+        author: Jacob Chapel
+        body: "MUST-FIX: the intentional-run path does not measure the patch/full/cache-reuse behaviors the
+          manual validation task depends on. It sets patch_mode_behavior to 'install_merged_patches
+          available', full_model_materialization to a safetensors file read, returned_model_behavior
+          to '_load_model_from_artifact available', and weights_resident_in_cache to
+          bool(_incremental_cache), but it never runs patch output, first full saved model output,
+          returned model loading, or artifact reuse as observed workflow behavior. Evidence: the
+          fake Comfy-shaped probe exits 0 and reports these availability strings without invoking
+          install_merged_patches, MaterializationSink, or _load_model_from_artifact. Impact:
+          @task-full-model-real-comfy-memory-validation-manual-run cannot use this harness to
+          compare patch output, first full saved model output, and cache reuse, so the task's
+          promised manual memory-mode validation mechanism is incomplete."
+        created_at: 2026-04-27T20:56:59.075Z
+      - _ulid: 01KQ8C9QZGY3TGBSZ05H78AR4J
+        author: "@claude"
+        body: "Fixed: run_validation now exercises each workflow function as real behavior.
+          install_merged_patches is called with a ComfyUI ModelPatcher and loaded tensors (reports
+          patched key count). MaterializationSink writes a full artifact to disk with
+          build_metadata. check_full_model_cache validates the written artifact (reports cache
+          hit/miss with recipe hash). _load_model_from_artifact loads the artifact back into a
+          patcher (reports loaded key count). Harness artifact is cleaned up after validation. Added
+          3 new round-trip tests verifying sink write + cache check, artifact tensor readback, and
+          cache rejection on hash mismatch."
+        created_at: 2026-04-27T21:07:36.556Z
+    kind: blocker
+    resolved_at: 2026-04-27T21:07:41.765Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T20:57:18.382Z
+created_at: 2026-04-27T20:53:01.731Z
+updated_at: 2026-04-27T21:07:41.765Z
+notes: []

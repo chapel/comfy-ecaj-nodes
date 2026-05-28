@@ -1,0 +1,110 @@
+_ulid: 01KQ70YD8EFDTQ4MGRP77CF2EZ
+slugs: []
+title: Review full model memory validation fix cycle
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_full_model_memory_validation.py tests/test_persistence.py
+      tests/test_executor.py tests/test_exit_node.py: 177 passed, 1 skipped"
+    name: pytest persistence executor exit
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T08:31:55.824Z
+    completed_at: 2026-04-27T08:31:55.824Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found behavioral test annotations for all three @comfy-memory-manager-compatibility
+      ACs; no source-scanning tests found in the new module
+    name: AC annotation coverage
+    required: true
+    runner: rg
+    created_at: 2026-04-27T08:31:55.975Z
+    completed_at: 2026-04-27T08:31:55.975Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok passed; schema/references OK, existing alignment/completeness
+      warnings only
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T08:31:56.130Z
+    completed_at: 2026-04-27T08:31:56.130Z
+events:
+  - _ulid: 01KQ70YD8ESPXHWA143ENDK9RD
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T08:29:56.366Z
+  - _ulid: 01KQ70Z2KB65Z05YZEX1AAH6MN
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T08:30:18.219Z
+  - _ulid: 01KQ7121YHRWATYBESTX3REDKP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest persistence executor exit
+    timestamp: 2026-04-27T08:31:55.857Z
+  - _ulid: 01KQ71223741BW9B81YMVWRA1P
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation coverage
+    timestamp: 2026-04-27T08:31:56.007Z
+  - _ulid: 01KQ7122844RMCSDAYMAQHFC2K
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T08:31:56.164Z
+  - _ulid: 01KQ712DQXR09QHKRXTFNZVEF7
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-27T08:32:07.933Z
+  - _ulid: 01KQ712DQXK4VBCCR9T8RF08MK
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T08:32:07.933Z
+examined_commit: 23c45827b15d5d06151bb0f95786edc09f678cbb
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HRA1PMN922FBX8STVEFST"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T08:32:07.933Z
+created_at: 2026-04-27T08:29:56.366Z
+updated_at: 2026-04-27T08:32:07.933Z
+notes: []

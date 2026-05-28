@@ -1,0 +1,202 @@
+_ulid: 01KQ6VB8V01WCG3MAC8ZGPZ412
+slugs: []
+title: Review task-full-model-cache-metadata
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok passed. Schema/references OK; existing alignment/completeness
+      warnings remain.
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T06:53:39.891Z
+    completed_at: 2026-04-27T06:53:39.891Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_exit_node.py -k 'SaveModelCacheHit or SaveModelCacheMiss or
+      IsChangedPersistence': 6 passed, 30 deselected in 0.45s"
+    name: exit save/cache slice
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T06:53:40.059Z
+    completed_at: 2026-04-27T06:53:40.059Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_persistence.py: 56 passed in 0.27s"
+    name: persistence tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T06:53:40.214Z
+    completed_at: 2026-04-27T06:53:40.214Z
+events:
+  - _ulid: 01KQ6VB8TZTQ99J5WEWSVKC25G
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T06:52:06.367Z
+  - _ulid: 01KQ6VBJ74GNDWBAGFED5SYQJH
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T06:52:15.972Z
+  - _ulid: 01KQ6VE46PYY67CPG75MRDCKTJ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T06:53:39.927Z
+  - _ulid: 01KQ6VE4BNJ3ATCXC4X971X5KH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: exit save/cache slice
+    timestamp: 2026-04-27T06:53:40.085Z
+  - _ulid: 01KQ6VE4GKZR8TQWFKQAY26F8N
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: persistence tests
+    timestamp: 2026-04-27T06:53:40.243Z
+  - _ulid: 01KQ6VEJTT6ZPBYGD6YFSX2GC4
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ6VEJT361G7F083WWN18RZH
+    timestamp: 2026-04-27T06:53:54.906Z
+  - _ulid: 01KQ6VEK00HE9GRJHPP5N31K2K
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
+    timestamp: 2026-04-27T06:53:55.072Z
+  - _ulid: 01KQ6VETPNTV3MTYRV0JX6AY5E
+    actor: jacob.chapel@gmail.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T06:54:02.965Z
+  - _ulid: 01KQ6VETPNQ4JPDDTD98KS8RVZ
+    actor: jacob.chapel@gmail.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T06:54:02.965Z
+  - _ulid: 01KQ6W61ZDC8CCERBM64TZ2KX4
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ6VEJT361G7F083WWN18RZH
+    timestamp: 2026-04-27T07:06:44.077Z
+  - _ulid: 01KQ6W67K053E56DCGSQPBDVXK
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ6VEJT361G7F083WWN18RZH
+    timestamp: 2026-04-27T07:06:49.824Z
+  - _ulid: 01KQ6W6GTK8D3SCC2M49T5GQTE
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
+    timestamp: 2026-04-27T07:06:59.283Z
+  - _ulid: 01KQ6W6PJEV9KVMNXB44GE7ZN4
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
+    timestamp: 2026-04-27T07:07:05.166Z
+examined_commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HRA0DXES7K03VX0RCDXQ2"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ6VEJT361G7F083WWN18RZH
+    anchor:
+      type: code
+      commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
+      line_end: 473
+      line_start: 473
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ6VEJT3Y0H992PWH65DEG9X
+        author: Jacob Chapel
+        body: "MUST-FIX: full saved model mode still calls check_cache(save_path, recipe_hash) without
+          artifact_kind='full_model'. That means a legacy ecaj safetensors file with the same recipe
+          hash but no __ecaj_artifact_kind__ is still treated as a cache hit and skips merge work,
+          contrary to this task's requirement to reject missing/wrong kind for full saved model
+          output. Evidence: the existing exit-node cache-hit test builds metadata without
+          __ecaj_artifact_kind__ and still passes the save_model=True cache-hit path."
+        created_at: 2026-04-27T06:53:54.883Z
+      - _ulid: 01KQ6W61YK53V1DW56E4Y8TZC0
+        author: "@claude"
+        body: "Fixed: check_cache at exit.py:473 now passes artifact_kind='full_model'. Updated the
+          cache-hit test metadata to include __ecaj_artifact_kind__='full_model' so it correctly
+          exercises the mode-aware path. Legacy ecaj files without artifact_kind will now correctly
+          be treated as cache misses for full saved model mode."
+        created_at: 2026-04-27T07:06:44.047Z
+    kind: blocker
+    resolved_at: 2026-04-27T07:06:49.793Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ6VEJZ0Q36APRJS05K93P7T
+    anchor:
+      type: code
+      commit: 43e0f9bb9dbeab653da1627e32575342c35f18c6
+      line_end: 688
+      line_start: 686
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ6VEJZ1Q9X5RTYZD32J552P
+        author: Jacob Chapel
+        body: "MUST-FIX: full saved model artifacts are still built with build_metadata(..., workflow_json)
+          and no artifact_kind. Newly saved full-model outputs therefore omit
+          __ecaj_artifact_kind__, so subsequent mode-aware cache checks cannot distinguish them from
+          older or other ecaj artifacts. Pass artifact_kind='full_model' here and add/adjust an
+          Exit-node behavioral test that asserts the materialization metadata contains it."
+        created_at: 2026-04-27T06:53:55.041Z
+      - _ulid: 01KQ6W6GSQ9HAM28NT7DYYEYN9
+        author: "@claude"
+        body: "Fixed: build_metadata at exit.py:686 now passes artifact_kind='full_model'. Added a new
+          behavioral test (test_materialization_metadata_includes_artifact_kind) that asserts the
+          metadata kwarg passed to CheckpointMaterializationSink contains
+          __ecaj_artifact_kind__='full_model'."
+        created_at: 2026-04-27T07:06:59.255Z
+    kind: blocker
+    resolved_at: 2026-04-27T07:07:05.144Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: jacob.chapel@gmail.com
+    role: reviewer
+    created_at: 2026-04-27T06:54:02.964Z
+created_at: 2026-04-27T06:52:06.368Z
+updated_at: 2026-04-27T07:07:05.144Z
+notes: []

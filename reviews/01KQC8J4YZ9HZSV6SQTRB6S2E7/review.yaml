@@ -1,0 +1,214 @@
+_ulid: 01KQC8J4YZ9HZSV6SQTRB6S2E7
+slugs: []
+title: Review checkpoint save artifact format cycle 2
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest: 1446 passed in 10.88s"
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T09:29:02.568Z
+    completed_at: 2026-04-29T09:29:02.568Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok: schema/references/skills OK; existing
+      alignment/completeness warnings only"
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T09:29:30.278Z
+    completed_at: 2026-04-29T09:29:30.278Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Targeted suites from review helpers passed; transient probe confirmed
+      save_comfy_checkpoint overwrites an existing non-ecaj target when no caller-side guard runs.
+    name: targeted review probes
+    required: false
+    runner: pytest
+    created_at: 2026-04-29T09:29:58.393Z
+    completed_at: 2026-04-29T09:29:58.393Z
+events:
+  - _ulid: 01KQC8J4YZPQZ1V53A31KMTC8E
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T09:19:15.423Z
+  - _ulid: 01KQC8JQY2DJ0CX0TVC2TZDFH7
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T09:19:34.850Z
+  - _ulid: 01KQC9236Z8QQYGCF5H9GBMFA7
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC9233WRT128TE3KF8H19JP
+    timestamp: 2026-04-29T09:27:57.919Z
+  - _ulid: 01KQC933G00DNAT0X0QPB24GH7
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC933CVXWNSZ658EFER9WWV
+    timestamp: 2026-04-29T09:28:30.976Z
+  - _ulid: 01KQC942EDBG4NGS791XAKD6JC
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-04-29T09:29:02.669Z
+  - _ulid: 01KQC94XHMWPJXP7GH88X95BV8
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T09:29:30.420Z
+  - _ulid: 01KQC95RYV0GX7H9X657RKKKKF
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted review probes
+    timestamp: 2026-04-29T09:29:58.491Z
+  - _ulid: 01KQC974RWB2AGKPGKV18M8P97
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T09:30:43.356Z
+  - _ulid: 01KQC974RWY89CSN85Z3JYJB20
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T09:30:43.356Z
+  - _ulid: 01KQCA59T04Q51KEDJX55FQQT2
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC9233WRT128TE3KF8H19JP
+    timestamp: 2026-04-29T09:47:11.552Z
+  - _ulid: 01KQCA5EWFCRMH1NR92AZR2CNZ
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC9233WRT128TE3KF8H19JP
+    timestamp: 2026-04-29T09:47:16.751Z
+  - _ulid: 01KQCA5RBH8V9HSXQEMB7DZ99N
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC933CVXWNSZ658EFER9WWV
+    timestamp: 2026-04-29T09:47:26.449Z
+  - _ulid: 01KQCA5XRKRRS7D617EA1W7CRN
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC933CVXWNSZ658EFER9WWV
+    timestamp: 2026-04-29T09:47:31.987Z
+examined_commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN9MR5P6F1ECW0G30GEZ"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQC9233WRT128TE3KF8H19JP
+    anchor:
+      type: code
+      commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
+      line_end: 561
+      line_start: 561
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQC9233XVWXV2KAGZNC33ATE
+        author: Jacob Chapel
+        body: "MUST-FIX: checkpoint publication can still replace unsafe targets and does not classify the
+          temp artifact before publishing. The new checkpoint writer always calls
+          os.replace(tmp_path, save_path) after comfy.sd.save_checkpoint succeeds. On the checkpoint
+          save path, the only non-ecaj overwrite refusal happens through check_checkpoint_cache, and
+          that is skipped when enable_cache=False; the no-op checkpoint path has the same pattern. I
+          verified the helper will overwrite an existing non-ecaj target when called with a
+          successful mocked Comfy save. This violates the task requirements to preserve refusal to
+          overwrite non-ecaj files and to publish the final target only after the temp artifact is
+          classified and safe to reuse."
+        created_at: 2026-04-29T09:27:57.821Z
+      - _ulid: 01KQCA59Q4409CP1MESBFTGW4P
+        author: "@claude"
+        body: "Fixed: Added _guard_non_ecaj_overwrite() that runs unconditionally before any write in
+          save_comfy_checkpoint — checks safetensors header for __ecaj_version__ and raises
+          ValueError if missing, same pattern as check_checkpoint_cache/check_full_model_cache.
+          Added _classify_temp_artifact() that verifies ecaj metadata and artifact_kind on the temp
+          file after comfy.sd.save_checkpoint writes it, before the atomic os.replace. Both guards
+          fire regardless of enable_cache. Added test_refuses_overwrite_non_ecaj_file,
+          test_classification_failure_does_not_publish, and test_wrong_artifact_kind_not_published."
+        created_at: 2026-04-29T09:47:11.460Z
+    kind: blocker
+    resolved_at: 2026-04-29T09:47:16.649Z
+    resolved_by: "@claude"
+  - _ulid: 01KQC933CVXWNSZ658EFER9WWV
+    anchor:
+      type: code
+      commit: d177cc6773466d39bcb4aeee0d8c6e504f2566d2
+      line_end: 765
+      line_start: 734
+      path: tests/test_checkpoint_save_format.py
+      side: head
+    entries:
+      - _ulid: 01KQC933CWEYD1ZHGGGHZJR8ZA
+        author: Jacob Chapel
+        body: "MUST-FIX: the AC-8 smoke test does not exercise the load side of the saved checkpoint
+          contract. This test monkeypatches comfy.sd.save_checkpoint to write predetermined
+          checkpoint-shaped tensors, calls save_comfy_checkpoint directly, and only asserts
+          safetensors key prefixes. It never loads the artifact through a Comfy checkpoint loader
+          (or a monkeypatched equivalent) and therefore does not prove the required save/load path
+          selected by CheckpointLoaderSimple-style semantics. Replace or extend it with a behavioral
+          save/load smoke test that proves the produced artifact is consumed through the checkpoint
+          loader path with MODEL, CLIP, and VAE/decode components."
+        created_at: 2026-04-29T09:28:30.876Z
+      - _ulid: 01KQCA5R89CFYHAB9FWTCKNEDA
+        author: "@claude"
+        body: "Fixed: Replaced test_checkpoint_save_produces_comfy_compatible_keys with
+          test_checkpoint_save_load_round_trip — a behavioral save/load smoke test. After saving via
+          save_comfy_checkpoint with monkeypatched comfy.sd.save_checkpoint, the test loads the
+          artifact with safe_open and performs CheckpointLoaderSimple-style key routing: model.* →
+          MODEL, conditioner.* → CLIP, first_stage_model.* → VAE. Asserts all three component sets
+          are non-empty, no orphan keys exist, all values are torch.Tensor instances, no
+          internal-format keys leak, and ecaj metadata survives the round trip."
+        created_at: 2026-04-29T09:47:26.344Z
+    kind: blocker
+    resolved_at: 2026-04-29T09:47:31.884Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T09:30:43.356Z
+created_at: 2026-04-29T09:19:15.423Z
+updated_at: 2026-04-29T09:47:31.884Z
+notes: []

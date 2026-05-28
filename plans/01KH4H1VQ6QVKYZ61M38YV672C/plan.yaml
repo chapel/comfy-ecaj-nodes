@@ -1,0 +1,15 @@
+_ulid: 01KH4H1VQ6QVKYZ61M38YV672C
+slugs:
+  - plan-foundation-project-infrastructure
+title: Foundation — Project Infrastructure
+status: completed
+approved_at: null
+derived_specs:
+  - "@comfyui-packaging"
+  - "@testing-infrastructure"
+derived_tasks:
+  - "@implement-comfyui-packaging"
+  - "@implement-testing-infrastructure"
+source_path: /tmp/foundation-plan.md
+created_at: 2026-02-10T19:39:32.454Z
+completed_at: null

@@ -1,0 +1,235 @@
+_ulid: 01KQBZR5QNG24SVHXB5HNMBG8N
+slugs: []
+title: Review checkpoint-aware artifact metadata and cache classification cycle 2
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_persistence.py tests/test_exit_node.py
+      tests/test_full_model_streaming.py: 172 passed in 1.76s"
+    name: focused pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T06:48:38.307Z
+    completed_at: 2026-04-29T06:48:38.307Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest: 1322 passed in 10.80s"
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T06:48:38.317Z
+    completed_at: 2026-04-29T06:48:38.317Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found behavioral AC annotations for @saved-model-artifact-safety and
+      @exit-model-persistence in tests/test_persistence.py, tests/test_exit_node.py, and
+      tests/test_full_model_streaming.py; no added source-scanning tests found in the submitted test
+      diff
+    name: AC annotations
+    required: false
+    runner: rg
+    created_at: 2026-04-29T06:48:38.805Z
+    completed_at: 2026-04-29T06:48:38.805Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate: schema/references OK; validation passed with existing
+      alignment/completeness warnings and exited 6 because --warnings-ok was not used"
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-04-29T06:48:39.177Z
+    completed_at: 2026-04-29T06:48:39.177Z
+events:
+  - _ulid: 01KQBZR5QNGDCCF75BXJJAWKAS
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T06:45:15.637Z
+  - _ulid: 01KQBZRKMFP9RS44CHZCD3QYRB
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T06:45:29.871Z
+  - _ulid: 01KQBZYBQXPPDZ8N1T68AQRXBX
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-04-29T06:48:38.397Z
+  - _ulid: 01KQBZYBX2AQ32YA5E419Z4N2F
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-29T06:48:38.562Z
+  - _ulid: 01KQBZYC7F6AS2PBZ2H4SFSB9H
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotations
+    timestamp: 2026-04-29T06:48:38.895Z
+  - _ulid: 01KQBZYCKS2N07Q6MEXS5HKNV8
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T06:48:39.289Z
+  - _ulid: 01KQBZYTVT45JSZNAC93X6TH6P
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQBZYTRTPEG96Q5ZXJAQ5ZRK
+    timestamp: 2026-04-29T06:48:53.882Z
+  - _ulid: 01KQBZZ56R2HR6QC3T3Q3FPXWN
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQBZZ53P4DG6E7YFWF377WGV
+    timestamp: 2026-04-29T06:49:04.472Z
+  - _ulid: 01KQBZZETC15C7D7R1FHB8E4Z9
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T06:49:14.316Z
+  - _ulid: 01KQBZZETC0FPNG5VS1Y6NDXCX
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T06:49:14.316Z
+  - _ulid: 01KQC0SE1GN84X1WNJ3R17115Z
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQBZZ53P4DG6E7YFWF377WGV
+    timestamp: 2026-04-29T07:03:25.488Z
+  - _ulid: 01KQC0SSP0CMYB1TYN4AMCKPE3
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQBZYTRTPEG96Q5ZXJAQ5ZRK
+    timestamp: 2026-04-29T07:03:37.408Z
+  - _ulid: 01KQC0SZ6JJ07WG9YZCSAM7CJQ
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQBZZ53P4DG6E7YFWF377WGV
+    timestamp: 2026-04-29T07:03:43.058Z
+  - _ulid: 01KQC0T1HB5NH385EQ41Y5JN40
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQBZYTRTPEG96Q5ZXJAQ5ZRK
+    timestamp: 2026-04-29T07:03:45.451Z
+examined_commit: 58ee1cd21f036143cf551f1150523d0ed4e418c6
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN7CTJ03G2VS2J4KHAQB"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQBZYTRTPEG96Q5ZXJAQ5ZRK
+    anchor:
+      type: code
+      commit: 58ee1cd21f036143cf551f1150523d0ed4e418c6
+      line_end: 705
+      line_start: 702
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQBZYTRT291TB8C9WCFR6E2A
+        author: Jacob Chapel
+        body: "MUST-FIX: checkpoint cache validation is wired with the diffusion-only base manifest, so a
+          checkpoint-style save cannot be reused. The caller passes base_manifest here, which only
+          contains model_patcher.model_state_dict() keys. check_checkpoint_cache then rejects an
+          all-diffusion artifact as internal-only, and a real checkpoint artifact with CLIP/VAE keys
+          would fail the exact artifact_keys == expected_keys manifest check because those companion
+          keys are absent from base_manifest. The writer below also opens the sink with a manifest
+          built only from base_state, so the checkpoint metadata it writes describes an artifact
+          that the checkpoint validator rejects on the next run. This violates
+          @exit-model-persistence ac-3 and the task requirement that matching checkpoint artifact
+          kind plus matching metadata are accepted as a cache hit."
+        created_at: 2026-04-29T06:48:53.787Z
+      - _ulid: 01KQC0SSJYY5QH08XQT0PHMGCA
+        author: "@claude"
+        body: "Fixed: check_checkpoint_cache is now called without expected_manifest. The base_manifest only
+          reflects model_patcher.model_state_dict() keys and may not include companion component
+          keys (CLIP, VAE). Checkpoint cache validation relies on metadata fields instead: recipe
+          hash, artifact kind, base identity, dependency fingerprints, checkpoint component
+          classification, and internal-only artifact rejection. Added test verifying
+          check_checkpoint_cache is called without expected_manifest. Also added test verifying
+          diffusion-only RecipeModel recipes route to check_full_model_cache."
+        created_at: 2026-04-29T07:03:37.310Z
+    kind: blocker
+    resolved_at: 2026-04-29T07:03:45.354Z
+    resolved_by: "@claude"
+  - _ulid: 01KQBZZ53P4DG6E7YFWF377WGV
+    anchor:
+      type: code
+      commit: 58ee1cd21f036143cf551f1150523d0ed4e418c6
+      line_end: 420
+      line_start: 419
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQBZZ53PK2SJZMV4SX6KP770
+        author: Jacob Chapel
+        body: "MUST-FIX: _recipe_has_checkpoint_components treats every RecipeModel as checkpoint companion
+          metadata, but the diffusion-model input node also emits
+          RecipeModel(source_dir='diffusion_models'). Those diffusion-only model recipes are
+          therefore routed through check_checkpoint_cache and stamped with
+          artifact_kind='checkpoint' plus checkpoint_components=True, even though they are not
+          checkpoint artifacts with companion components. That misclassifies diffusion-only
+          artifacts and makes their save_model cache path a false miss under the new internal-only
+          rejection, violating the artifact-kind classification contract in @exit-model-persistence
+          ac-3/ac-4/ac-6."
+        created_at: 2026-04-29T06:49:04.374Z
+      - _ulid: 01KQC0SDYGMGGWX39BEGF6W6S9
+        author: "@claude"
+        body: 'Fixed: _recipe_has_checkpoint_components now checks node.source_dir == "checkpoints" instead
+          of treating all RecipeModel nodes as checkpoint companions.
+          RecipeModel(source_dir="diffusion_models") from the diffusion model input node is no
+          longer misclassified as checkpoint-style. Added 3 tests: diffusion-model RecipeModel not
+          detected as checkpoint, diffusion-model in Compose not detected, and mixed
+          diffusion+checkpoint correctly detected.'
+        created_at: 2026-04-29T07:03:25.391Z
+    kind: blocker
+    resolved_at: 2026-04-29T07:03:42.963Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T06:49:14.316Z
+created_at: 2026-04-29T06:45:15.637Z
+updated_at: 2026-04-29T07:03:45.354Z
+notes: []

@@ -1,0 +1,204 @@
+_ulid: 01KQ8E5PBED41561CCFX9VF0GX
+slugs: []
+title: Review guarded manual real-Comfy memory harness cycle 6
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: ruff check scripts/manual/real_comfy_memory_validation.py
+      tests/test_real_comfy_memory_harness.py -> All checks passed.
+    name: ruff changed files
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T21:43:39.556Z
+    completed_at: 2026-04-27T21:43:39.556Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found annotated tests for @manual-comfy-memory-validation ac-explicit-opt-in-required,
+      ac-refuses-before-comfy-work-without-opt-in, and ac-report-identifies-memory-mode in
+      tests/test_real_comfy_memory_harness.py.
+    name: AC annotations
+    required: true
+    runner: rg
+    created_at: 2026-04-27T21:43:39.857Z
+    completed_at: 2026-04-27T21:43:39.857Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Validation passed with existing repo warnings accepted via --warnings-ok:
+      schema/references OK; 4 alignment warnings and 12 completeness warnings are pre-existing
+      project metadata."
+    name: kspec validate --warnings-ok
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T21:43:40.109Z
+    completed_at: 2026-04-27T21:43:40.109Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: pytest tests/test_real_comfy_memory_harness.py -q -> 39 passed.
+    name: targeted harness tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T21:43:40.415Z
+    completed_at: 2026-04-27T21:43:40.415Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest -q exited 1 locally with 18 failures in tests/test_incremental_recompute.py and
+      tests/test_memory_management.py caused by RuntimeError: Insufficient system RAM for merge
+      (available ~827-948 MB, estimated need 1508 MB). No harness failures; PR CI test is green."
+    name: full pytest
+    required: false
+    runner: pytest
+    created_at: 2026-04-27T21:43:57.713Z
+    completed_at: 2026-04-27T21:43:57.713Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: With ambient comfy importable on PYTHONPATH and --comfy-root pointing to a directory
+      without comfy/__init__.py, run_validation returned an error, memory_mode remained unknown,
+      sys.path was unchanged, and no comfy modules were loaded.
+    name: ambient Comfy root isolation probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T21:43:57.962Z
+    completed_at: 2026-04-27T21:43:57.962Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: With a temp Comfy-shaped root, safetensors fixture, and all guards, the harness exited 0,
+      reported memory_mode=NORMAL_FAKE, artifact_cache_hit=True, returned-model behavior, memory
+      observations, and weights_resident_in_cache=False.
+    name: Comfy-shaped intentional-run probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T21:43:58.221Z
+    completed_at: 2026-04-27T21:43:58.221Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "gh pr list for PR #97 shows base=dev, mergeStateStatus=CLEAN, lint=SUCCESS, test=SUCCESS
+      for head cf1d6f0."
+    name: PR CI
+    required: true
+    runner: gh
+    created_at: 2026-04-27T21:43:58.481Z
+    completed_at: 2026-04-27T21:43:58.481Z
+events:
+  - _ulid: 01KQ8E5PBEV7SD8EDSRNFAPJDY
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T21:40:20.974Z
+  - _ulid: 01KQ8E61G4KAZB4KY7B3C1P28G
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T21:40:32.388Z
+  - _ulid: 01KQ8EBRBF71294JS32JK6C721
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff changed files
+    timestamp: 2026-04-27T21:43:39.631Z
+  - _ulid: 01KQ8EBRMTQ6CGMZ486HPXSNFM
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotations
+    timestamp: 2026-04-27T21:43:39.930Z
+  - _ulid: 01KQ8EBRWV94HQVB5B1R8M2PAH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --warnings-ok
+    timestamp: 2026-04-27T21:43:40.187Z
+  - _ulid: 01KQ8EBS7BFTRSXFH4JC46NVSW
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted harness tests
+    timestamp: 2026-04-27T21:43:40.523Z
+  - _ulid: 01KQ8ECA2TVF72Y53P0H525HRH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: full pytest
+    timestamp: 2026-04-27T21:43:57.786Z
+  - _ulid: 01KQ8ECAAKQW66PS2CQYZ6RKQB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ambient Comfy root isolation probe
+    timestamp: 2026-04-27T21:43:58.036Z
+  - _ulid: 01KQ8ECAJK4V9SZWSX9MGJCYXJ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Comfy-shaped intentional-run probe
+    timestamp: 2026-04-27T21:43:58.291Z
+  - _ulid: 01KQ8ECATQAPHNBPAY8BM3MZ7D
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: PR CI
+    timestamp: 2026-04-27T21:43:58.551Z
+  - _ulid: 01KQ8ECMHCERDNR3CS6X4FC26B
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-27T21:44:08.492Z
+  - _ulid: 01KQ8ECMHCB4GBAPTCKWH33YSR
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T21:44:08.492Z
+examined_commit: cf1d6f0b2b24c05d0411a5a727a2a72e72fb8675
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T21:44:08.492Z
+created_at: 2026-04-27T21:40:20.974Z
+updated_at: 2026-04-27T21:44:08.492Z
+notes: []

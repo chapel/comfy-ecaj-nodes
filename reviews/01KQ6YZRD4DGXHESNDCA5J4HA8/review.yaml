@@ -1,0 +1,40 @@
+_ulid: 01KQ6YZRD4DGXHESNDCA5J4HA8
+slugs: []
+title: Review task-full-model-exit-integration
+author: Jacob Chapel
+checks: []
+events:
+  - _ulid: 01KQ6YZRCXG9K09QTZ8KEYSTZT
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T07:55:43.389Z
+  - _ulid: 01KQ6Z02ZRWXKHQRKQZM49KGA4
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T07:55:54.232Z
+  - _ulid: 01KQ6Z96A9GSYJYAJ1BKE62YSS
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T08:00:52.553Z
+examined_commit: 00fdbaf75fd9bd92904e11505fb9258da72dd38e
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HRA11DGTMKET3Y0J4BN65"
+  shadow_commit: ""
+threads: []
+verdicts: []
+created_at: 2026-04-27T07:55:43.396Z
+updated_at: 2026-04-27T08:00:52.509Z
+notes: []

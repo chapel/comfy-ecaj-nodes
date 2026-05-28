@@ -1,0 +1,1027 @@
+_ulid: 01KQCAACHT2E0G4YMV5B61FB0W
+slugs: []
+title: Review checkpoint save artifact format cycle 3
+author: Jacob Chapel
+checks:
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m ruff check . failed with 22 errors: E501 in nodes/exit.py and tests, unused
+      imports, unsorted imports, and unused locals in changed tests."
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-04-29T09:54:38.222Z
+    completed_at: 2026-04-29T09:54:38.222Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok passed. Plain kspec validate reports existing
+      alignment/completeness warnings and exits 6.
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T09:54:38.620Z
+    completed_at: 2026-04-29T09:54:38.620Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Full suite: uv run pytest -> 1449 passed in 11.84s. Targeted checkpoint tests: python -m
+      pytest -q tests/test_checkpoint_save_format.py tests/test_checkpoint_components.py
+      tests/test_exit_node.py -> passed."
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T09:54:39.028Z
+    completed_at: 2026-04-29T09:54:39.028Z
+events:
+  - _ulid: 01KQCAACHTBSCAJ0CNZ8AF898F
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T09:49:58.202Z
+  - _ulid: 01KQCAAWMTVKDH3RHFFMWHVA4N
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T09:50:14.683Z
+  - _ulid: 01KQCAJY3HQWG9ZK13KJNZBX9V
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: ruff
+    timestamp: 2026-04-29T09:54:38.321Z
+  - _ulid: 01KQCAJYG830WN9YZQAY93R219
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T09:54:38.728Z
+  - _ulid: 01KQCAJYWK0P74W7HZXKRW5JW6
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-04-29T09:54:39.123Z
+  - _ulid: 01KQCAKF6ZYW7H4DANSAB062BP
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQCAKF3EPDZFMAYA4NCAYH9M
+    timestamp: 2026-04-29T09:54:55.839Z
+  - _ulid: 01KQCAKFKD7ZND7NTAWNVXDC50
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQCAKFGCEQFDG62HSAMTJZ4V
+    timestamp: 2026-04-29T09:54:56.237Z
+  - _ulid: 01KQCANPH05GC0E8FM3XFJENV3
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQCANPDW24RDY47HW98Y2T0Q
+    timestamp: 2026-04-29T09:56:08.864Z
+  - _ulid: 01KQCANZGFSRWRQFZER7471SRZ
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T09:56:18.063Z
+  - _ulid: 01KQCANZGFB9PW1KQQ76NXTP8Z
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T09:56:18.063Z
+  - _ulid: 01KQCBQSQN957J30JJDG77Z9GR
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQCAKF3EPDZFMAYA4NCAYH9M
+    timestamp: 2026-04-29T10:14:46.261Z
+  - _ulid: 01KQCBR17PAP9DBFTEQEHGWY7F
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQCAKFGCEQFDG62HSAMTJZ4V
+    timestamp: 2026-04-29T10:14:53.942Z
+  - _ulid: 01KQCBRA2M8QSC31XHEBXNW0D1
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQCANPDW24RDY47HW98Y2T0Q
+    timestamp: 2026-04-29T10:15:02.996Z
+  - _ulid: 01KQCBRJ25D3NCBFA3A6YV0KGR
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQCAKF3EPDZFMAYA4NCAYH9M
+    timestamp: 2026-04-29T10:15:11.173Z
+  - _ulid: 01KQCBRMCGSKED1N959SPGHWMD
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQCAKFGCEQFDG62HSAMTJZ4V
+    timestamp: 2026-04-29T10:15:13.552Z
+  - _ulid: 01KQCBRPZ3RR4V290WN97X5ND1
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQCANPDW24RDY47HW98Y2T0Q
+    timestamp: 2026-04-29T10:15:16.195Z
+examined_commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN9MR5P6F1ECW0G30GEZ"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQCAKF3EPDZFMAYA4NCAYH9M
+    anchor:
+      type: code
+      commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
+      line_end: 17
+      line_start: 17
+      path: tests/test_checkpoint_save_format.py
+      side: head
+    entries:
+      - _ulid: 01KQCAKF3EBG2BTYBMARZEHG0A
+        author: Jacob Chapel
+        body: >-
+          MUST-FIX: the new checkpoint save tests also fail Ruff. The same E501 Line too long (117 >
+          99)
+             --> nodes/exit.py:487:100
+              |
+          485 |     if isinstance(node, RecipeBase):
+
+          486 |         cc = node.checkpoint_components
+
+          487 |         return cc is not None and isinstance(cc, CheckpointComponents) and cc.clip
+          is not None and cc.vae is not None
+              |                                                                                                    ^^^^^^^^^^^^^^^^^^
+          488 |     if isinstance(node, RecipeModel):
+
+          489 |         return node.source_dir == "checkpoints"
+              |
+
+          I001 [*] Import block is un-sorted or un-formatted
+            --> tests/test_checkpoint_save_format.py:13:1
+             |
+          11 |   """
+
+          12 |
+
+          13 | / from __future__ import annotations
+
+          14 | |
+
+          15 | | import json
+
+          16 | | import os
+
+          17 | | from unittest.mock import MagicMock, call, patch
+
+          18 | |
+
+          19 | | import pytest
+
+          20 | | import torch
+
+          21 | | from safetensors.torch import load_file, save_file
+
+          22 | |
+
+          23 | | from lib.persistence import (
+
+          24 | |     build_metadata,
+
+          25 | |     check_checkpoint_cache,
+
+          26 | | )
+
+          27 | | from lib.recipe import (
+
+          28 | |     CheckpointComponents,
+
+          29 | |     RecipeBase,
+
+          30 | |     RecipeCompose,
+
+          31 | |     RecipeLoRA,
+
+          32 | |     RecipeMerge,
+
+          33 | |     RecipeModel,
+
+          34 | | )
+
+          35 | | from nodes.exit import WIDENExitNode, save_comfy_checkpoint
+
+          36 | | from tests.conftest import make_checkpoint_components
+             | |_____________________________________________________^
+             |
+          help: Organize imports
+
+
+          F401 [*] `unittest.mock.call` imported but unused
+            --> tests/test_checkpoint_save_format.py:17:38
+             |
+          15 | import json
+
+          16 | import os
+
+          17 | from unittest.mock import MagicMock, call, patch
+             |                                      ^^^^
+          18 |
+
+          19 | import pytest
+             |
+          help: Remove unused import: `unittest.mock.call`
+
+
+          F401 [*] `lib.persistence.build_metadata` imported but unused
+            --> tests/test_checkpoint_save_format.py:24:5
+             |
+          23 | from lib.persistence import (
+
+          24 |     build_metadata,
+             |     ^^^^^^^^^^^^^^
+          25 |     check_checkpoint_cache,
+
+          26 | )
+             |
+          help: Remove unused import: `lib.persistence.build_metadata`
+
+
+          F401 [*] `lib.recipe.CheckpointComponents` imported but unused
+            --> tests/test_checkpoint_save_format.py:28:5
+             |
+          26 | )
+
+          27 | from lib.recipe import (
+
+          28 |     CheckpointComponents,
+             |     ^^^^^^^^^^^^^^^^^^^^
+          29 |     RecipeBase,
+
+          30 |     RecipeCompose,
+             |
+          help: Remove unused import: `lib.recipe.CheckpointComponents`
+
+
+          F841 Local variable `result` is assigned to but never used
+             --> tests/test_checkpoint_save_format.py:307:13
+              |
+          305 |             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+          306 |
+
+          307 |             result = node.execute(merge, save_model=True, model_name="model")
+              |             ^^^^^^
+          308 |
+
+          309 |             # save_comfy_checkpoint MUST have been called
+              |
+          help: Remove assignment to unused variable `result`
+
+
+          F841 Local variable `mock_save_ckpt` is assigned to but never used
+             --> tests/test_checkpoint_save_format.py:353:58
+              |
+          351 |             patch("nodes.exit.chunked_evaluation", return_value={}),
+
+          352 |             patch("nodes.exit.install_merged_patches") as mock_install,
+
+          353 |             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+              |                                                          ^^^^^^^^^^^^^^
+          354 |             patch("nodes.exit.MaterializationSink") as mock_sink_cls,
+
+          355 |             patch("nodes.exit.check_ram_preflight"),
+              |
+          help: Remove assignment to unused variable `mock_save_ckpt`
+
+
+          F841 Local variable `result` is assigned to but never used
+             --> tests/test_checkpoint_save_format.py:504:13
+              |
+          502 |             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+          503 |
+
+          504 |             result = node.execute(merge, save_model=True, model_name="model")
+              |             ^^^^^^
+          505 |
+
+          506 |             # save_comfy_checkpoint MUST be called (checkpoint-style)
+              |
+          help: Remove assignment to unused variable `result`
+
+
+          F841 Local variable `mock_save_ckpt` is assigned to but never used
+             --> tests/test_checkpoint_save_format.py:553:58
+              |
+          551 |             patch("nodes.exit.chunked_evaluation", return_value={}),
+
+          552 |             patch("nodes.exit.install_merged_patches") as mock_install,
+
+          553 |             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+              |                                                          ^^^^^^^^^^^^^^
+          554 |             patch("nodes.exit.build_metadata") as mock_build_meta,
+
+          555 |             patch("nodes.exit.check_ram_preflight"),
+              |
+          help: Remove assignment to unused variable `mock_save_ckpt`
+
+
+          E501 Line too long (108 > 99)
+             --> tests/test_checkpoint_save_format.py:575:100
+              |
+          573 |                 all_model_keys=frozenset(),
+
+          574 |             )
+
+          575 |             mock_build_meta.return_value = {"__ecaj_version__": "1",
+          "__ecaj_artifact_kind__": "checkpoint"}
+              |                                                                                                    ^^^^^^^^^
+          576 |             mock_install.return_value = mock_model_patcher.clone()
+              |
+
+          E501 Line too long (100 > 99)
+             --> tests/test_checkpoint_save_format.py:621:100
+              |
+          619 |             "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
+
+          620 |         })
+
+          621 |         assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY,
+          self._DEPS) is False
+              |                                                                                                    ^
+          622 |
+
+          623 |     # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+              |
+
+          E501 Line too long (100 > 99)
+             --> tests/test_checkpoint_save_format.py:632:100
+              |
+          630 |             "model_sampling.sigmas": torch.randn(4),
+
+          631 |         })
+
+          632 |         assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY,
+          self._DEPS) is False
+              |                                                                                                    ^
+          633 |
+
+          634 |     # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+              |
+
+          E501 Line too long (100 > 99)
+             --> tests/test_checkpoint_save_format.py:653:100
+              |
+          651 |             "first_stage_model.decoder.weight": torch.randn(4, 4),
+
+          652 |         }, artifact_kind="diffusion")
+
+          653 |         assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY,
+          self._DEPS) is False
+              |                                                                                                    ^
+          654 |
+
+          655 |     # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+              |
+
+          E501 Line too long (101 > 99)
+              --> tests/test_checkpoint_save_format.py:1073:100
+               |
+          1072 |     # AC: @checkpoint-loadable-saved-model-output
+          ac-downstream-return-remains-usable
+
+          1073 |     def test_load_model_from_checkpoint_artifact_updates_weights(self,
+          mock_model_patcher, tmp_path):
+               |                                                                                                    ^^
+          1074 |         """_load_model_from_artifact must load Comfy checkpoint keys
+
+          1075 |         (model.diffusion_model.*) into the returned model's state dict."""
+               |
+
+          F841 Local variable `result` is assigned to but never used
+              --> tests/test_checkpoint_save_format.py:1222:13
+               |
+          1220 |             mock_load.return_value = mock_model_patcher.clone()
+
+          1221 |
+
+          1222 |             result = node.execute(base, save_model=True, model_name="model")
+               |             ^^^^^^
+          1223 |
+
+          1224 |             # MaterializationSink MUST be used
+               |
+          help: Remove assignment to unused variable `result`
+
+
+          F841 Local variable `result` is assigned to but never used
+              --> tests/test_checkpoint_save_format.py:1259:13
+               |
+          1257 |             mock_load.return_value = mock_model_patcher.clone()
+
+          1258 |
+
+          1259 |             result = node.execute(base, save_model=True, model_name="model")
+               |             ^^^^^^
+          1260 |
+
+          1261 |             # check_checkpoint_cache MUST be called (not check_full_model_cache)
+               |
+          help: Remove assignment to unused variable `result`
+
+
+          E501 Line too long (102 > 99)
+              --> tests/test_exit_node.py:1370:100
+               |
+          1369 |     # AC: @full-saved-model-output ac-cache-reuses-artifact
+
+          1370 |     def test_checkpoint_sourced_lora_recipe_uses_checkpoint_cache(self,
+          mock_model_patcher, tmp_path):
+               |                                                                                                    ^^^
+          1371 |         """Checkpoint-sourced LoRA recipe (RecipeBase with checkpoint_components +
+          LoRA)
+
+          1372 |         must use check_checkpoint_cache, not check_full_model_cache."""
+               |
+
+          E501 Line too long (115 > 99)
+              --> tests/test_exit_node.py:1430:100
+               |
+          1428 |     # AC: @exit-model-persistence ac-3
+
+          1429 |     # AC: @exit-model-persistence ac-4
+
+          1430 |     def
+          test_diffusion_model_recipe_with_checkpoint_base_uses_checkpoint_cache(self,
+          mock_model_patcher, tmp_path):
+               |                                                                                                    ^^^^^^^^^^^^^^^^
+          1431 |         """RecipeModel with source_dir='diffusion_models' merged onto a checkpoint
+
+          1432 |         base still uses check_checkpoint_cache, because the base has
+          checkpoint_components.
+               |
+
+          F841 Local variable `mock_sink` is assigned to but never used
+              --> tests/test_exit_node.py:1448:9
+               |
+          1446 |         node = WIDENExitNode()
+
+          1447 |
+
+          1448 |         mock_sink = MagicMock()
+               |         ^^^^^^^^^
+          1449 |
+
+          1450 |         with (
+               |
+          help: Remove assignment to unused variable `mock_sink`
+
+
+          F401 [*] `tests.conftest.make_checkpoint_components` imported but unused
+            --> tests/test_full_model_streaming.py:26:28
+             |
+          24 |     _incremental_cache,
+
+          25 | )
+
+          26 | from tests.conftest import make_checkpoint_components
+             |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+          27 |
+
+          28 | # ---------------------------------------------------------------------------
+             |
+          help: Remove unused import: `tests.conftest.make_checkpoint_components`
+
+
+          F401 [*] `tests.conftest.make_checkpoint_components` imported but unused
+            --> tests/test_incremental_recompute.py:36:28
+             |
+          34 |     clear_incremental_cache,
+
+          35 | )
+
+          36 | from tests.conftest import make_checkpoint_components
+             |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+          37 |
+
+          38 | # ---------------------------------------------------------------------------
+             |
+          help: Remove unused import: `tests.conftest.make_checkpoint_components`
+
+
+          F401 [*] `tests.conftest.make_checkpoint_components` imported but unused
+            --> tests/test_memory_management.py:32:28
+             |
+          30 |     _incremental_cache,
+
+          31 | )
+
+          32 | from tests.conftest import make_checkpoint_components
+             |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+          33 |
+
+          34 | # ===========================================================================
+             |
+          help: Remove unused import: `tests.conftest.make_checkpoint_components`
+
+
+          Found 22 errors.
+
+          [*] 7 fixable with the `--fix` option (7 hidden fixes can be enabled with the
+          `--unsafe-fixes` option). run reports unsorted imports, unused imports (, , ), unused
+          locals, and several E501 violations in this file. Please clean the test lint failures
+          rather than leaving the suite dependent on pytest-only verification.
+        created_at: 2026-04-29T09:54:55.726Z
+      - _ulid: 01KQCBQSMG2ZR98H0WZHB5HY70
+        author: "@claude"
+        body: "Fixed: resolved all Ruff violations in test_checkpoint_save_format.py — removed unused
+          imports (call, build_metadata, CheckpointComponents), fixed import sorting (I001), removed
+          unused local variables (result, mock_save_ckpt), broke long lines (E501). Also fixed
+          unused imports in test_full_model_streaming.py, test_incremental_recompute.py, and
+          test_memory_management.py."
+        created_at: 2026-04-29T10:14:46.160Z
+    kind: blocker
+    resolved_at: 2026-04-29T10:15:11.063Z
+    resolved_by: "@claude"
+  - _ulid: 01KQCAKFGCEQFDG62HSAMTJZ4V
+    anchor:
+      type: code
+      commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
+      line_end: 487
+      line_start: 487
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQCAKFGD5XA82X5VV04GN7DK
+        author: Jacob Chapel
+        body: >-
+          MUST-FIX: the submitted snapshot does not pass the configured Ruff gate. E501 Line too
+          long (117 > 99)
+             --> nodes/exit.py:487:100
+              |
+          485 |     if isinstance(node, RecipeBase):
+
+          486 |         cc = node.checkpoint_components
+
+          487 |         return cc is not None and isinstance(cc, CheckpointComponents) and cc.clip
+          is not None and cc.vae is not None
+              |                                                                                                    ^^^^^^^^^^^^^^^^^^
+          488 |     if isinstance(node, RecipeModel):
+
+          489 |         return node.source_dir == "checkpoints"
+              |
+
+          I001 [*] Import block is un-sorted or un-formatted
+            --> tests/test_checkpoint_save_format.py:13:1
+             |
+          11 |   """
+
+          12 |
+
+          13 | / from __future__ import annotations
+
+          14 | |
+
+          15 | | import json
+
+          16 | | import os
+
+          17 | | from unittest.mock import MagicMock, call, patch
+
+          18 | |
+
+          19 | | import pytest
+
+          20 | | import torch
+
+          21 | | from safetensors.torch import load_file, save_file
+
+          22 | |
+
+          23 | | from lib.persistence import (
+
+          24 | |     build_metadata,
+
+          25 | |     check_checkpoint_cache,
+
+          26 | | )
+
+          27 | | from lib.recipe import (
+
+          28 | |     CheckpointComponents,
+
+          29 | |     RecipeBase,
+
+          30 | |     RecipeCompose,
+
+          31 | |     RecipeLoRA,
+
+          32 | |     RecipeMerge,
+
+          33 | |     RecipeModel,
+
+          34 | | )
+
+          35 | | from nodes.exit import WIDENExitNode, save_comfy_checkpoint
+
+          36 | | from tests.conftest import make_checkpoint_components
+             | |_____________________________________________________^
+             |
+          help: Organize imports
+
+
+          F401 [*] `unittest.mock.call` imported but unused
+            --> tests/test_checkpoint_save_format.py:17:38
+             |
+          15 | import json
+
+          16 | import os
+
+          17 | from unittest.mock import MagicMock, call, patch
+             |                                      ^^^^
+          18 |
+
+          19 | import pytest
+             |
+          help: Remove unused import: `unittest.mock.call`
+
+
+          F401 [*] `lib.persistence.build_metadata` imported but unused
+            --> tests/test_checkpoint_save_format.py:24:5
+             |
+          23 | from lib.persistence import (
+
+          24 |     build_metadata,
+             |     ^^^^^^^^^^^^^^
+          25 |     check_checkpoint_cache,
+
+          26 | )
+             |
+          help: Remove unused import: `lib.persistence.build_metadata`
+
+
+          F401 [*] `lib.recipe.CheckpointComponents` imported but unused
+            --> tests/test_checkpoint_save_format.py:28:5
+             |
+          26 | )
+
+          27 | from lib.recipe import (
+
+          28 |     CheckpointComponents,
+             |     ^^^^^^^^^^^^^^^^^^^^
+          29 |     RecipeBase,
+
+          30 |     RecipeCompose,
+             |
+          help: Remove unused import: `lib.recipe.CheckpointComponents`
+
+
+          F841 Local variable `result` is assigned to but never used
+             --> tests/test_checkpoint_save_format.py:307:13
+              |
+          305 |             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+          306 |
+
+          307 |             result = node.execute(merge, save_model=True, model_name="model")
+              |             ^^^^^^
+          308 |
+
+          309 |             # save_comfy_checkpoint MUST have been called
+              |
+          help: Remove assignment to unused variable `result`
+
+
+          F841 Local variable `mock_save_ckpt` is assigned to but never used
+             --> tests/test_checkpoint_save_format.py:353:58
+              |
+          351 |             patch("nodes.exit.chunked_evaluation", return_value={}),
+
+          352 |             patch("nodes.exit.install_merged_patches") as mock_install,
+
+          353 |             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+              |                                                          ^^^^^^^^^^^^^^
+          354 |             patch("nodes.exit.MaterializationSink") as mock_sink_cls,
+
+          355 |             patch("nodes.exit.check_ram_preflight"),
+              |
+          help: Remove assignment to unused variable `mock_save_ckpt`
+
+
+          F841 Local variable `result` is assigned to but never used
+             --> tests/test_checkpoint_save_format.py:504:13
+              |
+          502 |             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
+
+          503 |
+
+          504 |             result = node.execute(merge, save_model=True, model_name="model")
+              |             ^^^^^^
+          505 |
+
+          506 |             # save_comfy_checkpoint MUST be called (checkpoint-style)
+              |
+          help: Remove assignment to unused variable `result`
+
+
+          F841 Local variable `mock_save_ckpt` is assigned to but never used
+             --> tests/test_checkpoint_save_format.py:553:58
+              |
+          551 |             patch("nodes.exit.chunked_evaluation", return_value={}),
+
+          552 |             patch("nodes.exit.install_merged_patches") as mock_install,
+
+          553 |             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+              |                                                          ^^^^^^^^^^^^^^
+          554 |             patch("nodes.exit.build_metadata") as mock_build_meta,
+
+          555 |             patch("nodes.exit.check_ram_preflight"),
+              |
+          help: Remove assignment to unused variable `mock_save_ckpt`
+
+
+          E501 Line too long (108 > 99)
+             --> tests/test_checkpoint_save_format.py:575:100
+              |
+          573 |                 all_model_keys=frozenset(),
+
+          574 |             )
+
+          575 |             mock_build_meta.return_value = {"__ecaj_version__": "1",
+          "__ecaj_artifact_kind__": "checkpoint"}
+              |                                                                                                    ^^^^^^^^^
+          576 |             mock_install.return_value = mock_model_patcher.clone()
+              |
+
+          E501 Line too long (100 > 99)
+             --> tests/test_checkpoint_save_format.py:621:100
+              |
+          619 |             "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
+
+          620 |         })
+
+          621 |         assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY,
+          self._DEPS) is False
+              |                                                                                                    ^
+          622 |
+
+          623 |     # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+              |
+
+          E501 Line too long (100 > 99)
+             --> tests/test_checkpoint_save_format.py:632:100
+              |
+          630 |             "model_sampling.sigmas": torch.randn(4),
+
+          631 |         })
+
+          632 |         assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY,
+          self._DEPS) is False
+              |                                                                                                    ^
+          633 |
+
+          634 |     # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+              |
+
+          E501 Line too long (100 > 99)
+             --> tests/test_checkpoint_save_format.py:653:100
+              |
+          651 |             "first_stage_model.decoder.weight": torch.randn(4, 4),
+
+          652 |         }, artifact_kind="diffusion")
+
+          653 |         assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY,
+          self._DEPS) is False
+              |                                                                                                    ^
+          654 |
+
+          655 |     # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+              |
+
+          E501 Line too long (101 > 99)
+              --> tests/test_checkpoint_save_format.py:1073:100
+               |
+          1072 |     # AC: @checkpoint-loadable-saved-model-output
+          ac-downstream-return-remains-usable
+
+          1073 |     def test_load_model_from_checkpoint_artifact_updates_weights(self,
+          mock_model_patcher, tmp_path):
+               |                                                                                                    ^^
+          1074 |         """_load_model_from_artifact must load Comfy checkpoint keys
+
+          1075 |         (model.diffusion_model.*) into the returned model's state dict."""
+               |
+
+          F841 Local variable `result` is assigned to but never used
+              --> tests/test_checkpoint_save_format.py:1222:13
+               |
+          1220 |             mock_load.return_value = mock_model_patcher.clone()
+
+          1221 |
+
+          1222 |             result = node.execute(base, save_model=True, model_name="model")
+               |             ^^^^^^
+          1223 |
+
+          1224 |             # MaterializationSink MUST be used
+               |
+          help: Remove assignment to unused variable `result`
+
+
+          F841 Local variable `result` is assigned to but never used
+              --> tests/test_checkpoint_save_format.py:1259:13
+               |
+          1257 |             mock_load.return_value = mock_model_patcher.clone()
+
+          1258 |
+
+          1259 |             result = node.execute(base, save_model=True, model_name="model")
+               |             ^^^^^^
+          1260 |
+
+          1261 |             # check_checkpoint_cache MUST be called (not check_full_model_cache)
+               |
+          help: Remove assignment to unused variable `result`
+
+
+          E501 Line too long (102 > 99)
+              --> tests/test_exit_node.py:1370:100
+               |
+          1369 |     # AC: @full-saved-model-output ac-cache-reuses-artifact
+
+          1370 |     def test_checkpoint_sourced_lora_recipe_uses_checkpoint_cache(self,
+          mock_model_patcher, tmp_path):
+               |                                                                                                    ^^^
+          1371 |         """Checkpoint-sourced LoRA recipe (RecipeBase with checkpoint_components +
+          LoRA)
+
+          1372 |         must use check_checkpoint_cache, not check_full_model_cache."""
+               |
+
+          E501 Line too long (115 > 99)
+              --> tests/test_exit_node.py:1430:100
+               |
+          1428 |     # AC: @exit-model-persistence ac-3
+
+          1429 |     # AC: @exit-model-persistence ac-4
+
+          1430 |     def
+          test_diffusion_model_recipe_with_checkpoint_base_uses_checkpoint_cache(self,
+          mock_model_patcher, tmp_path):
+               |                                                                                                    ^^^^^^^^^^^^^^^^
+          1431 |         """RecipeModel with source_dir='diffusion_models' merged onto a checkpoint
+
+          1432 |         base still uses check_checkpoint_cache, because the base has
+          checkpoint_components.
+               |
+
+          F841 Local variable `mock_sink` is assigned to but never used
+              --> tests/test_exit_node.py:1448:9
+               |
+          1446 |         node = WIDENExitNode()
+
+          1447 |
+
+          1448 |         mock_sink = MagicMock()
+               |         ^^^^^^^^^
+          1449 |
+
+          1450 |         with (
+               |
+          help: Remove assignment to unused variable `mock_sink`
+
+
+          F401 [*] `tests.conftest.make_checkpoint_components` imported but unused
+            --> tests/test_full_model_streaming.py:26:28
+             |
+          24 |     _incremental_cache,
+
+          25 | )
+
+          26 | from tests.conftest import make_checkpoint_components
+             |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+          27 |
+
+          28 | # ---------------------------------------------------------------------------
+             |
+          help: Remove unused import: `tests.conftest.make_checkpoint_components`
+
+
+          F401 [*] `tests.conftest.make_checkpoint_components` imported but unused
+            --> tests/test_incremental_recompute.py:36:28
+             |
+          34 |     clear_incremental_cache,
+
+          35 | )
+
+          36 | from tests.conftest import make_checkpoint_components
+             |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+          37 |
+
+          38 | # ---------------------------------------------------------------------------
+             |
+          help: Remove unused import: `tests.conftest.make_checkpoint_components`
+
+
+          F401 [*] `tests.conftest.make_checkpoint_components` imported but unused
+            --> tests/test_memory_management.py:32:28
+             |
+          30 |     _incremental_cache,
+
+          31 | )
+
+          32 | from tests.conftest import make_checkpoint_components
+             |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+          33 |
+
+          34 | # ===========================================================================
+             |
+          help: Remove unused import: `tests.conftest.make_checkpoint_components`
+
+
+          Found 22 errors.
+
+          [*] 7 fixable with the `--fix` option (7 hidden fixes can be enabled with the
+          `--unsafe-fixes` option). reports E501 here () plus additional changed-file failures, so
+          the review cannot advance until the lint check is clean.
+        created_at: 2026-04-29T09:54:56.141Z
+      - _ulid: 01KQCBR14DG5QSEB3EJS408069
+        author: "@claude"
+        body: "Fixed: broke long return statement in _recipe_has_checkpoint_components into multi-line
+          boolean expression. Also fixed E501 in test_exit_node.py function defs and removed unused
+          mock_sink variable."
+        created_at: 2026-04-29T10:14:53.837Z
+    kind: blocker
+    resolved_at: 2026-04-29T10:15:13.445Z
+    resolved_by: "@claude"
+  - _ulid: 01KQCANPDW24RDY47HW98Y2T0Q
+    anchor:
+      type: code
+      commit: 810d66f9d0ed8cbfe87b85209f616354532207a5
+      line_end: 767
+      line_start: 765
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQCANPDW7652M8QV41N1XRAS
+        author: Jacob Chapel
+        body: 'MUST-FIX: checkpoint component validation now runs for every save_model request before the
+          code classifies the recipe as checkpoint or diffusion. That makes the diffusion-only save
+          path unreachable through execute, even though this patch keeps and tests
+          _execute_diffusion_save by patching validate_checkpoint_components out. I confirmed with a
+          zimage RecipeBase without checkpoint_components: WIDENExitNode.execute(...,
+          save_model=True) raises "Checkpoint save_model requires CLIP and VAE components" before
+          reaching the diffusion save path. This regresses the exit-model-persistence contract for
+          truly diffusion-only artifacts and should be scoped to checkpoint-style saves only, or the
+          recipe/source kind needs to be explicit enough to distinguish the two.'
+        created_at: 2026-04-29T09:56:08.764Z
+      - _ulid: 01KQCBR9ZM6EGWT46RGDRF92AX
+        author: "@claude"
+        body: "Fixed: guarded validate_checkpoint_components in execute() with 'if
+          base.checkpoint_components is not None' so it only fires for checkpoint-style recipes
+          (where the user wired CLIP/VAE to Entry). Diffusion-only recipes
+          (checkpoint_components=None) now skip the validation and proceed through the diffusion
+          save path. Updated 4 tests in test_checkpoint_components.py to use explicit
+          CheckpointComponents(clip=None, vae=None) to correctly signal checkpoint intent while
+          testing the missing-components AC."
+        created_at: 2026-04-29T10:15:02.900Z
+    kind: blocker
+    resolved_at: 2026-04-29T10:15:16.083Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T09:56:18.063Z
+created_at: 2026-04-29T09:49:58.202Z
+updated_at: 2026-04-29T10:15:16.083Z
+notes: []

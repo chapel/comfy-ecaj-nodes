@@ -1,0 +1,261 @@
+_ulid: 01KQC6Q4ERBA34Q9RYMAJ3D087
+slugs: []
+title: Review checkpoint save artifact format
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 1434 passed in 10.04s
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T08:51:45.448Z
+    completed_at: 2026-04-29T08:51:45.448Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok passed; warnings are pre-existing alignment/completeness warnings
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T08:51:45.808Z
+    completed_at: 2026-04-29T08:51:45.808Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: git diff --check dev...HEAD produced no whitespace errors
+    name: diff check
+    required: true
+    runner: git
+    created_at: 2026-04-29T08:51:46.156Z
+    completed_at: 2026-04-29T08:51:46.156Z
+events:
+  - _ulid: 01KQC6Q4EQHTBB2AT8RTXTMSMW
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T08:47:01.592Z
+  - _ulid: 01KQC6QF4S54N09ZBR9JM8PFQ7
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T08:47:12.537Z
+  - _ulid: 01KQC6ZSRCAF2FXFRXKE5CCXVT
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-04-29T08:51:45.548Z
+  - _ulid: 01KQC6ZT3BH1XJ4Y78RGZKPHT6
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T08:51:45.899Z
+  - _ulid: 01KQC6ZTEH3NBS6JCGSEV0PAJP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: diff check
+    timestamp: 2026-04-29T08:51:46.258Z
+  - _ulid: 01KQC70EMG039VY945T8MG31PP
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC70EHE76VWHQ03G7926VH3
+    timestamp: 2026-04-29T08:52:06.928Z
+  - _ulid: 01KQC70S80714P7TNFYZ7WA4ZQ
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC70S4YBZ3X6DM7MGHDRSBB
+    timestamp: 2026-04-29T08:52:17.793Z
+  - _ulid: 01KQC712Z7T671HWMA2ZMVE26Y
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC712WBKPC6B585RT0Q6Q5C
+    timestamp: 2026-04-29T08:52:27.751Z
+  - _ulid: 01KQC71EMWYT2HF9NN4MZEM7W5
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T08:52:39.708Z
+  - _ulid: 01KQC71EMWT5PPQNB1M5HAYR0Y
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T08:52:39.708Z
+  - _ulid: 01KQC8BHZG4VACX9CBXH43T1F0
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC70EHE76VWHQ03G7926VH3
+    timestamp: 2026-04-29T09:15:39.376Z
+  - _ulid: 01KQC8BMR4YGK165FRTT3F503X
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC70S4YBZ3X6DM7MGHDRSBB
+    timestamp: 2026-04-29T09:15:42.212Z
+  - _ulid: 01KQC8BQWXKPCW7B4SA9GSRF5T
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC712WBKPC6B585RT0Q6Q5C
+    timestamp: 2026-04-29T09:15:45.437Z
+  - _ulid: 01KQC8BZF7VG56GW089A68S3E4
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC70EHE76VWHQ03G7926VH3
+    timestamp: 2026-04-29T09:15:53.192Z
+  - _ulid: 01KQC8C209BWEZ2KWPABPREMAQ
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC70S4YBZ3X6DM7MGHDRSBB
+    timestamp: 2026-04-29T09:15:55.786Z
+  - _ulid: 01KQC8C4EKY7BGK4RCQ503Z99M
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC712WBKPC6B585RT0Q6Q5C
+    timestamp: 2026-04-29T09:15:58.292Z
+examined_commit: bddfbc71a07578a396071075ca5ed286c5b24b71
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN9MR5P6F1ECW0G30GEZ"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQC70EHE76VWHQ03G7926VH3
+    anchor:
+      type: code
+      commit: bddfbc71a07578a396071075ca5ed286c5b24b71
+      line_end: 472
+      line_start: 463
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQC70EHEXHMC6W93ZFYJ6YD1
+        author: Jacob Chapel
+        body: "MUST-FIX: checkpoint-source classification ignores RecipeBase.checkpoint_components. WIDEN
+          Entry stores CLIP/VAE on RecipeBase when the source comes from CheckpointLoaderSimple, but
+          _recipe_has_checkpoint_components only returns true for checkpoint RecipeModel nodes. A
+          normal checkpoint Entry + LoRA/Merge + Exit save_model recipe therefore routes as
+          diffusion-only, uses check_full_model_cache/MaterializationSink, and publishes an internal
+          artifact_kind=diffusion file instead of calling comfy.sd.save_checkpoint. I confirmed a
+          RecipeBase(checkpoint_components=...) + RecipeLoRA merge returns False from this helper.
+          This violates @checkpoint-loadable-saved-model-output
+          ac-artifact-matches-source-model-kind and the task requirement not to publish
+          internal-format artifacts for checkpoint-style saves."
+        created_at: 2026-04-29T08:52:06.830Z
+      - _ulid: 01KQC8BHWE4P206NYRQGKP0WRF
+        author: "@claude"
+        body: "Fixed: _recipe_has_checkpoint_components now checks RecipeBase.checkpoint_components (clip
+          and vae present) in addition to RecipeModel source_dir=checkpoints. A checkpoint Entry +
+          LoRA/Merge recipe now correctly routes through the checkpoint save path. Added 6 unit
+          tests for the classification logic in TestRecipeHasCheckpointComponents."
+        created_at: 2026-04-29T09:15:39.278Z
+    kind: blocker
+    resolved_at: 2026-04-29T09:15:53.091Z
+    resolved_by: "@claude"
+  - _ulid: 01KQC70S4YBZ3X6DM7MGHDRSBB
+    anchor:
+      type: code
+      commit: bddfbc71a07578a396071075ca5ed286c5b24b71
+      line_end: 851
+      line_start: 846
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQC70S4YJSHF5RAE648749K0
+        author: Jacob Chapel
+        body: "MUST-FIX: valid checkpoint cache hits return the wrong MODEL. On a checkpoint cache hit this
+          path calls _load_model_from_artifact, but that loader only updates exact diffusion_model.*
+          keys (or strips only the bare diffusion_model. prefix). Comfy checkpoint artifacts store
+          merged diffusion under model.diffusion_model.* along with conditioner.* and
+          first_stage_model.* keys, so the loader ignores the saved merged weights and returns a
+          clone with the original base weights. I confirmed this with a safetensors containing
+          model.diffusion_model.*, conditioner.*, and first_stage_model.*: the returned
+          model_state_dict stayed identical to the original. This breaks cache reuse for checkpoint
+          saves and violates @exit-model-persistence ac-3/ac-8 and
+          @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable."
+        created_at: 2026-04-29T08:52:17.694Z
+      - _ulid: 01KQC8BMMXWRZXHVA95XYS50DC
+        author: "@claude"
+        body: "Fixed: _load_model_from_artifact now handles Comfy checkpoint-style keys
+          (model.diffusion_model.*) by extracting diffusion weights from both the Comfy prefix and
+          the internal diffusion_model.* prefix, then maps them back to the patcher's
+          diffusion_model.* keys. Added tests verifying checkpoint artifact loading updates model
+          weights correctly."
+        created_at: 2026-04-29T09:15:42.109Z
+    kind: blocker
+    resolved_at: 2026-04-29T09:15:55.688Z
+    resolved_by: "@claude"
+  - _ulid: 01KQC712WBKPC6B585RT0Q6Q5C
+    anchor:
+      type: code
+      commit: bddfbc71a07578a396071075ca5ed286c5b24b71
+      line_end: 757
+      line_start: 724
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQC712WBWKGTKC803F7VK9GJ
+        author: Jacob Chapel
+        body: "MUST-FIX: base-only checkpoint saves still publish the old diffusion artifact. execute()
+          sends a RecipeBase root with save_model=True to _execute_full_model_noop, and this path
+          always validates/reuses expected_artifact_kind=diffusion and writes through
+          MaterializationSink with artifact_kind=diffusion. A WIDEN Entry fed from
+          CheckpointLoaderSimple can be a RecipeBase with checkpoint_components, so saving that
+          checkpoint-style source produces a diffusion_model.* internal artifact instead of a
+          checkpoint loadable with conditioning and VAE components. This violates
+          @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind for the
+          no-op checkpoint-source workflow."
+        created_at: 2026-04-29T08:52:27.659Z
+      - _ulid: 01KQC8BQSNW80R191EAS6HDXTP
+        author: "@claude"
+        body: "Fixed: _execute_full_model_noop now detects checkpoint-style RecipeBase via
+          _recipe_has_checkpoint_components and routes through save_comfy_checkpoint with
+          artifact_kind=checkpoint instead of MaterializationSink with artifact_kind=diffusion.
+          Cache validation also uses check_checkpoint_cache for checkpoint noop saves. Added 3 tests
+          covering noop checkpoint save, noop diffusion save, and noop checkpoint cache hit."
+        created_at: 2026-04-29T09:15:45.333Z
+    kind: blocker
+    resolved_at: 2026-04-29T09:15:58.192Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T08:52:39.708Z
+created_at: 2026-04-29T08:47:01.592Z
+updated_at: 2026-04-29T09:15:58.192Z
+notes: []

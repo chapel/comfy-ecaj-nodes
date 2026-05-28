@@ -1,0 +1,224 @@
+_ulid: 01KQ6PJ7RXZYM77RSZRENKH9AT
+slugs: []
+title: Review add sink-writing chunk evaluation
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "ruff check .: exit 0; All checks passed"
+    name: ruff check
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T05:31:00.888Z
+    completed_at: 2026-04-27T05:31:00.888Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest -v: exit 0; 1236 passed in 8.25s"
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T05:31:01.012Z
+    completed_at: 2026-04-27T05:31:01.012Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found behavioral tests annotated for @streaming-full-model-materialization
+      ac-affected-results-released in tests/test_chunked_evaluation_to_sink.py; no source-scanning
+      tests found in new test file
+    name: AC annotation scan
+    required: true
+    runner: rg
+    created_at: 2026-04-27T05:31:01.124Z
+    completed_at: 2026-04-27T05:31:01.124Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok: exit 0; schema/references OK; existing
+      alignment/completeness warnings remain"
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T05:31:01.224Z
+    completed_at: 2026-04-27T05:31:01.224Z
+events:
+  - _ulid: 01KQ6PJ7RX8HAFZTE9E2HEZREA
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T05:28:31.773Z
+  - _ulid: 01KQ6PJPJ8MNYCYKFWDSPBSNSW
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T05:28:46.920Z
+  - _ulid: 01KQ6PPSDE9S3EX9QFZX3WW3S2
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check
+    timestamp: 2026-04-27T05:31:00.910Z
+  - _ulid: 01KQ6PPSH5R1J65XCA9VXNCV15
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-04-27T05:31:01.029Z
+  - _ulid: 01KQ6PPSMPX4Z2Y6FWTVKKMAJF
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation scan
+    timestamp: 2026-04-27T05:31:01.142Z
+  - _ulid: 01KQ6PPSQT4WM9N3R16MG4XCFB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T05:31:01.242Z
+  - _ulid: 01KQ6PQADNABW0DCFFS5VVH5EV
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ6PQAD4D3SYJA1B4N5714W0
+    timestamp: 2026-04-27T05:31:18.325Z
+  - _ulid: 01KQ6PQAGTN6NE8YB37QBRD256
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ6PQAG9MTZBPT93X8Z8MP0Z
+    timestamp: 2026-04-27T05:31:18.426Z
+  - _ulid: 01KQ6PQH2E00FJTMC2EE7EQSVN
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T05:31:25.135Z
+  - _ulid: 01KQ6PQH2FRWHG8VWRNT9JT3XH
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T05:31:25.135Z
+  - _ulid: 01KQ6QBF28EW5BPCHAZ5T33JBZ
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ6PQAD4D3SYJA1B4N5714W0
+    timestamp: 2026-04-27T05:42:18.440Z
+  - _ulid: 01KQ6QBWM2388R34Z6NKN4D4N3
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ6PQAD4D3SYJA1B4N5714W0
+    timestamp: 2026-04-27T05:42:32.322Z
+  - _ulid: 01KQ6QBZMJ1HG8T01VA00WPYBX
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ6PQAG9MTZBPT93X8Z8MP0Z
+    timestamp: 2026-04-27T05:42:35.410Z
+  - _ulid: 01KQ6QC55XN9DAA3Z90YR260R9
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ6PQAG9MTZBPT93X8Z8MP0Z
+    timestamp: 2026-04-27T05:42:41.085Z
+examined_commit: a561fbe0865113b8f5d80344acaae3485e17f40b
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HR9YAB7181HKX6YSBX650"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ6PQAD4D3SYJA1B4N5714W0
+    anchor:
+      type: code
+      commit: a561fbe0865113b8f5d80344acaae3485e17f40b
+      line_end: 432
+      line_start: 431
+      path: lib/gpu_ops.py
+      side: head
+    entries:
+      - _ulid: 01KQ6PQAD49MCZPPVXVYETRJ9Y
+        author: Jacob Chapel
+        body: "MUST-FIX: the normal chunk path writes slices to the sink but never releases the local
+          merged_cpu batch before the next chunk starts. Evidence: an instrumented eval_fn
+          inspecting the caller frame saw merged_cpu from the prior chunk still present when
+          evaluating the next chunk. Impact: a streaming sink can still overlap the previous full
+          CPU chunk with the next chunk's base/eval tensors, so this does not satisfy the task
+          requirement to release local chunk references before later chunks are evaluated."
+        created_at: 2026-04-27T05:31:18.308Z
+      - _ulid: 01KQ6QBF1MTGAZTCYFTZ5C6QF0
+        author: "@claude"
+        body: "Fixed: Added 'del merged_cpu' after the sink write loop in the normal chunk path (line 435).
+          The merged_cpu batch tensor is now explicitly released before the next chunk iteration
+          begins its base_stack/base_gpu allocation. Added a behavioral test
+          (test_merged_cpu_released_between_chunks) that uses frame inspection to verify merged_cpu
+          is not present in the caller's locals when the next chunk's eval_fn executes."
+        created_at: 2026-04-27T05:42:18.420Z
+    kind: blocker
+    resolved_at: 2026-04-27T05:42:32.297Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ6PQAG9MTZBPT93X8Z8MP0Z
+    anchor:
+      type: code
+      commit: a561fbe0865113b8f5d80344acaae3485e17f40b
+      line_end: 459
+      line_start: 459
+      path: lib/gpu_ops.py
+      side: head
+    entries:
+      - _ulid: 01KQ6PQAGAEDCSFVFAXFX7GQ67
+        author: Jacob Chapel
+        body: "MUST-FIX: the OOM retry path has the same retained local reference after each single-key
+          write. Evidence: forcing the batch OOM path and inspecting the caller frame showed
+          merged_cpu from key 'a' still present when key 'b' evaluation started. Impact: the
+          fallback path does not release completed local result tensors before later retry keys are
+          evaluated, which weakens the bounded-memory guarantee the sink-writing path is meant to
+          provide."
+        created_at: 2026-04-27T05:31:18.410Z
+      - _ulid: 01KQ6QBZKV01W7D93X4EXK9RC8
+        author: "@claude"
+        body: "Fixed: Added 'del merged_cpu' after 'sink.write_tensor(key, merged_cpu[0])' in the OOM retry
+          path (line 461). Each single-key result tensor is now released before the next retry key
+          begins evaluation. Added a behavioral test
+          (test_merged_cpu_released_between_oom_retry_keys) that forces the OOM fallback path and
+          uses frame inspection to verify merged_cpu is not present when subsequent retry keys
+          evaluate."
+        created_at: 2026-04-27T05:42:35.387Z
+    kind: blocker
+    resolved_at: 2026-04-27T05:42:41.065Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T05:31:25.134Z
+created_at: 2026-04-27T05:28:31.773Z
+updated_at: 2026-04-27T05:42:41.065Z
+notes: []

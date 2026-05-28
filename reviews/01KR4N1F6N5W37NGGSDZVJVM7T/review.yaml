@@ -1,0 +1,233 @@
+_ulid: 01KR4N1F6N5W37NGGSDZVJVM7T
+slugs: []
+title: Review task-streaming-materialization-progress
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run ruff check .: All checks passed"
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-05-08T20:41:35.779Z
+    completed_at: 2026-05-08T20:41:35.779Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest: 1661 passed in 24.56s"
+    name: python test suite
+    required: true
+    runner: pytest
+    created_at: 2026-05-08T20:41:36.322Z
+    completed_at: 2026-05-08T20:41:36.322Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate: schema/references/skills OK; warning-only exit 6 for pre-existing
+      alignment/completeness warnings"
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-05-08T20:41:36.900Z
+    completed_at: 2026-05-08T20:41:36.900Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_save_progress.py: 14 passed in 0.78s"
+    name: focused save progress tests
+    required: true
+    runner: pytest
+    created_at: 2026-05-08T20:41:37.444Z
+    completed_at: 2026-05-08T20:41:37.444Z
+events:
+  - _ulid: 01KR4N1F6MA73FVA66VDSY16KT
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-05-08T20:39:06.708Z
+  - _ulid: 01KR4N2560G0GVRRRM3MWX8FXY
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-05-08T20:39:29.217Z
+  - _ulid: 01KR4N60Y4KY613MNP0R9RK2FM
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-05-08T20:41:35.940Z
+  - _ulid: 01KR4N61F6639G17QYGMTJ8RWX
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: python test suite
+    timestamp: 2026-05-08T20:41:36.486Z
+  - _ulid: 01KR4N621BJ2TR2Q614D4GYQYP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-05-08T20:41:37.067Z
+  - _ulid: 01KR4N62JKBZ405EDHVDYX4754
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused save progress tests
+    timestamp: 2026-05-08T20:41:37.620Z
+  - _ulid: 01KR4N6CES7E3A18FFMVS0508N
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KR4N6CA02ZQDX0E9HQP27EDR
+    timestamp: 2026-05-08T20:41:47.737Z
+  - _ulid: 01KR4N6K8XCEXMSZVMBB66HM0V
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KR4N6K43QMYNMY2F6HHQS2R9
+    timestamp: 2026-05-08T20:41:54.717Z
+  - _ulid: 01KR4N7RVN1GSKTAB96983QD4P
+    actor: codex@openai.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-05-08T20:42:33.206Z
+  - _ulid: 01KR4N7RVPWH24VEPJKPKE7ZG2
+    actor: codex@openai.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-05-08T20:42:33.206Z
+  - _ulid: 01KR4NS02N62C1NTTGV6A3JWV3
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KR4N6CA02ZQDX0E9HQP27EDR
+    timestamp: 2026-05-08T20:51:57.653Z
+  - _ulid: 01KR4NS8JS8BH28FDMKQMCJR2S
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KR4N6K43QMYNMY2F6HHQS2R9
+    timestamp: 2026-05-08T20:52:06.362Z
+  - _ulid: 01KR4NSDWRBPK2N8EDGK93B5H6
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KR4N6CA02ZQDX0E9HQP27EDR
+    timestamp: 2026-05-08T20:52:11.801Z
+  - _ulid: 01KR4NSGF088NJ7N682KDG1TAZ
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KR4N6K43QMYNMY2F6HHQS2R9
+    timestamp: 2026-05-08T20:52:14.432Z
+examined_commit: 105b7e259a41dca6b482f16c9df1d4da95ec99be
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KR4M7F3PVVBBD593P79WZPFS"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KR4N6CA02ZQDX0E9HQP27EDR
+    anchor:
+      type: code
+      commit: 105b7e259a41dca6b482f16c9df1d4da95ec99be
+      line_end: 1208
+      line_start: 1201
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KR4N6CA12RQXCTP8SHG35NM7
+        author: Jacob Chapel
+        body: "MUST-FIX: finalization status is emitted only after no-op diffusion publication has already
+          completed. This path calls sink.finalize(...), which performs validation/fsync/atomic
+          replace, and only then calls progress.finalize(). During the active validation/publication
+          phase the last reported phase remains write_tensor, so @streaming-materialization-progress
+          ac-finalization-status-visible is not satisfied for no-op diffusion saves. Move the phase
+          entry before the long finalize/publish work, while preserving the rule that
+          published/success is not reported until publication actually succeeds, and add behavioral
+          coverage that observes the phase while finalize/pre_publish_check is active."
+        created_at: 2026-05-08T20:41:47.585Z
+      - _ulid: 01KR4NRZYAWK21HYE5C8N0RDE5
+        author: "@claude"
+        body: "Fixed in 34cffde. Split SavedModelProgress.finalize() into two operations: finalize() now
+          only enters the 'finalize' phase and advances the bar (no longer marks published), and a
+          new mark_published() sets the success flag. _execute_full_model_noop now calls
+          progress.finalize() BEFORE sink.finalize, then progress.mark_published() only after
+          sink.finalize returns. This makes the active validation/fsync/atomic-replace phase visible
+          to users while preserving the rule that published is only reported on actual success.
+          Added behavioral tests (TestExitNodeFinalizationOrder) that use a spy pre_publish_check —
+          which runs inside sink.finalize between fsync and atomic replace — to assert phase ==
+          'finalize' and published is False mid-flight, and a failure variant where
+          pre_publish_check raises and published stays False."
+        created_at: 2026-05-08T20:51:57.514Z
+    kind: blocker
+    resolved_at: 2026-05-08T20:52:11.661Z
+    resolved_by: "@claude"
+  - _ulid: 01KR4N6K43QMYNMY2F6HHQS2R9
+    anchor:
+      type: code
+      commit: 105b7e259a41dca6b482f16c9df1d4da95ec99be
+      line_end: 1810
+      line_start: 1803
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KR4N6K43FFMJ4ETZHS8RKAB2
+        author: Jacob Chapel
+        body: "MUST-FIX: normal diffusion saved-model materialization has the same finalization-status
+          ordering bug. The code calls sink.finalize(...), including validation/fsync/atomic
+          replace, before progress.finalize(), so users do not get a post-write
+          finalization/publication status while that phase is active. That misses
+          @streaming-materialization-progress ac-finalization-status-visible for the normal merge
+          save path. The fix should report entering finalization before sink.finalize starts, then
+          only mark publication/success after sink.finalize returns; tests should prove this order
+          with an instrumented sink or pre_publish_check."
+        created_at: 2026-05-08T20:41:54.563Z
+      - _ulid: 01KR4NS8EAQ7PVY726YFEDH4E4
+        author: "@claude"
+        body: "Fixed in 34cffde. Same ordering fix applied to _execute_diffusion_save: progress.finalize()
+          is now called BEFORE sink.finalize (immediately after del base_state), and
+          progress.mark_published() runs only after sink.finalize returns.
+          test_diffusion_merge_save_phase_is_finalize_during_pre_publish_check observes phase ==
+          'finalize' and published == False during pre_publish_check on the merge path;
+          test_diffusion_merge_save_pre_publish_failure_keeps_published_false proves a
+          pre_publish_check rejection on the merge path leaves published False, no leftover temp
+          files, and no published artifact at the target path."
+        created_at: 2026-05-08T20:52:06.218Z
+    kind: blocker
+    resolved_at: 2026-05-08T20:52:14.291Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex@openai.com
+    role: reviewer
+    created_at: 2026-05-08T20:42:33.205Z
+created_at: 2026-05-08T20:39:06.709Z
+updated_at: 2026-05-08T20:52:14.291Z
+notes: []

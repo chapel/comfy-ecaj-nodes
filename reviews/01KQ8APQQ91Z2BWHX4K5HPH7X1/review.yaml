@@ -1,0 +1,258 @@
+_ulid: 01KQ8APQQ91Z2BWHX4K5HPH7X1
+slugs: []
+title: Review guarded manual real-Comfy memory harness cycle 2
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Validation passed with schema/reference OK; existing alignment/completeness warnings were
+      allowed with --warnings-ok.
+    name: kspec validate --warnings-ok
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T20:42:48.579Z
+    completed_at: 2026-04-27T20:42:48.579Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest tests/test_real_comfy_memory_harness.py -q passed: 29 tests passed."
+    name: targeted harness tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T20:42:56.365Z
+    completed_at: 2026-04-27T20:42:56.365Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m ruff check scripts/manual/real_comfy_memory_validation.py
+      tests/test_real_comfy_memory_harness.py passed with all checks passed.
+    name: ruff changed files
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T20:43:02.252Z
+    completed_at: 2026-04-27T20:43:02.252Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m pytest -q passed; awaiter reported exit code 0 and completion through 100
+      percent with no failures or errors.
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T20:43:08.604Z
+    completed_at: 2026-04-27T20:43:08.604Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Fake ComfyUI root plus safetensors artifact passed guards, but run_validation returned
+      errors=[import-error: attempted relative import beyond top-level package]. Separate cache-key
+      probe showed canonical __ecaj_recipe_hash__ artifacts are reported false when the harness
+      reads ecaj_recipe_hash."
+    name: manual harness Comfy-shaped root probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T20:43:15.123Z
+    completed_at: 2026-04-27T20:43:15.123Z
+events:
+  - _ulid: 01KQ8APQQ9F639YBW0BWBXPTTN
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T20:39:45.129Z
+  - _ulid: 01KQ8AQ0KNBRBJBZT0GAXDHCA8
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T20:39:54.229Z
+  - _ulid: 01KQ8AVBCE30KYH4SJPPM84QVZ
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ8AVBA034PQE3Z5075T5R9P
+    timestamp: 2026-04-27T20:42:16.334Z
+  - _ulid: 01KQ8AVVE3NXBPSDY3D0B5JJSB
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ8AVBA034PQE3Z5075T5R9P
+    timestamp: 2026-04-27T20:42:32.771Z
+  - _ulid: 01KQ8AW3Z8EBM39RBH3EDV3K5X
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ8AW3X555XV5P0C0MK6ZHHW
+    timestamp: 2026-04-27T20:42:41.512Z
+  - _ulid: 01KQ8AWAYC84BZ1ZXGD92CA931
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --warnings-ok
+    timestamp: 2026-04-27T20:42:48.652Z
+  - _ulid: 01KQ8AWJHFX4Q19PV47JS8HBTT
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted harness tests
+    timestamp: 2026-04-27T20:42:56.431Z
+  - _ulid: 01KQ8AWR9T7EXV568FAFE6CPSJ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff changed files
+    timestamp: 2026-04-27T20:43:02.330Z
+  - _ulid: 01KQ8AWYG5DTK15HMZVGC2RDDG
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-27T20:43:08.677Z
+  - _ulid: 01KQ8AX4VMEMSFB8HWRZ64C793
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: manual harness Comfy-shaped root probe
+    timestamp: 2026-04-27T20:43:15.189Z
+  - _ulid: 01KQ8AXC6N7GDXX78EWVB70HNE
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T20:43:22.710Z
+  - _ulid: 01KQ8AXC6P4Z8RJ3RX6JMA0RXH
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T20:43:22.710Z
+  - _ulid: 01KQ8BCHYFME10MQZEPNBTA00C
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ8AVBA034PQE3Z5075T5R9P
+    timestamp: 2026-04-27T20:51:40.111Z
+  - _ulid: 01KQ8BCN31VFV358JREZ2D0828
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ8AW3X555XV5P0C0MK6ZHHW
+    timestamp: 2026-04-27T20:51:43.329Z
+  - _ulid: 01KQ8BCTPKYTBA1TDPXSMNCF3Z
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ8AVBA034PQE3Z5075T5R9P
+    timestamp: 2026-04-27T20:51:49.075Z
+  - _ulid: 01KQ8BCX8SXD1QV88JHP2QCM96
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ8AW3X555XV5P0C0MK6ZHHW
+    timestamp: 2026-04-27T20:51:51.706Z
+examined_commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ8AVBA034PQE3Z5075T5R9P
+    anchor:
+      type: code
+      commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
+      line_end: 387
+      line_start: 383
+      path: scripts/manual/real_comfy_memory_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQ8AVBA1TFEXQKBN3E5KEQVB
+        author: Jacob Chapel
+        body: "MUST-FIX: the guarded intentional-run path imports  as a top-level package, but  uses
+          relative imports (), so this fails outside ComfyUI's package context. I verified with a
+          fake Comfy-shaped root plus a safetensors model: after all guards passed,  returned ,
+          leaving patch/full behavior fields empty. Impact: the manual harness cannot complete the
+          real validation path that this task adds."
+        created_at: 2026-04-27T20:42:16.257Z
+      - _ulid: 01KQ8AVVBZ3V858MMNHWT9VPX3
+        author: Jacob Chapel
+        body: 'Clarification for shell-stripped tokens above: the failing import is from nodes.exit.
+          nodes/exit.py uses relative imports such as from ..lib..., so importing it as top-level
+          nodes.exit raises attempted relative import beyond top-level package. Evidence command
+          created fake ComfyUI/comfy/model_management.py and a safetensors artifact, then
+          run_validation returned errors=["import-error: attempted relative import beyond top-level
+          package"].'
+        created_at: 2026-04-27T20:42:32.703Z
+      - _ulid: 01KQ8BCHW4J2KZ1E4H8PKW0KW5
+        author: "@claude"
+        body: "Fixed: Added _setup_package_bridge() that replicates the conftest.py _ecaj synthetic package
+          and MetaPathFinder. This is called in run_validation after _setup_import_paths(), so
+          nodes/exit.py relative imports (from ..lib.X) resolve correctly via _ecaj.nodes.exit →
+          _ecaj.lib.X. The bridge is idempotent — it checks for _ecaj in sys.modules before
+          installing. Added 3 tests: bridge idempotency, _ecaj root creation, and nodes.exit
+          importability after bridge."
+        created_at: 2026-04-27T20:51:40.036Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:51:48.996Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ8AW3X555XV5P0C0MK6ZHHW
+    anchor:
+      type: code
+      commit: 477264da59ac58c98d7cdf984dcb11e2a24f9db1
+      line_end: 438
+      line_start: 433
+      path: scripts/manual/real_comfy_memory_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQ8AW3X5N3T64ET6SBHAWQ9C
+        author: Jacob Chapel
+        body: 'MUST-FIX: the artifact cache-hit report reads metadata key ecaj_recipe_hash, but ecaj
+          artifacts produced by this project store the canonical key __ecaj_recipe_hash__. I
+          verified with a safetensors file containing __ecaj_recipe_hash__=abc123: using the harness
+          key produced expected_hash="" and check_full_model_cache returned False, while using
+          __ecaj_recipe_hash__ returned True. Impact: the intentional report can falsely say a valid
+          full artifact was not reused, so it does not report actual full artifact cache-hit
+          behavior.'
+        created_at: 2026-04-27T20:42:41.445Z
+      - _ulid: 01KQ8BCN0HNT4SZ8GS5P72W6T4
+        author: "@claude"
+        body: "Fixed: Changed meta.get('ecaj_recipe_hash', '') to meta.get('__ecaj_recipe_hash__', '')
+          matching the canonical key used in lib/persistence.py (line 338, 396, 475). Added a test
+          that creates a safetensors file with the canonical key and verifies the extraction returns
+          the expected value while the old bare key returns empty."
+        created_at: 2026-04-27T20:51:43.249Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:51:51.623Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T20:43:22.709Z
+created_at: 2026-04-27T20:39:45.129Z
+updated_at: 2026-04-27T20:51:51.623Z
+notes: []

@@ -1,0 +1,217 @@
+_ulid: 01KQCK0VVT62XZT93577ND2J2W
+slugs: []
+title: Review checkpoint save live validation harness cycle 4
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok passed; existing alignment/completeness warnings are
+      unrelated to this task.
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T12:26:27.904Z
+    completed_at: 2026-04-29T12:26:27.904Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found annotations for all seven @live-comfy-saved-output-validation ACs in
+      tests/test_checkpoint_validation_harness.py; no trait AC annotations were required by kspec
+      validate.
+    name: AC annotation scan
+    required: true
+    runner: rg
+    created_at: 2026-04-29T12:26:43.633Z
+    completed_at: 2026-04-29T12:26:43.633Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_checkpoint_validation_harness.py -q passed: 87 tests passed."
+    name: targeted pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T12:26:55.657Z
+    completed_at: 2026-04-29T12:26:55.657Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run pytest -q completed with exit code 0; all project tests passed.
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T12:27:23.916Z
+    completed_at: 2026-04-29T12:27:23.916Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run ruff check scripts/manual/real_comfy_checkpoint_validation.py
+      tests/test_checkpoint_validation_harness.py passed.
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-04-29T12:27:36.553Z
+    completed_at: 2026-04-29T12:27:36.553Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Mocked run_validation with downstream_ksampler returning node_error(KSampler) produced
+      checkpoint_loader_result.accepted=False and failure_categories['loader']='downstream', so
+      loader and downstream outcomes are not distinct.
+    name: loader/downstream distinction probe
+    required: true
+    runner: python
+    created_at: 2026-04-29T12:27:58.768Z
+    completed_at: 2026-04-29T12:27:58.768Z
+events:
+  - _ulid: 01KQCK0VVS424003HCW4RMXJSR
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T12:22:03.386Z
+  - _ulid: 01KQCK1NHA1WEK0TQBS7EBCCCE
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T12:22:29.674Z
+  - _ulid: 01KQCK7PFYE1R8A6CNMXX24X25
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQCK7PBY20TPN7VDB310EDBV
+    timestamp: 2026-04-29T12:25:47.262Z
+  - _ulid: 01KQCK8Y9GX02MNSMHFAF5A8E4
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T12:26:28.017Z
+  - _ulid: 01KQCK9DN9JB23GEA40H4AE8RT
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation scan
+    timestamp: 2026-04-29T12:26:43.753Z
+  - _ulid: 01KQCK9SDB07D9XSBB2SGFC14W
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted pytest
+    timestamp: 2026-04-29T12:26:55.787Z
+  - _ulid: 01KQCKAN1E9N4MKVMCAWQJGZXN
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-29T12:27:24.078Z
+  - _ulid: 01KQCKB1C5D5MJFFQGJJFKZXWE
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-04-29T12:27:36.710Z
+  - _ulid: 01KQCKBQ27JRAPJR9XQTKHGH1K
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: loader/downstream distinction probe
+    timestamp: 2026-04-29T12:27:58.919Z
+  - _ulid: 01KQCKC1B4YMMJ6H05K3AR2NRM
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T12:28:09.444Z
+  - _ulid: 01KQCKC1B4J9NRR77V7P6C3JZN
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T12:28:09.444Z
+  - _ulid: 01KQCM1R40E339GH1938MP93SM
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQCK7PBY20TPN7VDB310EDBV
+    timestamp: 2026-04-29T12:40:00.896Z
+  - _ulid: 01KQCM1XXJA02F0GKNSDK4FNW9
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQCK7PBY20TPN7VDB310EDBV
+    timestamp: 2026-04-29T12:40:06.834Z
+examined_commit: 099b309999b053bbad95f13eb7badb1a1b6463ba
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZNB6KR4MXEYGT4PANG25"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQCK7PBY20TPN7VDB310EDBV
+    anchor:
+      type: code
+      commit: 099b309999b053bbad95f13eb7badb1a1b6463ba
+      line_end: 899
+      line_start: 890
+      path: scripts/manual/real_comfy_checkpoint_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQCK7PBY2JT2QE85ARFSMHXS
+        author: Jacob Chapel
+        body: "MUST-FIX: loader and downstream outcomes are not distinct. When the saved-artifact downstream
+          workflow fails in KSampler, run_validation copies that same downstream failure into
+          checkpoint_loader_result and classifies the loader category from it. Evidence: a mocked
+          downstream result with error 'node_error(KSampler): KSampler inference failed' produces
+          checkpoint_loader_result.accepted=False and failure_categories['loader']='downstream',
+          even though the checkpoint loader was not the failing node. This violates the requirement
+          to record loader and downstream workflow results and distinct failure categories for
+          loader versus downstream failures."
+        created_at: 2026-04-29T12:25:47.134Z
+      - _ulid: 01KQCM1R0CM0J9SSG1XRM74V6X
+        author: "@claude"
+        body: "Fixed: loader and downstream outcomes are now distinct. Added _extract_failing_node_type() to
+          parse the failing node class from node_error(NodeType) error strings. run_validation now
+          uses this to correctly attribute failures: if CheckpointLoaderSimple fails, loader is
+          marked failed and downstream is skipped; if any other node fails (KSampler, VAEDecode,
+          etc.), the loader is marked accepted=True and only the downstream carries the failure.
+          Added 9 new tests covering all cases (KSampler failure with loader accepted, loader
+          failure with downstream skipped, VAEDecode failure with loader accepted, all-success case,
+          and the helper itself). All 1570 tests pass."
+        created_at: 2026-04-29T12:40:00.780Z
+    kind: blocker
+    resolved_at: 2026-04-29T12:40:06.715Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T12:28:09.443Z
+created_at: 2026-04-29T12:22:03.386Z
+updated_at: 2026-04-29T12:40:06.715Z
+notes: []

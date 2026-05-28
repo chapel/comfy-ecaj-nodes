@@ -1,0 +1,215 @@
+_ulid: 01KQB4XHMY1NG502E6JNZQ6RK6
+slugs: []
+title: "Plan review: Checkpoint Save Reconciliation Plan v4"
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Checked closed reviews 01KQAW7P and 01KQAWTK; current plan splits prior compound ACs, pins
+      the CLIP/VAE Entry contract, and replaces prior-branch classification with concrete
+      deliverables.
+    name: Prior blocker regression
+    required: true
+    created_at: 2026-04-28T22:57:25.035Z
+    completed_at: 2026-04-28T22:57:25.035Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Three new specs have 4, 8, and 7 ACs respectively; ACs are observable behavioral
+      contracts, while mechanics stay in task descriptions.
+    name: Spec quality
+    required: true
+    created_at: 2026-04-28T22:57:25.247Z
+    completed_at: 2026-04-28T22:57:25.247Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Inspected @full-saved-model-output, @exit-model-persistence,
+      @comfy-memory-manager-compatibility, @streaming-full-model-materialization, and
+      @manual-comfy-memory-validation; target AC IDs and parent refs resolve, and searches found no
+      duplicate new specs.
+    name: Existing spec neighborhood
+    required: true
+    created_at: 2026-04-28T22:57:25.439Z
+    completed_at: 2026-04-28T22:57:25.439Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: All 14 manual tasks include concrete what/why/required implementation/testing/covers
+      sections; spec rewrite tasks enumerate exact description, AC, status, and non-change
+      instructions.
+    name: Task standalone executability
+    required: true
+    created_at: 2026-04-28T22:57:25.655Z
+    completed_at: 2026-04-28T22:57:25.655Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Plan fixes save_model as the only save UX, adds visible optional CLIP/VAE inputs on WIDEN
+      Entry, forbids hidden globals/source guessing, and rejects output_mode/dropdown adoption.
+    name: Component sourcing and UX contract
+    required: true
+    created_at: 2026-04-28T22:57:25.887Z
+    completed_at: 2026-04-28T22:57:25.887Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Prior branch work is represented as artifact metadata/cache classification, atomic writer,
+      result sink handoff, Comfy checkpoint writer, and no-deepcopy return behavior; no
+      classify/salvage task remains.
+    name: Prior branch deliverables
+    required: true
+    created_at: 2026-04-28T22:57:26.081Z
+    completed_at: 2026-04-28T22:57:26.081Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: All 19 new ACs are claimed by one or more tasks; referenced existing AC IDs resolve;
+      preservation task is scoped to verifying existing implemented specs remain unchanged.
+    name: AC coverage mapping
+    required: true
+    created_at: 2026-04-28T22:57:26.279Z
+    completed_at: 2026-04-28T22:57:26.279Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Parsed 14 tasks from plan YAML; dependency graph is acyclic and implementation tasks
+      depend on needed spec-update and prerequisite implementation tasks.
+    name: Dependency ordering
+    required: true
+    created_at: 2026-04-28T22:57:26.478Z
+    completed_at: 2026-04-28T22:57:26.478Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec plan import --dry-run passed. kspec validate and kspec validate --alignment passed
+      with warning-only exit 6: existing orphan module specs Foundation/WIDEN Merge, existing status
+      mismatches, and existing missing descriptions."
+    name: kspec validation
+    required: true
+    created_at: 2026-04-28T22:57:26.676Z
+    completed_at: 2026-04-28T22:57:26.676Z
+events:
+  - _ulid: 01KQB4XHMYSBAH0HZ2PDE0X9E0
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-28T22:56:20.126Z
+  - _ulid: 01KQB4ZGW6GYTB3XX59C09JYKR
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-28T22:57:24.870Z
+  - _ulid: 01KQB4ZH3NBJNQY7JQ8QZ20E6E
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Prior blocker regression
+    timestamp: 2026-04-28T22:57:25.110Z
+  - _ulid: 01KQB4ZHA6WZTW35XQXC6CT56T
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Spec quality
+    timestamp: 2026-04-28T22:57:25.318Z
+  - _ulid: 01KQB4ZHGJG3R48GTYRAA9SN5V
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Existing spec neighborhood
+    timestamp: 2026-04-28T22:57:25.522Z
+  - _ulid: 01KQB4ZHQW2T9DDW38HWJZRMTX
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Task standalone executability
+    timestamp: 2026-04-28T22:57:25.756Z
+  - _ulid: 01KQB4ZHY126JBC1M2D2XDRSXP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Component sourcing and UX contract
+    timestamp: 2026-04-28T22:57:25.953Z
+  - _ulid: 01KQB4ZJ49G9XAFECHZXVWNDPM
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Prior branch deliverables
+    timestamp: 2026-04-28T22:57:26.153Z
+  - _ulid: 01KQB4ZJADV97P5HKMJN3DC7QV
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC coverage mapping
+    timestamp: 2026-04-28T22:57:26.350Z
+  - _ulid: 01KQB4ZJGKB7K12FEK3DRAPEEM
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Dependency ordering
+    timestamp: 2026-04-28T22:57:26.547Z
+  - _ulid: 01KQB4ZJQMR0PSKGA7DRP8XA3F
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validation
+    timestamp: 2026-04-28T22:57:26.772Z
+  - _ulid: 01KQB4ZJXN3XM8RJ6PW5Q0NMFT
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-28T22:57:26.965Z
+  - _ulid: 01KQB4ZJXNW7QDE5Q2B24QZ6Z2
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-28T22:57:26.965Z
+examined_commit: null
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: plan
+  content_hash: ""
+  ref: "@plan-checkpoint-save-reconciliation-plan-2"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-28T22:57:26.965Z
+created_at: 2026-04-28T22:56:20.126Z
+updated_at: 2026-04-28T22:57:26.965Z
+notes: []

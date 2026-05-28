@@ -1,0 +1,130 @@
+_ulid: 01KQBWJX3DHEAV9Z24X5K68EGJ
+slugs: []
+title: Review checkpoint-save memory compatibility spec rewrite
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok: schema/references OK; validation passed with existing
+      alignment/completeness warnings"
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T05:52:20.534Z
+    completed_at: 2026-04-29T05:52:20.534Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "TMPDIR=/home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-rewr\
+      ite-comfy-memory-compatibility-spec-01kqbtzn-review/.tmp-review pytest: 1285 passed in 9.94s.
+      Default /tmp is full, so workspace TMPDIR was used."
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T05:52:20.847Z
+    completed_at: 2026-04-29T05:52:20.847Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec item get @comfy-memory-manager-compatibility: implementation status is in_progress
+      and description plus all six ACs match the task wording"
+    name: spec wording
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T05:52:21.183Z
+    completed_at: 2026-04-29T05:52:21.183Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Reviewed task notes, kspec task review, linked @live-comfy-saved-output-validation ACs,
+      and repository search for primitive-helper language; no spec text treats primitive helper
+      tests as sufficient release evidence.
+    name: scope review
+    required: true
+    runner: manual
+    created_at: 2026-04-29T05:52:21.497Z
+    completed_at: 2026-04-29T05:52:21.497Z
+events:
+  - _ulid: 01KQBWJX3DWJY6BVJH8V182VAD
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T05:49:57.229Z
+  - _ulid: 01KQBWKK2ZCK53NYEHVWMX4T1H
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T05:50:19.743Z
+  - _ulid: 01KQBWQ94EBNFDDQVWWE8GAPQZ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T05:52:20.622Z
+  - _ulid: 01KQBWQ9E9ZZMV12YYF4RQ8VC2
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-04-29T05:52:20.938Z
+  - _ulid: 01KQBWQ9RN0ZR101KDBN3C9BXD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: spec wording
+    timestamp: 2026-04-29T05:52:21.270Z
+  - _ulid: 01KQBWQA3BC8C4B6HN9151RMD5
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: scope review
+    timestamp: 2026-04-29T05:52:21.612Z
+  - _ulid: 01KQBWQR7E0JRWW412NZF5G15C
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-29T05:52:36.078Z
+  - _ulid: 01KQBWQR7FSSS5QB3N575VCV80
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T05:52:36.079Z
+examined_commit: 26ba19e9cfd73da35baf5151989a28eb18931d2c
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN4ERV4CK4S7AEWQ5VYK"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T05:52:36.078Z
+created_at: 2026-04-29T05:49:57.229Z
+updated_at: 2026-04-29T05:52:36.078Z
+notes: []

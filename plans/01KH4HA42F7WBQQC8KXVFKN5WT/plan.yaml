@@ -1,0 +1,49 @@
+_ulid: 01KH4HA42F7WBQQC8KXVFKN5WT
+slugs:
+  - plan-widen-merge-feature-specs
+title: WIDEN Merge — Feature Specs
+status: completed
+approved_at: null
+derived_specs:
+  - "@recipe-system"
+  - "@entry-node"
+  - "@lora-node"
+  - "@compose-node"
+  - "@merge-node"
+  - "@exit-node"
+  - "@exit-recipe-analysis"
+  - "@exit-batched-eval"
+  - "@exit-patch-install"
+  - "@widen-core"
+  - "@batched-executor"
+  - "@lora-loaders"
+  - "@sdxl-loader"
+  - "@zimage-loader"
+  - "@memory-management"
+  - "@per-block-control"
+  - "@block-config-type"
+  - "@merge-block-config"
+  - "@lora-block-config"
+derived_tasks:
+  - "@implement-recipe-type-system"
+  - "@implement-entry-node"
+  - "@implement-lora-node"
+  - "@implement-compose-node"
+  - "@implement-merge-node"
+  - "@implement-exit-node"
+  - "@implement-exit-recipe-analysis"
+  - "@implement-exit-batched-evaluation"
+  - "@implement-exit-patch-installation"
+  - "@implement-widen-core-algorithm"
+  - "@implement-batched-pipeline-executor"
+  - "@implement-architecture-specific-lora-loaders"
+  - "@implement-sdxl-lora-loader"
+  - "@implement-z-image-lora-loader"
+  - "@implement-memory-management"
+  - "@implement-per-block-control"
+  - "@implement-block-config-type"
+  - "@implement-merge-per-block-t-factor"
+  - "@implement-lora-per-block-strength"
+source_path: /tmp/widen-plan.md
+created_at: 2026-02-10T19:44:03.151Z
+completed_at: null

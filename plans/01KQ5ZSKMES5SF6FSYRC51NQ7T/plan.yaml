@@ -1,0 +1,25 @@
+_ulid: 01KQ5ZSKMES5SF6FSYRC51NQ7T
+slugs:
+  - plan-full-saved-model-output-plan
+title: Full Saved Model Output Plan
+status: active
+approved_at: 2026-04-27T04:04:17.161Z
+branch: plan/plan-full-saved-model-output-plan/01kq5zsk
+derived_specs:
+  - "@full-saved-model-output"
+  - "@streaming-full-model-materialization"
+  - "@comfy-memory-manager-compatibility"
+derived_tasks:
+  - "@task-full-model-update-existing-specs"
+  - "@task-full-model-saved-artifact-reload-spike"
+  - "@task-full-model-result-sink-interface"
+  - "@task-full-model-chunked-evaluation-to-sink"
+  - "@task-full-model-incremental-writer"
+  - "@task-full-model-checkpoint-materialization"
+  - "@task-full-model-cache-metadata"
+  - "@task-full-model-exit-integration"
+  - "@task-full-model-memory-validation"
+module_ref: null
+source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/full-saved-model-output.md
+created_at: 2026-04-26T22:50:36.045Z
+completed_at: null

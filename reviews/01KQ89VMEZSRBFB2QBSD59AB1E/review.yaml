@@ -1,0 +1,221 @@
+_ulid: 01KQ89VMEZSRBFB2QBSD59AB1E
+slugs: []
+title: Review guarded manual real-Comfy memory harness
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate: schema/references OK; exited 6 only because existing
+      alignment/completeness warnings were reported"
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T20:26:52.253Z
+    completed_at: 2026-04-27T20:26:52.253Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: With all opt-ins and a ComfyUI-shaped root containing comfy/model_management.py plus
+      top-level nodes.py, the script exited 0 while report fields contained import-error for
+      nodes.exit and lib, so patch/full/artifact behavior was not validated.
+    name: manual harness Comfy-shaped root probe
+    required: true
+    runner: shell
+    created_at: 2026-04-27T20:26:52.506Z
+    completed_at: 2026-04-27T20:26:52.506Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_real_comfy_memory_harness.py -q: 24 passed"
+    name: targeted harness tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T20:26:52.763Z
+    completed_at: 2026-04-27T20:26:52.763Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest -q: completed successfully; all tests passed"
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T20:26:53.017Z
+    completed_at: 2026-04-27T20:26:53.017Z
+events:
+  - _ulid: 01KQ89VMEY5NZ6T98KYHP0BYCP
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T20:24:57.054Z
+  - _ulid: 01KQ89WG8J1T0ZS6NQ7X441T5R
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T20:25:25.522Z
+  - _ulid: 01KQ89Z513FM2ZE5371PMG53EP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T20:26:52.323Z
+  - _ulid: 01KQ89Z593JESQT694KYG8HCNG
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: manual harness Comfy-shaped root probe
+    timestamp: 2026-04-27T20:26:52.579Z
+  - _ulid: 01KQ89Z5GX43M24Z2E810RTV07
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted harness tests
+    timestamp: 2026-04-27T20:26:52.829Z
+  - _ulid: 01KQ89Z5S5ZT11Y4VY3D7CMKCB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-27T20:26:53.093Z
+  - _ulid: 01KQ89ZSPVRVXPV59P3X3V51TF
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ89ZSMM9CZQENYZ5QFY4D1J
+    timestamp: 2026-04-27T20:27:13.499Z
+  - _ulid: 01KQ89ZSYSWCPN6RX87C0YM5N0
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ89ZSWHTK0Y0H5VEV6PW9AK
+    timestamp: 2026-04-27T20:27:13.753Z
+  - _ulid: 01KQ8A02T0YFHEJJK08EK0B7P7
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T20:27:22.816Z
+  - _ulid: 01KQ8A02T0P92J2Q5HWFZ4QM4V
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T20:27:22.816Z
+  - _ulid: 01KQ8AFX2MHSK6JH9EBPSVDMEM
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ89ZSMM9CZQENYZ5QFY4D1J
+    timestamp: 2026-04-27T20:36:01.236Z
+  - _ulid: 01KQ8AG02CYWGHTYYH29RNBVP3
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ89ZSWHTK0Y0H5VEV6PW9AK
+    timestamp: 2026-04-27T20:36:04.301Z
+  - _ulid: 01KQ8AG55RJ9NRTD9D9GVE5DEF
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ89ZSMM9CZQENYZ5QFY4D1J
+    timestamp: 2026-04-27T20:36:09.528Z
+  - _ulid: 01KQ8AG7DEWV11CB1QMZCA1APN
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ89ZSWHTK0Y0H5VEV6PW9AK
+    timestamp: 2026-04-27T20:36:11.822Z
+examined_commit: afea787efe1c0a926a94ac97b416789f3af80b50
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ89ZSMM9CZQENYZ5QFY4D1J
+    anchor:
+      type: code
+      commit: afea787efe1c0a926a94ac97b416789f3af80b50
+      line_end: 386
+      line_start: 329
+      path: scripts/manual/real_comfy_memory_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQ89ZSMMZ9P5B1W3EAN23M77
+        author: Jacob Chapel
+        body: "MUST-FIX: the intentional-run path prepends the ComfyUI root to sys.path and then imports
+          this project as nodes.exit/lib.*. A real ComfyUI root has a top-level nodes.py, so the
+          Comfy module shadows this project package; my Comfy-shaped root probe produced
+          import-error values for patch-mode, full materialization, artifact reuse, and
+          returned-model behavior while main still exited 0. The harness therefore reports success
+          without validating the required behavior."
+        created_at: 2026-04-27T20:27:13.428Z
+      - _ulid: 01KQ8AFX0EQFW0MFPHVXSYQE62
+        author: "@claude"
+        body: "Fixed: Added _setup_import_paths() that inserts the project root before the ComfyUI root on
+          sys.path, preventing ComfyUI's nodes.py from shadowing the project's nodes/ package.
+          Project modules (nodes.exit, lib.*) now resolve correctly even when a real ComfyUI root
+          with nodes.py is present. Added tests verifying path ordering and idempotency."
+        created_at: 2026-04-27T20:36:01.158Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:36:09.465Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ89ZSWHTK0Y0H5VEV6PW9AK
+    anchor:
+      type: code
+      commit: afea787efe1c0a926a94ac97b416789f3af80b50
+      line_end: 397
+      line_start: 313
+      path: scripts/manual/real_comfy_memory_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQ89ZSWHT44FBCHV8PV1FXWQ
+        author: Jacob Chapel
+        body: "MUST-FIX: run_validation never uses model_path to load or execute the explicit deterministic
+          fixture/model input; it only copies the string into the report. As a result an intentional
+          run can succeed with a nonexistent model and cannot actually validate first full saved
+          model materialization, artifact cache-hit behavior, returned-model behavior, artifact
+          reuse, or whether affected weights remain resident in Exit cache state."
+        created_at: 2026-04-27T20:27:13.681Z
+      - _ulid: 01KQ8AG00C9RRWYCC74VKVA7G0
+        author: "@claude"
+        body: "Fixed: run_validation now validates model_path exists before touching sys.path (returns error
+          report if missing). When the file exists, it opens it via safetensors.safe_open to read
+          actual tensor keys/shapes/dtypes, builds a manifest for check_full_model_cache, and
+          reports real cache-hit results. A nonexistent model now produces an error rather than a
+          successful report with empty fields."
+        created_at: 2026-04-27T20:36:04.236Z
+    kind: blocker
+    resolved_at: 2026-04-27T20:36:11.751Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T20:27:22.816Z
+created_at: 2026-04-27T20:24:57.055Z
+updated_at: 2026-04-27T20:36:11.751Z
+notes: []

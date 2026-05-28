@@ -1,0 +1,237 @@
+_ulid: 01KQAWTK2ZDASX3ZWQPWKV1DEE
+slugs: []
+title: "Plan review: Checkpoint Save Reconciliation Plan v2"
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Checked all six blockers from @01KQAW7P: compound cache rejection AC split; diagnostic AC
+      split; live report AC split; component sourcing now requires visible graph source/no hidden
+      global state; existing-spec Covers line added; primitive-test coverage moved off the harness
+      task."
+    name: Prior blocker regression
+    required: true
+    created_at: 2026-04-28T20:35:33.432Z
+    completed_at: 2026-04-28T20:35:33.432Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Behavioral ACs are mostly timeless and previous compound ACs were fixed, but
+      @checkpoint-loadable-saved-model-output ac-generated-workflow-round-trip omits the required
+      bounded image-producing/SaveImage-style downstream success baseline.
+    name: Spec quality
+    required: true
+    created_at: 2026-04-28T20:35:39.234Z
+    completed_at: 2026-04-28T20:35:39.234Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: All listed ACs are claimed by tasks, but the plan lacks an AC/task coverage target for the
+      required SaveImage-style image-producing downstream validation, so release-relevant downstream
+      coverage is incomplete.
+    name: AC coverage mapping
+    required: true
+    created_at: 2026-04-28T20:35:45.105Z
+    completed_at: 2026-04-28T20:35:45.105Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Tasks include what/why/how/testing sections, explicit save_model boolean constraint,
+      relevant files/areas, and guarded live-validation requirements. The component sourcing task
+      now states visible graph sourcing/no hidden global state; remaining dependency-ordering
+      concern is recorded as a non-blocking question.
+    name: Task standalone executability
+    required: true
+    created_at: 2026-04-28T20:35:51.764Z
+    completed_at: 2026-04-28T20:35:51.764Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Task graph is acyclic and main implementation dependencies are sensible: spec alignment
+      first; terminal output/component sourcing before artifact/return behavior; harness before
+      manual live run; kspec-state reconciliation last. Recorded a non-blocking question about
+      whether prior-branch reconciliation should be split or moved earlier."
+    name: Dependency ordering
+    required: true
+    created_at: 2026-04-28T20:35:58.408Z
+    completed_at: 2026-04-28T20:35:58.408Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Plan preserves the existing save_model boolean and repeatedly rejects an output-mode
+      dropdown; checkpoint-style requirements are expressed as component/validation/artifact
+      behavior rather than a new user mode selector.
+    name: Scope discipline
+    required: true
+    created_at: 2026-04-28T20:36:06.629Z
+    completed_at: 2026-04-28T20:36:06.629Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Ran kspec validate and kspec validate --alignment. Both passed schema/reference
+      validation with existing repository warnings: orphan Foundation/WIDEN Merge modules, Full
+      Saved Model Output/Accurate RAM status mismatches, and pre-existing missing descriptions."
+    name: kspec validation
+    required: false
+    runner: kspec
+    created_at: 2026-04-28T20:36:12.761Z
+    completed_at: 2026-04-28T20:36:12.761Z
+events:
+  - _ulid: 01KQAWTK2Z08HR0AXR519N99F9
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-28T20:34:54.687Z
+  - _ulid: 01KQAWTWVCY0M957THJ97M83BK
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-28T20:35:04.684Z
+  - _ulid: 01KQAWV653EYXV1M972WS664TF
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQAWV62NX9D8MHRB6Q6MSYPN
+    timestamp: 2026-04-28T20:35:14.211Z
+  - _ulid: 01KQAWVDA2WVVSG8642JX5BQ1V
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: question
+      thread_ulid: 01KQAWVD7MFHRRABPE3GQQ9P76
+    timestamp: 2026-04-28T20:35:21.538Z
+  - _ulid: 01KQAWVS07VTP3XCM385KQC2E5
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Prior blocker regression
+    timestamp: 2026-04-28T20:35:33.511Z
+  - _ulid: 01KQAWVYNJWCRAN9D270A8Y1MC
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: Spec quality
+    timestamp: 2026-04-28T20:35:39.314Z
+  - _ulid: 01KQAWW4CZXRM4Y1A1R8PHNQ8G
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: AC coverage mapping
+    timestamp: 2026-04-28T20:35:45.183Z
+  - _ulid: 01KQAWWAX51EME5ZWTBK8QXEXG
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Task standalone executability
+    timestamp: 2026-04-28T20:35:51.846Z
+  - _ulid: 01KQAWWHCNQ74383QS8A62XBTD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Dependency ordering
+    timestamp: 2026-04-28T20:35:58.486Z
+  - _ulid: 01KQAWWSDNVH2TC9S2E5JDPCBZ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Scope discipline
+    timestamp: 2026-04-28T20:36:06.709Z
+  - _ulid: 01KQAWWZDMS8EGQ5W03835CQ5E
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validation
+    timestamp: 2026-04-28T20:36:12.852Z
+  - _ulid: 01KQAWX4V5P5XP758359P3M8RP
+    actor: Jacob Chapel
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-28T20:36:18.405Z
+  - _ulid: 01KQAWX4V53AJF8KRM04VJN0Z1
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-28T20:36:18.405Z
+examined_commit: null
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: plan
+  content_hash: ""
+  ref: "@plan-checkpoint-save-reconciliation-plan-1"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQAWV62NX9D8MHRB6Q6MSYPN
+    anchor:
+      type: structured
+      field: ac-generated-workflow-round-trip
+      ref: "@checkpoint-loadable-saved-model-output"
+      section: acceptance_criteria
+    entries:
+      - _ulid: 01KQAWV62NEBMEQM1ECF0VMRV1
+        author: Jacob Chapel
+        body: "MUST-FIX: The plan brief requires checkpoint-style saved artifacts to prove bounded
+          KSampler/VAEDecode/SaveImage-style downstream success, not only diffusion-loadability.
+          This AC requires an appropriate loader and a normal generation-and-decode workflow, but it
+          does not durably require an image-producing/SaveImage-style downstream output step.
+          Impact: a future task could satisfy the spec with loader plus sampler/decode smoke
+          coverage while still missing the terminal image-output behavior that distinguishes a
+          usable checkpoint workflow in ComfyUI. Update this AC or add a separate AC so
+          checkpoint-style round-trip validation explicitly includes a bounded image-producing
+          downstream workflow for the model kind."
+        created_at: 2026-04-28T20:35:14.134Z
+    kind: blocker
+  - _ulid: 01KQAWVD7MFHRRABPE3GQQ9P76
+    anchor:
+      type: structured
+      ref: "@task-checkpoint-save-prior-branch-reconciliation"
+      section: dependencies
+    entries:
+      - _ulid: 01KQAWVD7NBEH4GF1ESBC5JH4C
+        author: Jacob Chapel
+        body: "SHOULD-FIX: This task is where the previous branch is classified as
+          adopt/rewrite/supersede/discard, including checkpoint/materialization helpers, metadata
+          checks, incomplete-write cleanup, and cache behavior. It currently depends on the
+          artifact-format and returned-model implementation tasks, so the salvage decisions happen
+          after the tasks most likely to need that input. If reconciliation is intended as
+          implementation input rather than a post-implementation audit, move it earlier or split an
+          early inventory/decision task from later code adoption."
+        created_at: 2026-04-28T20:35:21.461Z
+    kind: question
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: Jacob Chapel
+    role: reviewer
+    created_at: 2026-04-28T20:36:18.404Z
+created_at: 2026-04-28T20:34:54.687Z
+updated_at: 2026-04-28T20:36:18.405Z
+notes: []

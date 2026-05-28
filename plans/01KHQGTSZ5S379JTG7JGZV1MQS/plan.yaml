@@ -1,0 +1,17 @@
+_ulid: 01KHQGTSZ5S379JTG7JGZV1MQS
+slugs:
+  - plan-fix-incremental-recompute-memory-estimation
+title: Fix Incremental Recompute Memory Estimation
+status: completed
+approved_at: null
+derived_specs:
+  - "@accurate-ram-preflight"
+  - "@loader-memory-measurement"
+  - "@cache-loader-metadata"
+derived_tasks:
+  - "@implement-accurate-ram-preflight-estimation"
+  - "@implement-loader-memory-measurement"
+  - "@implement-cache-loader-metadata"
+source_path: /home/chapel/Projects/comfy-ecaj-nodes/.claude/plans/fix-memory-estimation.md
+created_at: 2026-02-18T04:41:15.493Z
+completed_at: null

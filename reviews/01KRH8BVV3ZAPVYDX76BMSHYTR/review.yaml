@@ -1,0 +1,237 @@
+_ulid: 01KRH8BVV3ZAPVYDX76BMSHYTR
+slugs: []
+title: Review task-checkpoint-save-memory-validation-reporting cycle 2
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest tests/test_checkpoint_validation_harness.py
+      tests/test_real_comfy_memory_harness.py: 182 passed in 14.33s"
+    name: pytest targeted
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T18:10:58.828Z
+    completed_at: 2026-05-13T18:10:58.828Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest tests/test_checkpoint_returned_model.py: 30 passed in 1.71s"
+    name: pytest checkpoint returned model
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T18:11:00.041Z
+    completed_at: 2026-05-13T18:11:00.041Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest: 1720 passed in 39.45s"
+    name: pytest full
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T18:11:00.042Z
+    completed_at: 2026-05-13T18:11:00.042Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "ruff check scripts/manual/real_comfy_checkpoint_validation.py
+      tests/test_checkpoint_validation_harness.py: All checks passed"
+    name: ruff touched files
+    required: true
+    runner: ruff
+    created_at: 2026-05-13T18:11:01.278Z
+    completed_at: 2026-05-13T18:11:01.278Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --refs: Validation passed; schema OK; references OK"
+    name: kspec validate --refs
+    required: true
+    runner: kspec
+    created_at: 2026-05-13T18:11:08.297Z
+    completed_at: 2026-05-13T18:11:08.297Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate: schema/references/skills OK but exited 6 due existing
+      alignment/completeness warnings: 4 alignment warnings and 12 completeness warnings"
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-05-13T18:11:09.439Z
+    completed_at: 2026-05-13T18:11:09.439Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "git diff --check dev..HEAD: no whitespace errors"
+    name: git diff --check
+    required: true
+    runner: git
+    created_at: 2026-05-13T18:11:10.590Z
+    completed_at: 2026-05-13T18:11:10.590Z
+events:
+  - _ulid: 01KRH8BVV2RKDSKQ6WQFXMGN19
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-05-13T18:07:43.458Z
+  - _ulid: 01KRH8C40K04PDT08GZM4TZE80
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-05-13T18:07:51.827Z
+  - _ulid: 01KRH8GVSDA5KHY90ZEWT2Y94A
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
+    timestamp: 2026-05-13T18:10:27.245Z
+  - _ulid: 01KRH8HTZ7M5CCTHST3HDKFZ47
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest targeted
+    timestamp: 2026-05-13T18:10:59.175Z
+  - _ulid: 01KRH8HW5JBRZHZQDVZ2JFCB27
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest checkpoint returned model
+    timestamp: 2026-05-13T18:11:00.402Z
+  - _ulid: 01KRH8HWV6M4KXB7RNZZ3C11RV
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest full
+    timestamp: 2026-05-13T18:11:01.094Z
+  - _ulid: 01KRH8HXE6NXWCMZ11K27SC55S
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff touched files
+    timestamp: 2026-05-13T18:11:01.702Z
+  - _ulid: 01KRH8J471WH7XMVJSP4Z3E5R9
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --refs
+    timestamp: 2026-05-13T18:11:08.641Z
+  - _ulid: 01KRH8J5BFDPV0E2SWXTB9YPEK
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: kspec validate
+    timestamp: 2026-05-13T18:11:09.807Z
+  - _ulid: 01KRH8J6G93N0PJ30N9N3VEM8M
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: git diff --check
+    timestamp: 2026-05-13T18:11:10.985Z
+  - _ulid: 01KRH8JJV23SQYH7ASDTSA99XX
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-05-13T18:11:23.618Z
+  - _ulid: 01KRH8JJV21E1KJBRW5TVTMSRW
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-05-13T18:11:23.618Z
+  - _ulid: 01KRH9BBRFRZ6XJBCPPQPQ2GTX
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
+    timestamp: 2026-05-13T18:24:55.567Z
+  - _ulid: 01KRH9BHJ7Q3DB7Y2E6X7D5K9G
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
+    timestamp: 2026-05-13T18:25:01.511Z
+examined_commit: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KRH2YMJZ9JC1T350SFECPBST"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KRH8GVDZ93HFSFYRWTT8NHFD
+    anchor:
+      type: code
+      commit: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
+      line_end: 1802
+      line_start: 1768
+      path: scripts/manual/real_comfy_checkpoint_validation.py
+      side: head
+    entries:
+      - _ulid: 01KRH8GVDZ9HGDR9CBEPFK3BHD
+        author: Jacob Chapel
+        body: "MUST-FIX: process/log memory observations are only collected when --repeat-cache-miss-runs is
+          greater than zero. The task and @live-comfy-saved-output-validation
+          ac-report-records-process-memory-points require that when an operator supplies explicit
+          process-memory inputs for checkpoint validation, the report records per-run memory
+          observations for before execution, save-time when available, and after WIDENExit returns.
+          With --comfy-pid and --comfy-log-path supplied but the default repeat count, this branch
+          skips run_repeated_cache_miss_runs entirely, does not read procfs or parse the log, and
+          emits an empty repeat_cache_miss_run_reports plus a not-requested result. Evidence: I
+          patched collect_process_memory_observation to raise, called run_validation(...,
+          comfy_pid=12345, comfy_log_path='/tmp/comfy.log') with fake API dependencies, and no
+          exception was raised; the report contained repeat reports: 0 and result: not-requested.
+          The normal checkpoint-save run needs its own per-run memory record, or the CLI/report
+          should otherwise require repeat runs before accepting those memory inputs."
+        created_at: 2026-05-13T18:10:26.879Z
+      - _ulid: 01KRH9BBJ53XRRYMCHWRSAVPRG
+        author: "@claude"
+        body: |-
+          Fixed in d9a0c9a. The primary checkpoint save inside run_validation now records its own per-run memory observations independently of --repeat-cache-miss-runs.
+
+          Approach:
+          - Extracted begin_save_run_memory_observation and finalize_save_run_memory_observation helpers from the repeat loop so the same lifecycle (before-run snapshot, log offset capture, submit, after-save=unavailable, after-return snapshot, log segment parse) is reused for the primary save.
+          - Renamed RepeatedCacheMissRunReport to CheckpointSaveRunReport (kept the old name as an alias) since the dataclass now serves both the primary save and the repeat series.
+          - Added report.primary_checkpoint_save_run (always populated with the PRIMARY_CHECKPOINT_SAVE_IDENTITY identity). With --comfy-pid supplied: before-run and after-return procfs samples are recorded. With --comfy-log-path supplied: after-checkpoint-save and after-checkpoint-temp-model-release WIDEN labels are parsed. process_memory_after_save is always recorded as unavailable (same reason as before — submit_workflow is post-/history).
+
+          Reviewer reproducer is now covered by TestRunValidationPrimarySaveMemory::test_primary_save_invokes_procfs_when_pid_supplied_zero_repeats: patching collect_process_memory_observation to raise when run_validation is called with comfy_pid=12345 and repeats=0 now triggers the raise via the primary save's before-run sample (asserted via captured labels and report.errors).
+        created_at: 2026-05-13T18:24:55.365Z
+    kind: blocker
+    resolved_at: 2026-05-13T18:25:01.310Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-05-13T18:11:23.618Z
+created_at: 2026-05-13T18:07:43.459Z
+updated_at: 2026-05-13T18:25:01.310Z
+notes: []

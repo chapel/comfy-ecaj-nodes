@@ -1,0 +1,225 @@
+_ulid: 01KQBYGDA2Q6K8519GP18FZZM0
+slugs: []
+title: Review checkpoint-aware artifact metadata and cache classification
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_persistence.py -q: 70 passed"
+    name: pytest persistence
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T06:25:40.489Z
+    completed_at: 2026-04-29T06:25:40.489Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_full_model_streaming.py tests/test_exit_node.py -q: 93 passed"
+    name: pytest exit/full streaming
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T06:25:40.815Z
+    completed_at: 2026-04-29T06:25:40.815Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Created an ecaj full-mode safetensors with only diffusion_model.* keys and no
+      artifact_kind/base/dependency/checkpoint metadata. check_full_model_cache returned True;
+      check_checkpoint_cache returned False. nodes/exit.py still uses check_full_model_cache for
+      save_model cache reuse.
+    name: checkpoint cache integration repro
+    required: true
+    runner: python
+    created_at: 2026-04-29T06:25:41.166Z
+    completed_at: 2026-04-29T06:25:41.166Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Schema and references OK; command exited 6 because existing alignment/completeness
+      warnings remain (no trait coverage blocker reported).
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-04-29T06:25:41.551Z
+    completed_at: 2026-04-29T06:25:41.551Z
+events:
+  - _ulid: 01KQBYGDA297ZHYQ77JKD6TKPK
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T06:23:32.674Z
+  - _ulid: 01KQBYGQVBBKB3AKXEWSH7ZAJW
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T06:23:43.467Z
+  - _ulid: 01KQBYMA77AWQ560HVEV0BV8GA
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest persistence
+    timestamp: 2026-04-29T06:25:40.584Z
+  - _ulid: 01KQBYMAHFPT9F2B61YSBS7F09
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest exit/full streaming
+    timestamp: 2026-04-29T06:25:40.911Z
+  - _ulid: 01KQBYMAWJ2SYBXPQXJJ542DHP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: checkpoint cache integration repro
+    timestamp: 2026-04-29T06:25:41.266Z
+  - _ulid: 01KQBYMB8YAK4GNY8HSDGG3DYY
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T06:25:41.662Z
+  - _ulid: 01KQBYMT83DW32P7A5MBR90TXT
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQBYMT5CY8DRV3Q66ZJKQ79T
+    timestamp: 2026-04-29T06:25:56.995Z
+  - _ulid: 01KQBYMTK2M7NDBSXXSWD62PVN
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQBYMTG8YXN23NF8RW9RD5WP
+    timestamp: 2026-04-29T06:25:57.346Z
+  - _ulid: 01KQBYN4HSWSV6PR8MM3R4DSKW
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T06:26:07.545Z
+  - _ulid: 01KQBYN4HS5PXMNCF4AWB28P9V
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T06:26:07.545Z
+  - _ulid: 01KQBZHC25G4RKTV827R6PKG4W
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQBYMT5CY8DRV3Q66ZJKQ79T
+    timestamp: 2026-04-29T06:41:32.741Z
+  - _ulid: 01KQBZHEGARR6P75C6Z67WK59J
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQBYMTG8YXN23NF8RW9RD5WP
+    timestamp: 2026-04-29T06:41:35.242Z
+  - _ulid: 01KQBZHM7T6HNAFYDEZFV2F6BZ
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQBYMT5CY8DRV3Q66ZJKQ79T
+    timestamp: 2026-04-29T06:41:41.114Z
+  - _ulid: 01KQBZHPQ7BJ8MYVVM99AMEERT
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQBYMTG8YXN23NF8RW9RD5WP
+    timestamp: 2026-04-29T06:41:43.655Z
+examined_commit: b4fddba6ff319d353e122663560f4d502e28db0a
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN7CTJ03G2VS2J4KHAQB"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQBYMT5CY8DRV3Q66ZJKQ79T
+    anchor:
+      type: code
+      commit: b4fddba6ff319d353e122663560f4d502e28db0a
+      line_end: 670
+      line_start: 668
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQBYMT5C0JZWA6STZYWMFY4C
+        author: Jacob Chapel
+        body: "MUST-FIX: checkpoint-style save_model cache reuse still calls check_full_model_cache, so the
+          new checkpoint-aware metadata/classification checks are not enforced in the Exit path. I
+          confirmed this by creating an ecaj full-mode safetensors containing only diffusion_model.*
+          keys and no artifact_kind/base/dependency/checkpoint metadata: check_full_model_cache
+          returned True while check_checkpoint_cache returned False. With the current call here, a
+          matching old internal/diffusion-only artifact can still be accepted as a checkpoint
+          save_model cache hit, violating @saved-model-artifact-safety
+          ac-missing-metadata-not-reused, ac-wrong-artifact-kind-not-reused,
+          ac-internal-format-not-checkpoint-cache and @exit-model-persistence ac-3/ac-4."
+        created_at: 2026-04-29T06:25:56.908Z
+      - _ulid: 01KQBZHBZCCH13KT8BCMREJGY8
+        author: "@claude"
+        body: "Fixed: _execute_full_saved_model now detects checkpoint-style recipes via
+          _recipe_has_checkpoint_components() and calls check_checkpoint_cache instead of
+          check_full_model_cache. Non-checkpoint recipes continue to use check_full_model_cache.
+          Added tests verifying the routing."
+        created_at: 2026-04-29T06:41:32.651Z
+    kind: blocker
+    resolved_at: 2026-04-29T06:41:41.027Z
+    resolved_by: "@claude"
+  - _ulid: 01KQBYMTG8YXN23NF8RW9RD5WP
+    anchor:
+      type: code
+      commit: b4fddba6ff319d353e122663560f4d502e28db0a
+      line_end: 738
+      line_start: 735
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQBYMTG8MGK7Z99CM78G4ZM8
+        author: Jacob Chapel
+        body: "MUST-FIX: newly published save_model artifacts are still written with only
+          output_mode='full'; the required checkpoint-aware metadata from this task is never passed
+          into build_metadata. The saved header therefore omits __ecaj_artifact_kind__,
+          __ecaj_base_identity__, __ecaj_dependency_fingerprints__, and
+          __ecaj_checkpoint_components__, so artifacts produced by the actual Exit save path do not
+          satisfy @exit-model-persistence ac-6 and cannot support the checkpoint-aware cache
+          validation contract."
+        created_at: 2026-04-29T06:25:57.256Z
+      - _ulid: 01KQBZHEDFYQ8T9QT81JXB59JD
+        author: "@claude"
+        body: "Fixed: build_metadata call now passes artifact_kind='checkpoint', base_identity,
+          dependency_fingerprints, and checkpoint_components=True for checkpoint-style recipes.
+          Added test verifying all checkpoint metadata fields are included."
+        created_at: 2026-04-29T06:41:35.150Z
+    kind: blocker
+    resolved_at: 2026-04-29T06:41:43.563Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T06:26:07.545Z
+created_at: 2026-04-29T06:23:32.674Z
+updated_at: 2026-04-29T06:41:43.563Z
+notes: []

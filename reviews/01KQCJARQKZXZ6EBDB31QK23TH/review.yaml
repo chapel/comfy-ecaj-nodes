@@ -1,0 +1,221 @@
+_ulid: 01KQCJARQKZXZ6EBDB31QK23TH
+slugs: []
+title: Review checkpoint save live validation harness cycle 3
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_checkpoint_validation_harness.py -q passed: 83 tests passed."
+    name: targeted pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T12:12:36.014Z
+    completed_at: 2026-04-29T12:12:36.014Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run ruff check scripts/manual/real_comfy_checkpoint_validation.py
+      tests/test_checkpoint_validation_harness.py passed.
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-04-29T12:12:36.435Z
+    completed_at: 2026-04-29T12:12:36.435Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found annotations for all seven @live-comfy-saved-output-validation ACs in
+      tests/test_checkpoint_validation_harness.py; no trait AC annotations required.
+    name: AC annotation scan
+    required: true
+    runner: rg
+    created_at: 2026-04-29T12:12:36.869Z
+    completed_at: 2026-04-29T12:12:36.869Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok passed; repository has pre-existing alignment/completeness
+      warnings, no schema/reference failures.
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T12:12:37.264Z
+    completed_at: 2026-04-29T12:12:37.264Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "classify_failure(WorkflowResult(accepted=False, error='node_error(KSampler): OOM: cannot
+      allocate')) returned downstream, and run_validation then reported memory_mode: none for a
+      downstream OOM."
+    name: memory-mode classification probe
+    required: true
+    runner: python
+    created_at: 2026-04-29T12:12:47.427Z
+    completed_at: 2026-04-29T12:12:47.427Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv run pytest -q passed full project suite at snapshot 3f36d68b94be.
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T12:12:47.839Z
+    completed_at: 2026-04-29T12:12:47.839Z
+events:
+  - _ulid: 01KQCJARQDXZX0JRYBEAE4F9TV
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T12:09:59.277Z
+  - _ulid: 01KQCJB8SXFMKCQ6QFHPZZXN3M
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T12:10:15.742Z
+  - _ulid: 01KQCJFHX5R9APD6VK0NQB4YS8
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted pytest
+    timestamp: 2026-04-29T12:12:36.133Z
+  - _ulid: 01KQCJFJA7KV24DPWXGMRVTV9F
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-04-29T12:12:36.551Z
+  - _ulid: 01KQCJFJQNC7XJQ6KZSXQ50RAT
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation scan
+    timestamp: 2026-04-29T12:12:36.981Z
+  - _ulid: 01KQCJFK4FT504TYWTT4SSD8C4
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T12:12:37.391Z
+  - _ulid: 01KQCJFX1THTENEAP3G0TG55A2
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: memory-mode classification probe
+    timestamp: 2026-04-29T12:12:47.546Z
+  - _ulid: 01KQCJFXEGNZJNH9TMFRPMDX5W
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-29T12:12:47.952Z
+  - _ulid: 01KQCJGFK2ZGZAYW1DS0AKC44R
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQCJGFFCA7X0JR5WHZ9H5KGD
+    timestamp: 2026-04-29T12:13:06.530Z
+  - _ulid: 01KQCJGNGF3FPZRKC44B13BZGY
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T12:13:12.591Z
+  - _ulid: 01KQCJGNGFTMT1A7NZKXEKV698
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T12:13:12.591Z
+  - _ulid: 01KQCJW6KC1RZ8R0FPFK6G8NFV
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQCJGFFCA7X0JR5WHZ9H5KGD
+    timestamp: 2026-04-29T12:19:30.540Z
+  - _ulid: 01KQCJWBTGX5G7DHTJQVM855E2
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQCJGFFCA7X0JR5WHZ9H5KGD
+    timestamp: 2026-04-29T12:19:35.889Z
+examined_commit: 3f36d68b94be306650b1eae189bcdf9c2caad793
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZNB6KR4MXEYGT4PANG25"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQCJGFFCA7X0JR5WHZ9H5KGD
+    anchor:
+      type: code
+      commit: 3f36d68b94be306650b1eae189bcdf9c2caad793
+      line_end: 776
+      line_start: 767
+      path: scripts/manual/real_comfy_checkpoint_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQCJGFFCB3P8RGCETJFDV8B6
+        author: Jacob Chapel
+        body: "MUST-FIX: memory-mode failures are still masked when the runtime error also names the failing
+          workflow node. The classifier checks save/loader/downstream keywords before
+          memory/vram/oom, so node_error(KSampler): OOM: cannot allocate returns downstream and
+          node_error(WIDENExit): save_model failed: CUDA out of memory returns save. Because
+          run_validation only populates the top-level memory_mode category from per-workflow
+          classifications equal to memory_mode, these real OOM/VRAM failures are reported as
+          memory_mode none. This violates ac-memory-mode-not-changed-for-success and the task
+          requirement for distinct memory-mode failure categories. Evidence: a direct probe at this
+          snapshot returned downstream for the KSampler OOM case, and a mocked run_validation with
+          downstream_ksampler OOM produced scheduling none, save none, loader downstream, downstream
+          downstream, cache none, memory_mode none."
+        created_at: 2026-04-29T12:13:06.412Z
+      - _ulid: 01KQCJW6FJHV9XG5886DTWXTSS
+        author: "@claude"
+        body: "Fixed: Moved the memory/VRAM/OOM keyword check in classify_failure() to run BEFORE
+          workflow-stage-specific checks (save, loader, downstream, etc.). Memory exhaustion is an
+          orthogonal failure dimension — when OOM occurs inside a KSampler or during save, the root
+          cause is memory pressure, not a workflow-stage problem. The existing run_validation
+          propagation logic (scanning per-workflow categories for 'memory_mode' values) was already
+          correct but was never triggered because classify_failure never returned 'memory_mode' when
+          node-context keywords were present. Added 4 new tests covering the exact reviewer
+          scenarios: node_error(KSampler): OOM, node_error(WIDENExit): CUDA out of memory,
+          node_error(CheckpointLoaderSimple): VRAM, and a full run_validation integration test
+          proving memory_mode propagates from downstream OOM."
+        created_at: 2026-04-29T12:19:30.418Z
+    kind: blocker
+    resolved_at: 2026-04-29T12:19:35.771Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T12:13:12.590Z
+created_at: 2026-04-29T12:09:59.283Z
+updated_at: 2026-04-29T12:19:35.771Z
+notes: []

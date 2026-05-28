@@ -1,0 +1,218 @@
+_ulid: 01KQ6SFDJQ8TJPGWYH7VBY8SHF
+slugs: []
+title: Review full checkpoint materialization (cycle 2)
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run ruff check .: All checks passed"
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T06:22:13.780Z
+    completed_at: 2026-04-27T06:22:13.780Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest -q: exit code 0, all tests passed"
+    name: pytest full suite
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T06:22:22.885Z
+    completed_at: 2026-04-27T06:22:22.885Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok: schema/references OK; existing alignment/completeness
+      warnings only"
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T06:22:32.712Z
+    completed_at: 2026-04-27T06:22:32.712Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_checkpoint_materialization.py tests/test_incremental_writer.py
+      tests/test_result_sink.py -q: 54 passed; uv run pytest
+      tests/test_incremental_recompute.py::TestExitNodeIncrementalCache::test_save_model_with_parti\
+      al_recompute -q: passed"
+    name: targeted materialization tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T06:22:39.755Z
+    completed_at: 2026-04-27T06:22:39.755Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Actual CheckpointMaterializationSink rejects duplicate affected writes: RuntimeError
+      Duplicate key 'a': already written. nodes/exit.py prewrites all cached merged_state entries,
+      then writes recomputed group_results again."
+    name: partial recompute materialization probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T06:22:47.349Z
+    completed_at: 2026-04-27T06:22:47.349Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "rg -n 'AC: @streaming-full-model-materialization' tests lib nodes found annotations for
+      all three ACs; no source-scanning tests found in changed materialization tests"
+    name: AC annotation scan
+    required: false
+    runner: rg
+    created_at: 2026-04-27T06:23:05.497Z
+    completed_at: 2026-04-27T06:23:05.497Z
+events:
+  - _ulid: 01KQ6SFDJQNMCW0A77GJ3JRVGF
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T06:19:25.143Z
+  - _ulid: 01KQ6SFYFQ0A9SAAXB5KC6XN2V
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T06:19:42.455Z
+  - _ulid: 01KQ6SMJ9AC3Q7W2XFKATKV26P
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-04-27T06:22:13.803Z
+  - _ulid: 01KQ6SMV5SKNNTQE1FZ90WN4SH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest full suite
+    timestamp: 2026-04-27T06:22:22.905Z
+  - _ulid: 01KQ6SN4RZ0474SVZ0XGEX1Q0K
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T06:22:32.735Z
+  - _ulid: 01KQ6SNBMY7FXZ22FR0S7RET7V
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted materialization tests
+    timestamp: 2026-04-27T06:22:39.774Z
+  - _ulid: 01KQ6SNK2BTR2QT9S14TTFESTH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: partial recompute materialization probe
+    timestamp: 2026-04-27T06:22:47.371Z
+  - _ulid: 01KQ6SNXDV7C452NWBR87R9C8S
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ6SNXD3D0XMZ4PF8533D7J6
+    timestamp: 2026-04-27T06:22:57.979Z
+  - _ulid: 01KQ6SP4SEVCWGXKYWJKAWXWKS
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation scan
+    timestamp: 2026-04-27T06:23:05.518Z
+  - _ulid: 01KQ6SPEKJGM7X1EMG07KAZS54
+    actor: jacob.chapel@gmail.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T06:23:15.570Z
+  - _ulid: 01KQ6SPEKJQEEB9FFAKA3VVKVE
+    actor: jacob.chapel@gmail.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T06:23:15.570Z
+  - _ulid: 01KQ6TAMQQB3V2XMV6SZGYMT8C
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ6SNXD3D0XMZ4PF8533D7J6
+    timestamp: 2026-04-27T06:34:17.207Z
+  - _ulid: 01KQ6TAT5ZP6Z0D4WT5M1H4415
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ6SNXD3D0XMZ4PF8533D7J6
+    timestamp: 2026-04-27T06:34:22.783Z
+examined_commit: a6411d9558cd70c099f14a8ea61d0a1b39fb6ff9
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HR9ZR2NS2QC19B6QGS6C9"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ6SNXD3D0XMZ4PF8533D7J6
+    anchor:
+      type: code
+      commit: a6411d9558cd70c099f14a8ea61d0a1b39fb6ff9
+      line_end: 704
+      line_start: 701
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ6SNXD33CXQ0CVKNN99NWT1
+        author: Jacob Chapel
+        body: "MUST-FIX: partial incremental recompute with save_model=True writes recomputed keys to the
+          materialization artifact twice. In the partial-hit path, merged_state starts as the full
+          cached affected state, including keys that batch_groups will recompute. This loop writes
+          every cached key to CheckpointMaterializationSink before evaluation, then lines 768-773
+          write the recomputed group_results for those same keys. IncrementalSafetensorsWriter
+          rejects duplicates, so a valid partial recompute save aborts instead of publishing the
+          full checkpoint. Evidence: actual sink probe raises RuntimeError: Duplicate key 'a':
+          already written; the existing partial recompute test masks this by replacing
+          CheckpointMaterializationSink with MagicMock."
+        created_at: 2026-04-27T06:22:57.955Z
+      - _ulid: 01KQ6TAMQ4Z18824PK1C78HD7P
+        author: "@claude"
+        body: "Fixed: The pre-write loop at nodes/exit.py:701 now builds a recompute_set from batch_groups
+          values and skips any merged_state key that will be recomputed during evaluation. This
+          prevents the duplicate key write that IncrementalSafetensorsWriter correctly rejects. Also
+          replaced the MagicMock-based test with a real CheckpointMaterializationSink that exercises
+          a true partial recompute scenario: only IN-block keys are recomputed while MID/OUT keys
+          come from cache. The test reads back the resulting safetensors artifact and verifies both
+          cached and recomputed values are correct."
+        created_at: 2026-04-27T06:34:17.183Z
+    kind: blocker
+    resolved_at: 2026-04-27T06:34:22.762Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: jacob.chapel@gmail.com
+    role: reviewer
+    created_at: 2026-04-27T06:23:15.567Z
+created_at: 2026-04-27T06:19:25.143Z
+updated_at: 2026-04-27T06:34:22.762Z
+notes: []

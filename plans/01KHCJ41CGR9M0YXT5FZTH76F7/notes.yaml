@@ -1,0 +1,35 @@
+notes:
+  - _ulid: 01KHCJ41CG4R637R23MYDGSNT8
+    content: |-
+      Implementation notes:
+
+      The dependency chain for implementation:
+      1. full-model-recipe (standalone, extends lib/recipe.py)
+      2. model-input-node (depends on full-model-recipe)
+      3. full-model-loader (standalone, new lib/model_loader.py)
+      4. full-model-execution (depends on all above + existing exit-node + batched-executor)
+
+      Key architecture decisions:
+      - Disk-based loading, not ComfyUI MODEL: checkpoint files are opened
+        directly via safetensors.safe_open() at Exit time, bypassing ComfyUI's
+        model loading. This enables streaming per-batch access without full
+        model in memory. Same pattern as LoRA deferred loading.
+      - OpApplyModel is a "load" not "compute": it loads model weights into a
+        register. WIDEN's filter_delta/merge_weights handles the delta internally.
+      - Mixed recipes work naturally: LoRA and model nodes coexist in the same
+        recipe tree via chained merges.
+      - Per-block control reuses existing BlockConfig and block_classify
+        infrastructure. No new classifiers needed for SDXL/Z-Image.
+      - Only safetensors format supported. Non-safetensors checkpoints get a
+        clear error message.
+      - VAE/CLIP/text encoder keys in checkpoint files are filtered out --
+        only diffusion model weights are merged.
+      - Architecture detection runs on normalized keys (post prefix-stripping)
+        so existing _ARCH_PATTERNS work unchanged.
+
+      Reference implementations:
+      - merge-router/scripts/sdxl_merge.py: SDXL full model merge pattern
+      - merge-router/scripts/qwen_merge.py: Streaming safe_open() pattern
+      - merge-router/src/models/qwen_key_mapper.py: Key normalization pattern
+    author: "@claude"
+    created_at: 2026-02-13T22:32:07.824Z

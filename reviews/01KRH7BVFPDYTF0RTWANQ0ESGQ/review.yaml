@@ -1,0 +1,207 @@
+_ulid: 01KRH7BVFPDYTF0RTWANQ0ESGQ
+slugs: []
+title: Review task-checkpoint-save-memory-validation-reporting
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest tests/test_checkpoint_validation_harness.py
+      tests/test_real_comfy_memory_harness.py tests/test_checkpoint_returned_model.py: 210 passed in
+      5.99s"
+    name: pytest targeted
+    required: true
+    runner: pytest
+    created_at: 2026-05-13T17:52:08.855Z
+    completed_at: 2026-05-13T17:52:08.855Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --refs passed: Schema OK, References OK"
+    name: kspec validate --refs
+    required: true
+    runner: kspec
+    created_at: 2026-05-13T17:52:09.392Z
+    completed_at: 2026-05-13T17:52:09.392Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate reported Schema OK and References OK; exited 6 due to existing
+      alignment/completeness warnings (4 alignment, 13 completeness), not introduced
+      schema/reference failures
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-05-13T17:52:09.897Z
+    completed_at: 2026-05-13T17:52:09.897Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: git diff --check dev...HEAD produced no whitespace errors
+    name: git diff --check
+    required: true
+    runner: git
+    created_at: 2026-05-13T17:52:10.403Z
+    completed_at: 2026-05-13T17:52:10.403Z
+events:
+  - _ulid: 01KRH7BVFPPD6V4DW90J1G6V6X
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-05-13T17:50:14.518Z
+  - _ulid: 01KRH7C7J6MECK760SH7S8JKKE
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-05-13T17:50:26.886Z
+  - _ulid: 01KRH7FB9N7D425PS3TKY52KM9
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest targeted
+    timestamp: 2026-05-13T17:52:09.014Z
+  - _ulid: 01KRH7FBTDN4ZXHDAK57CNDPZS
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --refs
+    timestamp: 2026-05-13T17:52:09.549Z
+  - _ulid: 01KRH7FCAMMG33JK6X3PDRH86S
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-05-13T17:52:10.069Z
+  - _ulid: 01KRH7FCTANBR5TXAXQWSH3AZB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: git diff --check
+    timestamp: 2026-05-13T17:52:10.570Z
+  - _ulid: 01KRH7FTPZW7E4KWK8ZYVV28KF
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KRH7FTJ55JKH0DQTZ64W5RJ1
+    timestamp: 2026-05-13T17:52:24.799Z
+  - _ulid: 01KRH7GHMWYQYYP0TAMWTAV1RH
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-05-13T17:52:48.284Z
+  - _ulid: 01KRH7GHMWJTDZZEQN7J4MXHBR
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-05-13T17:52:48.284Z
+  - _ulid: 01KRH82DR0QJ1VM0EDBKFN8VKS
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KRH7FTJ55JKH0DQTZ64W5RJ1
+    timestamp: 2026-05-13T18:02:34.112Z
+  - _ulid: 01KRH82JTEBW51X9JK8Q73M3MM
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KRH7FTJ55JKH0DQTZ64W5RJ1
+    timestamp: 2026-05-13T18:02:39.310Z
+examined_commit: b2f58236a8afeb92408d3ba1ef69386bd7a09486
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KRH2YMJZ9JC1T350SFECPBST"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KRH7FTJ55JKH0DQTZ64W5RJ1
+    anchor:
+      type: code
+      commit: b2f58236a8afeb92408d3ba1ef69386bd7a09486
+      line_end: 1456
+      line_start: 1452
+      path: scripts/manual/real_comfy_checkpoint_validation.py
+      side: head
+    entries:
+      - _ulid: 01KRH7FTJ53CR96SZW5SJ82H1B
+        author: Jacob Chapel
+        body: "MUST-FIX: process_memory_after_save is collected only after submit_workflow returns, and
+          submit_workflow waits for /history completion before returning. That means the reported
+          after-save OS RSS/Swap/Anonymous observation is actually another post-return sample, not
+          the requested save-time checkpoint-writing lifecycle point. Evidence: an ordered trace of
+          run_repeated_cache_miss_runs records [('collect', 'before-run'), ('submit',
+          'repeat_cache_miss_000'), ('collect', 'after-save'), ('collect', 'after-return')]. Impact:
+          reports can falsely claim save-time process memory was observed and cannot distinguish
+          temporary payload residency during checkpoint serialization from memory after WIDENExit
+          returned. Record the save-time OS observation as unavailable unless it is actually sampled
+          at that lifecycle point, or derive a correctly named save-time observation from
+          instrumentation that runs at after-checkpoint-save."
+        created_at: 2026-05-13T17:52:24.645Z
+      - _ulid: 01KRH82DK7S9RJ74B12G5QSJ8W
+        author: "@claude"
+        body: >-
+          Fixed by recording process_memory_after_save as always unavailable from the external
+          harness, with a lifecycle reason that points the reader to log_after_checkpoint_save for
+          save-time evidence.
+
+
+          Root cause confirmed: submit_workflow blocks on /history and only returns once ComfyUI
+          reports the prompt completed (i.e. after WIDENExit returned), so any procfs read after
+          that call is post-return.
+
+
+          Changes:
+
+          - scripts/manual/real_comfy_checkpoint_validation.py: removed the after-save procfs read
+          in run_repeated_cache_miss_runs. Introduced unavailable_save_time_observation() helper
+          that returns an explicit unavailable ProcessMemoryObservation with label="after-save" and
+          an error explaining the /history lifecycle constraint and pointing at
+          log_after_checkpoint_save as the save-time evidence source. Updated docstrings on the
+          module header, --comfy-pid CLI help, RepeatedCacheMissRunReport, and
+          run_repeated_cache_miss_runs to reflect that the OS save-time observation cannot be
+          sampled externally and that save-time evidence comes from the WIDEN [mem] log labels.
+
+          - tests/test_checkpoint_validation_harness.py: added
+          test_after_save_os_observation_is_always_unavailable which fakes a procfs collector that
+          would return available observations for every label and asserts (a) the harness never asks
+          for the "after-save" label, (b) the only labels sampled per run are before-run and
+          after-return, and (c) each run's process_memory_after_save is unavailable with a
+          save-time/history lifecycle reason. Added
+          test_unavailable_save_time_observation_helper_records_pid_and_reason for the helper.
+          Updated test_accumulation_failure_marks_failure_category fake to reflect two collects per
+          run instead of three.
+        created_at: 2026-05-13T18:02:33.958Z
+    kind: blocker
+    resolved_at: 2026-05-13T18:02:39.153Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-05-13T17:52:48.283Z
+created_at: 2026-05-13T17:50:14.518Z
+updated_at: 2026-05-13T18:02:39.153Z
+notes: []

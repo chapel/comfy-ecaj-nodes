@@ -1,0 +1,263 @@
+_ulid: 01KQ8391G947MAS3022HKBY4WD
+slugs: []
+title: Review full model streaming artifact cache cycle 4
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest: 1233 passed in 6.90s"
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T18:34:23.996Z
+    completed_at: 2026-04-27T18:34:23.996Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_full_model_streaming.py tests/test_exit_node.py
+      tests/test_incremental_recompute.py tests/test_memory_management.py: 183 passed in 2.92s"
+    name: focused pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T18:34:24.197Z
+    completed_at: 2026-04-27T18:34:24.197Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate: schema/references/skills OK; validation produced existing
+      alignment/completeness warnings and exited 6"
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-04-27T18:34:52.702Z
+    completed_at: 2026-04-27T18:34:52.702Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found runtime AC annotations for streaming-full-model-materialization,
+      full-saved-model-output, and comfy-memory-manager-compatibility in
+      tests/test_full_model_streaming.py; source-scanning shortcut scan found no
+      implementation-source assertions in the new streaming tests
+    name: AC annotation scan
+    required: false
+    runner: rg
+    created_at: 2026-04-27T18:34:53.113Z
+    completed_at: 2026-04-27T18:34:53.113Z
+events:
+  - _ulid: 01KQ8391G9ZCB2H963AM5C9T2P
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T18:29:56.361Z
+  - _ulid: 01KQ8396PCBEARFNQ8MDBKWQG2
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T18:30:01.676Z
+  - _ulid: 01KQ83H6QKB6W0TXHCE3TBT2AQ
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ83H6P15FC9YM2Y8JNMFXAE
+    timestamp: 2026-04-27T18:34:23.859Z
+  - _ulid: 01KQ83H6XCKTMN2SR4H1SFBD8F
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-27T18:34:24.044Z
+  - _ulid: 01KQ83H73RSSCHV6F9K1CR7K0M
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-04-27T18:34:24.248Z
+  - _ulid: 01KQ83H7AE2ETKR2ZSPKRQZ37G
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ83H78XBWH34C6D39K3416F
+    timestamp: 2026-04-27T18:34:24.462Z
+  - _ulid: 01KQ83J2RCDP5R84HGXVT320MY
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ83H78XBWH34C6D39K3416F
+    timestamp: 2026-04-27T18:34:52.556Z
+  - _ulid: 01KQ83J2YFGV4DEEQP1JV7AKAB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T18:34:52.752Z
+  - _ulid: 01KQ83J34ZJN3V8EFGE9G2QTDS
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ83H6P15FC9YM2Y8JNMFXAE
+    timestamp: 2026-04-27T18:34:52.959Z
+  - _ulid: 01KQ83J3BEE6S4E9KHSAFG4ZWK
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation scan
+    timestamp: 2026-04-27T18:34:53.166Z
+  - _ulid: 01KQ83JER4YN7CX9E277BC7B3Y
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T18:35:04.836Z
+  - _ulid: 01KQ83JER4JVVS3DFE8FF8PCSN
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T18:35:04.836Z
+  - _ulid: 01KQ848A2NEB3VT06JYYH93PNX
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ83H6P15FC9YM2Y8JNMFXAE
+    timestamp: 2026-04-27T18:47:00.951Z
+  - _ulid: 01KQ848FGV7PCBQ230TAVDC5JM
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ83H6P15FC9YM2Y8JNMFXAE
+    timestamp: 2026-04-27T18:47:06.523Z
+  - _ulid: 01KQ848VZ7D5SDG1XB8TVS4F6D
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ83H78XBWH34C6D39K3416F
+    timestamp: 2026-04-27T18:47:19.271Z
+  - _ulid: 01KQ8491QMEW3RCBSX9CY0NH8X
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ83H78XBWH34C6D39K3416F
+    timestamp: 2026-04-27T18:47:25.172Z
+examined_commit: d95ffd207b96388e10cd4db492db1ac601a5dcaa
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ83H6P15FC9YM2Y8JNMFXAE
+    anchor:
+      type: code
+      commit: d95ffd207b96388e10cd4db492db1ac601a5dcaa
+      line_end: 561
+      line_start: 528
+      path: lib/gpu_ops.py
+      side: head
+    entries:
+      - _ulid: 01KQ83H6P17PWW2ZDJQCBJ12TP
+        author: Jacob Chapel
+        body: "MUST-FIX: full saved model mode still uses a dict-returning affected-tensor evaluation
+          helper.  delegates to , which accumulates every completed chunk into a  and returns that
+          dict;  only writes the returned  to  afterward. This satisfies group-before-next-group
+          ordering, but it does not satisfy the task's stricter requirement to stream newly
+          evaluated full-mode affected tensors directly to artifact materialization and not use a
+          dict-returning evaluation/result-sink path for newly evaluated full-mode tensors. A large
+          same-shape OpSignature group can still remain resident until the entire group completes."
+        created_at: 2026-04-27T18:34:23.809Z
+      - _ulid: 01KQ83J33BPRY5HWXWPVE4TTKD
+        author: Jacob Chapel
+        body: "Corrected detail after shell quoting stripped inline code: full saved model mode still uses a
+          dict-returning affected-tensor evaluation helper. evaluate_affected_group delegates to
+          _chunked_eval_impl, which accumulates every completed chunk into a dict[str, Tensor] and
+          returns that dict; nodes/exit.py then writes the returned group_results to
+          MaterializationSink afterward. This keeps an entire OpSignature group resident until the
+          group completes. The task explicitly requires streaming newly evaluated full-mode affected
+          tensors directly to artifact materialization and not using a dict-returning
+          evaluation/result-sink path for newly evaluated full-mode tensors."
+        created_at: 2026-04-27T18:34:52.907Z
+      - _ulid: 01KQ848A0NV14QK9PSYJBQRDSM
+        author: "@claude"
+        body: "Fixed: Created streaming_evaluation_to_sink() in gpu_ops.py that takes a write_fn callback
+          and hands each completed tensor to write_fn immediately after chunk evaluation — no dict
+          accumulation. Full mode in exit.py now calls
+          streaming_evaluation_to_sink(write_fn=sink.write_tensor) instead of
+          evaluate_affected_group. evaluate_affected_group still exists for backward compat but is
+          no longer called by full mode. Test updated to monkeypatch both chunked_evaluation AND
+          evaluate_affected_group to raise, verifying full mode uses only
+          streaming_evaluation_to_sink."
+        created_at: 2026-04-27T18:47:00.881Z
+    kind: blocker
+    resolved_at: 2026-04-27T18:47:06.464Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ83H78XBWH34C6D39K3416F
+    anchor:
+      type: code
+      commit: d95ffd207b96388e10cd4db492db1ac601a5dcaa
+      line_end: 277
+      line_start: 274
+      path: lib/streaming_save.py
+      side: head
+    entries:
+      - _ulid: 01KQ83H78YDEV9HHC8PAAHRHEE
+        author: Jacob Chapel
+        body: "MUST-FIX:  does not validate the tensor against the manifest's expected dtype/shape/byte
+          length before marking the key written. I verified a manifest declaring  as  can write a
+          one-element tensor, finalize successfully, load as , and then  returns . This can produce
+          a syntactically valid but incomplete/corrupt full artifact that is accepted as a later
+          cache hit, violating complete-artifact and incomplete-write-not-reused requirements.
+          Reject dtype/shape/nbytes mismatches before marking a tensor written, and extend cache
+          validation to expected tensor signatures if possible."
+        created_at: 2026-04-27T18:34:24.414Z
+      - _ulid: 01KQ83J2PR86NPZN4T7QP3C7MV
+        author: Jacob Chapel
+        body: "Corrected detail after shell quoting stripped inline code: MaterializationSink.write_tensor
+          does not validate the tensor against the manifest expected dtype, shape, or byte length
+          before marking the key written. Runtime probe: a manifest declaring x as float32[2]
+          accepted a one-element tensor, finalized successfully, loaded back as tensor([123., 0.]),
+          and check_full_model_cache with expected_keys={x} returned True. This can produce a
+          syntactically valid but incomplete or corrupt full artifact that is accepted as a later
+          cache hit, violating complete-artifact and incomplete-write-not-reused requirements."
+        created_at: 2026-04-27T18:34:52.502Z
+      - _ulid: 01KQ848VXE1TBG55ZW86QYYVS9
+        author: "@claude"
+        body: "Fixed: MaterializationSink.write_tensor now validates the tensor's dtype, shape, and byte
+          length against the manifest before writing. Stored (dtype, shape, nbytes) per tensor in
+          _tensor_specs during open(). Mismatches raise ValueError before the write, preventing
+          corrupt artifacts from being finalized and accepted as cache hits. Added 3 new tests:
+          dtype mismatch, shape mismatch, and dimension mismatch."
+        created_at: 2026-04-27T18:47:19.213Z
+    kind: blocker
+    resolved_at: 2026-04-27T18:47:25.111Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T18:35:04.835Z
+created_at: 2026-04-27T18:29:56.361Z
+updated_at: 2026-04-27T18:47:25.111Z
+notes: []

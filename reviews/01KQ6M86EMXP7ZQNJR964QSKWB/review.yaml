@@ -1,0 +1,159 @@
+_ulid: 01KQ6M86EMXP7ZQNJR964QSKWB
+slugs: []
+title: Review saved-artifact reload spike after lint fix
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest tests/test_spike_reload.py -q passed on 037927f: 13 passed."
+    name: focused pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T04:48:21.919Z
+    completed_at: 2026-04-27T04:48:21.919Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --warnings-ok passed on 037927f: schema OK, references OK, skills OK; only
+      pre-existing alignment/completeness warnings reported."
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T04:48:22.025Z
+    completed_at: 2026-04-27T04:48:22.025Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: ruff check . passed on 037927f.
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T04:48:22.131Z
+    completed_at: 2026-04-27T04:48:22.131Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: git diff --check passed on 037927f.
+    name: diff check
+    required: true
+    runner: git
+    created_at: 2026-04-27T04:48:34.428Z
+    completed_at: 2026-04-27T04:48:34.428Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: pytest -q passed on 037927f with exit code 0; all tests passed.
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T04:48:34.528Z
+    completed_at: 2026-04-27T04:48:34.528Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "PR #88 checks passed on 037927f: lint pass, test pass."
+    name: github ci
+    required: true
+    runner: gh
+    created_at: 2026-04-27T04:49:07.928Z
+    completed_at: 2026-04-27T04:49:07.928Z
+events:
+  - _ulid: 01KQ6M86EMXMKS0PD209YSFYY6
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T04:48:05.588Z
+  - _ulid: 01KQ6M8PA7APF9CM4H7C26QQKA
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T04:48:21.831Z
+  - _ulid: 01KQ6M8PD8H43K2407FEXPM1N4
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-04-27T04:48:21.928Z
+  - _ulid: 01KQ6M8PGGSY7VJF2HSFTVC503
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T04:48:22.034Z
+  - _ulid: 01KQ6M8PKWMZF80WZ8T3D5ZS3X
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-04-27T04:48:22.140Z
+  - _ulid: 01KQ6M92M770ZB7S91M5X5D9KV
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: diff check
+    timestamp: 2026-04-27T04:48:34.439Z
+  - _ulid: 01KQ6M92Q82V3PA9960MVK4T64
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-27T04:48:34.536Z
+  - _ulid: 01KQ6M9A0GPZBDAAVJG0KJBVFF
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-27T04:48:42.001Z
+  - _ulid: 01KQ6M9A0HGYMZ3QD35NA5K19R
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T04:48:42.001Z
+  - _ulid: 01KQ6MA3B2Q66SNFRA8W6DHTZN
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: github ci
+    timestamp: 2026-04-27T04:49:07.938Z
+examined_commit: 037927fada7da9d3508cc2724002b5dc8e07e2b7
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ6HR9X1MXKCW6XYR4B7V5RW"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T04:48:42.000Z
+created_at: 2026-04-27T04:48:05.588Z
+updated_at: 2026-04-27T04:49:07.928Z
+notes: []

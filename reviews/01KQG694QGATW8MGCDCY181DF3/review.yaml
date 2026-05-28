@@ -1,0 +1,144 @@
+_ulid: 01KQG694QGATW8MGCDCY181DF3
+slugs: []
+title: Review task-bf16-streaming-raw-byte-materialization
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: All checks passed.
+    name: ruff check .
+    required: true
+    runner: ruff
+    created_at: 2026-04-30T21:57:56.899Z
+    completed_at: 2026-04-30T21:57:56.899Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "PR #111 head b442af3299de8b79a1882f2de3e459e1ee1f172a: lint SUCCESS, test SUCCESS;
+      mergeable into dev."
+    name: GitHub CI
+    required: true
+    runner: gh
+    created_at: 2026-04-30T21:57:57.333Z
+    completed_at: 2026-04-30T21:57:57.333Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Full test suite exited 0; all tests passed.
+    name: pytest -q
+    required: true
+    runner: pytest
+    created_at: 2026-04-30T21:57:57.791Z
+    completed_at: 2026-04-30T21:57:57.791Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Schema/references OK; no trait coverage blockers. Existing alignment/completeness warnings
+      remain.
+    name: kspec validate --warnings-ok
+    required: true
+    runner: kspec
+    created_at: 2026-04-30T21:58:11.969Z
+    completed_at: 2026-04-30T21:58:11.969Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Verified _tensor_bytes equals contiguous uint8 view bytes for BF16 strided view;
+      stream_save_file and MaterializationSink round-trip BF16 dtype/shape/value.
+    name: BF16 byte path sanity
+    required: true
+    runner: python
+    created_at: 2026-04-30T21:58:12.417Z
+    completed_at: 2026-04-30T21:58:12.417Z
+events:
+  - _ulid: 01KQG694QF9RJP2B922QZPBDEA
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-30T21:56:20.848Z
+  - _ulid: 01KQG69YQN66JX7YF08V030VPB
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-30T21:56:47.478Z
+  - _ulid: 01KQG6C2MZZT5TSYR00ET9VXK1
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check .
+    timestamp: 2026-04-30T21:57:57.023Z
+  - _ulid: 01KQG6C32TMY8N91YGN0NCTPZ9
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: GitHub CI
+    timestamp: 2026-04-30T21:57:57.466Z
+  - _ulid: 01KQG6C3J1SG0B6AZ2H6A8KMXD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest -q
+    timestamp: 2026-04-30T21:57:57.953Z
+  - _ulid: 01KQG6CHC29CVC1CDCPM7VT4MN
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --warnings-ok
+    timestamp: 2026-04-30T21:58:12.098Z
+  - _ulid: 01KQG6CHT01TCFY4PMTE3RNG83
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: BF16 byte path sanity
+    timestamp: 2026-04-30T21:58:12.544Z
+  - _ulid: 01KQG6CZGMZWYSDKYDZV0NGGFT
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-30T21:58:26.580Z
+  - _ulid: 01KQG6CZGMSFHSG119HTDX9AMS
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-30T21:58:26.580Z
+examined_commit: b442af3299de8b79a1882f2de3e459e1ee1f172a
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQG5V0WNWWZN45DG0AMYR2ZD"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-30T21:58:26.579Z
+created_at: 2026-04-30T21:56:20.848Z
+updated_at: 2026-04-30T21:58:26.580Z
+notes: []

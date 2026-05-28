@@ -1,0 +1,292 @@
+_ulid: 01KQC130TSW8DDCSEHB0EPA98P
+slugs: []
+title: Review checkpoint-aware artifact metadata and cache classification cycle 3
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_persistence.py tests/test_exit_node.py -q: 125 passed"
+    name: focused pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T07:13:07.061Z
+    completed_at: 2026-04-29T07:13:07.061Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "rg -n 'AC: @(saved-model-artifact-safety|exit-model-persistence)' tests found annotations
+      for covered ACs; no source-scanning tests found in changed tests."
+    name: AC annotations
+    required: false
+    runner: rg
+    created_at: 2026-04-29T07:13:07.405Z
+    completed_at: 2026-04-29T07:13:07.405Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate: schema/references/skills OK; exited 6 due existing alignment/completeness
+      warnings."
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-04-29T07:13:07.764Z
+    completed_at: 2026-04-29T07:13:07.764Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest -q: 1327 passed"
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T07:13:08.117Z
+    completed_at: 2026-04-29T07:13:08.117Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Behavioral probes showed check_checkpoint_cache returns True for
+      __ecaj_checkpoint_components__='false' and for checkpoint metadata missing __ecaj_recipe__;
+      check_full_model_cache returns True for a full artifact missing artifact_kind/base/dependency
+      metadata.
+    name: metadata negative probes
+    required: true
+    runner: python
+    created_at: 2026-04-29T07:13:28.862Z
+    completed_at: 2026-04-29T07:13:28.862Z
+events:
+  - _ulid: 01KQC130TRD4TXMQ40MWHWTK2S
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T07:08:39.640Z
+  - _ulid: 01KQC13V4D3NVRVMFS6N4YV6B6
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T07:09:06.574Z
+  - _ulid: 01KQC197SKD0Z1ZMNBHG1NBSTE
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC197PHN01A5K51PAY37TVY
+    timestamp: 2026-04-29T07:12:03.379Z
+  - _ulid: 01KQC19MZSD9KSS52RJXQ11ECF
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC19MWWMVTSVFZ9NRZDHGDN
+    timestamp: 2026-04-29T07:12:16.889Z
+  - _ulid: 01KQC1AEJR3XCH36MZZ7Q7TAXX
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQC1AEFS93RHY214A9QSN687
+    timestamp: 2026-04-29T07:12:43.096Z
+  - _ulid: 01KQC1B62Q9ZXD5EWARZT0D6T9
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-04-29T07:13:07.159Z
+  - _ulid: 01KQC1B6DKF0FKDBA712RQXKD3
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotations
+    timestamp: 2026-04-29T07:13:07.507Z
+  - _ulid: 01KQC1B6RZ81ZR6924XC922JHN
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T07:13:07.871Z
+  - _ulid: 01KQC1B749SHTTBH6KR0H3C0Y7
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-29T07:13:08.233Z
+  - _ulid: 01KQC1BVBWDRMDTTY18QT5QT0B
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: metadata negative probes
+    timestamp: 2026-04-29T07:13:28.956Z
+  - _ulid: 01KQC1C348BJQW7RH33RCYVY19
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-29T07:13:36.904Z
+  - _ulid: 01KQC1C348465CD3D811776ZK3
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T07:13:36.904Z
+  - _ulid: 01KQC218SMZVT5AK6WDA4CR450
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC197PHN01A5K51PAY37TVY
+    timestamp: 2026-04-29T07:25:10.836Z
+  - _ulid: 01KQC21BAPQQZ511NN77FQ3GMZ
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC19MWWMVTSVFZ9NRZDHGDN
+    timestamp: 2026-04-29T07:25:13.430Z
+  - _ulid: 01KQC21EG9JR5C46M3YG27R5RF
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQC1AEFS93RHY214A9QSN687
+    timestamp: 2026-04-29T07:25:16.681Z
+  - _ulid: 01KQC21MY48QCQGY9GP1PQ9J7T
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC197PHN01A5K51PAY37TVY
+    timestamp: 2026-04-29T07:25:23.268Z
+  - _ulid: 01KQC21QG8GTWDMCP6E07Y12ZK
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC19MWWMVTSVFZ9NRZDHGDN
+    timestamp: 2026-04-29T07:25:25.896Z
+  - _ulid: 01KQC21SRS600K65PQVRF5RS0E
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQC1AEFS93RHY214A9QSN687
+    timestamp: 2026-04-29T07:25:28.218Z
+examined_commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN7CTJ03G2VS2J4KHAQB"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQC197PHN01A5K51PAY37TVY
+    anchor:
+      type: code
+      commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
+      line_end: 672
+      line_start: 669
+      path: lib/persistence.py
+      side: head
+    entries:
+      - _ulid: 01KQC197PHB37DAJ6J1DTS0VAP
+        author: Jacob Chapel
+        body: "MUST-FIX: checkpoint component classification only checks that __ecaj_checkpoint_components__
+          exists, not that it records a checkpoint artifact with companion components. I created a
+          safetensors file with artifact_kind=checkpoint, matching hash/base/dependencies,
+          non-internal tensor keys, and __ecaj_checkpoint_components__='false';
+          check_checkpoint_cache returned True. That accepts metadata that explicitly does not say
+          the artifact was written with checkpoint companion components, violating the checkpoint
+          classification requirement and allowing an invalid cache hit."
+        created_at: 2026-04-29T07:12:03.281Z
+      - _ulid: 01KQC218PYQM0NBWXY568Q3H09
+        author: "@claude"
+        body: "Fixed: check_checkpoint_cache now compares stored_components against \"true\" instead of just
+          checking for None. A file with __ecaj_checkpoint_components__='false' is now correctly
+          rejected as a cache miss."
+        created_at: 2026-04-29T07:25:10.750Z
+    kind: blocker
+    resolved_at: 2026-04-29T07:25:23.159Z
+    resolved_by: "@claude"
+  - _ulid: 01KQC19MWWMVTSVFZ9NRZDHGDN
+    anchor:
+      type: code
+      commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
+      line_end: 659
+      line_start: 651
+      path: lib/persistence.py
+      side: head
+    entries:
+      - _ulid: 01KQC19MWWDE7PEXFKX8BAXBT5
+        author: Jacob Chapel
+        body: "MUST-FIX: checkpoint cache validation does not require the serialized recipe metadata
+          (__ecaj_recipe__) before accepting a hit. I created a safetensors file with matching
+          __ecaj_recipe_hash__, artifact_kind=checkpoint, checkpoint_components=true, matching
+          base/dependencies, and non-internal tensor keys, but no __ecaj_recipe__;
+          check_checkpoint_cache returned True. The task requires saved artifacts to include
+          __ecaj_recipe__, and @saved-model-artifact-safety ac-missing-metadata-not-reused says
+          files missing required saved-model metadata must not be reused."
+        created_at: 2026-04-29T07:12:16.796Z
+      - _ulid: 01KQC21B7CAWKB44PQMJCH91CT
+        author: "@claude"
+        body: "Fixed: check_checkpoint_cache now requires __ecaj_recipe__ to be present in metadata before
+          proceeding with any other checks. Files missing __ecaj_recipe__ are immediately rejected
+          as cache misses."
+        created_at: 2026-04-29T07:25:13.324Z
+    kind: blocker
+    resolved_at: 2026-04-29T07:25:25.790Z
+    resolved_by: "@claude"
+  - _ulid: 01KQC1AEFS93RHY214A9QSN687
+    anchor:
+      type: code
+      commit: 0fa21eb64f1eac52047ca6f2549f2ffcf53f48c6
+      line_end: 792
+      line_start: 784
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQC1AEFS05RERYDD1KYA83M5
+        author: Jacob Chapel
+        body: "MUST-FIX: the non-checkpoint save path still omits the required artifact classification and
+          cache identity metadata. For non-checkpoint RecipeMerge saves these arguments are passed
+          as None, and the RecipeBase/no-op save path calls build_metadata without them at all;
+          check_full_model_cache also accepts legacy full artifacts that lack
+          __ecaj_artifact_kind__, __ecaj_base_identity__, and __ecaj_dependency_fingerprints__ when
+          the hash and manifest match. That violates @exit-model-persistence ac-6/ac-4 and the task
+          requirement that saved artifacts include requested artifact kind, base identity, and
+          dependency fingerprints, while preserving manifest/header validation rather than replacing
+          it."
+        created_at: 2026-04-29T07:12:43.001Z
+      - _ulid: 01KQC21ECWVYTTKBXNTJ6WE4J3
+        author: "@claude"
+        body: "Fixed: All save paths (checkpoint, non-checkpoint RecipeMerge, and RecipeBase/no-op) now
+          write artifact_kind, base_identity, and dependency_fingerprints metadata. Non-checkpoint
+          paths use artifact_kind='diffusion'. check_full_model_cache now accepts
+          expected_artifact_kind, expected_base_identity, and expected_dependency_fingerprints
+          keyword params and validates them when provided. Both RecipeMerge non-checkpoint and
+          RecipeBase call sites pass these expected values."
+        created_at: 2026-04-29T07:25:16.571Z
+    kind: blocker
+    resolved_at: 2026-04-29T07:25:28.110Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T07:13:36.903Z
+created_at: 2026-04-29T07:08:39.641Z
+updated_at: 2026-04-29T07:25:28.110Z
+notes: []

@@ -1,0 +1,329 @@
+_ulid: 01KQ822FQK09Q8WEEM2TND599M
+slugs: []
+title: Review full model streaming artifact cache cycle 3
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found runtime AC annotations for @streaming-full-model-materialization,
+      @full-saved-model-output, and @comfy-memory-manager-compatibility in
+      tests/test_full_model_streaming.py.
+    name: AC annotation grep
+    required: true
+    runner: rg
+    created_at: 2026-04-27T18:12:30.999Z
+    completed_at: 2026-04-27T18:12:30.999Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest passed: 1227 passed in 7.27s."
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T18:12:31.200Z
+    completed_at: 2026-04-27T18:12:31.200Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok passed; schema/references OK, existing alignment/completeness
+      warnings reported.
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T18:12:31.402Z
+    completed_at: 2026-04-27T18:12:31.402Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: No inspect.getsource/AST/source-grep style regression tests found in changed test files.
+    name: source-scanning test grep
+    required: true
+    runner: rg
+    created_at: 2026-04-27T18:12:31.609Z
+    completed_at: 2026-04-27T18:12:31.609Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "pytest tests/test_full_model_streaming.py -q passed: 33 tests passed."
+    name: streaming tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T18:12:31.824Z
+    completed_at: 2026-04-27T18:12:31.824Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Probe pre-populated _incremental_cache, ran RecipeBase full mode with enable_cache=False,
+      and cache remained: 1 ['sentinel']."
+    name: no-op enable_cache false probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T18:12:57.786Z
+    completed_at: 2026-04-27T18:12:57.786Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Probe created a full-mode safetensors artifact with matching hash but only one tensor;
+      check_full_model_cache returned True, so incomplete full artifacts can be reused.
+    name: incomplete artifact cache probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T18:12:57.989Z
+    completed_at: 2026-04-27T18:12:57.989Z
+events:
+  - _ulid: 01KQ822FQKTDX179J2MGPCR9NQ
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T18:08:52.979Z
+  - _ulid: 01KQ823A6AMMNKW283045XGWQ8
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T18:09:20.074Z
+  - _ulid: 01KQ8294P7TAHG298D8C1WPRGB
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation grep
+    timestamp: 2026-04-27T18:12:31.047Z
+  - _ulid: 01KQ8294W9FCVV2SJZT7MM1Z5X
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-27T18:12:31.241Z
+  - _ulid: 01KQ82952PMVZ1RPW256JMWMM6
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-27T18:12:31.447Z
+  - _ulid: 01KQ829598MDH23515CHQ6GESP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: source-scanning test grep
+    timestamp: 2026-04-27T18:12:31.656Z
+  - _ulid: 01KQ8295FX8EPTHTZS44QT7VW2
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: streaming tests
+    timestamp: 2026-04-27T18:12:31.870Z
+  - _ulid: 01KQ829YBFVQPKQM5QEH37GMCS
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ829Y9WRGZWQJ4DAQW403S1
+    timestamp: 2026-04-27T18:12:57.327Z
+  - _ulid: 01KQ829YHRQMZ0QDB0S8QJW31H
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ829YGB4DX060SM3TA9RE86
+    timestamp: 2026-04-27T18:12:57.528Z
+  - _ulid: 01KQ829YMTEJ8VNX3BFJ2C0G44
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ829YGD1PNRYKT974M91GM1
+    timestamp: 2026-04-27T18:12:57.626Z
+  - _ulid: 01KQ829YVBB6MWJEBSXBBJAWCZ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: no-op enable_cache false probe
+    timestamp: 2026-04-27T18:12:57.835Z
+  - _ulid: 01KQ829Z1H66Z9MJ2AH9P75V2S
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: incomplete artifact cache probe
+    timestamp: 2026-04-27T18:12:58.034Z
+  - _ulid: 01KQ82AA0M79JYFNT9GKDK016X
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T18:13:09.268Z
+  - _ulid: 01KQ82AA0MR2NQ6ECQQ9V7H1BK
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T18:13:09.268Z
+  - _ulid: 01KQ833FQQ8YBC87RJR7WWQ5RV
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ829Y9WRGZWQJ4DAQW403S1
+    timestamp: 2026-04-27T18:26:54.327Z
+  - _ulid: 01KQ833JRCDD3T2VRCVJR29JZT
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ829YGB4DX060SM3TA9RE86
+    timestamp: 2026-04-27T18:26:57.421Z
+  - _ulid: 01KQ833P1GF9QYZ34YMH7NNS2C
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ829YGD1PNRYKT974M91GM1
+    timestamp: 2026-04-27T18:27:00.784Z
+  - _ulid: 01KQ833VVA670TR5EXZWQ0G6GH
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ829Y9WRGZWQJ4DAQW403S1
+    timestamp: 2026-04-27T18:27:06.730Z
+  - _ulid: 01KQ833XXQXC4RVHRMM64K69HD
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ829YGB4DX060SM3TA9RE86
+    timestamp: 2026-04-27T18:27:08.855Z
+  - _ulid: 01KQ8340BKRADQRBEZ0RJ54HGH
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ829YGD1PNRYKT974M91GM1
+    timestamp: 2026-04-27T18:27:11.347Z
+examined_commit: 2564ca6e52b64b52693022dda5479761d0c66018
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ829Y9WRGZWQJ4DAQW403S1
+    anchor:
+      type: code
+      commit: 2564ca6e52b64b52693022dda5479761d0c66018
+      line_end: 337
+      line_start: 331
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ829Y9XYKAHD5V8SGNW4XV2
+        author: Jacob Chapel
+        body: "MUST-FIX: full saved model mode still materializes the entire artifact into process-resident
+          patch tensors instead of returning a MODEL loaded through Comfy's model loading lifecycle.
+          _load_model_from_artifact reads every safetensors key into full_state, then
+          install_merged_patches stores those tensors as set patches on a clone. The submitted test
+          at tests/test_full_model_streaming.py:727-783 confirms every key is retained in
+          result.patches. Impact: the returned MODEL is not actually Comfy-owned loaded-artifact
+          memory, and all full-model weights remain resident solely because Exit returned, violating
+          ac-return-loaded-model and ac-comfy-owns-returned-model-memory."
+        created_at: 2026-04-27T18:12:57.277Z
+      - _ulid: 01KQ833FP9B1G4TCP7PG1F7J8V
+        author: "@claude"
+        body: "Fixed: _load_model_from_artifact no longer installs artifact weights as set patches. Instead,
+          it deep-copies the model and loads artifact weights directly into the model's own state
+          dict via _state_dict update. The returned model has zero set patches — all weights are
+          model-owned (Comfy-managed memory). Added TestLoadedModelNoResidentPatches with two tests
+          verifying no patches and original model independence. Updated test_cache_hit_skips_gpu and
+          test_artifact_load_returns_full_model_weights to verify model_state_dict() values instead
+          of patches."
+        created_at: 2026-04-27T18:26:54.280Z
+    kind: blocker
+    resolved_at: 2026-04-27T18:27:06.682Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ829YGB4DX060SM3TA9RE86
+    anchor:
+      type: code
+      commit: 2564ca6e52b64b52693022dda5479761d0c66018
+      line_end: 556
+      line_start: 526
+      path: nodes/exit.py
+      side: head
+    entries:
+      - _ulid: 01KQ829YGBQDNPK6E4MFVW52WZ
+        author: Jacob Chapel
+        body: "MUST-FIX: RecipeBase full saved model mode ignores enable_cache=False for the in-memory
+          incremental cache. This path skips the cache lookup when enable_cache is false, but never
+          clears _incremental_cache before returning. I verified with a probe that a pre-populated
+          sentinel cache entry remains after RecipeBase full mode with enable_cache=False. Impact:
+          cache-disabled full-mode no-op workflows leave process-resident tensor cache payloads
+          behind, violating the task requirement that enable_cache=False evicts in-memory cache
+          entries."
+        created_at: 2026-04-27T18:12:57.484Z
+      - _ulid: 01KQ833JPTT1AGV5F1709R8FCW
+        author: "@claude"
+        body: "Fixed: _execute_full_model_noop now calls _incremental_cache.clear() when enable_cache=False,
+          before the materialization path. Added TestNoopEnableCacheFalseEvicts test that
+          pre-populates cache with a sentinel, runs RecipeBase full mode with enable_cache=False,
+          and verifies cache is empty after."
+        created_at: 2026-04-27T18:26:57.369Z
+    kind: blocker
+    resolved_at: 2026-04-27T18:27:08.806Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ829YGD1PNRYKT974M91GM1
+    anchor:
+      type: code
+      commit: 2564ca6e52b64b52693022dda5479761d0c66018
+      line_end: 460
+      line_start: 448
+      path: lib/persistence.py
+      side: head
+    entries:
+      - _ulid: 01KQ829YGDMJ8MBD5AWNFHK1NE
+        author: Jacob Chapel
+        body: "MUST-FIX: full-model cache validation does not prove the artifact is complete. After checking
+          hash/mode and parseable affected-key metadata, this returns True without comparing the
+          safetensors keys to the current model manifest or even to the affected-key list. I
+          verified with a probe that a matching-hash full-mode artifact containing only
+          {'only_one_key'} is accepted. Impact: incomplete or hand-written partial artifacts can
+          become cache hits, violating ac-incomplete-write-not-reused and ac-complete-artifact."
+        created_at: 2026-04-27T18:12:57.486Z
+      - _ulid: 01KQ833NZZGPVRPPQEB733D7XK
+        author: "@claude"
+        body: "Fixed: check_full_model_cache now accepts an optional expected_keys parameter. When provided,
+          the artifact's actual safetensors keys must exactly match the expected set — incomplete or
+          extra-key artifacts are rejected. Both call sites in exit.py now pass
+          expected_keys=set(base_state.keys()). Added TestIncompleteArtifactRejected with three
+          tests: incomplete artifact rejected, complete artifact accepted, and extra-keys artifact
+          rejected."
+        created_at: 2026-04-27T18:27:00.735Z
+    kind: blocker
+    resolved_at: 2026-04-27T18:27:11.302Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T18:13:09.268Z
+created_at: 2026-04-27T18:08:52.979Z
+updated_at: 2026-04-27T18:27:11.302Z
+notes: []

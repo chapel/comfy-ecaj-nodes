@@ -1,0 +1,21 @@
+_ulid: 01KHDHEGJP4RMVVFZTC0GY96B5
+slugs:
+  - plan-qwen-and-flux-2-klein-architecture-support
+title: Qwen and Flux 2 Klein Architecture Support
+status: completed
+approved_at: null
+derived_specs:
+  - "@qwen-support"
+  - "@flux-klein-support"
+derived_tasks:
+  - "@qwen-detect-classify"
+  - "@qwen-lora-loader"
+  - "@qwen-model-loader"
+  - "@qwen-block-config"
+  - "@flux-detect-classify"
+  - "@flux-lora-loader"
+  - "@flux-model-loader"
+  - "@flux-block-config"
+source_path: /home/chapel/.claude/plans/functional-yawning-clover.md
+created_at: 2026-02-14T07:39:36.918Z
+completed_at: null

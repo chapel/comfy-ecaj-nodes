@@ -1,0 +1,9 @@
+notes:
+  - _ulid: 01KH4H1VQ7PHVBZ7BHBJMKYDJE
+    content: |-
+      Implementation notes:
+
+      Foundation specs are project-level infrastructure. They should be completed
+      before WIDEN feature work begins, as they establish patterns all nodes follow.
+    author: "@claude"
+    created_at: 2026-02-10T19:39:32.455Z

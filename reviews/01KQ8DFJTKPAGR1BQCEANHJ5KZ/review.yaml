@@ -1,0 +1,230 @@
+_ulid: 01KQ8DFJTKPAGR1BQCEANHJ5KZ
+slugs: []
+title: Review guarded manual real-Comfy memory harness cycle 5
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Validation passed with existing alignment/completeness warnings under --warnings-ok.
+    name: kspec validate --warnings-ok
+    required: true
+    runner: kspec
+    created_at: 2026-04-27T21:32:49.972Z
+    completed_at: 2026-04-27T21:32:49.972Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found tests annotated for ac-explicit-opt-in-required,
+      ac-refuses-before-comfy-work-without-opt-in, and ac-report-identifies-memory-mode.
+    name: AC annotations
+    required: true
+    runner: rg
+    created_at: 2026-04-27T21:32:50.171Z
+    completed_at: 2026-04-27T21:32:50.171Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m ruff check scripts/manual/real_comfy_memory_validation.py
+      tests/test_real_comfy_memory_harness.py: All checks passed."
+    name: ruff changed files
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T21:32:50.315Z
+    completed_at: 2026-04-27T21:32:50.315Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest tests/test_real_comfy_memory_harness.py -q: 36 passed."
+    name: targeted harness tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T21:32:50.476Z
+    completed_at: 2026-04-27T21:32:50.476Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Standalone subprocess with fake ComfyUI root, opt-in env/flag, fixture model, and report
+      path exited 0 and wrote the report.
+    name: Comfy-shaped intentional-run probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T21:32:50.627Z
+    completed_at: 2026-04-27T21:32:50.627Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: With an empty explicit --comfy-root and a different fake comfy package later on sys.path,
+      run_validation imported the ambient package and reported memory_mode=RANDOM_COMFY_WAS_USED
+      with no errors.
+    name: ambient Comfy root isolation probe
+    required: true
+    runner: python
+    created_at: 2026-04-27T21:32:50.778Z
+    completed_at: 2026-04-27T21:32:50.778Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest -q exited 1: 1319 passed, 18 failed. Failures were RAM preflight
+      RuntimeError in tests/test_incremental_recompute.py and tests/test_memory_management.py with
+      available RAM below estimates."
+    name: full pytest
+    required: false
+    runner: pytest
+    created_at: 2026-04-27T21:32:50.967Z
+    completed_at: 2026-04-27T21:32:50.967Z
+events:
+  - _ulid: 01KQ8DFJTKD0CKPB9AKXY6TQX4
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T21:28:16.467Z
+  - _ulid: 01KQ8DFS1FNZNZG8Z3W76X5FCA
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T21:28:22.831Z
+  - _ulid: 01KQ8DQXT6K71D81YC4ED5SJMY
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ8DQXQW34NE0A43KS0GVB0N
+    timestamp: 2026-04-27T21:32:49.862Z
+  - _ulid: 01KQ8DQY0FYS1QWF3SS8VPZSTY
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --warnings-ok
+    timestamp: 2026-04-27T21:32:50.063Z
+  - _ulid: 01KQ8DQY5FJ2F3XCCJ0NA50V4K
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotations
+    timestamp: 2026-04-27T21:32:50.223Z
+  - _ulid: 01KQ8DQYA3RZV30B2C99R8F0V5
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff changed files
+    timestamp: 2026-04-27T21:32:50.371Z
+  - _ulid: 01KQ8DQYF1S4BQQJN6JN4PPNQD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted harness tests
+    timestamp: 2026-04-27T21:32:50.529Z
+  - _ulid: 01KQ8DQYKRPENFWSS4YAQY9P8D
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: Comfy-shaped intentional-run probe
+    timestamp: 2026-04-27T21:32:50.680Z
+  - _ulid: 01KQ8DQYRRMD9YZKZ53JZYV0KQ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: ambient Comfy root isolation probe
+    timestamp: 2026-04-27T21:32:50.841Z
+  - _ulid: 01KQ8DQYYD5P013KQGY4EKJ5E9
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: full pytest
+    timestamp: 2026-04-27T21:32:51.021Z
+  - _ulid: 01KQ8DQZ2W8A4MBGSGAV3TNSNE
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T21:32:51.164Z
+  - _ulid: 01KQ8DQZ2WRBJJQM0AV6ACVBWZ
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T21:32:51.164Z
+  - _ulid: 01KQ8E39K5FV0DGX6VZT24FN20
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ8DQXQW34NE0A43KS0GVB0N
+    timestamp: 2026-04-27T21:39:02.373Z
+  - _ulid: 01KQ8E3FZ08VM0MDMN165RVBD6
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ8DQXQW34NE0A43KS0GVB0N
+    timestamp: 2026-04-27T21:39:08.897Z
+examined_commit: 5bf8bf9f735bf30616ff18fa6040814933affa03
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3MPV8MZAP7HKCFJWHQ6"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ8DQXQW34NE0A43KS0GVB0N
+    anchor:
+      type: code
+      commit: 5bf8bf9f735bf30616ff18fa6040814933affa03
+      line_end: 523
+      line_start: 512
+      path: scripts/manual/real_comfy_memory_validation.py
+      side: head
+    entries:
+      - _ulid: 01KQ8DQXQXMVDWHQW1MYNJBS11
+        author: Jacob Chapel
+        body: "MUST-FIX: run_validation does not verify that --comfy-root actually contains or resolves the
+          imported ComfyUI package before mutating sys.path and importing comfy. Evidence: with a
+          valid safetensors model, an empty explicit root, and a different fake comfy package later
+          on sys.path, run_validation reported memory_mode=RANDOM_COMFY_WAS_USED, had no errors, and
+          executed the patch/cache probes. That violates the task requirement that the harness never
+          auto-discover a random ComfyUI install; a typo in --comfy-root can validate the wrong
+          installation."
+        created_at: 2026-04-27T21:32:49.789Z
+      - _ulid: 01KQ8E39GTHWC6KXKN77S30VG7
+        author: "@claude"
+        body: "Fixed: run_validation now validates --comfy-root contains comfy/__init__.py before mutating
+          sys.path. A secondary defense-in-depth check uses importlib.util.find_spec to confirm the
+          resolved comfy package is under the specified root, not an ambient installation. Added 3
+          tests covering empty root, root without comfy/, and ambient comfy isolation."
+        created_at: 2026-04-27T21:39:02.297Z
+    kind: blocker
+    resolved_at: 2026-04-27T21:39:08.825Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T21:32:51.164Z
+created_at: 2026-04-27T21:28:16.467Z
+updated_at: 2026-04-27T21:39:08.825Z
+notes: []

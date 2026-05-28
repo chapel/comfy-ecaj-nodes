@@ -1,0 +1,125 @@
+_ulid: 01KQCDWD8B7HF3XBQMYK3JE6V2
+slugs: []
+title: Review checkpoint save artifact format cycle 6
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: pytest -q tests/test_checkpoint_save_format.py tests/test_checkpoint_components.py
+      tests/test_exit_node.py completed at 100%
+    name: targeted checkpoint tests
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T10:55:45.036Z
+    completed_at: 2026-04-29T10:55:45.036Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: pytest -q completed at 100%
+    name: pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T10:55:45.454Z
+    completed_at: 2026-04-29T10:55:45.454Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: ruff check . -> All checks passed
+    name: ruff
+    required: true
+    runner: ruff
+    created_at: 2026-04-29T10:55:45.843Z
+    completed_at: 2026-04-29T10:55:45.843Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok passed; warnings were existing alignment/completeness warnings
+    name: kspec validate
+    required: true
+    runner: kspec
+    created_at: 2026-04-29T10:55:46.255Z
+    completed_at: 2026-04-29T10:55:46.255Z
+events:
+  - _ulid: 01KQCDWD8AP15KB25RW15MJ1SS
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T10:52:14.474Z
+  - _ulid: 01KQCDWTRQAM678DNWYRAEYPKB
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T10:52:28.311Z
+  - _ulid: 01KQCE2TZVNJYWWK8PPYTBR4AF
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted checkpoint tests
+    timestamp: 2026-04-29T10:55:45.147Z
+  - _ulid: 01KQCE2VCTXEWA9RZBCWZ9KTDY
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-04-29T10:55:45.562Z
+  - _ulid: 01KQCE2VSEW6D47XXKVTC1SG9Z
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff
+    timestamp: 2026-04-29T10:55:45.966Z
+  - _ulid: 01KQCE2W6CXT5QM4R9FT8SBK2N
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate
+    timestamp: 2026-04-29T10:55:46.380Z
+  - _ulid: 01KQCE3ANTKDGN20Y74YMW3FN2
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-29T10:56:01.210Z
+  - _ulid: 01KQCE3ANT0M0BGG4JYHSQZKCX
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T10:56:01.210Z
+examined_commit: 11f3ee7902ee6d9969f6e092dcd9a2bbc75fbcfe
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN9MR5P6F1ECW0G30GEZ"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-29T10:56:01.210Z
+created_at: 2026-04-29T10:52:14.475Z
+updated_at: 2026-04-29T10:56:01.210Z
+notes: []

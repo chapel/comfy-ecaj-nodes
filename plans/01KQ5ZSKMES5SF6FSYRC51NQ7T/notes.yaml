@@ -1,0 +1,85 @@
+notes:
+  - _ulid: 01KQ63B11ST3FJNH2VY69FQJ18
+    content: Harden specs/tasks for Dynamic VRAM investigation and plan best practices
+    author: Jacob Chapel
+    created_at: 2026-04-26T23:52:32.569Z
+  - _ulid: 01KQ63RYS42WGVN3WMPR1F67EW
+    content: "Address plan-reviewer findings: parent hierarchy, behavioral specs, standalone spec-update
+      tasks, cache ordering"
+    author: Jacob Chapel
+    created_at: 2026-04-27T00:00:08.996Z
+  - _ulid: 01KQ6408FMZV19CNFSRE51G5R2
+    content: "Address remaining reviewer findings: attach output specs under @exit-node and make memory
+      validation ACs pass/fail"
+    author: Jacob Chapel
+    created_at: 2026-04-27T00:04:08.309Z
+  - _ulid: 01KQ6AENV0D89753S6NW42DRJG
+    content: Fold saved-model reload PoC validation into full saved model plan as early gated spike
+    author: Jacob Chapel
+    created_at: 2026-04-27T01:56:52.193Z
+  - _ulid: 01KQ6AER7586GP9PZEPGQDS1G0
+    content: Standalone @plan-saved-model-reload-proof-of-concept-plan was rejected for now and its
+      useful validation was folded into this plan as task-full-model-saved-artifact-reload-spike.
+      The spike should gate later materialization work.
+    author: Jacob Chapel
+    created_at: 2026-04-27T01:56:54.629Z
+  - _ulid: 01KQ6ANVYJWAQ4CAJMA8T87SRX
+    content: "Address reviewer gate findings: spec reconciliation and reload spike now gate
+      materialization work"
+    author: Jacob Chapel
+    created_at: 2026-04-27T02:00:47.826Z
+  - _ulid: 01KQ6ARGE580WWKWZPMWEZ5MJV
+    content: "Address reviewer finding: spec reconciliation task no longer claims final product AC coverage"
+    author: Jacob Chapel
+    created_at: 2026-04-27T02:02:14.342Z
+  - _ulid: 01KQ6HRA2JM4ET31DYJNTZGS2M
+    content: >-
+      This option is the strongest candidate for actually using ComfyUI's Dynamic
+
+      VRAM system because the merged result becomes a normal saved diffusion artifact
+
+      loaded through Comfy's own model loading path. Dynamic VRAM is implemented by
+
+      Comfy/aimdo around Comfy-managed model weights and ModelPatcher lifecycle; it is
+
+      not a general-purpose allocator for arbitrary tensors held by custom nodes.
+
+
+      The tradeoff is disk usage and an extra artifact load path. The plan therefore
+
+      keeps the full saved model path explicit instead of replacing the current patch
+
+      output by default. The first implementation gate is the saved-artifact reload spike: before
+      any
+
+      bounded materialization refactor begins, the project must prove that a WIDEN
+
+      saved artifact can be loaded as a usable Comfy MODEL with parity against the
+
+      current in-memory patch output. After that gate passes, the proof point for
+
+      promotion is measured behavior under a current ComfyUI build with Dynamic VRAM
+
+      enabled: the returned model should no longer depend on the original in-memory
+
+      set patch payload, and any new load-time or write-time peak should be visible in
+
+      the validation output.
+    author: Jacob Chapel
+    created_at: 2026-04-27T04:04:27.858Z
+  - _ulid: 01KQCQD6DZ2QTMWY9QPGGWWHBX
+    content: Primitive helper validation was superseded by checkpoint-style live validation. The
+      checkpoint-save reconciliation plan (@plan-checkpoint-save-reconciliation-plan-2) is now the
+      authoritative validation baseline for checkpoint-style saved output. Diffusion-only
+      loadability is not sufficient for checkpoint-style models — live validation through the full
+      checkpoint loader and downstream workflow is required.
+    author: "@claude"
+    created_at: 2026-04-29T13:38:41.727Z
+  - _ulid: 01KS0BBZZZY6KGWX2P4ENYMPAX
+    content: "Validation pass 2026-05-19: all 9 derived tasks are completed and derived
+      full-output/streaming specs are implemented; non-Comfy gates passed (full pytest 1731, ruff,
+      kspec refs). Leaving plan active because derived @comfy-memory-manager-compatibility remains
+      in_progress due pending manual_only @task-full-model-real-comfy-memory-validation-manual-run,
+      and Jacob asked not to run Comfy/GPU right now."
+    author: Jacob Chapel
+    created_at: 2026-05-19T14:48:49.919Z

@@ -1,0 +1,142 @@
+_ulid: 01KQC4HF928JCTTJZGNB4SNFSG
+slugs: []
+title: Review atomic incremental writer fix cycle
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 1382 passed in 10.44s
+    name: pytest full suite
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T08:10:10.268Z
+    completed_at: 2026-04-29T08:10:10.268Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "tests/test_incremental_writer.py: 22 passed in 0.24s"
+    name: pytest incremental writer
+    required: true
+    runner: pytest
+    created_at: 2026-04-29T08:10:16.517Z
+    completed_at: 2026-04-29T08:10:16.517Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "ruff check lib/incremental_writer.py tests/test_incremental_writer.py: All checks passed"
+    name: ruff changed files
+    required: true
+    runner: ruff
+    created_at: 2026-04-29T08:10:22.767Z
+    completed_at: 2026-04-29T08:10:22.767Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Validation schema/references passed; command exited 6 due to existing
+      alignment/completeness warnings.
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-04-29T08:10:30.290Z
+    completed_at: 2026-04-29T08:10:30.290Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "PR #104 into dev: lint and test check runs completed successfully; mergeStateStatus CLEAN."
+    name: PR CI
+    required: true
+    runner: github-actions
+    created_at: 2026-04-29T08:10:36.835Z
+    completed_at: 2026-04-29T08:10:36.835Z
+events:
+  - _ulid: 01KQC4HF923F9XS1G2M983PWJ4
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-29T08:08:58.914Z
+  - _ulid: 01KQC4JK6Y3W3GHCBM1DBYTXZW
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-29T08:09:35.710Z
+  - _ulid: 01KQC4KN217TK5WJ68HADDS1AH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest full suite
+    timestamp: 2026-04-29T08:10:10.369Z
+  - _ulid: 01KQC4KV56YARVV3A89N9DWE6D
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest incremental writer
+    timestamp: 2026-04-29T08:10:16.614Z
+  - _ulid: 01KQC4M18SWFHK9SKTK8BWDSC7
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff changed files
+    timestamp: 2026-04-29T08:10:22.873Z
+  - _ulid: 01KQC4M8KR04YB01BZVSNST4RX
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: kspec validate
+    timestamp: 2026-04-29T08:10:30.392Z
+  - _ulid: 01KQC4MF074EA0CJFJ0XYC5EP7
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: PR CI
+    timestamp: 2026-04-29T08:10:36.935Z
+  - _ulid: 01KQC4MXMTYRM40D340A8XWXCC
+    actor: jacob.chapel@gmail.com
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-04-29T08:10:51.930Z
+  - _ulid: 01KQC4MXMTRM6KKGQWXTR31P7S
+    actor: jacob.chapel@gmail.com
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-29T08:10:51.930Z
+examined_commit: d93459a422c0d8cf6b774db721ba6a53f5b95ed2
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQBTZN83176W432HWKN1CTV4"
+  shadow_commit: ""
+threads: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: jacob.chapel@gmail.com
+    role: reviewer
+    created_at: 2026-04-29T08:10:51.930Z
+created_at: 2026-04-29T08:08:58.914Z
+updated_at: 2026-04-29T08:10:51.930Z
+notes: []

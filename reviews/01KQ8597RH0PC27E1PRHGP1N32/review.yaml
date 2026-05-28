@@ -1,0 +1,226 @@
+_ulid: 01KQ8597RH0PC27E1PRHGP1N32
+slugs: []
+title: Review full model streaming artifact cache cycle 6
+author: Jacob Chapel
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run ruff check .: All checks passed"
+    name: ruff check
+    required: true
+    runner: ruff
+    created_at: 2026-04-27T19:08:55.488Z
+    completed_at: 2026-04-27T19:08:55.488Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate: schema/references OK, but command exited 6 due existing
+      alignment/completeness warnings"
+    name: kspec validate
+    required: false
+    runner: kspec
+    created_at: 2026-04-27T19:08:55.693Z
+    completed_at: 2026-04-27T19:08:55.693Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest: 1236 passed"
+    name: full pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T19:08:55.896Z
+    completed_at: 2026-04-27T19:08:55.896Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run pytest tests/test_full_model_streaming.py tests/test_exit_node.py
+      tests/test_incremental_recompute.py tests/test_memory_management.py: 186 passed"
+    name: targeted pytest
+    required: true
+    runner: pytest
+    created_at: 2026-04-27T19:08:56.098Z
+    completed_at: 2026-04-27T19:08:56.098Z
+events:
+  - _ulid: 01KQ8597RGNVZCF32M3A6376SA
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-04-27T19:04:59.921Z
+  - _ulid: 01KQ85A0GVAWRJ6HP85TQ84273
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-04-27T19:05:25.275Z
+  - _ulid: 01KQ85GDVTBZDBDVC6DV5YNDQQ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check
+    timestamp: 2026-04-27T19:08:55.547Z
+  - _ulid: 01KQ85GE234FDGD71BT7S1F3J1
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: kspec validate
+    timestamp: 2026-04-27T19:08:55.747Z
+  - _ulid: 01KQ85GE8HDA6QQ3FDHHR3HVPX
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-04-27T19:08:55.953Z
+  - _ulid: 01KQ85GEESJ4QMN0X403ZK9HA2
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: targeted pytest
+    timestamp: 2026-04-27T19:08:56.154Z
+  - _ulid: 01KQ85GX6SHE1YARFAAEJ01N91
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ85GX50N1CYZB785RA1VR23
+    timestamp: 2026-04-27T19:09:11.257Z
+  - _ulid: 01KQ85GXD4XEGAV0PZK1ZK136F
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KQ85GXB7T83SSB04N8GXTBYB
+    timestamp: 2026-04-27T19:09:11.460Z
+  - _ulid: 01KQ85H5CPMG32HSQ4SBV2X4PS
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-04-27T19:09:19.638Z
+  - _ulid: 01KQ85H5CPY8SM3SH3AXDM6XPY
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-04-27T19:09:19.638Z
+  - _ulid: 01KQ85ZHRBJZ6J78Q5HVRBZPP9
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ85GX50N1CYZB785RA1VR23
+    timestamp: 2026-04-27T19:17:11.051Z
+  - _ulid: 01KQ85ZMKXTCNH51GA9WJWCAG7
+    actor: "@claude"
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KQ85GXB7T83SSB04N8GXTBYB
+    timestamp: 2026-04-27T19:17:13.981Z
+  - _ulid: 01KQ85ZT2AAF376Z85VWPH1QQK
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ85GX50N1CYZB785RA1VR23
+    timestamp: 2026-04-27T19:17:19.562Z
+  - _ulid: 01KQ85ZWMS1298R79VDK93VHZR
+    actor: "@claude"
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KQ85GXB7T83SSB04N8GXTBYB
+    timestamp: 2026-04-27T19:17:22.201Z
+examined_commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
+external_links: []
+lifecycle_state: closed
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KQ7VC3HBVJMA4S8K9VBDCP7D"
+  shadow_commit: ""
+threads:
+  - _ulid: 01KQ85GX50N1CYZB785RA1VR23
+    anchor:
+      type: code
+      commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
+      line_end: 448
+      line_start: 440
+      path: lib/persistence.py
+      side: head
+    entries:
+      - _ulid: 01KQ85GX51DDAZ2EYVJD2WQ6PS
+        author: Jacob Chapel
+        body: "MUST-FIX: full-mode cache validation treats an existing corrupt or non-ecaj file as a cache
+          miss, so _execute_full_saved_model continues to MaterializationSink and atomically
+          replaces that user file. This regresses @exit-model-persistence ac-9, which requires a
+          clear error when model_name already points at a file not created by this node. I verified
+          with a runtime probe that a pre-existing non-safetensors file at save_path is overwritten
+          instead of raising."
+        created_at: 2026-04-27T19:09:11.201Z
+      - _ulid: 01KQ85ZHPMCRD03V6MEX47V34K
+        author: "@claude"
+        body: "Fixed: check_full_model_cache now raises ValueError for corrupt or non-ecaj files at
+          save_path, matching check_cache (patch mode) behavior. When safe_open fails
+          (corrupt/non-safetensors file), raises ValueError instead of returning False. When
+          metadata is missing __ecaj_version__, also raises ValueError. Added 4 runtime tests:
+          non-safetensors file raises, valid safetensors without ecaj raises, None metadata raises,
+          and a full-mode runtime probe confirming non-ecaj file blocks execution and preserves the
+          original file."
+        created_at: 2026-04-27T19:17:10.996Z
+    kind: blocker
+    resolved_at: 2026-04-27T19:17:19.502Z
+    resolved_by: "@claude"
+  - _ulid: 01KQ85GXB7T83SSB04N8GXTBYB
+    anchor:
+      type: code
+      commit: 94058d55e814c1b4aaaf2a5d087c86d1ad8d160d
+      line_end: 475
+      line_start: 469
+      path: lib/persistence.py
+      side: head
+    entries:
+      - _ulid: 01KQ85GXB7R9A1M4YYCVSDBJ7M
+        author: Jacob Chapel
+        body: "MUST-FIX: full-mode cache validation only compares the artifact key set. An artifact with the
+          expected key names but wrong tensor shapes or dtypes is accepted as a reusable full-model
+          cache hit, even though the task requires invalid artifacts to be non-reusable and
+          @full-saved-model-output ac-complete-artifact requires the complete artifact to contain
+          the required model weights with correct tensor specs. I verified check_full_model_cache
+          returns True for a safetensors file containing key 'a' with shape (3, 3) when the base
+          manifest would require a different shape."
+        created_at: 2026-04-27T19:09:11.399Z
+      - _ulid: 01KQ85ZMJ69YEQJCYNPN4WK3XR
+        author: "@claude"
+        body: "Fixed: check_full_model_cache now accepts expected_manifest (dict[str, tuple[dtype, shape]])
+          instead of expected_keys (set[str]). The artifact's tensor shapes and dtypes are read via
+          get_slice metadata and validated against the manifest. An artifact with correct key names
+          but wrong shapes or dtypes is now rejected. Both callers in exit.py updated to pass the
+          full manifest. Added 4 tests: wrong shape rejected, wrong dtype rejected, correct
+          shape+dtype accepted, and multi-key partial shape mismatch rejected."
+        created_at: 2026-04-27T19:17:13.926Z
+    kind: blocker
+    resolved_at: 2026-04-27T19:17:22.140Z
+    resolved_by: "@claude"
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-04-27T19:09:19.638Z
+created_at: 2026-04-27T19:04:59.921Z
+updated_at: 2026-04-27T19:17:22.140Z
+notes: []

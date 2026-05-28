@@ -1,0 +1,21 @@
+notes:
+  - _ulid: 01KH4HA42FBM7ZS0H0EKPMES8T
+    content: |-
+      Implementation notes:
+
+      Architecture scope: SDXL and Z-Image are concrete requirements with
+      implementation detail. Flux and Qwen support is planned but not specced
+      as requirements -- loaders can be added as new requirement specs under
+      lora-loaders when ready.
+
+      The dependency chain for implementation:
+      1. recipe-system (standalone, pure Python)
+      2. widen-core (standalone, pure torch)
+      3. entry-node, lora-node, compose-node, merge-node (depend on recipe-system)
+      4. lora-loaders (depend on arch knowledge, produce DeltaSpecs)
+      5. batched-executor (depends on widen-core + lora-loaders + recipe-system)
+      6. memory-management (depends on batched-executor + lora-loaders)
+      7. exit-node + sub-reqs (depends on batched-executor + recipe-system + memory-management)
+      8. per-block-control (layers on top of everything)
+    author: "@claude"
+    created_at: 2026-02-10T19:44:03.151Z

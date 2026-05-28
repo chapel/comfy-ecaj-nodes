@@ -1,0 +1,60 @@
+notes:
+  - _ulid: 01KHQGTSZ5ZX6B0ZE9J2ESTRH0
+    content: >-
+      Implementation notes:
+
+
+      ### Execution order
+
+
+      1. `loader-memory-measurement` first (adds the measurement interface)
+
+      2. `cache-loader-metadata` second (stores measurements in cache)
+
+      3. `accurate-ram-preflight` last (fixes the formula, uses measurements for logging)
+
+
+      ### Files affected
+
+
+      - `lib/lora/base.py` — add abstract `loaded_bytes` property
+
+      - `lib/lora/sdxl.py`, `sdxl_clip.py`, `flux.py`, `zimage.py`, `qwen.py` — implement
+      `loaded_bytes`
+
+      - `lib/model_loader.py` — add `loaded_bytes` property (returns 0)
+
+      - `lib/clip_model_loader.py` — add `loaded_bytes` property (returns 0)
+
+      - `lib/gpu_ops.py` — update `estimate_peak_ram` signature and formula
+
+      - `nodes/exit.py` — update preflight call, store loader_bytes in cache
+
+      - `nodes/clip_exit.py` — update preflight call
+
+      - `tests/test_memory_management.py` — update/add tests for new formula
+
+      - `tests/test_lora_loaders.py` — add loaded_bytes tests
+
+      - `tests/test_incremental_recompute.py` — add cache metadata tests
+
+
+      ### Backward compatibility
+
+
+      - `_CacheEntry` gains a new field. Existing cache entries (in-memory only, not
+        persisted to disk) will simply miss on structural fingerprint mismatch since
+        the cache is LRU-1 and in-process. No migration needed.
+
+      ### What this does NOT change
+
+
+      - VRAM estimation (`compute_batch_size`) — separate concern, working correctly
+
+      - OOM backoff in `chunked_evaluation` — runtime safety net, unchanged
+
+      - `pin_memory` gating (`ac-9`) — unchanged, already correct
+
+      - Cache eviction under memory pressure (`ac-12`) — unchanged
+    author: "@claude"
+    created_at: 2026-02-18T04:41:15.493Z
