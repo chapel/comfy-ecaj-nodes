@@ -138,6 +138,32 @@ agents:
       - review
     tools:
       - kspec
+  - _ulid: 01KVVCY9EQ7HBP0Q7VKTJVDS38
+    description: Alternate Claude-backed plan reviewer for second-opinion plan review cycles.
+    adapter: claude-agent-acp
+    auto_approve: false
+    budget:
+      timeout_minutes: 60
+    capabilities:
+      - review
+      - specs
+    concurrency:
+      max_concurrent: 1
+    conventions:
+      - architecture
+      - testing
+      - commits
+    dispatch: []
+    id: plan-reviewer-claude
+    name: Plan Reviewer Claude
+    runner: claude
+    skills:
+      - review-plan
+      - review
+      - writing-specs
+      - plan
+    tools:
+      - kspec
 conventions:
   - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
     domain: commits
