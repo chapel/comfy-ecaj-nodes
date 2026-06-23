@@ -17,6 +17,7 @@ agents:
     description: Autonomous task worker. Picks up automation-eligible ready and needs_work tasks.
     tags:
       - scaffold-default
+    adapter: codex-acp
     auto_approve: true
     budget:
       timeout_minutes: 60
@@ -26,7 +27,10 @@ agents:
       - refactor
     concurrency:
       max_concurrent: 1
-    conventions: []
+    conventions:
+      - architecture
+      - testing
+      - commits
     dispatch:
       - filter:
           automation: eligible
@@ -39,8 +43,12 @@ agents:
         on: task.needs_work
     id: task-worker
     name: Task Worker
+    session:
+      idle_grace_period_ms: 5000
+      mode: auto_close
     skills:
       - task-work
+      - comfy-widen-gates
     tools:
       - kspec
       - git
