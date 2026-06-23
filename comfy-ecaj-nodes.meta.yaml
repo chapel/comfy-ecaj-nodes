@@ -1724,6 +1724,24 @@ skills:
       - codex
       - droid
     version: 0.14.0
+  - _ulid: 01KVVCXWTW516SYTBG2EM70397
+    description: Project-specific validation and review gates for comfy-ecaj-nodes WIDEN/ComfyUI work.
+    origin: project
+    depends_on: []
+    tags:
+      - comfy
+      - widen
+      - testing
+      - review
+    _type: skill
+    allowed_tools: []
+    id: comfy-widen-gates
+    name: Comfy WIDEN Gates
+    platforms:
+      - claude-code
+      - codex
+      - droid
+    version: 1.0.0
 workflows:
   - _ulid: 01KH4D2G8XEYKRQNNZR9HC6S8A
     description: Core pattern for working on a task. Full lifecycle from start through PR merge.
