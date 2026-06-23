@@ -66,13 +66,21 @@ agents:
       - review
     concurrency:
       max_concurrent: 1
-    conventions: []
+    conventions:
+      - architecture
+      - testing
+      - commits
     dispatch:
       - on: task.pending_review
     id: pr-reviewer
     name: PR Reviewer
+    session:
+      idle_grace_period_ms: 5000
+      mode: auto_close
     skills:
-      - pr-review
+      - review
+      - merge
+      - comfy-widen-gates
     tools:
       - kspec
       - git
