@@ -89,12 +89,16 @@ agents:
       - review
     concurrency:
       max_concurrent: 1
-    conventions: []
+    conventions:
+      - architecture
+      - testing
+      - commits
     dispatch: []
     id: primary-dev
     name: Primary Development Agent
     skills:
       - task-work
+      - comfy-widen-gates
     tools:
       - kspec
       - git
