@@ -156,7 +156,6 @@ agents:
     dispatch: []
     id: plan-reviewer-claude
     name: Plan Reviewer Claude
-    runner: claude
     skills:
       - review-plan
       - review
