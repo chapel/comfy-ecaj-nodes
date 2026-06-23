@@ -146,11 +146,20 @@ conventions:
         cover"
       - The local-review workflow checks for AC annotation coverage before PR
       - Tests must not require a running ComfyUI instance or GPU
-  - _ulid: 01KQ62QA95D4NEBSBRKEEPX57P
+  - _ulid: 01KVVBZRPZD3XTCE3ET5Y4T3AZ
     domain: architecture
     examples: []
     rules:
-      - "PLACEHOLDER: Replace this rule with your project's architectural constraints and patterns"
+      - "ComfyUI nodes use deferred execution: Entry/LoRA/Compose/Merge build immutable WIDEN recipe
+        data only; Exit performs all tensor/GPU work."
+      - "Architecture support is pluggable: add architecture-specific
+        loaders/classifiers/auto-detection instead of branching inside generic executor paths."
+      - LoRA loaders must preserve exact base-model keyspace semantics, including fused/sliced
+        weights and compound names; never silently drop unmatched LoRA groups.
+      - Tests should exercise parser, shape, block-classification, and executor behavior with
+        CPU-safe synthetic tensors before any GPU/ComfyUI smoke.
+      - "Keep ComfyUI integration thin: nodes expose recipe/config surfaces while lib/ owns
+        algorithmic behavior and deterministic validation."
 hooks:
   - _ulid: 01KQ62QAAESYP4ZTGSDZ1FNJ4F
     action:
