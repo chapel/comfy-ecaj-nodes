@@ -112,25 +112,22 @@ agents:
       - git
       - npm
   - _ulid: 01KQ62QA8SGZG5QGTEY53C1JJQ
-    description: |-
-      Reviews plans for quality, completeness, and spec alignment.
-      Has review capability and plan-focused skills attached.
-
-      Adapter guidance: This agent uses the default adapter configured
-      for your project. If authentication fails with the default adapter,
-      you can switch adapters using:
-        kspec meta set agents --update plan-reviewer --adapter <adapter-name>
-      Run `kspec agent adapters` to list available adapters and their
-      authentication requirements.
+    description: Reviews draft plans for spec quality, task completeness, and readiness before approval.
     tags:
       - scaffold-default
     adapter: codex-acp
     auto_approve: true
+    budget:
+      timeout_minutes: 60
     capabilities:
       - review
+      - specs
     concurrency:
       max_concurrent: 1
-    conventions: []
+    conventions:
+      - architecture
+      - testing
+      - commits
     dispatch: []
     id: plan-reviewer
     name: Plan Reviewer
@@ -138,9 +135,9 @@ agents:
       - review-plan
       - writing-specs
       - plan
+      - review
     tools:
       - kspec
-      - git
 conventions:
   - _ulid: 01KH4D4XBHYX71V8BQF8NVQTA1
     domain: commits
