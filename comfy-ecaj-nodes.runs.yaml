@@ -10241,7 +10241,7 @@ runs:
     completed_at: 2026-06-24T05:39:06.045Z
   - _ulid: 01KVW2STTSEDEPW7A6AQKXTSB0
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10255,7 +10255,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-24T05:50:04.753Z
-        completed_at: 2026-06-24T05:50:04.753Z
+        completed_at: 2026-06-24T05:50:17.775Z
+        notes: "Friction: a task note containing Markdown backticks was passed through a double-quoted shell
+          argument, so the shell attempted command substitution before kspec received the note. This
+          is systemic agent workflow friction when notes include commands or paths. Also observed
+          that uv is not available in this dispatch shell, requiring equivalent python -m commands
+          and explicit note evidence."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-24T05:50:17.775Z
+        completed_at: 2026-06-24T05:50:17.775Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T05:49:13.945Z
