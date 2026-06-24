@@ -58,3 +58,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T04:45:47.561Z
+  - _ulid: 01KVVZH636BZFQX1APN8ZG5KK5
+    content: "Fix cycle 2 approach: replace Krea2Loader's key-level expected-shape union with
+      per-loaded-entry validation so each LoRA set/group is checked against the current recipe shape
+      before execution. Added a regression for the reviewer reproduction: one matching and one
+      mismatched Krea 2 LoRA set mapped to the same model key must fail preflight and report the bad
+      set. Re-verified AC focus: complete-or-rejected compatibility now rejects mixed loaded groups
+      before apply_lora_batch_gpu."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T04:52:04.838Z
