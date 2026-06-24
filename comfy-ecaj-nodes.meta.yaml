@@ -1693,8 +1693,12 @@ observations:
       synthetic fixtures initially encoded incorrectly; pairing synthetic safetensors tests with
       pinned public-header evidence is worth repeating for package compatibility work.
     author: Jacob Chapel
-    resolution: null
-    resolved: false
+    resolution: Covered by existing observations @01KVW09P and @01KVVXS0 about pinned public safetensors
+      header checks catching compatibility gaps that synthetic fixtures miss; no separate tracking
+      needed.
+    resolved: true
+    resolved_at: 2026-06-24T05:30:03.244Z
+    resolved_by: Jacob Chapel
     created_at: 2026-06-24T05:29:17.882Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
