@@ -199,12 +199,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-06-24T04:57:08.054Z
+      updated_at: 2026-06-24T04:57:09.810Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-06-24T04:57:08.054Z
+      updated_at: 2026-06-24T04:57:09.810Z
     integration:
       status: pending
       detail: null
@@ -212,8 +212,8 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 465863ed3f4078846a44c0cf7ef88cc70df423e5
-      updated_at: 2026-06-24T04:57:08.054Z
-    lifecycle_state: ready
+      updated_at: 2026-06-24T04:57:09.810Z
+    lifecycle_state: integrating
     resolved_base_branch: dev
     task_id: 01KVVVJV8D69BXGR7T66VYA7KK
     task_ref: "@01KVVVJV8D69BXGR7T66VYA7KK"
@@ -221,18 +221,23 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-06-24T04:49:03.798Z
-      last_reconciled_at: 2026-06-24T04:57:08.054Z
+      last_reconciled_at: 2026-06-24T04:57:09.810Z
       created_at: 2026-06-24T04:03:49.656Z
-      updated_at: 2026-06-24T04:57:08.054Z
+      updated_at: 2026-06-24T04:57:09.810Z
     workspace_id: dispatch-workspace-01KVVVJV8D69BXGR7T66VYA7KK
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 4b4934005e31a023fb04ad85c6010d3198ea4529
+        last_seen_at: 2026-06-24T04:57:09.810Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-krea2-lora-package-compatibility-01kvvvjv-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
-        head: 9d0f3591f47584f001949757fec26dcf7a1641d4
-        last_seen_at: 2026-06-24T04:49:02.620Z
+        head: 4b4934005e31a023fb04ad85c6010d3198ea4529
+        last_seen_at: 2026-06-24T04:57:09.810Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-krea2-lora-package-compatibility-01kvvvjv
   - active_role: null
     base_branch_point: 465863ed3f4078846a44c0cf7ef88cc70df423e5
