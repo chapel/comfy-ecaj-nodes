@@ -1729,19 +1729,19 @@ reviews:
   - _ulid: 01KVVZW2DSK7CDSAF1BF9KCNB0
     slugs: []
     title: Review Krea 2 LoRA package compatibility (cycle 3)
-    disposition: pending
+    disposition: changes_requested
     author: Jacob Chapel
-    check_count: 0
+    check_count: 9
     examined_commit: 4b4934005e31a023fb04ad85c6010d3198ea4529
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
       content_hash: ""
       ref: "@01KVVVJV8D69BXGR7T66VYA7KK"
       shadow_commit: ""
-    thread_count: 0
-    unresolved_blocker_count: 0
-    verdict_count: 0
+    thread_count: 1
+    unresolved_blocker_count: 1
+    verdict_count: 1
     created_at: 2026-06-24T04:58:01.529Z
-    updated_at: 2026-06-24T04:58:14.978Z
+    updated_at: 2026-06-24T05:03:14.776Z

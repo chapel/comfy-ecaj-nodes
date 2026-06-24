@@ -2,7 +2,103 @@ _ulid: 01KVVZW2DSK7CDSAF1BF9KCNB0
 slugs: []
 title: Review Krea 2 LoRA package compatibility (cycle 3)
 author: Jacob Chapel
-checks: []
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m compileall lib nodes tests passed
+    name: compileall
+    required: true
+    runner: python -m compileall
+    created_at: 2026-06-24T05:03:11.485Z
+    completed_at: 2026-06-24T05:03:11.485Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m pytest tests/test_krea2_lora_loader.py tests/test_krea2_architecture.py -q
+      passed (21 tests)
+    name: focused pytest
+    required: true
+    runner: python -m pytest
+    created_at: 2026-06-24T05:03:11.854Z
+    completed_at: 2026-06-24T05:03:11.854Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 1757 passed in 23.70s
+    name: pytest
+    required: true
+    runner: python -m pytest
+    created_at: 2026-06-24T05:03:12.199Z
+    completed_at: 2026-06-24T05:03:12.199Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m ruff check . -> All checks passed
+    name: ruff check
+    required: true
+    runner: python -m ruff
+    created_at: 2026-06-24T05:03:12.536Z
+    completed_at: 2026-06-24T05:03:12.536Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m ruff format --check . -> 108 files already formatted
+    name: ruff format
+    required: true
+    runner: python -m ruff
+    created_at: 2026-06-24T05:03:12.875Z
+    completed_at: 2026-06-24T05:03:12.875Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --refs --warnings-ok passed
+    name: kspec validate refs
+    required: true
+    runner: kspec validate
+    created_at: 2026-06-24T05:03:13.214Z
+    completed_at: 2026-06-24T05:03:13.214Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --alignment --warnings-ok passed with existing warnings: 2 orphaned specs
+      and 1 status mismatch"
+    name: kspec validate alignment
+    required: true
+    runner: kspec validate
+    created_at: 2026-06-24T05:03:13.536Z
+    completed_at: 2026-06-24T05:03:13.536Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --completeness --warnings-ok passed with existing missing-description warnings
+    name: kspec validate completeness
+    required: true
+    runner: kspec validate
+    created_at: 2026-06-24T05:03:13.844Z
+    completed_at: 2026-06-24T05:03:13.844Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Pinned HF headers for Comfy-Org coolblue/darkbrush/plasmoid/warmpastel and krea retroanime
+      each contain unsupported transformer.time_embed.linear_1, transformer.time_embed.linear_2, and
+      transformer.time_mod_proj lora_A/B keys; local fixture with
+      transformer.time_embed.linear_1.lora_A/B.weight raises Krea2CompatibilityError unsupported
+      tensor groups.
+    name: public Krea 2 header parser coverage
+    required: true
+    runner: custom header/probe check
+    created_at: 2026-06-24T05:03:14.163Z
+    completed_at: 2026-06-24T05:03:14.163Z
 events:
   - _ulid: 01KVVZW2DS0EE8JD4BC33J6DK1
     actor: Jacob Chapel
@@ -17,17 +113,136 @@ events:
       from: draft
       to: open
     timestamp: 2026-06-24T04:58:15.011Z
+  - _ulid: 01KVW05H4V09S3QVFH1R9R4F2P
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: compileall
+    timestamp: 2026-06-24T05:03:11.515Z
+  - _ulid: 01KVW05HGCJ6QWJJM089YCNX48
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-06-24T05:03:11.884Z
+  - _ulid: 01KVW05HVBX97GKZHA42KY37VY
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-06-24T05:03:12.235Z
+  - _ulid: 01KVW05J5K89D1842P0J5PNDQD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check
+    timestamp: 2026-06-24T05:03:12.563Z
+  - _ulid: 01KVW05JGADZ0HP18J06925KX0
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff format
+    timestamp: 2026-06-24T05:03:12.906Z
+  - _ulid: 01KVW05JTQ0Q8208XJPA41JKK1
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate refs
+    timestamp: 2026-06-24T05:03:13.239Z
+  - _ulid: 01KVW05K4X6FSJ9E3SJZK4XZXR
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate alignment
+    timestamp: 2026-06-24T05:03:13.565Z
+  - _ulid: 01KVW05KEC67YRW4HVFT6W3XGH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate completeness
+    timestamp: 2026-06-24T05:03:13.868Z
+  - _ulid: 01KVW05KR71C6X278EP14HW9CP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: public Krea 2 header parser coverage
+    timestamp: 2026-06-24T05:03:14.183Z
+  - _ulid: 01KVW05M1W7MEYK4K20E6TQY5B
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KVW05M11AN362DGTFCDYTH95
+    timestamp: 2026-06-24T05:03:14.492Z
+  - _ulid: 01KVW05MAR17A2BSEYAGSTFBGF
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-06-24T05:03:14.776Z
+  - _ulid: 01KVW05MARY50CEW9AJWTVWDHJ
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-06-24T05:03:14.776Z
 examined_commit: 4b4934005e31a023fb04ad85c6010d3198ea4529
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
   content_hash: ""
   ref: "@01KVVVJV8D69BXGR7T66VYA7KK"
   shadow_commit: ""
-threads: []
-verdicts: []
+threads:
+  - _ulid: 01KVW05M11AN362DGTFCDYTH95
+    anchor:
+      type: code
+      commit: 4b4934005e31a023fb04ad85c6010d3198ea4529
+      line_end: 73
+      line_start: 68
+      path: lib/lora/krea2.py
+      side: head
+    entries:
+      - _ulid: 01KVW05M114PQA31TVMB5HC1JF
+        author: Jacob Chapel
+        body: "MUST-FIX: the public diffusers-style Krea 2 LoRA packages are not fully supported because the
+          compatibility table does not map their timestep projection groups. The pinned Comfy-Org
+          coolblue/darkbrush/plasmoid/warmpastel headers and krea retroanime header contain
+          transformer.time_embed.linear_1, transformer.time_embed.linear_2, and
+          transformer.time_mod_proj lora_A/B keys. _parse_krea2_lora_key returns None for those
+          groups, and a local safetensors fixture with
+          transformer.time_embed.linear_1.lora_A/B.weight makes Krea2Loader.load raise
+          Krea2CompatibilityError for unsupported tensor groups. Impact: AC
+          ac-supported-krea2-lora-packages-load is not met for those supported public packages;
+          users still cannot apply them without manual rewriting/removal. Add explicit mappings for
+          these public names to the Krea base timestep/projection weights (verify against the Comfy
+          Krea state dict, likely tmlp.1, tmlp.3, and tproj.1) and add behavioral/header coverage so
+          the full public family loads or fails only for genuinely incompatible groups."
+        created_at: 2026-06-24T05:03:14.465Z
+    kind: blocker
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-06-24T05:03:14.776Z
 created_at: 2026-06-24T04:58:01.529Z
-updated_at: 2026-06-24T04:58:14.978Z
+updated_at: 2026-06-24T05:03:14.776Z
 notes: []

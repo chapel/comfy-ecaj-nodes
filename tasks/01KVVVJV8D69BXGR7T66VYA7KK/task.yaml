@@ -45,7 +45,7 @@ description: |
 spec_ref: "@krea2-lora-package-compatibility"
 plan_ref: "@plan-krea-2-architecture-support-plan"
 origin: derived
-status: pending_review
+status: needs_work
 blocked_by: []
 depends_on:
   - "@task-krea2-architecture-recognition-routing"
@@ -65,7 +65,7 @@ submission_linkage:
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
-session_id: 01KVVZBMWMHPZ90J9XMJY6K6GT
+session_id: null
 history:
   - author: Jacob Chapel
     changes:
@@ -251,6 +251,16 @@ history:
         previous: "@01KVVYZ83T40N95EPMWEVSV90B"
     command: review-link
     timestamp: 2026-06-24T04:58:01.877Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: needs_work
+        previous: pending_review
+      session_id:
+        new: null
+        previous: 01KVVZBMWMHPZ90J9XMJY6K6GT
+    command: review-verdict-needs-work
+    timestamp: 2026-06-24T05:03:15.014Z
 resource_refs:
   - git_commit: null
     git_path: null
