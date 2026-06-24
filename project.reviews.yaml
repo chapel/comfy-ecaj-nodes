@@ -1674,7 +1674,7 @@ reviews:
     title: Review Krea 2 LoRA package compatibility
     disposition: pending
     author: Jacob Chapel
-    check_count: 2
+    check_count: 3
     examined_commit: 0914a9d7fd96de80a60dd280463179286589439c
     lifecycle_state: open
     related_refs: []
@@ -1687,4 +1687,4 @@ reviews:
     unresolved_blocker_count: 0
     verdict_count: 0
     created_at: 2026-06-24T04:22:35.195Z
-    updated_at: 2026-06-24T04:26:51.966Z
+    updated_at: 2026-06-24T04:26:52.454Z
