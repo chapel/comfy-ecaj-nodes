@@ -1,1 +1,13 @@
-notes: []
+notes:
+  - _ulid: 01KVW27558NBJYDWA6WG3BXGZ1
+    content: "Approach: add shared CPU-safe Krea 2 fixtures for architecture keys, supported public LoRA
+      package families, compound text-fusion names, block/layer groups, and dtype compatibility
+      surfaces; add behavioral validation tests that exercise existing architecture detection, Krea
+      LoRA loader diagnostics, and block/layer controls together. Optional evidence path: add a
+      guarded safetensors header/probe helper and a smoke-evidence guide that require explicit
+      operator-provided paths and record skip reasons when assets/GPU/ComfyUI are unavailable. Test
+      plan: focused Krea validation tests plus existing Krea architecture/LoRA/block tests, then
+      comfy-widen-gates compileall, pytest, ruff check/format, and kspec validate."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T05:39:01.928Z
