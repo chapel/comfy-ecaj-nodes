@@ -77,7 +77,7 @@ workspaces:
         head: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
         last_seen_at: 2026-05-13T17:03:06.153Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/checkpoint-save-release-temp-model-return-artifact-checkpoi
-  - active_role: reviewer
+  - active_role: null
     base_branch_point: 0a0fdbe68425ce2f7f1fee58c97e1c85aa7404de
     bootstrap:
       status: succeeded
@@ -141,9 +141,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-06-24T03:58:26.264Z
-      last_reconciled_at: 2026-06-24T04:04:41.284Z
+      last_reconciled_at: 2026-06-24T04:07:10.077Z
       created_at: 2026-06-24T03:44:39.662Z
-      updated_at: 2026-06-24T04:04:41.284Z
+      updated_at: 2026-06-24T04:07:10.077Z
     workspace_id: dispatch-workspace-01KVVVJV4JCST8N84GX03DZYGJ
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
