@@ -48,7 +48,7 @@ description: |
 spec_ref: "@krea2-architecture-support"
 plan_ref: "@plan-krea-2-architecture-support-plan"
 origin: derived
-status: pending
+status: in_progress
 blocked_by: []
 depends_on: []
 context: []
@@ -59,6 +59,7 @@ tags:
   - entry-node
   - routing
 vcs_refs: []
+session_id: 01KVVVNR2NFWKJ10M425DC7G7M
 history:
   - author: Jacob Chapel
     changes:
@@ -106,6 +107,19 @@ history:
         previous: null
     command: task-set
     timestamp: 2026-06-24T03:43:15.516Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: in_progress
+        previous: pending
+      session_id:
+        new: 01KVVVNR2NFWKJ10M425DC7G7M
+        previous: null
+      started_at:
+        new: 2026-06-24T03:45:19.664Z
+        previous: null
+    command: task-start
+    timestamp: 2026-06-24T03:45:19.665Z
 resource_refs:
   - git_commit: null
     git_path: null
@@ -124,5 +138,6 @@ resource_refs:
     recorded_at: 2026-06-24T03:43:04.843Z
     sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
 created_at: 2026-06-24T03:43:04.850Z
+started_at: 2026-06-24T03:45:19.664Z
 todos: []
 automation: eligible
