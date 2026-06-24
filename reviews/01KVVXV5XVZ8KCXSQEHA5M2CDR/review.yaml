@@ -164,6 +164,13 @@ events:
       kind: blocker
       thread_ulid: 01KVVY43366NFZQJ3W786D3BN0
     timestamp: 2026-06-24T04:27:27.235Z
+  - _ulid: 01KVVY43K2GE79187RW9M3W4H3
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KVVY43JA80DFV34T6WT6G6CF
+    timestamp: 2026-06-24T04:27:27.714Z
 examined_commit: 0914a9d7fd96de80a60dd280463179286589439c
 external_links: []
 lifecycle_state: open
@@ -196,7 +203,28 @@ threads:
           publishes a result, with actionable incompatible-group diagnostics."
         created_at: 2026-06-24T04:27:27.206Z
     kind: blocker
+  - _ulid: 01KVVY43JA80DFV34T6WT6G6CF
+    anchor:
+      type: code
+      commit: 0914a9d7fd96de80a60dd280463179286589439c
+      line_end: 277
+      line_start: 276
+      path: lib/lora/krea2.py
+      side: head
+    entries:
+      - _ulid: 01KVVY43JAAZAQJ1EGZVQBHVME
+        author: Jacob Chapel
+        body: "MUST-FIX: explicit Krea 2 LoRA alpha tensors are ignored after key normalization.
+          alpha_values is stored under the raw LoRA base path (for example
+          transformer.transformer_blocks.0.attn.to_q), but this lookup uses the normalized model key
+          (diffusion_model.blocks.0.attn.wq.weight), so packages with .alpha apply at default rank
+          scaling instead of their encoded alpha. Evidence: a safetensors fixture with rank=2 and
+          transformer.transformer_blocks.0.attn.to_q.alpha=1.0 produced DeltaSpec.scale=1.0;
+          expected strength * alpha / rank = 0.5. This changes LoRA contribution magnitude and
+          violates stable/documented strength semantics."
+        created_at: 2026-06-24T04:27:27.690Z
+    kind: blocker
 verdicts: []
 created_at: 2026-06-24T04:22:35.195Z
-updated_at: 2026-06-24T04:27:27.206Z
+updated_at: 2026-06-24T04:27:27.690Z
 notes: []
