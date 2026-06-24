@@ -2,7 +2,121 @@ _ulid: 01KVVYCJRR3VH052GP1VA2KQ00
 slugs: []
 title: Review Krea 2 block and layer controls
 author: Jacob Chapel
-checks: []
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Passed: schema OK, references OK; 140 files, 59 items, 137 tasks."
+    name: kspec validate refs
+    required: true
+    runner: kspec validate --refs --warnings-ok
+    created_at: 2026-06-24T04:37:20.090Z
+    completed_at: 2026-06-24T04:37:20.090Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Passed with accepted existing warnings: 2 orphaned specs and 1 unrelated status mismatch."
+    name: kspec validate alignment
+    required: true
+    runner: kspec validate --alignment --warnings-ok
+    created_at: 2026-06-24T04:37:20.478Z
+    completed_at: 2026-06-24T04:37:20.478Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Passed with accepted existing missing-description warnings outside this task.
+    name: kspec validate completeness
+    required: true
+    runner: kspec validate --completeness --warnings-ok
+    created_at: 2026-06-24T04:37:20.865Z
+    completed_at: 2026-06-24T04:37:20.865Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Passed under available Python 3.11.14 interpreter; uv wrapper unavailable in this shell.
+    name: compileall
+    required: true
+    runner: python -m compileall lib nodes tests
+    created_at: 2026-06-24T04:37:21.223Z
+    completed_at: 2026-06-24T04:37:21.223Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 14 passed in 0.08s.
+    name: focused Krea tests
+    required: true
+    runner: python -m pytest tests/test_krea2_block_controls.py tests/test_krea2_architecture.py
+    created_at: 2026-06-24T04:37:21.550Z
+    completed_at: 2026-06-24T04:37:21.550Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 1745 passed in 28.18s.
+    name: unit tests
+    required: true
+    runner: python -m pytest
+    created_at: 2026-06-24T04:37:21.892Z
+    completed_at: 2026-06-24T04:37:21.892Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: All checks passed.
+    name: ruff check
+    required: true
+    runner: python -m ruff check .
+    created_at: 2026-06-24T04:37:22.223Z
+    completed_at: 2026-06-24T04:37:22.223Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 4 files already formatted; git diff --check dev...HEAD also passed.
+    name: ruff format changed files
+    required: true
+    runner: python -m ruff format --check __init__.py lib/block_classify.py nodes/block_config_krea2.py
+      tests/test_krea2_block_controls.py
+    created_at: 2026-06-24T04:37:22.553Z
+    completed_at: 2026-06-24T04:37:22.553Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "CI completed successfully: lint and test jobs both success for head
+      011104d3bcc44a1918cd2e1081e1a2262d2c5881."
+    name: GitHub CI
+    required: true
+    runner: GitHub Actions CI run 28075176772
+    created_at: 2026-06-24T04:37:22.873Z
+    completed_at: 2026-06-24T04:37:22.873Z
+  - status: skipped
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv is not installed/on PATH in this review shell; equivalent Python module entry points
+      were run and GitHub CI installed uv successfully.
+    name: uv wrapper availability
+    required: true
+    runner: uv run ...
+    created_at: 2026-06-24T04:37:23.195Z
+    completed_at: 2026-06-24T04:37:23.195Z
+  - status: skipped
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Local repo-wide check reports 56 unrelated files would reformat; none are in the submitted
+      diff. Changed files pass format check.
+    name: repo-wide ruff format baseline
+    required: true
+    runner: python -m ruff format --check .
+    created_at: 2026-06-24T04:37:23.528Z
+    completed_at: 2026-06-24T04:37:23.528Z
 events:
   - _ulid: 01KVVYCJRFNHRKJWVEQ030W0DN
     actor: Jacob Chapel
@@ -17,9 +131,102 @@ events:
       from: draft
       to: open
     timestamp: 2026-06-24T04:32:19.116Z
+  - _ulid: 01KVVYP63W03ZFJ5MWKJJ27F3A
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate refs
+    timestamp: 2026-06-24T04:37:20.124Z
+  - _ulid: 01KVVYP6FT8E6J7SV9QERSE05Q
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate alignment
+    timestamp: 2026-06-24T04:37:20.506Z
+  - _ulid: 01KVVYP6VVS4XDWNA0M72WZDFN
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate completeness
+    timestamp: 2026-06-24T04:37:20.891Z
+  - _ulid: 01KVVYP76VBZM6DJ535F7WC2Q3
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: compileall
+    timestamp: 2026-06-24T04:37:21.243Z
+  - _ulid: 01KVVYP7H3WAV532F0HGNGAKQN
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused Krea tests
+    timestamp: 2026-06-24T04:37:21.571Z
+  - _ulid: 01KVVYP7VYRTTF49BX7BBDD9QX
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: unit tests
+    timestamp: 2026-06-24T04:37:21.918Z
+  - _ulid: 01KVVYP864KXHFVMGQVGF8DJHQ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check
+    timestamp: 2026-06-24T04:37:22.244Z
+  - _ulid: 01KVVYP8GGXWSTBVRDJHDHCTNS
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff format changed files
+    timestamp: 2026-06-24T04:37:22.576Z
+  - _ulid: 01KVVYP8TGQEYCT3RP2P7HBZV7
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: GitHub CI
+    timestamp: 2026-06-24T04:37:22.896Z
+  - _ulid: 01KVVYP94NM5KEKVMDB4DDWCW4
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: skipped
+      name: uv wrapper availability
+    timestamp: 2026-06-24T04:37:23.221Z
+  - _ulid: 01KVVYP9F7STW65R4QDS2GTENQ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: skipped
+      name: repo-wide ruff format baseline
+    timestamp: 2026-06-24T04:37:23.559Z
+  - _ulid: 01KVVYP9RXXH0C1XD9M6KCPH7Z
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-06-24T04:37:23.869Z
+  - _ulid: 01KVVYP9RX76GYXKMNBWE7AXSZ
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-06-24T04:37:23.869Z
 examined_commit: 011104d3bcc44a1918cd2e1081e1a2262d2c5881
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
@@ -27,7 +234,14 @@ subject:
   ref: "@01KVVVJVB8K1JCKN5W57RQK8GR"
   shadow_commit: ""
 threads: []
-verdicts: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-06-24T04:37:23.869Z
 created_at: 2026-06-24T04:32:05.400Z
-updated_at: 2026-06-24T04:32:19.095Z
+updated_at: 2026-06-24T04:37:23.869Z
 notes: []
