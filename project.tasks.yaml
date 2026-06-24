@@ -2611,6 +2611,7 @@
   notes_count: 0
   todos_count: 0
   created_at: 2026-06-24T03:43:04.850Z
+  automation: eligible
 - _ulid: 01KVVVJV8D69BXGR7T66VYA7KK
   slugs:
     - task-krea2-lora-package-compatibility
