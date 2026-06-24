@@ -12,3 +12,19 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T04:23:32.621Z
+  - _ulid: 01KVVY3MH93Z2FPG3E0AD5E3EH
+    content: "Implemented Krea 2 block/layer controls. Added WIDENBlockConfigKrea2Node with B00-B27 main
+      denoiser sliders, text-fusion sliders TF_LW0/TF_LW1/TF_PROJECTOR/TF_REF0/TF_REF1, structural
+      projection sliders, and layer categories
+      attention/feed_forward/norm/embedding_projection/structural. Updated Krea classification to
+      keep main/text-fusion/structural groups distinct and leave unsupported keys neutral.
+      Verification: python -m pytest tests/test_krea2_block_controls.py
+      tests/test_krea2_architecture.py passed (14 tests); python -m compileall lib nodes tests
+      passed; python -m pytest passed (1745 tests); python -m ruff check . passed; changed-file
+      python -m ruff format --check passed. Repo-wide python -m ruff format --check . reports 56
+      pre-existing files outside this task would reformat under the harness ruff because uv is
+      unavailable in this shell, so unrelated formatting was left untouched. kspec validate
+      --refs/--alignment/--completeness --warnings-ok passed with existing warnings."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T04:27:12.297Z
