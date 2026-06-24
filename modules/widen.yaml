@@ -1589,7 +1589,7 @@ features:
           partial or misleading merge is produced.
         status:
           maturity: draft
-          implementation: in_progress
+          implementation: implemented
         depends_on: []
         implements: []
         relates_to: []
