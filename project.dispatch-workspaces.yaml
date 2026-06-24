@@ -272,18 +272,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-krea2-block-layer-controls/01kvvvjv
-    canonical_branch_head: 465863ed3f4078846a44c0cf7ef88cc70df423e5
+    canonical_branch_head: 011104d3bcc44a1918cd2e1081e1a2262d2c5881
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-06-24T04:21:47.477Z
+      updated_at: 2026-06-24T04:27:43.213Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-06-24T04:21:48.694Z
+      updated_at: 2026-06-24T04:27:43.213Z
     integration:
       status: pending
       detail: null
@@ -291,7 +291,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 465863ed3f4078846a44c0cf7ef88cc70df423e5
-      updated_at: 2026-06-24T04:21:47.477Z
+      updated_at: 2026-06-24T04:27:43.213Z
     lifecycle_state: active
     resolved_base_branch: dev
     task_id: 01KVVVJVB8K1JCKN5W57RQK8GR
@@ -300,9 +300,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-06-24T04:21:48.694Z
-      last_reconciled_at: 2026-06-24T04:21:48.694Z
+      last_reconciled_at: 2026-06-24T04:27:43.213Z
       created_at: 2026-06-24T04:21:47.477Z
-      updated_at: 2026-06-24T04:21:48.694Z
+      updated_at: 2026-06-24T04:27:43.213Z
     workspace_id: dispatch-workspace-01KVVVJVB8K1JCKN5W57RQK8GR
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
