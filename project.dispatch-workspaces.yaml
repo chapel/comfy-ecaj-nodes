@@ -154,7 +154,7 @@ workspaces:
         head: 41df8de1951f852bfa253b215bae3a6fb4956298
         last_seen_at: 2026-06-24T03:58:22.042Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-krea2-architecture-recognition-routing-01kvvvjv
-  - active_role: reviewer
+  - active_role: null
     base_branch_point: 465863ed3f4078846a44c0cf7ef88cc70df423e5
     bootstrap:
       status: succeeded
@@ -196,12 +196,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-06-24T04:21:43.515Z
+      updated_at: 2026-06-24T04:30:09.230Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-06-24T04:21:46.298Z
+      updated_at: 2026-06-24T04:30:09.230Z
     integration:
       status: pending
       detail: null
@@ -209,7 +209,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 465863ed3f4078846a44c0cf7ef88cc70df423e5
-      updated_at: 2026-06-24T04:21:43.515Z
+      updated_at: 2026-06-24T04:30:09.230Z
     lifecycle_state: integrating
     resolved_base_branch: dev
     task_id: 01KVVVJV8D69BXGR7T66VYA7KK
@@ -218,9 +218,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-06-24T04:21:46.298Z
-      last_reconciled_at: 2026-06-24T04:21:46.298Z
+      last_reconciled_at: 2026-06-24T04:30:09.230Z
       created_at: 2026-06-24T04:03:49.656Z
-      updated_at: 2026-06-24T04:21:46.298Z
+      updated_at: 2026-06-24T04:30:09.230Z
     workspace_id: dispatch-workspace-01KVVVJV8D69BXGR7T66VYA7KK
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
