@@ -17,8 +17,8 @@ Public sources referenced by the imported implementation reference include:
 - ai-toolkit Krea 2 implementation: <https://github.com/ostris/ai-toolkit/blob/724e67d63428a7daddc77355b88d90fe99ea9fd2/extensions_built_in/diffusion_models/krea2/krea2.py>
 - ai-toolkit Krea 2 MMDiT source: <https://github.com/ostris/ai-toolkit/blob/724e67d63428a7daddc77355b88d90fe99ea9fd2/extensions_built_in/diffusion_models/krea2/src/mmdit.py>
 - ai-toolkit LoKr helper: <https://github.com/ostris/ai-toolkit/blob/724e67d63428a7daddc77355b88d90fe99ea9fd2/toolkit/models/lokr.py>
-- Comfy-Org Krea 2 LoRAs: <https://huggingface.co/Comfy-Org/Krea-2/tree/main/loras>
-- Krea RetroAnime LoRA: <https://huggingface.co/krea/Krea-2-LoRA-retroanime/tree/main>
+- Comfy-Org Krea 2 LoRAs: <https://huggingface.co/Comfy-Org/Krea-2/tree/9b05e613f06f5ee45d97b362ba3478fec5488b5a/loras>
+- Krea RetroAnime LoRA: <https://huggingface.co/krea/Krea-2-LoRA-retroanime/tree/23336fcff3bac43028918a2df795fbb63fdc1ff3>
 
 ## Scope
 
