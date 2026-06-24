@@ -3174,6 +3174,9 @@ features:
       model signature and recipe behavior. Krea 2 support is based on Krea-specific
       model features and compatibility rules rather than reusing another
       architecture's assumptions.
+    status:
+      maturity: draft
+      implementation: in_progress
     depends_on: []
     implements: []
     relates_to: []
