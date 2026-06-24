@@ -35,6 +35,92 @@ checks:
     runner: kspec
     created_at: 2026-06-24T05:56:23.849Z
     completed_at: 2026-06-24T05:56:23.849Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok passed; warnings are existing metadata warnings outside the
+      submitted files/specs.
+    name: kspec validate full
+    required: true
+    runner: kspec
+    created_at: 2026-06-24T05:56:59.052Z
+    completed_at: 2026-06-24T05:56:59.052Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: rg found annotations for all covered Krea 2 architecture, LoRA compatibility, and
+      block/layer ACs in behavioral pytest tests; no source-scanning tests found in the submitted
+      test module.
+    name: AC annotation coverage
+    required: true
+    runner: rg
+    created_at: 2026-06-24T05:56:59.332Z
+    completed_at: 2026-06-24T05:56:59.332Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: uv unavailable on PATH and python -m uv missing; python -m compileall lib nodes tests
+      passed in the active workspace environment.
+    name: compileall
+    required: true
+    runner: python
+    created_at: 2026-06-24T05:56:59.568Z
+    completed_at: 2026-06-24T05:56:59.568Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m pytest tests/test_krea2_validation_fixtures.py tests/test_krea2_architecture.py
+      tests/test_krea2_lora_loader.py tests/test_krea2_block_controls.py -> 33 passed in 0.09s.
+    name: focused Krea pytest
+    required: true
+    runner: python pytest
+    created_at: 2026-06-24T05:56:59.809Z
+    completed_at: 2026-06-24T05:56:59.809Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m pytest -> 1764 passed in 14.01s.
+    name: full pytest
+    required: true
+    runner: python pytest
+    created_at: 2026-06-24T05:57:00.035Z
+    completed_at: 2026-06-24T05:57:00.035Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m ruff check . -> All checks passed.
+    name: ruff check
+    required: true
+    runner: python ruff
+    created_at: 2026-06-24T05:57:00.318Z
+    completed_at: 2026-06-24T05:57:00.318Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m ruff format --check . -> 111 files already formatted.
+    name: ruff format
+    required: true
+    runner: python ruff
+    created_at: 2026-06-24T05:57:00.555Z
+    completed_at: 2026-06-24T05:57:00.555Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "PR #121 / commit 7fd565e36cc6dd612661f79ae7b74077eb13d69b CI run 28078094757 completed
+      successfully."
+    name: GitHub CI
+    required: true
+    runner: GitHub Actions
+    created_at: 2026-06-24T05:57:00.791Z
+    completed_at: 2026-06-24T05:57:00.791Z
 events:
   - _ulid: 01KVW309GJB9ZHVD18FQ1A0EJC
     actor: Jacob Chapel
@@ -70,6 +156,62 @@ events:
       status: pass
       name: kspec validate alignment
     timestamp: 2026-06-24T05:56:23.871Z
+  - _ulid: 01KVW38129HYZJAY00D40M2EEA
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate full
+    timestamp: 2026-06-24T05:56:59.081Z
+  - _ulid: 01KVW381AMFW1VKQ00H5DVCD6S
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: AC annotation coverage
+    timestamp: 2026-06-24T05:56:59.348Z
+  - _ulid: 01KVW381J5P5J4FW159158QPDP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: compileall
+    timestamp: 2026-06-24T05:56:59.589Z
+  - _ulid: 01KVW381SJ7NKSX04VHRTXGBHQ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused Krea pytest
+    timestamp: 2026-06-24T05:56:59.826Z
+  - _ulid: 01KVW3820P15010SRTEMD5D8PJ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-06-24T05:57:00.055Z
+  - _ulid: 01KVW3829GNWEPWW7H3NYREE0Y
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check
+    timestamp: 2026-06-24T05:57:00.336Z
+  - _ulid: 01KVW382GTWNEAPY9D700HXT9S
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff format
+    timestamp: 2026-06-24T05:57:00.570Z
+  - _ulid: 01KVW382R8QBS9DNAAH1GJX6QD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: GitHub CI
+    timestamp: 2026-06-24T05:57:00.808Z
 examined_commit: 7fd565e36cc6dd612661f79ae7b74077eb13d69b
 external_links: []
 lifecycle_state: open
@@ -82,5 +224,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-24T05:52:45.586Z
-updated_at: 2026-06-24T05:56:23.849Z
+updated_at: 2026-06-24T05:57:00.791Z
 notes: []
