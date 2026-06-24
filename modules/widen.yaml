@@ -3182,7 +3182,7 @@ features:
       architecture's assumptions.
     status:
       maturity: draft
-      implementation: in_progress
+      implementation: implemented
     depends_on: []
     implements: []
     relates_to: []
