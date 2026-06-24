@@ -1,1 +1,17 @@
-notes: []
+notes:
+  - _ulid: 01KVVVW4KHG37XPAQH0JGDNRXS
+    content: "Approach: add a shared lib.architecture detector used by Entry and ModelLoader so Krea 2
+      detection, incomplete signatures, and ambiguous signatures are consistent. Krea evidence will
+      require main blocks, txtfusion structures, and structural projections from the pinned ComfyUI
+      Krea 2 source rather than a single generic transformer key. Routing will register krea2 in
+      supported architectures, ModelLoader detection, LoRA loader selection via a Krea2Loader that
+      explicitly defers package compatibility, and block/layer classifiers for Krea key families.
+      Edge cases: incomplete Krea-like keys must fail with missing evidence, mixed Krea plus another
+      supported signature must fail as ambiguous, and unsupported LoRA packages must not be silently
+      treated as another architecture. Test plan: new behavioral tests annotated for all three
+      @krea2-architecture-support ACs covering positive Entry detection,
+      unknown/incomplete/ambiguous rejection diagnostics, ModelLoader detection, LoRA-loader
+      routing, classifier/layer routing, and no-LoRA recipe analysis."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T03:48:09.462Z
