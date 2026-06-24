@@ -111,9 +111,7 @@ def check_guards(
     # Guard 1: environment variable
     val = env.get(_ENV_VAR, "")
     if val != "1":
-        reasons.append(
-            f"Environment variable {_ENV_VAR} is not set to '1' (got {val!r})."
-        )
+        reasons.append(f"Environment variable {_ENV_VAR} is not set to '1' (got {val!r}).")
 
     # Guard 2: CLI flag
     if _CLI_FLAG not in argv:
@@ -405,7 +403,8 @@ def read_proc_smaps_rollup_memory(pid: int) -> dict[str, int | None]:
 
 
 def collect_process_memory_observation(
-    pid: int | None, label: str,
+    pid: int | None,
+    label: str,
 ) -> ProcessMemoryObservation:
     """Snapshot process memory for ``pid`` at the given lifecycle label.
 
@@ -455,7 +454,8 @@ _LOG_LINE_RE = re.compile(
 
 
 def parse_widen_memory_log(
-    log_text: str, labels: tuple[str, ...],
+    log_text: str,
+    labels: tuple[str, ...],
 ) -> dict[str, LogMemoryObservation]:
     """Parse the last occurrence of each WIDEN ``[mem]`` label.
 
@@ -606,12 +606,14 @@ def finalize_save_run_memory_observation(
     """
     run.process_memory_after_save = unavailable_save_time_observation(comfy_pid)
     run.process_memory_after_return = collect_process_memory_observation(
-        comfy_pid, "after-return",
+        comfy_pid,
+        "after-return",
     )
 
     if comfy_log_path:
         segment, _end_offset, log_err = read_log_segment(
-            comfy_log_path, before_offset,
+            comfy_log_path,
+            before_offset,
         )
         if log_err:
             run.log_after_checkpoint_save = LogMemoryObservation(
@@ -768,28 +770,30 @@ class CheckpointValidationReport:
         return json.dumps(self.to_dict(), indent=indent)
 
 
-_REQUIRED_REPORT_FIELDS = frozenset({
-    "comfy_version",
-    "memory_mode",
-    "terminal_save_workflow_shape",
-    "terminal_save_result",
-    "checkpoint_save_workflow_shape",
-    "saved_artifact_path",
-    "saved_artifact_classification",
-    "checkpoint_save_result",
-    "checkpoint_loader_result",
-    "downstream_result",
-    "cache_reuse_result",
-    "cache_reuse_detail",
-    "failure_categories",
-    "comfy_pid",
-    "comfy_log_path",
-    "repeat_cache_miss_runs_requested",
-    "memory_accumulation_threshold_mb",
-    "primary_checkpoint_save_run",
-    "repeat_cache_miss_run_reports",
-    "repeated_cache_miss_memory_result",
-})
+_REQUIRED_REPORT_FIELDS = frozenset(
+    {
+        "comfy_version",
+        "memory_mode",
+        "terminal_save_workflow_shape",
+        "terminal_save_result",
+        "checkpoint_save_workflow_shape",
+        "saved_artifact_path",
+        "saved_artifact_classification",
+        "checkpoint_save_result",
+        "checkpoint_loader_result",
+        "downstream_result",
+        "cache_reuse_result",
+        "cache_reuse_detail",
+        "failure_categories",
+        "comfy_pid",
+        "comfy_log_path",
+        "repeat_cache_miss_runs_requested",
+        "memory_accumulation_threshold_mb",
+        "primary_checkpoint_save_run",
+        "repeat_cache_miss_run_reports",
+        "repeated_cache_miss_memory_result",
+    }
+)
 
 
 PRIMARY_CHECKPOINT_SAVE_IDENTITY = "primary-checkpoint-save"
@@ -835,48 +839,54 @@ def format_report(report: CheckpointValidationReport) -> str:
             lines.append(f"  ... and {len(report.node_classes) - 10} more")
         lines.append("")
 
-    lines.extend([
-        "--- Terminal Save ---",
-        f"  Accepted:     {report.terminal_save_result.accepted}",
-        f"  Prompt ID:    {report.terminal_save_result.prompt_id}",
-        f"  Error:        {report.terminal_save_result.error or 'none'}",
-    ])
+    lines.extend(
+        [
+            "--- Terminal Save ---",
+            f"  Accepted:     {report.terminal_save_result.accepted}",
+            f"  Prompt ID:    {report.terminal_save_result.prompt_id}",
+            f"  Error:        {report.terminal_save_result.error or 'none'}",
+        ]
+    )
     if report.terminal_save_workflow_shape:
         shape_json = json.dumps(report.terminal_save_workflow_shape)
         lines.append(f"  Workflow Shape: {shape_json}")
     lines.append("")
 
-    lines.extend([
-        "--- Checkpoint Save ---",
-        f"  Accepted:     {report.checkpoint_save_result.accepted}",
-        f"  Prompt ID:    {report.checkpoint_save_result.prompt_id}",
-        f"  Artifact:     {report.saved_artifact_path}",
-        f"  Classification: {report.saved_artifact_classification}",
-        f"  Error:        {report.checkpoint_save_result.error or 'none'}",
-    ])
+    lines.extend(
+        [
+            "--- Checkpoint Save ---",
+            f"  Accepted:     {report.checkpoint_save_result.accepted}",
+            f"  Prompt ID:    {report.checkpoint_save_result.prompt_id}",
+            f"  Artifact:     {report.saved_artifact_path}",
+            f"  Classification: {report.saved_artifact_classification}",
+            f"  Error:        {report.checkpoint_save_result.error or 'none'}",
+        ]
+    )
     if report.checkpoint_save_workflow_shape:
         shape_json = json.dumps(report.checkpoint_save_workflow_shape)
         lines.append(f"  Workflow Shape: {shape_json}")
     lines.append("")
 
-    lines.extend([
-        "--- Checkpoint Loader ---",
-        f"  Accepted:     {report.checkpoint_loader_result.accepted}",
-        f"  Prompt ID:    {report.checkpoint_loader_result.prompt_id}",
-        f"  Error:        {report.checkpoint_loader_result.error or 'none'}",
-        "",
-        "--- Downstream KSampler ---",
-        f"  Accepted:     {report.downstream_result.accepted}",
-        f"  Prompt ID:    {report.downstream_result.prompt_id}",
-        f"  Error:        {report.downstream_result.error or 'none'}",
-        "",
-        "--- Cache Reuse ---",
-        f"  Accepted:     {report.cache_reuse_result.accepted}",
-        f"  Prompt ID:    {report.cache_reuse_result.prompt_id}",
-        f"  Detail:       {report.cache_reuse_detail or 'none'}",
-        f"  Error:        {report.cache_reuse_result.error or 'none'}",
-        "",
-    ])
+    lines.extend(
+        [
+            "--- Checkpoint Loader ---",
+            f"  Accepted:     {report.checkpoint_loader_result.accepted}",
+            f"  Prompt ID:    {report.checkpoint_loader_result.prompt_id}",
+            f"  Error:        {report.checkpoint_loader_result.error or 'none'}",
+            "",
+            "--- Downstream KSampler ---",
+            f"  Accepted:     {report.downstream_result.accepted}",
+            f"  Prompt ID:    {report.downstream_result.prompt_id}",
+            f"  Error:        {report.downstream_result.error or 'none'}",
+            "",
+            "--- Cache Reuse ---",
+            f"  Accepted:     {report.cache_reuse_result.accepted}",
+            f"  Prompt ID:    {report.cache_reuse_result.prompt_id}",
+            f"  Detail:       {report.cache_reuse_detail or 'none'}",
+            f"  Error:        {report.cache_reuse_result.error or 'none'}",
+            "",
+        ]
+    )
 
     if report.failure_categories:
         lines.append("--- Failure Categories ---")
@@ -887,15 +897,10 @@ def format_report(report: CheckpointValidationReport) -> str:
     lines.append("--- Process-Memory Observation Inputs ---")
     pid_disp = report.comfy_pid if report.comfy_pid is not None else "not supplied"
     lines.append(f"  --comfy-pid:        {pid_disp}")
+    lines.append(f"  --comfy-log-path:   {report.comfy_log_path or 'not supplied'}")
+    lines.append(f"  --repeat-cache-miss-runs: {report.repeat_cache_miss_runs_requested}")
     lines.append(
-        f"  --comfy-log-path:   {report.comfy_log_path or 'not supplied'}"
-    )
-    lines.append(
-        f"  --repeat-cache-miss-runs: {report.repeat_cache_miss_runs_requested}"
-    )
-    lines.append(
-        f"  --memory-accumulation-threshold-mb: "
-        f"{report.memory_accumulation_threshold_mb}"
+        f"  --memory-accumulation-threshold-mb: {report.memory_accumulation_threshold_mb}"
     )
     lines.append("")
 
@@ -986,7 +991,8 @@ def format_report(report: CheckpointValidationReport) -> str:
         lines.append("--- Repeated Cache-Miss Memory Result ---")
         lines.append(f"  result:        {result.get('result', 'unknown')}")
         threshold_disp = result.get(
-            "threshold_mb", report.memory_accumulation_threshold_mb,
+            "threshold_mb",
+            report.memory_accumulation_threshold_mb,
         )
         lines.append(f"  threshold_mb:  {threshold_disp}")
         if result.get("delta_kb") is not None:
@@ -1016,22 +1022,24 @@ def format_refusal(guard_result: GuardResult) -> str:
     ]
     for reason in guard_result.reasons:
         lines.append(f"  - {reason}")
-    lines.extend([
-        "",
-        "All of the following are required to run checkpoint validation:",
-        f"  1. {_ENV_VAR}=1 environment variable",
-        f"  2. {_CLI_FLAG} CLI flag",
-        "  3. --comfy-api-url <url>",
-        "  4. --source-model <name>",
-        "  5. --report-output <path>",
-        "",
-        "No ComfyUI API prompts were submitted.",
-        "No ComfyUI modules were imported.",
-        "No ComfyUI installation was modified.",
-        "No processes were started.",
-        "No large artifacts were written.",
-        "=" * 60,
-    ])
+    lines.extend(
+        [
+            "",
+            "All of the following are required to run checkpoint validation:",
+            f"  1. {_ENV_VAR}=1 environment variable",
+            f"  2. {_CLI_FLAG} CLI flag",
+            "  3. --comfy-api-url <url>",
+            "  4. --source-model <name>",
+            "  5. --report-output <path>",
+            "",
+            "No ComfyUI API prompts were submitted.",
+            "No ComfyUI modules were imported.",
+            "No ComfyUI installation was modified.",
+            "No processes were started.",
+            "No large artifacts were written.",
+            "=" * 60,
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -1053,7 +1061,9 @@ def _api_post_prompt(base_url: str, prompt: dict, timeout: float = 60.0) -> dict
     url = f"{base_url.rstrip('/')}/prompt"
     payload = json.dumps({"prompt": prompt}).encode("utf-8")
     req = urllib.request.Request(
-        url, data=payload, method="POST",
+        url,
+        data=payload,
+        method="POST",
         headers={"Content-Type": "application/json"},
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -1093,7 +1103,11 @@ def extract_node_classes(object_info: dict) -> list[str]:
 
 
 def query_prompt_history(
-    base_url: str, prompt_id: str, *, timeout: float = 30.0, max_polls: int = 30,
+    base_url: str,
+    prompt_id: str,
+    *,
+    timeout: float = 30.0,
+    max_polls: int = 30,
     poll_interval: float = 2.0,
 ) -> dict:
     """Poll /history/{prompt_id} until the prompt finishes or polls are exhausted.
@@ -1109,7 +1123,9 @@ def query_prompt_history(
 
 
 def check_cache_reuse(
-    base_url: str, first_prompt_id: str, reuse_prompt_id: str,
+    base_url: str,
+    first_prompt_id: str,
+    reuse_prompt_id: str,
     *,
     first_elapsed: float = 0.0,
     reuse_elapsed: float = 0.0,
@@ -1371,7 +1387,8 @@ def build_downstream_workflow(
 
 
 def build_repeat_cache_miss_workflow(
-    source_model: str, model_name: str,
+    source_model: str,
+    model_name: str,
 ) -> dict:
     """Build a checkpoint-save workflow with a caller-supplied model_name.
 
@@ -1406,7 +1423,8 @@ def build_repeat_cache_miss_workflow(
 
 
 def make_repeat_cache_miss_identity(
-    run_index: int, run_token: str | None = None,
+    run_index: int,
+    run_token: str | None = None,
 ) -> tuple[str, str]:
     """Return ``(cache_miss_identity, model_name)`` for a repeat run.
 
@@ -1557,7 +1575,7 @@ def _extract_failing_node_type(error: str) -> str:
     if error.startswith("node_error("):
         paren_end = error.find(")")
         if paren_end > len("node_error("):
-            return error[len("node_error("):paren_end]
+            return error[len("node_error(") : paren_end]
     return ""
 
 
@@ -1640,15 +1658,20 @@ def run_repeated_cache_miss_runs(
             cache_miss_identity=identity,
             model_name=model_name,
         )
-        run.process_memory_before, before_offset = (
-            begin_save_run_memory_observation(comfy_pid, comfy_log_path)
+        run.process_memory_before, before_offset = begin_save_run_memory_observation(
+            comfy_pid, comfy_log_path
         )
         workflow = build_repeat_cache_miss_workflow(source_model, model_name)
         run.save_result = submit_workflow(
-            comfy_api_url, workflow, f"repeat_cache_miss_{run_index:03d}",
+            comfy_api_url,
+            workflow,
+            f"repeat_cache_miss_{run_index:03d}",
         )
         finalize_save_run_memory_observation(
-            run, comfy_pid, comfy_log_path, before_offset,
+            run,
+            comfy_pid,
+            comfy_log_path,
+            before_offset,
         )
         results.append(run)
     return results
@@ -1690,7 +1713,8 @@ def run_validation(
         comfy_log_path=comfy_log_path or "",
         repeat_cache_miss_runs_requested=max(0, int(repeat_cache_miss_runs)),
         memory_accumulation_threshold_mb=max(
-            0, int(memory_accumulation_threshold_mb),
+            0,
+            int(memory_accumulation_threshold_mb),
         ),
     )
     start_time = time.time()
@@ -1717,7 +1741,9 @@ def run_validation(
         terminal_wf = build_terminal_exit_save_workflow(source_model)
         report.terminal_save_workflow_shape = terminal_wf
         report.terminal_save_result = submit_workflow(
-            comfy_api_url, terminal_wf, "terminal_exit_save",
+            comfy_api_url,
+            terminal_wf,
+            "terminal_exit_save",
         )
         report.failure_categories["scheduling"] = classify_failure(
             report.terminal_save_result,
@@ -1747,11 +1773,16 @@ def run_validation(
             begin_save_run_memory_observation(comfy_pid, comfy_log_path)
         )
         report.checkpoint_save_result = submit_workflow(
-            comfy_api_url, save_wf, "checkpoint_save",
+            comfy_api_url,
+            save_wf,
+            "checkpoint_save",
         )
         primary_run.save_result = report.checkpoint_save_result
         finalize_save_run_memory_observation(
-            primary_run, comfy_pid, comfy_log_path, primary_before_offset,
+            primary_run,
+            comfy_pid,
+            comfy_log_path,
+            primary_before_offset,
         )
         report.primary_checkpoint_save_run = primary_run
         report.failure_categories["save"] = classify_failure(
@@ -1786,7 +1817,9 @@ def run_validation(
                 batch_size=batch_size,
             )
             downstream_full_result = submit_workflow(
-                comfy_api_url, downstream_wf, "downstream_ksampler",
+                comfy_api_url,
+                downstream_wf,
+                "downstream_ksampler",
             )
             # The downstream workflow contains both CheckpointLoaderSimple
             # (node "1") and KSampler (node "5").  A single submission
@@ -1860,15 +1893,16 @@ def run_validation(
         # --- Submit cache reuse workflow and verify reuse ---
         cache_wf = build_cache_reuse_workflow(source_model)
         report.cache_reuse_result = submit_workflow(
-            comfy_api_url, cache_wf, "cache_reuse",
+            comfy_api_url,
+            cache_wf,
+            "cache_reuse",
         )
         report.failure_categories["cache"] = classify_failure(
             report.cache_reuse_result,
         )
 
         # Check cache reuse by comparing execution history
-        if (report.checkpoint_save_result.accepted
-                and report.cache_reuse_result.accepted):
+        if report.checkpoint_save_result.accepted and report.cache_reuse_result.accepted:
             cache_reused, detail = check_cache_reuse(
                 comfy_api_url,
                 report.checkpoint_save_result.prompt_id,
@@ -1880,9 +1914,7 @@ def run_validation(
             if not cache_reused:
                 report.failure_categories["cache"] = "cache_not_reused"
         elif report.cache_reuse_result.accepted:
-            report.cache_reuse_detail = (
-                "first save was rejected; cannot verify reuse"
-            )
+            report.cache_reuse_detail = "first save was rejected; cannot verify reuse"
         else:
             report.cache_reuse_detail = "cache reuse prompt was rejected"
 
@@ -1895,16 +1927,15 @@ def run_validation(
                 comfy_pid=comfy_pid,
                 comfy_log_path=comfy_log_path,
             )
-            report.repeated_cache_miss_memory_result = (
-                analyze_memory_accumulation(
-                    report.repeat_cache_miss_run_reports,
-                    report.memory_accumulation_threshold_mb,
-                )
+            report.repeated_cache_miss_memory_result = analyze_memory_accumulation(
+                report.repeat_cache_miss_run_reports,
+                report.memory_accumulation_threshold_mb,
             )
             if report.repeated_cache_miss_memory_result.get("result") == "failed":
                 report.failure_categories["repeated_cache_miss_memory"] = (
                     report.repeated_cache_miss_memory_result.get(
-                        "detail", "accumulation exceeded threshold",
+                        "detail",
+                        "accumulation exceeded threshold",
                     )
                 )
             else:

@@ -45,6 +45,7 @@ def _make_full_mode_mocks(mock_model_patcher, keys_to_process, *, recipe=None):
 
     set_affected = {}
     if recipe is not None:
+
         def _find_loras(n):
             if isinstance(n, RecipeLoRA):
                 set_affected[str(id(n))] = set(keys_to_process)
@@ -56,6 +57,7 @@ def _make_full_mode_mocks(mock_model_patcher, keys_to_process, *, recipe=None):
                 _find_loras(n.target)
                 if n.backbone is not None:
                     _find_loras(n.backbone)
+
         _find_loras(recipe)
     if not set_affected:
         set_affected = {str(id(None)): set(keys_to_process)}
@@ -77,10 +79,19 @@ def _make_full_mode_mocks(mock_model_patcher, keys_to_process, *, recipe=None):
     return mock_analyze, mock_model_analysis, mock_loader, dummy_plan
 
 
-def _run_full_mode(recipe, mock_model_patcher, keys, tmp_path,
-                   *, model_name="test_model", enable_cache=True,
-                   extra_patches=None, chunked_eval_override=None,
-                   save_workflow=True, extra_pnginfo=None):
+def _run_full_mode(
+    recipe,
+    mock_model_patcher,
+    keys,
+    tmp_path,
+    *,
+    model_name="test_model",
+    enable_cache=True,
+    extra_patches=None,
+    chunked_eval_override=None,
+    save_workflow=True,
+    extra_pnginfo=None,
+):
     """Run WIDENExitNode.execute() in full saved model mode with mocking.
 
     Full mode now uses streaming_evaluation_to_sink (which calls write_fn
@@ -89,7 +100,9 @@ def _run_full_mode(recipe, mock_model_patcher, keys, tmp_path,
     that generates tensors and calls write_fn for each key.
     """
     mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-        mock_model_patcher, keys, recipe=recipe,
+        mock_model_patcher,
+        keys,
+        recipe=recipe,
     )
 
     save_path = str(tmp_path / f"{model_name}.safetensors")
@@ -163,8 +176,11 @@ def _run_full_mode(recipe, mock_model_patcher, keys, tmp_path,
 
         node = WIDENExitNode()
         result = node.execute(
-            recipe, save_model=True, model_name=model_name,
-            enable_cache=enable_cache, save_workflow=save_workflow,
+            recipe,
+            save_model=True,
+            model_name=model_name,
+            enable_cache=enable_cache,
+            save_workflow=save_workflow,
             extra_pnginfo=extra_pnginfo,
         )
     finally:
@@ -193,9 +209,7 @@ class TestFullModeSucceedsWithoutDictPath:
     """
 
     # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
-    def test_full_mode_succeeds_when_dict_eval_patched_to_fail(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_full_mode_succeeds_when_dict_eval_patched_to_fail(self, mock_model_patcher, tmp_path):
         """Full mode does not use the dict-returning chunked_evaluation path
         for newly evaluated affected tensors — it uses
         streaming_evaluation_to_sink which streams each tensor directly to
@@ -205,8 +219,9 @@ class TestFullModeSucceedsWithoutDictPath:
         full mode still succeeds because it calls
         streaming_evaluation_to_sink instead.
         """
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -214,7 +229,9 @@ class TestFullModeSucceedsWithoutDictPath:
         save_path = str(tmp_path / "test.safetensors")
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, keys, recipe=merge,
+            mock_model_patcher,
+            keys,
+            recipe=merge,
         )
 
         affected_tensors = {k: torch.randn(4, 4) for k in keys}
@@ -225,8 +242,9 @@ class TestFullModeSucceedsWithoutDictPath:
         def chunked_eval_bomb(**kwargs):
             raise RuntimeError("chunked_evaluation must not be called in full mode")
 
-        def streaming_eval(*, keys, base_tensors, eval_fn, batch_size,
-                           device, dtype, storage_dtype, write_fn):
+        def streaming_eval(
+            *, keys, base_tensors, eval_fn, batch_size, device, dtype, storage_dtype, write_fn
+        ):
             for k in keys:
                 write_fn(k, affected_tensors[k])
 
@@ -269,8 +287,9 @@ class TestFullModeSucceedsWithoutDictPath:
         that the actual sink constructor IS called (showing the streaming
         sink replaces the in-memory sink path).
         """
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -278,7 +297,9 @@ class TestFullModeSucceedsWithoutDictPath:
         save_path = str(tmp_path / "sink_test.safetensors")
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, keys, recipe=merge,
+            mock_model_patcher,
+            keys,
+            recipe=merge,
         )
 
         affected_tensors = {k: torch.randn(4, 4) for k in keys}
@@ -291,8 +312,9 @@ class TestFullModeSucceedsWithoutDictPath:
         def dict_eval_bomb(**kwargs):
             raise RuntimeError("in-memory result accumulation must not be used")
 
-        def streaming_eval(*, keys, base_tensors, eval_fn, batch_size,
-                           device, dtype, storage_dtype, write_fn):
+        def streaming_eval(
+            *, keys, base_tensors, eval_fn, batch_size, device, dtype, storage_dtype, write_fn
+        ):
             for k in keys:
                 write_fn(k, affected_tensors[k])
 
@@ -357,15 +379,18 @@ class TestPatchModePreserved:
     # AC: @streaming-full-model-materialization (patch mode unchanged)
     def test_patch_mode_returns_patched_model(self, mock_model_patcher):
         """Patch mode (save_model=False) returns a ModelPatcher with set patches."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         keys = list(mock_model_patcher.model_state_dict().keys())
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, keys, recipe=merge,
+            mock_model_patcher,
+            keys,
+            recipe=merge,
         )
         merged = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
@@ -394,15 +419,18 @@ class TestPatchModePreserved:
     # AC: @streaming-full-model-materialization (patch mode cache preserved)
     def test_patch_mode_preserves_incremental_cache(self, mock_model_patcher):
         """Patch mode populates _incremental_cache with tensor payload."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         keys = list(mock_model_patcher.model_state_dict().keys())
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, keys, recipe=merge,
+            mock_model_patcher,
+            keys,
+            recipe=merge,
         )
         merged = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
@@ -451,9 +479,7 @@ class TestFullModeEventOrder:
     # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
     # AC: @streaming-full-model-materialization ac-affected-results-released
     # AC: @streaming-full-model-materialization ac-base-weight-bounded-copying
-    def test_event_order_interleaved_keys(
-        self, tmp_path
-    ):
+    def test_event_order_interleaved_keys(self, tmp_path):
         """Full mode event order with two affected groups whose keys interleave
         in sorted name order, plus an unaffected base key.
 
@@ -482,6 +508,7 @@ class TestFullModeEventOrder:
         state_dict[base_only_key] = torch.randn(4, 4, dtype=torch.float32)
 
         from tests.conftest import MockModelPatcher
+
         mock_patcher = MockModelPatcher.__new__(MockModelPatcher)
         mock_patcher._state_dict = state_dict
         mock_patcher.model = MagicMock()
@@ -489,6 +516,7 @@ class TestFullModeEventOrder:
         mock_patcher.model.diffusion_model.state_dict = MagicMock(return_value=state_dict)
         mock_patcher.patches = {}
         import uuid
+
         mock_patcher.patches_uuid = uuid.uuid4()
 
         def _clone():
@@ -498,10 +526,10 @@ class TestFullModeEventOrder:
             c.patches = {}
             c.patches_uuid = mock_patcher.patches_uuid
             return c
+
         mock_patcher.clone = _clone
 
-        base = RecipeBase(model_patcher=mock_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(model_patcher=mock_patcher, arch="sdxl", checkpoint_components=None)
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -510,7 +538,9 @@ class TestFullModeEventOrder:
         events = []
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-            mock_patcher, all_keys, recipe=merge,
+            mock_patcher,
+            all_keys,
+            recipe=merge,
         )
 
         group1_results = {k: torch.randn(4, 4) for k in group1_keys}
@@ -607,8 +637,7 @@ class TestFullModeEventOrder:
         # AC: @streaming-full-model-materialization ac-direct-artifact-handoff
         # Group 1 is written to sink BEFORE group 2 starts evaluation
         assert last_g1_write_idx < eval_g2_idx, (
-            f"Group 1 writes must complete before group 2 evaluation. "
-            f"Events: {events}"
+            f"Group 1 writes must complete before group 2 evaluation. Events: {events}"
         )
 
         # All writes happen before finalize
@@ -657,6 +686,7 @@ class TestFailureAbortsMaterialization:
             state_dict[k] = torch.randn(8, 8, dtype=torch.float32)
 
         from tests.conftest import MockModelPatcher
+
         mock_patcher = MockModelPatcher.__new__(MockModelPatcher)
         mock_patcher._state_dict = state_dict
         mock_patcher.model = MagicMock()
@@ -672,17 +702,19 @@ class TestFailureAbortsMaterialization:
             c.patches = {}
             c.patches_uuid = mock_patcher.patches_uuid
             return c
+
         mock_patcher.clone = _clone
 
-        base = RecipeBase(model_patcher=mock_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(model_patcher=mock_patcher, arch="sdxl", checkpoint_components=None)
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         save_path = str(tmp_path / "partial.safetensors")
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-            mock_patcher, all_keys, recipe=merge,
+            mock_patcher,
+            all_keys,
+            recipe=merge,
         )
         sig1 = OpSignature(shape=(4, 4), ndim=2)
         sig2 = OpSignature(shape=(8, 8), ndim=2)
@@ -761,17 +793,21 @@ class TestFailureAbortsMaterialization:
             full_manifest[k] = (torch.float32, (4, 4))
         for k in group2_keys:
             full_manifest[k] = (torch.float32, (8, 8))
-        assert check_full_model_cache(
-            save_path, "test_hash", expected_manifest=full_manifest,
-        ) is False, "Partial artifact must not be accepted as a full-model cache hit"
+        assert (
+            check_full_model_cache(
+                save_path,
+                "test_hash",
+                expected_manifest=full_manifest,
+            )
+            is False
+        ), "Partial artifact must not be accepted as a full-model cache hit"
 
     # AC: @streaming-full-model-materialization ac-failed-materialization-releases-resident-payload
-    def test_failure_leaves_no_full_mode_tensor_in_cache(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_failure_leaves_no_full_mode_tensor_in_cache(self, mock_model_patcher, tmp_path):
         """After failure, no full-mode tensor payload remains in _incremental_cache."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -780,7 +816,9 @@ class TestFailureAbortsMaterialization:
         _incremental_cache.clear()
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, keys, recipe=merge,
+            mock_model_patcher,
+            keys,
+            recipe=merge,
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
 
@@ -824,9 +862,7 @@ class TestFinalizeFailure:
     """
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
-    def test_finalize_failure_does_not_create_artifact(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_finalize_failure_does_not_create_artifact(self, mock_model_patcher, tmp_path):
         """If finalize fails, the node's error handling must abort the sink
         and leave no reusable artifact or full-mode cache payload.
 
@@ -837,8 +873,9 @@ class TestFinalizeFailure:
         """
         import os
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -846,13 +883,16 @@ class TestFinalizeFailure:
         save_path = str(tmp_path / "finalize_fail.safetensors")
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, keys, recipe=merge,
+            mock_model_patcher,
+            keys,
+            recipe=merge,
         )
         merged = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        def streaming_eval(*, keys, base_tensors, eval_fn, batch_size,
-                           device, dtype, storage_dtype, write_fn):
+        def streaming_eval(
+            *, keys, base_tensors, eval_fn, batch_size, device, dtype, storage_dtype, write_fn
+        ):
             for k in keys:
                 write_fn(k, merged[k])
 
@@ -897,9 +937,7 @@ class TestFinalizeFailure:
 
         # No temp files left behind in the directory
         temp_files = [f for f in os.listdir(tmp_path) if f.startswith(".ecaj_tmp_")]
-        assert len(temp_files) == 0, (
-            f"Temp files left behind after finalize failure: {temp_files}"
-        )
+        assert len(temp_files) == 0, f"Temp files left behind after finalize failure: {temp_files}"
 
 
 # ===========================================================================
@@ -922,8 +960,9 @@ class TestFullArtifactCacheHit:
     def test_cache_hit_skips_gpu(self, mock_model_patcher, tmp_path):
         """On full-model cache hit, GPU pipeline is skipped entirely and
         the returned MODEL comes from comfy.sd.load_diffusion_model."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -933,8 +972,7 @@ class TestFullArtifactCacheHit:
 
         # Cache artifacts use the EXTERNAL Comfy-loadable layout.
         artifact_tensors = {
-            "model.diffusion_model." + k.removeprefix("diffusion_model."):
-                torch.ones(4, 4) * 42.0
+            "model.diffusion_model." + k.removeprefix("diffusion_model."): torch.ones(4, 4) * 42.0
             for k in keys
         }
 
@@ -972,9 +1010,7 @@ class TestFullArtifactCacheHit:
                 return_value=sentinel_model,
             ) as mock_load,
         ):
-            (result,) = WIDENExitNode().execute(
-                merge, save_model=True, model_name="cached"
-            )
+            (result,) = WIDENExitNode().execute(merge, save_model=True, model_name="cached")
             mock_analyze.assert_not_called()
 
         assert result is sentinel_model
@@ -1017,7 +1053,9 @@ class TestFullArtifactCacheHit:
         )
 
         result = _load_model_from_artifact(
-            save_path, mock_model_patcher, torch.float32,
+            save_path,
+            mock_model_patcher,
+            torch.float32,
         )
 
         # All keys must have artifact values in model_state_dict, not the
@@ -1168,12 +1206,11 @@ class TestNoResidentPayload:
     """
 
     # AC: @streaming-full-model-materialization ac-full-cache-avoids-resident-payload
-    def test_full_mode_no_tensor_payload_after_success(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_full_mode_no_tensor_payload_after_success(self, mock_model_patcher, tmp_path):
         """After full mode success, _incremental_cache has no tensor payload."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1185,9 +1222,7 @@ class TestNoResidentPayload:
         assert len(_incremental_cache) == 0
 
     # AC: @streaming-full-model-materialization ac-full-cache-avoids-resident-payload
-    def test_pre_populated_patch_cache_not_read_by_full_mode(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_pre_populated_patch_cache_not_read_by_full_mode(self, mock_model_patcher, tmp_path):
         """A pre-populated patch-mode tensor cache sentinel (all zeros) is not
         read or reused by full mode. The returned artifact must contain the
         freshly computed tensors (non-zero), not the sentinel zeros.
@@ -1196,8 +1231,9 @@ class TestNoResidentPayload:
         treated as a patch-mode tensor payload."""
         from nodes.exit import _CacheEntry
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1218,7 +1254,10 @@ class TestNoResidentPayload:
         fresh_tensors = {k: torch.ones(4, 4) * fresh_value for k in keys}
 
         (result,), mocks = _run_full_mode(
-            merge, mock_model_patcher, keys, tmp_path,
+            merge,
+            mock_model_patcher,
+            keys,
+            tmp_path,
             chunked_eval_override=fresh_tensors,
         )
 
@@ -1242,9 +1281,7 @@ class TestNoResidentPayload:
                 )
 
     # AC: @streaming-full-model-materialization ac-full-cache-avoids-resident-payload
-    def test_full_artifact_not_treated_as_patch_tensor_payload(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_full_artifact_not_treated_as_patch_tensor_payload(self, mock_model_patcher, tmp_path):
         """A full-model artifact is not treated as a patch-mode tensor payload.
 
         Phase 1: Run full mode — _incremental_cache must be empty afterward.
@@ -1252,8 +1289,9 @@ class TestNoResidentPayload:
         (not reuse the full-mode artifact as a tensor payload) and populate
         _incremental_cache with its own tensor payload.
         """
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1277,7 +1315,9 @@ class TestNoResidentPayload:
 
         # Phase 2: patch mode — must compute fresh, not reuse full artifact
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, keys, recipe=merge,
+            mock_model_patcher,
+            keys,
+            recipe=merge,
         )
         patch_merged = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
@@ -1325,14 +1365,13 @@ class TestEnableCacheFalseEvicts:
     """
 
     # AC: @streaming-full-model-materialization (cache disable)
-    def test_enable_cache_false_evicts_in_full_mode(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_enable_cache_false_evicts_in_full_mode(self, mock_model_patcher, tmp_path):
         """enable_cache=False in full mode should evict _incremental_cache entries."""
         from nodes.exit import _CacheEntry
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1348,7 +1387,11 @@ class TestEnableCacheFalseEvicts:
         )
 
         (result,), mocks = _run_full_mode(
-            merge, mock_model_patcher, keys, tmp_path, enable_cache=False,
+            merge,
+            mock_model_patcher,
+            keys,
+            tmp_path,
+            enable_cache=False,
         )
 
         assert len(_incremental_cache) == 0
@@ -1367,12 +1410,11 @@ class TestNoOpFullMode:
     """
 
     # AC: @full-saved-model-output ac-no-op-produces-full-artifact
-    def test_recipe_base_noop_produces_full_artifact(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_recipe_base_noop_produces_full_artifact(self, mock_model_patcher, tmp_path):
         """RecipeBase-only recipe in full mode produces a valid full artifact."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         save_path = str(tmp_path / "noop.safetensors")
 
         with (
@@ -1386,12 +1428,11 @@ class TestNoOpFullMode:
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.ProgressBar", None),
         ):
-            (result,) = WIDENExitNode().execute(
-                base, save_model=True, model_name="noop"
-            )
+            (result,) = WIDENExitNode().execute(base, save_model=True, model_name="noop")
 
         # Artifact should exist with all base keys (in EXTERNAL Comfy layout)
         import os
+
         assert os.path.exists(save_path)
 
         with safe_open(save_path, framework="pt") as f:
@@ -1406,19 +1447,21 @@ class TestNoOpFullMode:
         assert saved_keys == expected_external_keys
 
     # AC: @full-saved-model-output ac-no-op-produces-full-artifact
-    def test_merge_noop_produces_full_artifact(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_merge_noop_produces_full_artifact(self, mock_model_patcher, tmp_path):
         """Merge recipe that produces no affected diffusion keys still produces
         a full artifact in full mode."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         # No keys to process (empty affected keys)
         (result,), mocks = _run_full_mode(
-            merge, mock_model_patcher, [], tmp_path,
+            merge,
+            mock_model_patcher,
+            [],
+            tmp_path,
             model_name="noop_merge",
             chunked_eval_override={},
         )
@@ -1440,8 +1483,9 @@ class TestComfyMemoryCompatibility:
     AC: @comfy-memory-manager-compatibility ac-non-dynamic-memory-mode-supported
     """
 
-    def _run_with_vram_state(self, mock_model_patcher, tmp_path, model_name,
-                             vram_state_value, *, cleanup_available=True):
+    def _run_with_vram_state(
+        self, mock_model_patcher, tmp_path, model_name, vram_state_value, *, cleanup_available=True
+    ):
         """Run full mode with a simulated Comfy memory management state.
 
         Installs a mock comfy.model_management module with the given
@@ -1452,8 +1496,9 @@ class TestComfyMemoryCompatibility:
         import sys
         import types
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1486,7 +1531,10 @@ class TestComfyMemoryCompatibility:
 
         try:
             (result,), mocks = _run_full_mode(
-                merge, mock_model_patcher, keys, tmp_path,
+                merge,
+                mock_model_patcher,
+                keys,
+                tmp_path,
                 model_name=model_name,
             )
         finally:
@@ -1507,9 +1555,7 @@ class TestComfyMemoryCompatibility:
         assert result is not None
 
         # Artifact was written to disk (streaming succeeded)
-        assert os.path.exists(save_path), (
-            "Full-mode artifact must exist after streaming"
-        )
+        assert os.path.exists(save_path), "Full-mode artifact must exist after streaming"
         with safe_open(save_path, framework="pt") as f:
             meta = f.metadata()
             assert meta["__ecaj_output_mode__"] == "full"
@@ -1525,7 +1571,9 @@ class TestComfyMemoryCompatibility:
         when Dynamic VRAM is the active memory mode.  The exit node must not
         call set_vram_state to opt out."""
         result, mode_change_calls, mm, save_path = self._run_with_vram_state(
-            mock_model_patcher, tmp_path, "dvram",
+            mock_model_patcher,
+            tmp_path,
+            "dvram",
             vram_state_value="NORMAL_VRAM",
         )
         self._assert_streaming_behavior(result, save_path)
@@ -1538,7 +1586,9 @@ class TestComfyMemoryCompatibility:
         """Full mode streams and leaves no resident payload when Dynamic VRAM
         is NOT active (e.g. HIGH_VRAM)."""
         result, mode_change_calls, mm, save_path = self._run_with_vram_state(
-            mock_model_patcher, tmp_path, "no_dvram",
+            mock_model_patcher,
+            tmp_path,
+            "no_dvram",
             vram_state_value="HIGH_VRAM",
         )
         self._assert_streaming_behavior(result, save_path)
@@ -1547,31 +1597,29 @@ class TestComfyMemoryCompatibility:
         )
 
     # AC: @comfy-memory-manager-compatibility ac-memory-mode-preserved
-    def test_full_mode_does_not_mutate_memory_mode(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_full_mode_does_not_mutate_memory_mode(self, mock_model_patcher, tmp_path):
         """Full mode streams, leaves no resident payload, and does not mutate
         the ComfyUI memory mode.  vram_state before and after must match."""
         result, mode_change_calls, mm, save_path = self._run_with_vram_state(
-            mock_model_patcher, tmp_path, "mode_check",
+            mock_model_patcher,
+            tmp_path,
+            "mode_check",
             vram_state_value="LOW_VRAM",
         )
         self._assert_streaming_behavior(result, save_path)
-        assert len(mode_change_calls) == 0, (
-            f"set_vram_state was called: {mode_change_calls}"
-        )
+        assert len(mode_change_calls) == 0, f"set_vram_state was called: {mode_change_calls}"
         assert mm.vram_state == "LOW_VRAM", (
             f"vram_state was mutated from LOW_VRAM to {mm.vram_state}"
         )
 
     # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-    def test_full_mode_comfy_cleanup_unavailable(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_full_mode_comfy_cleanup_unavailable(self, mock_model_patcher, tmp_path):
         """Full mode streams, leaves no resident payload, and succeeds when
         Comfy memory-management cleanup APIs are unavailable."""
         result, mode_change_calls, mm, save_path = self._run_with_vram_state(
-            mock_model_patcher, tmp_path, "no_comfy_cleanup",
+            mock_model_patcher,
+            tmp_path,
+            "no_comfy_cleanup",
             vram_state_value="NORMAL_VRAM",
             cleanup_available=False,
         )
@@ -1767,15 +1815,14 @@ class TestNoopEnableCacheFalseEvicts:
     """
 
     # AC: @streaming-full-model-materialization (cache disable)
-    def test_noop_enable_cache_false_clears_incremental_cache(
-        self, mock_model_patcher, tmp_path
-    ):
+    def test_noop_enable_cache_false_clears_incremental_cache(self, mock_model_patcher, tmp_path):
         """RecipeBase full mode with enable_cache=False must clear any
         pre-populated _incremental_cache entries."""
         from nodes.exit import _CacheEntry
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         keys = list(mock_model_patcher.model_state_dict().keys())
         save_path = str(tmp_path / "noop_nocache.safetensors")
 
@@ -1801,7 +1848,9 @@ class TestNoopEnableCacheFalseEvicts:
             patch("nodes.exit.ProgressBar", None),
         ):
             (result,) = WIDENExitNode().execute(
-                base, save_model=True, model_name="noop_nocache",
+                base,
+                save_model=True,
+                model_name="noop_nocache",
                 enable_cache=False,
             )
 
@@ -1853,9 +1902,14 @@ class TestIncompleteArtifactRejected:
             "another_key": (torch.float32, (4, 4)),
             "third_key": (torch.float32, (4, 4)),
         }
-        assert check_full_model_cache(
-            save_path, "hash1", expected_manifest=expected_manifest,
-        ) is False
+        assert (
+            check_full_model_cache(
+                save_path,
+                "hash1",
+                expected_manifest=expected_manifest,
+            )
+            is False
+        )
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
     def test_complete_artifact_accepted_with_expected_manifest(self, tmp_path):
@@ -1874,9 +1928,14 @@ class TestIncompleteArtifactRejected:
             },
         )
         expected_manifest = {k: (torch.float32, (4, 4)) for k in expected_keys}
-        assert check_full_model_cache(
-            save_path, "hash1", expected_manifest=expected_manifest,
-        ) is True
+        assert (
+            check_full_model_cache(
+                save_path,
+                "hash1",
+                expected_manifest=expected_manifest,
+            )
+            is True
+        )
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
     def test_extra_keys_in_artifact_rejected(self, tmp_path):
@@ -1898,9 +1957,14 @@ class TestIncompleteArtifactRejected:
             "a": (torch.float32, (4, 4)),
             "b": (torch.float32, (4, 4)),
         }
-        assert check_full_model_cache(
-            save_path, "hash1", expected_manifest=expected_manifest,
-        ) is False
+        assert (
+            check_full_model_cache(
+                save_path,
+                "hash1",
+                expected_manifest=expected_manifest,
+            )
+            is False
+        )
 
 
 # ===========================================================================
@@ -1955,12 +2019,15 @@ class TestNonEcajFileRaisesOnFullModeCache:
 
     # AC: @exit-model-persistence ac-9
     def test_full_mode_does_not_overwrite_non_ecaj_file(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """Runtime probe: a pre-existing non-safetensors file at the save path
         must cause the full-mode execution to raise, NOT silently overwrite."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=None)
+        base = RecipeBase(
+            model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1971,8 +2038,8 @@ class TestNonEcajFileRaisesOnFullModeCache:
         with open(save_path, "w") as f:
             f.write("important user data — must not be overwritten")
 
-        mock_analyze, mock_model_analysis, mock_loader, dummy_plan = (
-            _make_full_mode_mocks(mock_model_patcher, keys, recipe=merge)
+        mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_full_mode_mocks(
+            mock_model_patcher, keys, recipe=merge
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
 
@@ -2034,9 +2101,14 @@ class TestArtifactShapeDtypeValidation:
         )
         # Manifest expects (4, 4) but artifact has (3, 3).
         expected_manifest = {"a": (torch.float32, (4, 4))}
-        assert check_full_model_cache(
-            save_path, "hash1", expected_manifest=expected_manifest,
-        ) is False
+        assert (
+            check_full_model_cache(
+                save_path,
+                "hash1",
+                expected_manifest=expected_manifest,
+            )
+            is False
+        )
 
     # AC: @full-saved-model-output ac-complete-artifact
     def test_wrong_dtype_rejected(self, tmp_path):
@@ -2055,9 +2127,14 @@ class TestArtifactShapeDtypeValidation:
         )
         # Manifest expects float32 but artifact has float16.
         expected_manifest = {"a": (torch.float32, (4, 4))}
-        assert check_full_model_cache(
-            save_path, "hash1", expected_manifest=expected_manifest,
-        ) is False
+        assert (
+            check_full_model_cache(
+                save_path,
+                "hash1",
+                expected_manifest=expected_manifest,
+            )
+            is False
+        )
 
     # AC: @full-saved-model-output ac-complete-artifact
     def test_correct_shape_and_dtype_accepted(self, tmp_path):
@@ -2081,9 +2158,14 @@ class TestArtifactShapeDtypeValidation:
             "a": (torch.float32, (4, 4)),
             "b": (torch.float16, (8, 8)),
         }
-        assert check_full_model_cache(
-            save_path, "hash1", expected_manifest=expected_manifest,
-        ) is True
+        assert (
+            check_full_model_cache(
+                save_path,
+                "hash1",
+                expected_manifest=expected_manifest,
+            )
+            is True
+        )
 
     # AC: @full-saved-model-output ac-complete-artifact
     def test_multi_key_one_wrong_shape(self, tmp_path):
@@ -2108,9 +2190,14 @@ class TestArtifactShapeDtypeValidation:
             "a": (torch.float32, (4, 4)),
             "b": (torch.float32, (8, 8)),
         }
-        assert check_full_model_cache(
-            save_path, "hash1", expected_manifest=expected_manifest,
-        ) is False
+        assert (
+            check_full_model_cache(
+                save_path,
+                "hash1",
+                expected_manifest=expected_manifest,
+            )
+            is False
+        )
 
 
 # ===========================================================================
@@ -2148,7 +2235,9 @@ class TestLoadedModelNoResidentPatches:
         )
 
         result = _load_model_from_artifact(
-            save_path, mock_model_patcher, torch.float32,
+            save_path,
+            mock_model_patcher,
+            torch.float32,
         )
 
         # No set patches — weights are model-owned.
@@ -2222,9 +2311,9 @@ class TestMixedDtypeArtifactPreservation:
         mock_patcher._state_dict = state_dict
         mock_patcher.model = MagicMock()
         mock_patcher.model.diffusion_model = MagicMock()
-        mock_patcher.model.diffusion_model.state_dict = MagicMock(return_value={
-            k.removeprefix("diffusion_model."): v for k, v in state_dict.items()
-        })
+        mock_patcher.model.diffusion_model.state_dict = MagicMock(
+            return_value={k.removeprefix("diffusion_model."): v for k, v in state_dict.items()}
+        )
         mock_patcher.model.diffusion_model.load_state_dict = MagicMock(
             side_effect=TypeError("fallback"),
         )
@@ -2238,6 +2327,7 @@ class TestMixedDtypeArtifactPreservation:
             c.patches = {}
             c.patches_uuid = mock_patcher.patches_uuid
             return c
+
         mock_patcher.clone = _clone
 
         # Create artifact with mixed dtypes
@@ -2245,8 +2335,11 @@ class TestMixedDtypeArtifactPreservation:
         artifact_tensors = {
             "diffusion_model.layer1.weight": torch.ones(4, 4, dtype=torch.float32) * 10.0,
             "diffusion_model.layer2.weight": torch.ones(
-                4, 4, dtype=torch.float16,
-            ) * 5.0,
+                4,
+                4,
+                dtype=torch.float16,
+            )
+            * 5.0,
         }
         save_file(
             artifact_tensors,
@@ -2261,7 +2354,9 @@ class TestMixedDtypeArtifactPreservation:
         )
 
         result = _load_model_from_artifact(
-            save_path, mock_patcher, torch.float32,
+            save_path,
+            mock_patcher,
+            torch.float32,
         )
 
         result_sd = result.model_state_dict()

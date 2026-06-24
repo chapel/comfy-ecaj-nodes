@@ -180,6 +180,7 @@ class TestAC5GetLoaderCLIPDispatch:
 
     def test_get_loader_clip_looks_for_arch_clip_key(self):
         """get_loader looks for '{arch}_clip' key in registry for CLIP domain."""
+
         # AC: @recipe-domain-field ac-5
         # Add a mock CLIP loader to verify dispatch
         class MockCLIPLoader(LoRALoader):

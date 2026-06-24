@@ -276,13 +276,9 @@ class MaterializationSink:
         if self._finalized or self._aborted:
             raise RuntimeError("MaterializationSink already finalized or aborted")
         if name not in self._tensor_offsets:
-            raise RuntimeError(
-                f"write_tensor called with unknown tensor name: {name!r}"
-            )
+            raise RuntimeError(f"write_tensor called with unknown tensor name: {name!r}")
         if name in self._written:
-            raise RuntimeError(
-                f"write_tensor called twice for tensor: {name!r}"
-            )
+            raise RuntimeError(f"write_tensor called twice for tensor: {name!r}")
 
         # Validate tensor against manifest expectations.
         assert self._tensor_specs is not None

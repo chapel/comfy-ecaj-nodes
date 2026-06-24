@@ -154,9 +154,7 @@ class TestTextEncoderKeyExposure:
         assert _normalize_clip_key("model.first_stage_model.encoder.weight") is None
         assert _normalize_clip_key("first_stage_model.decoder.weight") is None
 
-    def test_loader_works_with_empty_clip_keys(
-        self, diffusion_only_checkpoint_path: str
-    ) -> None:
+    def test_loader_works_with_empty_clip_keys(self, diffusion_only_checkpoint_path: str) -> None:
         """Loader handles checkpoints without any CLIP keys."""
         with CLIPModelLoader(diffusion_only_checkpoint_path) as loader:
             assert len(loader.affected_keys) == 0
@@ -183,9 +181,7 @@ class TestGetWeights:
             for t in tensors:
                 assert isinstance(t, torch.Tensor)
 
-    def test_get_weights_maps_to_clip_base_model_format(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_get_weights_maps_to_clip_base_model_format(self, sdxl_checkpoint_path: str) -> None:
         """Keys are mapped from conditioner.embedders to clip_l/clip_g format."""
         with CLIPModelLoader(sdxl_checkpoint_path) as loader:
             # File has conditioner.embedders.0.transformer.text_model...
@@ -197,9 +193,7 @@ class TestGetWeights:
             assert len(tensors) == 1
             assert tensors[0].shape == (768, 768)
 
-    def test_get_weights_raises_for_missing_keys(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_get_weights_raises_for_missing_keys(self, sdxl_checkpoint_path: str) -> None:
         """get_weights() raises KeyError for missing keys."""
         with CLIPModelLoader(sdxl_checkpoint_path) as loader:
             with pytest.raises(KeyError) as exc_info:
@@ -208,9 +202,7 @@ class TestGetWeights:
             assert "missing" in str(exc_info.value).lower()
             assert "nonexistent" in str(exc_info.value)
 
-    def test_get_weights_error_lists_missing_keys(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_get_weights_error_lists_missing_keys(self, sdxl_checkpoint_path: str) -> None:
         """Error message lists all missing keys."""
         with CLIPModelLoader(sdxl_checkpoint_path) as loader:
             missing = ["clip_l.missing1.weight", "clip_l.missing2.weight"]
@@ -236,9 +228,7 @@ class TestAffectedKeys:
         with CLIPModelLoader(sdxl_checkpoint_path) as loader:
             assert isinstance(loader.affected_keys, frozenset)
 
-    def test_affected_keys_contains_both_encoders(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_affected_keys_contains_both_encoders(self, sdxl_checkpoint_path: str) -> None:
         """affected_keys includes both CLIP-L and CLIP-G keys."""
         with CLIPModelLoader(sdxl_checkpoint_path) as loader:
             clip_l_keys = [k for k in loader.affected_keys if k.startswith("clip_l.")]
@@ -318,9 +308,7 @@ class TestUnsupportedFormatError:
 
         assert "safetensors" in str(exc_info.value).lower()
 
-    def test_error_message_suggests_conversion(
-        self, non_safetensors_path: str
-    ) -> None:
+    def test_error_message_suggests_conversion(self, non_safetensors_path: str) -> None:
         """Error message suggests converting to safetensors."""
         with pytest.raises(UnsupportedFormatError) as exc_info:
             CLIPModelLoader(non_safetensors_path)
@@ -485,9 +473,7 @@ class TestEdgeCases:
             tensors = loader.get_weights([first_key])
             assert len(tensors) == 1
 
-    def test_get_weights_empty_list_returns_empty(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_get_weights_empty_list_returns_empty(self, sdxl_checkpoint_path: str) -> None:
         """get_weights([]) returns empty list."""
         with CLIPModelLoader(sdxl_checkpoint_path) as loader:
             tensors = loader.get_weights([])

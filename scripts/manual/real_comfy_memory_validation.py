@@ -71,9 +71,7 @@ def check_guards(
     # Guard 1: environment variable
     val = env.get(_ENV_VAR, "")
     if val != "1":
-        reasons.append(
-            f"Environment variable {_ENV_VAR} is not set to '1' (got {val!r})."
-        )
+        reasons.append(f"Environment variable {_ENV_VAR} is not set to '1' (got {val!r}).")
 
     # Guard 2: CLI flag
     if _CLI_FLAG not in argv:
@@ -239,20 +237,22 @@ def format_refusal(guard_result: GuardResult) -> str:
     ]
     for reason in guard_result.reasons:
         lines.append(f"  - {reason}")
-    lines.extend([
-        "",
-        "All of the following are required to run real ComfyUI validation:",
-        f"  1. {_ENV_VAR}=1 environment variable",
-        f"  2. {_CLI_FLAG} CLI flag",
-        "  3. --comfy-root <path>",
-        "  4. --model-path <path>",
-        "  5. --report-output <path>",
-        "",
-        "No ComfyUI modules were imported.",
-        "No ComfyUI installation was modified.",
-        "No ComfyUI process was started.",
-        "=" * 60,
-    ])
+    lines.extend(
+        [
+            "",
+            "All of the following are required to run real ComfyUI validation:",
+            f"  1. {_ENV_VAR}=1 environment variable",
+            f"  2. {_CLI_FLAG} CLI flag",
+            "  3. --comfy-root <path>",
+            "  4. --model-path <path>",
+            "  5. --report-output <path>",
+            "",
+            "No ComfyUI modules were imported.",
+            "No ComfyUI installation was modified.",
+            "No ComfyUI process was started.",
+            "=" * 60,
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -409,7 +409,9 @@ def _setup_package_bridge() -> None:
                 return None
 
             spec = importlib.util.spec_from_file_location(
-                fullname, fp, submodule_search_locations=search,
+                fullname,
+                fp,
+                submodule_search_locations=search,
             )
             if spec is None:
                 return None
@@ -440,12 +442,13 @@ def _setup_package_bridge() -> None:
             old = module.__spec__
             if old is not None and old.name != spec_name:
                 new_spec = importlib.machinery.ModuleSpec(
-                    spec_name, old.loader, is_package=is_pkg, origin=old.origin,
+                    spec_name,
+                    old.loader,
+                    is_package=is_pkg,
+                    origin=old.origin,
                 )
                 if is_pkg and old.submodule_search_locations is not None:
-                    new_spec.submodule_search_locations = list(
-                        old.submodule_search_locations
-                    )
+                    new_spec.submodule_search_locations = list(old.submodule_search_locations)
                 new_spec.has_location = getattr(old, "has_location", False)
                 module.__spec__ = new_spec
 
@@ -461,10 +464,14 @@ def _setup_package_bridge() -> None:
 
     def _mk_existing(name, mod):
         is_pkg = hasattr(mod, "__path__")
-        loader = type("_Noop", (importlib.abc.Loader,), {
-            "create_module": lambda self, spec: mod,
-            "exec_module": lambda self, module: None,
-        })()
+        loader = type(
+            "_Noop",
+            (importlib.abc.Loader,),
+            {
+                "create_module": lambda self, spec: mod,
+                "exec_module": lambda self, module: None,
+            },
+        )()
         spec = importlib.machinery.ModuleSpec(name, loader, is_package=is_pkg)
         if is_pkg:
             spec.submodule_search_locations = list(mod.__path__)
@@ -503,9 +510,7 @@ def run_validation(
 
     # --- Pre-flight: validate model_path exists -------------------------
     if not os.path.isfile(model_path):
-        report.errors.append(
-            f"model_path does not exist or is not a file: {model_path}"
-        )
+        report.errors.append(f"model_path does not exist or is not a file: {model_path}")
         report.duration_seconds = time.time() - start_time
         return report
 
@@ -513,8 +518,7 @@ def run_validation(
     comfy_pkg = os.path.join(comfy_root, "comfy", "__init__.py")
     if not os.path.isfile(comfy_pkg):
         report.errors.append(
-            f"--comfy-root does not contain a ComfyUI installation "
-            f"(missing {comfy_pkg})"
+            f"--comfy-root does not contain a ComfyUI installation (missing {comfy_pkg})"
         )
         report.duration_seconds = time.time() - start_time
         return report
@@ -524,9 +528,7 @@ def run_validation(
     _setup_package_bridge()
 
     try:
-        report.memory_observations.append(
-            _collect_memory_observation("before-validation")
-        )
+        report.memory_observations.append(_collect_memory_observation("before-validation"))
 
         # --- Post-import: verify comfy resolves from the specified root ---
         import importlib.util
@@ -597,13 +599,12 @@ def run_validation(
             _DM_PREFIX = "diffusion_model."
             dm_state: dict[str, torch.Tensor] = {}
             for k, t in tensors.items():
-                unprefixed = (
-                    k.removeprefix(_DM_PREFIX) if k.startswith(_DM_PREFIX) else k
-                )
+                unprefixed = k.removeprefix(_DM_PREFIX) if k.startswith(_DM_PREFIX) else k
                 dm_state[unprefixed] = t
 
             class _HarnessDiffusionModel:
                 """Minimal diffusion_model satisfying state_dict()/load_state_dict()."""
+
                 def __init__(self, unprefixed_state: dict[str, torch.Tensor]):
                     self._sd = dict(unprefixed_state)
 
@@ -625,6 +626,7 @@ def run_validation(
                 tensor dict — matching the contract that real ComfyUI
                 ModelPatcher.clone() / model_state_dict() relies on.
                 """
+
                 def __init__(
                     self,
                     diffusion_model: _HarnessDiffusionModel,
@@ -660,20 +662,14 @@ def run_validation(
             have_patcher = False
             report.errors.append(f"ModelPatcher construction: {exc}")
 
-        report.memory_observations.append(
-            _collect_memory_observation("after-model-load")
-        )
+        report.memory_observations.append(_collect_memory_observation("after-model-load"))
 
         # -- Exercise patch-mode behaviour via install_merged_patches ---
         if have_patcher:
             try:
                 # Pick a subset of tensors as the "merged" state for patching.
-                merged_subset = {
-                    k: t.clone() for k, t in list(tensors.items())[:3]
-                }
-                patched = install_merged_patches(
-                    model_patcher, merged_subset, storage_dtype
-                )
+                merged_subset = {k: t.clone() for k, t in list(tensors.items())[:3]}
+                patched = install_merged_patches(model_patcher, merged_subset, storage_dtype)
                 patched_keys = list(patched.patches.keys()) if hasattr(patched, "patches") else []
                 report.patch_mode_behavior = (
                     f"install_merged_patches executed; "
@@ -683,13 +679,9 @@ def run_validation(
                 report.patch_mode_behavior = f"install_merged_patches error: {exc}"
                 report.errors.append(f"install_merged_patches: {exc}")
         else:
-            report.patch_mode_behavior = (
-                "skipped (no ModelPatcher available from ComfyUI)"
-            )
+            report.patch_mode_behavior = "skipped (no ModelPatcher available from ComfyUI)"
 
-        report.memory_observations.append(
-            _collect_memory_observation("after-patch-mode-probe")
-        )
+        report.memory_observations.append(_collect_memory_observation("after-patch-mode-probe"))
 
         # -- Exercise full-model materialization via MaterializationSink -
         # Write a full artifact to a temp file using the streaming sink.
@@ -719,20 +711,14 @@ def run_validation(
             )
         except Exception as exc:
             sink.abort()
-            report.full_model_materialization = (
-                f"MaterializationSink error: {exc}"
-            )
+            report.full_model_materialization = f"MaterializationSink error: {exc}"
             report.errors.append(f"MaterializationSink: {exc}")
 
-        report.memory_observations.append(
-            _collect_memory_observation("after-materialization")
-        )
+        report.memory_observations.append(_collect_memory_observation("after-materialization"))
 
         # -- Exercise artifact cache-hit via check_full_model_cache -----
         try:
-            cache_hit = check_full_model_cache(
-                artifact_path, recipe_hash, manifest
-            )
+            cache_hit = check_full_model_cache(artifact_path, recipe_hash, manifest)
             report.artifact_cache_hit = cache_hit
             report.artifact_reuse = (
                 f"check_full_model_cache returned {cache_hit}; "
@@ -746,9 +732,7 @@ def run_validation(
         # -- Exercise returned-model loading via _load_model_from_artifact
         if have_patcher and os.path.isfile(artifact_path):
             try:
-                returned = _load_model_from_artifact(
-                    artifact_path, model_patcher, storage_dtype
-                )
+                returned = _load_model_from_artifact(artifact_path, model_patcher, storage_dtype)
                 # Verify the returned patcher has state accessible.
                 if hasattr(returned, "_state_dict") and returned._state_dict:
                     returned_keys = len(returned._state_dict)
@@ -761,14 +745,10 @@ def run_validation(
                     f"patcher type={type(returned).__name__}"
                 )
             except Exception as exc:
-                report.returned_model_behavior = (
-                    f"_load_model_from_artifact error: {exc}"
-                )
+                report.returned_model_behavior = f"_load_model_from_artifact error: {exc}"
                 report.errors.append(f"_load_model_from_artifact: {exc}")
         else:
-            report.returned_model_behavior = (
-                "skipped (no ModelPatcher or no artifact written)"
-            )
+            report.returned_model_behavior = "skipped (no ModelPatcher or no artifact written)"
 
         # -- Clean up harness artifact ----------------------------------
         try:
@@ -780,9 +760,7 @@ def run_validation(
         # -- Check incremental cache state ------------------------------
         report.weights_resident_in_cache = bool(_incremental_cache)
 
-        report.memory_observations.append(
-            _collect_memory_observation("after-validation")
-        )
+        report.memory_observations.append(_collect_memory_observation("after-validation"))
 
     except ImportError as exc:
         report.errors.append(f"import-error: {exc}")

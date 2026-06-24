@@ -96,8 +96,8 @@ def test_input_types_uses_folder_paths(monkeypatch):
     # Create mock folder_paths with a mock lora list
     mock_folder_paths = ModuleType("folder_paths")
     mock_lora_list = ["lora1.safetensors", "lora2.safetensors", "style_lora.safetensors"]
-    mock_folder_paths.get_filename_list = (
-        lambda folder: mock_lora_list if folder == "loras" else []
+    mock_folder_paths.get_filename_list = lambda folder: (
+        mock_lora_list if folder == "loras" else []
     )
 
     # Patch before import

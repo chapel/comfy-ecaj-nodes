@@ -75,13 +75,10 @@ class IncrementalWriter:
         if metadata is not None:
             for k, v in metadata.items():
                 if not isinstance(k, str):
-                    raise TypeError(
-                        f"metadata key must be str, got {type(k).__name__}: {k!r}"
-                    )
+                    raise TypeError(f"metadata key must be str, got {type(k).__name__}: {k!r}")
                 if not isinstance(v, str):
                     raise TypeError(
-                        f"metadata value must be str, got {type(v).__name__}"
-                        f" for key {k!r}"
+                        f"metadata value must be str, got {type(v).__name__} for key {k!r}"
                     )
 
         self._save_path = save_path
@@ -183,9 +180,7 @@ class IncrementalWriter:
 
         if name in self._written:
             self._poison(f"write_tensor called twice for already written tensor: {name!r}")
-            raise RuntimeError(
-                f"write_tensor called twice for already written tensor: {name!r}"
-            )
+            raise RuntimeError(f"write_tensor called twice for already written tensor: {name!r}")
 
         expected_dtype, expected_shape, expected_nbytes = self._tensor_specs[name]
         if tensor.dtype != expected_dtype:

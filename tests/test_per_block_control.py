@@ -625,8 +625,16 @@ class TestBlockConfigFluxNode:
         # Build kwargs for all blocks + non-block + layer types
         kwargs = {f"DB{i:02d}": 1.0 for i in range(8)}
         kwargs.update({f"SB{i:02d}": 1.0 for i in range(24)})
-        kwargs.update({"GUIDANCE_IN": 1.0, "TIME_IN": 1.0, "VECTOR_IN": 1.0,
-                       "IMG_IN": 1.0, "TXT_IN": 1.0, "FINAL_LAYER": 1.0})
+        kwargs.update(
+            {
+                "GUIDANCE_IN": 1.0,
+                "TIME_IN": 1.0,
+                "VECTOR_IN": 1.0,
+                "IMG_IN": 1.0,
+                "TXT_IN": 1.0,
+                "FINAL_LAYER": 1.0,
+            }
+        )
         kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
         kwargs["DB00"] = 0.5  # Override one to verify
 
@@ -644,8 +652,16 @@ class TestBlockConfigFluxNode:
         # Build kwargs for all blocks with distinct values + layer types
         kwargs = {f"DB{i:02d}": 0.5 + i * 0.1 for i in range(8)}
         kwargs.update({f"SB{i:02d}": 0.7 + i * 0.05 for i in range(24)})
-        kwargs.update({"GUIDANCE_IN": 1.0, "TIME_IN": 1.0, "VECTOR_IN": 1.0,
-                       "IMG_IN": 1.0, "TXT_IN": 1.0, "FINAL_LAYER": 1.0})
+        kwargs.update(
+            {
+                "GUIDANCE_IN": 1.0,
+                "TIME_IN": 1.0,
+                "VECTOR_IN": 1.0,
+                "IMG_IN": 1.0,
+                "TXT_IN": 1.0,
+                "FINAL_LAYER": 1.0,
+            }
+        )
         kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
 
         (config,) = node.create_config(**kwargs)
@@ -664,8 +680,16 @@ class TestBlockConfigFluxNode:
         # Build kwargs for all blocks + non-block + layer types
         kwargs = {f"DB{i:02d}": 1.0 for i in range(8)}
         kwargs.update({f"SB{i:02d}": 1.0 for i in range(24)})
-        kwargs.update({"GUIDANCE_IN": 1.0, "TIME_IN": 1.0, "VECTOR_IN": 1.0,
-                       "IMG_IN": 1.0, "TXT_IN": 1.0, "FINAL_LAYER": 1.0})
+        kwargs.update(
+            {
+                "GUIDANCE_IN": 1.0,
+                "TIME_IN": 1.0,
+                "VECTOR_IN": 1.0,
+                "IMG_IN": 1.0,
+                "TXT_IN": 1.0,
+                "FINAL_LAYER": 1.0,
+            }
+        )
         kwargs.update({"attention": 0.7, "feed_forward": 1.3, "norm": 0.85})
 
         (config,) = node.create_config(**kwargs)
@@ -682,8 +706,16 @@ class TestBlockConfigFluxNode:
         # Simulate 4B model: only use DB00-DB04, SB00-SB19
         kwargs = {f"DB{i:02d}": 1.0 for i in range(8)}
         kwargs.update({f"SB{i:02d}": 1.0 for i in range(24)})
-        kwargs.update({"GUIDANCE_IN": 1.0, "TIME_IN": 1.0, "VECTOR_IN": 1.0,
-                       "IMG_IN": 1.0, "TXT_IN": 1.0, "FINAL_LAYER": 1.0})
+        kwargs.update(
+            {
+                "GUIDANCE_IN": 1.0,
+                "TIME_IN": 1.0,
+                "VECTOR_IN": 1.0,
+                "IMG_IN": 1.0,
+                "TXT_IN": 1.0,
+                "FINAL_LAYER": 1.0,
+            }
+        )
         kwargs.update({"attention": 1.0, "feed_forward": 1.0, "norm": 1.0})
 
         # Set used blocks for 4B variant
@@ -715,8 +747,16 @@ class TestBlockConfigFluxNode:
         # All defaults except boundary test blocks
         kwargs = {f"DB{i:02d}": 1.0 for i in range(8)}
         kwargs.update({f"SB{i:02d}": 1.0 for i in range(24)})
-        kwargs.update({"GUIDANCE_IN": 1.0, "TIME_IN": 1.0, "VECTOR_IN": 1.0,
-                       "IMG_IN": 1.0, "TXT_IN": 1.0, "FINAL_LAYER": 1.0})
+        kwargs.update(
+            {
+                "GUIDANCE_IN": 1.0,
+                "TIME_IN": 1.0,
+                "VECTOR_IN": 1.0,
+                "IMG_IN": 1.0,
+                "TXT_IN": 1.0,
+                "FINAL_LAYER": 1.0,
+            }
+        )
         kwargs["DB00"] = 0.0
         kwargs["DB07"] = 2.0
         kwargs["SB00"] = 0.0
@@ -811,9 +851,7 @@ class TestBlockConfigZeroSkipsWiden:
         )
 
         # IN00 (index 0) with t=0.0 should return backbone
-        assert torch.allclose(result[0], backbone[0]), (
-            "Block override 0.0 should return backbone"
-        )
+        assert torch.allclose(result[0], backbone[0]), "Block override 0.0 should return backbone"
         # IN01 (index 1) with t=1.0 should apply WIDEN filtering (not equal to backbone)
         # (non-zero delta means filtered result differs from backbone)
 

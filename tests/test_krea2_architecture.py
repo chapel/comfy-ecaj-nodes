@@ -168,16 +168,33 @@ def test_krea2_model_analysis_accepts_krea2_checkpoint() -> None:
 
 
 # AC: @krea2-architecture-support ac-krea2-recipe-uses-krea-compatible-paths
-def test_krea2_loader_rejects_lora_packages_until_package_compatibility_exists() -> None:
+def test_krea2_loader_routes_to_implemented_package_compatibility() -> None:
+    with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+        save_file(
+            {
+                "transformer.transformer_blocks.0.attn.to_q.lora_A.weight": (torch.ones(2, 3)),
+                "transformer.transformer_blocks.0.attn.to_q.lora_B.weight": (torch.ones(4, 2)),
+            },
+            f.name,
+        )
+        path = f.name
+
     loader = get_loader("krea2")
-
-    with pytest.raises(NotImplementedError) as exc_info:
-        loader.load("krea2-lora.safetensors")
-
-    message = str(exc_info.value)
-    assert "Krea 2 LoRA package compatibility" in message
-    assert "not implemented" in message
-    assert loader.affected_keys == frozenset()
-    assert loader.affected_keys_for_set("missing") == set()
-    assert loader.get_delta_specs([], {}) == []
-    assert loader.loaded_bytes == 0
+    try:
+        loader.load(path, set_id="krea")
+        assert loader.affected_keys == frozenset({"diffusion_model.blocks.0.attn.wq.weight"})
+        assert loader.affected_keys_for_set("krea") == {"diffusion_model.blocks.0.attn.wq.weight"}
+        assert (
+            len(
+                loader.get_delta_specs(
+                    list(loader.affected_keys),
+                    {
+                        "diffusion_model.blocks.0.attn.wq.weight": 0,
+                    },
+                )
+            )
+            == 1
+        )
+        assert loader.loaded_bytes > 0
+    finally:
+        loader.cleanup()

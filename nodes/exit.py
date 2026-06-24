@@ -90,20 +90,24 @@ def _to_external_diffusion_key(key: str) -> str:
     if key.startswith(_EXTERNAL_DIFFUSION_PREFIX):
         return key
     if key.startswith(_INTERNAL_DIFFUSION_PREFIX):
-        return _EXTERNAL_DIFFUSION_PREFIX + key[len(_INTERNAL_DIFFUSION_PREFIX):]
+        return _EXTERNAL_DIFFUSION_PREFIX + key[len(_INTERNAL_DIFFUSION_PREFIX) :]
     return key
 
 
 def _comfy_load_diffusion_model(save_path: str, model_options: dict | None = None):
     """Indirection over comfy.sd.load_diffusion_model so tests can patch it."""
     import comfy.sd
+
     return comfy.sd.load_diffusion_model(
-        save_path, model_options=model_options or {},
+        save_path,
+        model_options=model_options or {},
     )
 
 
 def _build_save_progress(
-    *, manifest_size: int, artifact_name: str,
+    *,
+    manifest_size: int,
+    artifact_name: str,
 ) -> SavedModelProgress:
     """Construct a SavedModelProgress for a diffusion-only save.
 
@@ -160,9 +164,7 @@ def _load_diffusion_model_artifact(save_path: str) -> object:
             f"Failed to load diffusion-model artifact: {save_path} — {exc}"
         ) from exc
     if result is None:
-        raise RuntimeError(
-            f"Comfy diffusion-model loader returned None for: {save_path}"
-        )
+        raise RuntimeError(f"Comfy diffusion-model loader returned None for: {save_path}")
     return result
 
 
@@ -203,8 +205,11 @@ class _CacheEntry:
     """
 
     __slots__ = (
-        "structural_fingerprint", "block_configs", "merged_state",
-        "storage_dtype", "loader_bytes",
+        "structural_fingerprint",
+        "block_configs",
+        "merged_state",
+        "storage_dtype",
+        "loader_bytes",
     )
 
     def __init__(
@@ -298,9 +303,7 @@ def _validate_recipe_tree(node: RecipeNode, path: str = "root") -> None:
             _validate_recipe_tree(node.backbone, backbone_path)
 
     else:
-        raise ValueError(
-            f"Unknown recipe node type at {path}: {type(node).__name__}"
-        )
+        raise ValueError(f"Unknown recipe node type at {path}: {type(node).__name__}")
 
 
 def validate_checkpoint_components(base: RecipeBase, save_model: bool) -> None:
@@ -626,20 +629,18 @@ def _load_checkpoint_artifact(save_path: str) -> object:
 
     try:
         result = comfy.sd.load_checkpoint_guess_config(
-            save_path, output_vae=True, output_clip=True,
+            save_path,
+            output_vae=True,
+            output_clip=True,
         )
     except Exception as exc:
-        raise RuntimeError(
-            f"Failed to load checkpoint artifact: {save_path} — {exc}"
-        ) from exc
+        raise RuntimeError(f"Failed to load checkpoint artifact: {save_path} — {exc}") from exc
 
     # load_checkpoint_guess_config returns [model, clip, vae, ...].
     # Return only the MODEL for WIDEN Exit's MODEL output.
     model = result[0]
     if model is None:
-        raise RuntimeError(
-            f"Comfy checkpoint loader returned None MODEL for: {save_path}"
-        )
+        raise RuntimeError(f"Comfy checkpoint loader returned None MODEL for: {save_path}")
     return model
 
 
@@ -692,9 +693,7 @@ def _resolve_diffusion_models_path(model_name: str) -> str:
     if not dirs:
         dirs = folder_paths.get_folder_paths("unet")
     if not dirs:
-        raise ValueError(
-            "No diffusion_models (or unet) directory configured in ComfyUI"
-        )
+        raise ValueError("No diffusion_models (or unet) directory configured in ComfyUI")
     return os.path.join(dirs[0], model_name)
 
 
@@ -822,9 +821,7 @@ def _classify_temp_artifact(tmp_path: str, expected_kind: str) -> None:
 
     # AC: @saved-model-artifact-safety ac-no-partial-publication
     # Checkpoint artifacts must contain all three component groups.
-    if expected_kind == "checkpoint" and not _has_checkpoint_component_prefixes(
-        tensor_keys
-    ):
+    if expected_kind == "checkpoint" and not _has_checkpoint_component_prefixes(tensor_keys):
         raise RuntimeError(
             "Temp checkpoint artifact missing required component prefixes "
             "(need model/diffusion, conditioning, and VAE keys) "
@@ -838,9 +835,8 @@ def _classify_temp_artifact(tmp_path: str, expected_kind: str) -> None:
     # would not load through comfy.sd.load_diffusion_model.
     if expected_kind == "diffusion":
         for key in tensor_keys:
-            if (
-                key.startswith(_INTERNAL_DIFFUSION_PREFIX)
-                and not key.startswith(_EXTERNAL_DIFFUSION_PREFIX)
+            if key.startswith(_INTERNAL_DIFFUSION_PREFIX) and not key.startswith(
+                _EXTERNAL_DIFFUSION_PREFIX
             ):
                 raise RuntimeError(
                     f"Temp diffusion artifact contains internal-format key "
@@ -892,9 +888,7 @@ def save_comfy_checkpoint(
 
     directory = os.path.dirname(save_path) or "."
     suffix = secrets.token_hex(4)
-    tmp_path = os.path.join(
-        directory, f".ecaj_tmp_{suffix}_{os.path.basename(save_path)}"
-    )
+    tmp_path = os.path.join(directory, f".ecaj_tmp_{suffix}_{os.path.basename(save_path)}")
 
     try:
         # comfy.sd.save_checkpoint writes a safetensors file with model.*,
@@ -1065,8 +1059,7 @@ class WIDENExitNode:
         if save_model:
             base = widen if isinstance(widen, RecipeBase) else walk_to_base(widen)
             has_checkpoint_intent = (
-                base.checkpoint_components is not None
-                or _recipe_has_checkpoint_components(widen)
+                base.checkpoint_components is not None or _recipe_has_checkpoint_components(widen)
             )
             if has_checkpoint_intent:
                 validate_checkpoint_components(base, save_model=True)
@@ -1077,7 +1070,10 @@ class WIDENExitNode:
                 # AC: @full-saved-model-output ac-no-op-produces-full-artifact
                 # No-op recipe in full mode: produce a full artifact with all base weights
                 return self._execute_full_model_noop(
-                    widen, model_name, save_workflow, enable_cache,
+                    widen,
+                    model_name,
+                    save_workflow,
+                    enable_cache,
                     extra_pnginfo,
                 )
             return (widen.model_patcher.clone(),)  # type: ignore[attr-defined]
@@ -1090,12 +1086,17 @@ class WIDENExitNode:
 
         if save_model:
             return self._execute_full_saved_model(
-                widen, model_name, save_workflow, enable_cache,
+                widen,
+                model_name,
+                save_workflow,
+                enable_cache,
                 extra_pnginfo,
             )
         else:
             return self._execute_patch_mode(
-                widen, enable_cache, save_model=False,
+                widen,
+                enable_cache,
+                save_model=False,
             )
 
     def _execute_full_model_noop(
@@ -1133,16 +1134,19 @@ class WIDENExitNode:
         serialized = serialize_recipe(widen, base_identity, lora_stats)
         recipe_hash = compute_recipe_hash(serialized)
         dependency_fingerprints_json = json.dumps(
-            lora_stats, sort_keys=True, separators=(",", ":"),
+            lora_stats,
+            sort_keys=True,
+            separators=(",", ":"),
         )
-
 
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         # AC: @exit-model-persistence ac-4, ac-6
         if enable_cache:
             if is_checkpoint:
                 cache_hit = check_checkpoint_cache(
-                    save_path, recipe_hash, base_identity,
+                    save_path,
+                    recipe_hash,
+                    base_identity,
                     dependency_fingerprints_json,
                 )
             else:
@@ -1153,7 +1157,8 @@ class WIDENExitNode:
                     for k, v in base_state.items()
                 }
                 cache_hit = check_full_model_cache(
-                    save_path, recipe_hash,
+                    save_path,
+                    recipe_hash,
                     expected_manifest=external_manifest,
                     expected_artifact_kind="diffusion",
                     expected_source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
@@ -1179,20 +1184,24 @@ class WIDENExitNode:
         # entries from earlier patch-mode runs must be cleared.
         if not enable_cache:
             _incremental_cache.clear()
-        workflow_json = (
-            json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
-        )
+        workflow_json = json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
 
         if is_checkpoint:
             # Checkpoint-style no-op: save via Comfy checkpoint semantics.
             # Install base weights as set patches (no merge needed — this is
             # a no-op save of the original checkpoint).
             merged_model = install_merged_patches(
-                model_patcher, {}, storage_dtype,
+                model_patcher,
+                {},
+                storage_dtype,
             )
 
             metadata = build_metadata(
-                serialized, recipe_hash, [], workflow_json, output_mode="full",
+                serialized,
+                recipe_hash,
+                [],
+                workflow_json,
+                output_mode="full",
                 artifact_kind="checkpoint",
                 source_model_kind=_SOURCE_KIND_CHECKPOINT,
                 base_identity=base_identity,
@@ -1220,7 +1229,11 @@ class WIDENExitNode:
             # Diffusion-only no-op: write external Comfy-loadable layout via
             # MaterializationSink.
             metadata = build_metadata(
-                serialized, recipe_hash, [], workflow_json, output_mode="full",
+                serialized,
+                recipe_hash,
+                [],
+                workflow_json,
+                output_mode="full",
                 artifact_kind="diffusion",
                 source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
                 base_identity=base_identity,
@@ -1255,7 +1268,8 @@ class WIDENExitNode:
                 sink.finalize(
                     save_path,
                     pre_publish_check=lambda p: _classify_temp_artifact(
-                        p, expected_kind="diffusion",
+                        p,
+                        expected_kind="diffusion",
                     ),
                 )
                 # AC: @streaming-materialization-progress ac-failure-status-not-success
@@ -1323,12 +1337,12 @@ class WIDENExitNode:
         recipe_hash = compute_recipe_hash(serialized)
 
         # Build manifest early for cache validation (shapes + dtypes, not just key names).
-        base_manifest = {
-            k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()
-        }
+        base_manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
 
         dependency_fingerprints_json = json.dumps(
-            lora_stats, sort_keys=True, separators=(",", ":"),
+            lora_stats,
+            sort_keys=True,
+            separators=(",", ":"),
         )
 
         # AC: @full-saved-model-output ac-cache-reuses-artifact
@@ -1347,16 +1361,18 @@ class WIDENExitNode:
         if enable_cache:
             if is_checkpoint:
                 cache_hit = check_checkpoint_cache(
-                    save_path, recipe_hash, base_identity,
+                    save_path,
+                    recipe_hash,
+                    base_identity,
                     dependency_fingerprints_json,
                 )
             else:
                 external_manifest = {
-                    _to_external_diffusion_key(k): v
-                    for k, v in base_manifest.items()
+                    _to_external_diffusion_key(k): v for k, v in base_manifest.items()
                 }
                 cache_hit = check_full_model_cache(
-                    save_path, recipe_hash,
+                    save_path,
+                    recipe_hash,
                     expected_manifest=external_manifest,
                     expected_artifact_kind="diffusion",
                     expected_source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
@@ -1383,17 +1399,39 @@ class WIDENExitNode:
         # non-checkpoint (diffusion-only) saves continue using MaterializationSink.
         if is_checkpoint:
             return self._execute_checkpoint_save(
-                widen, model_patcher, base_state, storage_dtype, key_shapes,
-                save_path, serialized, recipe_hash, base_identity,
-                dependency_fingerprints_json, save_workflow, enable_cache,
-                extra_pnginfo, lora_path_resolver, model_path_resolver,
+                widen,
+                model_patcher,
+                base_state,
+                storage_dtype,
+                key_shapes,
+                save_path,
+                serialized,
+                recipe_hash,
+                base_identity,
+                dependency_fingerprints_json,
+                save_workflow,
+                enable_cache,
+                extra_pnginfo,
+                lora_path_resolver,
+                model_path_resolver,
             )
         else:
             return self._execute_diffusion_save(
-                widen, model_patcher, base_state, storage_dtype, key_shapes,
-                save_path, serialized, recipe_hash, base_identity,
-                dependency_fingerprints_json, save_workflow, enable_cache,
-                extra_pnginfo, lora_path_resolver, model_path_resolver,
+                widen,
+                model_patcher,
+                base_state,
+                storage_dtype,
+                key_shapes,
+                save_path,
+                serialized,
+                recipe_hash,
+                base_identity,
+                dependency_fingerprints_json,
+                save_workflow,
+                enable_cache,
+                extra_pnginfo,
+                lora_path_resolver,
+                model_path_resolver,
             )
 
     def _execute_checkpoint_save(
@@ -1460,6 +1498,9 @@ class WIDENExitNode:
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
             all_keys = set(base_state.keys())
+            validate_loader_keys = getattr(loader, "validate_compatible_keys", None)
+            if validate_loader_keys is not None:
+                validate_loader_keys(all_keys)
             lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
             model_keys = all_keys & all_model_keys
             keys_to_process = lora_keys | model_keys
@@ -1486,7 +1527,9 @@ class WIDENExitNode:
 
             if keys_to_process:
                 batch_groups = compile_batch_groups(
-                    list(keys_to_process), arch=arch, key_shapes=key_shapes,
+                    list(keys_to_process),
+                    arch=arch,
+                    key_shapes=key_shapes,
                 )
             else:
                 batch_groups = {}
@@ -1504,15 +1547,15 @@ class WIDENExitNode:
                 # for Comfy save), so budget the full merged state size.
                 merged_state_bytes = sum(
                     base_state[k].nelement() * base_state[k].element_size()
-                    for keys in batch_groups.values() for k in keys
+                    for keys in batch_groups.values()
+                    for k in keys
                 )
                 check_ram_preflight(
                     merged_state_bytes=merged_state_bytes,
                     worst_chunk_bytes=worst_chunk_bytes,
                     save_model=True,
-                    loader_bytes=loader.loaded_bytes + sum(
-                        ml.loaded_bytes for ml in model_loaders.values()
-                    ),
+                    loader_bytes=loader.loaded_bytes
+                    + sum(ml.loaded_bytes for ml in model_loaders.values()),
                 )
 
             _log_memory("before-gpu-eval-checkpoint")
@@ -1523,6 +1566,7 @@ class WIDENExitNode:
             merged_state: dict[str, torch.Tensor] = {}
 
             if batch_groups:
+
                 def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
                     def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
                         return execute_plan(
@@ -1538,11 +1582,19 @@ class WIDENExitNode:
                             model_loaders=mdl_ldrs,
                             domain=dom,
                         )
+
                     return eval_fn
 
                 eval_fn = make_eval_fn(
-                    plan, loader, widen_merger, device, compute_dtype,
-                    arch, widen_config, model_loaders, domain,
+                    plan,
+                    loader,
+                    widen_merger,
+                    device,
+                    compute_dtype,
+                    arch,
+                    widen_config,
+                    model_loaders,
+                    domain,
                 )
 
                 pbar_count = len(batch_groups)
@@ -1551,7 +1603,9 @@ class WIDENExitNode:
                 for sig, group_keys in batch_groups.items():
                     n_models = len(set_affected) + len(model_loaders)
                     batch_size = compute_batch_size(
-                        sig.shape, n_models, compute_dtype,
+                        sig.shape,
+                        n_models,
+                        compute_dtype,
                     )
                     group_base = {k: base_state[k] for k in group_keys}
                     group_results = chunked_evaluation(
@@ -1584,7 +1638,9 @@ class WIDENExitNode:
             # release it on any subsequent failure (save, publication, cache
             # bookkeeping) before control returns to ComfyUI.
             temporary_model = install_merged_patches(
-                model_patcher, merged_state, storage_dtype,
+                model_patcher,
+                merged_state,
+                storage_dtype,
             )
 
             # Free merged_state — weights are now held as set patches on temporary_model
@@ -1592,14 +1648,15 @@ class WIDENExitNode:
             gc.collect()
 
             # Build ecaj metadata for the checkpoint artifact.
-            workflow_json = (
-                json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
-            )
+            workflow_json = json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
             # AC: @exit-model-persistence ac-6
             # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
             # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
             metadata = build_metadata(
-                serialized, recipe_hash, sorted(affected_key_set), workflow_json,
+                serialized,
+                recipe_hash,
+                sorted(affected_key_set),
+                workflow_json,
                 output_mode="full",
                 artifact_kind="checkpoint",
                 source_model_kind=_SOURCE_KIND_CHECKPOINT,
@@ -1632,6 +1689,7 @@ class WIDENExitNode:
                     get_torch_device,
                     soft_empty_cache,
                 )
+
                 free_memory(1e30, get_torch_device())
                 soft_empty_cache()
             except (ImportError, AttributeError):
@@ -1728,6 +1786,9 @@ class WIDENExitNode:
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
             all_keys = set(base_state.keys())
+            validate_loader_keys = getattr(loader, "validate_compatible_keys", None)
+            if validate_loader_keys is not None:
+                validate_loader_keys(all_keys)
             lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
             model_keys = all_keys & all_model_keys
             keys_to_process = lora_keys | model_keys
@@ -1763,11 +1824,12 @@ class WIDENExitNode:
             for k, v in base_state.items():
                 manifest[_to_external_diffusion_key(k)] = (v.dtype, tuple(v.shape))
 
-            workflow_json = (
-                json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
-            )
+            workflow_json = json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
             metadata = build_metadata(
-                serialized, recipe_hash, sorted(affected_key_set), workflow_json,
+                serialized,
+                recipe_hash,
+                sorted(affected_key_set),
+                workflow_json,
                 output_mode="full",
                 artifact_kind="diffusion",
                 source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
@@ -1781,7 +1843,9 @@ class WIDENExitNode:
 
             if keys_to_process:
                 batch_groups = compile_batch_groups(
-                    list(keys_to_process), arch=arch, key_shapes=key_shapes,
+                    list(keys_to_process),
+                    arch=arch,
+                    key_shapes=key_shapes,
                 )
             else:
                 batch_groups = {}
@@ -1799,9 +1863,8 @@ class WIDENExitNode:
                     merged_state_bytes=worst_chunk_bytes,
                     worst_chunk_bytes=worst_chunk_bytes,
                     save_model=True,
-                    loader_bytes=loader.loaded_bytes + sum(
-                        ml.loaded_bytes for ml in model_loaders.values()
-                    ),
+                    loader_bytes=loader.loaded_bytes
+                    + sum(ml.loaded_bytes for ml in model_loaders.values()),
                 )
 
             _log_memory("before-gpu-eval-full")
@@ -1834,11 +1897,19 @@ class WIDENExitNode:
                         model_loaders=mdl_ldrs,
                         domain=dom,
                     )
+
                 return eval_fn
 
             eval_fn = make_eval_fn(
-                plan, loader, widen_merger, device, compute_dtype,
-                arch, widen_config, model_loaders, domain,
+                plan,
+                loader,
+                widen_merger,
+                device,
+                compute_dtype,
+                arch,
+                widen_config,
+                model_loaders,
+                domain,
             )
 
             # streaming_evaluation_to_sink calls write_fn(name, tensor) using
@@ -1854,7 +1925,9 @@ class WIDENExitNode:
             for sig, group_keys in batch_groups.items():
                 n_models = len(set_affected) + len(model_loaders)
                 batch_size = compute_batch_size(
-                    sig.shape, n_models, compute_dtype,
+                    sig.shape,
+                    n_models,
+                    compute_dtype,
                 )
                 group_base = {k: base_state[k] for k in group_keys}
                 streaming_evaluation_to_sink(
@@ -1885,7 +1958,8 @@ class WIDENExitNode:
             sink.finalize(
                 save_path,
                 pre_publish_check=lambda p: _classify_temp_artifact(
-                    p, expected_kind="diffusion",
+                    p,
+                    expected_kind="diffusion",
                 ),
             )
             # AC: @streaming-materialization-progress ac-failure-status-not-success
@@ -1899,6 +1973,7 @@ class WIDENExitNode:
                     get_torch_device,
                     soft_empty_cache,
                 )
+
                 free_memory(1e30, get_torch_device())
                 soft_empty_cache()
             except (ImportError, AttributeError):
@@ -1972,6 +2047,9 @@ class WIDENExitNode:
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
             all_keys = set(base_state.keys())
+            validate_loader_keys = getattr(loader, "validate_compatible_keys", None)
+            if validate_loader_keys is not None:
+                validate_loader_keys(all_keys)
             lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
             model_keys = all_keys & all_model_keys
             keys_to_process = lora_keys | model_keys
@@ -1996,15 +2074,15 @@ class WIDENExitNode:
             widen_merger = WIDEN(widen_config)
 
             batch_groups = compile_batch_groups(
-                list(keys_to_process), arch=arch, key_shapes=key_shapes,
+                list(keys_to_process),
+                arch=arch,
+                key_shapes=key_shapes,
             )
 
             plan = compile_plan(widen, set_id_map, arch, model_id_map)
 
             # --- Incremental cache: detect which blocks changed ---
-            structural_fp = compute_structural_fingerprint(
-                widen, base_identity, lora_stats
-            )
+            structural_fp = compute_structural_fingerprint(widen, base_identity, lora_stats)
             current_block_configs = collect_block_configs(widen)
             current_loader_bytes = loader.loaded_bytes + sum(
                 ml.loaded_bytes for ml in model_loaders.values()
@@ -2012,10 +2090,7 @@ class WIDENExitNode:
             cached_entry = _incremental_cache.get(structural_fp) if enable_cache else None
             incremental_hit = False
 
-            if (
-                cached_entry is not None
-                and cached_entry.storage_dtype == storage_dtype
-            ):
+            if cached_entry is not None and cached_entry.storage_dtype == storage_dtype:
                 diff = compute_changed_blocks(
                     cached_entry.block_configs, current_block_configs, arch
                 )
@@ -2023,9 +2098,7 @@ class WIDENExitNode:
                     changed_blocks, changed_layer_types = diff
 
                     if not changed_blocks and not changed_layer_types:
-                        merged_state = {
-                            k: v for k, v in cached_entry.merged_state.items()
-                        }
+                        merged_state = {k: v for k, v in cached_entry.merged_state.items()}
                         incremental_hit = True
                         batch_groups = {}
 
@@ -2034,22 +2107,21 @@ class WIDENExitNode:
                             pbar.update(1)
                     else:
                         recompute_keys = filter_changed_keys(
-                            keys_to_process, changed_blocks,
-                            changed_layer_types, arch,
+                            keys_to_process,
+                            changed_blocks,
+                            changed_layer_types,
+                            arch,
                         )
 
                         if not recompute_keys:
-                            merged_state = {
-                                k: v for k, v in cached_entry.merged_state.items()
-                            }
+                            merged_state = {k: v for k, v in cached_entry.merged_state.items()}
                             incremental_hit = True
                             batch_groups = {}
                         else:
-                            merged_state = {
-                                k: v for k, v in cached_entry.merged_state.items()
-                            }
+                            merged_state = {k: v for k, v in cached_entry.merged_state.items()}
                             batch_groups = compile_batch_groups(
-                                list(recompute_keys), arch=arch,
+                                list(recompute_keys),
+                                arch=arch,
                                 key_shapes=key_shapes,
                             )
                             incremental_hit = True
@@ -2067,9 +2139,7 @@ class WIDENExitNode:
 
             if batch_groups:
                 processed_keys = {k for keys in batch_groups.values() for k in keys}
-                merged_state_bytes = sum(
-                    key_byte_sizes[k] for k in processed_keys
-                )
+                merged_state_bytes = sum(key_byte_sizes[k] for k in processed_keys)
                 n_models = len(set_affected) + len(model_loaders)
                 storage_element_size = torch.finfo(storage_dtype).bits // 8
                 worst_chunk_bytes = max(
@@ -2093,7 +2163,9 @@ class WIDENExitNode:
                 for sig, group_keys in batch_groups.items():
                     n_models = len(set_affected) + len(model_loaders)
                     batch_size = compute_batch_size(
-                        sig.shape, n_models, compute_dtype,
+                        sig.shape,
+                        n_models,
+                        compute_dtype,
                     )
 
                     def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
@@ -2111,11 +2183,19 @@ class WIDENExitNode:
                                 model_loaders=mdl_ldrs,
                                 domain=dom,
                             )
+
                         return eval_fn
 
                     eval_fn = make_eval_fn(
-                        plan, loader, widen_merger, device, compute_dtype,
-                        arch, widen_config, model_loaders, domain,
+                        plan,
+                        loader,
+                        widen_merger,
+                        device,
+                        compute_dtype,
+                        arch,
+                        widen_config,
+                        model_loaders,
+                        domain,
                     )
 
                     group_base = {k: base_state[k] for k in group_keys}
@@ -2166,8 +2246,7 @@ class WIDENExitNode:
                         loader_bytes=current_loader_bytes,
                     )
                     cache_bytes = sum(
-                        t.nelement() * t.element_size()
-                        for t in merged_state.values()
+                        t.nelement() * t.element_size() for t in merged_state.values()
                     )
                     logger.info(
                         "Cache stored: %d MB merged_state, avail=%d MB",

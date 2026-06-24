@@ -276,9 +276,7 @@ class TestRecipeModel:
     def test_recipe_model_block_config_custom(self):
         """RecipeModel can have a BlockConfig."""
         block_cfg = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
-        model = RecipeModel(
-            path="checkpoint.safetensors", strength=0.8, block_config=block_cfg
-        )
+        model = RecipeModel(path="checkpoint.safetensors", strength=0.8, block_config=block_cfg)
         assert model.block_config is block_cfg
         assert model.block_config.arch == "sdxl"
 

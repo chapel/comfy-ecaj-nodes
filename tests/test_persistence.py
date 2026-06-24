@@ -207,9 +207,7 @@ class TestSerializeRecipe:
     # AC: @diffusion-model-path-resolution ac-6
     def test_recipe_model_source_dir_affects_hash(self):
         """Same path with different source_dir should produce different serialization."""
-        model_ckpt = RecipeModel(
-            path="model.safetensors", strength=1.0, source_dir="checkpoints"
-        )
+        model_ckpt = RecipeModel(path="model.safetensors", strength=1.0, source_dir="checkpoints")
         model_diff = RecipeModel(
             path="model.safetensors", strength=1.0, source_dir="diffusion_models"
         )
@@ -346,9 +344,7 @@ class TestComputeLoraStats:
         model_file.parent.mkdir(parents=True, exist_ok=True)
         model_file.write_bytes(b"x" * 200)
 
-        model = RecipeModel(
-            path="test.safetensors", strength=1.0, source_dir="checkpoints"
-        )
+        model = RecipeModel(path="test.safetensors", strength=1.0, source_dir="checkpoints")
 
         received_args = []
 
@@ -373,9 +369,7 @@ class TestComputeLoraStats:
         diff_dir.mkdir(parents=True, exist_ok=True)
         (diff_dir / "flux.safetensors").write_bytes(b"y" * 300)
 
-        model = RecipeModel(
-            path="flux.safetensors", strength=1.0, source_dir="diffusion_models"
-        )
+        model = RecipeModel(path="flux.safetensors", strength=1.0, source_dir="diffusion_models")
 
         def lora_resolver(name):
             return None
@@ -397,9 +391,7 @@ class TestComputeLoraStats:
 
         base = RecipeBase(model_patcher=object(), arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},))
-        model = RecipeModel(
-            path="model.safetensors", strength=0.5, source_dir="checkpoints"
-        )
+        model = RecipeModel(path="model.safetensors", strength=0.5, source_dir="checkpoints")
         compose = RecipeCompose(branches=(lora, model))
         merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=0.5)
 
@@ -691,7 +683,9 @@ class TestBuildMetadataArtifactKind:
         """All checkpoint fields should be present together."""
         deps = json.dumps({"lora.safetensors": [1234.5, 100]})
         metadata = build_metadata(
-            '{"recipe": true}', "hash123", ["key_a"],
+            '{"recipe": true}',
+            "hash123",
+            ["key_a"],
             artifact_kind="checkpoint",
             base_identity="base_sha256",
             dependency_fingerprints=deps,
@@ -726,14 +720,19 @@ class TestCheckCheckpointCache:
     _BASE_IDENTITY = "base_sha256_abc"
     _DEPS = json.dumps({"lora.safetensors": [1234.5, 100]})
 
-    def _make_checkpoint_file(self, path, *, recipe_hash="abc123",
-                              artifact_kind="checkpoint",
-                              base_identity=None,
-                              dependency_fingerprints=None,
-                              checkpoint_components=True,
-                              version="1",
-                              tensors=None,
-                              extra_metadata=None):
+    def _make_checkpoint_file(
+        self,
+        path,
+        *,
+        recipe_hash="abc123",
+        artifact_kind="checkpoint",
+        base_identity=None,
+        dependency_fingerprints=None,
+        checkpoint_components=True,
+        version="1",
+        tensors=None,
+        extra_metadata=None,
+    ):
         """Helper to create a valid checkpoint-style safetensors file."""
         if base_identity is None:
             base_identity = self._BASE_IDENTITY
@@ -763,7 +762,10 @@ class TestCheckCheckpointCache:
         path = tmp_path / "model.safetensors"
         self._make_checkpoint_file(path)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is True
 
@@ -784,7 +786,10 @@ class TestCheckCheckpointCache:
         }
         save_file(tensors, str(path), metadata=metadata)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -794,7 +799,10 @@ class TestCheckCheckpointCache:
         path = tmp_path / "model.safetensors"
         self._make_checkpoint_file(path, artifact_kind="diffusion")
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -804,7 +812,10 @@ class TestCheckCheckpointCache:
         path = tmp_path / "model.safetensors"
         self._make_checkpoint_file(path, checkpoint_components=False)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -814,7 +825,10 @@ class TestCheckCheckpointCache:
         path = tmp_path / "model.safetensors"
         self._make_checkpoint_file(path, version="999")
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -829,7 +843,10 @@ class TestCheckCheckpointCache:
         }
         self._make_checkpoint_file(path, tensors=internal_tensors)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -844,7 +861,10 @@ class TestCheckCheckpointCache:
         }
         self._make_checkpoint_file(path, tensors=internal_tensors)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -858,7 +878,10 @@ class TestCheckCheckpointCache:
         }
         self._make_checkpoint_file(path, tensors=internal_tensors)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -869,7 +892,10 @@ class TestCheckCheckpointCache:
         save_file({"key_a": torch.randn(4, 4)}, str(path))
         with pytest.raises(ValueError, match="not an ecaj-saved model"):
             check_checkpoint_cache(
-                str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+                str(path),
+                "abc123",
+                self._BASE_IDENTITY,
+                self._DEPS,
             )
 
     # AC: @exit-model-persistence ac-9
@@ -879,7 +905,10 @@ class TestCheckCheckpointCache:
         save_file({"key_a": torch.randn(4, 4)}, str(path), metadata={})
         with pytest.raises(ValueError, match="not an ecaj-saved model"):
             check_checkpoint_cache(
-                str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+                str(path),
+                "abc123",
+                self._BASE_IDENTITY,
+                self._DEPS,
             )
 
     # AC: @exit-model-persistence ac-4
@@ -888,7 +917,10 @@ class TestCheckCheckpointCache:
         path = tmp_path / "model.safetensors"
         self._make_checkpoint_file(path, recipe_hash="abc123")
         result = check_checkpoint_cache(
-            str(path), "different_hash", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "different_hash",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -898,7 +930,10 @@ class TestCheckCheckpointCache:
         path = tmp_path / "model.safetensors"
         self._make_checkpoint_file(path)
         result = check_checkpoint_cache(
-            str(path), "abc123", "different_base_identity", self._DEPS,
+            str(path),
+            "abc123",
+            "different_base_identity",
+            self._DEPS,
         )
         assert result is False
 
@@ -909,7 +944,10 @@ class TestCheckCheckpointCache:
         self._make_checkpoint_file(path)
         different_deps = json.dumps({"lora.safetensors": [9999.9, 200]})
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, different_deps,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            different_deps,
         )
         assert result is False
 
@@ -917,7 +955,9 @@ class TestCheckCheckpointCache:
         """Non-existent file returns False (not an error)."""
         result = check_checkpoint_cache(
             str(tmp_path / "nonexistent.safetensors"),
-            "abc123", self._BASE_IDENTITY, self._DEPS,
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -938,7 +978,10 @@ class TestCheckCheckpointCache:
         }
         save_file(tensors, str(path), metadata=metadata)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -959,7 +1002,10 @@ class TestCheckCheckpointCache:
         }
         save_file(tensors, str(path), metadata=metadata)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -980,7 +1026,10 @@ class TestCheckCheckpointCache:
         }
         save_file(tensors, str(path), metadata=metadata)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -1001,7 +1050,10 @@ class TestCheckCheckpointCache:
         }
         save_file(tensors, str(path), metadata=metadata)
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -1022,10 +1074,15 @@ class TestCheckFullModelCacheClassification:
     _BASE_IDENTITY = "base_sha256_xyz"
     _DEPS = json.dumps({"lora.safetensors": [5678.0, 200]})
 
-    def _make_full_file(self, path, *, recipe_hash="abc123",
-                        artifact_kind="diffusion",
-                        base_identity=None,
-                        dependency_fingerprints=None):
+    def _make_full_file(
+        self,
+        path,
+        *,
+        recipe_hash="abc123",
+        artifact_kind="diffusion",
+        base_identity=None,
+        dependency_fingerprints=None,
+    ):
         """Helper to create a full-model safetensors file with classification metadata."""
         if base_identity is None:
             base_identity = self._BASE_IDENTITY
@@ -1049,7 +1106,8 @@ class TestCheckFullModelCacheClassification:
         path = tmp_path / "model.safetensors"
         self._make_full_file(path)
         result = check_full_model_cache(
-            str(path), "abc123",
+            str(path),
+            "abc123",
             expected_artifact_kind="diffusion",
             expected_base_identity=self._BASE_IDENTITY,
             expected_dependency_fingerprints=self._DEPS,
@@ -1072,7 +1130,8 @@ class TestCheckFullModelCacheClassification:
         }
         save_file(self._TENSORS, str(path), metadata=metadata)
         result = check_full_model_cache(
-            str(path), "abc123",
+            str(path),
+            "abc123",
             expected_artifact_kind="diffusion",
             expected_base_identity=self._BASE_IDENTITY,
             expected_dependency_fingerprints=self._DEPS,
@@ -1085,7 +1144,8 @@ class TestCheckFullModelCacheClassification:
         path = tmp_path / "model.safetensors"
         self._make_full_file(path, artifact_kind="checkpoint")
         result = check_full_model_cache(
-            str(path), "abc123",
+            str(path),
+            "abc123",
             expected_artifact_kind="diffusion",
             expected_base_identity=self._BASE_IDENTITY,
             expected_dependency_fingerprints=self._DEPS,
@@ -1108,7 +1168,8 @@ class TestCheckFullModelCacheClassification:
         }
         save_file(self._TENSORS, str(path), metadata=metadata)
         result = check_full_model_cache(
-            str(path), "abc123",
+            str(path),
+            "abc123",
             expected_artifact_kind="diffusion",
             expected_base_identity=self._BASE_IDENTITY,
             expected_dependency_fingerprints=self._DEPS,
@@ -1131,7 +1192,8 @@ class TestCheckFullModelCacheClassification:
         }
         save_file(self._TENSORS, str(path), metadata=metadata)
         result = check_full_model_cache(
-            str(path), "abc123",
+            str(path),
+            "abc123",
             expected_artifact_kind="diffusion",
             expected_base_identity=self._BASE_IDENTITY,
             expected_dependency_fingerprints=self._DEPS,
@@ -1144,7 +1206,8 @@ class TestCheckFullModelCacheClassification:
         path = tmp_path / "model.safetensors"
         self._make_full_file(path)
         result = check_full_model_cache(
-            str(path), "abc123",
+            str(path),
+            "abc123",
             expected_artifact_kind="diffusion",
             expected_base_identity="different_base",
             expected_dependency_fingerprints=self._DEPS,
@@ -1158,7 +1221,8 @@ class TestCheckFullModelCacheClassification:
         self._make_full_file(path)
         different_deps = json.dumps({"lora.safetensors": [9999.0, 999]})
         result = check_full_model_cache(
-            str(path), "abc123",
+            str(path),
+            "abc123",
             expected_artifact_kind="diffusion",
             expected_base_identity=self._BASE_IDENTITY,
             expected_dependency_fingerprints=different_deps,

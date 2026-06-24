@@ -111,9 +111,7 @@ def _validate_clip_recipe_tree(node: RecipeNode, path: str = "root") -> None:
             _validate_clip_recipe_tree(node.backbone, backbone_path)
 
     else:
-        raise ValueError(
-            f"Unknown recipe node type at {path}: {type(node).__name__}"
-        )
+        raise ValueError(f"Unknown recipe node type at {path}: {type(node).__name__}")
 
 
 def _unpatch_loaded_clip_clones(clip: object) -> None:
@@ -309,7 +307,9 @@ class WIDENCLIPExitNode:
         try:
             # AC-3: Analyze recipe for CLIP model checkpoints via domain dispatch
             model_analysis = analyze_recipe_models(
-                widen_clip, base.arch, model_path_resolver=model_path_resolver,
+                widen_clip,
+                base.arch,
+                model_path_resolver=model_path_resolver,
                 domain="clip",
             )
 
@@ -381,9 +381,7 @@ class WIDENCLIPExitNode:
             if batch_groups:
                 # Only count keys being processed — not the full base_state.
                 processed_keys = {k for keys in batch_groups.values() for k in keys}
-                merged_state_bytes = sum(
-                    key_byte_sizes[k] for k in processed_keys
-                )
+                merged_state_bytes = sum(key_byte_sizes[k] for k in processed_keys)
                 n_models = len(set_affected) + len(clip_model_loaders)
                 element_size = torch.finfo(compute_dtype).bits // 8
                 # Compute worst-case chunk bytes: pair each group's batch_size
@@ -433,11 +431,19 @@ class WIDENCLIPExitNode:
                             model_loaders=mdl_ldrs,
                             domain=dom,
                         )
+
                     return eval_fn
 
                 eval_fn = make_eval_fn(
-                    plan, loader, widen_merger, device, compute_dtype,
-                    arch, widen_config, clip_model_loaders, "clip",
+                    plan,
+                    loader,
+                    widen_merger,
+                    device,
+                    compute_dtype,
+                    arch,
+                    widen_config,
+                    clip_model_loaders,
+                    "clip",
                 )
 
                 # Run chunked evaluation with OOM backoff

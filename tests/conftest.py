@@ -263,6 +263,7 @@ def _mock_comfyui_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     # MODEL.  Tests that need to assert on loader arguments patch
     # nodes.exit._comfy_load_diffusion_model directly.
     from unittest.mock import MagicMock as _MagicMock
+
     comfy_sd_mod.load_diffusion_model = lambda *args, **kwargs: _MagicMock(
         name="comfy_load_diffusion_model_stub",
     )

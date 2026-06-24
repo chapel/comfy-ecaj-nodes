@@ -107,7 +107,7 @@ def _normalize_kohya_key(key: str) -> str:
         return key
 
     # Strip lora_unet_ prefix
-    key = key[len("lora_unet_"):]
+    key = key[len("lora_unet_") :]
 
     # Convert numeric indices
     key = re.sub(r"_(\d+)_", r".\1.", key)
@@ -144,7 +144,7 @@ def _normalize_lycoris_key(key: str) -> str:
         return key
 
     # Strip lycoris_ prefix
-    key = key[len("lycoris_"):]
+    key = key[len("lycoris_") :]
 
     # Convert numeric indices
     key = re.sub(r"_(\d+)_", r".\1.", key)
@@ -216,11 +216,11 @@ def _parse_flux_lora_key(
 
     # Handle diffusion_model prefix
     if base_path.startswith("diffusion_model."):
-        base_path = base_path[len("diffusion_model."):]
+        base_path = base_path[len("diffusion_model.") :]
 
     # Handle transformer prefix
     if base_path.startswith("transformer."):
-        base_path = base_path[len("transformer."):]
+        base_path = base_path[len("transformer.") :]
 
     # Handle BFL/kohya format
     if base_path.startswith("lora_unet_"):
@@ -372,7 +372,7 @@ class FluxLoader(LoRALoader):
                 if lora_key.endswith(".alpha"):
                     alpha_tensor = f.get_tensor(lora_key)
                     if alpha_tensor.numel() == 1:
-                        alpha_values[lora_key[:-len(".alpha")]] = alpha_tensor.item()
+                        alpha_values[lora_key[: -len(".alpha")]] = alpha_tensor.item()
                     continue
 
                 model_key, direction, qkv_comp, attn_stream = _parse_flux_lora_key(lora_key)
@@ -383,10 +383,14 @@ class FluxLoader(LoRALoader):
 
                 # Extract LoRA base path for alpha lookup
                 lora_base = lora_key
-                for suffix in (".lora_A.weight", ".lora_B.weight",
-                               ".lora_down.weight", ".lora_up.weight"):
+                for suffix in (
+                    ".lora_A.weight",
+                    ".lora_B.weight",
+                    ".lora_down.weight",
+                    ".lora_up.weight",
+                ):
                     if lora_base.endswith(suffix):
-                        lora_base = lora_base[:-len(suffix)]
+                        lora_base = lora_base[: -len(suffix)]
                         break
 
                 # For QKV/MLP, track each component separately
@@ -440,9 +444,7 @@ class FluxLoader(LoRALoader):
                     self._hidden_dims[model_key] = up.shape[0]
             else:
                 # Standard LoRA
-                self._lora_data_by_set[effective_set_id][layer_key].append(
-                    (up, down, scale)
-                )
+                self._lora_data_by_set[effective_set_id][layer_key].append((up, down, scale))
                 self._affected_by_set[effective_set_id].add(layer_key)
                 self._affected.add(layer_key)
 

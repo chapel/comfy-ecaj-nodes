@@ -26,6 +26,7 @@ def _dir_resolver(base_dir: str):
     """Create a resolver that joins LoRA names to a base directory."""
     return lambda name: os.path.join(base_dir, name)
 
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -92,9 +93,7 @@ class TestAC1TreeWalk:
         """Given a simple recipe tree, walks to find RecipeBase."""
         # AC: @exit-recipe-analysis ac-1
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
-        lora = RecipeLoRA(
-            loras=({"path": Path(sdxl_lora_a).name, "strength": 1.0},)
-        )
+        lora = RecipeLoRA(loras=({"path": Path(sdxl_lora_a).name, "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         result = analyze_recipe(merge, lora_path_resolver=_dir_resolver(temp_lora_dir))
@@ -125,9 +124,7 @@ class TestAC1TreeWalk:
         assert result.arch == "sdxl"
         result.loader.cleanup()
 
-    def test_extracts_arch_tag_correctly(
-        self, mock_model_patcher: MockModelPatcher
-    ):
+    def test_extracts_arch_tag_correctly(self, mock_model_patcher: MockModelPatcher):
         """Extracts the architecture tag from RecipeBase."""
         # AC: @exit-recipe-analysis ac-1
         base_sdxl = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
@@ -356,9 +353,7 @@ class TestAC4AffectedKeyMap:
 
         for set_id, keys in result.set_affected.items():
             for key in keys:
-                assert key.startswith("diffusion_model."), (
-                    f"Key {key} not in model format"
-                )
+                assert key.startswith("diffusion_model."), f"Key {key} not in model format"
 
         result.loader.cleanup()
 
@@ -445,9 +440,7 @@ class TestAC6MissingLoraError:
         """Missing LoRA file raises FileNotFoundError."""
         # AC: @exit-recipe-analysis ac-6
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
-        lora = RecipeLoRA(
-            loras=({"path": "nonexistent_lora.safetensors", "strength": 1.0},)
-        )
+        lora = RecipeLoRA(loras=({"path": "nonexistent_lora.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         with pytest.raises(FileNotFoundError) as exc_info:
@@ -462,9 +455,7 @@ class TestAC6MissingLoraError:
         """FileNotFoundError includes context about which LoRA node."""
         # AC: @exit-recipe-analysis ac-6
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
-        lora = RecipeLoRA(
-            loras=({"path": "missing.safetensors", "strength": 0.75},)
-        )
+        lora = RecipeLoRA(loras=({"path": "missing.safetensors", "strength": 0.75},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         with pytest.raises(FileNotFoundError) as exc_info:
@@ -554,13 +545,12 @@ class TestNestedLoraPathResolution:
         mock_model_patcher: MockModelPatcher,
     ):
         """When resolver returns None, FileNotFoundError is raised."""
+
         def null_resolver(name: str) -> str | None:
             return None
 
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
-        lora = RecipeLoRA(
-            loras=({"path": "subdir/missing.safetensors", "strength": 1.0},)
-        )
+        lora = RecipeLoRA(loras=({"path": "subdir/missing.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         with pytest.raises(FileNotFoundError, match="subdir/missing.safetensors"):

@@ -106,9 +106,7 @@ class TestSafeOpenAccess:
 
         loader.cleanup()
 
-    def test_loader_works_as_context_manager(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_loader_works_as_context_manager(self, sdxl_checkpoint_path: str) -> None:
         """Loader supports context manager for automatic cleanup."""
         with ModelLoader(sdxl_checkpoint_path) as loader:
             assert len(loader.affected_keys) > 0
@@ -171,9 +169,7 @@ class TestSDXLKeyNormalization:
         normalized = _normalize_key(file_key)
         assert normalized == "diffusion_model.input_blocks.0.0.weight"
 
-    def test_sdxl_checkpoint_keys_normalized_correctly(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_sdxl_checkpoint_keys_normalized_correctly(self, sdxl_checkpoint_path: str) -> None:
         """SDXL checkpoint keys are normalized to base model format."""
         with ModelLoader(sdxl_checkpoint_path) as loader:
             # Check all keys have correct format
@@ -236,9 +232,7 @@ class TestAffectedKeysFiltering:
             for key in loader.affected_keys:
                 assert "first_stage_model" not in key
 
-    def test_affected_keys_excludes_text_encoder(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_affected_keys_excludes_text_encoder(self, sdxl_checkpoint_path: str) -> None:
         """Text encoder keys (conditioner) are excluded."""
         with ModelLoader(sdxl_checkpoint_path) as loader:
             for key in loader.affected_keys:
@@ -254,9 +248,7 @@ class TestAffectedKeysFiltering:
         assert _normalize_key("conditioner.embedders.weight") is None
         assert _normalize_key("cond_stage_model.transformer.weight") is None
 
-    def test_affected_keys_returns_frozenset(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_affected_keys_returns_frozenset(self, sdxl_checkpoint_path: str) -> None:
         """affected_keys returns frozenset to prevent mutation."""
         with ModelLoader(sdxl_checkpoint_path) as loader:
             assert isinstance(loader.affected_keys, frozenset)
@@ -279,9 +271,7 @@ class TestCleanup:
         loader.cleanup()
         assert loader._handle is None
 
-    def test_context_manager_calls_cleanup(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_context_manager_calls_cleanup(self, sdxl_checkpoint_path: str) -> None:
         """Context manager calls cleanup() on exit."""
         with ModelLoader(sdxl_checkpoint_path) as loader:
             assert loader._handle is not None
@@ -298,9 +288,7 @@ class TestCleanup:
 class TestKeyMismatchError:
     """Tests for clear error on unmatched keys."""
 
-    def test_get_weights_raises_for_missing_keys(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_get_weights_raises_for_missing_keys(self, sdxl_checkpoint_path: str) -> None:
         """get_weights() raises KeyMismatchError for missing keys."""
         with ModelLoader(sdxl_checkpoint_path) as loader:
             with pytest.raises(KeyMismatchError) as exc_info:
@@ -309,9 +297,7 @@ class TestKeyMismatchError:
             assert "missing" in str(exc_info.value).lower()
             assert "nonexistent" in str(exc_info.value)
 
-    def test_key_mismatch_error_lists_unmatched_keys(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_key_mismatch_error_lists_unmatched_keys(self, sdxl_checkpoint_path: str) -> None:
         """KeyMismatchError message lists the unmatched keys."""
         with ModelLoader(sdxl_checkpoint_path) as loader:
             missing = [
@@ -340,9 +326,7 @@ class TestArchitectureDetection:
         with ModelLoader(sdxl_checkpoint_path) as loader:
             assert loader.arch == "sdxl"
 
-    def test_detect_zimage_architecture(
-        self, zimage_checkpoint_path: str
-    ) -> None:
+    def test_detect_zimage_architecture(self, zimage_checkpoint_path: str) -> None:
         """Z-Image checkpoint detected from layers + noise_refiner pattern."""
         with ModelLoader(zimage_checkpoint_path) as loader:
             assert loader.arch == "zimage"
@@ -350,24 +334,30 @@ class TestArchitectureDetection:
     def test_detect_architecture_without_loading_tensors(self) -> None:
         """Architecture detection uses only key inspection, no tensor loading."""
         # Test the detection function directly with just keys
-        sdxl_keys = frozenset({
-            "diffusion_model.input_blocks.0.0.weight",
-            "diffusion_model.middle_block.0.weight",
-            "diffusion_model.output_blocks.0.0.weight",
-        })
+        sdxl_keys = frozenset(
+            {
+                "diffusion_model.input_blocks.0.0.weight",
+                "diffusion_model.middle_block.0.weight",
+                "diffusion_model.output_blocks.0.0.weight",
+            }
+        )
         assert _detect_architecture_from_keys(sdxl_keys) == "sdxl"
 
-        zimage_keys = frozenset({
-            "diffusion_model.layers.0.attention.qkv.weight",
-            "diffusion_model.noise_refiner.0.attn.weight",
-        })
+        zimage_keys = frozenset(
+            {
+                "diffusion_model.layers.0.attention.qkv.weight",
+                "diffusion_model.noise_refiner.0.attn.weight",
+            }
+        )
         assert _detect_architecture_from_keys(zimage_keys) == "zimage"
 
     def test_unknown_architecture_returns_none(self) -> None:
         """Unknown architecture patterns return None."""
-        unknown_keys = frozenset({
-            "diffusion_model.some.unknown.structure.weight",
-        })
+        unknown_keys = frozenset(
+            {
+                "diffusion_model.some.unknown.structure.weight",
+            }
+        )
         assert _detect_architecture_from_keys(unknown_keys) is None
 
 
@@ -380,9 +370,7 @@ class TestArchitectureDetection:
 class TestUnsupportedFormatError:
     """Tests for non-safetensors format rejection."""
 
-    def test_ckpt_file_raises_unsupported_error(
-        self, non_safetensors_path: str
-    ) -> None:
+    def test_ckpt_file_raises_unsupported_error(self, non_safetensors_path: str) -> None:
         """Opening a .ckpt file raises UnsupportedFormatError."""
         with pytest.raises(UnsupportedFormatError) as exc_info:
             ModelLoader(non_safetensors_path)
@@ -402,9 +390,7 @@ class TestUnsupportedFormatError:
 
         assert "safetensors" in str(exc_info.value).lower()
 
-    def test_error_message_suggests_conversion(
-        self, non_safetensors_path: str
-    ) -> None:
+    def test_error_message_suggests_conversion(self, non_safetensors_path: str) -> None:
         """Error message suggests converting to safetensors."""
         with pytest.raises(UnsupportedFormatError) as exc_info:
             ModelLoader(non_safetensors_path)
@@ -459,9 +445,7 @@ class TestQwenArchitectureDetection:
         with ModelLoader(qwen_checkpoint_path) as loader:
             assert loader.arch == "qwen"
 
-    def test_detect_qwen_with_model_prefix(
-        self, qwen_model_prefix_checkpoint_path: str
-    ) -> None:
+    def test_detect_qwen_with_model_prefix(self, qwen_model_prefix_checkpoint_path: str) -> None:
         """Qwen checkpoint with model.transformer prefix detected."""
         with ModelLoader(qwen_model_prefix_checkpoint_path) as loader:
             assert loader.arch == "qwen"
@@ -469,17 +453,13 @@ class TestQwenArchitectureDetection:
     def test_detect_qwen_architecture_without_loading_tensors(self) -> None:
         """Qwen detection uses only key inspection, no tensor loading."""
         # Test with exactly 60 transformer_blocks keys (threshold)
-        qwen_keys = frozenset(
-            f"diffusion_model.transformer_blocks.{i}.weight" for i in range(60)
-        )
+        qwen_keys = frozenset(f"diffusion_model.transformer_blocks.{i}.weight" for i in range(60))
         assert _detect_architecture_from_keys(qwen_keys) == "qwen"
 
     def test_below_threshold_not_detected_as_qwen(self) -> None:
         """Less than 60 transformer_blocks keys does not trigger Qwen detection."""
         # 59 keys - just below threshold
-        keys = frozenset(
-            f"diffusion_model.transformer_blocks.{i}.weight" for i in range(59)
-        )
+        keys = frozenset(f"diffusion_model.transformer_blocks.{i}.weight" for i in range(59))
         assert _detect_architecture_from_keys(keys) != "qwen"
 
 
@@ -498,9 +478,7 @@ class TestQwenKeyNormalization:
         normalized = _normalize_key(file_key)
         assert normalized == "diffusion_model.transformer_blocks.5.attn.weight"
 
-    def test_qwen_checkpoint_keys_normalized_correctly(
-        self, qwen_checkpoint_path: str
-    ) -> None:
+    def test_qwen_checkpoint_keys_normalized_correctly(self, qwen_checkpoint_path: str) -> None:
         """Qwen checkpoint keys are normalized to base model format."""
         with ModelLoader(qwen_checkpoint_path) as loader:
             for key in loader.affected_keys:
@@ -590,20 +568,24 @@ class TestFluxArchitectureDetection:
     def test_detect_flux_architecture_without_loading_tensors(self) -> None:
         """Flux detection uses only key inspection, no tensor loading."""
         # Test with double_blocks keys
-        flux_keys = frozenset({
-            "diffusion_model.double_blocks.0.img_attn.qkv.weight",
-            "diffusion_model.double_blocks.1.txt_attn.qkv.weight",
-            "diffusion_model.single_blocks.0.linear1.weight",
-        })
+        flux_keys = frozenset(
+            {
+                "diffusion_model.double_blocks.0.img_attn.qkv.weight",
+                "diffusion_model.double_blocks.1.txt_attn.qkv.weight",
+                "diffusion_model.single_blocks.0.linear1.weight",
+            }
+        )
         assert _detect_architecture_from_keys(flux_keys) == "flux"
 
     def test_flux_not_detected_without_double_blocks(self) -> None:
         """Keys without double_blocks do not trigger Flux detection."""
         # Only single_blocks should not trigger Flux
-        keys = frozenset({
-            "diffusion_model.single_blocks.0.linear1.weight",
-            "diffusion_model.single_blocks.1.linear1.weight",
-        })
+        keys = frozenset(
+            {
+                "diffusion_model.single_blocks.0.linear1.weight",
+                "diffusion_model.single_blocks.1.linear1.weight",
+            }
+        )
         assert _detect_architecture_from_keys(keys) != "flux"
 
 
@@ -622,9 +604,7 @@ class TestFluxKeyNormalization:
         normalized = _normalize_key(file_key)
         assert normalized == "diffusion_model.double_blocks.0.img_attn.qkv.weight"
 
-    def test_flux_checkpoint_keys_normalized_correctly(
-        self, flux_checkpoint_path: str
-    ) -> None:
+    def test_flux_checkpoint_keys_normalized_correctly(self, flux_checkpoint_path: str) -> None:
         """Flux checkpoint keys are normalized to base model format."""
         with ModelLoader(flux_checkpoint_path) as loader:
             for key in loader.affected_keys:

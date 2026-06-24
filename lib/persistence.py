@@ -215,9 +215,7 @@ def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
         for idx in sorted(sample_indices):
             sample_tensor = base_state[sorted_keys[idx]]
             flat = sample_tensor.detach().float().reshape(-1)[:64].contiguous().cpu()
-            hasher.update(
-                bytes(flat.untyped_storage())[:flat.nelement() * flat.element_size()]
-            )
+            hasher.update(bytes(flat.untyped_storage())[: flat.nelement() * flat.element_size()])
 
     return hasher.hexdigest()
 
@@ -548,10 +546,7 @@ def check_full_model_cache(
             return False
     if expected_source_model_kind is not None:
         stored_source_kind = metadata.get("__ecaj_source_model_kind__")
-        if (
-            stored_source_kind is None
-            or stored_source_kind != expected_source_model_kind
-        ):
+        if stored_source_kind is None or stored_source_kind != expected_source_model_kind:
             return False
     if expected_base_identity is not None:
         stored_base = metadata.get("__ecaj_base_identity__")
@@ -575,6 +570,7 @@ def check_full_model_cache(
         # Reuse the canonical map from streaming_save (which covers all
         # dtypes the writer supports, including BOOL, C64, float8, U16/U32/U64).
         from .streaming_save import _DTYPE_MAP as _WRITER_DTYPE_MAP
+
         _ST_DTYPE_MAP = {v: k for k, v in _WRITER_DTYPE_MAP.items()}
 
         for key, (expected_dtype, expected_shape) in expected_manifest.items():
@@ -620,8 +616,7 @@ def _is_internal_only_artifact(tensor_keys: set[str]) -> bool:
     if not tensor_keys:
         return True
     return all(
-        any(k.startswith(prefix) for prefix in _INTERNAL_ONLY_KEY_PREFIXES)
-        for k in tensor_keys
+        any(k.startswith(prefix) for prefix in _INTERNAL_ONLY_KEY_PREFIXES) for k in tensor_keys
     )
 
 
@@ -651,9 +646,7 @@ def _has_checkpoint_component_prefixes(tensor_keys: set[str]) -> bool:
     if not tensor_keys:
         return False
     for prefix_group in _CHECKPOINT_COMPONENT_PREFIXES:
-        if not any(
-            k.startswith(p) for k in tensor_keys for p in prefix_group
-        ):
+        if not any(k.startswith(p) for k in tensor_keys for p in prefix_group):
             return False
     return True
 
@@ -790,6 +783,7 @@ def check_checkpoint_cache(
             return False
 
         from .streaming_save import _DTYPE_MAP as _WRITER_DTYPE_MAP
+
         _ST_DTYPE_MAP = {v: k for k, v in _WRITER_DTYPE_MAP.items()}
 
         for key, (expected_dtype, expected_shape) in expected_manifest.items():
@@ -871,9 +865,7 @@ def compute_structural_fingerprint(
     Returns:
         SHA-256 hex digest
     """
-    serialized = serialize_recipe(
-        node, base_identity, lora_stats, strip_block_config=True
-    )
+    serialized = serialize_recipe(node, base_identity, lora_stats, strip_block_config=True)
     return hashlib.sha256(serialized.encode()).hexdigest()
 
 

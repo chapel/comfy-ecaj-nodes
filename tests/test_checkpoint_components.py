@@ -187,8 +187,10 @@ class TestMissingComponentsFailBeforeWork:
 
         node = WIDENExitNode()
 
-        with patch("nodes.exit.analyze_recipe") as mock_analyze, \
-             patch("nodes.exit.walk_to_base") as mock_walk:
+        with (
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.walk_to_base") as mock_walk,
+        ):
             mock_walk.return_value = base
 
             with pytest.raises(ValueError):
@@ -228,7 +230,9 @@ class TestMissingComponentsFailBeforeWork:
         patcher = MockModelPatcher()
         base = RecipeBase(model_patcher=patcher, arch="sdxl")
         model = RecipeModel(
-            path="clip.safetensors", strength=1.0, source_dir="checkpoints",
+            path="clip.safetensors",
+            strength=1.0,
+            source_dir="checkpoints",
         )
         merge = RecipeMerge(base=base, target=model, backbone=None, t_factor=0.5)
 
@@ -415,31 +419,32 @@ class TestValidComponentsPassValidation:
         # With valid components, execution should proceed past validation and
         # reach the checkpoint save seam (save_comfy_checkpoint) without
         # real checkpoint I/O.
-        with patch("nodes.exit.analyze_recipe") as mock_analyze, \
-             patch("nodes.exit.analyze_recipe_models") as mock_model_analyze, \
-             patch("nodes.exit.walk_to_base", return_value=base), \
-             patch("nodes.exit._unpatch_loaded_clones"), \
-             patch("nodes.exit._build_lora_resolver") as mock_lr, \
-             patch("nodes.exit._build_model_resolver") as mock_mr, \
-             patch("nodes.exit.compute_base_identity", return_value="base-id"), \
-             patch("nodes.exit.compute_lora_stats", return_value={}), \
-             patch("nodes.exit.validate_model_name", return_value="test.safetensors"), \
-             patch("nodes.exit._resolve_checkpoints_path", return_value="/tmp/test.safetensors"), \
-             patch("nodes.exit.serialize_recipe", return_value="serialized"), \
-             patch("nodes.exit.compute_recipe_hash", return_value="hash"), \
-             patch("nodes.exit.check_checkpoint_cache", return_value=False), \
-             patch("nodes.exit.compile_plan", return_value=object()), \
-             patch("nodes.exit.compile_batch_groups", return_value={}), \
-             patch("nodes.exit.chunked_evaluation", return_value={}), \
-             patch("nodes.exit.install_merged_patches", return_value=patcher.clone()), \
-             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt, \
-             patch.multiple(
-                 "nodes.exit",
-                 check_ram_preflight=DEFAULT,
-                 _load_checkpoint_artifact=MagicMock(return_value=patcher.clone()),
-             ), \
-             patch("nodes.exit.ProgressBar", None):
-
+        with (
+            patch("nodes.exit.analyze_recipe") as mock_analyze,
+            patch("nodes.exit.analyze_recipe_models") as mock_model_analyze,
+            patch("nodes.exit.walk_to_base", return_value=base),
+            patch("nodes.exit._unpatch_loaded_clones"),
+            patch("nodes.exit._build_lora_resolver") as mock_lr,
+            patch("nodes.exit._build_model_resolver") as mock_mr,
+            patch("nodes.exit.compute_base_identity", return_value="base-id"),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.validate_model_name", return_value="test.safetensors"),
+            patch("nodes.exit._resolve_checkpoints_path", return_value="/tmp/test.safetensors"),
+            patch("nodes.exit.serialize_recipe", return_value="serialized"),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash"),
+            patch("nodes.exit.check_checkpoint_cache", return_value=False),
+            patch("nodes.exit.compile_plan", return_value=object()),
+            patch("nodes.exit.compile_batch_groups", return_value={}),
+            patch("nodes.exit.chunked_evaluation", return_value={}),
+            patch("nodes.exit.install_merged_patches", return_value=patcher.clone()),
+            patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
+            patch.multiple(
+                "nodes.exit",
+                check_ram_preflight=DEFAULT,
+                _load_checkpoint_artifact=MagicMock(return_value=patcher.clone()),
+            ),
+            patch("nodes.exit.ProgressBar", None),
+        ):
             mock_lr.return_value = lambda name: None
             mock_mr.return_value = lambda name, src: None
             mock_analyze.return_value = SimpleNamespace(

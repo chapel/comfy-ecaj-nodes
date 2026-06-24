@@ -65,7 +65,8 @@ class TestSavedModelProgressHelper:
             return bar
 
         prog = SavedModelProgress(
-            total_units=5, progress_bar_factory=factory,
+            total_units=5,
+            progress_bar_factory=factory,
         )
         prog.prepare()
         prog.tensor_written("k1")
@@ -87,7 +88,8 @@ class TestSavedModelProgressHelper:
         atomic-replace work) leaves published=False.
         """
         prog = SavedModelProgress(
-            total_units=3, progress_bar_factory=RecordingProgressBar,
+            total_units=3,
+            progress_bar_factory=RecordingProgressBar,
         )
         prog.prepare()
         prog.finalize()
@@ -113,7 +115,8 @@ class TestSavedModelProgressHelper:
         """A finalize() entry with no mark_published() (sink failure) must
         leave the artifact reported as not-published."""
         prog = SavedModelProgress(
-            total_units=3, progress_bar_factory=RecordingProgressBar,
+            total_units=3,
+            progress_bar_factory=RecordingProgressBar,
         )
         prog.prepare()
         prog.finalize()
@@ -129,7 +132,8 @@ class TestSavedModelProgressHelper:
     def test_helper_cache_reuse_uses_distinct_phase(self):
         """Cache reuse does not pretend to write tensors."""
         prog = SavedModelProgress(
-            total_units=1, progress_bar_factory=RecordingProgressBar,
+            total_units=1,
+            progress_bar_factory=RecordingProgressBar,
         )
         prog.cache_reuse()
         phases = [phase for phase, _ in prog.messages]
@@ -142,7 +146,8 @@ class TestSavedModelProgressHelper:
     def test_helper_failure_does_not_report_published(self):
         """Failure must clear published and emit a failure phase."""
         prog = SavedModelProgress(
-            total_units=3, progress_bar_factory=RecordingProgressBar,
+            total_units=3,
+            progress_bar_factory=RecordingProgressBar,
         )
         prog.prepare()
         prog.tensor_written("k1")
@@ -157,7 +162,8 @@ class TestSavedModelProgressHelper:
     def test_helper_safe_with_no_progress_bar_factory(self):
         """ProgressBar absence (e.g. running outside ComfyUI) is safe."""
         prog = SavedModelProgress(
-            total_units=2, progress_bar_factory=None,
+            total_units=2,
+            progress_bar_factory=None,
         )
         prog.prepare()
         prog.tensor_written("k1")
@@ -172,7 +178,8 @@ class TestSavedModelProgressHelper:
     def test_helper_swallows_progress_bar_construction_errors(self):
         """A broken ProgressBar must not break a save."""
         prog = SavedModelProgress(
-            total_units=2, progress_bar_factory=RaisingProgressBar,
+            total_units=2,
+            progress_bar_factory=RaisingProgressBar,
         )
         # Exercising every public method must remain safe.
         prog.prepare()
@@ -224,10 +231,13 @@ class TestExitNodeProgressNoOpDiffusionSave:
     # AC: @streaming-materialization-progress ac-no-op-save-progress
     # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
     def test_noop_diffusion_save_advances_progress_per_base_write(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         save_path = str(tmp_path / "noop_progress.safetensors")
@@ -245,8 +255,7 @@ class TestExitNodeProgressNoOpDiffusionSave:
             return prog
 
         with (
-            patch("nodes.exit.validate_model_name",
-                  return_value="noop_progress.safetensors"),
+            patch("nodes.exit.validate_model_name", return_value="noop_progress.safetensors"),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
@@ -254,8 +263,7 @@ class TestExitNodeProgressNoOpDiffusionSave:
             patch("nodes.exit.serialize_recipe", return_value="{}"),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
-            patch("nodes.exit._build_save_progress",
-                  side_effect=capture_progress),
+            patch("nodes.exit._build_save_progress", side_effect=capture_progress),
         ):
             WIDENExitNode().execute(base, save_model=True, model_name="noop")
 
@@ -263,8 +271,7 @@ class TestExitNodeProgressNoOpDiffusionSave:
         prog = recorded[0]
         # Each base tensor advanced progress, plus prepare/finalize/reload.
         write_phase_messages = [
-            (phase, msg) for phase, msg in prog.messages
-            if phase == "write_tensor"
+            (phase, msg) for phase, msg in prog.messages if phase == "write_tensor"
         ]
         assert len(write_phase_messages) == 1, (
             f"Expected single write_tensor phase entry, got: {prog.messages}"
@@ -275,10 +282,13 @@ class TestExitNodeProgressNoOpDiffusionSave:
 
     # AC: @streaming-materialization-progress ac-finalization-status-visible
     def test_noop_diffusion_save_reports_post_write_phases(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         save_path = str(tmp_path / "noop_phases.safetensors")
@@ -295,8 +305,7 @@ class TestExitNodeProgressNoOpDiffusionSave:
             return prog
 
         with (
-            patch("nodes.exit.validate_model_name",
-                  return_value="noop_phases.safetensors"),
+            patch("nodes.exit.validate_model_name", return_value="noop_phases.safetensors"),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
@@ -304,8 +313,7 @@ class TestExitNodeProgressNoOpDiffusionSave:
             patch("nodes.exit.serialize_recipe", return_value="{}"),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
-            patch("nodes.exit._build_save_progress",
-                  side_effect=capture_progress),
+            patch("nodes.exit._build_save_progress", side_effect=capture_progress),
         ):
             WIDENExitNode().execute(base, save_model=True, model_name="noop2")
 
@@ -327,10 +335,13 @@ class TestExitNodeProgressDiffusionMergeSave:
     # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
     # AC: @streaming-materialization-progress ac-affected-write-progress
     def test_diffusion_merge_save_advances_for_each_tensor_handoff(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -343,7 +354,9 @@ class TestExitNodeProgressDiffusionMergeSave:
         save_path = str(tmp_path / "merge_progress.safetensors")
 
         mock_analyze, mock_model_analysis, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, affected_keys, recipe=merge,
+            mock_model_patcher,
+            affected_keys,
+            recipe=merge,
         )
 
         merged = {k: torch.randn(4, 4) for k in affected_keys}
@@ -368,23 +381,18 @@ class TestExitNodeProgressDiffusionMergeSave:
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
-            patch("nodes.exit.analyze_recipe_models",
-                  return_value=mock_model_analysis),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
-            patch("nodes.exit.compile_batch_groups",
-                  return_value={sig: affected_keys}),
-            patch("nodes.exit.streaming_evaluation_to_sink",
-                  side_effect=streaming_eval),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: affected_keys}),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
-            patch("nodes.exit.validate_model_name",
-                  return_value="merge_progress.safetensors"),
+            patch("nodes.exit.validate_model_name", return_value="merge_progress.safetensors"),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
-            patch("nodes.exit._build_save_progress",
-                  side_effect=capture_progress),
+            patch("nodes.exit._build_save_progress", side_effect=capture_progress),
         ):
             WIDENExitNode().execute(merge, save_model=True, model_name="merge")
 
@@ -422,10 +430,13 @@ class TestExitNodeProgressCacheHit:
 
     # AC: @streaming-materialization-progress ac-cache-reuse-status-visible
     def test_cache_hit_reports_cache_reuse_phase_no_tensor_writes(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -436,8 +447,7 @@ class TestExitNodeProgressCacheHit:
         save_path = str(tmp_path / "cached_progress.safetensors")
 
         artifact_tensors = {
-            "model.diffusion_model." + k.removeprefix("diffusion_model."):
-                torch.ones(4, 4) * 7.0
+            "model.diffusion_model." + k.removeprefix("diffusion_model."): torch.ones(4, 4) * 7.0
             for k in keys
         }
         dep_fps = json.dumps({}, sort_keys=True, separators=(",", ":"))
@@ -479,8 +489,7 @@ class TestExitNodeProgressCacheHit:
             return prog
 
         with (
-            patch("nodes.exit.validate_model_name",
-                  return_value="cached_progress.safetensors"),
+            patch("nodes.exit.validate_model_name", return_value="cached_progress.safetensors"),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="match"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
@@ -493,8 +502,7 @@ class TestExitNodeProgressCacheHit:
                 return_value=MagicMock(name="loaded"),
             ),
             patch("nodes.exit._build_save_progress", side_effect=capture_save),
-            patch("nodes.exit._build_cache_reuse_progress",
-                  side_effect=capture_cache),
+            patch("nodes.exit._build_cache_reuse_progress", side_effect=capture_cache),
         ):
             WIDENExitNode().execute(merge, save_model=True, model_name="cached")
             mock_analyze.assert_not_called()
@@ -512,11 +520,14 @@ class TestExitNodeProgressCacheHit:
 
     # AC: @streaming-materialization-progress ac-cache-reuse-status-visible
     def test_noop_cache_hit_reports_cache_reuse_phase(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """Even a no-op cache hit (RecipeBase only) reports cache_reuse."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
 
@@ -524,8 +535,7 @@ class TestExitNodeProgressCacheHit:
         save_path = str(tmp_path / "cached_noop_progress.safetensors")
 
         artifact_tensors = {
-            "model.diffusion_model." + k.removeprefix("diffusion_model."):
-                torch.zeros(4, 4)
+            "model.diffusion_model." + k.removeprefix("diffusion_model."): torch.zeros(4, 4)
             for k in keys
         }
         dep_fps = json.dumps({}, sort_keys=True, separators=(",", ":"))
@@ -549,15 +559,17 @@ class TestExitNodeProgressCacheHit:
 
         def capture_cache(*, artifact_name: str):
             prog = SavedModelProgress(
-                total_units=1, progress_bar_factory=None,
+                total_units=1,
+                progress_bar_factory=None,
                 artifact_name=artifact_name,
             )
             recorded_cache.append(prog)
             return prog
 
         with (
-            patch("nodes.exit.validate_model_name",
-                  return_value="cached_noop_progress.safetensors"),
+            patch(
+                "nodes.exit.validate_model_name", return_value="cached_noop_progress.safetensors"
+            ),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="match"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
@@ -568,8 +580,7 @@ class TestExitNodeProgressCacheHit:
                 "nodes.exit._comfy_load_diffusion_model",
                 return_value=MagicMock(name="loaded"),
             ),
-            patch("nodes.exit._build_cache_reuse_progress",
-                  side_effect=capture_cache),
+            patch("nodes.exit._build_cache_reuse_progress", side_effect=capture_cache),
         ):
             WIDENExitNode().execute(base, save_model=True, model_name="cached_noop")
 
@@ -588,10 +599,13 @@ class TestExitNodeProgressFailure:
 
     # AC: @streaming-materialization-progress ac-failure-status-not-success
     def test_diffusion_save_failure_reports_failure_not_published(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -602,7 +616,9 @@ class TestExitNodeProgressFailure:
         save_path = str(tmp_path / "fails.safetensors")
 
         mock_analyze, mock_model_analysis, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, affected_keys, recipe=merge,
+            mock_model_patcher,
+            affected_keys,
+            recipe=merge,
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
 
@@ -624,23 +640,18 @@ class TestExitNodeProgressFailure:
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
-            patch("nodes.exit.analyze_recipe_models",
-                  return_value=mock_model_analysis),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
-            patch("nodes.exit.compile_batch_groups",
-                  return_value={sig: affected_keys}),
-            patch("nodes.exit.streaming_evaluation_to_sink",
-                  side_effect=streaming_eval),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: affected_keys}),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
-            patch("nodes.exit.validate_model_name",
-                  return_value="fails.safetensors"),
+            patch("nodes.exit.validate_model_name", return_value="fails.safetensors"),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
-            patch("nodes.exit._build_save_progress",
-                  side_effect=capture_progress),
+            patch("nodes.exit._build_save_progress", side_effect=capture_progress),
         ):
             with pytest.raises(RuntimeError, match="simulated mid-stream"):
                 WIDENExitNode().execute(merge, save_model=True, model_name="fail")
@@ -653,21 +664,23 @@ class TestExitNodeProgressFailure:
         assert "failure" in phases
         # The artifact must not have been published.
         import os
+
         assert not os.path.exists(save_path), (
             "Failed materialization must not leave a published artifact"
         )
         # And no leftover temp files.
-        temp_files = [
-            f for f in os.listdir(tmp_path) if f.startswith(".ecaj_tmp_")
-        ]
+        temp_files = [f for f in os.listdir(tmp_path) if f.startswith(".ecaj_tmp_")]
         assert temp_files == []
 
     # AC: @streaming-materialization-progress ac-failure-status-not-success
     def test_noop_diffusion_save_failure_reports_failure_not_published(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         save_path = str(tmp_path / "noop_fail.safetensors")
@@ -699,8 +712,7 @@ class TestExitNodeProgressFailure:
                 return super().write_tensor(name, tensor)
 
         with (
-            patch("nodes.exit.validate_model_name",
-                  return_value="noop_fail.safetensors"),
+            patch("nodes.exit.validate_model_name", return_value="noop_fail.safetensors"),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
@@ -708,8 +720,7 @@ class TestExitNodeProgressFailure:
             patch("nodes.exit.serialize_recipe", return_value="{}"),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
-            patch("nodes.exit._build_save_progress",
-                  side_effect=capture_progress),
+            patch("nodes.exit._build_save_progress", side_effect=capture_progress),
             patch("nodes.exit.MaterializationSink", FailingSink),
         ):
             with pytest.raises(OSError, match="noop write failure"):
@@ -721,6 +732,7 @@ class TestExitNodeProgressFailure:
         assert prog.published is False
         # No published artifact, no leftover temp.
         import os
+
         assert not os.path.exists(save_path)
         leftover = [f for f in os.listdir(tmp_path) if f.startswith(".ecaj_tmp_")]
         assert leftover == []
@@ -737,14 +749,14 @@ class TestExitNodeProgressBarAbsence:
         """When ProgressBar is None (running outside ComfyUI), the no-op
         diffusion save still produces a valid published artifact."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         save_path = str(tmp_path / "noprogressbar.safetensors")
 
         with (
-            patch("nodes.exit.validate_model_name",
-                  return_value="noprogressbar.safetensors"),
+            patch("nodes.exit.validate_model_name", return_value="noprogressbar.safetensors"),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
@@ -755,11 +767,14 @@ class TestExitNodeProgressBarAbsence:
             patch("nodes.exit.ProgressBar", None),
         ):
             (result,) = WIDENExitNode().execute(
-                base, save_model=True, model_name="noprogressbar",
+                base,
+                save_model=True,
+                model_name="noprogressbar",
             )
 
         assert result is not None
         import os
+
         assert os.path.exists(save_path)
 
 
@@ -774,7 +789,9 @@ class TestExitNodeFinalizationOrder:
 
     # AC: @streaming-materialization-progress ac-finalization-status-visible
     def test_noop_diffusion_save_phase_is_finalize_during_pre_publish_check(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """During pre_publish_check (which runs inside sink.finalize, between
         fsync and atomic replace), the no-op diffusion save's reported phase
@@ -783,7 +800,8 @@ class TestExitNodeFinalizationOrder:
         flag without disturbing the visible phase.
         """
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         save_path = str(tmp_path / "noop_finalize_order.safetensors")
@@ -810,8 +828,9 @@ class TestExitNodeFinalizationOrder:
             return _real_classify(p, expected_kind=expected_kind)
 
         with (
-            patch("nodes.exit.validate_model_name",
-                  return_value="noop_finalize_order.safetensors"),
+            patch(
+                "nodes.exit.validate_model_name", return_value="noop_finalize_order.safetensors"
+            ),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
@@ -819,13 +838,13 @@ class TestExitNodeFinalizationOrder:
             patch("nodes.exit.serialize_recipe", return_value="{}"),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
-            patch("nodes.exit._classify_temp_artifact",
-                  side_effect=spy_classify),
-            patch("nodes.exit._build_save_progress",
-                  side_effect=capture_progress),
+            patch("nodes.exit._classify_temp_artifact", side_effect=spy_classify),
+            patch("nodes.exit._build_save_progress", side_effect=capture_progress),
         ):
             WIDENExitNode().execute(
-                base, save_model=True, model_name="noop_finalize_order",
+                base,
+                save_model=True,
+                model_name="noop_finalize_order",
             )
 
         # While sink.finalize was still running (validation/fsync done,
@@ -842,14 +861,17 @@ class TestExitNodeFinalizationOrder:
 
     # AC: @streaming-materialization-progress ac-finalization-status-visible
     def test_diffusion_merge_save_phase_is_finalize_during_pre_publish_check(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """Same ordering invariant for the normal merge save path:
         progress.finalize() precedes sink.finalize, so the reported phase
         is 'finalize' while validation/fsync/atomic replace is in flight.
         """
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(
@@ -862,7 +884,9 @@ class TestExitNodeFinalizationOrder:
         save_path = str(tmp_path / "merge_finalize_order.safetensors")
 
         mock_analyze, mock_model_analysis, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, affected_keys, recipe=merge,
+            mock_model_patcher,
+            affected_keys,
+            recipe=merge,
         )
         merged = {k: torch.randn(4, 4) for k in affected_keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
@@ -896,28 +920,26 @@ class TestExitNodeFinalizationOrder:
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
-            patch("nodes.exit.analyze_recipe_models",
-                  return_value=mock_model_analysis),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
-            patch("nodes.exit.compile_batch_groups",
-                  return_value={sig: affected_keys}),
-            patch("nodes.exit.streaming_evaluation_to_sink",
-                  side_effect=streaming_eval),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: affected_keys}),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
-            patch("nodes.exit.validate_model_name",
-                  return_value="merge_finalize_order.safetensors"),
+            patch(
+                "nodes.exit.validate_model_name", return_value="merge_finalize_order.safetensors"
+            ),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
-            patch("nodes.exit._classify_temp_artifact",
-                  side_effect=spy_classify),
-            patch("nodes.exit._build_save_progress",
-                  side_effect=capture_progress),
+            patch("nodes.exit._classify_temp_artifact", side_effect=spy_classify),
+            patch("nodes.exit._build_save_progress", side_effect=capture_progress),
         ):
             WIDENExitNode().execute(
-                merge, save_model=True, model_name="merge_finalize_order",
+                merge,
+                save_model=True,
+                model_name="merge_finalize_order",
             )
 
         assert observed["phase_during_pre_publish"] == "finalize"
@@ -928,7 +950,9 @@ class TestExitNodeFinalizationOrder:
 
     # AC: @streaming-materialization-progress ac-failure-status-not-success
     def test_noop_diffusion_save_pre_publish_failure_keeps_published_false(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """A failure during sink.finalize (raised from pre_publish_check)
         must leave the artifact reported as NOT published, even though the
@@ -936,7 +960,8 @@ class TestExitNodeFinalizationOrder:
         gated on actual publication success rather than mere phase entry.
         """
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         save_path = str(tmp_path / "noop_pre_publish_fail.safetensors")
@@ -961,8 +986,9 @@ class TestExitNodeFinalizationOrder:
             raise RuntimeError("simulated pre_publish_check rejection")
 
         with (
-            patch("nodes.exit.validate_model_name",
-                  return_value="noop_pre_publish_fail.safetensors"),
+            patch(
+                "nodes.exit.validate_model_name", return_value="noop_pre_publish_fail.safetensors"
+            ),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
@@ -970,14 +996,14 @@ class TestExitNodeFinalizationOrder:
             patch("nodes.exit.serialize_recipe", return_value="{}"),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
-            patch("nodes.exit._classify_temp_artifact",
-                  side_effect=failing_classify),
-            patch("nodes.exit._build_save_progress",
-                  side_effect=capture_progress),
+            patch("nodes.exit._classify_temp_artifact", side_effect=failing_classify),
+            patch("nodes.exit._build_save_progress", side_effect=capture_progress),
         ):
             with pytest.raises(RuntimeError, match="pre_publish_check"):
                 WIDENExitNode().execute(
-                    base, save_model=True, model_name="noop_pre_publish_fail",
+                    base,
+                    save_model=True,
+                    model_name="noop_pre_publish_fail",
                 )
 
         # The phase entry happened before sink.finalize started its work.
@@ -993,17 +1019,21 @@ class TestExitNodeFinalizationOrder:
 
         # And no artifact was published or left behind as a temp file.
         import os
+
         assert not os.path.exists(save_path)
         leftover = [f for f in os.listdir(tmp_path) if f.startswith(".ecaj_tmp_")]
         assert leftover == []
 
     # AC: @streaming-materialization-progress ac-failure-status-not-success
     def test_diffusion_merge_save_pre_publish_failure_keeps_published_false(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """Same publication-gating invariant on the normal merge save path."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(
@@ -1016,7 +1046,9 @@ class TestExitNodeFinalizationOrder:
         save_path = str(tmp_path / "merge_pre_publish_fail.safetensors")
 
         mock_analyze, mock_model_analysis, dummy_plan = _make_full_mode_mocks(
-            mock_model_patcher, affected_keys, recipe=merge,
+            mock_model_patcher,
+            affected_keys,
+            recipe=merge,
         )
         merged = {k: torch.randn(4, 4) for k in affected_keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
@@ -1048,29 +1080,26 @@ class TestExitNodeFinalizationOrder:
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
-            patch("nodes.exit.analyze_recipe_models",
-                  return_value=mock_model_analysis),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
-            patch("nodes.exit.compile_batch_groups",
-                  return_value={sig: affected_keys}),
-            patch("nodes.exit.streaming_evaluation_to_sink",
-                  side_effect=streaming_eval),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: affected_keys}),
+            patch("nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
-            patch("nodes.exit.validate_model_name",
-                  return_value="merge_pre_publish_fail.safetensors"),
+            patch(
+                "nodes.exit.validate_model_name", return_value="merge_pre_publish_fail.safetensors"
+            ),
             patch("nodes.exit._resolve_save_path", return_value=save_path),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
-            patch("nodes.exit._classify_temp_artifact",
-                  side_effect=failing_classify),
-            patch("nodes.exit._build_save_progress",
-                  side_effect=capture_progress),
+            patch("nodes.exit._classify_temp_artifact", side_effect=failing_classify),
+            patch("nodes.exit._build_save_progress", side_effect=capture_progress),
         ):
             with pytest.raises(RuntimeError, match="pre_publish_check"):
                 WIDENExitNode().execute(
-                    merge, save_model=True,
+                    merge,
+                    save_model=True,
                     model_name="merge_pre_publish_fail",
                 )
 
@@ -1082,6 +1111,7 @@ class TestExitNodeFinalizationOrder:
         assert prog.published is False
 
         import os
+
         assert not os.path.exists(save_path)
         leftover = [f for f in os.listdir(tmp_path) if f.startswith(".ecaj_tmp_")]
         assert leftover == []
