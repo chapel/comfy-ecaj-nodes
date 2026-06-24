@@ -10119,7 +10119,7 @@ runs:
     completed_at: 2026-06-24T05:13:00.527Z
   - _ulid: 01KVW17664YTTJMXXSPNGXMBHH
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10143,7 +10143,16 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-06-24T05:22:20.279Z
-        completed_at: 2026-06-24T05:22:20.279Z
+        completed_at: 2026-06-24T05:22:28.435Z
+        notes: "Evaluation: skip capture for header-only compatibility validation because it matches
+          existing success observations @01KVVXS0 and @01KVW09P and is also related to pending task
+          @task-krea2-validation-and-smoke-evidence. Skip capture for missing/ad hoc resource access
+          because it matches existing friction observation @01KVVWDF. No unique high-confidence
+          reflection item remains."
+      - status: completed
+        step_index: 3
+        started_at: 2026-06-24T05:22:28.435Z
+        completed_at: 2026-06-24T05:22:28.435Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-06-24T05:21:34.404Z
