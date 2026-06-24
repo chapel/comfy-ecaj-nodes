@@ -1700,6 +1700,15 @@ observations:
     resolved_at: 2026-06-24T05:30:03.244Z
     resolved_by: Jacob Chapel
     created_at: 2026-06-24T05:29:17.882Z
+  - _ulid: 01KVW25Q9A9ZEJ09G5JZ9MYSMS
+    type: success
+    content: Krea 2 review cycles worked best when each blocker was converted into a focused behavioral
+      regression before resubmission; the final review could verify prior failures directly through
+      tests such as timestep target mapping and per-set shape preflight.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T05:38:14.954Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
