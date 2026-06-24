@@ -1587,6 +1587,9 @@ features:
           Users can apply supported public Krea 2 LoRA packages to Krea 2 WIDEN recipes
           without hand-renaming tensor keys, and incompatible packages fail before a
           partial or misleading merge is produced.
+        status:
+          maturity: draft
+          implementation: in_progress
         depends_on: []
         implements: []
         relates_to: []
