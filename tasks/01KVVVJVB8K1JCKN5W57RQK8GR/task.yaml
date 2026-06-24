@@ -44,7 +44,7 @@ description: |
 spec_ref: "@krea2-block-and-layer-controls"
 plan_ref: "@plan-krea-2-architecture-support-plan"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-krea2-architecture-recognition-routing"
@@ -55,6 +55,14 @@ tags:
   - block-config
   - layer-controls
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-krea2-block-layer-controls/01kvvvjv
+  captured_at: 2026-06-24T04:27:45.041Z
+  commit: 011104d3bcc44a1918cd2e1081e1a2262d2c5881
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KVVXSR0P1ND47XXCYT8CESTK
 history:
   - author: Jacob Chapel
@@ -100,6 +108,26 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-06-24T04:22:20.290Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-krea2-block-layer-controls/01kvvvjv
+          captured_at: 2026-06-24T04:27:45.041Z
+          commit: 011104d3bcc44a1918cd2e1081e1a2262d2c5881
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-06-24T04:27:45.048Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-06-24T04:27:45.048Z
 resource_refs:
   - git_commit: null
     git_path: null
@@ -111,5 +139,6 @@ resource_refs:
     sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
 created_at: 2026-06-24T03:43:05.064Z
 started_at: 2026-06-24T04:22:20.290Z
+submitted_at: 2026-06-24T04:27:45.048Z
 todos: []
 automation: eligible
