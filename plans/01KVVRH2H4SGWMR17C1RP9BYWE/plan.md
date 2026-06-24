@@ -2,218 +2,158 @@
 
 ## Context
 
-This is a quick draft for first-class `krea2` support in WIDEN / comfy-ecaj-nodes. It is based on:
+This draft adds first-class Krea 2 support to WIDEN / comfy-ecaj-nodes without relying on non-project local file paths in the plan. Local checkpoints and LoRA files may be used for optional validation, but task agents should receive those as explicit operator-provided inputs rather than hard-coded assumptions.
 
-- Local Krea 2 technical note: `/home/chapel/Documents/Obsidian Vault/Krea 2 Technical Report Deep Dive.md`
-- Local Krea model assets:
-  - `/mnt/big-data/AI/models/diffusion_models/krea/krea2_raw_bf16.safetensors`
-  - `/mnt/big-data/AI/models/diffusion_models/krea/krea2_raw_fp8_scaled.safetensors`
-  - `/mnt/big-data/AI/models/loras/krea/krea2_turbo_lora_rank_64_bf16.safetensors`
-- ComfyUI implementation references:
-  - `/home/chapel/Projects/ComfyUI/comfy/ldm/krea2/model.py`
-  - `/home/chapel/Projects/ComfyUI/comfy/text_encoders/krea2.py`
-- ai-toolkit current upstream reference: `~/Projects/ai-toolkit` fetched to `origin/main` at `724e67d Set krea 2 to use new lokr format` without rebasing the local dirty checkout.
-- Hugging Face LoRAs:
-  - `Comfy-Org/Krea-2/loras/krea2_turbo_lora_rank_64_bf16.safetensors` — Comfy/native-style keys, rank 64, `diffusion_model.blocks.*`, `lora_down/lora_up`.
-  - `Comfy-Org/Krea-2/loras/krea2_coolblue.safetensors`, `krea2_darkbrush.safetensors`, `krea2_plasmoid.safetensors`, `krea2_warmpastel.safetensors` — ai-toolkit-style keys, rank 32, `transformer.transformer_blocks.*`, `lora_A/lora_B`.
-  - `krea/Krea-2-LoRA-retroanime/retroanime.safetensors` — same ai-toolkit-style header shape as the style LoRAs above.
+## Resources
 
-Important architecture facts from the checkpoint/header probes:
+- [Krea 2 technical report deep dive](./resources/references/krea2-technical-report-deep-dive.md) — imported project-owned copy of the Obsidian research note based on the public Krea report.
+- [Krea 2 implementation reference](./resources/references/krea2-implementation-reference.md) — project-owned reference with public GitHub/Hugging Face links, planning facts from header/source inspection, and implementation guardrails.
 
-- Krea 2 should be a first-class architecture id: `krea2`.
-- The BF16 base has 430 tensors and about 12.82B elements.
-- Main denoiser blocks are local checkpoint keys `blocks.0` … `blocks.27`.
-- The local checkpoint also has text-fusion keys: `txtfusion.layerwise_blocks.*`, `txtfusion.refiner_blocks.*`, `txtfusion.projector.*`.
-- The model uses GQA attention: width 6144, 48 query heads, 12 key/value heads, head dim 128.
-- The native turbo LoRA maps cleanly to 264 base parameters after preserving compound names like `layerwise_blocks` and `refiner_blocks`.
-- Current Qwen-ish parsing is dangerous because it can almost work while corrupting text-fusion names, e.g. `layerwise_blocks` → `layerwise.blocks`.
-- New ai-toolkit-style LoRAs use a different dialect: `transformer.transformer_blocks.N.attn.to_q.lora_A/B.weight`, `transformer.text_fusion.*`, `ff.*`, etc. Supporting those requires explicit alias normalization to the Comfy/Krea base keyspace.
+Public sources referenced by the imported implementation reference include:
+
+- Krea report: <https://www.krea.ai/blog/krea-2-technical-report>
+- ComfyUI Krea 2 model/text-encoder sources pinned to an inspected GitHub commit.
+- ai-toolkit Krea 2 and LoKr sources pinned to inspected upstream commit `724e67d63428a7daddc77355b88d90fe99ea9fd2`.
+- Public Hugging Face Krea 2 LoRA repositories from Comfy-Org and Krea.
+
+## Scope
+
+In scope:
+
+- Detect Krea 2 diffusion models as `krea2` from Krea-specific structural evidence.
+- Route Krea 2 recipes through Krea-compatible loader, LoRA, block/layer, and validation paths.
+- Support public Krea 2 LoRA families without requiring users to manually rename LoRA tensors.
+- Provide Krea 2 block/layer controls that expose meaningful user-facing control groups.
+- Add Krea-specific tests and optional smoke evidence as task validation, not as a separate Krea-only validation spec.
+
+Out of scope for this plan:
+
+- A general project-wide validation-gate taxonomy; that belongs to the separate trait/taxonomy planning work.
+- A LoRA conversion/save utility for rewriting public LoRAs into another key format.
+- Hard-coded references to local checkpoint paths.
+- A blanket ban on FP8 or quantized inputs. Precision/quantization behavior should be compatibility-oriented: like-with-like should be allowed when the merge path supports it, and mixed or unsupported precision combinations should warn or fail explicitly.
 
 ## Specs
 
 ```yaml
-- title: Krea 2 Diffusion Architecture Support
-  slug: krea2-diffusion-architecture-support
+- title: Krea 2 Architecture Support
+  slug: krea2-architecture-support
   type: feature
   parent: "@widen"
-  tags: [krea2, diffusion, architecture]
+  tags: [krea2, architecture]
   description: |
-    WIDEN can detect and execute merge recipes against Krea 2 diffusion models as
-    a first-class architecture rather than treating them as Qwen, Flux, or a
-    generic transformer. Initial support is LoRA-first against BF16 Krea 2
-    diffusion checkpoints; direct FP8 math and independent full-model Krea2↔Krea2
-    WIDEN are explicitly out of scope unless a later plan adds dequantization and
-    full-model validation.
+    WIDEN treats Krea 2 as a supported architecture family with its own observable
+    model signature and recipe behavior. Krea 2 support is based on Krea-specific
+    model features and compatibility rules rather than reusing another
+    architecture's assumptions.
   acceptance_criteria:
-    - id: ac-detect-krea2
+    - id: ac-krea2-detected-from-krea-signature
       given: |
-        A ComfyUI model patcher exposes a Krea 2 diffusion state dict with
-        `blocks.N.*`, Krea text-fusion keys, and Krea structural keys.
+        A ComfyUI model exposes Krea 2 structural evidence such as Krea denoiser
+        blocks, Krea text-fusion structures, and Krea-specific structural
+        projections.
       when: |
-        the WIDEN Entry node snapshots the model.
+        the WIDEN Entry node snapshots the model for a recipe.
       then: |
-        the recipe base architecture is detected as `krea2` and unsupported
-        architectures remain rejected with a useful key-prefix diagnostic.
-    - id: ac-krea2-executor-routing
+        the recipe records the base architecture as `krea2` only when the observed
+        signature satisfies the documented Krea 2 recognition rules.
+    - id: ac-ambiguous-or-unknown-architecture-rejected
       given: |
-        A recipe base has architecture `krea2`.
+        A model lacks a complete supported architecture signature or presents
+        conflicting evidence for multiple supported architectures.
       when: |
-        the Exit executor applies LoRA deltas or block/layer controls.
+        the WIDEN Entry node attempts to create a recipe.
       then: |
-        Krea 2-specific loader selection, key normalization, block classification,
-        and validation paths are selected without routing through Qwen-specific
-        assumptions.
-    - id: ac-fp8-not-merged-implicitly
+        recipe creation fails before merge execution and reports the architecture
+        evidence that prevented a confident supported-architecture decision.
+    - id: ac-krea2-recipe-uses-krea-compatible-paths
       given: |
-        A Krea 2 checkpoint includes FP8-scaled weights or `weight_scale` sidecar
-        tensors.
+        A recipe records its base architecture as `krea2`.
       when: |
-        the checkpoint is used as a WIDEN base, LoRA merge target, or validation
-        fixture in this initial Krea 2 support path.
+        the recipe applies architecture-sensitive behavior such as LoRA loading,
+        block/layer weighting, full-model access, or saved-output compatibility.
       then: |
-        the operation rejects direct FP8/scale-sidecar merge math with an explicit
-        unsupported-input diagnostic; it does not silently merge FP8 sidecars as
-        ordinary model weights.
+        the behavior is selected from Krea 2-compatible rules whose supported
+        feature set is documented and testable for Krea 2 inputs.
 
-- title: Krea 2 LoRA Keyspace Support
-  slug: krea2-lora-keyspace-support
+- title: Krea 2 LoRA Package Compatibility
+  slug: krea2-lora-package-compatibility
   type: feature
   parent: "@lora-loaders"
-  tags: [krea2, lora, keyspace]
+  tags: [krea2, lora]
   description: |
-    WIDEN can load Krea 2 LoRAs from both the native Comfy/Krea key dialect and
-    the ai-toolkit training/export dialect, mapping every applicable LoRA group
-    to an exact Krea 2 base tensor or failing explicitly.
+    Users can apply supported public Krea 2 LoRA packages to Krea 2 WIDEN recipes
+    without hand-renaming tensor keys, and incompatible packages fail before a
+    partial or misleading merge is produced.
   acceptance_criteria:
-    - id: ac-native-turbo-lora-matches-base
+    - id: ac-supported-krea2-lora-packages-load
       given: |
-        The native Krea Turbo LoRA uses keys such as
-        `diffusion_model.blocks.0.attn.wq.lora_down.weight` and
-        `diffusion_model.txtfusion.layerwise_blocks.0.attn.wq.lora_up.weight`.
+        A user selects a Krea 2 LoRA package from a supported public Krea 2 LoRA
+        family for a Krea 2 recipe.
       when: |
-        the Krea 2 LoRA loader parses the LoRA against the BF16 Krea 2 base.
+        the LoRA node and Exit executor apply the recipe.
       then: |
-        every parsed LoRA group maps to an existing base key with a compatible
-        matrix product shape; no text-fusion group is skipped or name-mangled.
-    - id: ac-aitoolkit-style-lora-matches-base
+        the LoRA contribution is applied to the intended Krea 2 weight groups
+        without requiring the user to manually edit package tensor names.
+    - id: ac-lora-compatibility-is-complete-or-rejected
       given: |
-        An ai-toolkit-style Krea 2 LoRA uses keys such as
-        `transformer.transformer_blocks.0.attn.to_q.lora_A.weight`,
-        `transformer.text_fusion.layerwise_blocks.0.ff.up.lora_B.weight`, and
-        `transformer.final_layer.linear.lora_A.weight`.
+        A selected Krea 2 LoRA package contains tensor groups outside the supported
+        compatibility rules for the current Krea 2 recipe.
       when: |
-        the Krea 2 LoRA loader parses the LoRA against the BF16 Krea 2 base.
+        the package is checked before merge execution publishes a result.
       then: |
-        aliases are normalized into the Comfy/Krea base keyspace, including
-        `transformer_blocks`→`blocks`, `text_fusion`→`txtfusion`,
-        `to_q/to_k/to_v/to_out.0/to_gate`→`wq/wk/wv/wo/gate`, and
-        `ff.*`→`mlp.*`, with all supported groups either matched or explicitly
-        reported as unsupported.
-    - id: ac-lora-dialects-are-detected
+        WIDEN either applies every required supported group or fails with a report
+        of the unsupported or incompatible groups; it does not silently publish a
+        partial merge as successful.
+    - id: ac-krea2-lora-strength-controls-are-stable
       given: |
-        A Krea 2 LoRA is loaded without an explicit dialect override.
+        A Krea 2 LoRA is supported for the current recipe.
       when: |
-        the loader inspects its tensor names.
+        the user changes LoRA strength or combines the LoRA with block/layer
+        controls.
       then: |
-        it distinguishes native `lora_down/lora_up` keys from ai-toolkit
-        `lora_A/lora_B` keys and applies the correct rank, alpha, and matrix
-        multiplication conventions for that dialect.
+        the resulting recipe changes only through the documented strength and
+        block/layer semantics, with deterministic behavior across repeated runs.
 
-- title: Krea 2 Block and Layer Control
-  slug: krea2-block-and-layer-control
+- title: Krea 2 Block and Layer Controls
+  slug: krea2-block-and-layer-controls
   type: feature
   parent: "@per-block-control"
-  tags: [krea2, block-config, per-block-control]
+  tags: [krea2, block-config, layer-controls]
   description: |
-    Krea 2 recipes can use per-block and per-layer controls that reflect the
-    actual Krea 2 model layout, including main denoiser blocks and text-fusion
-    blocks.
+    Krea 2 recipes expose meaningful user controls for Krea 2 model regions and
+    layer categories, while preserving deterministic behavior for keys that do
+    not belong to a user-adjustable group.
   acceptance_criteria:
-    - id: ac-main-block-classification
+    - id: ac-main-model-regions-are-controllable
       given: |
-        Krea 2 diffusion keys under `blocks.0` through `blocks.27` are evaluated
-        for block-specific merge weights.
+        A Krea 2 recipe includes main denoiser model regions that are eligible for
+        per-region merge or LoRA weighting.
       when: |
-        the block classifier processes those keys.
+        the user configures Krea 2 block controls.
       then: |
-        each key is classified into stable block labels such as `B00` through
-        `B27`.
-    - id: ac-text-fusion-classification
+        changes to a main-region control affect only the corresponding Krea 2
+        main model region and leave unrelated regions at their configured values.
+    - id: ac-text-fusion-regions-are-controllable
       given: |
-        Krea 2 keys under `txtfusion.layerwise_blocks.*` and
-        `txtfusion.refiner_blocks.*` are evaluated for block-specific merge
-        weights.
+        A Krea 2 recipe includes Krea text-fusion regions that are eligible for
+        per-region merge or LoRA weighting.
       when: |
-        the block classifier processes those keys.
+        the user configures Krea 2 text-fusion controls.
       then: |
-        they are classified into distinct text-fusion block labels rather than
-        collapsed into `other` or into main denoiser blocks.
-    - id: ac-structural-keys-classified
+        changes to a text-fusion control affect the corresponding Krea text-fusion
+        region rather than being collapsed into an unrelated main-model or
+        generic catch-all control.
+    - id: ac-layer-category-controls-are-controllable
       given: |
-        Krea 2 structural keys such as `img_in`, `txt_in`, `time_embed`,
-        `time_mod_proj`, `final_layer`, and `txtfusion.projector` are present.
+        A Krea 2 recipe contains weights belonging to supported layer categories
+        such as attention, feed-forward, normalization, embedding/projection, or
+        structural/fallback groups.
       when: |
-        layer/block controls are applied.
+        the user configures Krea 2 layer-category controls.
       then: |
-        structural keys receive stable classifier labels or documented fallback
-        behavior so merge recipes remain deterministic.
-    - id: ac-layer-type-classification
-      given: |
-        Krea 2 attention, MLP, embedding/projection, text-fusion, and final-layer
-        keys are evaluated for layer-type filtering.
-      when: |
-        the layer-type classifier or block-config node maps those keys.
-      then: |
-        keys receive stable layer-type categories such as attention, mlp,
-        embedding/projection, text-fusion, final, or structural/fallback so
-        layer-type sliders do not collapse all Krea 2 weights into `other`.
-    - id: ac-krea2-block-config-sliders
-      given: |
-        A user opens the Krea 2 block-config node.
-      when: |
-        they configure global, main-block, text-fusion, structural, and
-        layer-type merge weights.
-      then: |
-        the node emits a `BlockConfig(arch="krea2")` whose slider keys are accepted
-        by the executor and applied to the matching Krea 2 key groups.
-
-- title: Krea 2 Validation Fixtures and Smoke Gates
-  slug: krea2-validation-fixtures-and-smoke-gates
-  type: requirement
-  parent: "@krea2-diffusion-architecture-support"
-  tags: [krea2, tests, validation]
-  description: |
-    Krea 2 support has CPU-safe parser/classifier coverage and optional real-file
-    smoke gates before being considered complete.
-  acceptance_criteria:
-    - id: ac-cpu-fixtures-cover-dialects
-      given: |
-        The test suite runs without GPU or full model downloads.
-      when: |
-        Krea 2 loader and classifier tests run.
-      then: |
-        synthetic fixtures cover native Comfy/Krea LoRA keys, ai-toolkit-style
-        LoRA keys, text-fusion compound names, GQA projection shapes, and
-        unsupported/missing-key diagnostics.
-    - id: ac-real-header-probe
-      given: |
-        The local Krea BF16 base, local/native Turbo LoRA, and public HF style
-        LoRA headers are accessible.
-      when: |
-        the optional validation harness runs.
-      then: |
-        it reports key counts, dialect, matched group count, missing group count,
-        and incompatible shape count without loading all model tensors into GPU
-        memory.
-    - id: ac-comfy-smoke-documentation
-      given: |
-        Krea 2 support passes CPU-safe tests and header validation.
-      when: |
-        the implementation task is submitted for review.
-      then: |
-        the task evidence documents a ComfyUI smoke path or explains why the
-        smoke was skipped, including required base model, LoRA, CLIP/text encoder,
-        VAE, and output artifact expectations.
+        each supported category modifies only its documented category of Krea 2
+        weights, and unsupported categories remain deterministic and documented.
 ```
 
 ## Tasks
@@ -221,235 +161,210 @@ Important architecture facts from the checkpoint/header probes:
 derive_from_specs: false
 
 ```yaml
-- title: Add Krea 2 architecture detection and registry plumbing
-  slug: task-krea2-architecture-detection
+- title: Add Krea 2 architecture recognition and recipe routing
+  slug: task-krea2-architecture-recognition-routing
   priority: 1
-  tags: [krea2, architecture, entry-node]
-  spec_ref: "@krea2-diffusion-architecture-support"
+  tags: [krea2, architecture, entry-node, routing]
+  spec_ref: "@krea2-architecture-support"
+  resource_refs:
+    - krea2-technical-report-deep-dive
+    - krea2-implementation-reference
   depends_on: []
   description: |
-    What: Add a first-class `krea2` architecture id throughout the recipe and
-    execution plumbing.
+    What: Add first-class `krea2` architecture recognition and route Krea 2 recipes
+    through Krea-compatible architecture paths.
 
-    Why: Krea 2 shares some transformer concepts with Qwen/Flux, but its base
-    keyspace, text-fusion modules, and LoRA dialects are different enough that
-    aliasing it to another architecture risks partial merges that look
-    successful.
+    Resources:
+    - [Krea 2 technical report deep dive](./resources/references/krea2-technical-report-deep-dive.md)
+      for architecture context and non-claims.
+    - [Krea 2 implementation reference](./resources/references/krea2-implementation-reference.md)
+      for pinned public source links and planning facts.
+
+    Why: Krea 2 has its own denoiser/text-fusion structure and should not be
+    accepted by accidental overlap with another architecture family.
 
     How:
-    - Add Krea 2 detection in `nodes/entry.py` using Krea-specific base keys,
-      e.g. `diffusion_model.blocks.*` plus `txtfusion`/`text_fusion`/structural
-      signatures that avoid false-positive Qwen detection.
-    - Register `krea2` anywhere architecture-specific loaders, classifiers,
-      block-config nodes, or executor branches are selected.
-    - Keep FP8-scaled inputs out of the default path unless an explicit
-      dequantization design is added.
-    - Add focused tests in the existing entry/model-loader test style.
+    - Inspect current architecture recognition in `nodes/entry.py` and any shared
+      architecture registry/helpers used by loaders, classifiers, model loaders,
+      and saved-output code.
+    - Define Krea 2 recognition rules using Krea-specific positive evidence. The
+      rule should require enough Krea evidence to distinguish Krea 2 from existing
+      supported families and should not rely on a single generic transformer key.
+    - Keep the unsupported/ambiguous architecture path separate from successful
+      Krea detection so tests can assert the two behaviors independently.
+    - Register `krea2` in the architecture-sensitive places that need to select
+      Krea-compatible behavior.
+    - Add compatibility handling for precision/quantization classes as a warning
+      or explicit compatibility check. Do not add a blanket FP8 ban; prefer
+      like-with-like compatibility and explicit diagnostics for mixed or
+      unsupported combinations.
 
     Testing:
-    - Run focused architecture-detection and model-loader tests.
-    - Add negative coverage proving Qwen and Flux fixtures still detect as their
-      own architectures.
-    - Add a focused rejection test for FP8-scaled Krea checkpoints or
-      `weight_scale` sidecars so unsupported inputs fail explicitly before merge
-      math.
+    - Add synthetic state-dict tests for positive Krea 2 recognition.
+    - Add negative tests for incomplete, unknown, and ambiguous architecture
+      signatures.
+    - Add routing tests proving a `krea2` recipe reaches Krea-compatible loader,
+      classifier, model-loader, and validation branches where those branches exist.
+    - Run `uv run python -m compileall lib nodes tests`, focused pytest for the
+      touched architecture tests, and the project review gates from the
+      `comfy-widen-gates` skill.
 
-    Covers: @krea2-diffusion-architecture-support ac-detect-krea2,
-      ac-krea2-executor-routing, ac-fp8-not-merged-implicitly.
+    Covers: @krea2-architecture-support ac-krea2-detected-from-krea-signature,
+      ac-ambiguous-or-unknown-architecture-rejected,
+      ac-krea2-recipe-uses-krea-compatible-paths.
 
-- title: Implement Krea 2 native LoRA loader
-  slug: task-krea2-native-lora-loader
+- title: Implement Krea 2 LoRA package compatibility
+  slug: task-krea2-lora-package-compatibility
   priority: 1
-  tags: [krea2, lora, native-dialect]
-  spec_ref: "@krea2-lora-keyspace-support"
+  tags: [krea2, lora, compatibility]
+  spec_ref: "@krea2-lora-package-compatibility"
+  resource_refs:
+    - krea2-implementation-reference
   depends_on:
-    - "@task-krea2-architecture-detection"
+    - "@task-krea2-architecture-recognition-routing"
   description: |
-    What: Implement a Krea 2 LoRA loader for native Comfy/Krea-style LoRAs using
-    `diffusion_model.*` keys and `lora_down/lora_up` tensors.
+    What: Implement Krea 2 LoRA compatibility for the public Krea 2 LoRA package
+    families identified in the imported implementation reference.
 
-    Why: The local Turbo LoRA is already in this dialect and should be the first
-    real merge target. Existing Qwen parsing currently almost works but can
-    corrupt compound text-fusion names.
+    Resources:
+    - [Krea 2 implementation reference](./resources/references/krea2-implementation-reference.md)
+      for pinned ComfyUI, ai-toolkit, LoKr, and Hugging Face references.
+
+    Why: Users should be able to use supported Krea 2 LoRAs without manually
+    rewriting tensor names, and unsupported packages must not produce silent
+    partial merges.
 
     How:
-    - Add `lib/lora/krea2.py` or equivalent and expose it from `lib/lora/__init__.py`.
-    - Preserve compound names exactly: `layerwise_blocks`, `refiner_blocks`,
-      `txtfusion`, `tmlp`, `txtmlp`, `tproj`, `wq`, `wk`, `wv`, `wo`, `gate`.
-    - Normalize only safe prefixes such as `diffusion_model.`.
-    - Validate every LoRA group against the base state dict and report missing or
-      incompatible groups explicitly.
-    - Add CPU-safe synthetic tests plus an optional header/key-only validation
-      helper for `/mnt/big-data/AI/models/loras/krea/krea2_turbo_lora_rank_64_bf16.safetensors`.
+    - Inspect `lib/lora/` loader interfaces and existing architecture loaders.
+    - Add or update a Krea 2 loader module with an explicit compatibility table
+      for supported public package families.
+    - Put detailed tensor-name normalization rules and shape expectations in code
+      comments/tests, not in timeless spec ACs.
+    - Preserve compound Krea names such as text-fusion substructure names during
+      normalization.
+    - Validate package groups before publishing merge output. Unsupported or
+      shape-incompatible groups must produce an actionable report instead of
+      being silently skipped.
+    - Ensure cleanup/resource-release behavior matches the existing loader
+      contract.
 
     Testing:
-    - New loader tests assert zero unmatched groups for the known native Turbo
-      LoRA key set when the BF16 base key set is available.
-    - Synthetic tests cover GQA shapes: `wq/wo/gate` 6144x6144 and `wk/wv`
-      1536x6144.
+    - Add CPU-safe synthetic fixtures for each supported package family.
+    - Add tests for compound-name preservation and shape compatibility.
+    - Add unsupported-package tests that fail before producing a merged result and
+      report the incompatible groups.
+    - Add optional header-only tests that accept operator-provided local sample
+      paths or public downloaded headers without hard-coding machine-local paths.
+    - Run focused loader tests and the project review gates.
 
-    Covers: @krea2-lora-keyspace-support ac-native-turbo-lora-matches-base;
-      @krea2-diffusion-architecture-support ac-krea2-executor-routing.
+    Covers: @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load,
+      ac-lora-compatibility-is-complete-or-rejected,
+      ac-krea2-lora-strength-controls-are-stable;
+      @krea2-architecture-support ac-krea2-recipe-uses-krea-compatible-paths.
 
-- title: Implement Krea 2 ai-toolkit LoRA dialect support
-  slug: task-krea2-aitoolkit-lora-dialect
+- title: Add Krea 2 block and layer controls
+  slug: task-krea2-block-layer-controls
   priority: 2
-  tags: [krea2, lora, ai-toolkit, huggingface]
-  spec_ref: "@krea2-lora-keyspace-support"
+  tags: [krea2, block-config, layer-controls]
+  spec_ref: "@krea2-block-and-layer-controls"
+  resource_refs:
+    - krea2-implementation-reference
   depends_on:
-    - "@task-krea2-native-lora-loader"
+    - "@task-krea2-architecture-recognition-routing"
   description: |
-    What: Extend the Krea 2 loader to parse ai-toolkit-exported LoRAs from the
-    public Krea 2 style LoRA repos.
+    What: Add Krea 2 key classification and user-facing block/layer controls that
+    map to Krea model regions and layer categories.
 
-    Why: The current public style LoRAs from Comfy-Org and krea use
-    `transformer.*` prefixes, `transformer_blocks`, `text_fusion`, and
-    `lora_A/lora_B` tensors rather than the native Comfy/Krea names. A Krea 2
-    implementation that only supports the Turbo LoRA would miss these real-world
-    LoRAs.
+    Resources:
+    - [Krea 2 implementation reference](./resources/references/krea2-implementation-reference.md)
+      for architecture structure facts and source links.
+
+    Why: Per-block and per-layer controls should remain meaningful for Krea 2
+    users. Krea text-fusion regions should not disappear into an unrelated or
+    generic catch-all group.
 
     How:
-    - Add dialect detection for `lora_A/lora_B` pairs.
-    - Normalize ai-toolkit module aliases into the Comfy/Krea base keyspace:
-      `transformer.transformer_blocks.N` → `blocks.N`,
-      `transformer.text_fusion` → `txtfusion`,
-      `attn.to_q/to_k/to_v/to_out.0/to_gate` → `attn.wq/wk/wv/wo/gate`,
-      `ff.up/ff.gate/ff.down` → `mlp.up/mlp.gate/mlp.down` where shapes match.
-    - Audit and map structural modules seen in headers: `img_in`, `txt_in`,
-      `time_embed`, `time_mod_proj`, `final_layer.linear`, and
-      `text_fusion.projector`.
-    - Decide whether unmapped structural modules are supported, skipped by
-      explicit user option, or rejected.
-    - Reference ai-toolkit upstream `origin/main` Krea2 code and keep the mapping
-      table in tests/docs so future export-format changes are visible.
+    - Inspect `lib/block_classify.py`, existing block config node factories, and
+      existing architecture-specific block config nodes.
+    - Add Krea 2 model-region classification for main denoiser regions and
+      text-fusion regions.
+    - Add Krea 2 layer-category classification for categories the existing UI and
+      executor can support.
+    - Define deterministic fallback behavior for structural keys and keys outside
+      user-adjustable groups.
+    - Add or generate a Krea 2 block-config node and register it in ComfyUI node
+      mappings.
+    - Keep exact internal labels and regexes in implementation/tests. Specs should
+      assert user-observable control behavior, not the regex mechanics.
 
     Testing:
-    - Header-only tests or fixtures derived from `krea2_coolblue.safetensors` and
-      `retroanime.safetensors` assert dialect detection and alias mapping.
-    - Shape tests prove `lora_A/lora_B` multiplication yields the target base
-      tensor shape for attention, MLP, text-fusion, and structural modules.
+    - Add unit tests proving main-region controls affect only main-region keys.
+    - Add unit tests proving text-fusion controls affect only text-fusion keys.
+    - Add layer-category tests for supported categories and fallback behavior.
+    - Add node tests proving the Krea 2 block-config output is accepted by LoRA
+      and merge consumers.
+    - Run focused classifier/node tests and the project review gates.
 
-    Covers: @krea2-lora-keyspace-support ac-aitoolkit-style-lora-matches-base,
-      ac-lora-dialects-are-detected.
+    Covers: @krea2-block-and-layer-controls ac-main-model-regions-are-controllable,
+      ac-text-fusion-regions-are-controllable,
+      ac-layer-category-controls-are-controllable;
+      @krea2-architecture-support ac-krea2-recipe-uses-krea-compatible-paths.
 
-- title: Add Krea 2 block classifier and block-config node
-  slug: task-krea2-block-config
-  priority: 2
-  tags: [krea2, block-config, ui]
-  spec_ref: "@krea2-block-and-layer-control"
-  depends_on:
-    - "@task-krea2-architecture-detection"
-  description: |
-    What: Add Krea 2 key classification and a matching ComfyUI block-config node.
-
-    Why: Without Krea-specific classification, per-block controls collapse into
-    generic/other buckets and do not reflect the 28 denoiser blocks or the
-    text-fusion stack.
-
-    How:
-    - Add `classify_key_krea2` to `lib/block_classify.py` and register it.
-    - Label main blocks `B00`–`B27`.
-    - Label text-fusion layerwise/refiner blocks distinctly, e.g. `TF_L00`– and
-      `TF_R00`– style labels.
-    - Add structural labels for `IMG_IN`, `TXT_IN`, `TIME_EMBED`,
-      `TIME_MOD_PROJ`, `FINAL_LAYER`, and `TXT_FUSION_PROJECTOR` or document
-      fallback handling.
-    - Add Krea 2 layer-type classification for attention, MLP, embedding,
-      projection/final, text-fusion, and structural/fallback keys so existing
-      layer-type filters and sliders work with `arch="krea2"`.
-    - Add `nodes/block_config_krea2.py` and expose it in node registration using
-      the same generator pattern as existing Qwen/Flux/Z-Image block config nodes.
-    - Include user-facing sliders for main denoiser blocks, text-fusion groups,
-      structural groups, and layer-type weights; text-fusion sliders are included
-      in the initial node under an advanced/clearly labeled section rather than
-      left as an open product decision.
-
-    Testing:
-    - Add classifier tests for native and ai-toolkit-normalized key forms.
-    - Add node tests proving default sliders produce a `BlockConfig(arch="krea2")`
-      and per-block/per-layer overrides affect expected key groups.
-
-    Covers: @krea2-block-and-layer-control ac-main-block-classification,
-      ac-text-fusion-classification, ac-structural-keys-classified,
-      ac-layer-type-classification, ac-krea2-block-config-sliders.
-
-- title: Add Krea 2 real-file validation harness
-  slug: task-krea2-real-file-validation
+- title: Add Krea 2 validation fixtures and optional smoke evidence
+  slug: task-krea2-validation-and-smoke-evidence
   priority: 3
-  tags: [krea2, validation, real-files]
-  spec_ref: "@krea2-validation-fixtures-and-smoke-gates"
+  tags: [krea2, tests, validation, smoke]
+  spec_ref: "@krea2-architecture-support"
+  resource_refs:
+    - krea2-implementation-reference
   depends_on:
-    - "@task-krea2-aitoolkit-lora-dialect"
-    - "@task-krea2-block-config"
+    - "@task-krea2-lora-package-compatibility"
+    - "@task-krea2-block-layer-controls"
   description: |
-    What: Add an optional validation command/test helper that can inspect the
-    local BF16 Krea base, local Turbo LoRA, and remote/HF style LoRA headers.
+    What: Add Krea-specific test fixtures and optional validation evidence for the
+    implemented architecture, LoRA, and block/layer behavior.
 
-    Why: Krea 2 checkpoints are large and should not be required for unit tests,
-    but support should be checked against real keyspaces before it is considered
-    ready for Comfy use.
+    Why: Krea 2 assets are large, but support still needs repeatable CPU-safe
+    tests plus a clear path for optional real-file or Comfy smoke evidence.
 
     How:
-    - Keep normal pytest CPU-safe and synthetic.
-    - Add an opt-in script or pytest marker that reads safetensors headers/key
-      metadata without moving tensors to GPU.
-    - Report base key count, LoRA group count, dialect, matched count, missing
-      count, incompatible shape count, and unsupported-group details.
-    - Include explicit skip messages when `/mnt/big-data` assets are unavailable.
+    - Keep required tests CPU-safe and synthetic.
+    - Add fixture data that exercises Krea architecture recognition, supported
+      LoRA package families, compound-name preservation, block/layer controls,
+      unsupported-package diagnostics, and precision/quantization compatibility
+      warnings or failures.
+    - Add an optional header/probe helper that accepts explicit operator-provided
+      paths or downloaded public sample locations. Do not hard-code local model
+      directories in tests, docs, or plan-derived task text.
+    - Document a Comfy smoke workflow using public source references and
+      operator-provided model assets. The smoke may be skipped when GPU/assets are
+      unavailable, but the skip reason and replacement evidence must be recorded.
+    - If the project-wide trait/validation plan creates a reusable validation
+      trait before this task starts, consider applying it in a separate reviewed
+      metadata update rather than expanding this task's product scope.
 
     Testing:
-    - Run normal pytest without the real Krea assets.
-    - Run the opt-in harness locally against `/mnt/big-data/AI/models/diffusion_models/krea/krea2_raw_bf16.safetensors`
-      and the known native/ai-toolkit LoRA samples.
+    - Run the required CPU-safe Krea tests.
+    - Run optional header/probe validation when assets are available.
+    - Run or document the Comfy smoke path with exact evidence or a concrete skip
+      reason.
+    - Run `kspec validate --warnings-ok` and the `comfy-widen-gates` review gates.
 
-    Covers: @krea2-validation-fixtures-and-smoke-gates ac-cpu-fixtures-cover-dialects,
-      ac-real-header-probe.
-
-- title: Document and execute a ComfyUI Krea 2 smoke path
-  slug: task-krea2-comfy-smoke
-  priority: 4
-  tags: [krea2, comfy, smoke]
-  spec_ref: "@krea2-validation-fixtures-and-smoke-gates"
-  depends_on:
-    - "@task-krea2-real-file-validation"
-  description: |
-    What: Document and, when local model assets are present, execute the smallest
-    ComfyUI workflow that proves a Krea 2 merged artifact can be loaded and used.
-
-    Why: Parser and tensor-shape correctness do not prove the saved output is
-    accepted by Comfy's Krea2 loader or that required text encoder/VAE components
-    are wired correctly.
-
-    How:
-    - Use the BF16 raw Krea 2 base first; do not use FP8-scaled base as a merge
-      input in the initial smoke.
-    - Apply a known LoRA at a small strength and save a merged diffusion artifact.
-    - Load the merged artifact through the local ComfyUI Krea2 path with the
-      expected Qwen3-VL text encoder and Qwen-Image VAE components.
-    - Record exact paths, loader names, output format, any Comfy log warnings,
-      and whether image generation completes.
-
-    Testing:
-    - Attach smoke evidence to task notes.
-    - If a GPU/Comfy session is not available, include the skipped reason and the
-      validated replacement evidence from the real-file harness.
-
-    Covers: @krea2-validation-fixtures-and-smoke-gates ac-comfy-smoke-documentation.
+    Covers: @krea2-architecture-support ac-krea2-detected-from-krea-signature,
+      ac-ambiguous-or-unknown-architecture-rejected,
+      ac-krea2-recipe-uses-krea-compatible-paths;
+      @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load,
+      ac-lora-compatibility-is-complete-or-rejected,
+      ac-krea2-lora-strength-controls-are-stable;
+      @krea2-block-and-layer-controls ac-main-model-regions-are-controllable,
+      ac-text-fusion-regions-are-controllable,
+      ac-layer-category-controls-are-controllable.
 ```
 
-## Initial Scope Decisions
+## Notes
 
-- ai-toolkit-style LoRAs are normalized on load only in this plan; a separate
-  conversion/save utility is deferred until there is a demonstrated workflow need.
-- Text-fusion block controls are exposed in the Krea 2 block-config node under an
-  advanced or clearly labeled section so they are available without making them
-  mandatory for simple workflows.
-- Unsupported structural LoRA groups fail by default with explicit diagnostics.
-  A future permissive "apply matched groups only" option may be planned later,
-  but it is not part of the initial safe merge path.
-- Initial implementation is LoRA-first against BF16 Krea 2 diffusion bases. Full
-  Krea2 model-model WIDEN is deferred until at least two independent compatible
-  BF16 Krea 2 checkpoints exist and can be validated.
-- FP8 support is deferred. If required later, it should be designed as an
-  explicit dequantize/merge/requantize path around BF16/FP32 merge math rather
-  than direct FP8 sidecar merging.
+- Krea-specific implementation details are intentionally concentrated in tasks and
+  imported resources. The specs describe durable user/system behavior.
+- The separate project-wide trait taxonomy draft should decide whether validation,
+  architecture support, LoRA loader safety, quantized-input safety, or block/layer
+  control contracts become reusable traits across the whole project.
