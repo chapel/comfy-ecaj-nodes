@@ -9858,7 +9858,7 @@ runs:
     started_at: 2026-06-24T04:38:49.968Z
   - _ulid: 01KVVYS8XPRB50EV2Y3C6WAVB2
     status: active
-    current_step: 4
+    current_step: 5
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9897,10 +9897,16 @@ runs:
           @01KQBYEH. Candidate capture is a success observation: in fix cycles, combining kspec
           review JSON with anchored thread IDs and focused behavioral regression tests gives a
           precise low-noise path from blocker to resolution."
-      - status: completed
+      - status: skipped
         step_index: 4
         started_at: 2026-06-24T04:40:20.985Z
-        completed_at: 2026-06-24T04:40:20.985Z
+        completed_at: 2026-06-24T04:40:28.115Z
+        notes: "No user decision needed: no new friction-driven improvement is being proposed. Proceeding to
+          capture the untracked success observation only."
+      - status: completed
+        step_index: 5
+        started_at: 2026-06-24T04:40:28.115Z
+        completed_at: 2026-06-24T04:40:28.115Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:39:01.303Z
