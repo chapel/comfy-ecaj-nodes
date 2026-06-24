@@ -1,1 +1,18 @@
-notes: []
+notes:
+  - _ulid: 01KVVX0E75AR5R9NKWGS1QC0V4
+    content: "Approach: implement Krea2Loader as an explicit compatibility table for the pinned public
+      families: diffusers-style transformer.* lora_A/B exports and native diffusion_model.*
+      lora_down/up exports. Map transformer_blocks->blocks, text_fusion->txtfusion,
+      to_q/to_k/to_v/to_gate/to_out.0->wq/wk/wv/gate/wo, ff->mlp, img_in->first, txt_in linear
+      layers->txtmlp linear layers, and final_layer.linear->last.linear. Preserve compound
+      text-fusion names during normalization. Add direct bias delta support for native .diff_b
+      tensors so the public turbo LoRA can be complete instead of rejected. Edge cases: incomplete
+      up/down pairs, rank mismatches, unsupported key families, missing mapped base keys for a
+      current recipe, set scoping, cleanup, and deterministic strength scaling. Test plan: new
+      CPU-safe Krea loader tests annotated for all @krea2-lora-package-compatibility ACs plus
+      @krea2-architecture-support ac-krea2-recipe-uses-krea-compatible-paths; focused tests cover
+      both package families, compound preservation, direct bias deltas, rejection diagnostics,
+      keyspace validation, set scoping, and repeated strength determinism."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T04:07:58.949Z
