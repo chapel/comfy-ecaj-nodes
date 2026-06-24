@@ -1584,6 +1584,18 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-06-24T03:57:37.574Z
+  - _ulid: 01KVVWY4Q4AYNG8KZYPX4N0M3S
+    type: friction
+    content: "Reflection/tooling/review-gates: Dispatched review workspaces for comfy-ecaj-nodes require
+      uv in project gate guidance, but uv was not installed during review of
+      @task-krea2-architecture-recognition-routing, forcing fallback to equivalent python -m
+      commands and skipped uv-runner evidence. Triage whether the fix belongs in dispatch bootstrap
+      or gate guidance."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KVVWT7"
+    created_at: 2026-06-24T04:06:43.684Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
