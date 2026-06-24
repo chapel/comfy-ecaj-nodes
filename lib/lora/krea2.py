@@ -15,7 +15,7 @@ explicit compatibility table instead of relying on broad underscore rewriting.
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 
 import torch
@@ -179,6 +179,14 @@ def _format_sample(values: Iterable[str], limit: int = 6) -> str:
     return ", ".join(items[:limit]) + f", ... (+{len(items) - limit} more)"
 
 
+def _expected_lora_shape(up: torch.Tensor, down: torch.Tensor) -> tuple[int, int]:
+    return (up.shape[0], down.shape[1])
+
+
+def _expected_direct_shape(tensor: torch.Tensor) -> tuple[int, ...]:
+    return tuple(tensor.shape)
+
+
 def _compatibility_error(
     path: str,
     *,
@@ -212,6 +220,7 @@ class Krea2Loader(LoRALoader):
         self._direct_data_by_set: dict[str, dict[str, list[tuple[torch.Tensor, float]]]] = (
             defaultdict(lambda: defaultdict(list))
         )
+        self._expected_shapes: dict[str, set[tuple[int, ...]]] = defaultdict(set)
         self._affected_by_set: dict[str, set[str]] = defaultdict(set)
         self._affected: set[str] = set()
 
@@ -229,13 +238,21 @@ class Krea2Loader(LoRALoader):
         direct_tensors: dict[str, torch.Tensor] = {}
         alpha_values: dict[str, float] = {}
         unsupported: list[str] = []
+        shape_errors: list[str] = []
 
         with safe_open(path, framework="pt", device="cpu") as f:
             for lora_key in f.keys():
                 if lora_key.endswith(".alpha"):
                     alpha_tensor = f.get_tensor(lora_key)
-                    if alpha_tensor.numel() == 1:
-                        alpha_values[lora_key[: -len(".alpha")]] = float(alpha_tensor.item())
+                    alpha_base_key = lora_key[: -len(".alpha")]
+                    normalized_alpha = _normalize_base_path(alpha_base_key)
+                    if normalized_alpha is None:
+                        unsupported.append(lora_key)
+                    elif alpha_tensor.numel() != 1:
+                        shape_errors.append(f"{lora_key} alpha must be scalar")
+                    else:
+                        model_key = f"diffusion_model.{normalized_alpha}.weight"
+                        alpha_values[model_key] = float(alpha_tensor.item())
                     continue
 
                 parsed = _parse_krea2_lora_key(lora_key)
@@ -254,7 +271,6 @@ class Krea2Loader(LoRALoader):
             for key, tensors in layer_tensors.items()
             if "up" not in tensors or "down" not in tensors
         ]
-        shape_errors: list[str] = []
         pending_lora: dict[str, list[tuple[torch.Tensor, torch.Tensor, float]]] = defaultdict(list)
         pending_direct: dict[str, list[tuple[torch.Tensor, float]]] = defaultdict(list)
 
@@ -300,10 +316,16 @@ class Krea2Loader(LoRALoader):
             self._lora_data_by_set[effective_set_id][model_key].extend(entries)
             self._affected_by_set[effective_set_id].add(model_key)
             self._affected.add(model_key)
+            for up, down, _scale in entries:
+                expected_shape = _expected_lora_shape(up, down)
+                self._expected_shapes[model_key].add(expected_shape)
         for model_key, entries in pending_direct.items():
             self._direct_data_by_set[effective_set_id][model_key].extend(entries)
             self._affected_by_set[effective_set_id].add(model_key)
             self._affected.add(model_key)
+            for tensor, _scale in entries:
+                expected_shape = _expected_direct_shape(tensor)
+                self._expected_shapes[model_key].add(expected_shape)
 
     @property
     def affected_keys(self) -> frozenset[str]:
@@ -312,19 +334,43 @@ class Krea2Loader(LoRALoader):
     def affected_keys_for_set(self, set_id: str) -> set[str]:
         return self._affected_by_set.get(set_id, set())
 
-    def validate_compatible_keys(self, all_keys: set[str] | frozenset[str]) -> None:
-        """Reject loaded tensors whose mapped base keys are absent.
+    def validate_compatible_keys(
+        self,
+        all_keys: set[str] | frozenset[str],
+        key_shapes: Mapping[str, tuple[int, ...]] | None = None,
+    ) -> None:
+        """Reject loaded tensors whose mapped base keys or shapes are incompatible.
 
         Exit nodes call this after base key discovery and before batching. It
-        catches package/model mismatches that a plain ``all_keys & affected``
-        filter would otherwise silently ignore.
+        catches package/model mismatches that a plain key intersection would
+        otherwise silently ignore or defer to a generic tensor-size error.
         """
         missing = self._affected - set(all_keys)
+        shape_errors: list[str] = []
+        if key_shapes is not None:
+            for model_key in sorted(self._affected - missing):
+                if model_key not in key_shapes:
+                    shape_errors.append(f"{model_key} has no current recipe shape metadata")
+                    continue
+                current_shape = tuple(key_shapes[model_key])
+                expected_shapes = self._expected_shapes.get(model_key, set())
+                if current_shape not in expected_shapes:
+                    expected = ", ".join(str(shape) for shape in sorted(expected_shapes))
+                    shape_errors.append(
+                        f"{model_key} package delta shape {expected} "
+                        f"does not match current recipe shape {current_shape}"
+                    )
+
         if missing:
+            shape_errors.insert(
+                0,
+                "mapped tensor groups not present in the current Krea 2 recipe: "
+                f"{_format_sample(missing)}",
+            )
+        if shape_errors:
             raise Krea2CompatibilityError(
-                "Krea 2 LoRA package mapped tensor groups that are not present "
-                "in the current Krea 2 recipe: "
-                f"{_format_sample(missing)}"
+                "Krea 2 LoRA package is not compatible with the current Krea 2 recipe; "
+                f"shape-incompatible groups: {_format_sample(shape_errors)}"
             )
 
     @property
@@ -388,5 +434,6 @@ class Krea2Loader(LoRALoader):
     def cleanup(self) -> None:
         self._lora_data_by_set.clear()
         self._direct_data_by_set.clear()
+        self._expected_shapes.clear()
         self._affected_by_set.clear()
         self._affected.clear()

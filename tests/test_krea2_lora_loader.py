@@ -147,6 +147,27 @@ def test_strength_changes_only_scales_deterministically(tmp_path: Path) -> None:
     assert torch.equal(specs_b[0].down, specs_c[0].down)
 
 
+def test_explicit_alpha_uses_normalized_krea_key(tmp_path: Path) -> None:
+    # AC: @krea2-lora-package-compatibility ac-krea2-lora-strength-controls-are-stable
+    path = _write_lora(
+        tmp_path,
+        {
+            "transformer.transformer_blocks.0.attn.to_q.lora_A.weight": torch.ones(2, 3),
+            "transformer.transformer_blocks.0.attn.to_q.lora_B.weight": torch.ones(4, 2),
+            "transformer.transformer_blocks.0.attn.to_q.alpha": torch.tensor(1.0),
+        },
+    )
+
+    loader = Krea2Loader()
+    loader.load(path, strength=1.0, set_id="s")
+
+    key = "diffusion_model.blocks.0.attn.wq.weight"
+    specs = loader.get_delta_specs([key], {key: 0}, set_id="s")
+
+    assert len(specs) == 1
+    assert specs[0].scale == pytest.approx(0.5)
+
+
 def test_unsupported_or_incomplete_groups_are_rejected(tmp_path: Path) -> None:
     # AC: @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
     path = _write_lora(
@@ -206,6 +227,30 @@ def test_mapped_keys_must_exist_in_current_recipe_keyspace(tmp_path: Path) -> No
     message = str(exc_info.value)
     assert "not present in the current Krea 2 recipe" in message
     assert "diffusion_model.blocks.3.attn.wq.weight" in message
+
+
+def test_mapped_keys_must_match_current_recipe_shapes(tmp_path: Path) -> None:
+    # AC: @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
+    path = _write_lora(
+        tmp_path,
+        {
+            "transformer.transformer_blocks.0.attn.to_q.lora_A.weight": torch.ones(2, 3),
+            "transformer.transformer_blocks.0.attn.to_q.lora_B.weight": torch.ones(4, 2),
+        },
+    )
+
+    loader = Krea2Loader()
+    loader.load(path, set_id="s")
+
+    key = "diffusion_model.blocks.0.attn.wq.weight"
+    with pytest.raises(Krea2CompatibilityError) as exc_info:
+        loader.validate_compatible_keys({key}, {key: (5, 3)})
+
+    message = str(exc_info.value)
+    assert "shape-incompatible groups" in message
+    assert key in message
+    assert "package delta shape (4, 3)" in message
+    assert "current recipe shape (5, 3)" in message
 
 
 def test_krea2_loader_registry_and_cleanup(tmp_path: Path) -> None:

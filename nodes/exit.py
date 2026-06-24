@@ -1500,7 +1500,7 @@ class WIDENExitNode:
             all_keys = set(base_state.keys())
             validate_loader_keys = getattr(loader, "validate_compatible_keys", None)
             if validate_loader_keys is not None:
-                validate_loader_keys(all_keys)
+                validate_loader_keys(all_keys, key_shapes)
             lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
             model_keys = all_keys & all_model_keys
             keys_to_process = lora_keys | model_keys
@@ -1788,7 +1788,7 @@ class WIDENExitNode:
             all_keys = set(base_state.keys())
             validate_loader_keys = getattr(loader, "validate_compatible_keys", None)
             if validate_loader_keys is not None:
-                validate_loader_keys(all_keys)
+                validate_loader_keys(all_keys, key_shapes)
             lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
             model_keys = all_keys & all_model_keys
             keys_to_process = lora_keys | model_keys
@@ -2049,7 +2049,7 @@ class WIDENExitNode:
             all_keys = set(base_state.keys())
             validate_loader_keys = getattr(loader, "validate_compatible_keys", None)
             if validate_loader_keys is not None:
-                validate_loader_keys(all_keys)
+                validate_loader_keys(all_keys, key_shapes)
             lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
             model_keys = all_keys & all_model_keys
             keys_to_process = lora_keys | model_keys
