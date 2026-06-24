@@ -9659,9 +9659,21 @@ runs:
     completed_at: 2026-06-24T04:06:53.387Z
   - _ulid: 01KVVXPYB6B9TN0EJJKVE7YMRE
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-06-24T04:20:16.358Z
+        completed_at: 2026-06-24T04:20:57.492Z
+        notes: "What worked well: Pinned public references plus safetensors header-only range probing let
+          the Krea loader support real public package key families without downloading full LoRA
+          payloads or relying on local machine paths. Focused synthetic tests made the Krea
+          compatibility behavior quick to iterate before full gates."
+      - status: completed
+        step_index: 1
+        started_at: 2026-06-24T04:20:57.492Z
+        completed_at: 2026-06-24T04:20:57.492Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:20:16.358Z
