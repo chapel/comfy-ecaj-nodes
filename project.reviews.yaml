@@ -1788,7 +1788,7 @@ reviews:
     title: Review task-krea2-validation-and-smoke-evidence
     disposition: pending
     author: Jacob Chapel
-    check_count: 0
+    check_count: 1
     examined_commit: 7fd565e36cc6dd612661f79ae7b74077eb13d69b
     lifecycle_state: open
     related_refs: []
@@ -1801,4 +1801,4 @@ reviews:
     unresolved_blocker_count: 0
     verdict_count: 0
     created_at: 2026-06-24T05:52:45.586Z
-    updated_at: 2026-06-24T05:52:59.718Z
+    updated_at: 2026-06-24T05:56:23.078Z
