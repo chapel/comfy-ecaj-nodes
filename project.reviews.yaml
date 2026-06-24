@@ -1783,3 +1783,21 @@ reviews:
     verdict_count: 1
     created_at: 2026-06-24T05:31:58.692Z
     updated_at: 2026-06-24T05:35:57.607Z
+  - _ulid: 01KVW309GJYV91EZFR2AX86YPD
+    slugs: []
+    title: Review task-krea2-validation-and-smoke-evidence
+    disposition: pending
+    author: Jacob Chapel
+    check_count: 0
+    examined_commit: 7fd565e36cc6dd612661f79ae7b74077eb13d69b
+    lifecycle_state: draft
+    related_refs: []
+    subject:
+      type: task
+      content_hash: ""
+      ref: "@01KVVVJVDY3HANBJP25XMN3F54"
+      shadow_commit: ""
+    thread_count: 0
+    unresolved_blocker_count: 0
+    verdict_count: 0
+    created_at: 2026-06-24T05:52:45.586Z
