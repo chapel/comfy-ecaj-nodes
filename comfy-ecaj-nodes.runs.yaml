@@ -9819,7 +9819,7 @@ runs:
     started_at: 2026-06-24T04:38:49.968Z
   - _ulid: 01KVVYS8XPRB50EV2Y3C6WAVB2
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9833,7 +9833,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-24T04:39:55.116Z
-        completed_at: 2026-06-24T04:39:55.116Z
+        completed_at: 2026-06-24T04:40:03.361Z
+        notes: "Friction points: project gate guidance names uv commands, but this dispatch shell did not
+          have uv on PATH, requiring python -m equivalents and extra explanation in task/PR
+          evidence. A kspec batch attempt failed because task note uses message, not content;
+          existing observation @01KQBYEH already covers batch JSON shape misuse, so no duplicate is
+          needed."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-24T04:40:03.361Z
+        completed_at: 2026-06-24T04:40:03.361Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:39:01.303Z
