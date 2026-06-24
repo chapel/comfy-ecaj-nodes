@@ -9596,7 +9596,7 @@ runs:
     started_at: 2026-06-24T03:56:03.668Z
     completed_at: 2026-06-24T03:57:46.729Z
   - _ulid: 01KVVWT7ZGG5K022XKV14W0PEZ
-    status: active
+    status: completed
     current_step: 5
     initiated_by: Jacob Chapel
     step_results:
@@ -9647,7 +9647,13 @@ runs:
       - status: completed
         step_index: 5
         started_at: 2026-06-24T04:06:18.537Z
-        completed_at: 2026-06-24T04:06:18.537Z
+        completed_at: 2026-06-24T04:06:53.387Z
+        notes: Captured new friction observation @01KVVWY4 for uv missing from dispatched review workspaces
+          despite uv-based gate guidance. Did not duplicate existing observations @01KVVWDFB for
+          repo-wide ruff format baseline noise or @01KVVWDF7 for detached review resource path
+          readability. No inbox/task was created because the uv fix needs triage to decide whether
+          it belongs in environment bootstrap or project gate docs.
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:04:35.952Z
+    completed_at: 2026-06-24T04:06:53.387Z
