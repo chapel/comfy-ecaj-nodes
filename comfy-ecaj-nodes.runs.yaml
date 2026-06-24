@@ -9764,7 +9764,7 @@ runs:
     started_at: 2026-06-24T04:28:20.216Z
     completed_at: 2026-06-24T04:29:47.864Z
   - _ulid: 01KVVY7C0R40QAM90PFXZ4GT0V
-    status: active
+    status: completed
     current_step: 3
     initiated_by: Jacob Chapel
     step_results:
@@ -9798,10 +9798,14 @@ runs:
           ambiguity -> existing observations/search hits @01KVVXKK and @01KVVWY4. Success pattern
           about reusable block-config factory is already reflected by @01KH5XMW and related
           completed architecture block-config tasks. No unique high-confidence item to capture."
-      - status: completed
+      - status: skipped
         step_index: 3
         started_at: 2026-06-24T04:30:36.696Z
-        completed_at: 2026-06-24T04:30:36.696Z
+        completed_at: 2026-06-24T04:30:43.044Z
+        notes: No capture performed. All concrete high-confidence candidates from this session were already
+          represented in observations, inbox, or completed task history; adding duplicates would
+          reduce signal.
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-06-24T04:29:14.648Z
+    completed_at: 2026-06-24T04:30:43.044Z
