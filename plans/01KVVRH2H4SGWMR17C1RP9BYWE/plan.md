@@ -12,9 +12,13 @@ This draft adds first-class Krea 2 support to WIDEN / comfy-ecaj-nodes without r
 Public sources referenced by the imported implementation reference include:
 
 - Krea report: <https://www.krea.ai/blog/krea-2-technical-report>
-- ComfyUI Krea 2 model/text-encoder sources pinned to an inspected GitHub commit.
-- ai-toolkit Krea 2 and LoKr sources pinned to inspected upstream commit `724e67d63428a7daddc77355b88d90fe99ea9fd2`.
-- Public Hugging Face Krea 2 LoRA repositories from Comfy-Org and Krea.
+- ComfyUI Krea 2 diffusion model: <https://github.com/Comfy-Org/ComfyUI/blob/2a610155821d670a2d8047e654e5fce96b790eb5/comfy/ldm/krea2/model.py>
+- ComfyUI Krea 2 text encoder: <https://github.com/Comfy-Org/ComfyUI/blob/2a610155821d670a2d8047e654e5fce96b790eb5/comfy/text_encoders/krea2.py>
+- ai-toolkit Krea 2 implementation: <https://github.com/ostris/ai-toolkit/blob/724e67d63428a7daddc77355b88d90fe99ea9fd2/extensions_built_in/diffusion_models/krea2/krea2.py>
+- ai-toolkit Krea 2 MMDiT source: <https://github.com/ostris/ai-toolkit/blob/724e67d63428a7daddc77355b88d90fe99ea9fd2/extensions_built_in/diffusion_models/krea2/src/mmdit.py>
+- ai-toolkit LoKr helper: <https://github.com/ostris/ai-toolkit/blob/724e67d63428a7daddc77355b88d90fe99ea9fd2/toolkit/models/lokr.py>
+- Comfy-Org Krea 2 LoRAs: <https://huggingface.co/Comfy-Org/Krea-2/tree/main/loras>
+- Krea RetroAnime LoRA: <https://huggingface.co/krea/Krea-2-LoRA-retroanime/tree/main>
 
 ## Scope
 
