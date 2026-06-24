@@ -197,6 +197,12 @@ events:
       from: open
       to: closed
     timestamp: 2026-06-24T05:20:51.104Z
+  - _ulid: 01KVW1GN2SAY5JYBZT5F0BYKCP
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KVW15VN8GSS7RM6409GB21RM
+    timestamp: 2026-06-24T05:26:44.569Z
 examined_commit: 13cb49fdb78b9d7c4aefbd81aa6e154d1000e718
 external_links: []
 lifecycle_state: closed
@@ -228,6 +234,14 @@ threads:
           these exact mappings and add a behavioral/header regression that compares them against the
           public base keyspace or an equivalent fixture using tmlp.0/2."
         created_at: 2026-06-24T05:20:50.856Z
+      - _ulid: 01KVW1GN1TCPZVY9PPPSST8DBX
+        author: Jacob Chapel
+        body: "Fixed in commit c76513ad: transformer.time_embed.linear_1 now maps to
+          diffusion_model.tmlp.0.weight and transformer.time_embed.linear_2 now maps to
+          diffusion_model.tmlp.2.weight. The timestep projection regression now validates those
+          public-base target keys and shapes while preserving transformer.time_mod_proj ->
+          diffusion_model.tproj.1.weight."
+        created_at: 2026-06-24T05:26:44.538Z
     kind: blocker
 verdicts:
   - applies_to_version:
@@ -238,5 +252,5 @@ verdicts:
     role: reviewer
     created_at: 2026-06-24T05:20:51.104Z
 created_at: 2026-06-24T05:14:32.061Z
-updated_at: 2026-06-24T05:20:51.104Z
+updated_at: 2026-06-24T05:26:44.538Z
 notes: []
