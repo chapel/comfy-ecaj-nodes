@@ -1,0 +1,26 @@
+_ulid: 01KVVWG5P79Z9N46G0ZVJWEK3E
+slugs: []
+title: Review task-krea2-architecture-recognition-routing
+author: Jacob Chapel
+checks: []
+events:
+  - _ulid: 01KVVWG5NWW8NDMNFH951HA7TC
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-06-24T03:59:05.916Z
+examined_commit: 41df8de1951f852bfa253b215bae3a6fb4956298
+external_links: []
+lifecycle_state: draft
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KVVVJV4JCST8N84GX03DZYGJ"
+  shadow_commit: ""
+threads: []
+verdicts: []
+created_at: 2026-06-24T03:59:05.927Z
+updated_at: null
+notes: []

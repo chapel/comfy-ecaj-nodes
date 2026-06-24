@@ -59,6 +59,7 @@ tags:
   - entry-node
   - routing
 vcs_refs: []
+review_ref: "@01KVVWG5P79Z9N46G0ZVJWEK3E"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-krea2-architecture-recognition-routing/01kvvvjv
@@ -148,6 +149,13 @@ history:
         previous: null
     command: task-submit
     timestamp: 2026-06-24T03:54:43.787Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KVVWG5P79Z9N46G0ZVJWEK3E"
+        previous: null
+    command: review-link
+    timestamp: 2026-06-24T03:59:06.305Z
 resource_refs:
   - git_commit: null
     git_path: null
