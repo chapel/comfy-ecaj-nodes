@@ -9712,7 +9712,7 @@ runs:
     completed_at: 2026-06-24T04:21:27.294Z
   - _ulid: 01KVVY5PVR5QA7Q3KDM82FNYKH
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9726,7 +9726,15 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-24T04:29:11.239Z
-        completed_at: 2026-06-24T04:29:11.239Z
+        completed_at: 2026-06-24T04:29:18.532Z
+        notes: "Friction points: uv was not available on the review shell PATH despite project gates naming
+          uv; I had to run equivalent python -m commands. The task resource was reported OK in
+          dispatch/task context but the advertised relative resource file was not materialized in
+          the detached review worktree, so I relied on the plan record summary instead."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-24T04:29:18.532Z
+        completed_at: 2026-06-24T04:29:18.532Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:28:20.216Z
