@@ -5,3 +5,11 @@ notes:
       01KVVEDGM0VXE0W35QYXX96K7Q passed. Plan remains draft awaiting Jacob approval/derive.
     author: Jacob Chapel
     created_at: 2026-06-24T02:49:53.861Z
+  - _ulid: 01KVVSP60NF676DKKD3VFFWAS4
+    content: "Updated draft after Jacob feedback: imported Krea deep dive and implementation reference
+      as plan resources, added sibling resources for source-plan validation, replaced local
+      model/code path references with imported resources or public pinned URLs, rewrote specs as
+      behavioral ACs, removed Krea-specific validation spec and FP8 blanket ban, and clarified
+      tasks."
+    author: Jacob Chapel
+    created_at: 2026-06-24T03:09:57.141Z
