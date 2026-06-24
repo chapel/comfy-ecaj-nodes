@@ -77,7 +77,7 @@ workspaces:
         head: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
         last_seen_at: 2026-05-13T17:03:06.153Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/checkpoint-save-release-temp-model-return-artifact-checkpoi
-  - active_role: null
+  - active_role: reviewer
     base_branch_point: 0a0fdbe68425ce2f7f1fee58c97e1c85aa7404de
     bootstrap:
       status: succeeded
@@ -119,12 +119,12 @@ workspaces:
       detail: integrated-into-base-branch
       eligible: true
       reason: integrated-into-base-branch
-      updated_at: 2026-06-24T04:03:46.295Z
+      updated_at: 2026-06-24T04:04:41.284Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-06-24T04:03:46.295Z
+      updated_at: 2026-06-24T04:04:41.284Z
     integration:
       status: merged
       detail: integration:merged
@@ -132,7 +132,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 0a0fdbe68425ce2f7f1fee58c97e1c85aa7404de
-      updated_at: 2026-06-24T04:03:46.295Z
+      updated_at: 2026-06-24T04:04:41.284Z
     lifecycle_state: closing
     resolved_base_branch: dev
     task_id: 01KVVVJV4JCST8N84GX03DZYGJ
@@ -141,9 +141,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-06-24T03:58:26.264Z
-      last_reconciled_at: 2026-06-24T04:03:46.295Z
+      last_reconciled_at: 2026-06-24T04:04:41.284Z
       created_at: 2026-06-24T03:44:39.662Z
-      updated_at: 2026-06-24T04:03:46.295Z
+      updated_at: 2026-06-24T04:04:41.284Z
     workspace_id: dispatch-workspace-01KVVVJV4JCST8N84GX03DZYGJ
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
