@@ -9978,7 +9978,7 @@ runs:
     completed_at: 2026-06-24T04:48:37.858Z
   - _ulid: 01KVVZPS1BS34YHGZW1AW2A0VR
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9992,7 +9992,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-24T04:56:05.008Z
-        completed_at: 2026-06-24T04:56:05.008Z
+        completed_at: 2026-06-24T04:56:12.702Z
+        notes: "Friction points: uv was unavailable on PATH despite project guidance preferring uv,
+          requiring python -m equivalents for every gate; this is already tracked by observation
+          @01KVVYMQ. Also, kspec workflow show required the run ref rather than showing the active
+          run by default; similar reflection workflow inspection friction is already tracked by
+          @01KQ6N3MY."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-24T04:56:12.702Z
+        completed_at: 2026-06-24T04:56:12.702Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:55:08.075Z
