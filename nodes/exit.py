@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import secrets
+import time
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
@@ -65,6 +66,25 @@ if TYPE_CHECKING:
     from ..lib.recipe import BlockConfig
 
 logger = logging.getLogger("ecaj.exit")
+
+
+class _PhaseTimer:
+    """Small logging helper for long-running WIDEN Exit phases."""
+
+    def __init__(self, label: str) -> None:
+        self.label = label
+        self.last = time.monotonic()
+        logger.info("WIDEN Exit phase start: %s", label)
+
+    def mark(self, phase: str) -> None:
+        now = time.monotonic()
+        logger.info(
+            "WIDEN Exit phase: %s: %s after %.3fs",
+            self.label,
+            phase,
+            now - self.last,
+        )
+        self.last = now
 
 # Internal merged-key prefix produced by ComfyUI BaseModel.state_dict():
 # `diffusion_model.X`.  ComfyUI's standalone diffusion-model loader
@@ -1312,18 +1332,26 @@ class WIDENExitNode:
         AC: @comfy-memory-manager-compatibility ac-no-dynamic-vram-opt-out
         AC: @comfy-memory-manager-compatibility ac-memory-mode-preserved
         """
+        timer = _PhaseTimer("full-saved-model")
         lora_path_resolver = _build_lora_resolver()
         model_path_resolver = _build_model_resolver()
+        timer.mark("resolvers-built")
 
         model_patcher = walk_to_base(widen).model_patcher
+        timer.mark("base-walked")
         _unpatch_loaded_clones(model_patcher)
+        timer.mark("loaded-clones-unpatched")
         base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
+        timer.mark(f"base-state-read keys={len(base_state)}")
         storage_dtype = next(iter(base_state.values())).dtype
 
         key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
+        timer.mark("key-shapes-built")
 
         base_identity = compute_base_identity(base_state)
+        timer.mark("base-identity-computed")
         lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+        timer.mark(f"dependency-stats-computed count={len(lora_stats)}")
 
         validated_name = validate_model_name(model_name)
         # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
@@ -1333,17 +1361,21 @@ class WIDENExitNode:
         # (CheckpointLoaderSimple discovery).
         is_checkpoint = _recipe_has_checkpoint_components(widen)
         save_path = _resolve_save_path(validated_name, is_checkpoint=is_checkpoint)
+        timer.mark(f"save-path-resolved checkpoint={is_checkpoint}")
         serialized = serialize_recipe(widen, base_identity, lora_stats)
         recipe_hash = compute_recipe_hash(serialized)
+        timer.mark("recipe-hash-computed")
 
         # Build manifest early for cache validation (shapes + dtypes, not just key names).
         base_manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
+        timer.mark("base-manifest-built")
 
         dependency_fingerprints_json = json.dumps(
             lora_stats,
             sort_keys=True,
             separators=(",", ":"),
         )
+        timer.mark("dependency-fingerprint-json-built")
 
         # AC: @full-saved-model-output ac-cache-reuses-artifact
         # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
@@ -1395,9 +1427,11 @@ class WIDENExitNode:
                     return (_load_checkpoint_artifact(save_path),)
                 return (_load_diffusion_model_artifact(save_path),)
 
+        timer.mark("cache-path-complete")
         # Branch: checkpoint-style saves use Comfy checkpoint save semantics;
         # non-checkpoint (diffusion-only) saves continue using MaterializationSink.
         if is_checkpoint:
+            timer.mark("dispatch-checkpoint-save")
             return self._execute_checkpoint_save(
                 widen,
                 model_patcher,
@@ -1416,6 +1450,7 @@ class WIDENExitNode:
                 model_path_resolver,
             )
         else:
+            timer.mark("dispatch-diffusion-save")
             return self._execute_diffusion_save(
                 widen,
                 model_patcher,
@@ -1750,13 +1785,16 @@ class WIDENExitNode:
         AC: @streaming-full-model-materialization
             ac-failed-materialization-releases-resident-payload
         """
+        timer = _PhaseTimer("diffusion-save")
         analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
+        timer.mark(f"recipe-analyzed affected={len(analysis.affected_keys)}")
 
         base = walk_to_base(widen)
         domain = getattr(base, "domain", "diffusion")
         model_analysis = analyze_recipe_models(
             widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
         )
+        timer.mark(f"recipe-models-analyzed model_loaders={len(model_analysis.model_loaders)}")
 
         sink = MaterializationSink()
         # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
@@ -1772,6 +1810,7 @@ class WIDENExitNode:
             manifest_size=len(base_state),
             artifact_name=os.path.basename(save_path),
         )
+        timer.mark(f"progress-built manifest_size={len(base_state)}")
         try:
             loader = analysis.loader
             set_affected = analysis.set_affected
@@ -1781,6 +1820,9 @@ class WIDENExitNode:
             model_affected = model_analysis.model_affected
             model_loaders = model_analysis.model_loaders
             all_model_keys = model_analysis.all_model_keys
+            timer.mark(
+                f"analysis-unpacked sets={len(set_affected)} model_keys={len(all_model_keys)}"
+            )
 
             compute_dtype = torch.float32
             device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -1789,9 +1831,11 @@ class WIDENExitNode:
             validate_loader_keys = getattr(loader, "validate_compatible_keys", None)
             if validate_loader_keys is not None:
                 validate_loader_keys(all_keys, key_shapes)
+            timer.mark(f"loader-compatible keys={len(all_keys)}")
             lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
             model_keys = all_keys & all_model_keys
             keys_to_process = lora_keys | model_keys
+            timer.mark(f"keys-selected lora={len(lora_keys)} model={len(model_keys)}")
 
             affected_key_set = keys_to_process
 
@@ -1810,8 +1854,10 @@ class WIDENExitNode:
                 dtype=compute_dtype,
             )
             widen_merger = WIDEN(widen_config)
+            timer.mark("widen-config-built")
 
             plan = compile_plan(widen, set_id_map, arch, model_id_map)
+            timer.mark(f"plan-compiled ops={len(plan.ops)}")
 
             # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
             # AC: @full-saved-model-output ac-diffusion-model-companion-separation
@@ -1823,6 +1869,7 @@ class WIDENExitNode:
             manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] = {}
             for k, v in base_state.items():
                 manifest[_to_external_diffusion_key(k)] = (v.dtype, tuple(v.shape))
+            timer.mark(f"manifest-built entries={len(manifest)}")
 
             workflow_json = json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
             metadata = build_metadata(
@@ -1839,7 +1886,9 @@ class WIDENExitNode:
             )
 
             progress.prepare()
+            timer.mark("progress-prepare-done")
             sink.open(manifest, save_path, metadata)
+            timer.mark("sink-opened")
 
             if keys_to_process:
                 batch_groups = compile_batch_groups(

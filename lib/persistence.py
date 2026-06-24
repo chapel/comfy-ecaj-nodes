@@ -15,6 +15,8 @@ import secrets
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+import torch
+
 from .streaming_save import stream_save_file
 
 if TYPE_CHECKING:
@@ -213,8 +215,16 @@ def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
     if sorted_keys:
         sample_indices = {0, len(sorted_keys) // 2, len(sorted_keys) - 1}
         for idx in sorted(sample_indices):
-            sample_tensor = base_state[sorted_keys[idx]]
-            flat = sample_tensor.detach().float().reshape(-1)[:64].contiguous().cpu()
+            sample_tensor = base_state[sorted_keys[idx]].detach()
+            # Slice before dtype conversion / CPU transfer.  Krea 2 has very
+            # large matrix tensors; converting the full sampled tensors before
+            # slicing can spend minutes materializing hundreds of MB per key
+            # before WIDEN Exit has published any progress.
+            if sample_tensor.is_contiguous():
+                sample = sample_tensor.view(-1)[:64]
+            else:
+                sample = sample_tensor.reshape(-1)[:64]
+            flat = sample.to(device="cpu", dtype=torch.float32).contiguous()
             hasher.update(bytes(flat.untyped_storage())[: flat.nelement() * flat.element_size()])
 
     return hasher.hexdigest()
