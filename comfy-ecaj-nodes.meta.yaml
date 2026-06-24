@@ -1633,6 +1633,29 @@ observations:
     resolved: false
     workflow_ref: "@01KVVYS8"
     created_at: 2026-06-24T04:40:37.632Z
+  - _ulid: 01KVVYWFQXV3AE3QJ3YEFT405J
+    type: friction
+    content: During PR publication review, GitHub API approval can fail when the authenticated reviewer
+      account owns the PR (`Review Can not approve your own pull request`). kspec review disposition
+      still provides the durable approval gate, so the workflow should treat GitHub approval as
+      optional/best-effort in this identity configuration and proceed only after kspec approval plus
+      CI/required checks are clean.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KVVYRX"
+    created_at: 2026-06-24T04:40:46.589Z
+  - _ulid: 01KVVYWFV8HZZH05STH8442A4A
+    type: success
+    content: "First-party kspec review records worked well as the review source of truth for a detached
+      PR snapshot: checks captured local validation, focused tests, full tests, lint, changed-file
+      format, kspec validation, and GitHub CI before merge; the task then completed cleanly after PR
+      #120 merged to dev."
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    workflow_ref: "@01KVVYRX"
+    created_at: 2026-06-24T04:40:46.696Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
