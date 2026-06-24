@@ -16,3 +16,20 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T04:07:58.949Z
+  - _ulid: 01KVVXKHNSWZT0QTRZ3TTA28BG
+    content: "Implemented Krea 2 LoRA package compatibility. Added Krea2Loader support for diffusers
+      transformer lora_A/B exports and native diffusion_model lora_down/up exports, preserving Krea
+      text-fusion compound names and mapping public package names to Krea base keys. Added direct
+      .diff_b bias delta support through DeltaSpec kind=direct so the public native turbo package
+      can apply completely. Added loader keyspace validation in Exit paths so mapped groups missing
+      from the current base model fail before batching instead of being silently filtered out. Added
+      CPU-safe tests for supported public families, compound-name preservation, native bias deltas,
+      deterministic strength scaling, unsupported/incomplete/rank-mismatch diagnostics, base-key
+      compatibility validation, registry routing, and cleanup. Gates: uv sync --extra dev completed;
+      uv compileall lib nodes tests passed; CUDA_VISIBLE_DEVICES= uv run pytest passed (1749
+      passed); uv run ruff check . passed; uv run ruff format --check . passed after applying
+      required repo-wide formatter baseline; kspec validate --warnings-ok, --alignment
+      --warnings-ok, and --completeness --warnings-ok passed with existing project warnings."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T04:18:25.082Z
