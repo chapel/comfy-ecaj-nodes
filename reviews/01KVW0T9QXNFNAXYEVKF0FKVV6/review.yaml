@@ -1,0 +1,26 @@
+_ulid: 01KVW0T9QXNFNAXYEVKF0FKVV6
+slugs: []
+title: Review Krea 2 LoRA package compatibility (cycle 4)
+author: Jacob Chapel
+checks: []
+events:
+  - _ulid: 01KVW0T9QWP9ZY870PHTH262KA
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-06-24T05:14:32.060Z
+examined_commit: 13cb49fdb78b9d7c4aefbd81aa6e154d1000e718
+external_links: []
+lifecycle_state: draft
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KVVVJV8D69BXGR7T66VYA7KK"
+  shadow_commit: ""
+threads: []
+verdicts: []
+created_at: 2026-06-24T05:14:32.061Z
+updated_at: null
+notes: []
