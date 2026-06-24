@@ -10034,7 +10034,7 @@ runs:
     completed_at: 2026-06-24T04:56:47.697Z
   - _ulid: 01KVW079EGXR57A05S322R1VQB
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10047,7 +10047,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-24T05:05:37.435Z
-        completed_at: 2026-06-24T05:05:37.435Z
+        completed_at: 2026-06-24T05:05:43.031Z
+        notes: "High-confidence success identified: header-only parser coverage against pinned public
+          safetensors artifacts is an effective review gate for public LoRA/package compatibility
+          claims. It caught unsupported Krea 2 time_embed/time_mod_proj groups that synthetic
+          fixtures and broad tests missed. Existing @01KVVXS0 covers header-only inspection as
+          design support; this session adds the distinct review-gate lesson."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-24T05:05:43.031Z
+        completed_at: 2026-06-24T05:05:43.031Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-06-24T05:04:09.168Z
