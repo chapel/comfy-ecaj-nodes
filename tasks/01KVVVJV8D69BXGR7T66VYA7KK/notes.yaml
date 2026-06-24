@@ -118,3 +118,14 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T05:20:51.283Z
+  - _ulid: 01KVW1CW4NF3K4VCSBCRM07ZSX
+    content: "Fix cycle 4 approach: correct the diffusers-style Krea 2 timestep projection compatibility
+      table so transformer.time_embed.linear_1 and transformer.time_embed.linear_2 target the public
+      Krea 2 base keyspace diffusion_model.tmlp.0.weight and diffusion_model.tmlp.2.weight. Update
+      the behavioral safetensors regression to validate those targets against current recipe shapes,
+      while preserving transformer.time_mod_proj -> diffusion_model.tproj.1.weight. Re-verify
+      supported-package loading, complete-or-rejected preflight validation, stable strength
+      semantics, and Krea-compatible routing."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T05:24:40.725Z
