@@ -9978,9 +9978,21 @@ runs:
     completed_at: 2026-06-24T04:48:37.858Z
   - _ulid: 01KVVZPS1BS34YHGZW1AW2A0VR
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-06-24T04:55:08.075Z
+        completed_at: 2026-06-24T04:56:05.008Z
+        notes: "What worked well: the review record included an exact mixed-shape reproduction, failing
+          check evidence, target line anchor, and expected failure mode. That made the fix narrow:
+          replace key-level shape union validation with per-loaded-entry validation and add a direct
+          behavioral regression."
+      - status: completed
+        step_index: 1
+        started_at: 2026-06-24T04:56:05.008Z
+        completed_at: 2026-06-24T04:56:05.008Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:55:08.075Z
