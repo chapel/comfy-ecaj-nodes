@@ -202,6 +202,12 @@ events:
     payload:
       thread_ulid: 01KVVZ5N27FPX2TYE5B1M20E2G
     timestamp: 2026-06-24T04:53:33.253Z
+  - _ulid: 01KVVZKWW5E2FJDAK2YNW2AXBH
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KVVZ5N27FPX2TYE5B1M20E2G
+    timestamp: 2026-06-24T04:53:33.701Z
 examined_commit: 9d0f3591f47584f001949757fec26dcf7a1641d4
 external_links: []
 lifecycle_state: closed
@@ -243,6 +249,8 @@ threads:
           covering the mixed good/bad set reproduction from this review."
         created_at: 2026-06-24T04:53:33.226Z
     kind: blocker
+    resolved_at: 2026-06-24T04:53:33.672Z
+    resolved_by: Jacob Chapel
 verdicts:
   - applies_to_version:
       type: entity_version
@@ -252,5 +260,5 @@ verdicts:
     role: reviewer
     created_at: 2026-06-24T04:45:47.288Z
 created_at: 2026-06-24T04:42:17.082Z
-updated_at: 2026-06-24T04:53:33.226Z
+updated_at: 2026-06-24T04:53:33.672Z
 notes: []
