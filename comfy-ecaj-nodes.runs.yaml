@@ -9597,9 +9597,22 @@ runs:
     completed_at: 2026-06-24T03:57:46.729Z
   - _ulid: 01KVVWT7ZGG5K022XKV14W0PEZ
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-06-24T04:04:35.952Z
+        completed_at: 2026-06-24T04:05:27.995Z
+        notes: "What worked well: The kspec review record gave a clear place to bind deterministic evidence
+          to the reviewed snapshot, and the GitHub connector made it straightforward to verify PR
+          #118 targeted dev, matched the reviewed head 41df8de1, had green CI, and merged cleanly.
+          AC-annotated behavioral tests for Entry, ModelLoader, loader registry, classifier routing,
+          and recipe analysis made the Krea 2 review efficient and defensible."
+      - status: completed
+        step_index: 1
+        started_at: 2026-06-24T04:05:27.995Z
+        completed_at: 2026-06-24T04:05:27.995Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:04:35.952Z
