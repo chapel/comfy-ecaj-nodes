@@ -13,6 +13,17 @@ checks:
     runner: kspec
     created_at: 2026-06-24T05:56:23.078Z
     completed_at: 2026-06-24T05:56:23.078Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --completeness --warnings-ok passed with known missing-description warnings
+      outside this task.
+    name: kspec validate completeness
+    required: true
+    runner: kspec
+    created_at: 2026-06-24T05:56:23.416Z
+    completed_at: 2026-06-24T05:56:23.416Z
 events:
   - _ulid: 01KVW309GJB9ZHVD18FQ1A0EJC
     actor: Jacob Chapel
@@ -34,6 +45,13 @@ events:
       status: pass
       name: kspec validate refs
     timestamp: 2026-06-24T05:56:23.097Z
+  - _ulid: 01KVW36Y8BJ8D784SZ0T1KHN5B
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate completeness
+    timestamp: 2026-06-24T05:56:23.435Z
 examined_commit: 7fd565e36cc6dd612661f79ae7b74077eb13d69b
 external_links: []
 lifecycle_state: open
@@ -46,5 +64,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-24T05:52:45.586Z
-updated_at: 2026-06-24T05:56:23.078Z
+updated_at: 2026-06-24T05:56:23.416Z
 notes: []
