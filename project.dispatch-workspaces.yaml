@@ -204,7 +204,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-06-24T05:06:04.710Z
+      updated_at: 2026-06-24T05:06:05.996Z
     integration:
       status: pending
       detail: null
@@ -213,7 +213,7 @@ workspaces:
       target_branch: dev
       target_commit: 465863ed3f4078846a44c0cf7ef88cc70df423e5
       updated_at: 2026-06-24T05:06:04.710Z
-    lifecycle_state: integrating
+    lifecycle_state: ready
     resolved_base_branch: dev
     task_id: 01KVVVJV8D69BXGR7T66VYA7KK
     task_ref: "@01KVVVJV8D69BXGR7T66VYA7KK"
@@ -221,18 +221,13 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-06-24T04:57:11.077Z
-      last_reconciled_at: 2026-06-24T05:06:04.710Z
+      last_reconciled_at: 2026-06-24T05:06:05.996Z
       created_at: 2026-06-24T04:03:49.656Z
-      updated_at: 2026-06-24T05:06:04.710Z
+      updated_at: 2026-06-24T05:06:05.996Z
     workspace_id: dispatch-workspace-01KVVVJV8D69BXGR7T66VYA7KK
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer:
-        branch_mode: detached
-        branch_ref: null
-        head: 4b4934005e31a023fb04ad85c6010d3198ea4529
-        last_seen_at: 2026-06-24T04:57:09.810Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-krea2-lora-package-compatibility-01kvvvjv-review
+      reviewer: null
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
