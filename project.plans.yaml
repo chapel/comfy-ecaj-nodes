@@ -264,3 +264,13 @@ plans:
     notes_count: 3
     source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/checkpoint-save-memory-contract-hardening.md
     created_at: 2026-05-12T23:58:47.222Z
+  - _ulid: 01KVVRH2H4SGWMR17C1RP9BYWE
+    slugs:
+      - plan-krea-2-architecture-support-plan
+    title: Krea 2 Architecture Support Plan
+    status: draft
+    derived_specs: []
+    derived_tasks: []
+    notes_count: 0
+    source_path: /home/chapel/Projects/comfy-ecaj-nodes/plans/krea2-architecture-support.md
+    created_at: 2026-06-24T02:49:41.156Z
