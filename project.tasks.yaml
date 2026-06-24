@@ -2599,7 +2599,7 @@
   type: task
   spec_ref: "@krea2-architecture-support"
   plan_ref: "@plan-krea-2-architecture-support-plan"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on: []
   priority: 1
@@ -2612,6 +2612,7 @@
   todos_count: 0
   created_at: 2026-06-24T03:43:04.850Z
   started_at: 2026-06-24T03:45:19.664Z
+  submitted_at: 2026-06-24T03:54:43.786Z
   automation: eligible
 - _ulid: 01KVVVJV8D69BXGR7T66VYA7KK
   slugs:

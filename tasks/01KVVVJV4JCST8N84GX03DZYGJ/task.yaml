@@ -48,7 +48,7 @@ description: |
 spec_ref: "@krea2-architecture-support"
 plan_ref: "@plan-krea-2-architecture-support-plan"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -59,6 +59,14 @@ tags:
   - entry-node
   - routing
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-krea2-architecture-recognition-routing/01kvvvjv
+  captured_at: 2026-06-24T03:54:43.772Z
+  commit: 41df8de1951f852bfa253b215bae3a6fb4956298
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 session_id: 01KVVVNR2NFWKJ10M425DC7G7M
 history:
   - author: Jacob Chapel
@@ -120,6 +128,26 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-06-24T03:45:19.665Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-krea2-architecture-recognition-routing/01kvvvjv
+          captured_at: 2026-06-24T03:54:43.772Z
+          commit: 41df8de1951f852bfa253b215bae3a6fb4956298
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-06-24T03:54:43.786Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-06-24T03:54:43.787Z
 resource_refs:
   - git_commit: null
     git_path: null
@@ -139,5 +167,6 @@ resource_refs:
     sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
 created_at: 2026-06-24T03:43:04.850Z
 started_at: 2026-06-24T03:45:19.664Z
+submitted_at: 2026-06-24T03:54:43.786Z
 todos: []
 automation: eligible
