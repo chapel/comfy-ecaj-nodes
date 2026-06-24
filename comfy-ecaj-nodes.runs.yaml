@@ -10204,7 +10204,7 @@ runs:
     completed_at: 2026-06-24T05:30:35.621Z
   - _ulid: 01KVW24C38NBX7EPMXFZ235AD2
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10224,7 +10224,15 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-06-24T05:38:45.142Z
-        completed_at: 2026-06-24T05:38:45.142Z
+        completed_at: 2026-06-24T05:38:58.173Z
+        notes: "Decision: skip uv/PATH friction as already covered by existing observations (search returned
+          @01KVVYMQ plus related @01KVVXKK/@01KVVWY4). Skip resource-reference friction as already
+          covered by @01KVVWDF7. Capture unique success as @01KVW25Q: blocker feedback converted
+          into focused behavioral regressions enabled clean final review."
+      - status: completed
+        step_index: 3
+        started_at: 2026-06-24T05:38:58.173Z
+        completed_at: 2026-06-24T05:38:58.173Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-06-24T05:37:30.728Z
