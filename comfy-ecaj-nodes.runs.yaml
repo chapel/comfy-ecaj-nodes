@@ -9532,9 +9532,21 @@ runs:
     completed_at: 2026-05-13T18:39:28.047Z
   - _ulid: 01KVVWAKPM0FHCS9TVKCNQ1WGD
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-06-24T03:56:03.668Z
+        completed_at: 2026-06-24T03:56:50.108Z
+        notes: "Worked well: writing AC-annotated Krea tests first made the detection contract concrete and
+          caught that incomplete Krea-like signatures were being reported as no evidence. The shared
+          lib.architecture detector kept Entry and ModelLoader behavior aligned instead of
+          duplicating architecture rules."
+      - status: completed
+        step_index: 1
+        started_at: 2026-06-24T03:56:50.108Z
+        completed_at: 2026-06-24T03:56:50.108Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T03:56:03.668Z
