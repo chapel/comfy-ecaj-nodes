@@ -28,8 +28,8 @@ Pinned to upstream `origin/main` commit inspected during planning: `724e67d63428
 
 ### Public LoRA samples
 
-- Comfy-Org Krea 2 LoRAs: <https://huggingface.co/Comfy-Org/Krea-2/tree/main/loras>
-- Krea RetroAnime LoRA: <https://huggingface.co/krea/Krea-2-LoRA-retroanime/tree/main>
+- Comfy-Org Krea 2 LoRAs: <https://huggingface.co/Comfy-Org/Krea-2/tree/9b05e613f06f5ee45d97b362ba3478fec5488b5a/loras>
+- Krea RetroAnime LoRA: <https://huggingface.co/krea/Krea-2-LoRA-retroanime/tree/23336fcff3bac43028918a2df795fbb63fdc1ff3>
 
 ## Planning facts from header/source inspection
 
