@@ -45,6 +45,17 @@ checks:
     runner: python -m compileall
     created_at: 2026-06-24T05:35:29.453Z
     completed_at: 2026-06-24T05:35:29.453Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest tests/test_krea2_lora_loader.py tests/test_krea2_architecture.py -q
+      passed: 22 tests"
+    name: focused pytest
+    required: true
+    runner: python -m pytest
+    created_at: 2026-06-24T05:35:32.203Z
+    completed_at: 2026-06-24T05:35:32.203Z
 events:
   - _ulid: 01KVW1T7V3APSMBAFSPQ72YQX2
     actor: Jacob Chapel
@@ -87,6 +98,13 @@ events:
       status: pass
       name: compileall
     timestamp: 2026-06-24T05:35:29.472Z
+  - _ulid: 01KVW20RBYBEEZP2YGEHRNX22V
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-06-24T05:35:32.222Z
 examined_commit: c76513adf09b1ccc1cc03df0c3620e6e1ca30893
 external_links: []
 lifecycle_state: open
@@ -99,5 +117,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-24T05:31:58.692Z
-updated_at: 2026-06-24T05:35:29.453Z
+updated_at: 2026-06-24T05:35:32.203Z
 notes: []
