@@ -1557,6 +1557,33 @@ observations:
     resolved: false
     workflow_ref: "@01KRHA2M"
     created_at: 2026-05-13T18:39:18.887Z
+  - _ulid: 01KVVWDF7Y58DJWBQZ8S7EETQ2
+    type: friction
+    content: Task resource_refs were reported as OK in dispatch context, but the referenced plan
+      resource files were not readable in the worker worktree; agents had to fall back to pinned
+      public URLs instead of local imported resources.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T03:57:37.406Z
+  - _ulid: 01KVVWDFB4K1Z52RPBYXJY1MD3
+    type: friction
+    content: The required full ruff format gate is noisy because many unrelated pre-existing files would
+      be reformatted; changed-file format checks avoided churn, but repo-wide format evidence
+      remains ambiguous until the baseline is normalized or a changed-file gate is documented.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T03:57:37.508Z
+  - _ulid: 01KVVWDFD6XJ5R128VA9265FRS
+    type: success
+    content: AC-annotated tests written before implementation made the Krea 2 architecture contract
+      concrete and caught a diagnostic gap in incomplete-signature evidence before broader gates
+      ran; sharing the detector between Entry and ModelLoader kept behavior aligned.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T03:57:37.574Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
