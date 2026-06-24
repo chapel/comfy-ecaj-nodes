@@ -347,18 +347,18 @@ workspaces:
       remote_ref: null
       source: provisioned
     canonical_branch: dispatch/task/task-krea2-validation-and-smoke-evidence/01kvvvjv
-    canonical_branch_head: e6ff6235432abd3af0190b5f428b86589c11e2d8
+    canonical_branch_head: 7fd565e36cc6dd612661f79ae7b74077eb13d69b
     cleanup:
       status: not_scheduled
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-06-24T05:36:49.346Z
+      updated_at: 2026-06-24T05:46:45.353Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-06-24T05:36:50.282Z
+      updated_at: 2026-06-24T05:46:45.353Z
     integration:
       status: pending
       detail: null
@@ -366,7 +366,7 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: e6ff6235432abd3af0190b5f428b86589c11e2d8
-      updated_at: 2026-06-24T05:36:49.346Z
+      updated_at: 2026-06-24T05:46:45.353Z
     lifecycle_state: active
     resolved_base_branch: dev
     task_id: 01KVVVJVDY3HANBJP25XMN3F54
@@ -375,9 +375,9 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-06-24T05:36:50.282Z
-      last_reconciled_at: 2026-06-24T05:36:50.282Z
+      last_reconciled_at: 2026-06-24T05:46:45.353Z
       created_at: 2026-06-24T05:36:49.346Z
-      updated_at: 2026-06-24T05:36:50.282Z
+      updated_at: 2026-06-24T05:46:45.353Z
     workspace_id: dispatch-workspace-01KVVVJVDY3HANBJP25XMN3F54
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
