@@ -220,12 +220,13 @@ def classify_key_krea2(key: str) -> str | None:
     """Classify a Krea 2 parameter key into a Krea-compatible group.
 
     Krea 2 is a single-stream MMDiT with numbered ``blocks`` plus a
-    ``txtfusion`` adapter. This initial routing classifier is intentionally
-    structural; user-facing Krea block config controls are added by the
-    dependent block/layer-control task.
+    ``txtfusion`` adapter. Main denoiser blocks, text-fusion blocks, and
+    structural projections are kept as separate user-facing groups so controls
+    do not collapse unrelated Krea regions together.
     """
-    if key.startswith("diffusion_model."):
-        key = key[len("diffusion_model.") :]
+    for prefix in ("diffusion_model.", "transformer."):
+        if key.startswith(prefix):
+            key = key[len(prefix) :]
 
     match = re.match(r"blocks\.(\d+)\.", key)
     if match:
@@ -241,6 +242,8 @@ def classify_key_krea2(key: str) -> str | None:
 
     if key.startswith("txtfusion.projector"):
         return "TF_PROJECTOR"
+    if key.startswith("pe_embedder"):
+        return "PE_EMBEDDER"
     if key.startswith("first."):
         return "FIRST"
     if key.startswith("tmlp."):
@@ -453,7 +456,8 @@ _FLUX_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
     ("modulation", "norm"),
 )
 
-# Layer type patterns for Krea 2.
+# Layer type patterns for Krea 2. Krea adds projection/embedding and structural
+# categories beyond the common attention/feed-forward/norm controls.
 _KREA2_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
     # Attention patterns
     (".attn.", "attention"),
@@ -467,12 +471,21 @@ _KREA2_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
     (".gate", "feed_forward"),
     (".up", "feed_forward"),
     (".down", "feed_forward"),
-    # Norm/modulation patterns
+    # Norm patterns
     (".prenorm", "norm"),
     (".postnorm", "norm"),
     (".norm", "norm"),
-    (".mod.", "norm"),
-    ("modulation", "norm"),
+    # Embedding/projection patterns
+    ("first.", "embedding_projection"),
+    ("tmlp.", "embedding_projection"),
+    ("txtmlp.", "embedding_projection"),
+    ("tproj.", "embedding_projection"),
+    ("txtfusion.projector", "embedding_projection"),
+    ("last.linear", "embedding_projection"),
+    ("pe_embedder", "embedding_projection"),
+    # Structural modulation/fallback patterns
+    (".mod.", "structural"),
+    ("modulation", "structural"),
 )
 
 # Layer type patterns for SDXL CLIP (ac-10)
