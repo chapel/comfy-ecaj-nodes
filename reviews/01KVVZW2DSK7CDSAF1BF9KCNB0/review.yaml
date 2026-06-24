@@ -199,6 +199,18 @@ events:
       from: open
       to: closed
     timestamp: 2026-06-24T05:03:14.776Z
+  - _ulid: 01KVW0HFDN71G7PD8AZCCSKNPM
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KVW05M11AN362DGTFCDYTH95
+    timestamp: 2026-06-24T05:09:42.965Z
+  - _ulid: 01KVW0HFPS9HJ9FQNY3DDC68BX
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KVW05M11AN362DGTFCDYTH95
+    timestamp: 2026-06-24T05:09:43.257Z
 examined_commit: 4b4934005e31a023fb04ad85c6010d3198ea4529
 external_links: []
 lifecycle_state: closed
@@ -234,7 +246,17 @@ threads:
           Krea state dict, likely tmlp.1, tmlp.3, and tproj.1) and add behavioral/header coverage so
           the full public family loads or fails only for genuinely incompatible groups."
         created_at: 2026-06-24T05:03:14.465Z
+      - _ulid: 01KVW0HFCZNPS1W32F3MGX4400
+        author: Jacob Chapel
+        body: "Fixed in commit 13cb49fd: added exact mappings for public diffusers-style Krea 2 timestep
+          groups transformer.time_embed.linear_1, transformer.time_embed.linear_2, and
+          transformer.time_mod_proj to diffusion_model.tmlp.1.weight, diffusion_model.tmlp.3.weight,
+          and diffusion_model.tproj.1.weight. Added behavioral safetensors coverage that loads those
+          public keys, validates current recipe shapes, and emits standard DeltaSpecs."
+        created_at: 2026-06-24T05:09:42.943Z
     kind: blocker
+    resolved_at: 2026-06-24T05:09:43.237Z
+    resolved_by: Jacob Chapel
 verdicts:
   - applies_to_version:
       type: entity_version
@@ -244,5 +266,5 @@ verdicts:
     role: reviewer
     created_at: 2026-06-24T05:03:14.776Z
 created_at: 2026-06-24T04:58:01.529Z
-updated_at: 2026-06-24T05:03:14.776Z
+updated_at: 2026-06-24T05:09:43.237Z
 notes: []

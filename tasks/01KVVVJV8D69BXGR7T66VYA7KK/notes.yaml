@@ -98,3 +98,18 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T05:07:41.344Z
+  - _ulid: 01KVW0HFTN01ZFVDTH51W887F2
+    content: "Fix cycle 3 complete in commit 13cb49fd. Addressed blocker @01KVW05M11AN362DGTFCDYTH95 by
+      mapping public diffusers-style timestep projection groups transformer.time_embed.linear_1,
+      transformer.time_embed.linear_2, and transformer.time_mod_proj to Krea recipe keys tmlp.1,
+      tmlp.3, and tproj.1. Added behavioral safetensors regression coverage that loads those groups
+      and validates current recipe shapes. Re-verified ACs for supported package loading,
+      complete-or-rejected compatibility, stable strength semantics, and Krea-compatible routing.
+      Gates run: python -m pytest tests/test_krea2_lora_loader.py tests/test_krea2_architecture.py
+      -q; python -m compileall lib nodes tests; python -m ruff check .; python -m ruff format
+      --check .; python -m pytest; kspec validate --refs --warnings-ok; kspec validate --alignment
+      --warnings-ok; kspec validate --completeness --warnings-ok; kspec validate --warnings-ok. uv
+      is unavailable on PATH, so python -m equivalents were used."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T05:09:43.381Z
