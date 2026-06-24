@@ -55,6 +55,7 @@ tags:
   - block-config
   - layer-controls
 vcs_refs: []
+review_ref: "@01KVVYCJRR3VH052GP1VA2KQ00"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-krea2-block-layer-controls/01kvvvjv
@@ -128,6 +129,13 @@ history:
         previous: null
     command: task-submit
     timestamp: 2026-06-24T04:27:45.048Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KVVYCJRR3VH052GP1VA2KQ00"
+        previous: null
+    command: review-link
+    timestamp: 2026-06-24T04:32:05.714Z
 resource_refs:
   - git_commit: null
     git_path: null

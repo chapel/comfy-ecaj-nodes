@@ -1,0 +1,26 @@
+_ulid: 01KVVYCJRR3VH052GP1VA2KQ00
+slugs: []
+title: Review Krea 2 block and layer controls
+author: Jacob Chapel
+checks: []
+events:
+  - _ulid: 01KVVYCJRFNHRKJWVEQ030W0DN
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-06-24T04:32:05.391Z
+examined_commit: 011104d3bcc44a1918cd2e1081e1a2262d2c5881
+external_links: []
+lifecycle_state: draft
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@01KVVVJVB8K1JCKN5W57RQK8GR"
+  shadow_commit: ""
+threads: []
+verdicts: []
+created_at: 2026-06-24T04:32:05.400Z
+updated_at: null
+notes: []
