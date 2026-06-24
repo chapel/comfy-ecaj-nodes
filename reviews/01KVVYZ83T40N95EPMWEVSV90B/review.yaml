@@ -196,6 +196,12 @@ events:
       from: open
       to: closed
     timestamp: 2026-06-24T04:45:47.288Z
+  - _ulid: 01KVVZKWE5EC1749Z49MS68FZD
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KVVZ5N27FPX2TYE5B1M20E2G
+    timestamp: 2026-06-24T04:53:33.253Z
 examined_commit: 9d0f3591f47584f001949757fec26dcf7a1641d4
 external_links: []
 lifecycle_state: closed
@@ -229,6 +235,13 @@ threads:
           expected package shape does not match the current recipe shape, not just require at least
           one expected shape to match."
         created_at: 2026-06-24T04:45:46.951Z
+      - _ulid: 01KVVZKWDAX85KQ0TPD32YBWXX
+        author: Jacob Chapel
+        body: "Fixed in commit 4b493400: Krea2Loader no longer stores expected shapes as a per-key union.
+          validate_compatible_keys now walks each loaded LoRA/direct delta entry by set and rejects
+          any package delta shape that does not match the current recipe shape. Added a regression
+          covering the mixed good/bad set reproduction from this review."
+        created_at: 2026-06-24T04:53:33.226Z
     kind: blocker
 verdicts:
   - applies_to_version:
@@ -239,5 +252,5 @@ verdicts:
     role: reviewer
     created_at: 2026-06-24T04:45:47.288Z
 created_at: 2026-06-24T04:42:17.082Z
-updated_at: 2026-06-24T04:45:47.288Z
+updated_at: 2026-06-24T04:53:33.226Z
 notes: []
