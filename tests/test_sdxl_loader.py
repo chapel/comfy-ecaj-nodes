@@ -106,30 +106,22 @@ class TestAC1BlockTypeMapping:
     def test_input_blocks_key_mapping(self):
         """input_blocks LoRA keys map to diffusion_model.input_blocks.*"""
         # AC: @sdxl-loader ac-1
-        result, _, _ = _parse_lora_key(
-            "lora_unet_input_blocks_0_0_conv.lora_up.weight"
-        )
+        result, _, _ = _parse_lora_key("lora_unet_input_blocks_0_0_conv.lora_up.weight")
         assert result == "diffusion_model.input_blocks.0.0.conv.weight"
 
     def test_middle_block_key_mapping(self):
         """middle_block LoRA keys map to diffusion_model.middle_block.*"""
         # AC: @sdxl-loader ac-1
-        result, _, _ = _parse_lora_key(
-            "lora_unet_middle_block_1_proj.lora_up.weight"
-        )
+        result, _, _ = _parse_lora_key("lora_unet_middle_block_1_proj.lora_up.weight")
         assert result == "diffusion_model.middle_block.1.proj.weight"
 
     def test_output_blocks_key_mapping(self):
         """output_blocks LoRA keys map to diffusion_model.output_blocks.*"""
         # AC: @sdxl-loader ac-1
-        result, _, _ = _parse_lora_key(
-            "lora_unet_output_blocks_3_0_conv.lora_up.weight"
-        )
+        result, _, _ = _parse_lora_key("lora_unet_output_blocks_3_0_conv.lora_up.weight")
         assert result == "diffusion_model.output_blocks.3.0.conv.weight"
 
-    def test_loader_produces_all_block_types(
-        self, sdxl_lora_with_all_block_types: str
-    ):
+    def test_loader_produces_all_block_types(self, sdxl_lora_with_all_block_types: str):
         """SDXLLoader produces keys for all block types."""
         # AC: @sdxl-loader ac-1
         loader = SDXLLoader()
@@ -271,17 +263,13 @@ class TestAC3AttentionKeyMapping:
     def test_proj_in_key_mapping(self):
         """proj_in LoRA keys map correctly."""
         # AC: @sdxl-loader ac-3
-        result, _, _ = _parse_lora_key(
-            "lora_unet_input_blocks_4_1_proj_in.lora_up.weight"
-        )
+        result, _, _ = _parse_lora_key("lora_unet_input_blocks_4_1_proj_in.lora_up.weight")
         assert result == "diffusion_model.input_blocks.4.1.proj_in.weight"
 
     def test_proj_out_key_mapping(self):
         """proj_out LoRA keys map correctly."""
         # AC: @sdxl-loader ac-3
-        result, _, _ = _parse_lora_key(
-            "lora_unet_output_blocks_5_0_proj_out.lora_down.weight"
-        )
+        result, _, _ = _parse_lora_key("lora_unet_output_blocks_5_0_proj_out.lora_down.weight")
         assert result == "diffusion_model.output_blocks.5.0.proj_out.weight"
 
     def test_to_q_key_mapping(self):
@@ -316,9 +304,7 @@ class TestAC3AttentionKeyMapping:
         expected = "diffusion_model.middle_block.1.transformer_blocks.0.attn1.to_out.0.weight"
         assert result == expected
 
-    def test_loader_handles_all_attention_keys(
-        self, sdxl_lora_with_attention_keys: str
-    ):
+    def test_loader_handles_all_attention_keys(self, sdxl_lora_with_attention_keys: str):
         """SDXLLoader correctly loads all attention-related keys."""
         # AC: @sdxl-loader ac-3
         loader = SDXLLoader()

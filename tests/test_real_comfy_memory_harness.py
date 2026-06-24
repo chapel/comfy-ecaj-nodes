@@ -55,9 +55,12 @@ class TestGuardRefusalNoEnvVar:
             env={},
             argv=[
                 "--run-real-comfy-memory",
-                "--comfy-root", "/fake/comfy",
-                "--model-path", "/fake/model.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-root",
+                "/fake/comfy",
+                "--model-path",
+                "/fake/model.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -69,9 +72,12 @@ class TestGuardRefusalNoEnvVar:
             env={"COMFY_ECAJ_REAL_MEMORY_VALIDATION": "0"},
             argv=[
                 "--run-real-comfy-memory",
-                "--comfy-root", "/fake/comfy",
-                "--model-path", "/fake/model.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-root",
+                "/fake/comfy",
+                "--model-path",
+                "/fake/model.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -86,9 +92,12 @@ class TestGuardRefusalNoFlag:
         result = harness.check_guards(
             env={"COMFY_ECAJ_REAL_MEMORY_VALIDATION": "1"},
             argv=[
-                "--comfy-root", "/fake/comfy",
-                "--model-path", "/fake/model.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-root",
+                "/fake/comfy",
+                "--model-path",
+                "/fake/model.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -104,8 +113,10 @@ class TestGuardRefusalMissingPaths:
             env={"COMFY_ECAJ_REAL_MEMORY_VALIDATION": "1"},
             argv=[
                 "--run-real-comfy-memory",
-                "--model-path", "/fake/model.safetensors",
-                "--report-output", "/fake/report.json",
+                "--model-path",
+                "/fake/model.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -117,8 +128,10 @@ class TestGuardRefusalMissingPaths:
             env={"COMFY_ECAJ_REAL_MEMORY_VALIDATION": "1"},
             argv=[
                 "--run-real-comfy-memory",
-                "--comfy-root", "/fake/comfy",
-                "--report-output", "/fake/report.json",
+                "--comfy-root",
+                "/fake/comfy",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -130,8 +143,10 @@ class TestGuardRefusalMissingPaths:
             env={"COMFY_ECAJ_REAL_MEMORY_VALIDATION": "1"},
             argv=[
                 "--run-real-comfy-memory",
-                "--comfy-root", "/fake/comfy",
-                "--model-path", "/fake/model.safetensors",
+                "--comfy-root",
+                "/fake/comfy",
+                "--model-path",
+                "/fake/model.safetensors",
             ],
         )
         assert not result.passed
@@ -193,9 +208,12 @@ class TestGuardAllPass:
             env={"COMFY_ECAJ_REAL_MEMORY_VALIDATION": "1"},
             argv=[
                 "--run-real-comfy-memory",
-                "--comfy-root", "/fake/comfy",
-                "--model-path", "/fake/model.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-root",
+                "/fake/comfy",
+                "--model-path",
+                "/fake/model.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert result.passed
@@ -396,9 +414,7 @@ class TestRunValidationModelPathValidation:
         )
         new_modules = set(sys.modules.keys()) - original_modules
         comfy_modules = {m for m in new_modules if m.startswith("comfy")}
-        assert not comfy_modules, (
-            f"Nonexistent model_path imported comfy modules: {comfy_modules}"
-        )
+        assert not comfy_modules, f"Nonexistent model_path imported comfy modules: {comfy_modules}"
 
 
 # ===========================================================================
@@ -479,12 +495,9 @@ class TestComfyRootValidation:
 
         # Must not have imported comfy from anywhere.
         new_comfy = {
-            m for m in (set(sys.modules.keys()) - original_modules)
-            if m.startswith("comfy")
+            m for m in (set(sys.modules.keys()) - original_modules) if m.startswith("comfy")
         }
-        assert not new_comfy, (
-            f"Ambient comfy modules imported despite wrong root: {new_comfy}"
-        )
+        assert not new_comfy, f"Ambient comfy modules imported despite wrong root: {new_comfy}"
 
 
 # ===========================================================================
@@ -542,15 +555,9 @@ class TestSetupPackageBridge:
         """Calling _setup_package_bridge twice does not fail or duplicate finders."""
         harness._setup_package_bridge()
         # Count _ecaj entries before second call.
-        count_before = sum(
-            1 for f in sys.meta_path
-            if type(f).__name__ == "_HarnessFinder"
-        )
+        count_before = sum(1 for f in sys.meta_path if type(f).__name__ == "_HarnessFinder")
         harness._setup_package_bridge()
-        count_after = sum(
-            1 for f in sys.meta_path
-            if type(f).__name__ == "_HarnessFinder"
-        )
+        count_after = sum(1 for f in sys.meta_path if type(f).__name__ == "_HarnessFinder")
         # Idempotent: second call is a no-op because _ecaj already in sys.modules.
         assert count_after == count_before
 

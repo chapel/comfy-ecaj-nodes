@@ -86,25 +86,23 @@ class TestWIDENTypeConnections:
     # Nodes that output WIDEN type
     WIDEN_OUTPUTS = [
         WIDENEntryNode,  # MODEL -> WIDEN
-        WIDENLoRANode,   # file + strength -> WIDEN
+        WIDENLoRANode,  # file + strength -> WIDEN
         WIDENComposeNode,  # branch accumulation -> WIDEN
         WIDENMergeNode,  # merge step -> WIDEN
     ]
 
     # Nodes that accept WIDEN input
     WIDEN_INPUTS = [
-        WIDENLoRANode,   # prev: WIDEN (optional)
+        WIDENLoRANode,  # prev: WIDEN (optional)
         WIDENComposeNode,  # branch: WIDEN, compose: WIDEN (optional)
         WIDENMergeNode,  # base: WIDEN, target: WIDEN, backbone: WIDEN (optional)
-        WIDENExitNode,   # widen: WIDEN
+        WIDENExitNode,  # widen: WIDEN
     ]
 
     def test_output_nodes_return_widen(self):
         """All WIDEN-outputting nodes declare RETURN_TYPES with 'WIDEN'."""
         for cls in self.WIDEN_OUTPUTS:
-            assert "WIDEN" in cls.RETURN_TYPES, (
-                f"{cls.__name__} should output WIDEN type"
-            )
+            assert "WIDEN" in cls.RETURN_TYPES, f"{cls.__name__} should output WIDEN type"
 
     def test_input_nodes_accept_widen(self):
         """All WIDEN-accepting nodes declare 'WIDEN' in INPUT_TYPES."""
@@ -115,9 +113,7 @@ class TestWIDENTypeConnections:
             all_inputs.update(input_types.get("optional", {}))
 
             widen_inputs = [k for k, v in all_inputs.items() if v[0] == "WIDEN"]
-            assert len(widen_inputs) > 0, (
-                f"{cls.__name__} should accept at least one WIDEN input"
-            )
+            assert len(widen_inputs) > 0, f"{cls.__name__} should accept at least one WIDEN input"
 
     def test_entry_outputs_widen_only(self):
         """Entry node is the only source, outputs WIDEN from MODEL."""

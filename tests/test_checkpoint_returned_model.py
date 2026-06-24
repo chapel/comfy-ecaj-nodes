@@ -283,7 +283,9 @@ class TestCacheMissReloadsSavedCheckpoint:
     # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
     # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
     def test_cache_miss_returns_loaded_checkpoint_artifact_not_temp_model(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """After a fresh checkpoint save, the returned MODEL must come from
         _load_checkpoint_artifact so Comfy owns the returned model lifecycle."""
@@ -357,7 +359,9 @@ class TestCacheMissReloadsSavedCheckpoint:
     # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
     # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
     def test_cache_miss_releases_temp_model_before_loading_checkpoint_artifact(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """The temporary merged ModelPatcher is released after checkpoint save
         and before the artifact-backed MODEL is loaded for the return value."""
@@ -771,7 +775,9 @@ class TestLoadCheckpointArtifact:
             result = _load_checkpoint_artifact(save_path)
 
             mock_load.assert_called_once_with(
-                save_path, output_vae=True, output_clip=True,
+                save_path,
+                output_vae=True,
+                output_clip=True,
             )
             assert result is mock_model
 
@@ -928,7 +934,9 @@ class TestCheckpointSaveFailureReleasesTempPayload:
     # AC: @comfy-memory-manager-compatibility ac-checkpoint-save-failure-releases-temp-payload
     # AC: @saved-model-artifact-safety ac-failed-return-not-successful
     def test_save_comfy_checkpoint_failure_releases_temp_and_propagates(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """If save_comfy_checkpoint raises after the temp ModelPatcher exists,
         finally still releases the temp payload and the save error propagates."""
@@ -998,7 +1006,9 @@ class TestCheckpointSaveFailureReleasesTempPayload:
     # AC: @comfy-memory-manager-compatibility ac-checkpoint-save-failure-releases-temp-payload
     # AC: @saved-model-artifact-safety ac-failed-return-not-successful
     def test_post_save_publication_failure_releases_temp_and_propagates(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """If post-save finalization (cache bookkeeping after the artifact is
         written) raises while the temp ModelPatcher is alive, finally still
@@ -1047,12 +1057,8 @@ class TestCheckpointSaveFailureReleasesTempPayload:
             ]:
                 stack.enter_context(cm)
             mock_analyze = stack.enter_context(patch("nodes.exit.analyze_recipe"))
-            mock_analyze_models = stack.enter_context(
-                patch("nodes.exit.analyze_recipe_models")
-            )
-            mock_ckpt_load = stack.enter_context(
-                patch("nodes.exit._load_checkpoint_artifact")
-            )
+            mock_analyze_models = stack.enter_context(patch("nodes.exit.analyze_recipe_models"))
+            mock_ckpt_load = stack.enter_context(patch("nodes.exit._load_checkpoint_artifact"))
             _stub_analyze(mock_analyze, mock_analyze_models, mock_model_patcher)
 
             with pytest.raises(RuntimeError, match="finalize failed: cache state"):
@@ -1069,7 +1075,9 @@ class TestCheckpointSaveFailureReleasesTempPayload:
     # AC: @comfy-memory-manager-compatibility ac-checkpoint-save-failure-releases-temp-payload
     # AC: @saved-model-artifact-safety ac-failed-return-not-successful
     def test_artifact_reload_failure_releases_temp_and_propagates(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """If _load_checkpoint_artifact raises after a successful save, the
         temporary save-time merge payload has already been released before the
@@ -1122,9 +1130,7 @@ class TestCheckpointSaveFailureReleasesTempPayload:
             ]:
                 stack.enter_context(cm)
             mock_analyze = stack.enter_context(patch("nodes.exit.analyze_recipe"))
-            mock_analyze_models = stack.enter_context(
-                patch("nodes.exit.analyze_recipe_models")
-            )
+            mock_analyze_models = stack.enter_context(patch("nodes.exit.analyze_recipe_models"))
             _stub_analyze(mock_analyze, mock_analyze_models, mock_model_patcher)
 
             with pytest.raises(RuntimeError, match="reload failed"):
@@ -1134,7 +1140,9 @@ class TestCheckpointSaveFailureReleasesTempPayload:
 
     # AC: @comfy-memory-manager-compatibility ac-checkpoint-save-failure-releases-temp-payload
     def test_failure_before_temp_model_created_skips_release(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """If install_merged_patches itself fails, no temporary payload was
         ever created, so _release_temporary_checkpoint_model must not be
@@ -1174,9 +1182,7 @@ class TestCheckpointSaveFailureReleasesTempPayload:
             ]:
                 stack.enter_context(cm)
             mock_analyze = stack.enter_context(patch("nodes.exit.analyze_recipe"))
-            mock_analyze_models = stack.enter_context(
-                patch("nodes.exit.analyze_recipe_models")
-            )
+            mock_analyze_models = stack.enter_context(patch("nodes.exit.analyze_recipe_models"))
             mock_save = stack.enter_context(patch("nodes.exit.save_comfy_checkpoint"))
             mock_release = stack.enter_context(
                 patch("nodes.exit._release_temporary_checkpoint_model")
@@ -1206,7 +1212,9 @@ class TestCheckpointCacheMissSuccessOrder:
 
     # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
     def test_cache_miss_success_order_save_release_load(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """In the cache-miss success path, save_comfy_checkpoint runs first,
         then the temporary save-time merge payload is released, then the

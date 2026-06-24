@@ -134,9 +134,7 @@ class TestRecipeModelAnalysis:
             t_factor=1.0,
         )
 
-        result = analyze_recipe_models(
-            recipe, base_arch="sdxl", model_path_resolver=None
-        )
+        result = analyze_recipe_models(recipe, base_arch="sdxl", model_path_resolver=None)
 
         try:
             assert len(result.model_loaders) == 1
@@ -160,9 +158,7 @@ class TestRecipeModelAnalysis:
             t_factor=1.0,
         )
 
-        result = analyze_recipe_models(
-            recipe, base_arch="sdxl", model_path_resolver=None
-        )
+        result = analyze_recipe_models(recipe, base_arch="sdxl", model_path_resolver=None)
 
         try:
             # Each model should have affected keys
@@ -241,9 +237,7 @@ class TestOpApplyModelCompilation:
 class TestOpApplyModelExecution:
     """Tests for OpApplyModel execution loading weights."""
 
-    def test_execute_plan_loads_model_weights(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_execute_plan_loads_model_weights(self, sdxl_checkpoint_path: str) -> None:
         """execute_plan() loads model weights from streaming loader."""
         # Create a simple plan with just OpApplyModel
         from lib.recipe_eval import EvalPlan, OpFilterDelta
@@ -252,8 +246,12 @@ class TestOpApplyModelExecution:
             model_id="model1", block_config=None, strength=1.0, input_reg=0, out_reg=1
         )
         op_filter = OpFilterDelta(
-            input_reg=1, backbone_reg=0, t_factor=1.0,
-            block_config=None, use_per_block=False, out_reg=2
+            input_reg=1,
+            backbone_reg=0,
+            t_factor=1.0,
+            block_config=None,
+            use_per_block=False,
+            out_reg=2,
         )
         plan = EvalPlan(
             ops=(op_apply, op_filter),
@@ -301,9 +299,7 @@ class TestOpApplyModelExecution:
 class TestModelDeltaComputation:
     """Tests for WIDEN computing delta from model weights."""
 
-    def test_filter_delta_receives_model_weights(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_filter_delta_receives_model_weights(self, sdxl_checkpoint_path: str) -> None:
         """OpFilterDelta receives raw model weights and computes delta."""
         from lib.recipe_eval import EvalPlan, OpFilterDelta
 
@@ -368,9 +364,7 @@ class TestMixedRecipes:
         """Recipes with both RecipeModel and RecipeLoRA compile correctly."""
         from lib.recipe_eval import OpApplyLoRA
 
-        recipe_lora = RecipeLoRA(
-            loras=({"path": "test.safetensors", "strength": 1.0},)
-        )
+        recipe_lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         recipe_model = RecipeModel(path=sdxl_checkpoint_path)
 
         # Compose both
@@ -385,9 +379,7 @@ class TestMixedRecipes:
         set_id_map = {id(recipe_lora): "lora1"}
         model_id_map = {id(recipe_model): "model1"}
 
-        plan = compile_plan(
-            recipe, set_id_map=set_id_map, arch="sdxl", model_id_map=model_id_map
-        )
+        plan = compile_plan(recipe, set_id_map=set_id_map, arch="sdxl", model_id_map=model_id_map)
 
         # Should have both OpApplyLoRA and OpApplyModel
         has_lora = any(isinstance(op, OpApplyLoRA) for op in plan.ops)
@@ -419,9 +411,7 @@ class TestArchitectureMismatch:
         )
 
         with pytest.raises(ValueError) as exc_info:
-            analyze_recipe_models(
-                recipe, base_arch="sdxl", model_path_resolver=None
-            )
+            analyze_recipe_models(recipe, base_arch="sdxl", model_path_resolver=None)
 
         error_msg = str(exc_info.value)
         assert "architecture" in error_msg.lower()
@@ -438,9 +428,7 @@ class TestArchitectureMismatch:
 class TestModelWeightsFreed:
     """Tests for model weights being freed after GPU evaluation."""
 
-    def test_dead_registers_freed_after_opapplymodel(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_dead_registers_freed_after_opapplymodel(self, sdxl_checkpoint_path: str) -> None:
         """Registers holding model weights are freed via dead_after."""
         from lib.recipe_eval import EvalPlan, OpFilterDelta
 
@@ -448,8 +436,12 @@ class TestModelWeightsFreed:
             model_id="model1", block_config=None, strength=1.0, input_reg=0, out_reg=1
         )
         op_filter = OpFilterDelta(
-            input_reg=1, backbone_reg=0, t_factor=1.0,
-            block_config=None, use_per_block=False, out_reg=2
+            input_reg=1,
+            backbone_reg=0,
+            t_factor=1.0,
+            block_config=None,
+            use_per_block=False,
+            out_reg=2,
         )
         # Register 1 should be dead after op_filter uses it
         plan = EvalPlan(
@@ -493,9 +485,7 @@ class TestModelWeightsFreed:
 class TestOOMBackoff:
     """Tests for OOM backoff compatibility with streaming loaders."""
 
-    def test_streaming_loader_supports_retry_reads(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_streaming_loader_supports_retry_reads(self, sdxl_checkpoint_path: str) -> None:
         """Streaming loader can re-read keys after OOM backoff."""
         loader = ModelLoader(sdxl_checkpoint_path)
         try:
@@ -545,9 +535,7 @@ class TestBlockConfigForModels:
         )
 
         model_id_map = {id(recipe_model): "model1"}
-        plan = compile_plan(
-            recipe, set_id_map={}, arch="sdxl", model_id_map=model_id_map
-        )
+        plan = compile_plan(recipe, set_id_map={}, arch="sdxl", model_id_map=model_id_map)
 
         apply_model_ops = [op for op in plan.ops if isinstance(op, OpApplyModel)]
         assert len(apply_model_ops) == 1
@@ -563,9 +551,7 @@ class TestBlockConfigForModels:
 class TestMissingCheckpointError:
     """Tests for missing checkpoint file error handling."""
 
-    def test_missing_checkpoint_raises_file_not_found(
-        self, recipe_base: RecipeBase
-    ) -> None:
+    def test_missing_checkpoint_raises_file_not_found(self, recipe_base: RecipeBase) -> None:
         """Missing checkpoint file raises FileNotFoundError with path."""
         recipe_model = RecipeModel(path="/nonexistent/model.safetensors")
         recipe = RecipeMerge(
@@ -576,9 +562,7 @@ class TestMissingCheckpointError:
         )
 
         with pytest.raises(FileNotFoundError) as exc_info:
-            analyze_recipe_models(
-                recipe, base_arch="sdxl", model_path_resolver=None
-            )
+            analyze_recipe_models(recipe, base_arch="sdxl", model_path_resolver=None)
 
         error_msg = str(exc_info.value)
         assert "nonexistent" in error_msg
@@ -636,9 +620,7 @@ class TestModelOnlyRecipeKeys:
             t_factor=1.0,
         )
 
-        result = analyze_recipe_models(
-            recipe, base_arch="sdxl", model_path_resolver=None
-        )
+        result = analyze_recipe_models(recipe, base_arch="sdxl", model_path_resolver=None)
 
         try:
             # All model keys should be in the affected set
@@ -660,7 +642,8 @@ class TestSequentialModelLoading:
     """Tests for sequential model loading during execution."""
 
     def test_compose_with_multiple_models_loads_sequentially(
-        self, recipe_base: RecipeBase,
+        self,
+        recipe_base: RecipeBase,
         sdxl_checkpoint_path: str,
         second_sdxl_checkpoint_path: str,
     ) -> None:
@@ -683,9 +666,7 @@ class TestSequentialModelLoading:
             id(model2): "model2",
         }
 
-        plan = compile_plan(
-            recipe, set_id_map={}, arch="sdxl", model_id_map=model_id_map
-        )
+        plan = compile_plan(recipe, set_id_map={}, arch="sdxl", model_id_map=model_id_map)
 
         # Should have two OpApplyModel ops (one per model)
         apply_model_ops = [op for op in plan.ops if isinstance(op, OpApplyModel)]
@@ -840,8 +821,11 @@ class TestModelBlockConfigScaling:
             block_overrides=(("IN00", 0.0), ("IN01", 0.5)),
         )
         op_apply = OpApplyModel(
-            model_id="model1", block_config=block_config, strength=1.0,
-            input_reg=0, out_reg=1,
+            model_id="model1",
+            block_config=block_config,
+            strength=1.0,
+            input_reg=0,
+            out_reg=1,
         )
         plan = EvalPlan(
             ops=(op_apply,),
@@ -886,8 +870,11 @@ class TestModelBlockConfigScaling:
             block_overrides=(("IN00", 0.0),),
         )
         op_apply = OpApplyModel(
-            model_id="model1", block_config=block_config, strength=1.0,
-            input_reg=0, out_reg=1,
+            model_id="model1",
+            block_config=block_config,
+            strength=1.0,
+            input_reg=0,
+            out_reg=1,
         )
         plan = EvalPlan(
             ops=(op_apply,),
@@ -926,9 +913,7 @@ class TestModelBlockConfigScaling:
 class TestRecipeModelValidation:
     """Tests for RecipeModel validation in various contexts."""
 
-    def test_recipe_model_cannot_be_tree_root(
-        self, sdxl_checkpoint_path: str
-    ) -> None:
+    def test_recipe_model_cannot_be_tree_root(self, sdxl_checkpoint_path: str) -> None:
         """RecipeModel cannot be the root of a recipe tree."""
         recipe_model = RecipeModel(path=sdxl_checkpoint_path)
 

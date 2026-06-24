@@ -104,9 +104,7 @@ def check_guards(
 
     val = env.get(_ENV_VAR, "")
     if val != "1":
-        reasons.append(
-            f"Environment variable {_ENV_VAR} is not set to '1' (got {val!r})."
-        )
+        reasons.append(f"Environment variable {_ENV_VAR} is not set to '1' (got {val!r}).")
 
     if _CLI_FLAG not in argv:
         reasons.append(f"CLI flag {_CLI_FLAG} is not present.")
@@ -123,9 +121,7 @@ def check_guards(
     if not known.comfy_api_url:
         reasons.append("--comfy-api-url is required but not provided.")
     if not known.source_diffusion_model:
-        reasons.append(
-            "--source-diffusion-model is required but not provided."
-        )
+        reasons.append("--source-diffusion-model is required but not provided.")
     if not known.companion_clip:
         reasons.append("--companion-clip is required but not provided.")
     if not known.companion_vae:
@@ -144,9 +140,7 @@ def parse_validated_args(argv: list[str] | None = None) -> argparse.Namespace:
         argv = sys.argv[1:]
 
     parser = argparse.ArgumentParser(
-        description=(
-            "Live ComfyUI diffusion-model saved-output validation harness."
-        ),
+        description=("Live ComfyUI diffusion-model saved-output validation harness."),
     )
     parser.add_argument(
         _CLI_FLAG,
@@ -268,19 +262,21 @@ class DiffusionModelValidationReport:
         return json.dumps(self.to_dict(), indent=indent)
 
 
-_REQUIRED_REPORT_FIELDS = frozenset({
-    "comfy_version",
-    "memory_mode",
-    "diffusion_save_workflow_shape",
-    "diffusion_save_result",
-    "saved_artifact_path",
-    "saved_artifact_classification",
-    "diffusion_loader_result",
-    "downstream_result",
-    "cache_reuse_result",
-    "cache_reuse_detail",
-    "failure_categories",
-})
+_REQUIRED_REPORT_FIELDS = frozenset(
+    {
+        "comfy_version",
+        "memory_mode",
+        "diffusion_save_workflow_shape",
+        "diffusion_save_result",
+        "saved_artifact_path",
+        "saved_artifact_classification",
+        "diffusion_loader_result",
+        "downstream_result",
+        "cache_reuse_result",
+        "cache_reuse_detail",
+        "failure_categories",
+    }
+)
 
 
 def report_has_required_fields(report_dict: dict) -> tuple[bool, list[str]]:
@@ -316,37 +312,41 @@ def format_report(report: DiffusionModelValidationReport) -> str:
             lines.append(f"  ... and {len(report.node_classes) - 10} more")
         lines.append("")
 
-    lines.extend([
-        "--- Diffusion-Model Save ---",
-        f"  Accepted:     {report.diffusion_save_result.accepted}",
-        f"  Prompt ID:    {report.diffusion_save_result.prompt_id}",
-        f"  Artifact:     {report.saved_artifact_path}",
-        f"  Classification: {report.saved_artifact_classification}",
-        f"  Error:        {report.diffusion_save_result.error or 'none'}",
-    ])
+    lines.extend(
+        [
+            "--- Diffusion-Model Save ---",
+            f"  Accepted:     {report.diffusion_save_result.accepted}",
+            f"  Prompt ID:    {report.diffusion_save_result.prompt_id}",
+            f"  Artifact:     {report.saved_artifact_path}",
+            f"  Classification: {report.saved_artifact_classification}",
+            f"  Error:        {report.diffusion_save_result.error or 'none'}",
+        ]
+    )
     if report.diffusion_save_workflow_shape:
         shape_json = json.dumps(report.diffusion_save_workflow_shape)
         lines.append(f"  Workflow Shape: {shape_json}")
     lines.append("")
 
-    lines.extend([
-        "--- Diffusion-Model Loader (UNETLoader) ---",
-        f"  Accepted:     {report.diffusion_loader_result.accepted}",
-        f"  Prompt ID:    {report.diffusion_loader_result.prompt_id}",
-        f"  Error:        {report.diffusion_loader_result.error or 'none'}",
-        "",
-        "--- Downstream KSampler (companion CLIP + VAE supplied separately) ---",
-        f"  Accepted:     {report.downstream_result.accepted}",
-        f"  Prompt ID:    {report.downstream_result.prompt_id}",
-        f"  Error:        {report.downstream_result.error or 'none'}",
-        "",
-        "--- Cache Reuse ---",
-        f"  Accepted:     {report.cache_reuse_result.accepted}",
-        f"  Prompt ID:    {report.cache_reuse_result.prompt_id}",
-        f"  Detail:       {report.cache_reuse_detail or 'none'}",
-        f"  Error:        {report.cache_reuse_result.error or 'none'}",
-        "",
-    ])
+    lines.extend(
+        [
+            "--- Diffusion-Model Loader (UNETLoader) ---",
+            f"  Accepted:     {report.diffusion_loader_result.accepted}",
+            f"  Prompt ID:    {report.diffusion_loader_result.prompt_id}",
+            f"  Error:        {report.diffusion_loader_result.error or 'none'}",
+            "",
+            "--- Downstream KSampler (companion CLIP + VAE supplied separately) ---",
+            f"  Accepted:     {report.downstream_result.accepted}",
+            f"  Prompt ID:    {report.downstream_result.prompt_id}",
+            f"  Error:        {report.downstream_result.error or 'none'}",
+            "",
+            "--- Cache Reuse ---",
+            f"  Accepted:     {report.cache_reuse_result.accepted}",
+            f"  Prompt ID:    {report.cache_reuse_result.prompt_id}",
+            f"  Detail:       {report.cache_reuse_detail or 'none'}",
+            f"  Error:        {report.cache_reuse_result.error or 'none'}",
+            "",
+        ]
+    )
 
     if report.failure_categories:
         lines.append("--- Failure Categories ---")
@@ -376,24 +376,26 @@ def format_refusal(guard_result: GuardResult) -> str:
     ]
     for reason in guard_result.reasons:
         lines.append(f"  - {reason}")
-    lines.extend([
-        "",
-        "All of the following are required to run diffusion-model validation:",
-        f"  1. {_ENV_VAR}=1 environment variable",
-        f"  2. {_CLI_FLAG} CLI flag",
-        "  3. --comfy-api-url <url>",
-        "  4. --source-diffusion-model <name>",
-        "  5. --companion-clip <name>",
-        "  6. --companion-vae <name>",
-        "  7. --report-output <path>",
-        "",
-        "No ComfyUI API prompts were submitted.",
-        "No ComfyUI modules were imported.",
-        "No ComfyUI installation was modified.",
-        "No processes were started.",
-        "No large artifacts were written.",
-        "=" * 60,
-    ])
+    lines.extend(
+        [
+            "",
+            "All of the following are required to run diffusion-model validation:",
+            f"  1. {_ENV_VAR}=1 environment variable",
+            f"  2. {_CLI_FLAG} CLI flag",
+            "  3. --comfy-api-url <url>",
+            "  4. --source-diffusion-model <name>",
+            "  5. --companion-clip <name>",
+            "  6. --companion-vae <name>",
+            "  7. --report-output <path>",
+            "",
+            "No ComfyUI API prompts were submitted.",
+            "No ComfyUI modules were imported.",
+            "No ComfyUI installation was modified.",
+            "No processes were started.",
+            "No large artifacts were written.",
+            "=" * 60,
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -415,7 +417,9 @@ def _api_post_prompt(base_url: str, prompt: dict, timeout: float = 60.0) -> dict
     url = f"{base_url.rstrip('/')}/prompt"
     payload = json.dumps({"prompt": prompt}).encode("utf-8")
     req = urllib.request.Request(
-        url, data=payload, method="POST",
+        url,
+        data=payload,
+        method="POST",
         headers={"Content-Type": "application/json"},
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -452,7 +456,11 @@ def extract_node_classes(object_info: dict) -> list[str]:
 
 
 def query_prompt_history(
-    base_url: str, prompt_id: str, *, timeout: float = 30.0, max_polls: int = 30,
+    base_url: str,
+    prompt_id: str,
+    *,
+    timeout: float = 30.0,
+    max_polls: int = 30,
     poll_interval: float = 2.0,
 ) -> dict:
     """Poll /history/{prompt_id} until the prompt finishes or polls are exhausted."""
@@ -465,7 +473,9 @@ def query_prompt_history(
 
 
 def check_cache_reuse(
-    base_url: str, first_prompt_id: str, reuse_prompt_id: str,
+    base_url: str,
+    first_prompt_id: str,
+    reuse_prompt_id: str,
     *,
     first_elapsed: float = 0.0,
     reuse_elapsed: float = 0.0,
@@ -758,7 +768,8 @@ def _extract_node_errors_from_history(history: dict) -> str:
                 err_data = msg[1] if isinstance(msg[1], dict) else {}
                 node_type = err_data.get("node_type", "unknown")
                 exception_message = err_data.get(
-                    "exception_message", "unknown error",
+                    "exception_message",
+                    "unknown error",
                 )
                 return f"node_error({node_type}): {exception_message}"
         return f"execution_error: status_str={status_str}"
@@ -766,7 +777,9 @@ def _extract_node_errors_from_history(history: dict) -> str:
 
 
 def submit_workflow(
-    base_url: str, workflow: dict, name: str,
+    base_url: str,
+    workflow: dict,
+    name: str,
 ) -> WorkflowResult:
     """Submit a workflow prompt, wait for completion, and classify the result."""
     result = WorkflowResult(name=name)
@@ -790,9 +803,7 @@ def submit_workflow(
         history = query_prompt_history(base_url, prompt_id)
         if not history:
             result.accepted = False
-            result.error = (
-                "execution_timeout: prompt accepted but never completed in /history"
-            )
+            result.error = "execution_timeout: prompt accepted but never completed in /history"
             return result
 
         node_error = _extract_node_errors_from_history(history)
@@ -825,7 +836,7 @@ def _extract_failing_node_type(error: str) -> str:
     if error.startswith("node_error("):
         paren_end = error.find(")")
         if paren_end > len("node_error("):
-            return error[len("node_error("):paren_end]
+            return error[len("node_error(") : paren_end]
     return ""
 
 
@@ -910,7 +921,9 @@ def run_validation(
         save_wf = build_diffusion_save_workflow(source_diffusion_model)
         report.diffusion_save_workflow_shape = save_wf
         report.diffusion_save_result = submit_workflow(
-            comfy_api_url, save_wf, "diffusion_model_save",
+            comfy_api_url,
+            save_wf,
+            "diffusion_model_save",
         )
         report.failure_categories["save"] = classify_failure(
             report.diffusion_save_result,
@@ -944,7 +957,9 @@ def run_validation(
                 batch_size=batch_size,
             )
             downstream_full_result = submit_workflow(
-                comfy_api_url, downstream_wf, "downstream_ksampler",
+                comfy_api_url,
+                downstream_wf,
+                "downstream_ksampler",
             )
             failing_node = _extract_failing_node_type(
                 downstream_full_result.error,
@@ -988,9 +1003,7 @@ def run_validation(
                 report.downstream_result,
             )
         else:
-            skip_reason = (
-                "skipped: diffusion-model save failed, no artifact to validate"
-            )
+            skip_reason = "skipped: diffusion-model save failed, no artifact to validate"
             report.diffusion_loader_result = WorkflowResult(
                 name="diffusion_loader",
                 accepted=False,
@@ -1007,14 +1020,15 @@ def run_validation(
         # --- Submit cache reuse workflow ---
         cache_wf = build_diffusion_cache_reuse_workflow(source_diffusion_model)
         report.cache_reuse_result = submit_workflow(
-            comfy_api_url, cache_wf, "diffusion_cache_reuse",
+            comfy_api_url,
+            cache_wf,
+            "diffusion_cache_reuse",
         )
         report.failure_categories["cache"] = classify_failure(
             report.cache_reuse_result,
         )
 
-        if (report.diffusion_save_result.accepted
-                and report.cache_reuse_result.accepted):
+        if report.diffusion_save_result.accepted and report.cache_reuse_result.accepted:
             cache_reused, detail = check_cache_reuse(
                 comfy_api_url,
                 report.diffusion_save_result.prompt_id,
@@ -1026,9 +1040,7 @@ def run_validation(
             if not cache_reused:
                 report.failure_categories["cache"] = "cache_not_reused"
         elif report.cache_reuse_result.accepted:
-            report.cache_reuse_detail = (
-                "first save was rejected; cannot verify reuse"
-            )
+            report.cache_reuse_detail = "first save was rejected; cannot verify reuse"
         else:
             report.cache_reuse_detail = "cache reuse prompt was rejected"
 
@@ -1092,7 +1104,8 @@ def main(argv: list[str] | None = None) -> int:
     print(report_text)
 
     os.makedirs(
-        os.path.dirname(os.path.abspath(args.report_output)), exist_ok=True,
+        os.path.dirname(os.path.abspath(args.report_output)),
+        exist_ok=True,
     )
     with open(args.report_output, "w") as f:
         f.write(report.to_json())

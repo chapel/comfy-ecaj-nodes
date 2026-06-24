@@ -92,7 +92,9 @@ class _UnifiedFinder(importlib.abc.MetaPathFinder):
             return None
 
         spec = importlib.util.spec_from_file_location(
-            fullname, fp, submodule_search_locations=search,
+            fullname,
+            fp,
+            submodule_search_locations=search,
         )
         if spec is None:
             return None
@@ -135,12 +137,13 @@ class _DualLoader(importlib.abc.Loader):
         old = module.__spec__
         if old is not None and old.name != spec_name:
             new_spec = importlib.machinery.ModuleSpec(
-                spec_name, old.loader, is_package=is_pkg, origin=old.origin,
+                spec_name,
+                old.loader,
+                is_package=is_pkg,
+                origin=old.origin,
             )
             if is_pkg and old.submodule_search_locations is not None:
-                new_spec.submodule_search_locations = list(
-                    old.submodule_search_locations
-                )
+                new_spec.submodule_search_locations = list(old.submodule_search_locations)
             new_spec.has_location = getattr(old, "has_location", False)
             module.__spec__ = new_spec
 

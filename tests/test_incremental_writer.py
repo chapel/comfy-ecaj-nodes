@@ -24,9 +24,7 @@ def _make_manifest(
     tensors: dict[str, torch.Tensor],
 ) -> dict[str, tuple[torch.dtype, tuple[int, ...]]]:
     """Build a manifest from a dict of tensors."""
-    return {
-        name: (t.dtype, tuple(t.shape)) for name, t in tensors.items()
-    }
+    return {name: (t.dtype, tuple(t.shape)) for name, t in tensors.items()}
 
 
 def _write_valid_artifact(
@@ -401,9 +399,7 @@ class TestWriteTimeExceptionPoisonsWriter:
                 "lib.incremental_writer._tensor_bytes",
                 side_effect=RuntimeError("serialization failed"),
             ):
-                with pytest.raises(
-                    RuntimeError, match="serialization"
-                ):
+                with pytest.raises(RuntimeError, match="serialization"):
                     w.write_tensor("a", tensors["a"])
 
             # Writer is poisoned — cannot finalize
@@ -411,13 +407,8 @@ class TestWriteTimeExceptionPoisonsWriter:
                 w.finalize()
 
             assert not os.path.exists(save_path)
-            remaining = [
-                f for f in os.listdir(tmpdir)
-                if f.startswith(".ecaj_tmp_")
-            ]
-            assert remaining == [], (
-                f"temp file not cleaned: {remaining}"
-            )
+            remaining = [f for f in os.listdir(tmpdir) if f.startswith(".ecaj_tmp_")]
+            assert remaining == [], f"temp file not cleaned: {remaining}"
 
     # AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
     def test_serialization_error_preserves_existing(self):
@@ -428,9 +419,7 @@ class TestWriteTimeExceptionPoisonsWriter:
             save_path = os.path.join(tmpdir, "model.safetensors")
             _write_valid_artifact(save_path, original_tensors)
 
-            with safe_open(
-                save_path, framework="pt", device="cpu"
-            ) as f:
+            with safe_open(save_path, framework="pt", device="cpu") as f:
                 original_x = f.get_tensor("x")
 
             manifest = {"a": (torch.float32, (4,))}
@@ -445,13 +434,9 @@ class TestWriteTimeExceptionPoisonsWriter:
 
             # Original artifact is intact
             assert os.path.exists(save_path)
-            with safe_open(
-                save_path, framework="pt", device="cpu"
-            ) as f:
+            with safe_open(save_path, framework="pt", device="cpu") as f:
                 assert set(f.keys()) == {"x"}
-                assert torch.equal(
-                    f.get_tensor("x"), original_x
-                )
+                assert torch.equal(f.get_tensor("x"), original_x)
 
 
 class TestMetadataValidation:
@@ -464,18 +449,11 @@ class TestMetadataValidation:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             save_path = os.path.join(tmpdir, "model.safetensors")
-            with pytest.raises(
-                TypeError, match="metadata value must be str"
-            ):
-                IncrementalWriter(
-                    manifest, save_path, metadata={"bad": 1}
-                )
+            with pytest.raises(TypeError, match="metadata value must be str"):
+                IncrementalWriter(manifest, save_path, metadata={"bad": 1})
 
             # No temp file created
-            remaining = [
-                f for f in os.listdir(tmpdir)
-                if f.startswith(".ecaj_tmp_")
-            ]
+            remaining = [f for f in os.listdir(tmpdir) if f.startswith(".ecaj_tmp_")]
             assert remaining == []
 
     # AC: @saved-model-artifact-safety ac-no-partial-publication
@@ -485,12 +463,8 @@ class TestMetadataValidation:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             save_path = os.path.join(tmpdir, "model.safetensors")
-            with pytest.raises(
-                TypeError, match="metadata key must be str"
-            ):
-                IncrementalWriter(
-                    manifest, save_path, metadata={42: "val"}
-                )
+            with pytest.raises(TypeError, match="metadata key must be str"):
+                IncrementalWriter(manifest, save_path, metadata={42: "val"})
 
     # AC: @saved-model-artifact-safety ac-existing-valid-artifact-preserved
     def test_invalid_metadata_does_not_corrupt_existing(self):
@@ -501,9 +475,7 @@ class TestMetadataValidation:
             save_path = os.path.join(tmpdir, "model.safetensors")
             _write_valid_artifact(save_path, original_tensors)
 
-            with safe_open(
-                save_path, framework="pt", device="cpu"
-            ) as f:
+            with safe_open(save_path, framework="pt", device="cpu") as f:
                 original_x = f.get_tensor("x")
 
             with pytest.raises(TypeError):
@@ -515,12 +487,8 @@ class TestMetadataValidation:
 
             # Original artifact is intact
             assert os.path.exists(save_path)
-            with safe_open(
-                save_path, framework="pt", device="cpu"
-            ) as f:
-                assert torch.equal(
-                    f.get_tensor("x"), original_x
-                )
+            with safe_open(save_path, framework="pt", device="cpu") as f:
+                assert torch.equal(f.get_tensor("x"), original_x)
 
 
 class TestFailedFinalizeIsTerminal:

@@ -45,12 +45,8 @@ def clip_l_lora_file() -> str:
                 8, 768
             ),
             # CLIP-L layer 5 MLP
-            "lora_te1_text_model_encoder_layers_5_mlp_fc1.lora_up.weight": torch.randn(
-                3072, 8
-            ),
-            "lora_te1_text_model_encoder_layers_5_mlp_fc1.lora_down.weight": torch.randn(
-                8, 768
-            ),
+            "lora_te1_text_model_encoder_layers_5_mlp_fc1.lora_up.weight": torch.randn(3072, 8),
+            "lora_te1_text_model_encoder_layers_5_mlp_fc1.lora_down.weight": torch.randn(8, 768),
         }
         save_file(tensors, f.name)
         return f.name
@@ -72,9 +68,7 @@ def clip_g_lora_file() -> str:
                 16, 1280
             ),
             # CLIP-G layer 20 MLP
-            "lora_te2_text_model_encoder_layers_20_mlp_fc2.lora_up.weight": torch.randn(
-                1280, 16
-            ),
+            "lora_te2_text_model_encoder_layers_20_mlp_fc2.lora_up.weight": torch.randn(1280, 16),
             "lora_te2_text_model_encoder_layers_20_mlp_fc2.lora_down.weight": torch.randn(
                 16, 5120
             ),
@@ -136,12 +130,8 @@ def mixed_unet_clip_lora_file() -> str:
             "lora_unet_input_blocks_4_1_proj_in.lora_up.weight": torch.randn(640, 8),
             "lora_unet_input_blocks_4_1_proj_in.lora_down.weight": torch.randn(8, 640),
             # CLIP-L keys (should be extracted)
-            "lora_te1_text_model_encoder_layers_7_mlp_fc2.lora_up.weight": torch.randn(
-                768, 8
-            ),
-            "lora_te1_text_model_encoder_layers_7_mlp_fc2.lora_down.weight": torch.randn(
-                8, 3072
-            ),
+            "lora_te1_text_model_encoder_layers_7_mlp_fc2.lora_up.weight": torch.randn(768, 8),
+            "lora_te1_text_model_encoder_layers_7_mlp_fc2.lora_down.weight": torch.randn(8, 3072),
             # CLIP-G keys (should be extracted)
             "lora_te2_text_model_encoder_layers_25_self_attn_k_proj.lora_up.weight": torch.randn(
                 1280, 16
@@ -464,9 +454,7 @@ class TestAC4DeltaSpecProduction:
         # Same key should have half the scale
         assert len(specs1) == len(specs2)
         for s1, s2 in zip(specs1, specs2, strict=True):
-            assert abs(s1.scale - 2 * s2.scale) < 1e-6, (
-                f"Scale mismatch: {s1.scale} vs {s2.scale}"
-            )
+            assert abs(s1.scale - 2 * s2.scale) < 1e-6, f"Scale mismatch: {s1.scale} vs {s2.scale}"
 
     def test_alpha_affects_scale(self, clip_lora_with_alpha_file: str):
         """Alpha value in LoRA file affects DeltaSpec scale."""

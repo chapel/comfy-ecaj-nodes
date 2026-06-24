@@ -53,9 +53,7 @@ class WIDENComposeNode:
 
         # Validate compose input if provided
         if compose is not None and not isinstance(compose, RecipeCompose):
-            raise TypeError(
-                f"compose must be RecipeCompose or None, got {type(compose).__name__}"
-            )
+            raise TypeError(f"compose must be RecipeCompose or None, got {type(compose).__name__}")
 
         # AC-1: No compose → single-element branches
         # AC-2: With compose → append to existing branches

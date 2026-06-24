@@ -138,9 +138,12 @@ class TestSinkReceivesKeysIncrementally:
 
         # Each receive must happen after its eval but before the next eval
         assert events == [
-            "eval:1", "receive:first",
-            "eval:2", "receive:second",
-            "eval:3", "receive:third",
+            "eval:1",
+            "receive:first",
+            "eval:2",
+            "receive:second",
+            "eval:3",
+            "receive:third",
         ]
 
 
@@ -185,9 +188,7 @@ class TestSinkOutputEqualsDictReturn:
 
         assert set(sink.results.keys()) == set(dict_result.keys())
         for k in keys:
-            assert torch.equal(sink.results[k], dict_result[k]), (
-                f"Mismatch for key {k}"
-            )
+            assert torch.equal(sink.results[k], dict_result[k]), f"Mismatch for key {k}"
 
     # AC: @streaming-full-model-materialization ac-affected-results-released
     def test_dict_sink_matches_evaluate_affected_group(self):

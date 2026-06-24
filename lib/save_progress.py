@@ -193,11 +193,7 @@ class SavedModelProgress:
 
     def _enter(self, phase: str, message: str) -> None:
         self._phase = phase
-        formatted = (
-            f"[{self._artifact_name}] {message}"
-            if self._artifact_name
-            else message
-        )
+        formatted = f"[{self._artifact_name}] {message}" if self._artifact_name else message
         self._messages.append((phase, formatted))
         logger.info("save progress: %s", formatted)
 

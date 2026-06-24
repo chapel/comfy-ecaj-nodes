@@ -91,7 +91,8 @@ def _run_diffusion_save(
     arguments or return a sentinel.
     """
     mock_analyze, mock_model_analysis, mock_loader, plan = _make_full_mode_mocks(
-        mock_patcher, keys,
+        mock_patcher,
+        keys,
     )
     merged = chunked_eval_override or {k: torch.randn(4, 4) for k in keys}
     sig = OpSignature(shape=(4, 4), ndim=2)
@@ -104,6 +105,7 @@ def _run_diffusion_save(
                 write_fn(k, merged[k])
 
     if comfy_load_side_effect is None:
+
         def comfy_load_side_effect(*a, **kw):
             return MagicMock(name="comfy_loaded_default")
 
@@ -129,14 +131,18 @@ def _run_diffusion_save(
     ctxs = []
     for target, value in base_patches.items():
         ctxs.append(patch(target, return_value=value))
-    ctxs.append(patch(
-        "nodes.exit.streaming_evaluation_to_sink",
-        side_effect=streaming_eval_side_effect,
-    ))
-    ctxs.append(patch(
-        "nodes.exit._comfy_load_diffusion_model",
-        side_effect=comfy_load_side_effect,
-    ))
+    ctxs.append(
+        patch(
+            "nodes.exit.streaming_evaluation_to_sink",
+            side_effect=streaming_eval_side_effect,
+        )
+    )
+    ctxs.append(
+        patch(
+            "nodes.exit._comfy_load_diffusion_model",
+            side_effect=comfy_load_side_effect,
+        )
+    )
 
     started = []
     try:
@@ -145,7 +151,9 @@ def _run_diffusion_save(
             started.append(c)
         node = WIDENExitNode()
         result = node.execute(
-            recipe, save_model=True, model_name="model",
+            recipe,
+            save_model=True,
+            model_name="model",
             enable_cache=enable_cache,
         )
     finally:
@@ -166,12 +174,15 @@ class TestDiffusionModelArtifactKeyLayout:
 
     # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
     def test_artifact_uses_external_diffusion_model_prefix(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """Diffusion-only save writes keys with model.diffusion_model.* prefix,
         not bare diffusion_model.*, so Comfy's diffusion loader can detect them."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -187,26 +198,26 @@ class TestDiffusionModelArtifactKeyLayout:
         # No bare diffusion_model.* keys (internal format leak)
         for k in artifact_keys:
             assert not (
-                k.startswith(_DIFFUSION_PREFIX)
-                and not k.startswith(_EXTERNAL_DIFFUSION_PREFIX)
+                k.startswith(_DIFFUSION_PREFIX) and not k.startswith(_EXTERNAL_DIFFUSION_PREFIX)
             ), f"Key {k!r} uses internal-only diffusion_model.* prefix"
 
         # Every internal key has a corresponding external key in the artifact
-        expected_external = {
-            _to_external_diffusion_key(k) for k in keys
-        }
+        expected_external = {_to_external_diffusion_key(k) for k in keys}
         assert artifact_keys == expected_external, (
             f"Expected external keys {expected_external}, got {artifact_keys}"
         )
 
     # AC: @full-saved-model-output ac-diffusion-model-companion-separation
     def test_artifact_excludes_companion_components(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """Diffusion-only save artifact contains no conditioner.* or
         first_stage_model.* keys — companion components stay outside."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -232,12 +243,15 @@ class TestDiffusionModelArtifactKeyLayout:
 
     # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
     def test_artifact_metadata_records_source_model_kind(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """Saved artifact metadata declares source_model_kind=diffusion_model
         and artifact_kind=diffusion."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -294,7 +308,9 @@ class TestDiffusionTransformerKeyLayout:
         keys that match the source bare-key suffix."""
         patcher = _make_diffusion_only_patcher(arch_keys)
         base = RecipeBase(
-            model_patcher=patcher, arch=arch_name, checkpoint_components=None,
+            model_patcher=patcher,
+            arch=arch_name,
+            checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -309,10 +325,8 @@ class TestDiffusionTransformerKeyLayout:
         for k in arch_keys:
             assert _to_external_diffusion_key(k) in artifact_keys
             # bare suffix shows up after stripping model.diffusion_model.
-            bare = k[len(_DIFFUSION_PREFIX):]
-            assert any(
-                ak == _EXTERNAL_DIFFUSION_PREFIX + bare for ak in artifact_keys
-            )
+            bare = k[len(_DIFFUSION_PREFIX) :]
+            assert any(ak == _EXTERNAL_DIFFUSION_PREFIX + bare for ak in artifact_keys)
 
 
 # ===========================================================================
@@ -331,7 +345,8 @@ class TestReturnedModelUsesComfyLoader:
         """After a fresh diffusion-only save, the returned MODEL is the
         result of comfy.sd.load_diffusion_model called with the saved path."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -348,7 +363,10 @@ class TestReturnedModelUsesComfyLoader:
             return sentinel_model
 
         result = _run_diffusion_save(
-            merge, mock_model_patcher, keys, save_path,
+            merge,
+            mock_model_patcher,
+            keys,
+            save_path,
             comfy_load_side_effect=fake_load,
         )
 
@@ -361,7 +379,8 @@ class TestReturnedModelUsesComfyLoader:
         """A cache hit returns a Comfy-loaded MODEL — comfy.sd.load_diffusion_model
         is invoked, no in-memory merge runs."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -371,9 +390,7 @@ class TestReturnedModelUsesComfyLoader:
         keys = list(mock_model_patcher.model_state_dict().keys())
 
         # Pre-populate a valid diffusion-model cache artifact
-        external_tensors = {
-            _to_external_diffusion_key(k): torch.ones(4, 4) * 9.0 for k in keys
-        }
+        external_tensors = {_to_external_diffusion_key(k): torch.ones(4, 4) * 9.0 for k in keys}
         dep_fps = json.dumps({}, sort_keys=True, separators=(",", ":"))
         save_file(
             external_tensors,
@@ -407,11 +424,14 @@ class TestReturnedModelUsesComfyLoader:
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.analyze_recipe") as mock_analyze,
             patch(
-                "nodes.exit._comfy_load_diffusion_model", return_value=sentinel_model,
+                "nodes.exit._comfy_load_diffusion_model",
+                return_value=sentinel_model,
             ) as mock_load,
         ):
             (result,) = WIDENExitNode().execute(
-                merge, save_model=True, model_name="cached",
+                merge,
+                save_model=True,
+                model_name="cached",
             )
 
         # Cache hit: no GPU pipeline ran
@@ -443,7 +463,8 @@ class TestDiffusionCacheValidation:
         }
         manifest = {
             "model.diffusion_model.input_blocks.0.0.weight": (
-                torch.float32, (4, 4),
+                torch.float32,
+                (4, 4),
             ),
         }
         dep_fps = json.dumps({})
@@ -463,13 +484,18 @@ class TestDiffusionCacheValidation:
                 "__ecaj_dependency_fingerprints__": dep_fps,
             },
         )
-        assert check_full_model_cache(
-            save_path, "h", expected_manifest=manifest,
-            expected_artifact_kind="diffusion",
-            expected_base_identity="b",
-            expected_dependency_fingerprints=dep_fps,
-            expected_source_model_kind="diffusion_model",
-        ) is False
+        assert (
+            check_full_model_cache(
+                save_path,
+                "h",
+                expected_manifest=manifest,
+                expected_artifact_kind="diffusion",
+                expected_base_identity="b",
+                expected_dependency_fingerprints=dep_fps,
+                expected_source_model_kind="diffusion_model",
+            )
+            is False
+        )
 
         os.remove(save_path)
 
@@ -489,13 +515,18 @@ class TestDiffusionCacheValidation:
                 "__ecaj_dependency_fingerprints__": dep_fps,
             },
         )
-        assert check_full_model_cache(
-            save_path, "h", expected_manifest=manifest,
-            expected_artifact_kind="diffusion",
-            expected_base_identity="b",
-            expected_dependency_fingerprints=dep_fps,
-            expected_source_model_kind="diffusion_model",
-        ) is False
+        assert (
+            check_full_model_cache(
+                save_path,
+                "h",
+                expected_manifest=manifest,
+                expected_artifact_kind="diffusion",
+                expected_base_identity="b",
+                expected_dependency_fingerprints=dep_fps,
+                expected_source_model_kind="diffusion_model",
+            )
+            is False
+        )
 
     # AC: @full-saved-model-output ac-cache-reuses-artifact
     def test_diffusion_cache_hit_accepts_matching_metadata(self, tmp_path):
@@ -507,7 +538,8 @@ class TestDiffusionCacheValidation:
         }
         manifest = {
             "model.diffusion_model.input_blocks.0.0.weight": (
-                torch.float32, (4, 4),
+                torch.float32,
+                (4, 4),
             ),
         }
         dep_fps = json.dumps({})
@@ -527,13 +559,18 @@ class TestDiffusionCacheValidation:
                 "__ecaj_dependency_fingerprints__": dep_fps,
             },
         )
-        assert check_full_model_cache(
-            save_path, "h", expected_manifest=manifest,
-            expected_artifact_kind="diffusion",
-            expected_base_identity="b",
-            expected_dependency_fingerprints=dep_fps,
-            expected_source_model_kind="diffusion_model",
-        ) is True
+        assert (
+            check_full_model_cache(
+                save_path,
+                "h",
+                expected_manifest=manifest,
+                expected_artifact_kind="diffusion",
+                expected_base_identity="b",
+                expected_dependency_fingerprints=dep_fps,
+                expected_source_model_kind="diffusion_model",
+            )
+            is True
+        )
 
     # AC: @full-saved-model-output ac-cache-reuses-artifact
     def test_diffusion_cache_rejects_checkpoint_artifact_kind(self, tmp_path):
@@ -563,13 +600,17 @@ class TestDiffusionCacheValidation:
                 "__ecaj_checkpoint_components__": "true",
             },
         )
-        assert check_full_model_cache(
-            save_path, "h",
-            expected_artifact_kind="diffusion",
-            expected_base_identity="b",
-            expected_dependency_fingerprints=dep_fps,
-            expected_source_model_kind="diffusion_model",
-        ) is False
+        assert (
+            check_full_model_cache(
+                save_path,
+                "h",
+                expected_artifact_kind="diffusion",
+                expected_base_identity="b",
+                expected_dependency_fingerprints=dep_fps,
+                expected_source_model_kind="diffusion_model",
+            )
+            is False
+        )
 
 
 # ===========================================================================
@@ -584,12 +625,15 @@ class TestIncompleteWritesNotReused:
 
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
     def test_failed_diffusion_write_does_not_publish(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """When streaming evaluation raises mid-stream, no artifact survives
         at save_path and no temp file is left behind."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -599,7 +643,8 @@ class TestIncompleteWritesNotReused:
         keys = list(mock_model_patcher.model_state_dict().keys())
 
         mock_analyze, mock_model_analysis, mock_loader, plan = _make_full_mode_mocks(
-            mock_model_patcher, keys,
+            mock_model_patcher,
+            keys,
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
 
@@ -626,7 +671,9 @@ class TestIncompleteWritesNotReused:
         ):
             with pytest.raises(RuntimeError, match="fail mid-stream"):
                 WIDENExitNode().execute(
-                    merge, save_model=True, model_name="fail",
+                    merge,
+                    save_model=True,
+                    model_name="fail",
                 )
 
         assert not os.path.exists(save_path)
@@ -655,9 +702,9 @@ class TestBF16RoundTripWithExternalKeys:
         patcher._state_dict = sd
         patcher.model = MagicMock()
         patcher.model.diffusion_model = MagicMock()
-        patcher.model.diffusion_model.state_dict = MagicMock(return_value={
-            k.removeprefix(_DIFFUSION_PREFIX): v for k, v in sd.items()
-        })
+        patcher.model.diffusion_model.state_dict = MagicMock(
+            return_value={k.removeprefix(_DIFFUSION_PREFIX): v for k, v in sd.items()}
+        )
         patcher.patches = {}
         patcher.patches_uuid = uuid.uuid4()
 
@@ -668,10 +715,13 @@ class TestBF16RoundTripWithExternalKeys:
             c.patches = {}
             c.patches_uuid = patcher.patches_uuid
             return c
+
         patcher.clone = _clone
 
         base = RecipeBase(
-            model_patcher=patcher, arch="sdxl", checkpoint_components=None,
+            model_patcher=patcher,
+            arch="sdxl",
+            checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
@@ -680,7 +730,11 @@ class TestBF16RoundTripWithExternalKeys:
         keys = list(sd.keys())
         merged = {keys[0]: bf16_tensor.clone()}
         _run_diffusion_save(
-            merge, patcher, keys, save_path, chunked_eval_override=merged,
+            merge,
+            patcher,
+            keys,
+            save_path,
+            chunked_eval_override=merged,
         )
 
         with safe_open(save_path, framework="pt") as f:
@@ -707,12 +761,15 @@ class TestRoutingByRecipeSourceKind:
 
     # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
     def test_diffusion_only_recipe_does_not_invoke_save_comfy_checkpoint(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """A diffusion-only recipe must NOT call save_comfy_checkpoint —
         checkpoint save semantics belong to checkpoint-style recipes."""
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -742,9 +799,10 @@ class TestKeyRemapHelper:
         )
 
     def test_already_external_unchanged(self):
-        assert _to_external_diffusion_key(
-            "model.diffusion_model.foo.bar"
-        ) == "model.diffusion_model.foo.bar"
+        assert (
+            _to_external_diffusion_key("model.diffusion_model.foo.bar")
+            == "model.diffusion_model.foo.bar"
+        )
 
     def test_unknown_prefix_unchanged(self):
         assert _to_external_diffusion_key("conditioner.foo") == "conditioner.foo"
@@ -797,7 +855,8 @@ class TestComfyLoaderHelper:
         path = str(tmp_path / "x.safetensors")
         sentinel = MagicMock(name="comfy_model")
         with patch(
-            "nodes.exit._comfy_load_diffusion_model", return_value=sentinel,
+            "nodes.exit._comfy_load_diffusion_model",
+            return_value=sentinel,
         ) as mock_loader:
             result = _load_diffusion_model_artifact(path)
         assert result is sentinel
@@ -871,7 +930,9 @@ class TestDiffusionModelsPathResolver:
         import folder_paths
 
         monkeypatch.setattr(
-            folder_paths, "get_folder_paths", lambda folder: [],
+            folder_paths,
+            "get_folder_paths",
+            lambda folder: [],
         )
         with pytest.raises(ValueError, match=r"diffusion_models"):
             _resolve_diffusion_models_path("model.safetensors")
@@ -882,7 +943,9 @@ class TestSaveKindAwarePathRouter:
 
     # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
     def test_diffusion_save_uses_diffusion_models_resolver(
-        self, monkeypatch, tmp_path,
+        self,
+        monkeypatch,
+        tmp_path,
     ):
         """is_checkpoint=False routes through the diffusion-models resolver,
         not the checkpoints resolver — this is the bug from review."""
@@ -907,7 +970,9 @@ class TestSaveKindAwarePathRouter:
 
     # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
     def test_checkpoint_save_uses_checkpoints_resolver(
-        self, monkeypatch, tmp_path,
+        self,
+        monkeypatch,
+        tmp_path,
     ):
         """is_checkpoint=True still routes through the checkpoints resolver."""
         import folder_paths
@@ -916,7 +981,8 @@ class TestSaveKindAwarePathRouter:
         ckpt_dir.mkdir()
 
         monkeypatch.setattr(
-            folder_paths, "get_folder_paths",
+            folder_paths,
+            "get_folder_paths",
             lambda folder: [str(ckpt_dir)] if folder == "checkpoints" else [],
         )
         path = _resolve_save_path("model.safetensors", is_checkpoint=True)
@@ -930,7 +996,10 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
 
     # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
     def test_fresh_save_publishes_under_diffusion_models_folder(
-        self, mock_model_patcher, tmp_path, monkeypatch,
+        self,
+        mock_model_patcher,
+        tmp_path,
+        monkeypatch,
     ):
         """A diffusion-only save_model run resolves the artifact path through
         folder_paths('diffusion_models').  We configure folder_paths to
@@ -953,7 +1022,8 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
         monkeypatch.setattr(folder_paths, "get_folder_paths", get_folder_paths)
 
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -961,7 +1031,8 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
 
         keys = list(mock_model_patcher.model_state_dict().keys())
         mock_analyze, mock_model_analysis, mock_loader, plan = _make_full_mode_mocks(
-            mock_model_patcher, keys,
+            mock_model_patcher,
+            keys,
         )
         merged = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
@@ -978,19 +1049,21 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
             patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=plan),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.streaming_evaluation_to_sink",
-                  side_effect=streaming_eval_side_effect),
+            patch(
+                "nodes.exit.streaming_evaluation_to_sink", side_effect=streaming_eval_side_effect
+            ),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_checkpoint_components"),
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
             patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit._comfy_load_diffusion_model",
-                  return_value=MagicMock(name="loaded")),
+            patch("nodes.exit._comfy_load_diffusion_model", return_value=MagicMock(name="loaded")),
         ):
             WIDENExitNode().execute(
-                merge, save_model=True, model_name="diffusion_only",
+                merge,
+                save_model=True,
+                model_name="diffusion_only",
             )
 
         expected_path = diffusion_dir / "diffusion_only.safetensors"
@@ -1005,7 +1078,10 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
     # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
     # AC: @full-saved-model-output ac-no-op-produces-full-artifact
     def test_noop_diffusion_save_publishes_under_diffusion_models_folder(
-        self, mock_model_patcher, tmp_path, monkeypatch,
+        self,
+        mock_model_patcher,
+        tmp_path,
+        monkeypatch,
     ):
         """A no-op diffusion save (RecipeBase, no merge) also publishes under
         the diffusion_models folder, not under checkpoints."""
@@ -1026,7 +1102,8 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
         monkeypatch.setattr(folder_paths, "get_folder_paths", get_folder_paths)
 
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
 
@@ -1034,11 +1111,12 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.ProgressBar", None),
-            patch("nodes.exit._comfy_load_diffusion_model",
-                  return_value=MagicMock(name="loaded")),
+            patch("nodes.exit._comfy_load_diffusion_model", return_value=MagicMock(name="loaded")),
         ):
             WIDENExitNode().execute(
-                base, save_model=True, model_name="diffusion_noop",
+                base,
+                save_model=True,
+                model_name="diffusion_noop",
             )
 
         assert (diffusion_dir / "diffusion_noop.safetensors").exists()
@@ -1047,7 +1125,10 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
     # AC: @full-saved-model-output ac-cache-reuses-artifact
     # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
     def test_diffusion_cache_hit_resolves_through_diffusion_models_folder(
-        self, mock_model_patcher, tmp_path, monkeypatch,
+        self,
+        mock_model_patcher,
+        tmp_path,
+        monkeypatch,
     ):
         """Diffusion cache validation must look in the diffusion_models
         folder.  We pre-place a valid artifact there and assert that
@@ -1070,7 +1151,8 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
         monkeypatch.setattr(folder_paths, "get_folder_paths", get_folder_paths)
 
         base = RecipeBase(
-            model_patcher=mock_model_patcher, arch="sdxl",
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
             checkpoint_components=None,
         )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
@@ -1078,7 +1160,8 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
         keys = list(mock_model_patcher.model_state_dict().keys())
 
         mock_analyze, mock_model_analysis, mock_loader, plan = _make_full_mode_mocks(
-            mock_model_patcher, keys,
+            mock_model_patcher,
+            keys,
         )
 
         sentinel = MagicMock(name="cached_model")
@@ -1090,8 +1173,7 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
-            patch("nodes.exit.analyze_recipe_models",
-                  return_value=mock_model_analysis),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=plan),
             patch("nodes.exit.compile_batch_groups", return_value={}),
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
@@ -1103,7 +1185,9 @@ class TestDiffusionSaveRoutingThroughFolderPaths:
             patch("nodes.exit._comfy_load_diffusion_model", return_value=sentinel),
         ):
             (result,) = WIDENExitNode().execute(
-                merge, save_model=True, model_name="cached_artifact",
+                merge,
+                save_model=True,
+                model_name="cached_artifact",
             )
 
         assert result is sentinel

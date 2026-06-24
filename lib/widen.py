@@ -281,9 +281,9 @@ class WIDEN:
         Returns:
             backbone + filtered_delta
         """
-        return self.filter_delta_batched(
-            lora_applied.unsqueeze(0), backbone.unsqueeze(0)
-        ).squeeze(0)
+        return self.filter_delta_batched(lora_applied.unsqueeze(0), backbone.unsqueeze(0)).squeeze(
+            0
+        )
 
     def merge_weights(
         self,
@@ -385,9 +385,7 @@ class WIDEN:
             m_base, D_base = self._disentangle_batched(backbone)
 
             delta_m = torch.abs(m_lora - m_base)
-            delta_D = self.divergence_calc.compute_direction_divergence_batched(
-                D_lora, D_base
-            )
+            delta_D = self.divergence_calc.compute_direction_divergence_batched(D_lora, D_base)
 
             # Per-sample variance check
             combined_raw = delta_m + delta_D

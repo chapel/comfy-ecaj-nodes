@@ -65,9 +65,11 @@ class TestSaveComfyCheckpoint:
             # creating the temp file so os.fsync/os.replace succeed.
             def side_effect(path, model_arg, **kwargs):
                 save_file(
-                    _MOCK_CHECKPOINT_TENSORS, path,
+                    _MOCK_CHECKPOINT_TENSORS,
+                    path,
                     metadata=kwargs.get("metadata", {}),
                 )
+
             mock_save.side_effect = side_effect
 
             save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
@@ -98,7 +100,8 @@ class TestSaveComfyCheckpoint:
             assert path != save_path, "Must write to temp path, not final target"
             assert ".ecaj_tmp_" in path, "Temp path should contain .ecaj_tmp_ prefix"
             save_file(
-                _MOCK_CHECKPOINT_TENSORS, path,
+                _MOCK_CHECKPOINT_TENSORS,
+                path,
                 metadata=kwargs.get("metadata", {}),
             )
 
@@ -237,7 +240,8 @@ class TestSaveComfyCheckpoint:
         def side_effect(path, model_arg, **kwargs):
             # Write with wrong artifact kind
             save_file(
-                {"dummy": torch.zeros(1)}, path,
+                {"dummy": torch.zeros(1)},
+                path,
                 metadata={"__ecaj_version__": "1", "__ecaj_artifact_kind__": "diffusion"},
             )
 
@@ -266,18 +270,12 @@ class TestSaveComfyCheckpoint:
             )
 
         with patch("comfy.sd.save_checkpoint", side_effect=side_effect):
-            with pytest.raises(
-                RuntimeError, match="missing required component prefixes"
-            ):
-                save_comfy_checkpoint(
-                    save_path, model, clip=clip, vae=vae, metadata=metadata
-                )
+            with pytest.raises(RuntimeError, match="missing required component prefixes"):
+                save_comfy_checkpoint(save_path, model, clip=clip, vae=vae, metadata=metadata)
 
         assert not os.path.exists(save_path)
         # No temp files should remain
-        tmp_files = [
-            f for f in os.listdir(str(tmp_path)) if f.startswith(".ecaj_tmp_")
-        ]
+        tmp_files = [f for f in os.listdir(str(tmp_path)) if f.startswith(".ecaj_tmp_")]
         assert tmp_files == []
 
 
@@ -668,12 +666,18 @@ class TestInternalFormatRejection:
     def test_diffusion_model_only_keys_rejected(self, tmp_path):
         """Artifact with only diffusion_model.* keys is rejected as checkpoint cache hit."""
         path = tmp_path / "model.safetensors"
-        self._make_file(path, {
-            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
-            "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
-        })
+        self._make_file(
+            path,
+            {
+                "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
+                "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
+            },
+        )
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -681,13 +685,19 @@ class TestInternalFormatRejection:
     def test_noise_augmentor_only_keys_rejected(self, tmp_path):
         """Artifact with diffusion_model + noise_augmentor keys only is rejected."""
         path = tmp_path / "model.safetensors"
-        self._make_file(path, {
-            "diffusion_model.layers.0.weight": torch.randn(4, 4),
-            "noise_augmentor.weight": torch.randn(4, 4),
-            "model_sampling.sigmas": torch.randn(4),
-        })
+        self._make_file(
+            path,
+            {
+                "diffusion_model.layers.0.weight": torch.randn(4, 4),
+                "noise_augmentor.weight": torch.randn(4, 4),
+                "model_sampling.sigmas": torch.randn(4),
+            },
+        )
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -695,23 +705,33 @@ class TestInternalFormatRejection:
     def test_checkpoint_with_vae_keys_accepted(self, tmp_path):
         """Artifact with diffusion + VAE keys (proper checkpoint) IS accepted."""
         path = tmp_path / "model.safetensors"
-        self._make_file(path, {
-            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
-            "first_stage_model.decoder.weight": torch.randn(4, 4),
-            "cond_stage_model.transformer.weight": torch.randn(4, 4),
-        })
+        self._make_file(
+            path,
+            {
+                "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
+                "first_stage_model.decoder.weight": torch.randn(4, 4),
+                "cond_stage_model.transformer.weight": torch.randn(4, 4),
+            },
+        )
         assert check_checkpoint_cache(str(path), "abc123", self._BASE_IDENTITY, self._DEPS) is True
 
     # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
     def test_wrong_artifact_kind_rejected(self, tmp_path):
         """Artifact with artifact_kind='diffusion' is rejected for checkpoint cache."""
         path = tmp_path / "model.safetensors"
-        self._make_file(path, {
-            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
-            "first_stage_model.decoder.weight": torch.randn(4, 4),
-        }, artifact_kind="diffusion")
+        self._make_file(
+            path,
+            {
+                "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
+                "first_stage_model.decoder.weight": torch.randn(4, 4),
+            },
+            artifact_kind="diffusion",
+        )
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -728,11 +748,17 @@ class TestInternalFormatRejection:
         """Metadata-valid artifact with only conditioner.* keys is rejected —
         missing diffusion and VAE components."""
         path = tmp_path / "model.safetensors"
-        self._make_file(path, {
-            "conditioner.embedders.0.weight": torch.randn(4, 4),
-        })
+        self._make_file(
+            path,
+            {
+                "conditioner.embedders.0.weight": torch.randn(4, 4),
+            },
+        )
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -740,12 +766,18 @@ class TestInternalFormatRejection:
     def test_missing_vae_component_rejected(self, tmp_path):
         """Artifact with diffusion + conditioning but no VAE keys is rejected."""
         path = tmp_path / "model.safetensors"
-        self._make_file(path, {
-            "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
-            "conditioner.embedders.0.weight": torch.randn(4, 4),
-        })
+        self._make_file(
+            path,
+            {
+                "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
+                "conditioner.embedders.0.weight": torch.randn(4, 4),
+            },
+        )
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -753,12 +785,18 @@ class TestInternalFormatRejection:
     def test_missing_conditioning_component_rejected(self, tmp_path):
         """Artifact with diffusion + VAE but no conditioning keys is rejected."""
         path = tmp_path / "model.safetensors"
-        self._make_file(path, {
-            "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
-            "first_stage_model.decoder.weight": torch.randn(4, 4),
-        })
+        self._make_file(
+            path,
+            {
+                "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
+                "first_stage_model.decoder.weight": torch.randn(4, 4),
+            },
+        )
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -766,12 +804,18 @@ class TestInternalFormatRejection:
     def test_missing_diffusion_component_rejected(self, tmp_path):
         """Artifact with conditioning + VAE but no diffusion keys is rejected."""
         path = tmp_path / "model.safetensors"
-        self._make_file(path, {
-            "conditioner.embedders.0.weight": torch.randn(4, 4),
-            "first_stage_model.decoder.weight": torch.randn(4, 4),
-        })
+        self._make_file(
+            path,
+            {
+                "conditioner.embedders.0.weight": torch.randn(4, 4),
+                "first_stage_model.decoder.weight": torch.randn(4, 4),
+            },
+        )
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is False
 
@@ -780,13 +824,19 @@ class TestInternalFormatRejection:
         """Artifact with Comfy-style model.* + conditioner.* + first_stage_model.*
         keys is accepted."""
         path = tmp_path / "model.safetensors"
-        self._make_file(path, {
-            "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
-            "conditioner.embedders.0.weight": torch.randn(4, 4),
-            "first_stage_model.decoder.weight": torch.randn(4, 4),
-        })
+        self._make_file(
+            path,
+            {
+                "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
+                "conditioner.embedders.0.weight": torch.randn(4, 4),
+                "first_stage_model.decoder.weight": torch.randn(4, 4),
+            },
+        )
         result = check_checkpoint_cache(
-            str(path), "abc123", self._BASE_IDENTITY, self._DEPS,
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
         )
         assert result is True
 
@@ -1221,7 +1271,9 @@ class TestCheckpointCacheHitModelLoading:
             result = _load_checkpoint_artifact(save_path)
 
             mock_load.assert_called_once_with(
-                save_path, output_vae=True, output_clip=True,
+                save_path,
+                output_vae=True,
+                output_clip=True,
             )
             assert result is mock_model
 

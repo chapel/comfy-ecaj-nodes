@@ -53,28 +53,36 @@ class TestGuardRefusalNoEnvVar:
             env={},
             argv=[
                 "--run-diffusion-model-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-diffusion-model", "model.safetensors",
-                "--companion-clip", "clip.safetensors",
-                "--companion-vae", "vae.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-diffusion-model",
+                "model.safetensors",
+                "--companion-clip",
+                "clip.safetensors",
+                "--companion-vae",
+                "vae.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
-        assert any(
-            "COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION" in r for r in result.reasons
-        )
+        assert any("COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION" in r for r in result.reasons)
 
     def test_wrong_env_var_value_refuses(self):
         result = harness.check_guards(
             env={"COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION": "0"},
             argv=[
                 "--run-diffusion-model-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-diffusion-model", "model.safetensors",
-                "--companion-clip", "clip.safetensors",
-                "--companion-vae", "vae.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-diffusion-model",
+                "model.safetensors",
+                "--companion-clip",
+                "clip.safetensors",
+                "--companion-vae",
+                "vae.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -87,17 +95,20 @@ class TestGuardRefusalMissingFlag:
         result = harness.check_guards(
             env={"COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION": "1"},
             argv=[
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-diffusion-model", "model.safetensors",
-                "--companion-clip", "clip.safetensors",
-                "--companion-vae", "vae.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-diffusion-model",
+                "model.safetensors",
+                "--companion-clip",
+                "clip.safetensors",
+                "--companion-vae",
+                "vae.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
-        assert any(
-            "--run-diffusion-model-validation" in r for r in result.reasons
-        )
+        assert any("--run-diffusion-model-validation" in r for r in result.reasons)
 
 
 class TestGuardRefusalMissingRequiredArgs:
@@ -108,10 +119,14 @@ class TestGuardRefusalMissingRequiredArgs:
             env={"COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION": "1"},
             argv=[
                 "--run-diffusion-model-validation",
-                "--source-diffusion-model", "model.safetensors",
-                "--companion-clip", "clip.safetensors",
-                "--companion-vae", "vae.safetensors",
-                "--report-output", "/fake/report.json",
+                "--source-diffusion-model",
+                "model.safetensors",
+                "--companion-clip",
+                "clip.safetensors",
+                "--companion-vae",
+                "vae.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -122,10 +137,14 @@ class TestGuardRefusalMissingRequiredArgs:
             env={"COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION": "1"},
             argv=[
                 "--run-diffusion-model-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--companion-clip", "clip.safetensors",
-                "--companion-vae", "vae.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--companion-clip",
+                "clip.safetensors",
+                "--companion-vae",
+                "vae.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -136,10 +155,14 @@ class TestGuardRefusalMissingRequiredArgs:
             env={"COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION": "1"},
             argv=[
                 "--run-diffusion-model-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-diffusion-model", "model.safetensors",
-                "--companion-vae", "vae.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-diffusion-model",
+                "model.safetensors",
+                "--companion-vae",
+                "vae.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -150,10 +173,14 @@ class TestGuardRefusalMissingRequiredArgs:
             env={"COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION": "1"},
             argv=[
                 "--run-diffusion-model-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-diffusion-model", "model.safetensors",
-                "--companion-clip", "clip.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-diffusion-model",
+                "model.safetensors",
+                "--companion-clip",
+                "clip.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -164,10 +191,14 @@ class TestGuardRefusalMissingRequiredArgs:
             env={"COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION": "1"},
             argv=[
                 "--run-diffusion-model-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-diffusion-model", "model.safetensors",
-                "--companion-clip", "clip.safetensors",
-                "--companion-vae", "vae.safetensors",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-diffusion-model",
+                "model.safetensors",
+                "--companion-clip",
+                "clip.safetensors",
+                "--companion-vae",
+                "vae.safetensors",
             ],
         )
         assert not result.passed
@@ -182,11 +213,16 @@ class TestGuardPasses:
             env={"COMFY_ECAJ_DIFFUSION_MODEL_VALIDATION": "1"},
             argv=[
                 "--run-diffusion-model-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-diffusion-model", "model.safetensors",
-                "--companion-clip", "clip.safetensors",
-                "--companion-vae", "vae.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-diffusion-model",
+                "model.safetensors",
+                "--companion-clip",
+                "clip.safetensors",
+                "--companion-vae",
+                "vae.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert result.passed
@@ -270,9 +306,7 @@ class TestDiffusionDownstreamWorkflowShape:
         )
         # The MODEL output for KSampler must come from a UNETLoader, not
         # a CheckpointLoaderSimple — this is the round-trip contract.
-        ksampler = next(
-            n for n in wf.values() if n["class_type"] == "KSampler"
-        )
+        ksampler = next(n for n in wf.values() if n["class_type"] == "KSampler")
         model_ref = ksampler["inputs"]["model"]
         producer = wf[model_ref[0]]
         assert producer["class_type"] == "UNETLoader"
@@ -307,9 +341,7 @@ class TestDiffusionDownstreamWorkflowShape:
             companion_clip="clip.safetensors",
             companion_vae="vae.safetensors",
         )
-        text_encoders = [
-            n for n in wf.values() if n["class_type"] == "CLIPTextEncode"
-        ]
+        text_encoders = [n for n in wf.values() if n["class_type"] == "CLIPTextEncode"]
         assert text_encoders, "downstream workflow must have CLIPTextEncode"
         for te in text_encoders:
             clip_ref = te["inputs"]["clip"]
@@ -326,9 +358,7 @@ class TestDiffusionDownstreamWorkflowShape:
             companion_clip="clip.safetensors",
             companion_vae="vae.safetensors",
         )
-        vae_decode = next(
-            n for n in wf.values() if n["class_type"] == "VAEDecode"
-        )
+        vae_decode = next(n for n in wf.values() if n["class_type"] == "VAEDecode")
         vae_ref = vae_decode["inputs"]["vae"]
         producer = wf[vae_ref[0]]
         assert producer["class_type"] == "VAELoader"
@@ -370,9 +400,7 @@ class TestDiffusionDownstreamWorkflowShape:
         )
         single = [n for n in wf.values() if n["class_type"] == "CLIPLoader"]
         assert len(single) == 1
-        assert "DualCLIPLoader" not in {
-            n["class_type"] for n in wf.values()
-        }
+        assert "DualCLIPLoader" not in {n["class_type"] for n in wf.values()}
 
 
 class TestDiffusionCacheReuseWorkflowShape:
@@ -413,31 +441,33 @@ class TestFailureClassification:
 
     def test_unet_loader_error_classified_as_loader(self):
         result = harness.WorkflowResult(
-            name="x", accepted=False,
+            name="x",
+            accepted=False,
             error="node_error(UNETLoader): file not found",
         )
         assert harness.classify_failure(result) == "loader"
 
     def test_diffusion_keyword_classified_as_loader(self):
         result = harness.WorkflowResult(
-            name="x", accepted=False,
-            error=(
-                "node_error(SomeNode): could not load diffusion model "
-                "from artifact"
-            ),
+            name="x",
+            accepted=False,
+            error=("node_error(SomeNode): could not load diffusion model from artifact"),
         )
         assert harness.classify_failure(result) == "loader"
 
     def test_oom_takes_priority_over_loader(self):
         result = harness.WorkflowResult(
-            name="x", accepted=False,
+            name="x",
+            accepted=False,
             error="node_error(UNETLoader): OOM: cannot allocate vram",
         )
         assert harness.classify_failure(result) == "memory_mode"
 
     def test_accepted_is_none(self):
         result = harness.WorkflowResult(
-            name="x", accepted=True, error="",
+            name="x",
+            accepted=True,
+            error="",
         )
         assert harness.classify_failure(result) == "none"
 
@@ -457,6 +487,7 @@ class TestReportFields:
 
     def test_to_json_round_trips(self):
         import json as _json
+
         rep = harness.DiffusionModelValidationReport(
             comfy_api_url="http://localhost:8188",
             source_diffusion_model="m.safetensors",
@@ -498,7 +529,8 @@ class TestRefusalFormatting:
 
     def test_refusal_confirms_no_work_done(self):
         guard = harness.GuardResult(
-            passed=False, reasons=("missing X",),
+            passed=False,
+            reasons=("missing X",),
         )
         text = harness.format_refusal(guard)
         assert "No ComfyUI API prompts were submitted" in text

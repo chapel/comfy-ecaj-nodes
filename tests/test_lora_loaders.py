@@ -204,9 +204,7 @@ class TestAC1ArchitectureSelection:
 class TestAC2DeltaSpecProduction:
     """AC-2: Architecture loaders produce DeltaSpec objects for batched executor."""
 
-    def test_sdxl_produces_deltaspec_objects(
-        self, sdxl_lora_file: str, cleanup_lora_files
-    ):
+    def test_sdxl_produces_deltaspec_objects(self, sdxl_lora_file: str, cleanup_lora_files):
         """SDXL loader produces DeltaSpec with correct fields."""
         # AC: @lora-loaders ac-2
         loader = SDXLLoader()
@@ -228,9 +226,7 @@ class TestAC2DeltaSpecProduction:
 
         loader.cleanup()
 
-    def test_zimage_produces_qkv_deltaspec(
-        self, zimage_lora_file: str, cleanup_lora_files
-    ):
+    def test_zimage_produces_qkv_deltaspec(self, zimage_lora_file: str, cleanup_lora_files):
         """Z-Image loader produces qkv_* kind DeltaSpecs for QKV layers."""
         # AC: @lora-loaders ac-2
         loader = ZImageLoader()
@@ -250,9 +246,7 @@ class TestAC2DeltaSpecProduction:
 
         loader.cleanup()
 
-    def test_deltaspec_tensors_are_valid(
-        self, sdxl_lora_file: str, cleanup_lora_files
-    ):
+    def test_deltaspec_tensors_are_valid(self, sdxl_lora_file: str, cleanup_lora_files):
         """DeltaSpec up/down tensors have valid shapes for bmm."""
         # AC: @lora-loaders ac-2
         loader = SDXLLoader()
@@ -292,9 +286,7 @@ class TestAC2DeltaSpecProduction:
         # Same key should have half the scale
         assert len(specs1) == len(specs2)
         for s1, s2 in zip(specs1, specs2, strict=True):
-            assert abs(s1.scale - 2 * s2.scale) < 1e-6, (
-                f"Scale mismatch: {s1.scale} vs {s2.scale}"
-            )
+            assert abs(s1.scale - 2 * s2.scale) < 1e-6, f"Scale mismatch: {s1.scale} vs {s2.scale}"
 
 
 # ---------------------------------------------------------------------------
@@ -335,6 +327,7 @@ class TestAC3PluggableDesign:
 
     def test_adding_new_arch_only_requires_registry_entry(self):
         """New architecture can be added by just updating the registry."""
+
         # AC: @lora-loaders ac-3
         # Create a mock loader
         class MockLoader(LoRALoader):
@@ -524,9 +517,7 @@ class TestQwenLoader:
         assert "qwen" in LOADER_REGISTRY
         assert LOADER_REGISTRY["qwen"] is QwenLoader
 
-    def test_qwen_diffusers_format_loads(
-        self, qwen_diffusers_lora_file: str, cleanup_lora_files
-    ):
+    def test_qwen_diffusers_format_loads(self, qwen_diffusers_lora_file: str, cleanup_lora_files):
         """Qwen loader handles diffusers format LoRA files."""
         # AC: @qwen-lora-loader ac-4
         loader = QwenLoader()
@@ -543,9 +534,7 @@ class TestQwenLoader:
 
         loader.cleanup()
 
-    def test_qwen_kohya_format_loads(
-        self, qwen_kohya_lora_file: str, cleanup_lora_files
-    ):
+    def test_qwen_kohya_format_loads(self, qwen_kohya_lora_file: str, cleanup_lora_files):
         """Qwen loader handles A1111/kohya format LoRA files."""
         # AC: @qwen-lora-loader ac-4
         loader = QwenLoader()
@@ -561,9 +550,7 @@ class TestQwenLoader:
 
         loader.cleanup()
 
-    def test_qwen_lycoris_format_loads(
-        self, qwen_lycoris_lora_file: str, cleanup_lora_files
-    ):
+    def test_qwen_lycoris_format_loads(self, qwen_lycoris_lora_file: str, cleanup_lora_files):
         """Qwen loader handles LyCORIS format LoRA files."""
         # AC: @qwen-lora-loader ac-4, ac-5
         loader = QwenLoader()
@@ -604,9 +591,7 @@ class TestQwenLoader:
 
         loader.cleanup()
 
-    def test_qwen_no_qkv_fusing(
-        self, qwen_diffusers_lora_file: str, cleanup_lora_files
-    ):
+    def test_qwen_no_qkv_fusing(self, qwen_diffusers_lora_file: str, cleanup_lora_files):
         """Qwen loader does NOT fuse QKV weights (unlike Z-Image)."""
         # AC: @qwen-lora-loader ac-6
         loader = QwenLoader()
@@ -626,9 +611,7 @@ class TestQwenLoader:
 
         loader.cleanup()
 
-    def test_qwen_compound_names_preserved(
-        self, qwen_lycoris_lora_file: str, cleanup_lora_files
-    ):
+    def test_qwen_compound_names_preserved(self, qwen_lycoris_lora_file: str, cleanup_lora_files):
         """Compound names like to_q, mlp, down_proj are preserved during normalization."""
         # AC: @qwen-lora-loader ac-5
         loader = QwenLoader()
@@ -646,9 +629,7 @@ class TestQwenLoader:
 
         loader.cleanup()
 
-    def test_qwen_strength_affects_scale(
-        self, qwen_diffusers_lora_file: str, cleanup_lora_files
-    ):
+    def test_qwen_strength_affects_scale(self, qwen_diffusers_lora_file: str, cleanup_lora_files):
         """LoRA strength multiplier affects DeltaSpec scale."""
         # AC: @qwen-lora-loader ac-6
         loader1 = QwenLoader()
@@ -666,13 +647,9 @@ class TestQwenLoader:
         # Same key should have half the scale
         assert len(specs1) == len(specs2)
         for s1, s2 in zip(specs1, specs2, strict=True):
-            assert abs(s1.scale - 2 * s2.scale) < 1e-6, (
-                f"Scale mismatch: {s1.scale} vs {s2.scale}"
-            )
+            assert abs(s1.scale - 2 * s2.scale) < 1e-6, f"Scale mismatch: {s1.scale} vs {s2.scale}"
 
-    def test_qwen_cleanup_clears_state(
-        self, qwen_diffusers_lora_file: str, cleanup_lora_files
-    ):
+    def test_qwen_cleanup_clears_state(self, qwen_diffusers_lora_file: str, cleanup_lora_files):
         """cleanup() releases loaded tensors."""
         # AC: @lora-loaders ac-4
         loader = QwenLoader()
@@ -682,9 +659,7 @@ class TestQwenLoader:
         loader.cleanup()
         assert len(loader.affected_keys) == 0, "cleanup should clear affected keys"
 
-    def test_qwen_full_workflow(
-        self, qwen_diffusers_lora_file: str, cleanup_lora_files
-    ):
+    def test_qwen_full_workflow(self, qwen_diffusers_lora_file: str, cleanup_lora_files):
         """Full workflow: get loader, load, get specs, cleanup."""
         # Get architecture-appropriate loader
         loader = get_loader("qwen")
@@ -797,9 +772,7 @@ class TestFluxLoader:
         assert "flux" in LOADER_REGISTRY
         assert LOADER_REGISTRY["flux"] is FluxLoader
 
-    def test_flux_double_block_diffusers_format_loads(
-        self, flux_double_block_lora_file: str
-    ):
+    def test_flux_double_block_diffusers_format_loads(self, flux_double_block_lora_file: str):
         """Flux loader handles diffusers format LoRA files for double_blocks."""
         # AC: @flux-lora-loader ac-4
         loader = FluxLoader()
@@ -832,9 +805,7 @@ class TestFluxLoader:
 
         loader.cleanup()
 
-    def test_flux_double_block_produces_qkv_deltaspec(
-        self, flux_double_block_lora_file: str
-    ):
+    def test_flux_double_block_produces_qkv_deltaspec(self, flux_double_block_lora_file: str):
         """Flux loader produces qkv_* kind DeltaSpecs for double_block QKV layers."""
         # AC: @flux-lora-loader ac-5
         # AC: @flux-lora-loader ac-7
@@ -871,9 +842,7 @@ class TestFluxLoader:
 
         loader.cleanup()
 
-    def test_flux_single_block_produces_qkv_and_mlp_specs(
-        self, flux_single_block_lora_file: str
-    ):
+    def test_flux_single_block_produces_qkv_and_mlp_specs(self, flux_single_block_lora_file: str):
         """Flux loader produces qkv_* and offset_mlp specs for single_block linear1."""
         # AC: @flux-lora-loader ac-6
         # AC: @flux-lora-loader ac-7
@@ -955,9 +924,7 @@ class TestFluxLoader:
         # Same key should have half the scale
         assert len(specs1) == len(specs2)
         for s1, s2 in zip(specs1, specs2, strict=True):
-            assert abs(s1.scale - 2 * s2.scale) < 1e-6, (
-                f"Scale mismatch: {s1.scale} vs {s2.scale}"
-            )
+            assert abs(s1.scale - 2 * s2.scale) < 1e-6, f"Scale mismatch: {s1.scale} vs {s2.scale}"
 
     def test_flux_cleanup_clears_state(self, flux_double_block_lora_file: str):
         """cleanup() releases loaded tensors."""
@@ -1059,8 +1026,8 @@ class TestLoadedBytes:
     def test_sdxl_loaded_bytes_exact_value(self):
         """loaded_bytes equals exact sum of tensor.nbytes for known tensor sizes."""
         with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
-            up = torch.zeros(64, 8)   # 64*8*4 = 2048 bytes (float32)
-            down = torch.zeros(8, 32) # 8*32*4 = 1024 bytes (float32)
+            up = torch.zeros(64, 8)  # 64*8*4 = 2048 bytes (float32)
+            down = torch.zeros(8, 32)  # 8*32*4 = 1024 bytes (float32)
             tensors = {
                 "lora_unet_input_blocks_0_0_proj_in.lora_up.weight": up,
                 "lora_unet_input_blocks_0_0_proj_in.lora_down.weight": down,
@@ -1081,9 +1048,7 @@ class TestLoadedBytes:
         assert loader.loaded_bytes == 0
 
     # AC: @loader-memory-measurement ac-6
-    def test_flux_loaded_bytes_zero_after_cleanup(
-        self, flux_double_block_lora_file: str
-    ):
+    def test_flux_loaded_bytes_zero_after_cleanup(self, flux_double_block_lora_file: str):
         """FluxLoader loaded_bytes returns 0 after cleanup."""
         loader = FluxLoader()
         loader.load(flux_double_block_lora_file)
@@ -1092,9 +1057,7 @@ class TestLoadedBytes:
         assert loader.loaded_bytes == 0
 
     # AC: @loader-memory-measurement ac-7
-    def test_flux_loaded_bytes_includes_qkv_data(
-        self, flux_double_block_lora_file: str
-    ):
+    def test_flux_loaded_bytes_includes_qkv_data(self, flux_double_block_lora_file: str):
         """FluxLoader loaded_bytes includes tensors from _qkv_data_by_set."""
         loader = FluxLoader()
         loader.load(flux_double_block_lora_file)
@@ -1105,9 +1068,7 @@ class TestLoadedBytes:
         assert len(loader._qkv_data_by_set) > 0
 
     # AC: @loader-memory-measurement ac-7
-    def test_zimage_loaded_bytes_includes_both_structures(
-        self, zimage_lora_file: str
-    ):
+    def test_zimage_loaded_bytes_includes_both_structures(self, zimage_lora_file: str):
         """ZImageLoader loaded_bytes includes both _lora_data and _qkv_data."""
         loader = ZImageLoader()
         loader.load(zimage_lora_file)

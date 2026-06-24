@@ -263,15 +263,11 @@ class TestComposeCallsMergeWeights:
                 self.filter_calls = []
 
             def merge_weights_batched(self, weights_list, backbone):
-                self.merge_calls.append(
-                    {"weights_list": weights_list, "backbone": backbone}
-                )
+                self.merge_calls.append({"weights_list": weights_list, "backbone": backbone})
                 return torch.stack(weights_list).mean(dim=0)
 
             def filter_delta_batched(self, lora_applied, backbone):
-                self.filter_calls.append(
-                    {"lora_applied": lora_applied, "backbone": backbone}
-                )
+                self.filter_calls.append({"lora_applied": lora_applied, "backbone": backbone})
                 return lora_applied
 
         loader = MockLoader()
@@ -330,15 +326,11 @@ class TestLoRACallsFilterDelta:
                 self.merge_calls = []
 
             def filter_delta_batched(self, lora_applied, backbone):
-                self.filter_calls.append(
-                    {"lora_applied": lora_applied, "backbone": backbone}
-                )
+                self.filter_calls.append({"lora_applied": lora_applied, "backbone": backbone})
                 return lora_applied
 
             def merge_weights_batched(self, weights_list, backbone):
-                self.merge_calls.append(
-                    {"weights_list": weights_list, "backbone": backbone}
-                )
+                self.merge_calls.append({"weights_list": weights_list, "backbone": backbone})
                 return torch.stack(weights_list).mean(dim=0)
 
         loader = MockLoader()
@@ -382,19 +374,11 @@ class TestChainedMergeOrder:
         base_batch = torch.randn(batch_size, 4, 4)
 
         base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl")
-        inner_lora = RecipeLoRA(
-            loras=({"path": "inner.safetensors", "strength": 1.0},)
-        )
-        inner_merge = RecipeMerge(
-            base=base, target=inner_lora, backbone=None, t_factor=1.0
-        )
+        inner_lora = RecipeLoRA(loras=({"path": "inner.safetensors", "strength": 1.0},))
+        inner_merge = RecipeMerge(base=base, target=inner_lora, backbone=None, t_factor=1.0)
 
-        outer_lora = RecipeLoRA(
-            loras=({"path": "outer.safetensors", "strength": 1.0},)
-        )
-        outer_merge = RecipeMerge(
-            base=inner_merge, target=outer_lora, backbone=None, t_factor=1.0
-        )
+        outer_lora = RecipeLoRA(loras=({"path": "outer.safetensors", "strength": 1.0},))
+        outer_merge = RecipeMerge(base=inner_merge, target=outer_lora, backbone=None, t_factor=1.0)
 
         class MockLoader:
             def get_delta_specs(self, keys, key_indices, set_id=None):
@@ -907,8 +891,11 @@ class TestSaveModelCacheHit:
         """Cache hit should skip analyze_recipe and return loaded model."""
         from safetensors.torch import save_file
 
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=make_checkpoint_components())
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -919,6 +906,7 @@ class TestSaveModelCacheHit:
         cached_tensors["conditioner.embedders.0.weight"] = torch.randn(4, 4)
         cached_tensors["first_stage_model.decoder.weight"] = torch.randn(4, 4)
         import json as _json
+
         cached_metadata = {
             "__ecaj_version__": "1",
             "__ecaj_recipe__": "{}",
@@ -928,7 +916,9 @@ class TestSaveModelCacheHit:
             "__ecaj_artifact_kind__": "checkpoint",
             "__ecaj_base_identity__": "base_id",
             "__ecaj_dependency_fingerprints__": _json.dumps(
-                {}, sort_keys=True, separators=(",", ":"),
+                {},
+                sort_keys=True,
+                separators=(",", ":"),
             ),
             "__ecaj_checkpoint_components__": "true",
         }
@@ -951,9 +941,7 @@ class TestSaveModelCacheHit:
             patch("nodes.exit.analyze_recipe") as mock_analyze,
             patch("nodes.exit._load_checkpoint_artifact", return_value=loaded_model),
         ):
-            (result,) = node.execute(
-                merge, save_model=True, model_name="cached"
-            )
+            (result,) = node.execute(merge, save_model=True, model_name="cached")
 
             # analyze_recipe should NOT have been called
             mock_analyze.assert_not_called()
@@ -976,8 +964,11 @@ class TestSaveModelCacheMiss:
     # AC: @exit-model-persistence ac-2
     def test_saves_after_gpu(self, mock_model_patcher, tmp_path):
         """Cache miss should run GPU pipeline and save result via save_comfy_checkpoint."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=make_checkpoint_components())
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1022,9 +1013,7 @@ class TestSaveModelCacheMiss:
             mock_install.return_value = mock_model_patcher.clone()
             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
 
-            (result,) = node.execute(
-                merge, save_model=True, model_name="model"
-            )
+            (result,) = node.execute(merge, save_model=True, model_name="model")
 
             # analyze_recipe SHOULD have been called
             mock_analyze.assert_called_once()
@@ -1034,8 +1023,11 @@ class TestSaveModelCacheMiss:
     # AC: @exit-model-persistence ac-4
     def test_overwrites_stale_cache(self, mock_model_patcher, tmp_path):
         """Hash mismatch should overwrite the stale cached file via save_comfy_checkpoint."""
-        base = RecipeBase(model_patcher=mock_model_patcher, arch="sdxl",
-                          checkpoint_components=make_checkpoint_components())
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=make_checkpoint_components(),
+        )
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
@@ -1080,9 +1072,7 @@ class TestSaveModelCacheMiss:
             mock_install.return_value = mock_model_patcher.clone()
             mock_chunked.return_value = {affected_key: torch.randn(4, 4)}
 
-            (result,) = node.execute(
-                merge, save_model=True, model_name="model"
-            )
+            (result,) = node.execute(merge, save_model=True, model_name="model")
 
             # Stale cache miss should write new artifact
             mock_save_ckpt.assert_called_once()
@@ -1113,9 +1103,7 @@ class TestIsChangedPersistence:
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         result_off = WIDENExitNode.IS_CHANGED(merge, save_model=False)
-        result_on = WIDENExitNode.IS_CHANGED(
-            merge, save_model=True, model_name="test"
-        )
+        result_on = WIDENExitNode.IS_CHANGED(merge, save_model=True, model_name="test")
         assert result_off != result_on
 
     def test_ignores_prompt_and_extra_pnginfo(self, mock_model_patcher):
@@ -1125,12 +1113,18 @@ class TestIsChangedPersistence:
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0)
 
         result1 = WIDENExitNode.IS_CHANGED(
-            merge, save_model=True, model_name="test",
-            prompt={"a": 1}, extra_pnginfo={"workflow": {}},
+            merge,
+            save_model=True,
+            model_name="test",
+            prompt={"a": 1},
+            extra_pnginfo={"workflow": {}},
         )
         result2 = WIDENExitNode.IS_CHANGED(
-            merge, save_model=True, model_name="test",
-            prompt={"b": 2}, extra_pnginfo={"different": {}},
+            merge,
+            save_model=True,
+            model_name="test",
+            prompt={"b": 2},
+            extra_pnginfo={"different": {}},
         )
         assert result1 == result2
 
@@ -1213,10 +1207,14 @@ class TestRecipeHasCheckpointComponents:
         """A recipe with diffusion-only and checkpoint RecipeModel nodes is checkpoint-style."""
         base = RecipeBase(model_patcher=object(), arch="sdxl")
         diffusion_model = RecipeModel(
-            path="flux.safetensors", strength=1.0, source_dir="diffusion_models",
+            path="flux.safetensors",
+            strength=1.0,
+            source_dir="diffusion_models",
         )
         checkpoint_model = RecipeModel(
-            path="clip.safetensors", strength=1.0, source_dir="checkpoints",
+            path="clip.safetensors",
+            strength=1.0,
+            source_dir="checkpoints",
         )
         compose = RecipeCompose(branches=(diffusion_model, checkpoint_model))
         merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=0.5)
@@ -1370,7 +1368,9 @@ class TestCheckpointCacheRouting:
 
     # AC: @full-saved-model-output ac-cache-reuses-artifact
     def test_checkpoint_sourced_lora_recipe_uses_checkpoint_cache(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """Checkpoint-sourced LoRA recipe (RecipeBase with checkpoint_components + LoRA)
         must use check_checkpoint_cache, not check_full_model_cache."""
@@ -1433,7 +1433,9 @@ class TestCheckpointCacheRouting:
     # AC: @exit-model-persistence ac-3
     # AC: @exit-model-persistence ac-4
     def test_diffusion_model_recipe_with_checkpoint_base_uses_checkpoint_cache(
-        self, mock_model_patcher, tmp_path,
+        self,
+        mock_model_patcher,
+        tmp_path,
     ):
         """RecipeModel with source_dir='diffusion_models' merged onto a checkpoint
         base still uses check_checkpoint_cache, because the base has checkpoint_components.

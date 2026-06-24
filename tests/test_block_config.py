@@ -165,9 +165,7 @@ class TestRecipeMergeBlockConfig:
         """RecipeMerge accepts explicit None for block_config."""
         base = RecipeBase(model_patcher=object(), arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "test.safetensors", "strength": 1.0},))
-        merge = RecipeMerge(
-            base=base, target=lora, backbone=None, t_factor=1.0, block_config=None
-        )
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0, block_config=None)
         assert merge.block_config is None
 
     def test_recipe_merge_block_config_with_config(self):

@@ -137,9 +137,7 @@ class TestChainedMerge:
         inner_merge = RecipeMerge(base=base, target=inner_lora, backbone=None, t_factor=1.0)
 
         outer_lora = _lora("outer.safetensors")
-        outer_merge = RecipeMerge(
-            base=inner_merge, target=outer_lora, backbone=None, t_factor=1.0
-        )
+        outer_merge = RecipeMerge(base=inner_merge, target=outer_lora, backbone=None, t_factor=1.0)
         set_id_map = {id(inner_lora): "inner", id(outer_lora): "outer"}
 
         plan = compile_plan(outer_merge, set_id_map, arch=None)
@@ -288,9 +286,7 @@ class TestPerBlockFlags:
         base = _base()
         lora = _lora()
         bc = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
-        merge = RecipeMerge(
-            base=base, target=lora, backbone=None, t_factor=1.0, block_config=bc
-        )
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0, block_config=bc)
         set_id_map = {id(lora): "set1"}
 
         plan = compile_plan(merge, set_id_map, arch="sdxl")
@@ -306,9 +302,7 @@ class TestPerBlockFlags:
         base = _base()
         lora = _lora()
         bc = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
-        merge = RecipeMerge(
-            base=base, target=lora, backbone=None, t_factor=1.0, block_config=bc
-        )
+        merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=1.0, block_config=bc)
         set_id_map = {id(lora): "set1"}
 
         plan = compile_plan(merge, set_id_map, arch=None)
@@ -384,12 +378,8 @@ class TestMergeAsTarget:
     def test_merge_target_uses_filter(self):
         base = _base()
         inner_lora = _lora("inner.safetensors")
-        inner_merge = RecipeMerge(
-            base=base, target=inner_lora, backbone=None, t_factor=0.8
-        )
-        outer_merge = RecipeMerge(
-            base=base, target=inner_merge, backbone=None, t_factor=0.9
-        )
+        inner_merge = RecipeMerge(base=base, target=inner_lora, backbone=None, t_factor=0.8)
+        outer_merge = RecipeMerge(base=base, target=inner_merge, backbone=None, t_factor=0.9)
         set_id_map = {id(inner_lora): "inner_set"}
 
         plan = compile_plan(outer_merge, set_id_map, arch=None)

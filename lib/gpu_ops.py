@@ -137,9 +137,7 @@ def check_ram_preflight(
         RuntimeError: With shortfall in MB if RAM is insufficient
     """
     avail = get_available_ram_bytes()
-    peak = estimate_peak_ram(
-        merged_state_bytes, worst_chunk_bytes, save_model, loader_bytes
-    )
+    peak = estimate_peak_ram(merged_state_bytes, worst_chunk_bytes, save_model, loader_bytes)
     if avail < peak:
         raise RuntimeError(
             f"Insufficient system RAM for merge: {avail // (1024**2)} MB available, "
@@ -162,7 +160,7 @@ class DeltaSpec:
     LoKr weights use per-key torch.kron on GPU instead of bmm.
     """
 
-    kind: str  # 'standard' | 'lokr' | 'qkv_q' | 'qkv_k' | 'qkv_v'
+    kind: str  # 'standard' | 'direct' | 'lokr' | 'qkv_q' | 'qkv_k' | 'qkv_v'
     key_index: int  # position in the batch [0..B)
     up: torch.Tensor | None = None  # (out, rank) — None for lokr
     down: torch.Tensor | None = None  # (rank, in) — None for lokr
@@ -258,9 +256,7 @@ def _compute_deltas(
     else:
         ups = torch.stack([s.up for s in group]).to(device, dtype=dtype)
         downs = torch.stack([s.down for s in group]).to(device, dtype=dtype)
-        scales = torch.tensor(
-            [s.scale for s in group], device=device, dtype=dtype
-        )
+        scales = torch.tensor([s.scale for s in group], device=device, dtype=dtype)
         deltas = torch.bmm(ups, downs) * scales.view(-1, 1, 1)
         del ups, downs, scales
         return [(spec, deltas[i]) for i, spec in enumerate(group)]
@@ -301,6 +297,8 @@ def apply_lora_batch_gpu(
     for spec in delta_specs:
         if spec.kind == "lokr":
             partitions[("lokr", 0)].append(spec)
+        elif spec.kind == "direct":
+            partitions[("direct", 0)].append(spec)
         elif spec.kind in ("qkv_q", "qkv_k", "qkv_v"):
             rank = spec.down.shape[0] if spec.down is not None else 0
             partitions[(spec.kind, rank)].append(spec)
@@ -319,6 +317,12 @@ def apply_lora_batch_gpu(
                 )
                 if spec.target_shape is not None:
                     delta = delta.view(spec.target_shape)
+                result[spec.key_index] += delta
+                del delta
+
+        elif kind == "direct":
+            for spec in group:
+                delta = spec.scale * spec.up.to(device, dtype=dtype)
                 result[spec.key_index] += delta
                 del delta
 
@@ -460,8 +464,10 @@ def _chunked_eval_to_sink_impl(
                         torch.cuda.empty_cache()
                     if isinstance(inner_e, MemoryError) or (
                         isinstance(inner_e, RuntimeError)
-                        and ("not enough memory" in str(inner_e).lower()
-                             or "out of memory" in str(inner_e).lower())
+                        and (
+                            "not enough memory" in str(inner_e).lower()
+                            or "out of memory" in str(inner_e).lower()
+                        )
                     ):
                         raise RuntimeError(
                             f"System memory exhausted during single-key retry for '{key}'"
@@ -474,9 +480,7 @@ def _chunked_eval_to_sink_impl(
             gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
-            raise RuntimeError(
-                "System memory exhausted during chunked evaluation"
-            ) from e
+            raise RuntimeError("System memory exhausted during chunked evaluation") from e
 
         except RuntimeError as e:
             # AC: @memory-management ac-11
@@ -485,9 +489,7 @@ def _chunked_eval_to_sink_impl(
                 gc.collect()
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
-                raise RuntimeError(
-                    "System memory exhausted during chunked evaluation"
-                ) from e
+                raise RuntimeError("System memory exhausted during chunked evaluation") from e
             raise
 
 
@@ -526,8 +528,14 @@ def evaluate_to_sink(
         sink: Object implementing ``ResultSink.receive(key, tensor)``.
     """
     _chunked_eval_to_sink_impl(
-        keys, base_tensors, eval_fn, batch_size, device, dtype,
-        storage_dtype, sink.receive,
+        keys,
+        base_tensors,
+        eval_fn,
+        batch_size,
+        device,
+        dtype,
+        storage_dtype,
+        sink.receive,
     )
 
 
@@ -573,8 +581,14 @@ def chunked_evaluation(
 
     sink = DictResultSink()
     _chunked_eval_to_sink_impl(
-        keys, base_tensors, eval_fn, batch_size, device, dtype,
-        storage_dtype, sink.receive,
+        keys,
+        base_tensors,
+        eval_fn,
+        batch_size,
+        device,
+        dtype,
+        storage_dtype,
+        sink.receive,
     )
     return sink.results
 
@@ -614,8 +628,14 @@ def evaluate_affected_group(
 
     sink = DictResultSink()
     _chunked_eval_to_sink_impl(
-        keys, base_tensors, eval_fn, batch_size, device, dtype,
-        storage_dtype, sink.receive,
+        keys,
+        base_tensors,
+        eval_fn,
+        batch_size,
+        device,
+        dtype,
+        storage_dtype,
+        sink.receive,
     )
     return sink.results
 
@@ -655,6 +675,12 @@ def streaming_evaluation_to_sink(
             completed tensor to artifact materialization.
     """
     _chunked_eval_to_sink_impl(
-        keys, base_tensors, eval_fn, batch_size, device, dtype,
-        storage_dtype, write_fn,
+        keys,
+        base_tensors,
+        eval_fn,
+        batch_size,
+        device,
+        dtype,
+        storage_dtype,
+        write_fn,
     )

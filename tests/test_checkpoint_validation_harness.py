@@ -54,9 +54,12 @@ class TestGuardRefusalNoEnvVar:
             env={},
             argv=[
                 "--run-checkpoint-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-model", "test.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-model",
+                "test.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -68,9 +71,12 @@ class TestGuardRefusalNoEnvVar:
             env={"COMFY_ECAJ_CHECKPOINT_VALIDATION": "0"},
             argv=[
                 "--run-checkpoint-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-model", "test.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-model",
+                "test.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -85,9 +91,12 @@ class TestGuardRefusalNoFlag:
         result = harness.check_guards(
             env={"COMFY_ECAJ_CHECKPOINT_VALIDATION": "1"},
             argv=[
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-model", "test.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-model",
+                "test.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -103,8 +112,10 @@ class TestGuardRefusalMissingApiUrl:
             env={"COMFY_ECAJ_CHECKPOINT_VALIDATION": "1"},
             argv=[
                 "--run-checkpoint-validation",
-                "--source-model", "test.safetensors",
-                "--report-output", "/fake/report.json",
+                "--source-model",
+                "test.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -120,8 +131,10 @@ class TestGuardRefusalMissingModelName:
             env={"COMFY_ECAJ_CHECKPOINT_VALIDATION": "1"},
             argv=[
                 "--run-checkpoint-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert not result.passed
@@ -137,8 +150,10 @@ class TestGuardRefusalMissingReportPath:
             env={"COMFY_ECAJ_CHECKPOINT_VALIDATION": "1"},
             argv=[
                 "--run-checkpoint-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-model", "test.safetensors",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-model",
+                "test.safetensors",
             ],
         )
         assert not result.passed
@@ -201,9 +216,12 @@ class TestGuardAllPass:
             env={"COMFY_ECAJ_CHECKPOINT_VALIDATION": "1"},
             argv=[
                 "--run-checkpoint-validation",
-                "--comfy-api-url", "http://127.0.0.1:8188",
-                "--source-model", "test.safetensors",
-                "--report-output", "/fake/report.json",
+                "--comfy-api-url",
+                "http://127.0.0.1:8188",
+                "--source-model",
+                "test.safetensors",
+                "--report-output",
+                "/fake/report.json",
             ],
         )
         assert result.passed
@@ -464,9 +482,7 @@ class TestMemoryModeNotChangedForSuccess:
 
     # AC: @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success
     def test_classify_failure_detects_oom(self):
-        result = harness.WorkflowResult(
-            name="test", accepted=False, error="OOM: cannot allocate"
-        )
+        result = harness.WorkflowResult(name="test", accepted=False, error="OOM: cannot allocate")
         assert harness.classify_failure(result) == "memory_mode"
 
     # AC: @live-comfy-saved-output-validation ac-memory-mode-not-changed-for-success
@@ -478,12 +494,20 @@ class TestMemoryModeNotChangedForSuccess:
         }
         mock_obj_info = {"WIDENEntry": {}, "WIDENExit": {}}
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value=mock_obj_info), \
-             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
-                 name="test", accepted=True, prompt_id="p1",
-             )), \
-             patch.object(harness, "check_cache_reuse", return_value=(True, "cached")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value=mock_obj_info),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="test",
+                    accepted=True,
+                    prompt_id="p1",
+                ),
+            ),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -715,10 +739,14 @@ class TestMockedRunValidation:
             "devices": [{"vram_state": "normal"}],
         }
         mock_obj_info = {
-            "WIDENEntry": {}, "WIDENExit": {},
-            "CheckpointLoaderSimple": {}, "KSampler": {},
-            "CLIPTextEncode": {}, "EmptyLatentImage": {},
-            "VAEDecode": {}, "SaveImage": {},
+            "WIDENEntry": {},
+            "WIDENExit": {},
+            "CheckpointLoaderSimple": {},
+            "KSampler": {},
+            "CLIPTextEncode": {},
+            "EmptyLatentImage": {},
+            "VAEDecode": {},
+            "SaveImage": {},
         }
 
         call_count = 0
@@ -735,10 +763,12 @@ class TestMockedRunValidation:
         def mock_check_cache(base_url, first_pid, reuse_pid, **kwargs):
             return True, f"WIDENExit node 3 cached in reuse prompt ({reuse_pid})"
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value=mock_obj_info), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", side_effect=mock_check_cache):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value=mock_obj_info),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", side_effect=mock_check_cache),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -791,7 +821,8 @@ class TestMockedRunValidation:
     def test_validation_with_failed_stats_returns_early(self):
         """If system_stats fails, report records error and returns early."""
         with patch.object(
-            harness, "query_system_stats",
+            harness,
+            "query_system_stats",
             side_effect=Exception("connection refused"),
         ):
             report = harness.run_validation(
@@ -819,17 +850,22 @@ class TestMockedRunValidation:
             submitted_names.append(name)
             if name == "checkpoint_save":
                 return harness.WorkflowResult(
-                    name=name, accepted=False,
+                    name=name,
+                    accepted=False,
                     error="Prompt has no outputs",
                 )
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id="p1",
+                name=name,
+                accepted=True,
+                prompt_id="p1",
             )
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="source.safetensors",
@@ -910,8 +946,13 @@ class TestWorkflowBuilders:
     def test_downstream_workflow_custom_params(self):
         wf = harness.build_downstream_workflow(
             "test.safetensors",
-            width=512, height=512, steps=5, cfg=7.5,
-            seed=123, sampler_name="dpmpp_2m", scheduler="karras",
+            width=512,
+            height=512,
+            steps=5,
+            cfg=7.5,
+            seed=123,
+            sampler_name="dpmpp_2m",
+            scheduler="karras",
             batch_size=2,
         )
         ks_node = next(v for v in wf.values() if v["class_type"] == "KSampler")
@@ -945,10 +986,7 @@ class TestWorkflowBuilders:
     def test_cache_reuse_workflow_same_model_name_as_save(self):
         save_wf = harness.build_checkpoint_save_workflow("test.safetensors")
         cache_wf = harness.build_cache_reuse_workflow("test.safetensors")
-        assert (
-            cache_wf["3"]["inputs"]["model_name"]
-            == save_wf["3"]["inputs"]["model_name"]
-        )
+        assert cache_wf["3"]["inputs"]["model_name"] == save_wf["3"]["inputs"]["model_name"]
 
 
 # ===========================================================================
@@ -992,22 +1030,32 @@ class TestReportJsonRoundtrip:
             node_classes=["WIDENEntry", "WIDENExit"],
             terminal_save_workflow_shape={"1": {"class_type": "CheckpointLoaderSimple"}},
             terminal_save_result=harness.WorkflowResult(
-                name="terminal", accepted=True, prompt_id="t1",
+                name="terminal",
+                accepted=True,
+                prompt_id="t1",
             ),
             checkpoint_save_workflow_shape={"1": {"class_type": "CheckpointLoaderSimple"}},
             checkpoint_save_result=harness.WorkflowResult(
-                name="save", accepted=True, prompt_id="s1",
+                name="save",
+                accepted=True,
+                prompt_id="s1",
             ),
             saved_artifact_path="/path/artifact.safetensors",
             saved_artifact_classification="checkpoint",
             checkpoint_loader_result=harness.WorkflowResult(
-                name="loader", accepted=True, prompt_id="l1",
+                name="loader",
+                accepted=True,
+                prompt_id="l1",
             ),
             downstream_result=harness.WorkflowResult(
-                name="downstream", accepted=True, prompt_id="d1",
+                name="downstream",
+                accepted=True,
+                prompt_id="d1",
             ),
             cache_reuse_result=harness.WorkflowResult(
-                name="cache", accepted=True, prompt_id="c1",
+                name="cache",
+                accepted=True,
+                prompt_id="c1",
             ),
             cache_reuse_detail="WIDENExit cached in reuse prompt",
             failure_categories={"scheduling": "none", "save": "none"},
@@ -1057,7 +1105,9 @@ class TestCheckCacheReuse:
 
         with patch.object(harness, "query_prompt_history", side_effect=mock_query):
             reused, detail = harness.check_cache_reuse(
-                "http://fake:8188", "first", "reuse",
+                "http://fake:8188",
+                "first",
+                "reuse",
             )
         assert reused is True
         assert "cached" in detail
@@ -1085,7 +1135,9 @@ class TestCheckCacheReuse:
 
         with patch.object(harness, "query_prompt_history", side_effect=mock_query):
             reused, detail = harness.check_cache_reuse(
-                "http://fake:8188", "first", "reuse",
+                "http://fake:8188",
+                "first",
+                "reuse",
             )
         assert reused is True
         assert "execution_cached" in detail
@@ -1109,7 +1161,9 @@ class TestCheckCacheReuse:
 
         with patch.object(harness, "query_prompt_history", side_effect=mock_query):
             reused, detail = harness.check_cache_reuse(
-                "http://fake:8188", "first", "reuse",
+                "http://fake:8188",
+                "first",
+                "reuse",
             )
         assert reused is False
         assert "NOT reused" in detail
@@ -1119,7 +1173,9 @@ class TestCheckCacheReuse:
         """Returns False with detail when history is unavailable."""
         with patch.object(harness, "query_prompt_history", return_value={}):
             reused, detail = harness.check_cache_reuse(
-                "http://fake:8188", "first", "reuse",
+                "http://fake:8188",
+                "first",
+                "reuse",
             )
         assert reused is False
         assert "unavailable" in detail
@@ -1128,11 +1184,14 @@ class TestCheckCacheReuse:
     def test_cache_check_handles_exception(self):
         """Returns False with detail when an exception occurs."""
         with patch.object(
-            harness, "query_prompt_history",
+            harness,
+            "query_prompt_history",
             side_effect=Exception("connection timeout"),
         ):
             reused, detail = harness.check_cache_reuse(
-                "http://fake:8188", "first", "reuse",
+                "http://fake:8188",
+                "first",
+                "reuse",
             )
         assert reused is False
         assert "failed" in detail
@@ -1148,11 +1207,16 @@ class TestCheckCacheReuse:
         }
 
         with patch.object(
-            harness, "query_prompt_history", return_value=no_exit_outputs_history,
+            harness,
+            "query_prompt_history",
+            return_value=no_exit_outputs_history,
         ):
             reused, detail = harness.check_cache_reuse(
-                "http://fake:8188", "first", "reuse",
-                first_elapsed=4.0, reuse_elapsed=0.7,
+                "http://fake:8188",
+                "first",
+                "reuse",
+                first_elapsed=4.0,
+                reuse_elapsed=0.7,
             )
         assert reused is True
         assert "timing" in detail
@@ -1167,11 +1231,16 @@ class TestCheckCacheReuse:
         }
 
         with patch.object(
-            harness, "query_prompt_history", return_value=no_exit_outputs_history,
+            harness,
+            "query_prompt_history",
+            return_value=no_exit_outputs_history,
         ):
             reused, detail = harness.check_cache_reuse(
-                "http://fake:8188", "first", "reuse",
-                first_elapsed=4.0, reuse_elapsed=3.5,
+                "http://fake:8188",
+                "first",
+                "reuse",
+                first_elapsed=4.0,
+                reuse_elapsed=3.5,
             )
         assert reused is False
         assert "timing does not indicate" in detail
@@ -1185,10 +1254,14 @@ class TestCheckCacheReuse:
         }
 
         with patch.object(
-            harness, "query_prompt_history", return_value=no_exit_outputs_history,
+            harness,
+            "query_prompt_history",
+            return_value=no_exit_outputs_history,
         ):
             reused, detail = harness.check_cache_reuse(
-                "http://fake:8188", "first", "reuse",
+                "http://fake:8188",
+                "first",
+                "reuse",
             )
         assert reused is False
         assert "no timing data" in detail
@@ -1225,13 +1298,17 @@ class TestDownstreamLoadsSavedArtifact:
         def mock_submit(base_url, workflow, name):
             submitted_workflows.append((name, workflow))
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id=f"p_{name}",
+                name=name,
+                accepted=True,
+                prompt_id=f"p_{name}",
             )
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", return_value=(True, "cached")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+        ):
             harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="source.safetensors",
@@ -1240,8 +1317,7 @@ class TestDownstreamLoadsSavedArtifact:
 
         # Find the downstream workflow submission
         downstream_submissions = [
-            (name, wf) for name, wf in submitted_workflows
-            if name == "downstream_ksampler"
+            (name, wf) for name, wf in submitted_workflows if name == "downstream_ksampler"
         ]
         assert len(downstream_submissions) == 1
         _, downstream_wf = downstream_submissions[0]
@@ -1308,8 +1384,10 @@ class TestSubmitWorkflowHistoryPolling:
             "status": {"status_str": "success", "messages": []},
         }
 
-        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
-             patch.object(harness, "query_prompt_history", return_value=mock_history):
+        with (
+            patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp),
+            patch.object(harness, "query_prompt_history", return_value=mock_history),
+        ):
             result = harness.submit_workflow("http://fake:8188", {}, "test_wf")
 
         assert result.accepted is True
@@ -1326,16 +1404,21 @@ class TestSubmitWorkflowHistoryPolling:
             "status": {
                 "status_str": "error",
                 "messages": [
-                    ["execution_error", {
-                        "node_type": "WIDENExit",
-                        "exception_message": "save_model failed: disk full",
-                    }],
+                    [
+                        "execution_error",
+                        {
+                            "node_type": "WIDENExit",
+                            "exception_message": "save_model failed: disk full",
+                        },
+                    ],
                 ],
             },
         }
 
-        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
-             patch.object(harness, "query_prompt_history", return_value=mock_history):
+        with (
+            patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp),
+            patch.object(harness, "query_prompt_history", return_value=mock_history),
+        ):
             result = harness.submit_workflow("http://fake:8188", {}, "test_wf")
 
         assert result.accepted is False
@@ -1348,8 +1431,10 @@ class TestSubmitWorkflowHistoryPolling:
         """Prompt accepted but /history never shows completion."""
         mock_prompt_resp = {"prompt_id": "p1"}
 
-        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
-             patch.object(harness, "query_prompt_history", return_value={}):
+        with (
+            patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp),
+            patch.object(harness, "query_prompt_history", return_value={}),
+        ):
             result = harness.submit_workflow("http://fake:8188", {}, "test_wf")
 
         assert result.accepted is False
@@ -1379,16 +1464,21 @@ class TestSubmitWorkflowHistoryPolling:
             "status": {
                 "status_str": "error",
                 "messages": [
-                    ["execution_error", {
-                        "node_type": "KSampler",
-                        "exception_message": "KSampler inference failed: NaN in latents",
-                    }],
+                    [
+                        "execution_error",
+                        {
+                            "node_type": "KSampler",
+                            "exception_message": "KSampler inference failed: NaN in latents",
+                        },
+                    ],
                 ],
             },
         }
 
-        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
-             patch.object(harness, "query_prompt_history", return_value=mock_history):
+        with (
+            patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp),
+            patch.object(harness, "query_prompt_history", return_value=mock_history),
+        ):
             result = harness.submit_workflow("http://fake:8188", {}, "downstream")
 
         assert result.accepted is False
@@ -1403,8 +1493,10 @@ class TestSubmitWorkflowHistoryPolling:
             "status": {"status_str": "success", "messages": []},
         }
 
-        with patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp), \
-             patch.object(harness, "query_prompt_history", return_value=mock_history):
+        with (
+            patch.object(harness, "_api_post_prompt", return_value=mock_prompt_resp),
+            patch.object(harness, "query_prompt_history", return_value=mock_history),
+        ):
             result = harness.submit_workflow("http://fake:8188", {}, "test_wf")
 
         assert result.elapsed_seconds > 0
@@ -1426,10 +1518,13 @@ class TestExtractNodeErrors:
             "status": {
                 "status_str": "error",
                 "messages": [
-                    ["execution_error", {
-                        "node_type": "SaveImage",
-                        "exception_message": "disk full",
-                    }],
+                    [
+                        "execution_error",
+                        {
+                            "node_type": "SaveImage",
+                            "exception_message": "disk full",
+                        },
+                    ],
                 ],
             },
         }
@@ -1458,19 +1553,28 @@ class TestExtractFailingNodeType:
     """_extract_failing_node_type parses the failing node class from error strings."""
 
     def test_ksampler_node_error(self):
-        assert harness._extract_failing_node_type(
-            "node_error(KSampler): inference failed",
-        ) == "KSampler"
+        assert (
+            harness._extract_failing_node_type(
+                "node_error(KSampler): inference failed",
+            )
+            == "KSampler"
+        )
 
     def test_checkpoint_loader_node_error(self):
-        assert harness._extract_failing_node_type(
-            "node_error(CheckpointLoaderSimple): could not load model",
-        ) == "CheckpointLoaderSimple"
+        assert (
+            harness._extract_failing_node_type(
+                "node_error(CheckpointLoaderSimple): could not load model",
+            )
+            == "CheckpointLoaderSimple"
+        )
 
     def test_widen_exit_node_error(self):
-        assert harness._extract_failing_node_type(
-            "node_error(WIDENExit): save failed",
-        ) == "WIDENExit"
+        assert (
+            harness._extract_failing_node_type(
+                "node_error(WIDENExit): save failed",
+            )
+            == "WIDENExit"
+        )
 
     def test_non_node_error_returns_empty(self):
         error = "execution_timeout: prompt never completed"
@@ -1505,17 +1609,22 @@ class TestLoaderDownstreamDistinction:
         def mock_submit(base_url, workflow, name):
             if name == "downstream_ksampler":
                 return harness.WorkflowResult(
-                    name=name, accepted=False,
+                    name=name,
+                    accepted=False,
                     error="node_error(KSampler): KSampler inference failed",
                 )
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id="p1",
+                name=name,
+                accepted=True,
+                prompt_id="p1",
             )
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -1541,17 +1650,22 @@ class TestLoaderDownstreamDistinction:
         def mock_submit(base_url, workflow, name):
             if name == "downstream_ksampler":
                 return harness.WorkflowResult(
-                    name=name, accepted=False,
+                    name=name,
+                    accepted=False,
                     error="node_error(CheckpointLoaderSimple): could not load model",
                 )
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id="p1",
+                name=name,
+                accepted=True,
+                prompt_id="p1",
             )
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -1576,13 +1690,17 @@ class TestLoaderDownstreamDistinction:
 
         def mock_submit(base_url, workflow, name):
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id=f"p_{name}",
+                name=name,
+                accepted=True,
+                prompt_id=f"p_{name}",
             )
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", return_value=(True, "cached")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -1605,17 +1723,22 @@ class TestLoaderDownstreamDistinction:
         def mock_submit(base_url, workflow, name):
             if name == "downstream_ksampler":
                 return harness.WorkflowResult(
-                    name=name, accepted=False,
+                    name=name,
+                    accepted=False,
                     error="node_error(VAEDecode): decode failed",
                 )
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id="p1",
+                name=name,
+                accepted=True,
+                prompt_id="p1",
             )
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -1647,17 +1770,22 @@ class TestMemoryModeFailurePropagation:
         def mock_submit(base_url, workflow, name):
             if name == "checkpoint_save":
                 return harness.WorkflowResult(
-                    name=name, accepted=False,
+                    name=name,
+                    accepted=False,
                     error="VRAM out of memory during save",
                 )
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id="p1",
+                name=name,
+                accepted=True,
+                prompt_id="p1",
             )
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -1686,17 +1814,22 @@ class TestMemoryModeFailurePropagation:
         def mock_submit(base_url, workflow, name):
             if name == "downstream_ksampler":
                 return harness.WorkflowResult(
-                    name=name, accepted=False,
+                    name=name,
+                    accepted=False,
                     error="node_error(KSampler): OOM: cannot allocate",
                 )
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id="p1",
+                name=name,
+                accepted=True,
+                prompt_id="p1",
             )
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -1717,12 +1850,20 @@ class TestMemoryModeFailurePropagation:
             "devices": [{"vram_state": "normal"}],
         }
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
-                 name="test", accepted=True, prompt_id="p1",
-             )), \
-             patch.object(harness, "check_cache_reuse", return_value=(True, "cached")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="test",
+                    accepted=True,
+                    prompt_id="p1",
+                ),
+            ),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="test.safetensors",
@@ -1750,10 +1891,14 @@ class TestNewMemoryArgsDoNotBypassGuards:
         result = harness.check_guards(
             env={},
             argv=[
-                "--comfy-pid", "12345",
-                "--comfy-log-path", "/fake/comfy.log",
-                "--repeat-cache-miss-runs", "3",
-                "--memory-accumulation-threshold-mb", "512",
+                "--comfy-pid",
+                "12345",
+                "--comfy-log-path",
+                "/fake/comfy.log",
+                "--repeat-cache-miss-runs",
+                "3",
+                "--memory-accumulation-threshold-mb",
+                "512",
             ],
         )
         assert not result.passed
@@ -1773,8 +1918,10 @@ class TestNewMemoryArgsDoNotBypassGuards:
             result = harness.check_guards(
                 env={},
                 argv=[
-                    "--comfy-pid", "12345",
-                    "--comfy-log-path", str(tmp_path / "fake.log"),
+                    "--comfy-pid",
+                    "12345",
+                    "--comfy-log-path",
+                    str(tmp_path / "fake.log"),
                 ],
             )
         assert not result.passed
@@ -1784,9 +1931,12 @@ class TestNewMemoryArgsDoNotBypassGuards:
         """main() with only new memory args still returns 1 (refusal)."""
         exit_code = harness.main(
             argv=[
-                "--comfy-pid", "999",
-                "--comfy-log-path", "/fake/comfy.log",
-                "--repeat-cache-miss-runs", "2",
+                "--comfy-pid",
+                "999",
+                "--comfy-log-path",
+                "/fake/comfy.log",
+                "--repeat-cache-miss-runs",
+                "2",
             ],
         )
         assert exit_code == 1
@@ -1842,8 +1992,10 @@ class TestProcessMemoryHelpers:
                 return orig_open(str(proc / "status"), *a, **kw)
             return orig_open(p, *a, **kw)
 
-        with patch.object(harness.os.path, "exists", side_effect=fake_exists), \
-             patch("builtins.open", side_effect=fake_open):
+        with (
+            patch.object(harness.os.path, "exists", side_effect=fake_exists),
+            patch("builtins.open", side_effect=fake_open),
+        ):
             obs = harness.collect_process_memory_observation(pid, "after-save")
 
         assert obs.available is True
@@ -1859,9 +2011,7 @@ class TestProcessMemoryHelpers:
         proc.mkdir(parents=True)
         # Only /proc/<pid>/status exists, no smaps_rollup
         (proc / "status").write_text(
-            "Name:   python\n"
-            "VmRSS:  9876 kB\n"
-            "VmSwap: 256 kB\n",
+            "Name:   python\nVmRSS:  9876 kB\nVmSwap: 256 kB\n",
         )
 
         orig_exists = os.path.exists
@@ -1879,8 +2029,10 @@ class TestProcessMemoryHelpers:
                 return orig_open(str(proc / "status"), *a, **kw)
             return orig_open(p, *a, **kw)
 
-        with patch.object(harness.os.path, "exists", side_effect=fake_exists), \
-             patch("builtins.open", side_effect=fake_open):
+        with (
+            patch.object(harness.os.path, "exists", side_effect=fake_exists),
+            patch("builtins.open", side_effect=fake_open),
+        ):
             obs = harness.collect_process_memory_observation(pid, "after-return")
 
         assert obs.available is True
@@ -1956,7 +2108,8 @@ class TestParseWidenMemoryLog:
             "[mem] after-checkpoint-save: RSS=2500MB VRAM=500MB(reserved=600MB)\n"
         )
         parsed = harness.parse_widen_memory_log(
-            log_text, ("after-checkpoint-save",),
+            log_text,
+            ("after-checkpoint-save",),
         )
         obs = parsed["after-checkpoint-save"]
         assert obs.available is True
@@ -1995,7 +2148,8 @@ class TestReadLogSegment:
     # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
     def test_unreadable_log_returns_error(self):
         text, end, err = harness.read_log_segment(
-            "/nonexistent/path/should/not/exist.log", 0,
+            "/nonexistent/path/should/not/exist.log",
+            0,
         )
         assert err
         assert text == ""
@@ -2065,16 +2219,25 @@ class TestReportIncludesProcessMemorySection:
             model_name="ecaj_checkpoint_validation_save_repeat-000-abc",
         )
         run.process_memory_before = harness.ProcessMemoryObservation(
-            label="before-run", available=True, source="smaps_rollup",
-            rss_kb=1000, swap_kb=10, anonymous_kb=900,
+            label="before-run",
+            available=True,
+            source="smaps_rollup",
+            rss_kb=1000,
+            swap_kb=10,
+            anonymous_kb=900,
         )
         run.process_memory_after_save = harness.ProcessMemoryObservation(
-            label="after-save", available=False,
+            label="after-save",
+            available=False,
             error="no --comfy-pid supplied",
         )
         run.process_memory_after_return = harness.ProcessMemoryObservation(
-            label="after-return", available=True, source="status",
-            rss_kb=1200, swap_kb=20, anonymous_kb=None,
+            label="after-return",
+            available=True,
+            source="status",
+            rss_kb=1200,
+            swap_kb=20,
+            anonymous_kb=None,
         )
         report = harness.CheckpointValidationReport(
             repeat_cache_miss_run_reports=[run],
@@ -2129,7 +2292,8 @@ class TestBuildRepeatCacheMissWorkflow:
     # AC: @live-comfy-saved-output-validation ac-report-records-repeated-cache-miss-memory
     def test_workflow_uses_supplied_model_name(self):
         wf = harness.build_repeat_cache_miss_workflow(
-            "src.safetensors", "ecaj_repeat_007_xyz",
+            "src.safetensors",
+            "ecaj_repeat_007_xyz",
         )
         assert wf["3"]["inputs"]["model_name"] == "ecaj_repeat_007_xyz"
         assert wf["3"]["inputs"]["enable_cache"] is False
@@ -2152,7 +2316,9 @@ class TestRunRepeatedCacheMissRuns:
         def mock_submit(base_url, workflow, name):
             submitted.append((name, workflow["3"]["inputs"]["model_name"]))
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id=f"p_{name}",
+                name=name,
+                accepted=True,
+                prompt_id=f"p_{name}",
             )
 
         with patch.object(harness, "submit_workflow", side_effect=mock_submit):
@@ -2176,7 +2342,8 @@ class TestRunRepeatedCacheMissRuns:
     # AC: @live-comfy-saved-output-validation ac-report-records-repeated-cache-miss-memory
     def test_each_run_records_save_result(self):
         with patch.object(
-            harness, "submit_workflow",
+            harness,
+            "submit_workflow",
             return_value=harness.WorkflowResult(name="r", accepted=True, prompt_id="x"),
         ):
             runs = harness.run_repeated_cache_miss_runs(
@@ -2190,7 +2357,8 @@ class TestRunRepeatedCacheMissRuns:
     # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
     def test_runs_record_unavailable_observation_when_pid_missing(self):
         with patch.object(
-            harness, "submit_workflow",
+            harness,
+            "submit_workflow",
             return_value=harness.WorkflowResult(name="r", accepted=True, prompt_id="x"),
         ):
             runs = harness.run_repeated_cache_miss_runs(
@@ -2226,8 +2394,7 @@ class TestRunRepeatedCacheMissRuns:
                     "RSS=4096MB VRAM=2048MB(reserved=3072MB)\n",
                 )
                 f.write(
-                    "2026-05-13 INFO [mem] "
-                    "after-checkpoint-temp-model-release: RSS=2048MB\n",
+                    "2026-05-13 INFO [mem] after-checkpoint-temp-model-release: RSS=2048MB\n",
                 )
             return harness.WorkflowResult(name=name, accepted=True, prompt_id="x")
 
@@ -2247,12 +2414,14 @@ class TestRunRepeatedCacheMissRuns:
 
     # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
     def test_runs_record_log_unavailable_when_log_path_missing_labels(
-        self, tmp_path,
+        self,
+        tmp_path,
     ):
         log_path = tmp_path / "comfy.log"
         log_path.write_text("some unrelated log\n")
         with patch.object(
-            harness, "submit_workflow",
+            harness,
+            "submit_workflow",
             return_value=harness.WorkflowResult(name="r", accepted=True, prompt_id="x"),
         ):
             runs = harness.run_repeated_cache_miss_runs(
@@ -2276,14 +2445,19 @@ class TestRunRepeatedCacheMissRuns:
         process_memory_after_save must always be recorded as unavailable
         — even when --comfy-pid is supplied and procfs is fully readable.
         """
+
         # fake_collect would return *available* observations for every
         # label it's asked for. If the harness ever calls
         # collect_process_memory_observation with "after-save" or returns
         # an available after-save observation, this test will fail.
         def fake_collect(pid, label):
             return harness.ProcessMemoryObservation(
-                label=label, available=True, source="smaps_rollup",
-                rss_kb=1_000_000, swap_kb=0, anonymous_kb=900_000,
+                label=label,
+                available=True,
+                source="smaps_rollup",
+                rss_kb=1_000_000,
+                swap_kb=0,
+                anonymous_kb=900_000,
             )
 
         seen_labels: list[str] = []
@@ -2292,14 +2466,20 @@ class TestRunRepeatedCacheMissRuns:
             seen_labels.append(label)
             return fake_collect(pid, label)
 
-        with patch.object(harness, "collect_process_memory_observation",
-                          side_effect=tracking_collect), \
-             patch.object(
-                 harness, "submit_workflow",
-                 return_value=harness.WorkflowResult(
-                     name="r", accepted=True, prompt_id="x",
-                 ),
-             ):
+        with (
+            patch.object(
+                harness, "collect_process_memory_observation", side_effect=tracking_collect
+            ),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="r",
+                    accepted=True,
+                    prompt_id="x",
+                ),
+            ),
+        ):
             runs = harness.run_repeated_cache_miss_runs(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2314,8 +2494,10 @@ class TestRunRepeatedCacheMissRuns:
         # The labels it *does* sample are the legitimate before-run /
         # after-return points (× 2 runs).
         assert seen_labels == [
-            "before-run", "after-return",
-            "before-run", "after-return",
+            "before-run",
+            "after-return",
+            "before-run",
+            "after-return",
         ]
 
         for run in runs:
@@ -2370,8 +2552,11 @@ class TestAnalyzeMemoryAccumulation:
             model_name=f"name_{index}",
         )
         run.process_memory_after_return = harness.ProcessMemoryObservation(
-            label="after-return", available=True, source="smaps_rollup",
-            rss_kb=rss_kb, swap_kb=swap_kb,
+            label="after-return",
+            available=True,
+            source="smaps_rollup",
+            rss_kb=rss_kb,
+            swap_kb=swap_kb,
         )
         return run
 
@@ -2418,7 +2603,9 @@ class TestAnalyzeMemoryAccumulation:
         runs = [
             self._run_with_post_return(0, rss_kb=1_000_000, swap_kb=0),
             self._run_with_post_return(
-                1, rss_kb=1_000_000, swap_kb=600_000,
+                1,
+                rss_kb=1_000_000,
+                swap_kb=600_000,
             ),  # +600 MB via swap
         ]
         result = harness.analyze_memory_accumulation(runs, threshold_mb=256)
@@ -2451,12 +2638,20 @@ class TestRunValidationRepeatCacheMiss:
             "system": {"comfyui_version": "0.3.4"},
             "devices": [{"vram_state": "normal"}],
         }
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
-                 name="t", accepted=True, prompt_id="p1",
-             )), \
-             patch.object(harness, "check_cache_reuse", return_value=(True, "cached")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="t",
+                    accepted=True,
+                    prompt_id="p1",
+                ),
+            ),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2464,10 +2659,7 @@ class TestRunValidationRepeatCacheMiss:
             )
         assert report.repeat_cache_miss_runs_requested == 0
         assert report.repeat_cache_miss_run_reports == []
-        assert (
-            report.repeated_cache_miss_memory_result.get("result")
-            == "not-requested"
-        )
+        assert report.repeated_cache_miss_memory_result.get("result") == "not-requested"
         # Threshold default still recorded for auditability.
         assert (
             report.repeated_cache_miss_memory_result["threshold_mb"]
@@ -2486,10 +2678,12 @@ class TestRunValidationRepeatCacheMiss:
             submitted_names.append((name, workflow["3"]["inputs"].get("model_name", "")))
             return harness.WorkflowResult(name=name, accepted=True, prompt_id=f"p_{name}")
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2502,9 +2696,7 @@ class TestRunValidationRepeatCacheMiss:
         identities = [r.cache_miss_identity for r in report.repeat_cache_miss_run_reports]
         assert len(set(identities)) == 3
         # Each repeat workflow's model_name is distinct.
-        repeat_names = [
-            m for n, m in submitted_names if n.startswith("repeat_cache_miss_")
-        ]
+        repeat_names = [m for n, m in submitted_names if n.startswith("repeat_cache_miss_")]
         assert len(set(repeat_names)) == 3
 
     # AC: @comfy-memory-manager-compatibility ac-repeated-cache-miss-memory-bounded
@@ -2522,8 +2714,12 @@ class TestRunValidationRepeatCacheMiss:
         def fake_collect(pid, label):
             if label != "after-return":
                 return harness.ProcessMemoryObservation(
-                    label=label, available=True, source="smaps_rollup",
-                    rss_kb=1_000_000, swap_kb=0, anonymous_kb=1_000_000,
+                    label=label,
+                    available=True,
+                    source="smaps_rollup",
+                    rss_kb=1_000_000,
+                    swap_kb=0,
+                    anonymous_kb=1_000_000,
                 )
             after_return_count[0] += 1
             # Primary save (1) + first repeat (2) are small; second
@@ -2534,18 +2730,29 @@ class TestRunValidationRepeatCacheMiss:
             else:
                 rss = 5_000_000  # +4 GB
             return harness.ProcessMemoryObservation(
-                label=label, available=True, source="smaps_rollup",
-                rss_kb=rss, swap_kb=0, anonymous_kb=rss,
+                label=label,
+                available=True,
+                source="smaps_rollup",
+                rss_kb=rss,
+                swap_kb=0,
+                anonymous_kb=rss,
             )
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
-                 name="r", accepted=True, prompt_id="p",
-             )), \
-             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")), \
-             patch.object(harness, "collect_process_memory_observation",
-                          side_effect=fake_collect):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="r",
+                    accepted=True,
+                    prompt_id="p",
+                ),
+            ),
+            patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")),
+            patch.object(harness, "collect_process_memory_observation", side_effect=fake_collect),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2560,10 +2767,7 @@ class TestRunValidationRepeatCacheMiss:
         assert report.repeated_cache_miss_memory_result["threshold_mb"] == 256
         # failure_categories propagates the accumulation failure.
         assert "repeated_cache_miss_memory" in report.failure_categories
-        assert (
-            report.failure_categories["repeated_cache_miss_memory"]
-            != "ok"
-        )
+        assert report.failure_categories["repeated_cache_miss_memory"] != "ok"
 
     # AC: @comfy-memory-manager-compatibility ac-repeated-cache-miss-memory-bounded
     def test_accumulation_within_threshold_is_ok(self):
@@ -2573,25 +2777,40 @@ class TestRunValidationRepeatCacheMiss:
         }
         # All observations roughly the same.
         flat_obs = harness.ProcessMemoryObservation(
-            label="x", available=True, source="smaps_rollup",
-            rss_kb=1_000_000, swap_kb=0, anonymous_kb=1_000_000,
+            label="x",
+            available=True,
+            source="smaps_rollup",
+            rss_kb=1_000_000,
+            swap_kb=0,
+            anonymous_kb=1_000_000,
         )
 
         def fake_collect(pid, label):
             obs = harness.ProcessMemoryObservation(
-                label=label, available=True, source="smaps_rollup",
-                rss_kb=1_000_000, swap_kb=0, anonymous_kb=1_000_000,
+                label=label,
+                available=True,
+                source="smaps_rollup",
+                rss_kb=1_000_000,
+                swap_kb=0,
+                anonymous_kb=1_000_000,
             )
             return obs
 
-        with patch.object(harness, "query_system_stats", return_value=mock_stats), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
-                 name="r", accepted=True, prompt_id="p",
-             )), \
-             patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")), \
-             patch.object(harness, "collect_process_memory_observation",
-                          side_effect=fake_collect):
+        with (
+            patch.object(harness, "query_system_stats", return_value=mock_stats),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="r",
+                    accepted=True,
+                    prompt_id="p",
+                ),
+            ),
+            patch.object(harness, "check_cache_reuse", return_value=(False, "n/a")),
+            patch.object(harness, "collect_process_memory_observation", side_effect=fake_collect),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2603,9 +2822,7 @@ class TestRunValidationRepeatCacheMiss:
         # _ = flat_obs  # ensure helper class is still constructible
         _ = flat_obs
         assert report.repeated_cache_miss_memory_result["result"] == "ok"
-        assert (
-            report.failure_categories["repeated_cache_miss_memory"] == "ok"
-        )
+        assert report.failure_categories["repeated_cache_miss_memory"] == "ok"
 
 
 # ===========================================================================
@@ -2647,20 +2864,26 @@ class TestRunValidationPrimarySaveMemory:
         def raising_collect(pid, label):
             called_labels.append(label)
             raise RuntimeError(
-                f"collect_process_memory_observation should not run "
-                f"for pid={pid} label={label}",
+                f"collect_process_memory_observation should not run for pid={pid} label={label}",
             )
 
-        with patch.object(harness, "query_system_stats",
-                          return_value=self._mock_stats()), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
-                 name="r", accepted=True, prompt_id="p",
-             )), \
-             patch.object(harness, "check_cache_reuse",
-                          return_value=(True, "cached")), \
-             patch.object(harness, "collect_process_memory_observation",
-                          side_effect=raising_collect):
+        with (
+            patch.object(harness, "query_system_stats", return_value=self._mock_stats()),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="r",
+                    accepted=True,
+                    prompt_id="p",
+                ),
+            ),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+            patch.object(
+                harness, "collect_process_memory_observation", side_effect=raising_collect
+            ),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2676,10 +2899,7 @@ class TestRunValidationPrimarySaveMemory:
         # The validation error was caught by run_validation's outer
         # try/except (the harness must not crash on observation
         # failures — but it must still attempt them).
-        assert any(
-            "collect_process_memory_observation" in err
-            for err in report.errors
-        )
+        assert any("collect_process_memory_observation" in err for err in report.errors)
 
     # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
     def test_primary_save_records_procfs_observations_when_pid_supplied(self):
@@ -2687,23 +2907,33 @@ class TestRunValidationPrimarySaveMemory:
         save's ``before`` and ``after-return`` observations are
         populated and ``after-save`` is recorded as unavailable.
         """
+
         def fake_collect(pid, label):
             return harness.ProcessMemoryObservation(
-                label=label, available=True, source="smaps_rollup",
-                rss_kb=2_000_000, swap_kb=10, anonymous_kb=1_900_000,
+                label=label,
+                available=True,
+                source="smaps_rollup",
+                rss_kb=2_000_000,
+                swap_kb=10,
+                anonymous_kb=1_900_000,
                 pid=pid,
             )
 
-        with patch.object(harness, "query_system_stats",
-                          return_value=self._mock_stats()), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
-                 name="r", accepted=True, prompt_id="p",
-             )), \
-             patch.object(harness, "check_cache_reuse",
-                          return_value=(True, "cached")), \
-             patch.object(harness, "collect_process_memory_observation",
-                          side_effect=fake_collect):
+        with (
+            patch.object(harness, "query_system_stats", return_value=self._mock_stats()),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="r",
+                    accepted=True,
+                    prompt_id="p",
+                ),
+            ),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+            patch.object(harness, "collect_process_memory_observation", side_effect=fake_collect),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2712,10 +2942,7 @@ class TestRunValidationPrimarySaveMemory:
             )
 
         primary = report.primary_checkpoint_save_run
-        assert (
-            primary.cache_miss_identity
-            == harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY
-        )
+        assert primary.cache_miss_identity == harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY
         assert primary.model_name == "ecaj_checkpoint_validation_save"
         assert primary.process_memory_before.available is True
         assert primary.process_memory_before.rss_kb == 2_000_000
@@ -2729,7 +2956,8 @@ class TestRunValidationPrimarySaveMemory:
 
     # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
     def test_primary_save_records_log_observations_when_log_supplied(
-        self, tmp_path,
+        self,
+        tmp_path,
     ):
         """With ``--comfy-log-path`` supplied and zero repeats, the
         primary save parses save-time and temp-release WIDEN labels.
@@ -2746,19 +2974,20 @@ class TestRunValidationPrimarySaveMemory:
                         "RSS=8192MB VRAM=4096MB(reserved=5120MB)\n",
                     )
                     f.write(
-                        "2026-05-13 INFO [mem] "
-                        "after-checkpoint-temp-model-release: RSS=4096MB\n",
+                        "2026-05-13 INFO [mem] after-checkpoint-temp-model-release: RSS=4096MB\n",
                     )
             return harness.WorkflowResult(
-                name=name, accepted=True, prompt_id=f"p_{name}",
+                name=name,
+                accepted=True,
+                prompt_id=f"p_{name}",
             )
 
-        with patch.object(harness, "query_system_stats",
-                          return_value=self._mock_stats()), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", side_effect=mock_submit), \
-             patch.object(harness, "check_cache_reuse",
-                          return_value=(True, "cached")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=self._mock_stats()),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(harness, "submit_workflow", side_effect=mock_submit),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2769,12 +2998,8 @@ class TestRunValidationPrimarySaveMemory:
         primary = report.primary_checkpoint_save_run
         assert primary.log_after_checkpoint_save.available is True
         assert primary.log_after_checkpoint_save.rss_mb == 8192
-        assert (
-            primary.log_after_checkpoint_temp_model_release.available is True
-        )
-        assert (
-            primary.log_after_checkpoint_temp_model_release.rss_mb == 4096
-        )
+        assert primary.log_after_checkpoint_temp_model_release.available is True
+        assert primary.log_after_checkpoint_temp_model_release.rss_mb == 4096
 
     # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
     def test_primary_save_records_unavailable_when_no_inputs_supplied(self):
@@ -2782,14 +3007,20 @@ class TestRunValidationPrimarySaveMemory:
         is still present but every observation is recorded as
         unavailable — the JSON shape is stable.
         """
-        with patch.object(harness, "query_system_stats",
-                          return_value=self._mock_stats()), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
-                 name="r", accepted=True, prompt_id="p",
-             )), \
-             patch.object(harness, "check_cache_reuse",
-                          return_value=(True, "cached")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=self._mock_stats()),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="r",
+                    accepted=True,
+                    prompt_id="p",
+                ),
+            ),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2797,29 +3028,30 @@ class TestRunValidationPrimarySaveMemory:
             )
 
         primary = report.primary_checkpoint_save_run
-        assert (
-            primary.cache_miss_identity
-            == harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY
-        )
+        assert primary.cache_miss_identity == harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY
         assert primary.process_memory_before.available is False
         assert primary.process_memory_after_save.available is False
         assert primary.process_memory_after_return.available is False
         assert primary.log_after_checkpoint_save.available is False
-        assert (
-            primary.log_after_checkpoint_temp_model_release.available is False
-        )
+        assert primary.log_after_checkpoint_temp_model_release.available is False
 
     # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
     def test_primary_save_run_serializes_in_json_report(self):
         """The primary save record is part of the JSON report."""
-        with patch.object(harness, "query_system_stats",
-                          return_value=self._mock_stats()), \
-             patch.object(harness, "query_object_info", return_value={}), \
-             patch.object(harness, "submit_workflow", return_value=harness.WorkflowResult(
-                 name="r", accepted=True, prompt_id="p",
-             )), \
-             patch.object(harness, "check_cache_reuse",
-                          return_value=(True, "cached")):
+        with (
+            patch.object(harness, "query_system_stats", return_value=self._mock_stats()),
+            patch.object(harness, "query_object_info", return_value={}),
+            patch.object(
+                harness,
+                "submit_workflow",
+                return_value=harness.WorkflowResult(
+                    name="r",
+                    accepted=True,
+                    prompt_id="p",
+                ),
+            ),
+            patch.object(harness, "check_cache_reuse", return_value=(True, "cached")),
+        ):
             report = harness.run_validation(
                 comfy_api_url="http://fake:8188",
                 source_model="src.safetensors",
@@ -2829,10 +3061,7 @@ class TestRunValidationPrimarySaveMemory:
         data = json.loads(report.to_json())
         assert "primary_checkpoint_save_run" in data
         primary = data["primary_checkpoint_save_run"]
-        assert (
-            primary["cache_miss_identity"]
-            == harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY
-        )
+        assert primary["cache_miss_identity"] == harness.PRIMARY_CHECKPOINT_SAVE_IDENTITY
         assert primary["model_name"] == "ecaj_checkpoint_validation_save"
         # Every nested observation dict is present.
         assert "process_memory_before" in primary
@@ -2854,8 +3083,12 @@ class TestRunValidationPrimarySaveMemory:
         )
         report.primary_checkpoint_save_run.process_memory_before = (
             harness.ProcessMemoryObservation(
-                label="before-run", available=True, source="smaps_rollup",
-                rss_kb=3000, swap_kb=0, anonymous_kb=2500,
+                label="before-run",
+                available=True,
+                source="smaps_rollup",
+                rss_kb=3000,
+                swap_kb=0,
+                anonymous_kb=2500,
             )
         )
         text = harness.format_report(report)
@@ -2880,19 +3113,22 @@ class TestSaveRunMemoryHelpers:
     # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
     def test_begin_returns_unavailable_observation_when_pid_none(self):
         before, offset = harness.begin_save_run_memory_observation(
-            None, None,
+            None,
+            None,
         )
         assert before.available is False
         assert offset == 0
 
     # AC: @live-comfy-saved-output-validation ac-report-records-process-memory-points
     def test_begin_captures_log_offset_when_log_path_supplied(
-        self, tmp_path,
+        self,
+        tmp_path,
     ):
         log_path = tmp_path / "comfy.log"
         log_path.write_bytes(b"existing log content\n")
         _before, offset = harness.begin_save_run_memory_observation(
-            None, str(log_path),
+            None,
+            str(log_path),
         )
         assert offset == len(b"existing log content\n")
 
@@ -2903,14 +3139,19 @@ class TestSaveRunMemoryHelpers:
 
         def fake_collect(pid, label):
             return harness.ProcessMemoryObservation(
-                label=label, available=True, source="smaps_rollup",
-                rss_kb=1000, swap_kb=0,
+                label=label,
+                available=True,
+                source="smaps_rollup",
+                rss_kb=1000,
+                swap_kb=0,
             )
 
-        with patch.object(harness, "collect_process_memory_observation",
-                          side_effect=fake_collect):
+        with patch.object(harness, "collect_process_memory_observation", side_effect=fake_collect):
             harness.finalize_save_run_memory_observation(
-                run, comfy_pid=4242, comfy_log_path=None, before_offset=0,
+                run,
+                comfy_pid=4242,
+                comfy_log_path=None,
+                before_offset=0,
             )
         assert run.process_memory_after_save.available is False
         assert "save-time" in run.process_memory_after_save.error.lower()
@@ -2926,7 +3167,9 @@ class TestSaveRunMemoryHelpers:
         )
         run = harness.CheckpointSaveRunReport()
         harness.finalize_save_run_memory_observation(
-            run, comfy_pid=None, comfy_log_path=str(log_path),
+            run,
+            comfy_pid=None,
+            comfy_log_path=str(log_path),
             before_offset=0,
         )
         assert run.log_after_checkpoint_save.available is True
@@ -2938,7 +3181,10 @@ class TestSaveRunMemoryHelpers:
     def test_finalize_records_log_unavailable_when_no_log_path(self):
         run = harness.CheckpointSaveRunReport()
         harness.finalize_save_run_memory_observation(
-            run, comfy_pid=None, comfy_log_path=None, before_offset=0,
+            run,
+            comfy_pid=None,
+            comfy_log_path=None,
+            before_offset=0,
         )
         assert run.log_after_checkpoint_save.available is False
         assert run.log_after_checkpoint_save.error
