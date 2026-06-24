@@ -9920,7 +9920,7 @@ runs:
     completed_at: 2026-06-24T04:40:47.308Z
   - _ulid: 01KVVZ773R7VX1NBP7RX6NKDPP
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9943,7 +9943,16 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-06-24T04:47:34.651Z
-        completed_at: 2026-06-24T04:47:34.651Z
+        completed_at: 2026-06-24T04:47:51.484Z
+        notes: "Coverage checked with kspec search: no matches for 'review reproduction', 'preflight shape',
+          'shape validation', 'LoRA shape', or 'same normalized key'. Broader searches found
+          existing coverage for review probes (@01KQ7ZHH, @01KQ815T9, @01KQCCBJ3), uv/path ambiguity
+          (@01KQ86Q4), and historical set-scoping work (@fix-lora-set-scoping), but nothing that
+          specifically tracks multi-set same-normalized-key validation probes."
+      - status: completed
+        step_index: 3
+        started_at: 2026-06-24T04:47:51.484Z
+        completed_at: 2026-06-24T04:47:51.484Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:46:38.200Z
