@@ -119,12 +119,12 @@ workspaces:
       detail: null
       eligible: false
       reason: null
-      updated_at: 2026-06-24T03:58:17.971Z
+      updated_at: 2026-06-24T03:58:22.042Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-06-24T03:58:17.971Z
+      updated_at: 2026-06-24T03:58:22.042Z
     integration:
       status: pending
       detail: null
@@ -132,8 +132,8 @@ workspaces:
       publication_mode: pull_request
       target_branch: dev
       target_commit: 0a0fdbe68425ce2f7f1fee58c97e1c85aa7404de
-      updated_at: 2026-06-24T03:58:17.971Z
-    lifecycle_state: ready
+      updated_at: 2026-06-24T03:58:22.042Z
+    lifecycle_state: integrating
     resolved_base_branch: dev
     task_id: 01KVVVJV4JCST8N84GX03DZYGJ
     task_ref: "@01KVVVJV4JCST8N84GX03DZYGJ"
@@ -141,16 +141,21 @@ workspaces:
     timestamps:
       closed_at: null
       last_active_at: 2026-06-24T03:44:40.472Z
-      last_reconciled_at: 2026-06-24T03:58:17.971Z
+      last_reconciled_at: 2026-06-24T03:58:22.042Z
       created_at: 2026-06-24T03:44:39.662Z
-      updated_at: 2026-06-24T03:58:17.971Z
+      updated_at: 2026-06-24T03:58:22.042Z
     workspace_id: dispatch-workspace-01KVVVJV4JCST8N84GX03DZYGJ
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
-      reviewer: null
+      reviewer:
+        branch_mode: detached
+        branch_ref: null
+        head: 41df8de1951f852bfa253b215bae3a6fb4956298
+        last_seen_at: 2026-06-24T03:58:22.042Z
+        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-krea2-architecture-recognition-routing-01kvvvjv-review
       worker:
         branch_mode: branch
         branch_ref: dispatch/task/task-krea2-architecture-recognition-routing/01kvvvjv
-        head: 0a0fdbe68425ce2f7f1fee58c97e1c85aa7404de
-        last_seen_at: 2026-06-24T03:44:39.662Z
+        head: 41df8de1951f852bfa253b215bae3a6fb4956298
+        last_seen_at: 2026-06-24T03:58:22.042Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-krea2-architecture-recognition-routing-01kvvvjv
