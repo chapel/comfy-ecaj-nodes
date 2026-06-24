@@ -187,6 +187,30 @@ events:
       from: open
       to: closed
     timestamp: 2026-06-24T04:27:40.414Z
+  - _ulid: 01KVVYPCAGSQYTS2ER36F0JJRW
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KVVY43366NFZQJ3W786D3BN0
+    timestamp: 2026-06-24T04:37:26.480Z
+  - _ulid: 01KVVYPCMT0KN27FH3AZZK0534
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KVVY43366NFZQJ3W786D3BN0
+    timestamp: 2026-06-24T04:37:26.810Z
+  - _ulid: 01KVVYPCZVQVH5A1TRDNQW81M0
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KVVY43JA80DFV34T6WT6G6CF
+    timestamp: 2026-06-24T04:37:27.163Z
+  - _ulid: 01KVVYPDAZT55XEYG86CWF6P43
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KVVY43JA80DFV34T6WT6G6CF
+    timestamp: 2026-06-24T04:37:27.519Z
 examined_commit: 0914a9d7fd96de80a60dd280463179286589439c
 external_links: []
 lifecycle_state: closed
@@ -218,7 +242,17 @@ threads:
           requires unsupported or shape-incompatible groups to be reported before merge execution
           publishes a result, with actionable incompatible-group diagnostics."
         created_at: 2026-06-24T04:27:27.206Z
+      - _ulid: 01KVVYPC9ERSD4M8JAPFKN6Q45
+        author: Jacob Chapel
+        body: "Fixed in 9d0f3591: Krea2Loader records the expected delta shape for each loaded group, and
+          Exit now passes current recipe key_shapes into validate_compatible_keys. Shape mismatches
+          are rejected during preflight with the affected key, package delta shape, and current
+          recipe shape before any batch apply runs. Added
+          test_mapped_keys_must_match_current_recipe_shapes."
+        created_at: 2026-06-24T04:37:26.446Z
     kind: blocker
+    resolved_at: 2026-06-24T04:37:26.791Z
+    resolved_by: Jacob Chapel
   - _ulid: 01KVVY43JA80DFV34T6WT6G6CF
     anchor:
       type: code
@@ -239,7 +273,16 @@ threads:
           expected strength * alpha / rank = 0.5. This changes LoRA contribution magnitude and
           violates stable/documented strength semantics."
         created_at: 2026-06-24T04:27:27.690Z
+      - _ulid: 01KVVYPCZ6W5V3JDK86GSCFXVH
+        author: Jacob Chapel
+        body: "Fixed in 9d0f3591: .alpha tensors are normalized through the same Krea 2 base-path mapping as
+          LoRA factor tensors and stored by normalized model key, so explicit alpha values now
+          produce strength * alpha / rank scaling. Added
+          test_explicit_alpha_uses_normalized_krea_key."
+        created_at: 2026-06-24T04:37:27.142Z
     kind: blocker
+    resolved_at: 2026-06-24T04:37:27.489Z
+    resolved_by: Jacob Chapel
 verdicts:
   - applies_to_version:
       type: entity_version
@@ -249,5 +292,5 @@ verdicts:
     role: reviewer
     created_at: 2026-06-24T04:27:40.410Z
 created_at: 2026-06-24T04:22:35.195Z
-updated_at: 2026-06-24T04:27:40.414Z
+updated_at: 2026-06-24T04:37:27.489Z
 notes: []

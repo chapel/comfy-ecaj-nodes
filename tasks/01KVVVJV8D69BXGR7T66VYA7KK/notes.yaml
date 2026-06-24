@@ -38,3 +38,18 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T04:27:40.687Z
+  - _ulid: 01KVVYPBWA2T29GCJNCFN70BGT
+    content: "Fix cycle 1: addressed both review blockers in commit 9d0f3591. Krea2Loader now normalizes
+      .alpha tensor paths before scale lookup, so explicit public-package alpha values affect
+      DeltaSpec.scale. The loader also records expected package delta shapes and Exit passes current
+      base key_shapes into validate_compatible_keys, so mapped Krea 2 groups with incompatible base
+      shapes fail preflight with actionable diagnostics. Re-verified ACs for supported package
+      loading, complete-or-rejected compatibility, stable strength semantics, and Krea-compatible
+      routing. Gates: python -m compileall lib nodes tests; python -m pytest
+      tests/test_krea2_lora_loader.py tests/test_krea2_architecture.py; python -m pytest; python -m
+      ruff check .; python -m ruff format --check .; kspec validate --refs --warnings-ok; kspec
+      validate --alignment --warnings-ok; kspec validate --completeness --warnings-ok. uv was
+      unavailable on PATH, so python -m equivalents were used."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T04:37:26.026Z
