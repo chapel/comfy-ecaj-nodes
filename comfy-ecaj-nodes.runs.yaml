@@ -9659,7 +9659,7 @@ runs:
     completed_at: 2026-06-24T04:06:53.387Z
   - _ulid: 01KVVXPYB6B9TN0EJJKVE7YMRE
     status: active
-    current_step: 3
+    current_step: 4
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9688,7 +9688,15 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-06-24T04:21:03.096Z
-        completed_at: 2026-06-24T04:21:03.096Z
+        completed_at: 2026-06-24T04:21:12.159Z
+        notes: "Improvement proposal: no new friction item proposed. Formatter baseline friction is already
+          tracked; resource lookup friction was not strong enough to capture. Success candidate:
+          document header-only safetensors range probing as a repeatable validation pattern for
+          large public model/LoRA packages."
+      - status: completed
+        step_index: 4
+        started_at: 2026-06-24T04:21:12.159Z
+        completed_at: 2026-06-24T04:21:12.159Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:20:16.358Z
