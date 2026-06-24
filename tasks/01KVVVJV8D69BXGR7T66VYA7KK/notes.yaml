@@ -68,3 +68,16 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T04:52:04.838Z
+  - _ulid: 01KVVZKVYQTP38VRRJ0EYF6MYP
+    content: "Fix cycle 2 complete in commit 4b493400. Addressed blocker @01KVVZ5N27FPX2TYE5B1M20E2G by
+      validating each Krea 2 LoRA set/group shape independently against current recipe key_shapes,
+      preventing a matching set from masking a mismatched set for the same model key. Added
+      behavioral regression test_each_loaded_set_shape_is_validated_before_execution. Gates run:
+      python -m pytest tests/test_krea2_lora_loader.py -q; python -m compileall lib nodes tests;
+      python -m ruff check .; python -m ruff format --check .; python -m pytest; kspec validate
+      --refs --warnings-ok; kspec validate --alignment --warnings-ok; kspec validate --completeness
+      --warnings-ok; kspec validate --warnings-ok. uv is unavailable on PATH, so python -m
+      equivalents were used."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T04:53:32.759Z
