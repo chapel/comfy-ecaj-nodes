@@ -193,9 +193,25 @@ events:
       status: skipped
       name: uv runner availability
     timestamp: 2026-06-24T04:02:32.990Z
+  - _ulid: 01KVVWPXZMSBJKVVHEX4W5SB8G
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-06-24T04:02:47.413Z
+  - _ulid: 01KVVWPXZNMZ4AG72C3GXANFME
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-06-24T04:02:47.413Z
 examined_commit: 41df8de1951f852bfa253b215bae3a6fb4956298
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
@@ -203,7 +219,14 @@ subject:
   ref: "@01KVVVJV4JCST8N84GX03DZYGJ"
   shadow_commit: ""
 threads: []
-verdicts: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-06-24T04:02:47.407Z
 created_at: 2026-06-24T03:59:05.927Z
-updated_at: 2026-06-24T04:02:32.961Z
+updated_at: 2026-06-24T04:02:47.413Z
 notes: []
