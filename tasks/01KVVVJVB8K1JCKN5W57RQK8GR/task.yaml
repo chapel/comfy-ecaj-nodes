@@ -44,8 +44,11 @@ description: |
 spec_ref: "@krea2-block-and-layer-controls"
 plan_ref: "@plan-krea-2-architecture-support-plan"
 origin: derived
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Approved in kspec review @01KVVYCJ and merged PR #120 into dev at 1dbc64e3. Added
+  Krea 2 block config controls, distinct Krea main/text-fusion/structural classification,
+  layer-category controls, registration, and behavioral tests."
 depends_on:
   - "@task-krea2-architecture-recognition-routing"
 context: []
@@ -136,6 +139,21 @@ history:
         previous: null
     command: review-link
     timestamp: 2026-06-24T04:32:05.714Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Approved in kspec review @01KVVYCJ and merged PR #120 into dev at 1dbc64e3. Added Krea 2 block
+          config controls, distinct Krea main/text-fusion/structural classification, layer-category
+          controls, registration, and behavioral tests."
+        previous: null
+      completed_at:
+        new: 2026-06-24T04:38:04.789Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-06-24T04:38:04.807Z
 resource_refs:
   - git_commit: null
     git_path: null
@@ -148,5 +166,6 @@ resource_refs:
 created_at: 2026-06-24T03:43:05.064Z
 started_at: 2026-06-24T04:22:20.290Z
 submitted_at: 2026-06-24T04:27:45.048Z
+completed_at: 2026-06-24T04:38:04.789Z
 todos: []
 automation: eligible
