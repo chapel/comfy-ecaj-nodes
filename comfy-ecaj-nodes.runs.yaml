@@ -9765,9 +9765,22 @@ runs:
     completed_at: 2026-06-24T04:29:47.864Z
   - _ulid: 01KVVY7C0R40QAM90PFXZ4GT0V
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-06-24T04:29:14.648Z
+        completed_at: 2026-06-24T04:30:07.981Z
+        notes: "Gate passed: session produced commit 011104d3, submitted @task-krea2-block-layer-controls to
+          pending_review, and opened PR #120. What worked well: task/plan context plus the existing
+          make_block_config_node factory made the Krea 2 node implementation narrow and consistent;
+          focused AC-annotated tests caught the intended behavior directly through classifier and
+          consumer paths."
+      - status: completed
+        step_index: 1
+        started_at: 2026-06-24T04:30:07.981Z
+        completed_at: 2026-06-24T04:30:07.981Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-06-24T04:29:14.648Z
