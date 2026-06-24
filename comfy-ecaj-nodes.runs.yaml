@@ -9532,7 +9532,7 @@ runs:
     completed_at: 2026-05-13T18:39:28.047Z
   - _ulid: 01KVVWAKPM0FHCS9TVKCNQ1WGD
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9546,7 +9546,17 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-24T03:56:50.108Z
-        completed_at: 2026-06-24T03:56:50.108Z
+        completed_at: 2026-06-24T03:56:57.780Z
+        notes: "Friction: task resources were listed as OK but the referenced resource files were not
+          present in the mutable worktree, so I had to fetch pinned public source files instead of
+          reading the imported references locally. The project gate expects uv, but uv is not
+          installed in this environment, forcing python -m fallbacks. Full ruff format --check is
+          noisy because many unrelated pre-existing files would be reformatted, so changed-file
+          format checks were needed to avoid unrelated churn."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-24T03:56:57.780Z
+        completed_at: 2026-06-24T03:56:57.780Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T03:56:03.668Z
