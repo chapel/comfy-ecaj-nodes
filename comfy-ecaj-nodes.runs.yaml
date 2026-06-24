@@ -9920,7 +9920,7 @@ runs:
     completed_at: 2026-06-24T04:40:47.308Z
   - _ulid: 01KVVZ773R7VX1NBP7RX6NKDPP
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9934,7 +9934,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-24T04:47:13.906Z
-        completed_at: 2026-06-24T04:47:13.906Z
+        completed_at: 2026-06-24T04:47:34.651Z
+        notes: "Friction: required gates name uv commands, but uv was unavailable on this review shell PATH,
+          so the review had to use python -m equivalents and record the deviation. This is already
+          covered by prior observation @01KQ86Q4 about verification environment ambiguity. Minor
+          friction: workflow command discovery required kspec help workflow after kspec workflow
+          list failed; not worth capturing as a new item."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-24T04:47:34.651Z
+        completed_at: 2026-06-24T04:47:34.651Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:46:38.200Z
