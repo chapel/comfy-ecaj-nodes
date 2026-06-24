@@ -1709,6 +1709,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-06-24T05:38:14.954Z
+  - _ulid: 01KVW2MAB7M7JY3EH1R4MWQCDY
+    type: friction
+    content: Task notes containing Markdown backticks can be interpreted by the shell when passed
+      through double-quoted command arguments; agents should use single quotes or files/stdin for
+      note bodies with command examples.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T05:46:13.223Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
