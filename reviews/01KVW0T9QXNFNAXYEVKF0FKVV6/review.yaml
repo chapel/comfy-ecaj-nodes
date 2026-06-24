@@ -2,7 +2,101 @@ _ulid: 01KVW0T9QXNFNAXYEVKF0FKVV6
 slugs: []
 title: Review Krea 2 LoRA package compatibility (cycle 4)
 author: Jacob Chapel
-checks: []
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m compileall lib nodes tests passed
+    name: compileall
+    required: true
+    runner: python -m compileall
+    created_at: 2026-06-24T05:20:48.690Z
+    completed_at: 2026-06-24T05:20:48.690Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m pytest tests/test_krea2_lora_loader.py tests/test_krea2_architecture.py -q passed
+    name: focused pytest
+    required: true
+    runner: python -m pytest
+    created_at: 2026-06-24T05:20:48.939Z
+    completed_at: 2026-06-24T05:20:48.939Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Full suite passed: 1758 passed in 14.04s"
+    name: pytest
+    required: true
+    runner: python -m pytest
+    created_at: 2026-06-24T05:20:49.197Z
+    completed_at: 2026-06-24T05:20:49.197Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: All checks passed
+    name: ruff check
+    required: true
+    runner: python -m ruff check .
+    created_at: 2026-06-24T05:20:49.441Z
+    completed_at: 2026-06-24T05:20:49.441Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 108 files already formatted
+    name: ruff format
+    required: true
+    runner: python -m ruff format --check .
+    created_at: 2026-06-24T05:20:49.702Z
+    completed_at: 2026-06-24T05:20:49.702Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Validation passed
+    name: kspec validate refs
+    required: true
+    runner: kspec validate --refs --warnings-ok
+    created_at: 2026-06-24T05:20:49.921Z
+    completed_at: 2026-06-24T05:20:49.921Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Validation passed with existing warnings: orphaned specs Foundation/WIDEN Merge and RAM
+      preflight status mismatch"
+    name: kspec validate alignment
+    required: true
+    runner: kspec validate --alignment --warnings-ok
+    created_at: 2026-06-24T05:20:50.129Z
+    completed_at: 2026-06-24T05:20:50.129Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Validation passed with existing missing-description warnings
+    name: kspec validate completeness
+    required: true
+    runner: kspec validate --completeness --warnings-ok
+    created_at: 2026-06-24T05:20:50.355Z
+    completed_at: 2026-06-24T05:20:50.355Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Pinned Comfy-Org and Krea style LoRA headers parse, but transformer.time_embed.linear_1/2
+      map to diffusion_model.tmlp.1/3 while pinned Krea 2 base header exposes
+      diffusion_model.tmlp.0.weight and diffusion_model.tmlp.2.weight. krea2_coolblue and retroanime
+      each report missing targets for tmlp.1 and tmlp.3.
+    name: public Krea 2 header target-shape check
+    required: true
+    runner: HTTP range safetensors header parser
+    created_at: 2026-06-24T05:20:50.583Z
+    completed_at: 2026-06-24T05:20:50.583Z
 events:
   - _ulid: 01KVW0T9QWP9ZY870PHTH262KA
     actor: Jacob Chapel
@@ -17,17 +111,132 @@ events:
       from: draft
       to: open
     timestamp: 2026-06-24T05:14:43.116Z
+  - _ulid: 01KVW15SJ5K4DJ81NN0NSWGK0N
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: compileall
+    timestamp: 2026-06-24T05:20:48.709Z
+  - _ulid: 01KVW15SSVXGVY8568H9DDES5W
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-06-24T05:20:48.955Z
+  - _ulid: 01KVW15T21W67ZA8JH5BF0Y6EP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-06-24T05:20:49.218Z
+  - _ulid: 01KVW15T9MZRQ4B60WFBNNSB3E
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check
+    timestamp: 2026-06-24T05:20:49.460Z
+  - _ulid: 01KVW15THP23EBJK4MNZE3QWSF
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff format
+    timestamp: 2026-06-24T05:20:49.718Z
+  - _ulid: 01KVW15TRHR6G3TGT3V0VXH1GG
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate refs
+    timestamp: 2026-06-24T05:20:49.937Z
+  - _ulid: 01KVW15TZ1E6TXV5XAZ8HHKJSC
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate alignment
+    timestamp: 2026-06-24T05:20:50.145Z
+  - _ulid: 01KVW15V63626KV1HADKE81EGP
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate completeness
+    timestamp: 2026-06-24T05:20:50.371Z
+  - _ulid: 01KVW15VD8BD3QA06RTWMNWWDH
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: public Krea 2 header target-shape check
+    timestamp: 2026-06-24T05:20:50.600Z
+  - _ulid: 01KVW15VNSEHQ096NBWW8NMZT7
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KVW15VN8GSS7RM6409GB21RM
+    timestamp: 2026-06-24T05:20:50.873Z
+  - _ulid: 01KVW15VX0VZZBYYST3VR9HV4Z
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-06-24T05:20:51.104Z
+  - _ulid: 01KVW15VX0ZMSP5N72B2QZDSJ5
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-06-24T05:20:51.104Z
 examined_commit: 13cb49fdb78b9d7c4aefbd81aa6e154d1000e718
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
   content_hash: ""
   ref: "@01KVVVJV8D69BXGR7T66VYA7KK"
   shadow_commit: ""
-threads: []
-verdicts: []
+threads:
+  - _ulid: 01KVW15VN8GSS7RM6409GB21RM
+    anchor:
+      type: code
+      commit: 13cb49fdb78b9d7c4aefbd81aa6e154d1000e718
+      line_end: 74
+      line_start: 73
+      path: lib/lora/krea2.py
+      side: head
+    entries:
+      - _ulid: 01KVW15VN8YNVBE35KNY04V672
+        author: Jacob Chapel
+        body: "MUST-FIX: the public diffusers-style Krea 2 timestep LoRA groups are mapped to non-existent
+          base keys. The pinned Krea 2 style LoRA headers contain transformer.time_embed.linear_1
+          and transformer.time_embed.linear_2, but the pinned Krea 2 base diffusion header exposes
+          tmlp.0.weight and tmlp.2.weight, not tmlp.1.weight or tmlp.3.weight. With the current
+          mapping, validate_compatible_keys rejects supported public style LoRAs before execution as
+          missing diffusion_model.tmlp.1.weight and diffusion_model.tmlp.3.weight, so
+          ac-supported-krea2-lora-packages-load is not satisfied for real public packages. Update
+          these exact mappings and add a behavioral/header regression that compares them against the
+          public base keyspace or an equivalent fixture using tmlp.0/2."
+        created_at: 2026-06-24T05:20:50.856Z
+    kind: blocker
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-06-24T05:20:51.104Z
 created_at: 2026-06-24T05:14:32.061Z
-updated_at: 2026-06-24T05:14:43.093Z
+updated_at: 2026-06-24T05:20:51.104Z
 notes: []
