@@ -2,7 +2,113 @@ _ulid: 01KVVWG5P79Z9N46G0ZVJWEK3E
 slugs: []
 title: Review task-krea2-architecture-recognition-routing
 author: Jacob Chapel
-checks: []
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --refs --warnings-ok: passed; Schema OK, References OK."
+    name: kspec validate --refs
+    required: true
+    runner: kspec
+    created_at: 2026-06-24T04:02:30.306Z
+    completed_at: 2026-06-24T04:02:30.306Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --alignment --warnings-ok: passed with existing warnings: 2 orphaned specs
+      and 1 pre-existing status mismatch."
+    name: kspec validate --alignment
+    required: true
+    runner: kspec
+    created_at: 2026-06-24T04:02:30.605Z
+    completed_at: 2026-06-24T04:02:30.605Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --completeness --warnings-ok: passed with existing missing-description
+      warnings."
+    name: kspec validate --completeness
+    required: true
+    runner: kspec
+    created_at: 2026-06-24T04:02:30.899Z
+    completed_at: 2026-06-24T04:02:30.899Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m compileall lib nodes tests: passed."
+    name: compileall
+    required: true
+    runner: python -m compileall
+    created_at: 2026-06-24T04:02:31.207Z
+    completed_at: 2026-06-24T04:02:31.207Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest tests/test_krea2_architecture.py tests/test_entry.py
+      tests/test_model_loader.py tests/test_lora_loaders.py tests/test_per_block_control.py: 184
+      passed in 0.65s."
+    name: focused pytest
+    required: true
+    runner: python -m pytest
+    created_at: 2026-06-24T04:02:31.509Z
+    completed_at: 2026-06-24T04:02:31.509Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m pytest: 1740 passed in 20.71s."
+    name: full pytest
+    required: true
+    runner: python -m pytest
+    created_at: 2026-06-24T04:02:31.802Z
+    completed_at: 2026-06-24T04:02:31.802Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m ruff check .: All checks passed."
+    name: ruff check
+    required: true
+    runner: python -m ruff
+    created_at: 2026-06-24T04:02:32.113Z
+    completed_at: 2026-06-24T04:02:32.113Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m ruff format --check on all 8 changed files: 8 files already formatted."
+    name: ruff format changed files
+    required: true
+    runner: python -m ruff
+    created_at: 2026-06-24T04:02:32.406Z
+    completed_at: 2026-06-24T04:02:32.406Z
+  - status: skipped
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: python -m ruff format --check . reports 56 pre-existing non-diff files would reformat;
+      changed files pass focused format check.
+    name: ruff format repo baseline
+    required: true
+    runner: python -m ruff
+    created_at: 2026-06-24T04:02:32.682Z
+    completed_at: 2026-06-24T04:02:32.682Z
+  - status: skipped
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv is not installed in this review environment (/usr/sbin/bash: uv: command not found);
+      equivalent python -m gates were run."
+    name: uv runner availability
+    required: true
+    runner: uv
+    created_at: 2026-06-24T04:02:32.961Z
+    completed_at: 2026-06-24T04:02:32.961Z
 events:
   - _ulid: 01KVVWG5NWW8NDMNFH951HA7TC
     actor: Jacob Chapel
@@ -17,6 +123,76 @@ events:
       from: draft
       to: open
     timestamp: 2026-06-24T03:59:22.723Z
+  - _ulid: 01KVVWPD9MCFH4XPR2M3NSS228
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --refs
+    timestamp: 2026-06-24T04:02:30.324Z
+  - _ulid: 01KVVWPDK5QSSD9JFR2S6D9RWD
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --alignment
+    timestamp: 2026-06-24T04:02:30.630Z
+  - _ulid: 01KVVWPDWEBG0Y6EZVWFVQ4ZGM
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate --completeness
+    timestamp: 2026-06-24T04:02:30.927Z
+  - _ulid: 01KVVWPE62S64B89YQ51MXMB64
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: compileall
+    timestamp: 2026-06-24T04:02:31.234Z
+  - _ulid: 01KVVWPEF88E596REPC2SSQJZC
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-06-24T04:02:31.528Z
+  - _ulid: 01KVVWPERP9ZY6GVSJMXM4H341
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-06-24T04:02:31.830Z
+  - _ulid: 01KVVWPF27QZDR8FQAVTZFN0HC
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check
+    timestamp: 2026-06-24T04:02:32.135Z
+  - _ulid: 01KVVWPFBGXQ99H5CCMDS7R4H8
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff format changed files
+    timestamp: 2026-06-24T04:02:32.432Z
+  - _ulid: 01KVVWPFM1DDZ5Z34EJYG87H2N
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: skipped
+      name: ruff format repo baseline
+    timestamp: 2026-06-24T04:02:32.705Z
+  - _ulid: 01KVVWPFWY09T7VWND4T09GKWR
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: skipped
+      name: uv runner availability
+    timestamp: 2026-06-24T04:02:32.990Z
 examined_commit: 41df8de1951f852bfa253b215bae3a6fb4956298
 external_links: []
 lifecycle_state: open
@@ -29,5 +205,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-24T03:59:05.927Z
-updated_at: 2026-06-24T03:59:22.686Z
+updated_at: 2026-06-24T04:02:32.961Z
 notes: []
