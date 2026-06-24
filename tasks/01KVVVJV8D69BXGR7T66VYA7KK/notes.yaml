@@ -86,3 +86,15 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T05:03:15.013Z
+  - _ulid: 01KVW0DRMZYHCGX96W74N5HYPF
+    content: "Fix cycle 3 approach: extend Krea2Loader's exact diffusers compatibility table for public
+      timestep projection LoRA groups named transformer.time_embed.linear_1,
+      transformer.time_embed.linear_2, and transformer.time_mod_proj. Map them to established Krea
+      recipe keys diffusion_model.tmlp.1.weight, diffusion_model.tmlp.3.weight, and
+      diffusion_model.tproj.1.weight, then add behavioral safetensors coverage proving the public
+      header groups load and validate against current recipe shapes. Re-verify ACs for supported
+      package loading, complete-or-rejected compatibility, stable strength semantics, and
+      Krea-compatible routing."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T05:07:41.344Z
