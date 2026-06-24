@@ -1934,6 +1934,9 @@ features:
           Krea 2 recipes expose meaningful user controls for Krea 2 model regions and
           layer categories, while preserving deterministic behavior for keys that do
           not belong to a user-adjustable group.
+        status:
+          maturity: draft
+          implementation: in_progress
         depends_on: []
         implements: []
         relates_to: []
