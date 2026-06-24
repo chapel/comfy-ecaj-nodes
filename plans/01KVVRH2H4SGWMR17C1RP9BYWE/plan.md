@@ -171,8 +171,8 @@ derive_from_specs: false
   tags: [krea2, architecture, entry-node, routing]
   spec_ref: "@krea2-architecture-support"
   resource_refs:
-    - krea2-technical-report-deep-dive
-    - krea2-implementation-reference
+    - "./resources/references/krea2-technical-report-deep-dive.md"
+    - "./resources/references/krea2-implementation-reference.md"
   depends_on: []
   description: |
     What: Add first-class `krea2` architecture recognition and route Krea 2 recipes
@@ -223,7 +223,7 @@ derive_from_specs: false
   tags: [krea2, lora, compatibility]
   spec_ref: "@krea2-lora-package-compatibility"
   resource_refs:
-    - krea2-implementation-reference
+    - "./resources/references/krea2-implementation-reference.md"
   depends_on:
     - "@task-krea2-architecture-recognition-routing"
   description: |
@@ -272,7 +272,7 @@ derive_from_specs: false
   tags: [krea2, block-config, layer-controls]
   spec_ref: "@krea2-block-and-layer-controls"
   resource_refs:
-    - krea2-implementation-reference
+    - "./resources/references/krea2-implementation-reference.md"
   depends_on:
     - "@task-krea2-architecture-recognition-routing"
   description: |
@@ -320,7 +320,7 @@ derive_from_specs: false
   tags: [krea2, tests, validation, smoke]
   spec_ref: "@krea2-architecture-support"
   resource_refs:
-    - krea2-implementation-reference
+    - "./resources/references/krea2-implementation-reference.md"
   depends_on:
     - "@task-krea2-lora-package-compatibility"
     - "@task-krea2-block-layer-controls"
