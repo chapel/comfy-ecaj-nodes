@@ -70,8 +70,8 @@ _EXACT_REPLACEMENTS = {
     "final_layer.linear": "last.linear",
     # Public diffusers-style Krea packages name the timestep projections after
     # their Diffusers modules; Krea checkpoints expose the same weights as tmlp/tproj.
-    "time_embed.linear_1": "tmlp.1",
-    "time_embed.linear_2": "tmlp.3",
+    "time_embed.linear_1": "tmlp.0",
+    "time_embed.linear_2": "tmlp.2",
     "time_mod_proj": "tproj.1",
     "txt_in.linear_1": "txtmlp.1",
     "txt_in.linear_2": "txtmlp.3",

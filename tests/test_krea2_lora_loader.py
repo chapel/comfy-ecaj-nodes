@@ -104,16 +104,16 @@ def test_diffusers_timestep_projection_groups_load_without_manual_renaming(
     loader.load(path, set_id="public")
 
     expected_keys = {
-        "diffusion_model.tmlp.1.weight",
-        "diffusion_model.tmlp.3.weight",
+        "diffusion_model.tmlp.0.weight",
+        "diffusion_model.tmlp.2.weight",
         "diffusion_model.tproj.1.weight",
     }
     assert loader.affected_keys_for_set("public") == expected_keys
     loader.validate_compatible_keys(
         expected_keys,
         {
-            "diffusion_model.tmlp.1.weight": (4, 3),
-            "diffusion_model.tmlp.3.weight": (5, 4),
+            "diffusion_model.tmlp.0.weight": (4, 3),
+            "diffusion_model.tmlp.2.weight": (5, 4),
             "diffusion_model.tproj.1.weight": (6, 5),
         },
     )
