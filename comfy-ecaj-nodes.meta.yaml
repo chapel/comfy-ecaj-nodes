@@ -1615,6 +1615,14 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-06-24T04:21:24.574Z
+  - _ulid: 01KVVYMQHXHY7FC7YKXAGRA2S5
+    type: friction
+    content: Dispatch shell PATH did not include uv even though project gates name uv commands; python
+      -m equivalents were required for validation evidence.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T04:36:32.445Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
