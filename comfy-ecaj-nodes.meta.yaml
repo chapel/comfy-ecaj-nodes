@@ -1687,6 +1687,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-06-24T05:05:28.340Z
+  - _ulid: 01KVW1NASTE33ZSY96B9BC57CE
+    type: success
+    content: Public Krea 2 header target-shape checks caught a compatibility-table error that CPU
+      synthetic fixtures initially encoded incorrectly; pairing synthetic safetensors tests with
+      pinned public-header evidence is worth repeating for package compatibility work.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T05:29:17.882Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
