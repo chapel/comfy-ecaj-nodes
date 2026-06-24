@@ -1606,6 +1606,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-06-24T04:18:27.415Z
+  - _ulid: 01KVVXS0YYH99GV07Y2HK3CTE6
+    type: success
+    content: For large public LoRA/model packages, safetensors header-only HTTP range requests against
+      pinned artifact URLs gave enough tensor names, dtypes, and shapes to design realistic
+      compatibility rules without downloading full payloads or using local asset paths.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T04:21:24.574Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
