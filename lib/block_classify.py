@@ -25,6 +25,7 @@ __all__ = [
     "classify_key_zimage",
     "classify_key_qwen",
     "classify_key_flux",
+    "classify_key_krea2",
 ]
 
 
@@ -215,6 +216,46 @@ def classify_key_flux(key: str) -> str | None:
 
 
 @functools.lru_cache(maxsize=4096)
+def classify_key_krea2(key: str) -> str | None:
+    """Classify a Krea 2 parameter key into a Krea-compatible group.
+
+    Krea 2 is a single-stream MMDiT with numbered ``blocks`` plus a
+    ``txtfusion`` adapter. This initial routing classifier is intentionally
+    structural; user-facing Krea block config controls are added by the
+    dependent block/layer-control task.
+    """
+    if key.startswith("diffusion_model."):
+        key = key[len("diffusion_model.") :]
+
+    match = re.match(r"blocks\.(\d+)\.", key)
+    if match:
+        return f"B{int(match.group(1)):02d}"
+
+    match = re.match(r"txtfusion\.layerwise_blocks\.(\d+)\.", key)
+    if match:
+        return f"TF_LW{int(match.group(1))}"
+
+    match = re.match(r"txtfusion\.refiner_blocks\.(\d+)\.", key)
+    if match:
+        return f"TF_REF{int(match.group(1))}"
+
+    if key.startswith("txtfusion.projector"):
+        return "TF_PROJECTOR"
+    if key.startswith("first."):
+        return "FIRST"
+    if key.startswith("tmlp."):
+        return "TMLP"
+    if key.startswith("txtmlp."):
+        return "TXTMLP"
+    if key.startswith("tproj."):
+        return "TPROJ"
+    if key.startswith("last."):
+        return "LAST"
+
+    return None
+
+
+@functools.lru_cache(maxsize=4096)
 def classify_key_sdxl_clip(key: str) -> str | None:
     """Classify an SDXL CLIP parameter key into an individual block.
 
@@ -271,6 +312,7 @@ _CLASSIFIERS: dict[str, Callable[[str], str | None]] = {
     "zimage": classify_key_zimage,
     "qwen": classify_key_qwen,
     "flux": classify_key_flux,
+    "krea2": classify_key_krea2,
 }
 
 
@@ -411,6 +453,28 @@ _FLUX_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
     ("modulation", "norm"),
 )
 
+# Layer type patterns for Krea 2.
+_KREA2_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
+    # Attention patterns
+    (".attn.", "attention"),
+    (".wq", "attention"),
+    (".wk", "attention"),
+    (".wv", "attention"),
+    (".wo", "attention"),
+    ("qknorm", "attention"),
+    # Feed-forward patterns
+    (".mlp.", "feed_forward"),
+    (".gate", "feed_forward"),
+    (".up", "feed_forward"),
+    (".down", "feed_forward"),
+    # Norm/modulation patterns
+    (".prenorm", "norm"),
+    (".postnorm", "norm"),
+    (".norm", "norm"),
+    (".mod.", "norm"),
+    ("modulation", "norm"),
+)
+
 # Layer type patterns for SDXL CLIP (ac-10)
 # CLIP text encoders use standard transformer patterns:
 # Attention: self_attn.q_proj, self_attn.k_proj, self_attn.v_proj, self_attn.out_proj
@@ -438,13 +502,12 @@ _LAYER_TYPE_PATTERNS: dict[str, tuple[tuple[str, str], ...]] = {
     "zimage": _ZIMAGE_LAYER_PATTERNS,
     "qwen": _QWEN_LAYER_PATTERNS,
     "flux": _FLUX_LAYER_PATTERNS,
+    "krea2": _KREA2_LAYER_PATTERNS,
 }
 
 
 @functools.lru_cache(maxsize=4096)
-def classify_layer_type(
-    key: str, arch: str | None, domain: str = "diffusion"
-) -> str | None:
+def classify_layer_type(key: str, arch: str | None, domain: str = "diffusion") -> str | None:
     """Classify a parameter key into a layer type for the given architecture and domain.
 
     # AC: @layer-type-filter ac-1
