@@ -9531,7 +9531,7 @@ runs:
     started_at: 2026-05-13T18:37:38.136Z
     completed_at: 2026-05-13T18:39:28.047Z
   - _ulid: 01KVVWAKPM0FHCS9TVKCNQ1WGD
-    status: active
+    status: completed
     current_step: 5
     initiated_by: Jacob Chapel
     step_results:
@@ -9585,7 +9585,13 @@ runs:
       - status: completed
         step_index: 5
         started_at: 2026-06-24T03:57:21.435Z
-        completed_at: 2026-06-24T03:57:21.435Z
+        completed_at: 2026-06-24T03:57:46.729Z
+        notes: Captured two friction observations (missing readable task resources in worktree; noisy
+          repo-wide ruff format baseline) and one success observation (AC-first tests plus shared
+          architecture detector caught the incomplete-signature diagnostic gap and kept
+          Entry/ModelLoader aligned). Did not duplicate uv environment friction because search found
+          existing observation @01KQ86Q4.
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T03:56:03.668Z
+    completed_at: 2026-06-24T03:57:46.729Z
