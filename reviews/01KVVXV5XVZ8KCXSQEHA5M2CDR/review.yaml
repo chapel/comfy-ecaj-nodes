@@ -55,6 +55,17 @@ checks:
     runner: python -m pytest
     created_at: 2026-06-24T04:27:08.599Z
     completed_at: 2026-06-24T04:27:08.599Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 18 passed in 0.08s. uv is not available on this review shell PATH; used active harness
+      Python with project dependencies present.
+    name: focused pytest
+    required: true
+    runner: python -m pytest tests/test_krea2_lora_loader.py tests/test_krea2_architecture.py
+    created_at: 2026-06-24T04:27:09.043Z
+    completed_at: 2026-06-24T04:27:09.043Z
 events:
   - _ulid: 01KVVXV5XVCMQNSZT737D11HJ1
     actor: Jacob Chapel
@@ -104,6 +115,13 @@ events:
       status: pass
       name: pytest
     timestamp: 2026-06-24T04:27:08.627Z
+  - _ulid: 01KVVY3HCRS3HZG8RADN4M7CCJ
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-06-24T04:27:09.080Z
 examined_commit: 0914a9d7fd96de80a60dd280463179286589439c
 external_links: []
 lifecycle_state: open
@@ -116,5 +134,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-24T04:22:35.195Z
-updated_at: 2026-06-24T04:27:08.599Z
+updated_at: 2026-06-24T04:27:09.043Z
 notes: []
