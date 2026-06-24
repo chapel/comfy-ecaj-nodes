@@ -45,7 +45,7 @@ description: |
 spec_ref: "@krea2-lora-package-compatibility"
 plan_ref: "@plan-krea-2-architecture-support-plan"
 origin: derived
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on:
   - "@task-krea2-architecture-recognition-routing"
@@ -60,8 +60,8 @@ review_ref: "@01KVVYZ83T40N95EPMWEVSV90B"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
-  captured_at: 2026-06-24T04:37:53.254Z
-  commit: 9d0f3591f47584f001949757fec26dcf7a1641d4
+  captured_at: 2026-06-24T04:53:49.778Z
+  commit: 4b4934005e31a023fb04ad85c6010d3198ea4529
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
@@ -217,6 +217,33 @@ history:
         previous: 2026-06-24T04:32:09.432Z
     command: task-start
     timestamp: 2026-06-24T04:49:53.782Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
+          captured_at: 2026-06-24T04:53:49.778Z
+          commit: 4b4934005e31a023fb04ad85c6010d3198ea4529
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
+        previous:
+          review_url: null
+          branch: dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
+          captured_at: 2026-06-24T04:37:53.254Z
+          commit: 9d0f3591f47584f001949757fec26dcf7a1641d4
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
+      submitted_at:
+        new: 2026-06-24T04:53:49.794Z
+        previous: 2026-06-24T04:37:53.282Z
+    command: task-submit
+    timestamp: 2026-06-24T04:53:49.794Z
 resource_refs:
   - git_commit: null
     git_path: null
@@ -228,6 +255,6 @@ resource_refs:
     sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
 created_at: 2026-06-24T03:43:04.973Z
 started_at: 2026-06-24T04:49:53.775Z
-submitted_at: 2026-06-24T04:37:53.282Z
+submitted_at: 2026-06-24T04:53:49.794Z
 todos: []
 automation: eligible
