@@ -98,3 +98,10 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T05:45:59.897Z
+  - _ulid: 01KVW2NWN21NCV14S6DBG01RJK
+    content: "Runner note: uv is not available on PATH in this dispatch shell, and python -m uv is not
+      installed. I used the active workspace Python environment for equivalent gates: python -m
+      compileall, python -m pytest, python -m ruff check, and python -m ruff format --check."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T05:47:04.738Z
