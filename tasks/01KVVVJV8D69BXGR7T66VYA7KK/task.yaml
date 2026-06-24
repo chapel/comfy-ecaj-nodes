@@ -56,7 +56,7 @@ tags:
   - lora
   - compatibility
 vcs_refs: []
-review_ref: "@01KVVXV5XVZ8KCXSQEHA5M2CDR"
+review_ref: "@01KVVYZ83T40N95EPMWEVSV90B"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-krea2-lora-package-compatibility/01kvvvjv
@@ -187,6 +187,13 @@ history:
         previous: 2026-06-24T04:19:06.918Z
     command: task-submit
     timestamp: 2026-06-24T04:37:53.282Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KVVYZ83T40N95EPMWEVSV90B"
+        previous: "@01KVVXV5XVZ8KCXSQEHA5M2CDR"
+    command: review-link
+    timestamp: 2026-06-24T04:42:17.695Z
 resource_refs:
   - git_commit: null
     git_path: null
