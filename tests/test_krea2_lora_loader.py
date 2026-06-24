@@ -82,6 +82,51 @@ def test_diffusers_public_family_loads_without_manual_renaming(tmp_path: Path) -
     assert {spec.kind for spec in specs} == {"standard"}
 
 
+def test_diffusers_timestep_projection_groups_load_without_manual_renaming(
+    tmp_path: Path,
+) -> None:
+    # AC: @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load
+    # AC: @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
+    # AC: @krea2-architecture-support ac-krea2-recipe-uses-krea-compatible-paths
+    path = _write_lora(
+        tmp_path,
+        {
+            "transformer.time_embed.linear_1.lora_A.weight": torch.ones(2, 3),
+            "transformer.time_embed.linear_1.lora_B.weight": torch.ones(4, 2),
+            "transformer.time_embed.linear_2.lora_A.weight": torch.ones(2, 4),
+            "transformer.time_embed.linear_2.lora_B.weight": torch.ones(5, 2),
+            "transformer.time_mod_proj.lora_A.weight": torch.ones(2, 5),
+            "transformer.time_mod_proj.lora_B.weight": torch.ones(6, 2),
+        },
+    )
+
+    loader = Krea2Loader()
+    loader.load(path, set_id="public")
+
+    expected_keys = {
+        "diffusion_model.tmlp.1.weight",
+        "diffusion_model.tmlp.3.weight",
+        "diffusion_model.tproj.1.weight",
+    }
+    assert loader.affected_keys_for_set("public") == expected_keys
+    loader.validate_compatible_keys(
+        expected_keys,
+        {
+            "diffusion_model.tmlp.1.weight": (4, 3),
+            "diffusion_model.tmlp.3.weight": (5, 4),
+            "diffusion_model.tproj.1.weight": (6, 5),
+        },
+    )
+
+    specs = loader.get_delta_specs(
+        sorted(expected_keys),
+        {key: i for i, key in enumerate(sorted(expected_keys))},
+        set_id="public",
+    )
+    assert len(specs) == 3
+    assert {spec.kind for spec in specs} == {"standard"}
+
+
 def test_native_public_family_loads_lora_and_bias_deltas(tmp_path: Path) -> None:
     # AC: @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load
     path = _write_lora(
