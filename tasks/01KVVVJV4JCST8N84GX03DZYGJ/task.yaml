@@ -1,0 +1,120 @@
+_ulid: 01KVVVJV4JCST8N84GX03DZYGJ
+slugs:
+  - task-krea2-architecture-recognition-routing
+title: Add Krea 2 architecture recognition and recipe routing
+type: task
+description: |
+  What: Add first-class `krea2` architecture recognition and route Krea 2 recipes
+  through Krea-compatible architecture paths.
+
+  Resources:
+  - [Krea 2 technical report deep dive](./resources/references/krea2-technical-report-deep-dive.md)
+    for architecture context and non-claims.
+  - [Krea 2 implementation reference](./resources/references/krea2-implementation-reference.md)
+    for pinned public source links and planning facts.
+
+  Why: Krea 2 has its own denoiser/text-fusion structure and should not be
+  accepted by accidental overlap with another architecture family.
+
+  How:
+  - Inspect current architecture recognition in `nodes/entry.py` and any shared
+    architecture registry/helpers used by loaders, classifiers, model loaders,
+    and saved-output code.
+  - Define Krea 2 recognition rules using Krea-specific positive evidence. The
+    rule should require enough Krea evidence to distinguish Krea 2 from existing
+    supported families and should not rely on a single generic transformer key.
+  - Keep the unsupported/ambiguous architecture path separate from successful
+    Krea detection so tests can assert the two behaviors independently.
+  - Register `krea2` in the architecture-sensitive places that need to select
+    Krea-compatible behavior.
+  - Add compatibility handling for precision/quantization classes as a warning
+    or explicit compatibility check. Do not add a blanket FP8 ban; prefer
+    like-with-like compatibility and explicit diagnostics for mixed or
+    unsupported combinations.
+
+  Testing:
+  - Add synthetic state-dict tests for positive Krea 2 recognition.
+  - Add negative tests for incomplete, unknown, and ambiguous architecture
+    signatures.
+  - Add routing tests proving a `krea2` recipe reaches Krea-compatible loader,
+    classifier, model-loader, and validation branches where those branches exist.
+  - Run `uv run python -m compileall lib nodes tests`, focused pytest for the
+    touched architecture tests, and the project review gates from the
+    `comfy-widen-gates` skill.
+
+  Covers: @krea2-architecture-support ac-krea2-detected-from-krea-signature,
+    ac-ambiguous-or-unknown-architecture-rejected,
+    ac-krea2-recipe-uses-krea-compatible-paths.
+spec_ref: "@krea2-architecture-support"
+plan_ref: "@plan-krea-2-architecture-support-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - krea2
+  - architecture
+  - entry-node
+  - routing
+vcs_refs: []
+history:
+  - author: Jacob Chapel
+    changes:
+      resource_refs:
+        new:
+          - git_commit: null
+            git_path: null
+            id: plan-krea2-technical-report-deep-dive
+            owner_ref: "@task-krea2-architecture-recognition-routing"
+            owner_type: task
+            path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-technical-report-deep-dive.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 1e57b7a4242611c44db20bb4aad1f997f58f1e23919c907db97040a9634690f7
+          - git_commit: null
+            git_path: null
+            id: plan-krea2-implementation-reference
+            owner_ref: "@task-krea2-architecture-recognition-routing"
+            owner_type: task
+            path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-implementation-reference.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+        previous:
+          - git_commit: null
+            git_path: null
+            id: krea2-technical-report-deep-dive
+            owner_ref: "@plan-krea-2-architecture-support-plan"
+            owner_type: plan
+            path: references/krea2-technical-report-deep-dive.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 1e57b7a4242611c44db20bb4aad1f997f58f1e23919c907db97040a9634690f7
+          - git_commit: null
+            git_path: null
+            id: krea2-implementation-reference
+            owner_ref: "@plan-krea-2-architecture-support-plan"
+            owner_type: plan
+            path: references/krea2-implementation-reference.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+    command: unknown
+    timestamp: 2026-06-24T03:43:04.960Z
+resource_refs:
+  - git_commit: null
+    git_path: null
+    id: plan-krea2-technical-report-deep-dive
+    owner_ref: "@task-krea2-architecture-recognition-routing"
+    owner_type: task
+    path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-technical-report-deep-dive.md
+    recorded_at: 2026-06-24T03:43:04.843Z
+    sha256: 1e57b7a4242611c44db20bb4aad1f997f58f1e23919c907db97040a9634690f7
+  - git_commit: null
+    git_path: null
+    id: plan-krea2-implementation-reference
+    owner_ref: "@task-krea2-architecture-recognition-routing"
+    owner_type: task
+    path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-implementation-reference.md
+    recorded_at: 2026-06-24T03:43:04.843Z
+    sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+created_at: 2026-06-24T03:43:04.850Z
+todos: []

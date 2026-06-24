@@ -1,0 +1,95 @@
+_ulid: 01KVVVJVDY3HANBJP25XMN3F54
+slugs:
+  - task-krea2-validation-and-smoke-evidence
+title: Add Krea 2 validation fixtures and optional smoke evidence
+type: task
+description: |
+  What: Add Krea-specific test fixtures and optional validation evidence for the
+  implemented architecture, LoRA, and block/layer behavior.
+
+  Why: Krea 2 assets are large, but support still needs repeatable CPU-safe
+  tests plus a clear path for optional real-file or Comfy smoke evidence.
+
+  How:
+  - Keep required tests CPU-safe and synthetic.
+  - Add fixture data that exercises Krea architecture recognition, supported
+    LoRA package families, compound-name preservation, block/layer controls,
+    unsupported-package diagnostics, and precision/quantization compatibility
+    warnings or failures.
+  - Add an optional header/probe helper that accepts explicit operator-provided
+    paths or downloaded public sample locations. Do not hard-code local model
+    directories in tests, docs, or plan-derived task text.
+  - Document a Comfy smoke workflow using public source references and
+    operator-provided model assets. The smoke may be skipped when GPU/assets are
+    unavailable, but the skip reason and replacement evidence must be recorded.
+  - If the project-wide trait/validation plan creates a reusable validation
+    trait before this task starts, consider applying it in a separate reviewed
+    metadata update rather than expanding this task's product scope.
+
+  Testing:
+  - Run the required CPU-safe Krea tests.
+  - Run optional header/probe validation when assets are available.
+  - Run or document the Comfy smoke path with exact evidence or a concrete skip
+    reason.
+  - Run `kspec validate --warnings-ok` and the `comfy-widen-gates` review gates.
+
+  Covers: @krea2-architecture-support ac-krea2-detected-from-krea-signature,
+    ac-ambiguous-or-unknown-architecture-rejected,
+    ac-krea2-recipe-uses-krea-compatible-paths;
+    @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load,
+    ac-lora-compatibility-is-complete-or-rejected,
+    ac-krea2-lora-strength-controls-are-stable;
+    @krea2-block-and-layer-controls ac-main-model-regions-are-controllable,
+    ac-text-fusion-regions-are-controllable,
+    ac-layer-category-controls-are-controllable.
+spec_ref: "@krea2-architecture-support"
+plan_ref: "@plan-krea-2-architecture-support-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-krea2-lora-package-compatibility"
+  - "@task-krea2-block-layer-controls"
+context: []
+priority: 3
+tags:
+  - krea2
+  - tests
+  - validation
+  - smoke
+vcs_refs: []
+history:
+  - author: Jacob Chapel
+    changes:
+      resource_refs:
+        new:
+          - git_commit: null
+            git_path: null
+            id: plan-krea2-implementation-reference
+            owner_ref: "@task-krea2-validation-and-smoke-evidence"
+            owner_type: task
+            path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-implementation-reference.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+        previous:
+          - git_commit: null
+            git_path: null
+            id: krea2-implementation-reference
+            owner_ref: "@plan-krea-2-architecture-support-plan"
+            owner_type: plan
+            path: references/krea2-implementation-reference.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+    command: unknown
+    timestamp: 2026-06-24T03:43:05.215Z
+resource_refs:
+  - git_commit: null
+    git_path: null
+    id: plan-krea2-implementation-reference
+    owner_ref: "@task-krea2-validation-and-smoke-evidence"
+    owner_type: task
+    path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-implementation-reference.md
+    recorded_at: 2026-06-24T03:43:04.843Z
+    sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+created_at: 2026-06-24T03:43:05.150Z
+todos: []

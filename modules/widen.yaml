@@ -1577,6 +1577,53 @@ features:
           for resource release
         when: it implements the loader interface
     tags: []
+    features:
+      - _ulid: 01KVVVJTWP36N0R4NCKG2ZJ9DA
+        slugs:
+          - krea2-lora-package-compatibility
+        title: Krea 2 LoRA Package Compatibility
+        type: feature
+        description: |
+          Users can apply supported public Krea 2 LoRA packages to Krea 2 WIDEN recipes
+          without hand-renaming tensor keys, and incompatible packages fail before a
+          partial or misleading merge is produced.
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        acceptance_criteria:
+          - given: |
+              A user selects a Krea 2 LoRA package from a supported public Krea 2 LoRA
+              family for a Krea 2 recipe.
+            id: ac-supported-krea2-lora-packages-load
+            then: |
+              the LoRA contribution is applied to the intended Krea 2 weight groups
+              without requiring the user to manually edit package tensor names.
+            when: |
+              the LoRA node and Exit executor apply the recipe.
+          - given: |
+              A selected Krea 2 LoRA package contains tensor groups outside the supported
+              compatibility rules for the current Krea 2 recipe.
+            id: ac-lora-compatibility-is-complete-or-rejected
+            then: |
+              WIDEN either applies every required supported group or fails with a report
+              of the unsupported or incompatible groups; it does not silently publish a
+              partial merge as successful.
+            when: |
+              the package is checked before merge execution publishes a result.
+          - given: |
+              A Krea 2 LoRA is supported for the current recipe.
+            id: ac-krea2-lora-strength-controls-are-stable
+            then: |
+              the resulting recipe changes only through the documented strength and
+              block/layer semantics, with deterministic behavior across repeated runs.
+            when: |
+              the user changes LoRA strength or combines the LoRA with block/layer
+              controls.
+        tags: []
+        created: 2026-06-24T03:43:04.598Z
+        notes: []
     requirements:
       - _ulid: 01KH4HA445WEG2RT7V1XGK45D3
         slugs:
@@ -1874,6 +1921,54 @@ features:
         then: backbone is returned for those keys (widen skipped)
         when: per-block WIDEN processing runs for that block
     tags: []
+    features:
+      - _ulid: 01KVVVJTZS1DHQH53WWSMFZ182
+        slugs:
+          - krea2-block-and-layer-controls
+        title: Krea 2 Block and Layer Controls
+        type: feature
+        description: |
+          Krea 2 recipes expose meaningful user controls for Krea 2 model regions and
+          layer categories, while preserving deterministic behavior for keys that do
+          not belong to a user-adjustable group.
+        depends_on: []
+        implements: []
+        relates_to: []
+        tests: []
+        traits: []
+        acceptance_criteria:
+          - given: |
+              A Krea 2 recipe includes main denoiser model regions that are eligible for
+              per-region merge or LoRA weighting.
+            id: ac-main-model-regions-are-controllable
+            then: |
+              changes to a main-region control affect only the corresponding Krea 2
+              main model region and leave unrelated regions at their configured values.
+            when: |
+              the user configures Krea 2 block controls.
+          - given: |
+              A Krea 2 recipe includes Krea text-fusion regions that are eligible for
+              per-region merge or LoRA weighting.
+            id: ac-text-fusion-regions-are-controllable
+            then: |
+              changes to a text-fusion control affect the corresponding Krea text-fusion
+              region rather than being collapsed into an unrelated main-model or
+              generic catch-all control.
+            when: |
+              the user configures Krea 2 text-fusion controls.
+          - given: |
+              A Krea 2 recipe contains weights belonging to supported layer categories
+              such as attention, feed-forward, normalization, embedding/projection, or
+              structural/fallback groups.
+            id: ac-layer-category-controls-are-controllable
+            then: |
+              each supported category modifies only its documented category of Krea 2
+              weights, and unsupported categories remain deterministic and documented.
+            when: |
+              the user configures Krea 2 layer-category controls.
+        tags: []
+        created: 2026-06-24T03:43:04.697Z
+        notes: []
     requirements:
       - _ulid: 01KH4HA4529G5BGA25WXD1VJWQ
         slugs:
@@ -3068,6 +3163,53 @@ features:
         created: 2026-02-15T19:59:49.235Z
         notes: []
     created: 2026-02-15T19:59:49.073Z
+    notes: []
+  - _ulid: 01KVVVJTTNY14MHNPHPEDB63GA
+    slugs:
+      - krea2-architecture-support
+    title: Krea 2 Architecture Support
+    type: feature
+    description: |
+      WIDEN treats Krea 2 as a supported architecture family with its own observable
+      model signature and recipe behavior. Krea 2 support is based on Krea-specific
+      model features and compatibility rules rather than reusing another
+      architecture's assumptions.
+    depends_on: []
+    implements: []
+    relates_to: []
+    tests: []
+    traits: []
+    acceptance_criteria:
+      - given: |
+          A ComfyUI model exposes Krea 2 structural evidence such as Krea denoiser
+          blocks, Krea text-fusion structures, and Krea-specific structural
+          projections.
+        id: ac-krea2-detected-from-krea-signature
+        then: |
+          the recipe records the base architecture as `krea2` only when the observed
+          signature satisfies the documented Krea 2 recognition rules.
+        when: |
+          the WIDEN Entry node snapshots the model for a recipe.
+      - given: |
+          A model lacks a complete supported architecture signature or presents
+          conflicting evidence for multiple supported architectures.
+        id: ac-ambiguous-or-unknown-architecture-rejected
+        then: |
+          recipe creation fails before merge execution and reports the architecture
+          evidence that prevented a confident supported-architecture decision.
+        when: |
+          the WIDEN Entry node attempts to create a recipe.
+      - given: |
+          A recipe records its base architecture as `krea2`.
+        id: ac-krea2-recipe-uses-krea-compatible-paths
+        then: |
+          the behavior is selected from Krea 2-compatible rules whose supported
+          feature set is documented and testable for Krea 2 inputs.
+        when: |
+          the recipe applies architecture-sensitive behavior such as LoRA loading,
+          block/layer weighting, full-model access, or saved-output compatibility.
+    tags: []
+    created: 2026-06-24T03:43:04.533Z
     notes: []
 requirements:
   - _ulid: 01KHHE6JSTNSGPTETWE2DDZQXP

@@ -2,11 +2,18 @@ _ulid: 01KVVRH2H4SGWMR17C1RP9BYWE
 slugs:
   - plan-krea-2-architecture-support-plan
 title: Krea 2 Architecture Support Plan
-status: approved
+status: active
 approved_at: 2026-06-24T03:42:10.407Z
 branch: null
-derived_specs: []
-derived_tasks: []
+derived_specs:
+  - "@krea2-architecture-support"
+  - "@krea2-lora-package-compatibility"
+  - "@krea2-block-and-layer-controls"
+derived_tasks:
+  - "@task-krea2-architecture-recognition-routing"
+  - "@task-krea2-lora-package-compatibility"
+  - "@task-krea2-block-layer-controls"
+  - "@task-krea2-validation-and-smoke-evidence"
 module_ref: null
 resource_summary:
   count: 2

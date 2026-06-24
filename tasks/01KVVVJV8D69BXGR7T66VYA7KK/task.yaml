@@ -1,0 +1,93 @@
+_ulid: 01KVVVJV8D69BXGR7T66VYA7KK
+slugs:
+  - task-krea2-lora-package-compatibility
+title: Implement Krea 2 LoRA package compatibility
+type: task
+description: |
+  What: Implement Krea 2 LoRA compatibility for the public Krea 2 LoRA package
+  families identified in the imported implementation reference.
+
+  Resources:
+  - [Krea 2 implementation reference](./resources/references/krea2-implementation-reference.md)
+    for pinned ComfyUI, ai-toolkit, LoKr, and Hugging Face references.
+
+  Why: Users should be able to use supported Krea 2 LoRAs without manually
+  rewriting tensor names, and unsupported packages must not produce silent
+  partial merges.
+
+  How:
+  - Inspect `lib/lora/` loader interfaces and existing architecture loaders.
+  - Add or update a Krea 2 loader module with an explicit compatibility table
+    for supported public package families.
+  - Put detailed tensor-name normalization rules and shape expectations in code
+    comments/tests, not in timeless spec ACs.
+  - Preserve compound Krea names such as text-fusion substructure names during
+    normalization.
+  - Validate package groups before publishing merge output. Unsupported or
+    shape-incompatible groups must produce an actionable report instead of
+    being silently skipped.
+  - Ensure cleanup/resource-release behavior matches the existing loader
+    contract.
+
+  Testing:
+  - Add CPU-safe synthetic fixtures for each supported package family.
+  - Add tests for compound-name preservation and shape compatibility.
+  - Add unsupported-package tests that fail before producing a merged result and
+    report the incompatible groups.
+  - Add optional header-only tests that accept operator-provided local sample
+    paths or public downloaded headers without hard-coding machine-local paths.
+  - Run focused loader tests and the project review gates.
+
+  Covers: @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load,
+    ac-lora-compatibility-is-complete-or-rejected,
+    ac-krea2-lora-strength-controls-are-stable;
+    @krea2-architecture-support ac-krea2-recipe-uses-krea-compatible-paths.
+spec_ref: "@krea2-lora-package-compatibility"
+plan_ref: "@plan-krea-2-architecture-support-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-krea2-architecture-recognition-routing"
+context: []
+priority: 1
+tags:
+  - krea2
+  - lora
+  - compatibility
+vcs_refs: []
+history:
+  - author: Jacob Chapel
+    changes:
+      resource_refs:
+        new:
+          - git_commit: null
+            git_path: null
+            id: plan-krea2-implementation-reference
+            owner_ref: "@task-krea2-lora-package-compatibility"
+            owner_type: task
+            path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-implementation-reference.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+        previous:
+          - git_commit: null
+            git_path: null
+            id: krea2-implementation-reference
+            owner_ref: "@plan-krea-2-architecture-support-plan"
+            owner_type: plan
+            path: references/krea2-implementation-reference.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+    command: unknown
+    timestamp: 2026-06-24T03:43:05.056Z
+resource_refs:
+  - git_commit: null
+    git_path: null
+    id: plan-krea2-implementation-reference
+    owner_ref: "@task-krea2-lora-package-compatibility"
+    owner_type: task
+    path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-implementation-reference.md
+    recorded_at: 2026-06-24T03:43:04.843Z
+    sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+created_at: 2026-06-24T03:43:04.973Z
+todos: []

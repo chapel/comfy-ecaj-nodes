@@ -1,0 +1,92 @@
+_ulid: 01KVVVJVB8K1JCKN5W57RQK8GR
+slugs:
+  - task-krea2-block-layer-controls
+title: Add Krea 2 block and layer controls
+type: task
+description: |
+  What: Add Krea 2 key classification and user-facing block/layer controls that
+  map to Krea model regions and layer categories.
+
+  Resources:
+  - [Krea 2 implementation reference](./resources/references/krea2-implementation-reference.md)
+    for architecture structure facts and source links.
+
+  Why: Per-block and per-layer controls should remain meaningful for Krea 2
+  users. Krea text-fusion regions should not disappear into an unrelated or
+  generic catch-all group.
+
+  How:
+  - Inspect `lib/block_classify.py`, existing block config node factories, and
+    existing architecture-specific block config nodes.
+  - Add Krea 2 model-region classification for main denoiser regions and
+    text-fusion regions.
+  - Add Krea 2 layer-category classification for categories the existing UI and
+    executor can support.
+  - Define deterministic fallback behavior for structural keys and keys outside
+    user-adjustable groups.
+  - Add or generate a Krea 2 block-config node and register it in ComfyUI node
+    mappings.
+  - Keep exact internal labels and regexes in implementation/tests. Specs should
+    assert user-observable control behavior, not the regex mechanics.
+
+  Testing:
+  - Add unit tests proving main-region controls affect only main-region keys.
+  - Add unit tests proving text-fusion controls affect only text-fusion keys.
+  - Add layer-category tests for supported categories and fallback behavior.
+  - Add node tests proving the Krea 2 block-config output is accepted by LoRA
+    and merge consumers.
+  - Run focused classifier/node tests and the project review gates.
+
+  Covers: @krea2-block-and-layer-controls ac-main-model-regions-are-controllable,
+    ac-text-fusion-regions-are-controllable,
+    ac-layer-category-controls-are-controllable;
+    @krea2-architecture-support ac-krea2-recipe-uses-krea-compatible-paths.
+spec_ref: "@krea2-block-and-layer-controls"
+plan_ref: "@plan-krea-2-architecture-support-plan"
+origin: derived
+status: pending
+blocked_by: []
+depends_on:
+  - "@task-krea2-architecture-recognition-routing"
+context: []
+priority: 2
+tags:
+  - krea2
+  - block-config
+  - layer-controls
+vcs_refs: []
+history:
+  - author: Jacob Chapel
+    changes:
+      resource_refs:
+        new:
+          - git_commit: null
+            git_path: null
+            id: plan-krea2-implementation-reference
+            owner_ref: "@task-krea2-block-layer-controls"
+            owner_type: task
+            path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-implementation-reference.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+        previous:
+          - git_commit: null
+            git_path: null
+            id: krea2-implementation-reference
+            owner_ref: "@plan-krea-2-architecture-support-plan"
+            owner_type: plan
+            path: references/krea2-implementation-reference.md
+            recorded_at: 2026-06-24T03:43:04.843Z
+            sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+    command: unknown
+    timestamp: 2026-06-24T03:43:05.143Z
+resource_refs:
+  - git_commit: null
+    git_path: null
+    id: plan-krea2-implementation-reference
+    owner_ref: "@task-krea2-block-layer-controls"
+    owner_type: task
+    path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-implementation-reference.md
+    recorded_at: 2026-06-24T03:43:04.843Z
+    sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
+created_at: 2026-06-24T03:43:05.064Z
+todos: []

@@ -1,0 +1,11 @@
+resources:
+  - description: Project-owned supporting reference with public source links, planning facts, and
+      resource/path guardrails.
+    bytes: 4149
+    content_type: text/markdown
+    git_commit: null
+    git_path: null
+    id: plan-krea2-implementation-reference
+    label: Krea 2 Implementation Reference
+    path: plan/01KVVRH2H4SGWMR17C1RP9BYWE/references/krea2-implementation-reference.md
+    sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb

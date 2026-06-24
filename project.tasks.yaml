@@ -2592,3 +2592,81 @@
   created_at: 2026-05-13T16:33:07.196Z
   started_at: 2026-05-13T20:38:24.291Z
   completed_at: 2026-05-13T20:38:24.291Z
+- _ulid: 01KVVVJV4JCST8N84GX03DZYGJ
+  slugs:
+    - task-krea2-architecture-recognition-routing
+  title: Add Krea 2 architecture recognition and recipe routing
+  type: task
+  spec_ref: "@krea2-architecture-support"
+  plan_ref: "@plan-krea-2-architecture-support-plan"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  priority: 1
+  tags:
+    - krea2
+    - architecture
+    - entry-node
+    - routing
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-06-24T03:43:04.850Z
+- _ulid: 01KVVVJV8D69BXGR7T66VYA7KK
+  slugs:
+    - task-krea2-lora-package-compatibility
+  title: Implement Krea 2 LoRA package compatibility
+  type: task
+  spec_ref: "@krea2-lora-package-compatibility"
+  plan_ref: "@plan-krea-2-architecture-support-plan"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-krea2-architecture-recognition-routing"
+  priority: 1
+  tags:
+    - krea2
+    - lora
+    - compatibility
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-06-24T03:43:04.973Z
+- _ulid: 01KVVVJVB8K1JCKN5W57RQK8GR
+  slugs:
+    - task-krea2-block-layer-controls
+  title: Add Krea 2 block and layer controls
+  type: task
+  spec_ref: "@krea2-block-and-layer-controls"
+  plan_ref: "@plan-krea-2-architecture-support-plan"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-krea2-architecture-recognition-routing"
+  priority: 2
+  tags:
+    - krea2
+    - block-config
+    - layer-controls
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-06-24T03:43:05.064Z
+- _ulid: 01KVVVJVDY3HANBJP25XMN3F54
+  slugs:
+    - task-krea2-validation-and-smoke-evidence
+  title: Add Krea 2 validation fixtures and optional smoke evidence
+  type: task
+  spec_ref: "@krea2-architecture-support"
+  plan_ref: "@plan-krea-2-architecture-support-plan"
+  status: pending
+  blocked_by: []
+  depends_on:
+    - "@task-krea2-lora-package-compatibility"
+    - "@task-krea2-block-layer-controls"
+  priority: 3
+  tags:
+    - krea2
+    - tests
+    - validation
+    - smoke
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-06-24T03:43:05.150Z
