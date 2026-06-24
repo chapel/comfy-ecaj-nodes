@@ -1677,6 +1677,16 @@ observations:
     resolved: false
     workflow_ref: "@01KVVZPS"
     created_at: 2026-06-24T04:56:38.697Z
+  - _ulid: 01KVW09PRMMZV0PW6E9N0R5ZP5
+    type: success
+    content: For public LoRA/package compatibility reviews, a header-only parser coverage check against
+      every pinned public safetensors artifact catches unsupported tensor-name families that
+      synthetic fixtures miss; in this Krea 2 review it exposed time_embed/time_mod_proj groups
+      after all local tests passed.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T05:05:28.340Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
