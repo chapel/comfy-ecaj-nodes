@@ -2671,7 +2671,7 @@
   type: task
   spec_ref: "@krea2-architecture-support"
   plan_ref: "@plan-krea-2-architecture-support-plan"
-  status: pending
+  status: in_progress
   blocked_by: []
   depends_on:
     - "@task-krea2-lora-package-compatibility"
@@ -2685,4 +2685,5 @@
   notes_count: 0
   todos_count: 0
   created_at: 2026-06-24T03:43:05.150Z
+  started_at: 2026-06-24T05:37:39.960Z
   automation: eligible

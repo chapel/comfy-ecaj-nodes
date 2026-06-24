@@ -45,7 +45,7 @@ description: |
 spec_ref: "@krea2-architecture-support"
 plan_ref: "@plan-krea-2-architecture-support-plan"
 origin: derived
-status: pending
+status: in_progress
 blocked_by: []
 depends_on:
   - "@task-krea2-lora-package-compatibility"
@@ -58,6 +58,7 @@ tags:
   - validation
   - smoke
 vcs_refs: []
+session_id: 01KVW234AQ112PPMFKFZPHCPMF
 history:
   - author: Jacob Chapel
     changes:
@@ -89,6 +90,19 @@ history:
         previous: null
     command: task-set
     timestamp: 2026-06-24T03:43:15.900Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: in_progress
+        previous: pending
+      session_id:
+        new: 01KVW234AQ112PPMFKFZPHCPMF
+        previous: null
+      started_at:
+        new: 2026-06-24T05:37:39.960Z
+        previous: null
+    command: task-start
+    timestamp: 2026-06-24T05:37:39.961Z
 resource_refs:
   - git_commit: null
     git_path: null
@@ -99,5 +113,6 @@ resource_refs:
     recorded_at: 2026-06-24T03:43:04.843Z
     sha256: 50503bd6899c74b97e958d7da0d82252182433539ba51060a9f207b437c1defb
 created_at: 2026-06-24T03:43:05.150Z
+started_at: 2026-06-24T05:37:39.960Z
 todos: []
 automation: eligible
