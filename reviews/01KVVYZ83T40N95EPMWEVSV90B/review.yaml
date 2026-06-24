@@ -2,7 +2,100 @@ _ulid: 01KVVYZ83T40N95EPMWEVSV90B
 slugs: []
 title: Review Krea 2 LoRA package compatibility (cycle 2)
 author: Jacob Chapel
-checks: []
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Passed. uv is not available on this review shell PATH, so used the active project Python
+      module equivalent.
+    name: compileall
+    required: true
+    runner: python -m compileall lib nodes tests
+    created_at: 2026-06-24T04:45:42.847Z
+    completed_at: 2026-06-24T04:45:42.847Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 20 passed in 0.09s.
+    name: focused pytest
+    required: true
+    runner: python -m pytest tests/test_krea2_lora_loader.py tests/test_krea2_architecture.py
+    created_at: 2026-06-24T04:45:43.203Z
+    completed_at: 2026-06-24T04:45:43.203Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 1751 passed in 26.61s.
+    name: pytest
+    required: true
+    runner: python -m pytest
+    created_at: 2026-06-24T04:45:43.541Z
+    completed_at: 2026-06-24T04:45:43.541Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: All checks passed.
+    name: ruff check
+    required: true
+    runner: python -m ruff check .
+    created_at: 2026-06-24T04:45:43.902Z
+    completed_at: 2026-06-24T04:45:43.902Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 106 files already formatted.
+    name: ruff format
+    required: true
+    runner: python -m ruff format --check .
+    created_at: 2026-06-24T04:45:44.226Z
+    completed_at: 2026-06-24T04:45:44.226Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Passed: schema and references OK."
+    name: kspec validate refs
+    required: true
+    runner: kspec validate --refs --warnings-ok
+    created_at: 2026-06-24T04:45:44.571Z
+    completed_at: 2026-06-24T04:45:44.571Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Passed with existing baseline warnings: 2 orphaned specs and 1 status mismatch."
+    name: kspec validate alignment
+    required: true
+    runner: kspec validate --alignment --warnings-ok
+    created_at: 2026-06-24T04:45:45.921Z
+    completed_at: 2026-06-24T04:45:45.921Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Passed with existing baseline warnings: 11 missing descriptions."
+    name: kspec validate completeness
+    required: true
+    runner: kspec validate --completeness --warnings-ok
+    created_at: 2026-06-24T04:45:46.255Z
+    completed_at: 2026-06-24T04:45:46.255Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Loaded two Krea2 LoRA sets for diffusion_model.blocks.0.attn.wq.weight: one delta shape
+      (4, 3), one (5, 3). validate_compatible_keys({key}, {key: (4, 3)}) passed, then applying the
+      bad set failed with RuntimeError: size 4 must match size 5."
+    name: mixed-shape Krea2 preflight reproduction
+    required: true
+    runner: python synthetic safetensors reproduction
+    created_at: 2026-06-24T04:45:46.607Z
+    completed_at: 2026-06-24T04:45:46.607Z
 events:
   - _ulid: 01KVVYZ83SAX19SPXR9VJ3QK25
     actor: Jacob Chapel
@@ -17,17 +110,134 @@ events:
       from: draft
       to: open
     timestamp: 2026-06-24T04:42:41.167Z
+  - _ulid: 01KVVZ5H2WSEYBP35W3XYHM1EF
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: compileall
+    timestamp: 2026-06-24T04:45:42.876Z
+  - _ulid: 01KVVZ5HE0JT71GNQDXWTM0353
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused pytest
+    timestamp: 2026-06-24T04:45:43.232Z
+  - _ulid: 01KVVZ5HRJRTZTNX98VFJE37M1
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest
+    timestamp: 2026-06-24T04:45:43.570Z
+  - _ulid: 01KVVZ5J3P5RMP22Q0T3B3VZ6Z
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff check
+    timestamp: 2026-06-24T04:45:43.926Z
+  - _ulid: 01KVVZ5JDPYVQTJYBTQFNDQHYS
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff format
+    timestamp: 2026-06-24T04:45:44.246Z
+  - _ulid: 01KVVZ5JRQVARENMR0X9BW24G5
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate refs
+    timestamp: 2026-06-24T04:45:44.599Z
+  - _ulid: 01KVVZ5M2Z1DQA15SWNEPXZX1Y
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate alignment
+    timestamp: 2026-06-24T04:45:45.951Z
+  - _ulid: 01KVVZ5MD8MK70RXWDT0T3QYYT
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec validate completeness
+    timestamp: 2026-06-24T04:45:46.280Z
+  - _ulid: 01KVVZ5MRD621F8K2W5V1FP01V
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: fail
+      name: mixed-shape Krea2 preflight reproduction
+    timestamp: 2026-06-24T04:45:46.638Z
+  - _ulid: 01KVVZ5N32K0JTEF4Q9CHMTG1R
+    actor: Jacob Chapel
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KVVZ5N27FPX2TYE5B1M20E2G
+    timestamp: 2026-06-24T04:45:46.978Z
+  - _ulid: 01KVVZ5NCRXRQAVPG11D8ECVW4
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-06-24T04:45:47.288Z
+  - _ulid: 01KVVZ5NCR6T48814WZX0RR8VK
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-06-24T04:45:47.288Z
 examined_commit: 9d0f3591f47584f001949757fec26dcf7a1641d4
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
   content_hash: ""
   ref: "@01KVVVJV8D69BXGR7T66VYA7KK"
   shadow_commit: ""
-threads: []
-verdicts: []
+threads:
+  - _ulid: 01KVVZ5N27FPX2TYE5B1M20E2G
+    anchor:
+      type: code
+      commit: 9d0f3591f47584f001949757fec26dcf7a1641d4
+      line_end: 358
+      line_start: 357
+      path: lib/lora/krea2.py
+      side: head
+    entries:
+      - _ulid: 01KVVZ5N27HDMNAQQ5BH07HJBE
+        author: Jacob Chapel
+        body: "MUST-FIX: Krea2Loader records expected shapes as a union per model key, so validation accepts
+          a mixed loaded set when any LoRA for that key matches the current base shape. I reproduced
+          this with two synthetic Krea 2 LoRA files for diffusion_model.blocks.0.attn.wq.weight: set
+          good had package delta shape (4, 3), set bad had package delta shape (5, 3), and the
+          current recipe shape was (4, 3). validate_compatible_keys({key}, {key: (4, 3)}) passed
+          because (4, 3) was in the union, but applying the bad set later failed in
+          apply_lora_batch_gpu with a tensor-size RuntimeError. This violates
+          ac-lora-compatibility-is-complete-or-rejected because a shape-incompatible group is not
+          reported before merge execution. Validation needs to reject every loaded group/set whose
+          expected package shape does not match the current recipe shape, not just require at least
+          one expected shape to match."
+        created_at: 2026-06-24T04:45:46.951Z
+    kind: blocker
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-06-24T04:45:47.288Z
 created_at: 2026-06-24T04:42:17.082Z
-updated_at: 2026-06-24T04:42:41.133Z
+updated_at: 2026-06-24T04:45:47.288Z
 notes: []
