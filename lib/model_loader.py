@@ -14,6 +14,13 @@ from pathlib import Path
 import torch
 from safetensors import safe_open
 
+from .architecture import (
+    ARCHITECTURE_RULES,
+    ArchitectureDetectionError,
+    detect_supported_architecture,
+    match_architecture_evidence,
+)
+
 __all__ = ["ModelLoader", "UnsupportedFormatError", "KeyMismatchError"]
 
 
@@ -33,54 +40,33 @@ class KeyMismatchError(ValueError):
 # Ordered by specificity (longer prefixes first).
 _FILE_KEY_PREFIXES = (
     "model.diffusion_model.",  # SDXL checkpoint format
-    "model.transformer.",      # Qwen checkpoint format (model.transformer.X)
-    "diffusion_model.",        # Some Z-Image/Diffusers formats
-    "transformer.",            # Alternate Z-Image/Qwen format
+    "model.transformer.",  # Qwen checkpoint format (model.transformer.X)
+    "diffusion_model.",  # Some Z-Image/Diffusers formats
+    "transformer.",  # Alternate Z-Image/Qwen format
 )
 
 # Prefixes that identify non-diffusion keys (VAE, text encoder) to exclude.
 _EXCLUDED_PREFIXES = (
-    "first_stage_model.",      # VAE
+    "first_stage_model.",  # VAE
     "model.first_stage_model.",
-    "conditioner.",            # Text encoder (SDXL)
+    "conditioner.",  # Text encoder (SDXL)
     "model.conditioner.",
-    "cond_stage_model.",       # Text encoder (SD 1.x/2.x)
+    "cond_stage_model.",  # Text encoder (SD 1.x/2.x)
     "model.cond_stage_model.",
-    "encoder.",                # VAE encoder
-    "decoder.",                # VAE decoder
-    "quant_conv.",             # VAE quantization
-    "post_quant_conv.",        # VAE post-quantization
+    "encoder.",  # VAE encoder
+    "decoder.",  # VAE decoder
+    "quant_conv.",  # VAE quantization
+    "post_quant_conv.",  # VAE post-quantization
 )
 
 # Architecture detection patterns (applied to NORMALIZED keys).
-# These match the patterns in nodes/entry.py but for file-derived keys.
-_ARCH_PATTERNS = (
-    # Z-Image: layers.N with noise_refiner
+# Kept as a compatibility surface for tests that inspect available rules.
+_ARCH_PATTERNS = tuple(
     (
-        "zimage",
-        lambda keys: any("diffusion_model.layers." in k for k in keys)
-        and any("noise_refiner" in k for k in keys),
-    ),
-    # SDXL: input_blocks, middle_block, output_blocks structure
-    (
-        "sdxl",
-        lambda keys: any("diffusion_model.input_blocks." in k for k in keys)
-        and any("diffusion_model.middle_block." in k for k in keys)
-        and any("diffusion_model.output_blocks." in k for k in keys),
-    ),
-    # Qwen: transformer_blocks at depth 60+ (matches nodes/entry.py pattern)
-    # AC: @qwen-model-loader ac-7
-    (
-        "qwen",
-        lambda keys: sum(1 for k in keys if "transformer_blocks" in k) >= 60,
-    ),
-    # Flux Klein: double_blocks structure (4B: 5 double + 20 single, 9B: 8 double + 24 single)
-    # Must not match Qwen which uses transformer_blocks instead of double_blocks.
-    # AC: @flux-model-loader ac-8
-    (
-        "flux",
-        lambda keys: any("double_blocks" in k for k in keys),
-    ),
+        rule.arch,
+        lambda keys, arch=rule.arch: match_architecture_evidence(keys, arch).is_complete,
+    )
+    for rule in ARCHITECTURE_RULES
 )
 
 
@@ -129,15 +115,15 @@ def _detect_architecture_from_keys(normalized_keys: frozenset[str]) -> str | Non
         normalized_keys: Set of normalized keys (with diffusion_model. prefix)
 
     Returns:
-        Architecture string ("sdxl", "zimage") or None if unknown.
+        Architecture string or None if unknown/ambiguous.
 
     # AC: @full-model-loader ac-8
     Determines architecture without loading tensor data.
     """
-    for arch, pattern_fn in _ARCH_PATTERNS:
-        if pattern_fn(normalized_keys):
-            return arch
-    return None
+    try:
+        return detect_supported_architecture(normalized_keys)
+    except ArchitectureDetectionError:
+        return None
 
 
 class ModelLoader:

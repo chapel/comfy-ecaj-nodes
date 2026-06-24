@@ -22,6 +22,7 @@ Usage:
 
 from .base import LoRALoader
 from .flux import FluxLoader
+from .krea2 import Krea2Loader
 from .qwen import QwenLoader
 from .sdxl import SDXLLoader
 from .sdxl_clip import SDXLCLIPLoader
@@ -30,6 +31,7 @@ from .zimage import ZImageLoader
 __all__ = [
     "LoRALoader",
     "FluxLoader",
+    "Krea2Loader",
     "QwenLoader",
     "SDXLLoader",
     "SDXLCLIPLoader",
@@ -53,6 +55,7 @@ LOADER_REGISTRY: dict[str, type[LoRALoader]] = {
     "zimage": ZImageLoader,
     "qwen": QwenLoader,
     "flux": FluxLoader,
+    "krea2": Krea2Loader,
 }
 
 
