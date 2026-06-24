@@ -220,7 +220,6 @@ class Krea2Loader(LoRALoader):
         self._direct_data_by_set: dict[str, dict[str, list[tuple[torch.Tensor, float]]]] = (
             defaultdict(lambda: defaultdict(list))
         )
-        self._expected_shapes: dict[str, set[tuple[int, ...]]] = defaultdict(set)
         self._affected_by_set: dict[str, set[str]] = defaultdict(set)
         self._affected: set[str] = set()
 
@@ -316,16 +315,10 @@ class Krea2Loader(LoRALoader):
             self._lora_data_by_set[effective_set_id][model_key].extend(entries)
             self._affected_by_set[effective_set_id].add(model_key)
             self._affected.add(model_key)
-            for up, down, _scale in entries:
-                expected_shape = _expected_lora_shape(up, down)
-                self._expected_shapes[model_key].add(expected_shape)
         for model_key, entries in pending_direct.items():
             self._direct_data_by_set[effective_set_id][model_key].extend(entries)
             self._affected_by_set[effective_set_id].add(model_key)
             self._affected.add(model_key)
-            for tensor, _scale in entries:
-                expected_shape = _expected_direct_shape(tensor)
-                self._expected_shapes[model_key].add(expected_shape)
 
     @property
     def affected_keys(self) -> frozenset[str]:
@@ -348,18 +341,30 @@ class Krea2Loader(LoRALoader):
         missing = self._affected - set(all_keys)
         shape_errors: list[str] = []
         if key_shapes is not None:
-            for model_key in sorted(self._affected - missing):
+            present_keys = self._affected - missing
+            for model_key in sorted(present_keys):
                 if model_key not in key_shapes:
                     shape_errors.append(f"{model_key} has no current recipe shape metadata")
                     continue
                 current_shape = tuple(key_shapes[model_key])
-                expected_shapes = self._expected_shapes.get(model_key, set())
-                if current_shape not in expected_shapes:
-                    expected = ", ".join(str(shape) for shape in sorted(expected_shapes))
-                    shape_errors.append(
-                        f"{model_key} package delta shape {expected} "
-                        f"does not match current recipe shape {current_shape}"
-                    )
+
+                for set_id, key_data in sorted(self._lora_data_by_set.items()):
+                    for up, down, _scale in key_data.get(model_key, ()):
+                        expected_shape = _expected_lora_shape(up, down)
+                        if expected_shape != current_shape:
+                            shape_errors.append(
+                                f"{model_key} set {set_id} package delta shape {expected_shape} "
+                                f"does not match current recipe shape {current_shape}"
+                            )
+
+                for set_id, key_data in sorted(self._direct_data_by_set.items()):
+                    for tensor, _scale in key_data.get(model_key, ()):
+                        expected_shape = _expected_direct_shape(tensor)
+                        if expected_shape != current_shape:
+                            shape_errors.append(
+                                f"{model_key} set {set_id} package delta shape {expected_shape} "
+                                f"does not match current recipe shape {current_shape}"
+                            )
 
         if missing:
             shape_errors.insert(
@@ -434,6 +439,5 @@ class Krea2Loader(LoRALoader):
     def cleanup(self) -> None:
         self._lora_data_by_set.clear()
         self._direct_data_by_set.clear()
-        self._expected_shapes.clear()
         self._affected_by_set.clear()
         self._affected.clear()

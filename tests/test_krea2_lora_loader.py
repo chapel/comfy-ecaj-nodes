@@ -16,6 +16,7 @@ from lib.lora.krea2 import (
 
 
 def _write_lora(tmp_path: Path, tensors: dict[str, torch.Tensor]) -> str:
+    tmp_path.mkdir(parents=True, exist_ok=True)
     path = tmp_path / "fixture.safetensors"
     save_file(tensors, str(path))
     return str(path)
@@ -251,6 +252,39 @@ def test_mapped_keys_must_match_current_recipe_shapes(tmp_path: Path) -> None:
     assert key in message
     assert "package delta shape (4, 3)" in message
     assert "current recipe shape (5, 3)" in message
+
+
+def test_each_loaded_set_shape_is_validated_before_execution(tmp_path: Path) -> None:
+    # AC: @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
+    good_path = _write_lora(
+        tmp_path / "good",
+        {
+            "transformer.transformer_blocks.0.attn.to_q.lora_A.weight": torch.ones(2, 3),
+            "transformer.transformer_blocks.0.attn.to_q.lora_B.weight": torch.ones(4, 2),
+        },
+    )
+    bad_path = _write_lora(
+        tmp_path / "bad",
+        {
+            "transformer.transformer_blocks.0.attn.to_q.lora_A.weight": torch.ones(2, 3),
+            "transformer.transformer_blocks.0.attn.to_q.lora_B.weight": torch.ones(5, 2),
+        },
+    )
+
+    loader = Krea2Loader()
+    loader.load(good_path, set_id="good")
+    loader.load(bad_path, set_id="bad")
+
+    key = "diffusion_model.blocks.0.attn.wq.weight"
+    with pytest.raises(Krea2CompatibilityError) as exc_info:
+        loader.validate_compatible_keys({key}, {key: (4, 3)})
+
+    message = str(exc_info.value)
+    assert "shape-incompatible groups" in message
+    assert "set bad" in message
+    assert "package delta shape (5, 3)" in message
+    assert "current recipe shape (4, 3)" in message
+    assert "set good" not in message
 
 
 def test_krea2_loader_registry_and_cleanup(tmp_path: Path) -> None:
