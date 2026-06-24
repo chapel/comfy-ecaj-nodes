@@ -9920,7 +9920,7 @@ runs:
     completed_at: 2026-06-24T04:40:47.308Z
   - _ulid: 01KVVZ773R7VX1NBP7RX6NKDPP
     status: active
-    current_step: 3
+    current_step: 4
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9952,7 +9952,17 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-06-24T04:47:51.484Z
-        completed_at: 2026-06-24T04:47:51.484Z
+        completed_at: 2026-06-24T04:48:01.352Z
+        notes: "Proposal: capture a success/process observation that loader reviews should include a
+          multi-package or multi-set probe where two inputs normalize to the same base key but have
+          different per-group metadata, such as shape or alpha. This catches aggregation bugs where
+          validation passes because one entry is valid while another incompatible entry for the same
+          key is still loaded. Scope: small observation for future triage into review guidance or
+          loader test patterns."
+      - status: completed
+        step_index: 4
+        started_at: 2026-06-24T04:48:01.352Z
+        completed_at: 2026-06-24T04:48:01.352Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:46:38.200Z
