@@ -1,0 +1,10 @@
+resources:
+  - description: Imported project-owned copy of the Krea 2 architecture/research deep dive used for planning.
+    bytes: 39826
+    content_type: text/markdown
+    git_commit: null
+    git_path: null
+    id: krea2-technical-report-deep-dive
+    label: Krea 2 Technical Report Deep Dive
+    path: references/krea2-technical-report-deep-dive.md
+    sha256: 1e57b7a4242611c44db20bb4aad1f997f58f1e23919c907db97040a9634690f7
