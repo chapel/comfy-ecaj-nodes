@@ -1,161 +1,6 @@
 kynetic_dispatch_workspaces: "1.0"
 workspaces:
   - active_role: null
-    base_branch_point: 5299140a65223aee02beb3044a6f1671840c11c0
-    bootstrap:
-      status: succeeded
-      canonicalBranchHead: 34cffdeeef112df9ba368ca2fd111af985376b99
-      configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-      failureMessage: null
-      invalidationReasons:
-        - canonical-branch-head-changed
-      lastRole: reviewer
-      lastRunAt: 2026-05-08T20:54:17.237Z
-      roleStates:
-        reviewer:
-          status: succeeded
-          canonicalBranchHead: 34cffdeeef112df9ba368ca2fd111af985376b99
-          configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-          failureMessage: null
-          invalidationReasons:
-            - canonical-branch-head-changed
-          lastRunAt: 2026-05-08T20:54:17.237Z
-          steps: []
-        worker:
-          status: succeeded
-          canonicalBranchHead: 105b7e259a41dca6b482f16c9df1d4da95ec99be
-          configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-          failureMessage: null
-          invalidationReasons:
-            - canonical-branch-head-changed
-          lastRunAt: 2026-05-08T20:46:02.802Z
-          steps: []
-      steps: []
-    branch_provenance:
-      adopted_at: null
-      adopted_from: null
-      ownership: dispatcher-managed
-      rehydrated: null
-      remote_ref: null
-      source: provisioned
-    canonical_branch: dispatch/task/task-streaming-materialization-progress/01kr4m7f
-    canonical_branch_head: 34cffdeeef112df9ba368ca2fd111af985376b99
-    cleanup:
-      status: completed
-      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      eligible: true
-      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      updated_at: 2026-05-08T21:02:34.123Z
-    health:
-      status: healthy
-      issues: []
-      summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-08T21:02:25.988Z
-    integration:
-      status: merged
-      detail: integration:merged
-      outcome: merged
-      publication_mode: pull_request
-      target_branch: dev
-      target_commit: 5299140a65223aee02beb3044a6f1671840c11c0
-      updated_at: 2026-05-08T21:02:25.988Z
-    lifecycle_state: closed
-    resolved_base_branch: dev
-    task_ref: "@01KR4M7F3PVVBBD593P79WZPFS"
-    task_slug: task-streaming-materialization-progress
-    timestamps:
-      closed_at: 2026-05-08T21:02:34.123Z
-      last_active_at: 2026-05-08T20:54:17.848Z
-      last_reconciled_at: 2026-05-08T21:02:25.988Z
-      created_at: 2026-05-08T20:26:24.380Z
-      updated_at: 2026-05-08T21:02:34.123Z
-    workspace_id: dispatch-workspace-01KR4M7F3PVVBBD593P79WZPFS
-    worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
-    worktrees:
-      reviewer: null
-      worker:
-        branch_mode: branch
-        branch_ref: dispatch/task/task-streaming-materialization-progress/01kr4m7f
-        head: 34cffdeeef112df9ba368ca2fd111af985376b99
-        last_seen_at: 2026-05-08T20:54:16.903Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-streaming-materialization-progress-01kr4m7f
-  - active_role: null
-    base_branch_point: 1b886134e0b0b88768419710d07a162ec7992a15
-    bootstrap:
-      status: succeeded
-      canonicalBranchHead: 6b172b7033446e42b767558da58978c501ce6c91
-      configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-      failureMessage: null
-      invalidationReasons: []
-      lastRole: reviewer
-      lastRunAt: 2026-05-13T17:14:09.322Z
-      roleStates:
-        reviewer:
-          status: succeeded
-          canonicalBranchHead: 6b172b7033446e42b767558da58978c501ce6c91
-          configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-          failureMessage: null
-          invalidationReasons: []
-          lastRunAt: 2026-05-13T17:14:09.322Z
-          steps: []
-        worker:
-          status: succeeded
-          canonicalBranchHead: 1b886134e0b0b88768419710d07a162ec7992a15
-          configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-          failureMessage: null
-          invalidationReasons: []
-          lastRunAt: 2026-05-13T17:02:40.429Z
-          steps: []
-      steps: []
-    branch_provenance:
-      adopted_at: null
-      adopted_from: null
-      ownership: dispatcher-managed
-      rehydrated: null
-      remote_ref: null
-      source: provisioned
-    canonical_branch: dispatch/task/task-checkpoint-save-memory-contract-ac-updates/01krh2ym
-    canonical_branch_head: 6b172b7033446e42b767558da58978c501ce6c91
-    cleanup:
-      status: completed
-      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      eligible: true
-      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      updated_at: 2026-05-13T17:22:45.086Z
-    health:
-      status: healthy
-      issues: []
-      summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:22:43.410Z
-    integration:
-      status: merged
-      detail: integration:merged
-      outcome: merged
-      publication_mode: pull_request
-      target_branch: dev
-      target_commit: 1b886134e0b0b88768419710d07a162ec7992a15
-      updated_at: 2026-05-13T17:22:43.410Z
-    lifecycle_state: closed
-    resolved_base_branch: dev
-    task_ref: "@01KRH2YMF71BHP0WG62E1RDF1C"
-    task_slug: task-checkpoint-save-memory-contract-ac-updates
-    timestamps:
-      closed_at: 2026-05-13T17:22:45.086Z
-      last_active_at: 2026-05-13T17:14:09.920Z
-      last_reconciled_at: 2026-05-13T17:22:43.410Z
-      created_at: 2026-05-13T17:02:40.126Z
-      updated_at: 2026-05-13T17:22:45.086Z
-    workspace_id: dispatch-workspace-01KRH2YMF71BHP0WG62E1RDF1C
-    worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
-    worktrees:
-      reviewer: null
-      worker:
-        branch_mode: branch
-        branch_ref: dispatch/task/task-checkpoint-save-memory-contract-ac-updates/01krh2ym
-        head: 6b172b7033446e42b767558da58978c501ce6c91
-        last_seen_at: 2026-05-13T17:14:08.992Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-memory-contract-ac-updates-01krh2ym
-  - active_role: null
     base_branch_point: 1b886134e0b0b88768419710d07a162ec7992a15
     bootstrap:
       status: succeeded
@@ -193,34 +38,35 @@ workspaces:
     canonical_branch: dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g
     canonical_branch_head: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
     cleanup:
-      status: not_scheduled
-      detail: null
-      eligible: false
-      reason: null
-      updated_at: 2026-05-13T17:14:05.746Z
+      status: scheduled
+      detail: integrated-into-base-branch
+      eligible: true
+      reason: integrated-into-base-branch
+      updated_at: 2026-06-24T03:43:35.555Z
     health:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:14:06.204Z
+      updated_at: 2026-06-24T03:43:35.555Z
     integration:
-      status: pending
-      detail: null
-      outcome: pull_request
+      status: merged
+      detail: integration:merged
+      outcome: merged
       publication_mode: pull_request
       target_branch: dev
       target_commit: 1b886134e0b0b88768419710d07a162ec7992a15
-      updated_at: 2026-05-13T17:14:05.746Z
-    lifecycle_state: ready
+      updated_at: 2026-06-24T03:43:35.555Z
+    lifecycle_state: closing
     resolved_base_branch: dev
+    task_id: 01KRF47GKDR0QMKKY5KNCA18EV
     task_ref: "@checkpoint-save-release-temp-model-return-artifact"
     task_slug: checkpoint-save-release-temp-model-return-artifact
     timestamps:
       closed_at: null
       last_active_at: 2026-05-13T17:03:07.263Z
-      last_reconciled_at: 2026-05-13T17:14:06.204Z
+      last_reconciled_at: 2026-06-24T03:43:35.555Z
       created_at: 2026-05-13T17:03:06.153Z
-      updated_at: 2026-05-13T17:14:06.204Z
+      updated_at: 2026-06-24T03:43:35.555Z
     workspace_id: dispatch-workspace-checkpoint-save-release-temp-model-return-artifact
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
@@ -231,158 +77,3 @@ workspaces:
         head: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
         last_seen_at: 2026-05-13T17:03:06.153Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/checkpoint-save-release-temp-model-return-artifact-checkpoi
-  - active_role: null
-    base_branch_point: 5b9807ed8cab3f6c9988639fc128a173c0610887
-    bootstrap:
-      status: succeeded
-      canonicalBranchHead: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
-      configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-      failureMessage: null
-      invalidationReasons: []
-      lastRole: reviewer
-      lastRunAt: 2026-05-13T17:31:46.212Z
-      roleStates:
-        reviewer:
-          status: succeeded
-          canonicalBranchHead: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
-          configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-          failureMessage: null
-          invalidationReasons: []
-          lastRunAt: 2026-05-13T17:31:46.212Z
-          steps: []
-        worker:
-          status: succeeded
-          canonicalBranchHead: 5b9807ed8cab3f6c9988639fc128a173c0610887
-          configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-          failureMessage: null
-          invalidationReasons: []
-          lastRunAt: 2026-05-13T17:18:47.087Z
-          steps: []
-      steps: []
-    branch_provenance:
-      adopted_at: null
-      adopted_from: null
-      ownership: dispatcher-managed
-      rehydrated: null
-      remote_ref: null
-      source: provisioned
-    canonical_branch: dispatch/task/task-checkpoint-save-temp-payload-release-hardening/01krh2ym
-    canonical_branch_head: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
-    cleanup:
-      status: completed
-      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      eligible: true
-      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      updated_at: 2026-05-13T17:37:46.836Z
-    health:
-      status: healthy
-      issues: []
-      summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T17:37:44.966Z
-    integration:
-      status: merged
-      detail: integration:merged
-      outcome: merged
-      publication_mode: pull_request
-      target_branch: dev
-      target_commit: 5b9807ed8cab3f6c9988639fc128a173c0610887
-      updated_at: 2026-05-13T17:37:44.966Z
-    lifecycle_state: closed
-    resolved_base_branch: dev
-    task_ref: "@01KRH2YMHPE7JQYJ734YWMRPAR"
-    task_slug: task-checkpoint-save-temp-payload-release-hardening
-    timestamps:
-      closed_at: 2026-05-13T17:37:46.836Z
-      last_active_at: 2026-05-13T17:31:46.890Z
-      last_reconciled_at: 2026-05-13T17:37:44.966Z
-      created_at: 2026-05-13T17:18:46.694Z
-      updated_at: 2026-05-13T17:37:46.836Z
-    workspace_id: dispatch-workspace-01KRH2YMHPE7JQYJ734YWMRPAR
-    worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
-    worktrees:
-      reviewer: null
-      worker:
-        branch_mode: branch
-        branch_ref: dispatch/task/task-checkpoint-save-temp-payload-release-hardening/01krh2ym
-        head: 6f943e84ed4c8fb2cbe3e746574aee0cee431639
-        last_seen_at: 2026-05-13T17:31:45.863Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-temp-payload-release-hardening-01krh2ym
-  - active_role: null
-    base_branch_point: 242589deff9dfa4775521e93934d8e99d7e61deb
-    bootstrap:
-      status: succeeded
-      canonicalBranchHead: d9a0c9a479c72e14d8fe85d0ba5b337cdb66d6c9
-      configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-      failureMessage: null
-      invalidationReasons:
-        - canonical-branch-head-changed
-      lastRole: reviewer
-      lastRunAt: 2026-05-13T18:28:17.487Z
-      roleStates:
-        reviewer:
-          status: succeeded
-          canonicalBranchHead: d9a0c9a479c72e14d8fe85d0ba5b337cdb66d6c9
-          configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-          failureMessage: null
-          invalidationReasons:
-            - canonical-branch-head-changed
-          lastRunAt: 2026-05-13T18:28:17.487Z
-          steps: []
-        worker:
-          status: succeeded
-          canonicalBranchHead: 26a1d8d0655501fa94c462c4d5a3b5ad7a79b80c
-          configHash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
-          failureMessage: null
-          invalidationReasons:
-            - canonical-branch-head-changed
-          lastRunAt: 2026-05-13T18:13:57.092Z
-          steps: []
-      steps: []
-    branch_provenance:
-      adopted_at: null
-      adopted_from: null
-      ownership: dispatcher-managed
-      rehydrated: null
-      remote_ref: null
-      source: provisioned
-    canonical_branch: dispatch/task/task-checkpoint-save-memory-validation-reporting/01krh2ym
-    canonical_branch_head: d9a0c9a479c72e14d8fe85d0ba5b337cdb66d6c9
-    cleanup:
-      status: completed
-      detail: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      eligible: true
-      reason: "Cleanup blocked: canonical branch still has an active dispatch invocation."
-      updated_at: 2026-05-13T18:40:50.946Z
-    health:
-      status: healthy
-      issues: []
-      summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-05-13T18:40:49.220Z
-    integration:
-      status: merged
-      detail: integration:merged
-      outcome: merged
-      publication_mode: pull_request
-      target_branch: dev
-      target_commit: 242589deff9dfa4775521e93934d8e99d7e61deb
-      updated_at: 2026-05-13T18:40:49.220Z
-    lifecycle_state: closed
-    resolved_base_branch: dev
-    task_ref: "@01KRH2YMJZ9JC1T350SFECPBST"
-    task_slug: task-checkpoint-save-memory-validation-reporting
-    timestamps:
-      closed_at: 2026-05-13T18:40:50.946Z
-      last_active_at: 2026-05-13T18:28:18.159Z
-      last_reconciled_at: 2026-05-13T18:40:49.220Z
-      created_at: 2026-05-13T17:35:45.826Z
-      updated_at: 2026-05-13T18:40:50.946Z
-    workspace_id: dispatch-workspace-01KRH2YMJZ9JC1T350SFECPBST
-    worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
-    worktrees:
-      reviewer: null
-      worker:
-        branch_mode: branch
-        branch_ref: dispatch/task/task-checkpoint-save-memory-validation-reporting/01krh2ym
-        head: d9a0c9a479c72e14d8fe85d0ba5b337cdb66d6c9
-        last_seen_at: 2026-05-13T18:28:17.024Z
-        path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/task-checkpoint-save-memory-validation-reporting-01krh2ym
