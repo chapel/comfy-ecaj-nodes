@@ -9920,9 +9920,21 @@ runs:
     completed_at: 2026-06-24T04:40:47.308Z
   - _ulid: 01KVVZ773R7VX1NBP7RX6NKDPP
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-06-24T04:46:38.200Z
+        completed_at: 2026-06-24T04:47:13.906Z
+        notes: "Worked well: the review record workflow made the fix-cycle state explicit; reading the prior
+          review threads before accepting worker claims focused the re-review; a tiny synthetic
+          safetensors reproduction directly encoded the complete-or-rejected AC and found a real
+          mixed-shape validation hole even though the broad suite passed."
+      - status: completed
+        step_index: 1
+        started_at: 2026-06-24T04:47:13.906Z
+        completed_at: 2026-06-24T04:47:13.906Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:46:38.200Z
