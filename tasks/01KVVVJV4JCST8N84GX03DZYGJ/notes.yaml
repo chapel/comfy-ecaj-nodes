@@ -15,3 +15,20 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T03:48:09.462Z
+  - _ulid: 01KVVW71WEKZP2GJ624QQ1KRGW
+    content: "Implemented Krea 2 architecture recognition/routing: added shared lib.architecture
+      signature detection with Krea main-block + txtfusion + structural-projection evidence, Entry
+      ambiguity/unknown diagnostics, ModelLoader krea2 detection, Krea2Loader registry entry with
+      explicit not-implemented diagnostics for LoRA package mapping, and Krea block/layer classifier
+      registration. Validation run: python -m pytest tests/test_krea2_architecture.py
+      tests/test_entry.py tests/test_model_loader.py tests/test_lora_loaders.py
+      tests/test_per_block_control.py (184 passed); python -m pytest (1740 passed); python -m
+      compileall lib nodes tests (pass); python -m ruff check . (pass); python -m ruff format
+      --check . failed on 56 pre-existing non-touched files after touched files were formatted;
+      kspec validate --refs/--alignment/--completeness --warnings-ok passed with existing warnings.
+      Project uv gates could not run because uv is not installed in this environment
+      (/usr/sbin/bash: uv: command not found); equivalent python -m commands were run where
+      possible."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T03:54:07.119Z
