@@ -1718,6 +1718,15 @@ observations:
     resolution: null
     resolved: false
     created_at: 2026-06-24T05:46:13.223Z
+  - _ulid: 01KVW2XSRPRH7SQY5WSV5B30RS
+    type: success
+    content: For large-asset architecture support, shared synthetic fixtures plus a guarded header-only
+      probe provided repeatable CPU-safe validation and an operator path for optional real-asset
+      evidence without hard-coding local model paths.
+    author: Jacob Chapel
+    resolution: null
+    resolved: false
+    created_at: 2026-06-24T05:51:23.926Z
 skills:
   - _ulid: 01KQ62Q9A22VEEJF8EW818P8TW
     description: Get help with kspec commands and workflows
