@@ -9659,7 +9659,7 @@ runs:
     completed_at: 2026-06-24T04:06:53.387Z
   - _ulid: 01KVVXPYB6B9TN0EJJKVE7YMRE
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -9673,7 +9673,15 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-24T04:20:57.492Z
-        completed_at: 2026-06-24T04:20:57.492Z
+        completed_at: 2026-06-24T04:21:00.419Z
+        notes: "Friction points: The required ruff format gate used the current uv-resolved ruff and
+          reformatted a broad existing baseline. This was already captured/tracked, so no duplicate
+          observation is needed. Resource refs were readable but not available through an obvious
+          task resource command in this CLI; this was minor and not captured."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-24T04:21:00.419Z
+        completed_at: 2026-06-24T04:21:00.419Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T04:20:16.358Z
