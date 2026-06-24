@@ -156,9 +156,25 @@ events:
       status: pass
       name: ruff format
     timestamp: 2026-06-24T05:35:40.403Z
+  - _ulid: 01KVW21H56SYQH0Y15J8RZAPPM
+    actor: codex
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-06-24T05:35:57.607Z
+  - _ulid: 01KVW21H5739E9R0DG16EKJ5PQ
+    actor: codex
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-06-24T05:35:57.607Z
 examined_commit: c76513adf09b1ccc1cc03df0c3620e6e1ca30893
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
@@ -166,7 +182,14 @@ subject:
   ref: "@01KVVVJV8D69BXGR7T66VYA7KK"
   shadow_commit: ""
 threads: []
-verdicts: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: codex
+    role: reviewer
+    created_at: 2026-06-24T05:35:57.606Z
 created_at: 2026-06-24T05:31:58.692Z
-updated_at: 2026-06-24T05:35:40.385Z
+updated_at: 2026-06-24T05:35:57.607Z
 notes: []
