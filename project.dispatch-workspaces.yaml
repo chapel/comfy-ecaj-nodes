@@ -77,7 +77,7 @@ workspaces:
         head: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
         last_seen_at: 2026-05-13T17:03:06.153Z
         path: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees/checkpoint-save-release-temp-model-return-artifact-checkpoi
-  - active_role: null
+  - active_role: worker
     base_branch_point: 0a0fdbe68425ce2f7f1fee58c97e1c85aa7404de
     bootstrap:
       status: succeeded
@@ -124,7 +124,7 @@ workspaces:
       status: healthy
       issues: []
       summary: Workspace record matches current git branch and worktree state.
-      updated_at: 2026-06-24T03:44:39.662Z
+      updated_at: 2026-06-24T03:44:40.472Z
     integration:
       status: pending
       detail: null
@@ -133,17 +133,17 @@ workspaces:
       target_branch: dev
       target_commit: 0a0fdbe68425ce2f7f1fee58c97e1c85aa7404de
       updated_at: 2026-06-24T03:44:39.662Z
-    lifecycle_state: ready
+    lifecycle_state: active
     resolved_base_branch: dev
     task_id: 01KVVVJV4JCST8N84GX03DZYGJ
     task_ref: "@01KVVVJV4JCST8N84GX03DZYGJ"
     task_slug: task-krea2-architecture-recognition-routing
     timestamps:
       closed_at: null
-      last_active_at: null
-      last_reconciled_at: 2026-06-24T03:44:39.662Z
+      last_active_at: 2026-06-24T03:44:40.472Z
+      last_reconciled_at: 2026-06-24T03:44:40.472Z
       created_at: 2026-06-24T03:44:39.662Z
-      updated_at: 2026-06-24T03:44:39.791Z
+      updated_at: 2026-06-24T03:44:40.472Z
     workspace_id: dispatch-workspace-01KVVVJV4JCST8N84GX03DZYGJ
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
