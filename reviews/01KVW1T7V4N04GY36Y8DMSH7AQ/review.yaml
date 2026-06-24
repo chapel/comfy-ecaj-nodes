@@ -76,6 +76,16 @@ checks:
     runner: python -m ruff
     created_at: 2026-06-24T05:35:37.661Z
     completed_at: 2026-06-24T05:35:37.661Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "python -m ruff format --check . passed: 108 files already formatted"
+    name: ruff format
+    required: true
+    runner: python -m ruff
+    created_at: 2026-06-24T05:35:40.385Z
+    completed_at: 2026-06-24T05:35:40.385Z
 events:
   - _ulid: 01KVW1T7V3APSMBAFSPQ72YQX2
     actor: Jacob Chapel
@@ -139,6 +149,13 @@ events:
       status: pass
       name: ruff check
     timestamp: 2026-06-24T05:35:37.684Z
+  - _ulid: 01KVW210BJRKN945Z375XZPTVK
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff format
+    timestamp: 2026-06-24T05:35:40.403Z
 examined_commit: c76513adf09b1ccc1cc03df0c3620e6e1ca30893
 external_links: []
 lifecycle_state: open
@@ -151,5 +168,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-24T05:31:58.692Z
-updated_at: 2026-06-24T05:35:37.661Z
+updated_at: 2026-06-24T05:35:40.385Z
 notes: []
