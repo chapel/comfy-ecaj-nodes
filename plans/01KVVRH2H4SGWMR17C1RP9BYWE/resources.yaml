@@ -8,3 +8,13 @@ resources:
     label: Krea 2 Technical Report Deep Dive
     path: references/krea2-technical-report-deep-dive.md
     sha256: 1e57b7a4242611c44db20bb4aad1f997f58f1e23919c907db97040a9634690f7
+  - description: Project-owned supporting reference with public source links, planning facts, and
+      resource/path guardrails.
+    bytes: 4077
+    content_type: text/markdown
+    git_commit: null
+    git_path: null
+    id: krea2-implementation-reference
+    label: Krea 2 Implementation Reference
+    path: references/krea2-implementation-reference.md
+    sha256: 85fcef1c9121d9015aa0e1e498eb1b3b592ec14a04389a11af1201f798e93cbe
