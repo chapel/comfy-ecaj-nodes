@@ -83,3 +83,18 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-24T05:45:41.523Z
+  - _ulid: 01KVW2KXAS5G7F2HJX66Y7YMZ0
+    content: "Validation evidence corrected: focused Krea tests passed: python -m pytest
+      tests/test_krea2_validation_fixtures.py tests/test_krea2_architecture.py
+      tests/test_krea2_lora_loader.py tests/test_krea2_block_controls.py -> 33 passed. New
+      validation module passed alone: python -m pytest tests/test_krea2_validation_fixtures.py -> 6
+      passed. Compile sanity passed: python -m compileall lib nodes tests. Full suite passed: python
+      -m pytest -> 1764 passed. Lint and format passed: python -m ruff check . and python -m ruff
+      format --check .. kspec validation passed for refs, alignment, completeness, and full
+      validation with --warnings-ok; remaining warnings are pre-existing metadata warnings unrelated
+      to this task. Optional real Comfy/GPU smoke was not run because no operator-provided Krea 2
+      assets or running ComfyUI instance were provided in this workspace; replacement evidence is
+      CPU-safe fixture/probe coverage and the documented docs/krea2-smoke-validation.md path."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T05:45:59.897Z
