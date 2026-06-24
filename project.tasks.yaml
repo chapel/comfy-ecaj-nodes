@@ -2623,7 +2623,7 @@
   type: task
   spec_ref: "@krea2-lora-package-compatibility"
   plan_ref: "@plan-krea-2-architecture-support-plan"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on:
     - "@task-krea2-architecture-recognition-routing"
@@ -2636,6 +2636,7 @@
   todos_count: 0
   created_at: 2026-06-24T03:43:04.973Z
   started_at: 2026-06-24T04:04:15.098Z
+  submitted_at: 2026-06-24T04:19:06.918Z
   automation: eligible
 - _ulid: 01KVVVJVB8K1JCKN5W57RQK8GR
   slugs:
