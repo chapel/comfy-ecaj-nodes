@@ -45,8 +45,11 @@ description: |
 spec_ref: "@krea2-lora-package-compatibility"
 plan_ref: "@plan-krea-2-architecture-support-plan"
 origin: derived
-status: pending_review
+status: completed
 blocked_by: []
+closed_reason: "Merged PR #119 into dev as e6ff6235432abd3af0190b5f428b86589c11e2d8. Implemented
+  Krea 2 LoRA package compatibility with diffusers/native package mapping, complete-or-rejected
+  preflight validation, strength determinism, and Krea-compatible routing tests."
 depends_on:
   - "@task-krea2-architecture-recognition-routing"
 context: []
@@ -365,6 +368,21 @@ history:
         previous: "@01KVW0T9QXNFNAXYEVKF0FKVV6"
     command: review-link
     timestamp: 2026-06-24T05:31:58.962Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: completed
+        previous: pending_review
+      closed_reason:
+        new: "Merged PR #119 into dev as e6ff6235432abd3af0190b5f428b86589c11e2d8. Implemented Krea 2 LoRA
+          package compatibility with diffusers/native package mapping, complete-or-rejected
+          preflight validation, strength determinism, and Krea-compatible routing tests."
+        previous: null
+      completed_at:
+        new: 2026-06-24T05:36:41.465Z
+        previous: null
+    command: task-complete
+    timestamp: 2026-06-24T05:36:41.480Z
 resource_refs:
   - git_commit: null
     git_path: null
@@ -377,5 +395,6 @@ resource_refs:
 created_at: 2026-06-24T03:43:04.973Z
 started_at: 2026-06-24T05:23:42.726Z
 submitted_at: 2026-06-24T05:27:21.815Z
+completed_at: 2026-06-24T05:36:41.465Z
 todos: []
 automation: eligible
