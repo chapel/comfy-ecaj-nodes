@@ -10240,7 +10240,7 @@ runs:
     started_at: 2026-06-24T05:37:30.728Z
     completed_at: 2026-06-24T05:39:06.045Z
   - _ulid: 01KVW2STTSEDEPW7A6AQKXTSB0
-    status: active
+    status: completed
     current_step: 5
     initiated_by: Jacob Chapel
     step_results:
@@ -10290,7 +10290,11 @@ runs:
       - status: completed
         step_index: 5
         started_at: 2026-06-24T05:51:15.690Z
-        completed_at: 2026-06-24T05:51:15.690Z
+        completed_at: 2026-06-24T05:51:40.841Z
+        notes: Captured success observation 01KVW2XS. The shell backtick/task-note friction was already
+          captured earlier as observation 01KVW2MA, so no duplicate friction observation was added.
+          No inbox/task was created because the only improvement proposal needs explicit approval.
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-24T05:49:13.945Z
+    completed_at: 2026-06-24T05:51:40.842Z
