@@ -38,11 +38,11 @@ workspaces:
     canonical_branch: dispatch/task/checkpoint-save-release-temp-model-return-artifact/01krf47g
     canonical_branch_head: 54c9bbe9e84d604c6b40160b4159d5822f9648e5
     cleanup:
-      status: scheduled
+      status: completed
       detail: integrated-into-base-branch
       eligible: true
       reason: integrated-into-base-branch
-      updated_at: 2026-06-24T03:43:35.555Z
+      updated_at: 2026-06-24T03:43:36.499Z
     health:
       status: healthy
       issues: []
@@ -56,17 +56,17 @@ workspaces:
       target_branch: dev
       target_commit: 1b886134e0b0b88768419710d07a162ec7992a15
       updated_at: 2026-06-24T03:43:35.555Z
-    lifecycle_state: closing
+    lifecycle_state: closed
     resolved_base_branch: dev
     task_id: 01KRF47GKDR0QMKKY5KNCA18EV
     task_ref: "@checkpoint-save-release-temp-model-return-artifact"
     task_slug: checkpoint-save-release-temp-model-return-artifact
     timestamps:
-      closed_at: null
+      closed_at: 2026-06-24T03:43:36.499Z
       last_active_at: 2026-05-13T17:03:07.263Z
       last_reconciled_at: 2026-06-24T03:43:35.555Z
       created_at: 2026-05-13T17:03:06.153Z
-      updated_at: 2026-06-24T03:43:35.555Z
+      updated_at: 2026-06-24T03:43:36.499Z
     workspace_id: dispatch-workspace-checkpoint-save-release-temp-model-return-artifact
     worktree_root: /home/chapel/Projects/comfy-ecaj-nodes/.kspec-worktrees
     worktrees:
