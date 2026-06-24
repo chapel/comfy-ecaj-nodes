@@ -1,1 +1,14 @@
-notes: []
+notes:
+  - _ulid: 01KVVXWY0DPF4ASV7JEX8VGK3D
+    content: "Approach: reuse lib.block_classify and the existing make_block_config_node factory. Extend
+      Krea 2 classification only where needed for user-facing block/layer controls, add a Krea 2
+      block-config node registered in ComfyUI mappings, and verify LoRA/Merge consumers accept the
+      produced BlockConfig through existing architecture validation. Edge cases:
+      diffusion_model/transformer prefixes, text-fusion regions must not collapse into Bxx groups,
+      Krea structural keys get deterministic named groups, unsupported keys remain neutral via
+      None/default behavior. Test plan: focused Krea classifier tests for main
+      regions/text-fusion/layer categories/fallback, node tests for output shape and consumer
+      acceptance, then focused pytest plus project gates."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-24T04:23:32.621Z
