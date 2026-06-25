@@ -1,0 +1,11 @@
+notes:
+  - _ulid: 01KVZQS6RP8YV42YVYYDF29QFP
+    content: "Implementation already committed on dev as d37eecd1 (fix: avoid full tensor casts in base
+      identity). Manual Krea 2 API smoke verified the fix: base identity preparation dropped from a
+      pre-progress stall to ~0.043s, WIDEN Exit progress advanced through 434 save units, artifact
+      finalized/reloaded successfully, and focused/full tests plus ruff passed before this task was
+      opened. Task should reconcile the existing commit with the new ACs by adding any missing
+      regression coverage/spec linkage and submitting through the normal review flow."
+    supersedes: null
+    author: Hermes
+    created_at: 2026-06-25T15:53:36.790Z

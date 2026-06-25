@@ -470,7 +470,7 @@ features:
                   stalled Exit node execution.
                 status:
                   maturity: draft
-                  implementation: implemented
+                  implementation: in_progress
                 depends_on: []
                 implements: []
                 relates_to: []
@@ -522,6 +522,13 @@ features:
                       the reported save status does not present the artifact as published.
                     when: |
                       the failure is reported to the workflow.
+                  - given: A saved-model workflow has entered preparation before tensor data is written into the saved
+                      artifact.
+                    id: ac-pre-materialization-phase-visible
+                    then: ComfyUI-visible status or logs identify the active preparation phase before tensor
+                      materialization progress begins.
+                    when: Cache validation, recipe identity, base identity, dependency fingerprinting, compatibility
+                      validation, or save-path preparation is active.
                 tags: []
                 created: 2026-05-08T20:24:54.595Z
                 notes:
@@ -1198,7 +1205,7 @@ features:
           I/O.
         status:
           maturity: draft
-          implementation: implemented
+          implementation: in_progress
         depends_on: []
         implements: []
         relates_to: []
@@ -1277,6 +1284,13 @@ features:
             id: ac-14
             then: no workflow JSON is included in safetensors metadata
             when: saving merged model to disk
+          - given: A saved-model workflow runs on a model whose state dict contains very large tensors.
+            id: ac-bounded-identity-preparation
+            then: Identity and metadata preparation inspect bounded samples or metadata only and do not
+              materialize full tensor dtype/device conversions solely for identity or cache
+              validation.
+            when: The Exit node computes recipe identity, base model identity, or dependency metadata before
+              artifact materialization.
         tags: []
         created: 2026-02-14T00:26:32.026Z
         notes:

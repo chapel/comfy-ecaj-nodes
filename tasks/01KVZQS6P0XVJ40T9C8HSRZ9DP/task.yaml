@@ -1,0 +1,100 @@
+_ulid: 01KVZQS6P0XVJ40T9C8HSRZ9DP
+slugs:
+  - task-reconcile-bounded-saved-model-prep
+title: Reconcile bounded saved-model preparation fix
+type: bug
+description: >-
+  Reconcile the already-committed WIDEN Exit saved-model preparation fix with the approved spec
+  coverage.
+
+
+  Context:
+
+  - Manual Krea 2 smoke testing reproduced a WIDEN Exit save_model=true stall before progress became
+  visible.
+
+  - Root cause was compute_base_identity() casting/materializing a full large tensor before slicing
+  a nominal 64-value sample.
+
+  - Existing implementation commit on dev: d37eecd1 fix: avoid full tensor casts in base identity.
+
+  - That commit slices before dtype/device conversion and adds WIDEN Exit phase logging.
+
+
+  Covers:
+
+  - @exit-model-persistence ac-bounded-identity-preparation
+
+  - @streaming-materialization-progress ac-pre-materialization-phase-visible
+
+  - Related existing contract: @exit-model-persistence ac-6
+
+  - Related existing contract: @streaming-full-model-materialization ac-base-weight-bounded-copying
+
+
+  Required work:
+
+  1. Inspect commit d37eecd1 and keep or refine the bounded identity implementation so
+  identity/cache preparation never performs full-tensor dtype/device conversion solely for sampling.
+
+  2. Ensure WIDEN Exit saved-model preparation emits useful phase logs/status before tensor
+  materialization progress begins.
+
+  3. Add focused CPU-safe regression coverage proving base identity sampling converts/copies only
+  the bounded sample rather than a full large tensor. The test must not require ComfyUI, CUDA, or
+  the real Krea 2 model files.
+
+  4. Add or adjust tests for the pre-materialization phase logging/status behavior if current
+  coverage does not already prove the new AC.
+
+  5. Run focused tests plus the project default Python test suite and lint for touched files.
+
+  6. Preserve or amend the implementation commit/branch so final submitted work has task/spec
+  linkage trailers if the review workflow requires them.
+
+
+  Out of scope:
+
+  - Broad Krea 2 architecture support beyond this saved-model preparation regression.
+
+  - Changing the WIDEN merge algorithm.
+
+  - Changing dispatch or ComfyUI stop/interrupt semantics.
+
+  - Live paid/provider generation or image-output quality validation.
+
+
+  Verification gates:
+
+  - python3 -m pytest tests/test_persistence.py tests/test_save_progress.py -q
+
+  - python3 -m pytest -q
+
+  - python3 -m ruff check lib/persistence.py nodes/exit.py
+
+  - kspec validate --warnings-ok
+spec_ref: "@exit-model-persistence"
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - bug
+  - persistence
+  - progress
+  - krea2
+vcs_refs: []
+history:
+  - author: Jacob Chapel
+    changes:
+      automation:
+        new: eligible
+        previous: manual_only
+    command: task-set
+    timestamp: 2026-06-25T15:53:36.954Z
+created_at: 2026-06-25T15:53:36.704Z
+todos: []
+automation: eligible
