@@ -1807,7 +1807,7 @@ reviews:
     title: Review reconcile bounded saved-model preparation fix
     disposition: pending
     author: Jacob Chapel
-    check_count: 9
+    check_count: 10
     examined_commit: 4d429aa2cc294865f746ce04156ccbbcbcd8a5ef
     lifecycle_state: open
     related_refs: []
@@ -1820,4 +1820,4 @@ reviews:
     unresolved_blocker_count: 0
     verdict_count: 0
     created_at: 2026-06-26T16:06:16.339Z
-    updated_at: 2026-06-26T16:09:31.263Z
+    updated_at: 2026-06-26T16:09:39.129Z
