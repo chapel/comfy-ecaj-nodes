@@ -10341,7 +10341,7 @@ runs:
     completed_at: 2026-06-24T06:00:19.712Z
   - _ulid: 01KW2AR5BQDPXSJFPTN5DAR24T
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10356,7 +10356,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-26T16:04:18.874Z
-        completed_at: 2026-06-26T16:04:18.874Z
+        completed_at: 2026-06-26T16:04:40.340Z
+        notes: "Friction points: ruff format --check failed on a minimal formatter-only blank-line issue in
+          nodes/exit.py in addition to the newly added test line wrapping. This is systemic only
+          insofar as the full format gate can expose prior formatting drift outside the intended
+          code path; search found existing observation @01KVVWDFB tracking the noisy full ruff
+          format gate, so no duplicate capture is needed."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-26T16:04:40.340Z
+        completed_at: 2026-06-26T16:04:40.340Z
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-26T16:03:34.391Z
