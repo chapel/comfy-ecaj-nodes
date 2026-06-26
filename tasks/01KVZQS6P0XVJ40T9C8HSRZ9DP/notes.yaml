@@ -31,3 +31,16 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-26T15:59:56.977Z
+  - _ulid: 01KW2ANGZ127SSTCQG16T55WCQ
+    content: "Verification: uv run pytest
+      tests/test_persistence.py::TestComputeBaseIdentity::test_large_tensor_sampling_converts_only_\
+      bounded_slice
+      tests/test_save_progress.py::TestExitNodePreMaterializationProgress::test_full_save_logs_prep\
+      aration_phases_before_progress_begins -q; uv run pytest tests/test_persistence.py
+      tests/test_save_progress.py -q; uv run python -m compileall lib nodes tests; uv run pytest -q;
+      uv run ruff check .; uv run ruff format --check .; kspec validate --warnings-ok; kspec
+      validate --refs --warnings-ok; kspec validate --alignment --warnings-ok; kspec validate
+      --completeness --warnings-ok. Kspec validation passed with existing warning baseline."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-26T16:02:07.969Z
