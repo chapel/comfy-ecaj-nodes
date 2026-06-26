@@ -6,6 +6,7 @@ AC coverage for: @streaming-materialization-progress
 from __future__ import annotations
 
 import json
+import logging
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -322,6 +323,71 @@ class TestExitNodeProgressNoOpDiffusionSave:
         assert phases.count("prepare") == 1
         assert "finalize" in phases
         assert phases[-1] == "reload"
+
+
+class TestExitNodePreMaterializationProgress:
+    """Saved-model preparation reports useful phases before tensor writes."""
+
+    # AC: @streaming-materialization-progress ac-pre-materialization-phase-visible
+    def test_full_save_logs_preparation_phases_before_progress_begins(
+        self,
+        mock_model_patcher,
+        caplog,
+        tmp_path,
+    ):
+        base = RecipeBase(
+            model_patcher=mock_model_patcher,
+            arch="sdxl",
+            checkpoint_components=None,
+        )
+        recipe = RecipeMerge(
+            base=base,
+            target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
+            backbone=None,
+            t_factor=1.0,
+        )
+        save_path = str(tmp_path / "prep_logging.safetensors")
+        keys = list(mock_model_patcher.model_state_dict().keys())
+        mock_analyze, mock_model_analysis, _dummy_plan = _make_full_mode_mocks(
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
+        )
+        messages_before_progress: list[str] = []
+
+        def stop_before_progress(*, manifest_size: int, artifact_name: str):
+            assert manifest_size == len(keys)
+            assert artifact_name == "prep_logging.safetensors"
+            messages_before_progress.extend(record.getMessage() for record in caplog.records)
+            raise RuntimeError("stop before materialization progress")
+
+        caplog.set_level(logging.INFO, logger="ecaj.exit")
+        with (
+            patch("nodes.exit.validate_model_name", return_value="prep_logging.safetensors"),
+            patch("nodes.exit._resolve_save_path", return_value=save_path),
+            patch("nodes.exit.compute_lora_stats", return_value={}),
+            patch("nodes.exit.serialize_recipe", return_value="{}"),
+            patch("nodes.exit.compute_recipe_hash", return_value="hash"),
+            patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
+            patch("nodes.exit._build_save_progress", side_effect=stop_before_progress),
+        ):
+            with pytest.raises(RuntimeError, match="stop before materialization progress"):
+                WIDENExitNode().execute(
+                    recipe,
+                    save_model=True,
+                    model_name="prep_logging",
+                    enable_cache=False,
+                )
+
+        assert any("full-saved-model: base-state-read" in m for m in messages_before_progress)
+        assert any(
+            "full-saved-model: base-identity-computed" in m for m in messages_before_progress
+        )
+        assert any("full-saved-model: save-path-resolved" in m for m in messages_before_progress)
+        assert any("full-saved-model: cache-path-complete" in m for m in messages_before_progress)
+        assert any("diffusion-save: recipe-analyzed" in m for m in messages_before_progress)
+        assert not any("progress-prepare-done" in m for m in messages_before_progress)
 
 
 class TestExitNodeProgressDiffusionMergeSave:

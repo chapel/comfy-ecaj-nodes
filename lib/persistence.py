@@ -192,6 +192,7 @@ def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
     """Compute a stable identity hash for a base model.
 
     AC: @exit-model-persistence ac-6
+    AC: @exit-model-persistence ac-bounded-identity-preparation
 
     Uses sorted key signatures (key|shape|dtype) plus tensor data samples
     from first, middle, and last keys to distinguish models with identical

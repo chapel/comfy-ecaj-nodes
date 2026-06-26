@@ -260,6 +260,91 @@ class TestComputeBaseIdentity:
         state2 = {"key_a": torch.zeros(4, 4)}
         assert compute_base_identity(state1) != compute_base_identity(state2)
 
+    # AC: @exit-model-persistence ac-bounded-identity-preparation
+    def test_large_tensor_sampling_converts_only_bounded_slice(self):
+        """Base identity sampling must slice before dtype/device conversion."""
+
+        class FakeLargeTensor:
+            def __init__(
+                self,
+                *,
+                shape: tuple[int, ...],
+                dtype: torch.dtype,
+                conversions: list[int],
+                numel: int | None = None,
+            ) -> None:
+                self.shape = shape
+                self.dtype = dtype
+                self._numel = numel if numel is not None else torch.Size(shape).numel()
+                self._conversions = conversions
+
+            def detach(self):
+                return self
+
+            def is_contiguous(self) -> bool:
+                return True
+
+            def view(self, *_shape: int):
+                return FakeLargeTensor(
+                    shape=(self._numel,),
+                    dtype=self.dtype,
+                    conversions=self._conversions,
+                    numel=self._numel,
+                )
+
+            def __getitem__(self, item: slice):
+                if not isinstance(item, slice):
+                    raise AssertionError(f"unexpected index: {item!r}")
+                start, stop, step = item.indices(self._numel)
+                sliced_numel = max(0, (stop - start + (step - 1)) // step)
+                return FakeLargeTensor(
+                    shape=(sliced_numel,),
+                    dtype=self.dtype,
+                    conversions=self._conversions,
+                    numel=sliced_numel,
+                )
+
+            def to(self, *, device: str, dtype: torch.dtype):
+                assert device == "cpu"
+                assert dtype is torch.float32
+                self._conversions.append(self._numel)
+                if self._numel > 64:
+                    raise AssertionError(
+                        f"converted full sample tensor with {self._numel} elements"
+                    )
+                return FakeConvertedSample(self._numel)
+
+        class FakeConvertedSample:
+            def __init__(self, numel: int) -> None:
+                self._numel = numel
+
+            def contiguous(self):
+                return self
+
+            def untyped_storage(self):
+                return b"\x00" * (self._numel * self.element_size())
+
+            def nelement(self) -> int:
+                return self._numel
+
+            def element_size(self) -> int:
+                return 4
+
+        conversions: list[int] = []
+        state = {
+            f"key_{idx}": FakeLargeTensor(
+                shape=(1_000_000, 1_000),
+                dtype=torch.float16,
+                conversions=conversions,
+            )
+            for idx in range(3)
+        }
+
+        identity = compute_base_identity(state)
+
+        assert len(identity) == 64
+        assert conversions == [64, 64, 64]
+
 
 # =============================================================================
 # AC-6: compute_recipe_hash
