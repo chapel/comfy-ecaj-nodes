@@ -13,6 +13,17 @@ checks:
     runner: kspec validate --refs --warnings-ok
     created_at: 2026-06-26T16:08:33.273Z
     completed_at: 2026-06-26T16:08:33.273Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Validation passed with existing warning baseline: 2 orphaned specs and 1 Accurate RAM
+      Preflight Estimation status mismatch."
+    name: kspec alignment
+    required: true
+    runner: kspec validate --alignment --warnings-ok
+    created_at: 2026-06-26T16:08:33.637Z
+    completed_at: 2026-06-26T16:08:33.637Z
 events:
   - _ulid: 01KW2AX3GKPGABP5S9SA9ZBPQN
     actor: Jacob Chapel
@@ -34,6 +45,13 @@ events:
       status: pass
       name: kspec refs
     timestamp: 2026-06-26T16:08:33.295Z
+  - _ulid: 01KW2B19KWA3BF1J251X0FGXPW
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec alignment
+    timestamp: 2026-06-26T16:08:33.660Z
 examined_commit: 4d429aa2cc294865f746ce04156ccbbcbcd8a5ef
 external_links: []
 lifecycle_state: open
@@ -46,5 +64,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-26T16:06:16.339Z
-updated_at: 2026-06-26T16:08:33.273Z
+updated_at: 2026-06-26T16:08:33.637Z
 notes: []
