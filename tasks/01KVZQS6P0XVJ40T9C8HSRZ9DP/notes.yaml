@@ -22,3 +22,12 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-06-26T15:58:54.779Z
+  - _ulid: 01KW2AHH1H8VNJJ8SD2NAWEMJN
+    content: "Implemented focused regression coverage: compute_base_identity now has a fake-large-tensor
+      test that fails if dtype/device conversion is attempted before 64-element sampling, and WIDEN
+      Exit full-save progress now has a log-order test proving named preparation phases are emitted
+      before materialization progress begins. Production bounded-slice logic from d37eecd1 remains
+      unchanged."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-26T15:59:56.977Z
