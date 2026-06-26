@@ -107,6 +107,16 @@ checks:
     runner: kspec validate --warnings-ok
     created_at: 2026-06-26T16:09:39.129Z
     completed_at: 2026-06-26T16:09:39.129Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "PR #122 head 4d429aa2cc294865f746ce04156ccbbcbcd8a5ef: CI lint SUCCESS and CI test SUCCESS."
+    name: github ci
+    required: true
+    runner: GitHub Actions CI
+    created_at: 2026-06-26T16:09:51.978Z
+    completed_at: 2026-06-26T16:09:51.978Z
 events:
   - _ulid: 01KW2AX3GKPGABP5S9SA9ZBPQN
     actor: Jacob Chapel
@@ -191,6 +201,13 @@ events:
       status: pass
       name: kspec validate
     timestamp: 2026-06-26T16:09:39.152Z
+  - _ulid: 01KW2B3P415Y1K4BS1EZ0J7JZ3
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: github ci
+    timestamp: 2026-06-26T16:09:52.002Z
 examined_commit: 4d429aa2cc294865f746ce04156ccbbcbcd8a5ef
 external_links: []
 lifecycle_state: open
@@ -203,5 +220,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-26T16:06:16.339Z
-updated_at: 2026-06-26T16:09:39.129Z
+updated_at: 2026-06-26T16:09:51.978Z
 notes: []
