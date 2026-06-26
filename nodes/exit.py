@@ -86,6 +86,7 @@ class _PhaseTimer:
         )
         self.last = now
 
+
 # Internal merged-key prefix produced by ComfyUI BaseModel.state_dict():
 # `diffusion_model.X`.  ComfyUI's standalone diffusion-model loader
 # (comfy.sd.load_diffusion_model_state_dict) only recognizes one of the
