@@ -10340,7 +10340,7 @@ runs:
     started_at: 2026-06-24T05:58:36.251Z
     completed_at: 2026-06-24T06:00:19.712Z
   - _ulid: 01KW2AR5BQDPXSJFPTN5DAR24T
-    status: active
+    status: completed
     current_step: 5
     initiated_by: Jacob Chapel
     step_results:
@@ -10387,7 +10387,12 @@ runs:
       - status: completed
         step_index: 5
         started_at: 2026-06-26T16:05:05.081Z
-        completed_at: 2026-06-26T16:05:05.081Z
+        completed_at: 2026-06-26T16:05:21.269Z
+        notes: "Capture: no new items created. Existing observation @01KVVWDFB already covers the
+          formatter-gate friction. Task-specific learnings are recorded in
+          @task-reconcile-bounded-saved-model-prep notes and PR #122. No new inbox items,
+          observations, or questions were warranted."
     total_steps: 6
     workflow_ref: "@01KH4D2XWDYBF7V5FW6GA497JC"
     started_at: 2026-06-26T16:03:34.391Z
+    completed_at: 2026-06-26T16:05:21.270Z
