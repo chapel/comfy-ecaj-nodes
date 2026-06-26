@@ -57,6 +57,16 @@ checks:
       -q
     created_at: 2026-06-26T16:08:49.954Z
     completed_at: 2026-06-26T16:08:49.954Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 100 focused tests passed across test_persistence.py and test_save_progress.py.
+    name: focused persistence/progress suite
+    required: true
+    runner: uv run pytest tests/test_persistence.py tests/test_save_progress.py -q
+    created_at: 2026-06-26T16:09:00.043Z
+    completed_at: 2026-06-26T16:09:00.043Z
 events:
   - _ulid: 01KW2AX3GKPGABP5S9SA9ZBPQN
     actor: Jacob Chapel
@@ -106,6 +116,13 @@ events:
       status: pass
       name: focused regressions
     timestamp: 2026-06-26T16:08:49.976Z
+  - _ulid: 01KW2B23D34MHRYVAVEDM3FCHS
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: focused persistence/progress suite
+    timestamp: 2026-06-26T16:09:00.068Z
 examined_commit: 4d429aa2cc294865f746ce04156ccbbcbcd8a5ef
 external_links: []
 lifecycle_state: open
@@ -118,5 +135,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-26T16:06:16.339Z
-updated_at: 2026-06-26T16:08:49.954Z
+updated_at: 2026-06-26T16:09:00.043Z
 notes: []
