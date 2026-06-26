@@ -67,6 +67,16 @@ checks:
     runner: uv run pytest tests/test_persistence.py tests/test_save_progress.py -q
     created_at: 2026-06-26T16:09:00.043Z
     completed_at: 2026-06-26T16:09:00.043Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Full project pytest suite passed.
+    name: full pytest
+    required: true
+    runner: uv run pytest -q
+    created_at: 2026-06-26T16:09:08.916Z
+    completed_at: 2026-06-26T16:09:08.916Z
 events:
   - _ulid: 01KW2AX3GKPGABP5S9SA9ZBPQN
     actor: Jacob Chapel
@@ -123,6 +133,13 @@ events:
       status: pass
       name: focused persistence/progress suite
     timestamp: 2026-06-26T16:09:00.068Z
+  - _ulid: 01KW2B2C2G2X4HBR01M6EZ97SY
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: full pytest
+    timestamp: 2026-06-26T16:09:08.944Z
 examined_commit: 4d429aa2cc294865f746ce04156ccbbcbcd8a5ef
 external_links: []
 lifecycle_state: open
@@ -135,5 +152,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-26T16:06:16.339Z
-updated_at: 2026-06-26T16:09:00.043Z
+updated_at: 2026-06-26T16:09:08.916Z
 notes: []
