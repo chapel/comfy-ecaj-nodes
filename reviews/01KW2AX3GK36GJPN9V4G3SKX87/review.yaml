@@ -87,6 +87,16 @@ checks:
     runner: uv run ruff check .
     created_at: 2026-06-26T16:09:23.452Z
     completed_at: 2026-06-26T16:09:23.452Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: 111 files already formatted.
+    name: ruff format
+    required: true
+    runner: uv run ruff format --check .
+    created_at: 2026-06-26T16:09:31.263Z
+    completed_at: 2026-06-26T16:09:31.263Z
 events:
   - _ulid: 01KW2AX3GKPGABP5S9SA9ZBPQN
     actor: Jacob Chapel
@@ -157,6 +167,13 @@ events:
       status: pass
       name: ruff check
     timestamp: 2026-06-26T16:09:23.479Z
+  - _ulid: 01KW2B31X1K2A26EMEGZEFKC1W
+    actor: Jacob Chapel
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff format
+    timestamp: 2026-06-26T16:09:31.297Z
 examined_commit: 4d429aa2cc294865f746ce04156ccbbcbcd8a5ef
 external_links: []
 lifecycle_state: open
@@ -169,5 +186,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-06-26T16:06:16.339Z
-updated_at: 2026-06-26T16:09:23.452Z
+updated_at: 2026-06-26T16:09:31.263Z
 notes: []
