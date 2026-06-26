@@ -10398,7 +10398,7 @@ runs:
     completed_at: 2026-06-26T16:05:21.270Z
   - _ulid: 01KW2B6Z1P9EFM1ZDFVTN20BX9
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10410,7 +10410,16 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-06-26T16:12:15.783Z
-        completed_at: 2026-06-26T16:12:15.783Z
+        completed_at: 2026-06-26T16:12:32.296Z
+        notes: "High-confidence review success patterns were already covered by existing observations such
+          as @01KQ6K6S, @01KQ80PS, @01KQCM72, and @01KRH6M1. Candidate friction: workflow refs are
+          discoverable through kspec search, but kspec workflow itself has runs/show/start and no
+          list subcommand; this caused an initial failed command and is only partially covered by
+          broader ref-type discoverability item @01KQCR3B5."
+      - status: completed
+        step_index: 2
+        started_at: 2026-06-26T16:12:32.296Z
+        completed_at: 2026-06-26T16:12:32.296Z
     total_steps: 4
     workflow_ref: "@01KH53WBNQFWW4PVZEQTPSSM67"
     started_at: 2026-06-26T16:11:39.446Z
