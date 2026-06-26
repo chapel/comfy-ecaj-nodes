@@ -87,6 +87,7 @@ tags:
   - progress
   - krea2
 vcs_refs: []
+review_ref: "@01KW2AX3GK36GJPN9V4G3SKX87"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-reconcile-bounded-saved-model-prep/01kvzqs6
@@ -137,6 +138,13 @@ history:
         previous: null
     command: task-submit
     timestamp: 2026-06-26T16:02:15.050Z
+  - author: Jacob Chapel
+    changes:
+      review_ref:
+        new: "@01KW2AX3GK36GJPN9V4G3SKX87"
+        previous: null
+    command: review-link
+    timestamp: 2026-06-26T16:06:16.676Z
 created_at: 2026-06-25T15:53:36.704Z
 started_at: 2026-06-26T15:57:11.321Z
 submitted_at: 2026-06-26T16:02:15.050Z
