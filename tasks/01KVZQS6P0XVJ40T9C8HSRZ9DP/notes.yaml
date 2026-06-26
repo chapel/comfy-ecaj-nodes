@@ -9,3 +9,16 @@ notes:
     supersedes: null
     author: Hermes
     created_at: 2026-06-25T15:53:36.790Z
+  - _ulid: 01KW2AFM9VTH0XR27Y63M8A2AV
+    content: "Approach: keep the existing d37eecd1 implementation, which slices sampled tensors before
+      CPU/float32 conversion, and add behavioral regression coverage around compute_base_identity
+      using a fake large tensor that fails on full-size conversion. For progress visibility, reuse
+      the existing WIDEN Exit phase logging added in nodes/exit.py and add a focused test that
+      captures preparation-phase log messages before _build_save_progress can begin materialization
+      progress. Edge cases: non-Comfy CPU-only execution, no real model files, no CUDA, and cache
+      disabled to avoid filesystem cache dependency. Test plan: focused persistence/progress tests
+      for @exit-model-persistence ac-bounded-identity-preparation and
+      @streaming-materialization-progress ac-pre-materialization-phase-visible, then project gates."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-06-26T15:58:54.779Z
