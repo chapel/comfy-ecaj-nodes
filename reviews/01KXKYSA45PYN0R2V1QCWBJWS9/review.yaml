@@ -10,9 +10,16 @@ events:
     payload:
       to: draft
     timestamp: 2026-07-15T22:36:30.725Z
+  - _ulid: 01KXKYSMJ46FSBFAXTA4MJJJ7Z
+    actor: Hermes Reviewer
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-07-15T22:36:41.412Z
 examined_commit: b659796fbc93980480e089a1ce3a0b675aa35c6b
 external_links: []
-lifecycle_state: draft
+lifecycle_state: open
 related_refs: []
 subject:
   type: task
@@ -22,5 +29,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-07-15T22:36:30.725Z
-updated_at: null
+updated_at: 2026-07-15T22:36:41.389Z
 notes: []
