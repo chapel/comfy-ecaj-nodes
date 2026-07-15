@@ -111,7 +111,7 @@ tags:
   - compatibility
   - manual-review
 vcs_refs: []
-review_ref: "@01KXM0EK8H0YMEE2690BBCNACS"
+review_ref: "@01KXM0RVQPDGKCDNQFXH2WVAXH"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf
@@ -381,6 +381,13 @@ history:
         previous: "@01KXKYSA45PYN0R2V1QCWBJWS9"
     command: review-link
     timestamp: 2026-07-15T23:05:38.226Z
+  - author: Hermes Closure Reviewer
+    changes:
+      review_ref:
+        new: "@01KXM0RVQPDGKCDNQFXH2WVAXH"
+        previous: "@01KXM0EK8H0YMEE2690BBCNACS"
+    command: review-link
+    timestamp: 2026-07-15T23:11:13.285Z
 created_at: 2026-07-15T21:09:45.833Z
 started_at: 2026-07-15T22:50:14.485Z
 submitted_at: 2026-07-15T22:57:04.903Z
