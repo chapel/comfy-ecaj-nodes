@@ -10,9 +10,16 @@ events:
     payload:
       to: draft
     timestamp: 2026-07-15T23:05:36.785Z
+  - _ulid: 01KXM0F8ERVYX78KHS3XD3JREP
+    actor: Hermes Closure Reviewer
+    event_type: lifecycle_change
+    payload:
+      from: draft
+      to: open
+    timestamp: 2026-07-15T23:05:58.488Z
 examined_commit: null
 external_links: []
-lifecycle_state: draft
+lifecycle_state: open
 related_refs: []
 subject:
   type: task
@@ -22,5 +29,5 @@ subject:
 threads: []
 verdicts: []
 created_at: 2026-07-15T23:05:36.785Z
-updated_at: null
+updated_at: 2026-07-15T23:05:58.459Z
 notes: []
