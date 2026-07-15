@@ -1597,13 +1597,12 @@ features:
           - krea2-lora-package-compatibility
         title: Krea 2 LoRA Package Compatibility
         type: feature
-        description: |
-          Users can apply supported public Krea 2 LoRA packages to Krea 2 WIDEN recipes
-          without hand-renaming tensor keys, and incompatible packages fail before a
-          partial or misleading merge is produced.
+        description: Users can apply supported public Krea 2 LoRA and LoKR adapter packages to Krea 2 WIDEN
+          recipes without hand-renaming tensor keys, and incompatible packages fail before a partial
+          or misleading merge is produced.
         status:
           maturity: draft
-          implementation: implemented
+          implementation: in_progress
         depends_on: []
         implements: []
         relates_to: []
@@ -1619,25 +1618,53 @@ features:
               without requiring the user to manually edit package tensor names.
             when: |
               the LoRA node and Exit executor apply the recipe.
-          - given: |
-              A selected Krea 2 LoRA package contains tensor groups outside the supported
-              compatibility rules for the current Krea 2 recipe.
+          - given: One or more selected Krea 2 adapter packages include a tensor group outside the supported
+              compatibility rules for the current Krea 2 recipe, including a recipe where otherwise
+              valid packages are combined with one incomplete, unsupported, unmapped, or
+              shape-incompatible package.
             id: ac-lora-compatibility-is-complete-or-rejected
-            then: |
-              WIDEN either applies every required supported group or fails with a report
-              of the unsupported or incompatible groups; it does not silently publish a
-              partial merge as successful.
-            when: |
-              the package is checked before merge execution publishes a result.
-          - given: |
-              A Krea 2 LoRA is supported for the current recipe.
+            then: WIDEN either applies every required group from every selected supported package or rejects the
+              recipe before publishing a result, reporting incomplete pairs, unsupported
+              serialization variants, unmapped base weights, or incompatible expanded shapes; it
+              does not silently skip groups or publish a partial merge as successful.
+            when: The selected packages are checked before merge execution publishes a result.
+          - given: A supported standard LoRA or native full-factor LoKR package contributes to a Krea 2 adapter
+              target.
             id: ac-krea2-lora-strength-controls-are-stable
-            then: |
-              the resulting recipe changes only through the documented strength and
-              block/layer semantics, with deterministic behavior across repeated runs.
-            when: |
-              the user changes LoRA strength or combines the LoRA with block/layer
+            then: The resulting recipe changes only through the documented package strength and existing
+              block/layer-control semantics, with block or layer controls applied at their defined
+              adapter-target or merge boundary rather than reinterpreted as per-package controls;
+              behavior is deterministic across repeated analysis and evaluation.
+            when: The user changes package strength or combines the adapter target with existing block or layer
               controls.
+          - given: A user selects a native Krea 2 full-factor LoKR package whose adapted weight groups contain
+              complete matching diffusion_model.*.lokr_w1 and diffusion_model.*.lokr_w2 tensor
+              pairs.
+            id: ac-native-full-factor-lokr-packages-load
+            then: Each complete pair maps to the corresponding Krea 2 base weight and contributes the Kronecker
+              product of its full factors at the user-selected strength, without manual tensor
+              renaming; scalar .alpha metadata does not additionally scale a complete direct w1/w2
+              pair, and the expanded contribution shape must match the current recipe weight shape
+              before a result can be published.
+            when: The package is validated and applied to a compatible Krea 2 WIDEN recipe.
+          - given: A Krea 2 WIDEN recipe chains two or more supported standard LoRA or native full-factor LoKR
+              packages within one adapter target, including packages that affect overlapping Krea 2
+              base weights.
+            id: ac-chained-krea2-adapters-compose-additively
+            then: Recipe analysis and evaluation preserve each package contribution and configured strength,
+              including additive overlapping same-key contributions within the shared adapter target
+              set; package loading does not overwrite an earlier chained contribution, and repeated
+              execution of the same recipe is deterministic.
+            when: Recipe analysis and WIDEN evaluation process the chained adapter target.
+          - given: A Krea 2 WIDEN recipe places supported standard LoRA or native full-factor LoKR packages in
+              two or more distinct adapter target branches, including branches that affect
+              overlapping Krea 2 base weights.
+            id: ac-branched-krea2-adapters-remain-isolated
+            then: Each branch remains a distinct WIDEN target contribution with its own configured package
+              strengths; same-key contributions from separate branches are not collapsed or
+              overwritten during loading or analysis, and repeated execution of the same recipe is
+              deterministic.
+            when: Recipe analysis and WIDEN evaluation process the branches.
         tags: []
         created: 2026-06-24T03:43:04.598Z
         notes: []
