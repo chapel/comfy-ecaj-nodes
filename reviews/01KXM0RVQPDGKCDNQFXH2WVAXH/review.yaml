@@ -390,9 +390,25 @@ events:
       status: skipped
       name: gpu-comfyui-smoke
     timestamp: 2026-07-15T23:12:44.280Z
+  - _ulid: 01KXM0W6H7ZRJA9JF1SHVS0JY9
+    actor: Hermes Closure Reviewer
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: approve
+    timestamp: 2026-07-15T23:13:02.503Z
+  - _ulid: 01KXM0W6H73DVR5HG6BCXGB9B8
+    actor: Hermes Closure Reviewer
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-07-15T23:13:02.503Z
 examined_commit: a0feb7f091507d8b508c0762b799f946eb33085e
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
@@ -400,7 +416,14 @@ subject:
   ref: "@task-krea2-native-full-factor-lokr-compatibility"
   shadow_commit: ""
 threads: []
-verdicts: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: approve
+    reviewer: Hermes Closure Reviewer
+    role: independent closure reviewer
+    created_at: 2026-07-15T23:13:02.503Z
 created_at: 2026-07-15T23:11:13.142Z
-updated_at: 2026-07-15T23:12:44.260Z
+updated_at: 2026-07-15T23:13:02.503Z
 notes: []
