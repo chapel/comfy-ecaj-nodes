@@ -259,9 +259,25 @@ events:
       kind: nit
       thread_ulid: 01KXKT8NR4GMXNVYB69E6G5395
     timestamp: 2026-07-15T21:17:31.287Z
+  - _ulid: 01KXKT92QWANXHZFPN82A86YRW
+    actor: Hermes Reviewer
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-07-15T21:17:44.573Z
+  - _ulid: 01KXKT92QXAEZ7Z7ED7B3SKRJ7
+    actor: Hermes Reviewer
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-07-15T21:17:44.573Z
 examined_commit: 8f7fca184225b4bc49b62406f85c48727f9c33a2
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
@@ -347,7 +363,14 @@ threads:
           diagnostics match the newly supported family.
         created_at: 2026-07-15T21:17:31.268Z
     kind: nit
-verdicts: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: Hermes Reviewer
+    role: independent project-native reviewer
+    created_at: 2026-07-15T21:17:44.572Z
 created_at: 2026-07-15T21:15:50.403Z
-updated_at: 2026-07-15T21:17:31.268Z
+updated_at: 2026-07-15T21:17:44.573Z
 notes: []
