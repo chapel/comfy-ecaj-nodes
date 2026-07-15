@@ -63,3 +63,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-07-15T21:57:13.153Z
+  - _ulid: 01KXKWQKR8FZZBX5MD2CZYT3J2
+    content: "Fix cycle 2 approach: preserve the header-only get_slice path while matching runtime alpha
+      acceptance (only scalar alpha metadata that maps to a supported group; reject
+      unrelated/unmappable alpha) and independently collect standard up/down versus LoKR w1/w2
+      directions for each mapped key. Add behavioral safetensors regressions first for unrelated
+      unsupported alpha rejection and a mixed complete LoRA+LoKR package on one mapped key, capture
+      RED, then make the narrow probe-only fix and run all CPU-only project/kspec gates."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-07-15T22:00:37.896Z
