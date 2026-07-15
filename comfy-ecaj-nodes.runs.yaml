@@ -10517,7 +10517,7 @@ runs:
     completed_at: 2026-07-15T22:07:47.611Z
   - _ulid: 01KXKYAHCDZX1PEHC73JGB962B
     status: active
-    current_step: 3
+    current_step: 4
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10545,7 +10545,14 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-07-15T22:28:49.146Z
-        completed_at: 2026-07-15T22:28:49.146Z
+        completed_at: 2026-07-15T22:28:52.065Z
+        notes: Each case uses tmp_path and freshly constructed tensor mappings; no shared mutable state,
+          payload services, GPU, ComfyUI, or external fixtures. CUDA_VISIBLE_DEVICES='' used for
+          test gates.
+      - status: completed
+        step_index: 4
+        started_at: 2026-07-15T22:28:52.065Z
+        completed_at: 2026-07-15T22:28:52.065Z
     task_ref: "@01KXKSTF79F9MATP8QKHYGVENQ"
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
