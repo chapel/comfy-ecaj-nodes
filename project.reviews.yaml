@@ -1898,9 +1898,9 @@ reviews:
   - _ulid: 01KXKYSA45PYN0R2V1QCWBJWS9
     slugs: []
     title: "Fresh class-level review: Krea 2 native full-factor LoKR compatibility"
-    disposition: pending
+    disposition: changes_requested
     author: Hermes Reviewer
-    check_count: 0
+    check_count: 19
     examined_commit: b659796fbc93980480e089a1ce3a0b675aa35c6b
     lifecycle_state: open
     related_refs: []
@@ -1909,8 +1909,8 @@ reviews:
       content_hash: ""
       ref: "@task-krea2-native-full-factor-lokr-compatibility"
       shadow_commit: ""
-    thread_count: 0
-    unresolved_blocker_count: 0
+    thread_count: 1
+    unresolved_blocker_count: 1
     verdict_count: 0
     created_at: 2026-07-15T22:36:30.725Z
-    updated_at: 2026-07-15T22:36:41.389Z
+    updated_at: 2026-07-15T22:40:13.174Z

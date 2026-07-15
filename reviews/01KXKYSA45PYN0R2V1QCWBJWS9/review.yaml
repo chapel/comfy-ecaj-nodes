@@ -2,7 +2,228 @@ _ulid: 01KXKYSA45PYN0R2V1QCWBJWS9
 slugs: []
 title: "Fresh class-level review: Krea 2 native full-factor LoKR compatibility"
 author: Hermes Reviewer
-checks: []
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Independently reviewed every changed file and surrounding loader/probe/analysis/executor
+      paths across
+      650463ba60fe082a8bd707565102e649bb34f73e..b659796fbc93980480e089a1ce3a0b675aa35c6b (5 files,
+      621 insertions, 21 deletions; four commits).
+    name: complete-base-head-range-review
+    required: true
+    runner: git/read-only source review
+    created_at: 2026-07-15T22:40:08.257Z
+    completed_at: 2026-07-15T22:40:08.257Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: CUDA_VISIBLE_DEVICES='' uv run python -m compileall lib nodes tests exited 0.
+    name: compileall
+    required: true
+    runner: uv run python -m compileall
+    created_at: 2026-07-15T22:40:08.535Z
+    completed_at: 2026-07-15T22:40:08.535Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "CUDA_VISIBLE_DEVICES='' uv run pytest -q tests/test_krea2_lora_loader.py
+      tests/test_krea2_lokr_recipes.py tests/test_krea2_validation_fixtures.py: 41 passed."
+    name: pytest-krea2-focused
+    required: true
+    runner: pytest
+    created_at: 2026-07-15T22:40:08.815Z
+    completed_at: 2026-07-15T22:40:08.815Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Exact differential slice covering 1D LoKR w1, 3D LoKR w2, 1D standard down, standard rank
+      mismatch, 2D direct bias, and non-scalar alpha: 6 passed."
+    name: six-prior-probe-runtime-cases
+    required: true
+    runner: pytest
+    created_at: 2026-07-15T22:40:09.091Z
+    completed_at: 2026-07-15T22:40:09.091Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: CUDA_VISIBLE_DEVICES='' uv run pytest -q completed 100% with exit 0; independent
+      collection totals 1788 tests.
+    name: pytest-full
+    required: true
+    runner: pytest
+    created_at: 2026-07-15T22:40:09.345Z
+    completed_at: 2026-07-15T22:40:09.345Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run ruff check .: All checks passed."
+    name: ruff-check
+    required: true
+    runner: ruff
+    created_at: 2026-07-15T22:40:09.589Z
+    completed_at: 2026-07-15T22:40:09.589Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "uv run ruff format --check .: 112 files already formatted."
+    name: ruff-format
+    required: true
+    runner: ruff
+    created_at: 2026-07-15T22:40:09.834Z
+    completed_at: 2026-07-15T22:40:09.834Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: git diff --check 650463ba..b659796f clean; HEAD b659796fbc93980480e089a1ce3a0b675aa35c6b;
+      tracked, staged, and untracked working tree clean at check time.
+    name: git-diff-check
+    required: true
+    runner: git
+    created_at: 2026-07-15T22:40:10.092Z
+    completed_at: 2026-07-15T22:40:10.092Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --refs --warnings-ok exited 0: schema and references OK."
+    name: kspec-refs
+    required: true
+    runner: kspec validate
+    created_at: 2026-07-15T22:40:10.357Z
+    completed_at: 2026-07-15T22:40:10.357Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --alignment --warnings-ok exited 0 with 3 accepted project-baseline
+      warnings (2 orphaned specs, 1 status mismatch).
+    name: kspec-alignment
+    required: true
+    runner: kspec validate
+    created_at: 2026-07-15T22:40:10.611Z
+    completed_at: 2026-07-15T22:40:10.611Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --completeness --warnings-ok exited 0 with 12 accepted project-baseline
+      completeness warnings.
+    name: kspec-completeness
+    required: true
+    runner: kspec validate
+    created_at: 2026-07-15T22:40:10.861Z
+    completed_at: 2026-07-15T22:40:10.861Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok exited 0; schema/references/skills OK, with the same 3
+      alignment and 12 completeness warnings.
+    name: kspec-full-validation
+    required: true
+    runner: kspec validate
+    created_at: 2026-07-15T22:40:11.109Z
+    completed_at: 2026-07-15T22:40:11.109Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Verified exact annotations and behavioral proof for all six Krea2 ACs plus
+      @batched-executor ac-7 and @loader-memory-measurement ac-1/ac-3/ac-6. Tests cover
+      parser/Kronecker/strength/alpha, chain and branch evaluation, complete-or-reject, exact
+      two-package bytes and cleanup, and synthetic header fixtures; no source-scanning or fluff
+      tests found.
+    name: ac-annotation-and-required-test-coverage
+    required: true
+    runner: project local-review guidance
+    created_at: 2026-07-15T22:40:11.369Z
+    completed_at: 2026-07-15T22:40:11.369Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Verified additive same-set contributions and isolated branch set IDs through
+      analyze_recipe/evaluate_recipe; exact LoKR factor byte accounting and cleanup of
+      bytes/affected sets; pending-state publication occurs only after per-package validation;
+      model-key/expanded-shape validation occurs before Exit evaluation publication.
+    name: recipe-memory-complete-reject-sweep
+    required: true
+    runner: source review + focused pytest
+    created_at: 2026-07-15T22:40:11.620Z
+    completed_at: 2026-07-15T22:40:11.620Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: All threads in @01KXKT5K, @01KXKWC2, and @01KXKXMQ remain replied to/resolved;
+      independently verified their fixes at current head without reopening or altering historical
+      reviews.
+    name: prior-blocker-closure
+    required: true
+    runner: kspec review/source regression review
+    created_at: 2026-07-15T22:40:11.868Z
+    completed_at: 2026-07-15T22:40:11.868Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Injected a fake safetensors handle where get_slice returns headers and get_tensor raises
+      AssertionError; inspect_lora_header accepted a complete LoKR pair without calling get_tensor.
+      Probe remains genuinely payload-free.
+    name: header-only-probe-boundary
+    required: true
+    runner: adversarial fake safe_open
+    created_at: 2026-07-15T22:40:12.121Z
+    completed_at: 2026-07-15T22:40:12.121Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Compared inspect_lora_header and Krea2Loader.load over 45 CPU-safe package classes
+      spanning standard native/diffusers LoRA, full-factor LoKR, direct bias, alpha, completeness,
+      0D-3D shapes, rank relations, supported/unmapped paths, valid+malformed packages, and mixed
+      families on one base key. 43/45 aligned; the two divergent fixtures are the same zero-rank
+      standard-LoRA invariant alone and mixed with valid LoKR: probe accepts, runtime raises
+      ZeroDivisionError."
+    name: header-probe-runtime-parity
+    required: true
+    runner: 45-case differential sweep
+    created_at: 2026-07-15T22:40:12.359Z
+    completed_at: 2026-07-15T22:40:12.359Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Inspected parser/normalizer, loader family grouping, alpha handling, direct/LoKR/standard
+      dimensions, pending-state publication, set-scoped specs, recipe analysis/evaluation,
+      model-key/shape validation, memory cleanup, and header probe. One unhandled shared invariant
+      remains: a complete 2D standard pair with rank 0 passes probe validation but divides by zero
+      in loader scale calculation."
+    name: invariant-propagation-sweep
+    required: true
+    runner: class-level source and differential audit
+    created_at: 2026-07-15T22:40:12.616Z
+    completed_at: 2026-07-15T22:40:12.616Z
+  - status: skipped
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: Skipped because GPU/ComfyUI/service/operator model-file validation was not approved and is
+      explicitly optional/out of scope; not a blocker.
+    name: gpu-comfyui-smoke
+    required: false
+    runner: operator-controlled integration
+    created_at: 2026-07-15T22:40:12.866Z
+    completed_at: 2026-07-15T22:40:12.866Z
 events:
   - _ulid: 01KXKYSA454QRB99E50TFWS30N
     actor: Hermes Reviewer
@@ -17,6 +238,146 @@ events:
       from: draft
       to: open
     timestamp: 2026-07-15T22:36:41.412Z
+  - _ulid: 01KXKYZYJK94KHBM02A4T53VYC
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: complete-base-head-range-review
+    timestamp: 2026-07-15T22:40:08.275Z
+  - _ulid: 01KXKYZYV9RRCSZJ5QW1A5MHWA
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: compileall
+    timestamp: 2026-07-15T22:40:08.553Z
+  - _ulid: 01KXKYZZ40XV8HPKBE4FMFEGKE
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest-krea2-focused
+    timestamp: 2026-07-15T22:40:08.832Z
+  - _ulid: 01KXKYZZCNMG4RBZZYPP2MXDZX
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: six-prior-probe-runtime-cases
+    timestamp: 2026-07-15T22:40:09.109Z
+  - _ulid: 01KXKYZZMK8AJC3NPPG02AWCWC
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest-full
+    timestamp: 2026-07-15T22:40:09.363Z
+  - _ulid: 01KXKYZZW7V685899BDF6WMGBC
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff-check
+    timestamp: 2026-07-15T22:40:09.607Z
+  - _ulid: 01KXKZ003V77ST2V2REQB4HH8G
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff-format
+    timestamp: 2026-07-15T22:40:09.851Z
+  - _ulid: 01KXKZ00BZC9TGSFNZ9ZM20TJV
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: git-diff-check
+    timestamp: 2026-07-15T22:40:10.111Z
+  - _ulid: 01KXKZ00M8ZKWKRPA5WJEJJJF9
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec-refs
+    timestamp: 2026-07-15T22:40:10.376Z
+  - _ulid: 01KXKZ00W8079KMYYCS29R8Y2R
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec-alignment
+    timestamp: 2026-07-15T22:40:10.632Z
+  - _ulid: 01KXKZ013ZFJS7AJQ4PZ9P7XCJ
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec-completeness
+    timestamp: 2026-07-15T22:40:10.879Z
+  - _ulid: 01KXKZ01BS7NM5TQ9QJ2S1DENK
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec-full-validation
+    timestamp: 2026-07-15T22:40:11.129Z
+  - _ulid: 01KXKZ01KW49KMBGHW0MCWGGA7
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: ac-annotation-and-required-test-coverage
+    timestamp: 2026-07-15T22:40:11.388Z
+  - _ulid: 01KXKZ01VRDS3PEEV5B5209D03
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: recipe-memory-complete-reject-sweep
+    timestamp: 2026-07-15T22:40:11.640Z
+  - _ulid: 01KXKZ023G270CGQXTPDK91HM3
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: prior-blocker-closure
+    timestamp: 2026-07-15T22:40:11.888Z
+  - _ulid: 01KXKZ02BDTRMGXN0JZCQV541S
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: header-only-probe-boundary
+    timestamp: 2026-07-15T22:40:12.141Z
+  - _ulid: 01KXKZ02JTEKQCXAA0KC89S3JK
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: fail
+      name: header-probe-runtime-parity
+    timestamp: 2026-07-15T22:40:12.378Z
+  - _ulid: 01KXKZ02TWMM84NYJ2FVX51NR7
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: fail
+      name: invariant-propagation-sweep
+    timestamp: 2026-07-15T22:40:12.636Z
+  - _ulid: 01KXKZ032K0C7VB9D4ZWDP259C
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: skipped
+      name: gpu-comfyui-smoke
+    timestamp: 2026-07-15T22:40:12.883Z
+  - _ulid: 01KXKZ03C902R4EY4H6Y6GNGHK
+    actor: Hermes Reviewer
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KXKZ03BPSCCJ65548KJZXCK7
+    timestamp: 2026-07-15T22:40:13.193Z
 examined_commit: b659796fbc93980480e089a1ce3a0b675aa35c6b
 external_links: []
 lifecycle_state: open
@@ -26,8 +387,31 @@ subject:
   content_hash: ""
   ref: "@task-krea2-native-full-factor-lokr-compatibility"
   shadow_commit: ""
-threads: []
+threads:
+  - _ulid: 01KXKZ03BPSCCJ65548KJZXCK7
+    anchor:
+      type: code
+      commit: b659796fbc93980480e089a1ce3a0b675aa35c6b
+      line_end: 324
+      line_start: 322
+      path: lib/lora/krea2.py
+      side: head
+    entries:
+      - _ulid: 01KXKZ03BP2PYTNQ6NGA1FZ65V
+        author: Hermes Reviewer
+        body: "MUST-FIX — standard LoRA rank must be positive in both the runtime loader and header probe. A
+          safetensors package with complete 2D factors down=(0, 6) and up=(4, 0) satisfies the
+          current inner-rank equality, so inspect_lora_header reports it supported with no errors,
+          while Krea2Loader.load reaches `strength * alpha / rank` and raises an unclassified
+          ZeroDivisionError. The same divergence persists when the malformed standard family is
+          mixed with a valid full-factor LoKR family on the same mapped key. This violates
+          complete-or-reject and header/runtime accept+reason parity. Evidence: fresh 45-case CPU
+          differential sweep, 43 aligned and these two manifestations divergent. Reject zero rank as
+          shape-incompatible before division and mirror that header-visible rule in the probe, with
+          same-fixture regressions."
+        created_at: 2026-07-15T22:40:13.174Z
+    kind: blocker
 verdicts: []
 created_at: 2026-07-15T22:36:30.725Z
-updated_at: 2026-07-15T22:36:41.389Z
+updated_at: 2026-07-15T22:40:13.174Z
 notes: []
