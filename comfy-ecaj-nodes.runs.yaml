@@ -10517,7 +10517,7 @@ runs:
     completed_at: 2026-07-15T22:07:47.611Z
   - _ulid: 01KXKYAHCDZX1PEHC73JGB962B
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10538,7 +10538,14 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-07-15T22:28:45.499Z
-        completed_at: 2026-07-15T22:28:45.499Z
+        completed_at: 2026-07-15T22:28:49.146Z
+        notes: Tests execute safetensors fixtures through inspect_lora_header and Krea2Loader.load, compare
+          observable shape-incompatible decisions, and do not inspect implementation source. RED was
+          6 failed; GREEN is 6 passed.
+      - status: completed
+        step_index: 3
+        started_at: 2026-07-15T22:28:49.146Z
+        completed_at: 2026-07-15T22:28:49.146Z
     task_ref: "@01KXKSTF79F9MATP8QKHYGVENQ"
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
