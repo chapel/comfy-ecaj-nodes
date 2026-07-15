@@ -13,3 +13,16 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-07-15T21:09:45.929Z
+  - _ulid: 01KXKSYMHCSVVXHGJPYJSBQ7DM
+    content: "Existing investigation work was moved into the dedicated manual task branch
+      dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf and committed as
+      8f7fca18 with Task/Spec trailers. The commit contains the current loader/parser/probe
+      implementation and focused synthetic tests only; it is being submitted specifically for
+      independent project-skill review against all six Krea 2 compatibility ACs and related
+      executor/memory ACs. No GPU or ComfyUI validation was run or authorized. Note: kspec task
+      branch reported branch creation without switching or creating the git ref in this shell, so
+      the commit was initially created on local dev, then safely moved to the deterministic task
+      branch and local dev was restored to 650463ba before review."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-07-15T21:12:02.348Z

@@ -99,7 +99,7 @@ description: >-
 spec_ref: "@krea2-lora-package-compatibility"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -111,6 +111,14 @@ tags:
   - compatibility
   - manual-review
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf
+  captured_at: 2026-07-15T21:12:02.496Z
+  commit: 8f7fca184225b4bc49b62406f85c48727f9c33a2
+  remote: null
+  remote_url: null
+  upstream_ref: dev
 history:
   - author: Jacob Chapel
     changes:
@@ -122,7 +130,28 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-07-15T21:10:23.484Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf
+          captured_at: 2026-07-15T21:12:02.496Z
+          commit: 8f7fca184225b4bc49b62406f85c48727f9c33a2
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous: null
+      submitted_at:
+        new: 2026-07-15T21:12:02.500Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-07-15T21:12:02.501Z
 created_at: 2026-07-15T21:09:45.833Z
 started_at: 2026-07-15T21:10:23.483Z
+submitted_at: 2026-07-15T21:12:02.500Z
 todos: []
 automation: manual_only
