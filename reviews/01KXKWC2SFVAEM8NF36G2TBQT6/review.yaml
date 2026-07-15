@@ -2,7 +2,162 @@ _ulid: 01KXKWC2SFVAEM8NF36G2TBQT6
 slugs: []
 title: "Fresh re-review: Krea 2 native full-factor LoKR compatibility"
 author: Hermes Reviewer
-checks: []
+checks:
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: CUDA_VISIBLE_DEVICES='' uv run python -m compileall lib nodes tests exited 0.
+    name: compileall
+    required: true
+    runner: uv
+    created_at: 2026-07-15T21:56:53.337Z
+    completed_at: 2026-07-15T21:56:53.337Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "CUDA_VISIBLE_DEVICES='' uv run pytest -q tests/test_krea2_lora_loader.py
+      tests/test_krea2_lokr_recipes.py tests/test_krea2_validation_fixtures.py: 33 passed."
+    name: pytest-krea2-focused
+    required: true
+    runner: pytest
+    created_at: 2026-07-15T21:56:53.626Z
+    completed_at: 2026-07-15T21:56:53.626Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "CUDA_VISIBLE_DEVICES='' uv run pytest: 1780 passed in 23.33s."
+    name: pytest-full
+    required: true
+    runner: pytest
+    created_at: 2026-07-15T21:56:53.909Z
+    completed_at: 2026-07-15T21:56:53.909Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "CUDA_VISIBLE_DEVICES='' uv run ruff check .: all checks passed."
+    name: ruff-check
+    required: true
+    runner: ruff
+    created_at: 2026-07-15T21:56:54.168Z
+    completed_at: 2026-07-15T21:56:54.168Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "CUDA_VISIBLE_DEVICES='' uv run ruff format --check .: 112 files already formatted."
+    name: ruff-format
+    required: true
+    runner: ruff
+    created_at: 2026-07-15T21:56:54.408Z
+    completed_at: 2026-07-15T21:56:54.408Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --refs --warnings-ok exited 0: schema and references OK (142 files, 59
+      items, 139 tasks before this review record)."
+    name: kspec-refs
+    required: true
+    runner: kspec
+    created_at: 2026-07-15T21:56:54.652Z
+    completed_at: 2026-07-15T21:56:54.652Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "kspec validate --alignment --warnings-ok exited 0 with 3 unrelated existing warnings: 2
+      orphaned specs and Accurate RAM Preflight status mismatch."
+    name: kspec-alignment
+    required: true
+    runner: kspec
+    created_at: 2026-07-15T21:56:54.904Z
+    completed_at: 2026-07-15T21:56:54.904Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --completeness --warnings-ok exited 0 with 13 project metadata warnings (11
+      missing descriptions); none concern the task's three covered specs or exact AC annotations.
+    name: kspec-completeness
+    required: true
+    runner: kspec
+    created_at: 2026-07-15T21:56:55.147Z
+    completed_at: 2026-07-15T21:56:55.147Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: kspec validate --warnings-ok exited 0; schema/references/skills OK, with the same
+      unrelated alignment/completeness warning baseline.
+    name: kspec-full-validation
+    required: true
+    runner: kspec
+    created_at: 2026-07-15T21:56:55.393Z
+    completed_at: 2026-07-15T21:56:55.393Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: git diff --check 650463ba..699cf74c exited 0; code worktree remained clean.
+    name: git-diff-check
+    required: true
+    runner: git
+    created_at: 2026-07-15T21:56:55.639Z
+    completed_at: 2026-07-15T21:56:55.639Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Exact standalone # AC annotations and behavioral evidence found for all 9 task-listed AC
+      refs: native LoKR mapping/kron/alpha/shape/rejection, chained and branched recipe
+      evaluation/determinism, batched executor ac-7, and loader memory ac-1/ac-3/ac-6."
+    name: ac-annotation-and-required-test-coverage
+    required: true
+    runner: project-native-local-review
+    created_at: 2026-07-15T21:56:55.886Z
+    completed_at: 2026-07-15T21:56:55.886Z
+  - status: pass
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Independently verified all four prior review issues at head: exact new LoKR AC
+      annotation/behavior tests, analyze_recipe+evaluate_recipe chain/branch seams, exact
+      two-package byte accounting+cleanup, and factor-neutral missing-pair diagnostics. Focused
+      tests passed."
+    name: prior-blocker-closure
+    required: true
+    runner: independent-diff-review
+    created_at: 2026-07-15T21:56:56.137Z
+    completed_at: 2026-07-15T21:56:56.137Z
+  - status: fail
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Inspected complete 650463ba..699cf74c diff and surrounding loader/parser, header probe,
+      analysis, recipe evaluator, DeltaSpec/apply path, memory cleanup, tests, and AC annotations.
+      Synthetic parity probes found two header-probe/loader compatibility divergences at
+      scripts/manual/krea2_header_probe.py: supported mixed complete standard+LoKR factors are
+      false-rejected, while an unsupported .alpha key is false-accepted."
+    name: invariant-propagation-sweep
+    required: true
+    runner: diff-first-adversarial-review
+    created_at: 2026-07-15T21:56:56.386Z
+    completed_at: 2026-07-15T21:56:56.386Z
+  - status: skipped
+    applies_to_version:
+      type: entity_version
+      content_hash: ""
+    evidence: "Skipped: no operator approval. No ComfyUI service, GPU, prompts, or operator model files
+      were accessed; optional and not itself a blocker."
+    name: gpu-comfyui-smoke
+    required: false
+    runner: operator-only
+    created_at: 2026-07-15T21:56:56.624Z
+    completed_at: 2026-07-15T21:56:56.624Z
 events:
   - _ulid: 01KXKWC2SETBN2K5PCX39CQ95C
     actor: Hermes Reviewer
@@ -17,6 +172,118 @@ events:
       from: draft
       to: open
     timestamp: 2026-07-15T21:54:31.169Z
+  - _ulid: 01KXKWGRFF1CY2RTWCK4CAVD3Y
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: compileall
+    timestamp: 2026-07-15T21:56:53.360Z
+  - _ulid: 01KXKWGRRDMA2SDWACHMD3QTN8
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest-krea2-focused
+    timestamp: 2026-07-15T21:56:53.645Z
+  - _ulid: 01KXKWGS1CJ0SRNAP8X1C7YD42
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: pytest-full
+    timestamp: 2026-07-15T21:56:53.932Z
+  - _ulid: 01KXKWGS997TWBEGEPNQWVTCCR
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff-check
+    timestamp: 2026-07-15T21:56:54.185Z
+  - _ulid: 01KXKWGSGTGHJYNBET43EZJN4B
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: ruff-format
+    timestamp: 2026-07-15T21:56:54.426Z
+  - _ulid: 01KXKWGSRTV5VVFS6T51X2C0QG
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec-refs
+    timestamp: 2026-07-15T21:56:54.682Z
+  - _ulid: 01KXKWGT0B5K874ATVBT35CF60
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec-alignment
+    timestamp: 2026-07-15T21:56:54.923Z
+  - _ulid: 01KXKWGT7WS3X2DDA2JWE39S5W
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec-completeness
+    timestamp: 2026-07-15T21:56:55.164Z
+  - _ulid: 01KXKWGTFK1ZXYA7BY2SA9SQ8M
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: kspec-full-validation
+    timestamp: 2026-07-15T21:56:55.411Z
+  - _ulid: 01KXKWGTQCCEKG20T60Q0QBJGM
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: git-diff-check
+    timestamp: 2026-07-15T21:56:55.660Z
+  - _ulid: 01KXKWGTZ2S0C9BQAQ6BDWP6EN
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: ac-annotation-and-required-test-coverage
+    timestamp: 2026-07-15T21:56:55.906Z
+  - _ulid: 01KXKWGV6V7GQSP66QYNQ1TX91
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: pass
+      name: prior-blocker-closure
+    timestamp: 2026-07-15T21:56:56.155Z
+  - _ulid: 01KXKWGVENGR5T17B0NHXCDKNQ
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: fail
+      name: invariant-propagation-sweep
+    timestamp: 2026-07-15T21:56:56.405Z
+  - _ulid: 01KXKWGVP41YF042MFPKRHJZMW
+    actor: Hermes Reviewer
+    event_type: check_added
+    payload:
+      status: skipped
+      name: gpu-comfyui-smoke
+    timestamp: 2026-07-15T21:56:56.644Z
+  - _ulid: 01KXKWGVXGT8WR4A8SKQCJE0W8
+    actor: Hermes Reviewer
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KXKWGVWY96KK35M9BV0A3GKR
+    timestamp: 2026-07-15T21:56:56.880Z
+  - _ulid: 01KXKWGW557MQ46R5JF4C54N1J
+    actor: Hermes Reviewer
+    event_type: thread_created
+    payload:
+      kind: blocker
+      thread_ulid: 01KXKWGW4J1P82D47AFHHZ2324
+    timestamp: 2026-07-15T21:56:57.125Z
 examined_commit: 699cf74c2128e814a551c2f9a41306acdb9e63b1
 external_links: []
 lifecycle_state: open
@@ -26,8 +293,51 @@ subject:
   content_hash: ""
   ref: "@task-krea2-native-full-factor-lokr-compatibility"
   shadow_commit: ""
-threads: []
+threads:
+  - _ulid: 01KXKWGVWY96KK35M9BV0A3GKR
+    anchor:
+      type: code
+      commit: 699cf74c2128e814a551c2f9a41306acdb9e63b1
+      line_end: 204
+      line_start: 203
+      path: scripts/manual/krea2_header_probe.py
+      side: head
+    entries:
+      - _ulid: 01KXKWGVWY18RXH2T87VN3NYKF
+        author: Hermes Reviewer
+        body: "MUST-FIX — the header-only compatibility probe unconditionally skips every .alpha key, while
+          Krea2Loader validates the alpha base path and rejects unsupported alpha groups.
+          Independent synthetic evidence: a package containing one complete native LoKR pair plus
+          unrelated.unsupported.alpha produced probe.errors == [] and no unsupported groups, but
+          Krea2Loader.load raised Krea2CompatibilityError naming that tensor as unsupported. This
+          makes the task-required header probe falsely certify a package that runtime
+          complete-or-reject validation rejects. Mirror loader alpha validation in the probe and add
+          a behavioral regression fixture."
+        created_at: 2026-07-15T21:56:56.862Z
+    kind: blocker
+  - _ulid: 01KXKWGW4J1P82D47AFHHZ2324
+    anchor:
+      type: code
+      commit: 699cf74c2128e814a551c2f9a41306acdb9e63b1
+      line_end: 222
+      line_start: 211
+      path: scripts/manual/krea2_header_probe.py
+      side: head
+    entries:
+      - _ulid: 01KXKWGW4KSDHA1P9SWHKJ108A
+        author: Hermes Reviewer
+        body: "MUST-FIX — the probe collapses all directions for a model key into one set and only accepts
+          exactly {down,up} or exactly {lokr_w1,lokr_w2}; the loader keeps those supported families
+          separately and applies both complete contributions. Independent synthetic evidence: one
+          package with complete up/down and complete w1/w2 for the same Krea 2 weight loaded
+          successfully, validated shape, and emitted standard+lokr DeltaSpecs, but
+          inspect_lora_header reported the key incomplete and emitted both incomplete and
+          no-supported errors. Preserve per-family completeness in the probe (or deliberately reject
+          the shape in the loader/spec); the header and runtime compatibility decisions must agree,
+          with a regression test."
+        created_at: 2026-07-15T21:56:57.107Z
+    kind: blocker
 verdicts: []
 created_at: 2026-07-15T21:54:20.079Z
-updated_at: 2026-07-15T21:54:31.109Z
+updated_at: 2026-07-15T21:56:57.107Z
 notes: []
