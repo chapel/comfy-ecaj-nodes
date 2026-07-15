@@ -10563,7 +10563,7 @@ runs:
     completed_at: 2026-07-15T22:28:54.532Z
   - _ulid: 01KXKZV8S24WPZQNMMRR21T156
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10576,7 +10576,14 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-07-15T22:55:22.506Z
-        completed_at: 2026-07-15T22:55:22.506Z
+        completed_at: 2026-07-15T22:55:31.402Z
+        notes: "AC coverage verified: new standalone annotation covers complete-or-reject; existing suite
+          covers valid standard rank, mixed families, LoKR, direct bias, alpha, chain/branch, and
+          memory behavior."
+      - status: completed
+        step_index: 2
+        started_at: 2026-07-15T22:55:31.402Z
+        completed_at: 2026-07-15T22:55:31.402Z
     task_ref: "@01KXKSTF79F9MATP8QKHYGVENQ"
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
