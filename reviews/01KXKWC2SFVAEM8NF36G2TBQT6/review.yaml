@@ -284,9 +284,25 @@ events:
       kind: blocker
       thread_ulid: 01KXKWGW4J1P82D47AFHHZ2324
     timestamp: 2026-07-15T21:56:57.125Z
+  - _ulid: 01KXKWHBQY53TSXWW59JGC9K91
+    actor: Hermes Reviewer
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-07-15T21:57:13.086Z
+  - _ulid: 01KXKWHBQYV1ZYQSS7CC69CQYA
+    actor: Hermes Reviewer
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-07-15T21:57:13.086Z
 examined_commit: 699cf74c2128e814a551c2f9a41306acdb9e63b1
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
@@ -337,7 +353,14 @@ threads:
           with a regression test."
         created_at: 2026-07-15T21:56:57.107Z
     kind: blocker
-verdicts: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: Hermes Reviewer
+    role: independent project-native reviewer
+    created_at: 2026-07-15T21:57:13.086Z
 created_at: 2026-07-15T21:54:20.079Z
-updated_at: 2026-07-15T21:56:57.107Z
+updated_at: 2026-07-15T21:57:13.086Z
 notes: []
