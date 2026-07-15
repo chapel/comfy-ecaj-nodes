@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import json
+import math
 import os
 import sys
 from collections import defaultdict
@@ -54,6 +55,7 @@ class HeaderProbe:
     supported_lora_groups: list[str] = field(default_factory=list)
     unsupported_lora_groups: list[str] = field(default_factory=list)
     incomplete_lora_groups: list[str] = field(default_factory=list)
+    shape_incompatible_lora_groups: list[str] = field(default_factory=list)
     key_samples: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
@@ -198,41 +200,63 @@ def inspect_lora_header(path: str) -> HeaderProbe:
         probe.errors.append(f"Could not read safetensors header: {exc}")
         return probe
 
-    lora_groups: dict[str, set[str]] = defaultdict(set)
-    lokr_groups: dict[str, set[str]] = defaultdict(set)
+    lora_groups: dict[str, dict[str, list[int]]] = defaultdict(dict)
+    lokr_groups: dict[str, dict[str, list[int]]] = defaultdict(dict)
     unsupported: list[str] = []
-    direct_groups: set[str] = set()
+    shape_errors: list[str] = []
+    direct_groups: dict[str, list[int]] = {}
     for key in keys:
         if key.endswith(".alpha"):
             alpha_base_key = key[: -len(".alpha")]
-            if _normalize_base_path(alpha_base_key) is None or not all(
-                dimension == 1 for dimension in shapes[key]
-            ):
+            if _normalize_base_path(alpha_base_key) is None:
                 unsupported.append(key)
+            elif math.prod(shapes[key]) != 1:
+                shape_errors.append(f"{key} alpha must be scalar")
             continue
         parsed = _parse_krea2_lora_key(key)
         if parsed is None:
             unsupported.append(key)
         elif parsed.direct_delta:
-            direct_groups.add(parsed.group_key)
+            direct_groups[parsed.group_key] = shapes[key]
         elif parsed.direction in ("lokr_w1", "lokr_w2"):
-            lokr_groups[parsed.group_key].add(parsed.direction)
+            lokr_groups[parsed.group_key][parsed.direction] = shapes[key]
         else:
-            lora_groups[parsed.group_key].add(parsed.direction)
+            lora_groups[parsed.group_key][parsed.direction] = shapes[key]
 
     incomplete = {
-        group for group, directions in lora_groups.items() if directions != {"down", "up"}
+        group for group, factors in lora_groups.items() if set(factors) != {"down", "up"}
     }
     incomplete.update(
-        group for group, directions in lokr_groups.items() if directions != {"lokr_w1", "lokr_w2"}
+        group for group, factors in lokr_groups.items() if set(factors) != {"lokr_w1", "lokr_w2"}
     )
-    supported_groups = {
-        group for group, directions in lora_groups.items() if directions == {"down", "up"}
-    }
-    supported_groups.update(
-        group for group, directions in lokr_groups.items() if directions == {"lokr_w1", "lokr_w2"}
-    )
-    supported_groups.update(direct_groups)
+    supported_groups: set[str] = set()
+    for group, factors in lora_groups.items():
+        if set(factors) != {"down", "up"}:
+            continue
+        up_shape = factors["up"]
+        down_shape = factors["down"]
+        if len(up_shape) != 2 or len(down_shape) != 2:
+            shape_errors.append(f"{group} expected 2D LoRA factors")
+        elif up_shape[1] != down_shape[0]:
+            shape_errors.append(
+                f"{group} rank mismatch: up {tuple(up_shape)} vs down {tuple(down_shape)}"
+            )
+        else:
+            supported_groups.add(group)
+
+    for group, factors in lokr_groups.items():
+        if set(factors) != {"lokr_w1", "lokr_w2"}:
+            continue
+        if len(factors["lokr_w1"]) != 2 or len(factors["lokr_w2"]) != 2:
+            shape_errors.append(f"{group} expected 2D LoKR factors")
+        else:
+            supported_groups.add(group)
+
+    for group, shape in direct_groups.items():
+        if len(shape) != 1:
+            shape_errors.append(f"{group} direct bias delta must be 1D, got {tuple(shape)}")
+        else:
+            supported_groups.add(group)
 
     probe.tensor_count = len(keys)
     probe.dtypes = dtypes
@@ -240,6 +264,7 @@ def inspect_lora_header(path: str) -> HeaderProbe:
     probe.supported_lora_groups = sorted(supported_groups)
     probe.unsupported_lora_groups = sorted(unsupported)[:24]
     probe.incomplete_lora_groups = sorted(incomplete)[:24]
+    probe.shape_incompatible_lora_groups = sorted(shape_errors)[:24]
     probe.evidence = "Supported Krea 2 package families: " + ", ".join(
         sorted(KREA2_COMPATIBILITY_FAMILIES)
     )
@@ -248,7 +273,9 @@ def inspect_lora_header(path: str) -> HeaderProbe:
         probe.errors.append("unsupported Krea 2 LoRA tensor groups detected")
     if incomplete:
         probe.errors.append("incomplete Krea 2 LoRA/LoKR factor groups detected")
-    if not supported_groups:
+    if shape_errors:
+        probe.errors.append("shape-incompatible Krea 2 LoRA tensor groups detected")
+    if not supported_groups and not (unsupported or incomplete or shape_errors):
         probe.errors.append("no supported Krea 2 LoRA tensor groups detected")
     return probe
 
