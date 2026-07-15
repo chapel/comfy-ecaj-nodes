@@ -73,3 +73,20 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-07-15T22:00:37.896Z
+  - _ulid: 01KXKX8AVYZZMXCYSNWVHQCMD1
+    content: "Fix cycle 2 completed in 5d75a5faa968bed24e55803e6f3e83da0b384dc4. Addressed and resolved
+      both blockers from @01KXKWC2SFVAEM8NF36G2TBQT6: unsupported/unmappable or non-scalar alpha
+      headers are no longer silently skipped, and standard LoRA versus LoKR factor families are
+      validated independently for a shared mapped key while supported groups are deduplicated. RED:
+      the exact two-regression slice failed 2/2 before the probe fix (unsupported alpha omitted;
+      mixed complete package reported unsupported/incomplete). GREEN: exact slice 2 passed; final
+      focused Krea2 loader/recipe/header suite 35 passed. Final CPU-only gates: compileall exit 0;
+      full pytest 1782 passed in 21.86s; ruff check passed; ruff format check 112 files already
+      formatted; git diff --check clean; kspec refs passed (142 files, 59 items, 139 tasks);
+      alignment exited 0 with 3 accepted pre-existing warnings; completeness exited 0 with 12
+      accepted pre-existing warnings; full validation exited 0 with those same warnings and skills
+      OK (14 files). Local-review @01KXKWQB completed 5/5 with no remaining MUST-FIX findings. No
+      GPU, ComfyUI, services, operator assets, or model files used."
+    supersedes: null
+    author: Hermes Worker
+    created_at: 2026-07-15T22:09:45.854Z
