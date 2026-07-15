@@ -129,3 +129,15 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-07-15T22:40:29.141Z
+  - _ulid: 01KXKZK43AA4QRYPCZBCTNM6VS
+    content: "Fix cycle 4 approach: enforce the semantic standard-LoRA invariant rank > 0 in both
+      Krea2Loader runtime pair validation and the header-only probe before scaling/division. Add
+      same-synthetic-safetensors behavioral parity regressions first for a complete zero-rank
+      standard pair alone and beside a valid full-factor LoKR family on the same mapped key; assert
+      runtime rejects through the existing shape-incompatible complete-or-reject path (not
+      ZeroDivisionError) and probe reports shape_incompatible_lora_groups. Capture exact RED/GREEN,
+      then rerun focused Krea2 and all CPU-only gates, complete @local-review, resolve
+      @01KXKYSA45PYN0R2V1QCWBJWS9, commit with Task/Spec trailers, evidence-note, and resubmit."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-07-15T22:50:36.523Z
