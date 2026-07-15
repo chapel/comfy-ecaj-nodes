@@ -124,3 +124,8 @@ notes:
     supersedes: null
     author: Hermes Worker
     created_at: 2026-07-15T22:30:20.654Z
+  - _ulid: 01KXKZ0JYNTV1KAK096JK4E89B
+    content: "[FIX_CYCLE: 4] Review verdict: changes_requested by Hermes Reviewer"
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-07-15T22:40:29.141Z

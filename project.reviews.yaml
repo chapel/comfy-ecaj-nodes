@@ -1902,7 +1902,7 @@ reviews:
     author: Hermes Reviewer
     check_count: 19
     examined_commit: b659796fbc93980480e089a1ce3a0b675aa35c6b
-    lifecycle_state: open
+    lifecycle_state: closed
     related_refs: []
     subject:
       type: task
@@ -1911,6 +1911,6 @@ reviews:
       shadow_commit: ""
     thread_count: 1
     unresolved_blocker_count: 1
-    verdict_count: 0
+    verdict_count: 1
     created_at: 2026-07-15T22:36:30.725Z
-    updated_at: 2026-07-15T22:40:13.174Z
+    updated_at: 2026-07-15T22:40:29.077Z

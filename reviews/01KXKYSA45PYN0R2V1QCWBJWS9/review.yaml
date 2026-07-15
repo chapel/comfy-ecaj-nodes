@@ -378,9 +378,25 @@ events:
       kind: blocker
       thread_ulid: 01KXKZ03BPSCCJ65548KJZXCK7
     timestamp: 2026-07-15T22:40:13.193Z
+  - _ulid: 01KXKZ0JWMBTZPH4AAQS5HY3BQ
+    actor: Hermes Reviewer
+    event_type: verdict_submitted
+    payload:
+      applies_to_version:
+        type: entity_version
+        content_hash: ""
+      decision: request_changes
+    timestamp: 2026-07-15T22:40:29.077Z
+  - _ulid: 01KXKZ0JWNV9MB5K9J7N0YM36A
+    actor: Hermes Reviewer
+    event_type: lifecycle_change
+    payload:
+      from: open
+      to: closed
+    timestamp: 2026-07-15T22:40:29.077Z
 examined_commit: b659796fbc93980480e089a1ce3a0b675aa35c6b
 external_links: []
-lifecycle_state: open
+lifecycle_state: closed
 related_refs: []
 subject:
   type: task
@@ -411,7 +427,14 @@ threads:
           same-fixture regressions."
         created_at: 2026-07-15T22:40:13.174Z
     kind: blocker
-verdicts: []
+verdicts:
+  - applies_to_version:
+      type: entity_version
+      content_hash: ""
+    decision: request_changes
+    reviewer: Hermes Reviewer
+    role: independent project-native reviewer
+    created_at: 2026-07-15T22:40:29.076Z
 created_at: 2026-07-15T22:36:30.725Z
-updated_at: 2026-07-15T22:40:13.174Z
+updated_at: 2026-07-15T22:40:29.077Z
 notes: []
