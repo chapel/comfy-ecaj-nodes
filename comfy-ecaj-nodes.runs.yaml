@@ -10563,9 +10563,20 @@ runs:
     completed_at: 2026-07-15T22:28:54.532Z
   - _ulid: 01KXKZV8S24WPZQNMMRR21T156
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-07-15T22:55:03.459Z
+        completed_at: 2026-07-15T22:55:22.506Z
+        notes: Read @krea2-lora-package-compatibility and related
+          @batched-executor/@loader-memory-measurement ACs; fix targets complete-or-reject and
+          stable standard-LoRA scaling semantics.
+      - status: completed
+        step_index: 1
+        started_at: 2026-07-15T22:55:22.506Z
+        completed_at: 2026-07-15T22:55:22.506Z
     task_ref: "@01KXKSTF79F9MATP8QKHYGVENQ"
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
