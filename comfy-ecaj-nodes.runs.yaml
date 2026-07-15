@@ -10436,9 +10436,19 @@ runs:
     completed_at: 2026-06-26T16:13:13.009Z
   - _ulid: 01KXKV1NCJHAVFDKBJY1F6AR4R
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-07-15T21:31:10.098Z
+        completed_at: 2026-07-15T21:48:26.158Z
+        notes: Read all six Krea 2 compatibility ACs plus batched-executor ac-7 and
+          loader-memory-measurement ac-1/ac-3/ac-6.
+      - status: completed
+        step_index: 1
+        started_at: 2026-07-15T21:48:26.158Z
+        completed_at: 2026-07-15T21:48:26.158Z
     task_ref: "@01KXKSTF79F9MATP8QKHYGVENQ"
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
