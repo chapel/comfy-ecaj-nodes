@@ -207,17 +207,21 @@ def _compatibility_error(
     path: str,
     *,
     unsupported: Iterable[str] = (),
-    incomplete: Iterable[str] = (),
+    incomplete_lora: Iterable[str] = (),
+    incomplete_lokr: Iterable[str] = (),
     shape_errors: Iterable[str] = (),
 ) -> Krea2CompatibilityError:
     parts = [f"Krea 2 LoRA package is not fully compatible: {path}"]
     unsupported = tuple(unsupported)
-    incomplete = tuple(incomplete)
+    incomplete_lora = tuple(incomplete_lora)
+    incomplete_lokr = tuple(incomplete_lokr)
     shape_errors = tuple(shape_errors)
     if unsupported:
         parts.append(f"unsupported tensor groups: {_format_sample(unsupported)}")
-    if incomplete:
-        parts.append(f"incomplete up/down groups: {_format_sample(incomplete)}")
+    if incomplete_lora:
+        parts.append(f"incomplete up/down groups: {_format_sample(incomplete_lora)}")
+    if incomplete_lokr:
+        parts.append(f"incomplete LoKR w1/w2 groups: {_format_sample(incomplete_lokr)}")
     if shape_errors:
         parts.append(f"shape-incompatible groups: {_format_sample(shape_errors)}")
     parts.append(
@@ -287,22 +291,22 @@ class Krea2Loader(LoRALoader):
                 else:
                     layer_tensors[parsed.group_key][parsed.direction] = tensor
 
-        incomplete = [
+        incomplete_lora = [
             key
             for key, tensors in layer_tensors.items()
             if "up" not in tensors or "down" not in tensors
         ]
-        incomplete.extend(
+        incomplete_lokr = [
             key
             for key, tensors in lokr_tensors.items()
             if "lokr_w1" not in tensors or "lokr_w2" not in tensors
-        )
+        ]
         pending_lora: dict[str, list[tuple[torch.Tensor, torch.Tensor, float]]] = defaultdict(list)
         pending_direct: dict[str, list[tuple[torch.Tensor, float]]] = defaultdict(list)
         pending_lokr: dict[str, list[tuple[torch.Tensor, torch.Tensor, float]]] = defaultdict(list)
 
         for model_key, tensors in layer_tensors.items():
-            if model_key in incomplete:
+            if model_key in incomplete_lora:
                 continue
             up = tensors["up"]
             down = tensors["down"]
@@ -321,7 +325,7 @@ class Krea2Loader(LoRALoader):
             pending_lora[model_key].append((up, down, scale))
 
         for model_key, tensors in lokr_tensors.items():
-            if model_key in incomplete:
+            if model_key in incomplete_lokr:
                 continue
             w1 = tensors["lokr_w1"]
             w2 = tensors["lokr_w2"]
@@ -341,11 +345,12 @@ class Krea2Loader(LoRALoader):
                 continue
             pending_direct[model_key].append((tensor, strength))
 
-        if unsupported or incomplete or shape_errors:
+        if unsupported or incomplete_lora or incomplete_lokr or shape_errors:
             raise _compatibility_error(
                 path,
                 unsupported=unsupported,
-                incomplete=incomplete,
+                incomplete_lora=incomplete_lora,
+                incomplete_lokr=incomplete_lokr,
                 shape_errors=shape_errors,
             )
 

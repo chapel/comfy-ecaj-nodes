@@ -150,6 +150,7 @@ def test_optional_probe_reports_krea_model_header_and_dtype_warnings(tmp_path: P
 
 
 # AC: @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load
+# AC: @krea2-lora-package-compatibility ac-native-full-factor-lokr-packages-load
 # AC: @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
 def test_optional_probe_reports_lora_header_compatibility_without_loading_payloads(
     tmp_path: Path,
@@ -165,6 +166,10 @@ def test_optional_probe_reports_lora_header_compatibility_without_loading_payloa
             "diffusion_model.blocks.0.attn.gate.lokr_w2": torch.ones(2, 3),
         },
     )
+    incomplete_lokr_path = write_safetensors(
+        tmp_path / "incomplete_lokr.safetensors",
+        {"diffusion_model.blocks.0.attn.gate.lokr_w1": torch.ones(2, 2)},
+    )
     unsupported_path = write_safetensors(
         tmp_path / "unsupported_lora.safetensors",
         unsupported_krea2_lora_tensors(),
@@ -172,6 +177,7 @@ def test_optional_probe_reports_lora_header_compatibility_without_loading_payloa
 
     supported = probe.inspect_lora_header(supported_path)
     lokr = probe.inspect_lora_header(lokr_path)
+    incomplete_lokr = probe.inspect_lora_header(incomplete_lokr_path)
     unsupported = probe.inspect_lora_header(unsupported_path)
 
     assert "diffusion_model.txtfusion.refiner_blocks.0.mlp.down.weight" in (
@@ -185,6 +191,10 @@ def test_optional_probe_reports_lora_header_compatibility_without_loading_payloa
     assert lokr.unsupported_lora_groups == []
     assert lokr.incomplete_lora_groups == []
     assert lokr.errors == []
+
+    assert incomplete_lokr.incomplete_lora_groups == ["diffusion_model.blocks.0.attn.gate.weight"]
+    assert "incomplete Krea 2 LoRA/LoKR factor groups detected" in incomplete_lokr.errors
+    assert all("up/down" not in error for error in incomplete_lokr.errors)
 
     assert unsupported.unsupported_lora_groups
     assert unsupported.incomplete_lora_groups == ["diffusion_model.blocks.0.attn.wv.weight"]

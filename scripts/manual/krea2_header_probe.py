@@ -233,7 +233,7 @@ def inspect_lora_header(path: str) -> HeaderProbe:
     if unsupported:
         probe.errors.append("unsupported Krea 2 LoRA tensor groups detected")
     if incomplete:
-        probe.errors.append("incomplete Krea 2 LoRA up/down groups detected")
+        probe.errors.append("incomplete Krea 2 LoRA/LoKR factor groups detected")
     if not supported_groups:
         probe.errors.append("no supported Krea 2 LoRA tensor groups detected")
     return probe
