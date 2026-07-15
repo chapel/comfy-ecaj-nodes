@@ -275,6 +275,54 @@ events:
       from: open
       to: closed
     timestamp: 2026-07-15T21:17:44.573Z
+  - _ulid: 01KXKW034PBNZXYRCXZSJ6CYN9
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KXKT8N1J4RQ1A43VQKGR2W0B
+    timestamp: 2026-07-15T21:47:47.222Z
+  - _ulid: 01KXKW03D06AEGV9HWJQD24KNP
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KXKT8N1J4RQ1A43VQKGR2W0B
+    timestamp: 2026-07-15T21:47:47.488Z
+  - _ulid: 01KXKW03NP5NQ11FXZ1CQH616A
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KXKT8N989GM2ZG0WXK9MRMBD
+    timestamp: 2026-07-15T21:47:47.766Z
+  - _ulid: 01KXKW03Y1QNAABB13JBTVWSTT
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KXKT8N989GM2ZG0WXK9MRMBD
+    timestamp: 2026-07-15T21:47:48.033Z
+  - _ulid: 01KXKW047SEBP8EAYX8TM2JDDB
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KXKT8NGH922TZNHW1D3HR5HK
+    timestamp: 2026-07-15T21:47:48.345Z
+  - _ulid: 01KXKW04HKF0VX3ZTNE8ZK6TR6
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KXKT8NGH922TZNHW1D3HR5HK
+    timestamp: 2026-07-15T21:47:48.659Z
+  - _ulid: 01KXKW04X659WN0EF3NYH7PJTH
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KXKT8NR4GMXNVYB69E6G5395
+    timestamp: 2026-07-15T21:47:49.030Z
+  - _ulid: 01KXKW059EWAKYRJDVWJPBAVTW
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KXKT8NR4GMXNVYB69E6G5395
+    timestamp: 2026-07-15T21:47:49.422Z
 examined_commit: 8f7fca184225b4bc49b62406f85c48727f9c33a2
 external_links: []
 lifecycle_state: closed
@@ -305,7 +353,15 @@ threads:
           local-review AC gate fails and complete-or-reject behavior for the newly accepted
           serialization family is not regression-protected."
         created_at: 2026-07-15T21:17:30.547Z
+      - _ulid: 01KXKW033Z08DKS3BDCMJY2X5Z
+        author: Jacob Chapel
+        body: "Fixed: added exact native-full-factor LoKR AC annotations plus behavioral parser/mapping,
+          Kronecker/strength/alpha, expanded-shape mismatch, missing w1/w2, and fail-closed
+          decomposed-form tests."
+        created_at: 2026-07-15T21:47:47.199Z
     kind: blocker
+    resolved_at: 2026-07-15T21:47:47.468Z
+    resolved_by: Jacob Chapel
   - _ulid: 01KXKT8N989GM2ZG0WXK9MRMBD
     anchor:
       type: code
@@ -325,7 +381,15 @@ threads:
           their configured strengths. Directly inspecting one loader set is insufficient for the
           ACs' recipe-analysis/evaluation contract.
         created_at: 2026-07-15T21:17:30.792Z
+      - _ulid: 01KXKW03N1MC1T7AGWKEN792F7
+        author: Jacob Chapel
+        body: "Fixed: added recipe-level analyze_recipe plus evaluate_recipe tests proving two overlapping
+          LoKR packages add within one chained set, distinct overlapping branches remain isolated at
+          configured strengths, and repeated evaluations are deterministic."
+        created_at: 2026-07-15T21:47:47.745Z
     kind: blocker
+    resolved_at: 2026-07-15T21:47:48.008Z
+    resolved_by: Jacob Chapel
   - _ulid: 01KXKT8NGH922TZNHW1D3HR5HK
     anchor:
       type: code
@@ -345,7 +409,15 @@ threads:
           bytes and no global/per-set affected keys. Impact: double-counting, omission, or stale
           LoKR storage can regress while all current tests remain green."
         created_at: 2026-07-15T21:17:31.026Z
+      - _ulid: 01KXKW046WKVTYK12P9CSVRQ3H
+        author: Jacob Chapel
+        body: "Fixed: added an exact two-package LoKR loaded-byte test annotated for
+          @loader-memory-measurement ac-1/ac-3/ac-6; it sums every w1/w2 nbytes and verifies cleanup
+          returns zero bytes with no global or per-set affected keys."
+        created_at: 2026-07-15T21:47:48.316Z
     kind: blocker
+    resolved_at: 2026-07-15T21:47:48.632Z
+    resolved_by: Jacob Chapel
   - _ulid: 01KXKT8NR4GMXNVYB69E6G5395
     anchor:
       type: code
@@ -362,7 +434,15 @@ threads:
           wording. Prefer a factor-neutral message or identify the missing LoKR factor so operator
           diagnostics match the newly supported family.
         created_at: 2026-07-15T21:17:31.268Z
+      - _ulid: 01KXKW04WA76CXV1J1PEJQHKR9
+        author: Jacob Chapel
+        body: "Fixed: loader diagnostics now distinguish incomplete LoRA up/down groups from incomplete LoKR
+          w1/w2 groups, and the header probe uses factor-neutral LoRA/LoKR wording with a behavioral
+          incomplete-LoKR header test."
+        created_at: 2026-07-15T21:47:49.002Z
     kind: nit
+    resolved_at: 2026-07-15T21:47:49.394Z
+    resolved_by: Jacob Chapel
 verdicts:
   - applies_to_version:
       type: entity_version
@@ -372,5 +452,5 @@ verdicts:
     role: independent project-native reviewer
     created_at: 2026-07-15T21:17:44.572Z
 created_at: 2026-07-15T21:15:50.403Z
-updated_at: 2026-07-15T21:17:44.573Z
+updated_at: 2026-07-15T21:47:49.394Z
 notes: []
