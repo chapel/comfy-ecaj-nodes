@@ -208,9 +208,15 @@ def inspect_lora_header(path: str) -> HeaderProbe:
         else:
             grouped[parsed.group_key].add(parsed.direction)
 
-    incomplete = [group for group, directions in grouped.items() if directions != {"down", "up"}]
+    incomplete = [
+        group
+        for group, directions in grouped.items()
+        if directions not in ({"down", "up"}, {"lokr_w1", "lokr_w2"})
+    ]
     supported_groups = sorted(
-        group for group, directions in grouped.items() if directions == {"down", "up"}
+        group
+        for group, directions in grouped.items()
+        if directions in ({"down", "up"}, {"lokr_w1", "lokr_w2"})
     )
     supported_groups.extend(sorted(direct_groups))
 

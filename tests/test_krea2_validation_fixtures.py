@@ -158,12 +158,20 @@ def test_optional_probe_reports_lora_header_compatibility_without_loading_payloa
         tmp_path / "supported_lora.safetensors",
         diffusers_krea2_lora_tensors(),
     )
+    lokr_path = write_safetensors(
+        tmp_path / "lokr_lora.safetensors",
+        {
+            "diffusion_model.blocks.0.attn.gate.lokr_w1": torch.ones(2, 2),
+            "diffusion_model.blocks.0.attn.gate.lokr_w2": torch.ones(2, 3),
+        },
+    )
     unsupported_path = write_safetensors(
         tmp_path / "unsupported_lora.safetensors",
         unsupported_krea2_lora_tensors(),
     )
 
     supported = probe.inspect_lora_header(supported_path)
+    lokr = probe.inspect_lora_header(lokr_path)
     unsupported = probe.inspect_lora_header(unsupported_path)
 
     assert "diffusion_model.txtfusion.refiner_blocks.0.mlp.down.weight" in (
@@ -172,6 +180,11 @@ def test_optional_probe_reports_lora_header_compatibility_without_loading_payloa
     assert supported.unsupported_lora_groups == []
     assert supported.incomplete_lora_groups == []
     assert supported.errors == []
+
+    assert "diffusion_model.blocks.0.attn.gate.weight" in lokr.supported_lora_groups
+    assert lokr.unsupported_lora_groups == []
+    assert lokr.incomplete_lora_groups == []
+    assert lokr.errors == []
 
     assert unsupported.unsupported_lora_groups
     assert unsupported.incomplete_lora_groups == ["diffusion_model.blocks.0.attn.wv.weight"]

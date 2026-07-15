@@ -6,6 +6,7 @@ Supports the public Krea 2 LoRA package families inspected for
 - Diffusers-style exports: ``transformer.*.lora_A/B.weight``.
 - Native Comfy-style exports: ``diffusion_model.*.lora_down/up.weight`` plus
   direct ``.diff_b`` bias deltas.
+- Native LoKR exports: ``diffusion_model.*.lokr_w1/w2``.
 
 Krea base weights are not QKV-fused. Public package names use a mixture of
 Diffusers module names and Comfy checkpoint names, so this loader keeps a small
@@ -42,6 +43,10 @@ KREA2_COMPATIBILITY_FAMILIES = {
         "diffusion_model.*.lora_up.weight",
         "diffusion_model.*.diff_b",
     ),
+    "native_diffusion_lokr": (
+        "diffusion_model.*.lokr_w1",
+        "diffusion_model.*.lokr_w2",
+    ),
 }
 
 _LORA_SUFFIXES = (
@@ -49,6 +54,8 @@ _LORA_SUFFIXES = (
     (".lora_B.weight", "up"),
     (".lora_down.weight", "down"),
     (".lora_up.weight", "up"),
+    (".lokr_w1", "lokr_w1"),
+    (".lokr_w2", "lokr_w2"),
 )
 
 _ATTN_REPLACEMENTS = (
@@ -192,6 +199,10 @@ def _expected_direct_shape(tensor: torch.Tensor) -> tuple[int, ...]:
     return tuple(tensor.shape)
 
 
+def _expected_lokr_shape(w1: torch.Tensor, w2: torch.Tensor) -> tuple[int, ...]:
+    return (w1.shape[0] * w2.shape[0], w1.shape[1] * w2.shape[1])
+
+
 def _compatibility_error(
     path: str,
     *,
@@ -225,6 +236,9 @@ class Krea2Loader(LoRALoader):
         self._direct_data_by_set: dict[str, dict[str, list[tuple[torch.Tensor, float]]]] = (
             defaultdict(lambda: defaultdict(list))
         )
+        self._lokr_data_by_set: dict[
+            str, dict[str, list[tuple[torch.Tensor, torch.Tensor, float]]]
+        ] = defaultdict(lambda: defaultdict(list))
         self._affected_by_set: dict[str, set[str]] = defaultdict(set)
         self._affected: set[str] = set()
 
@@ -239,6 +253,7 @@ class Krea2Loader(LoRALoader):
         effective_set_id = set_id if set_id is not None else "__default__"
 
         layer_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
+        lokr_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
         direct_tensors: dict[str, torch.Tensor] = {}
         alpha_values: dict[str, float] = {}
         unsupported: list[str] = []
@@ -267,6 +282,8 @@ class Krea2Loader(LoRALoader):
                 tensor = f.get_tensor(lora_key)
                 if parsed.direct_delta:
                     direct_tensors[parsed.model_key] = tensor
+                elif parsed.direction in ("lokr_w1", "lokr_w2"):
+                    lokr_tensors[parsed.group_key][parsed.direction] = tensor
                 else:
                     layer_tensors[parsed.group_key][parsed.direction] = tensor
 
@@ -275,8 +292,14 @@ class Krea2Loader(LoRALoader):
             for key, tensors in layer_tensors.items()
             if "up" not in tensors or "down" not in tensors
         ]
+        incomplete.extend(
+            key
+            for key, tensors in lokr_tensors.items()
+            if "lokr_w1" not in tensors or "lokr_w2" not in tensors
+        )
         pending_lora: dict[str, list[tuple[torch.Tensor, torch.Tensor, float]]] = defaultdict(list)
         pending_direct: dict[str, list[tuple[torch.Tensor, float]]] = defaultdict(list)
+        pending_lokr: dict[str, list[tuple[torch.Tensor, torch.Tensor, float]]] = defaultdict(list)
 
         for model_key, tensors in layer_tensors.items():
             if model_key in incomplete:
@@ -297,6 +320,19 @@ class Krea2Loader(LoRALoader):
             scale = strength * alpha / rank
             pending_lora[model_key].append((up, down, scale))
 
+        for model_key, tensors in lokr_tensors.items():
+            if model_key in incomplete:
+                continue
+            w1 = tensors["lokr_w1"]
+            w2 = tensors["lokr_w2"]
+            if w1.dim() != 2 or w2.dim() != 2:
+                shape_errors.append(f"{model_key} expected 2D LoKR factors")
+                continue
+            # Full w1/w2 LoKR packages match LyCORIS/ai-toolkit semantics:
+            # alpha metadata is not applied unless a decomposed factor pair is
+            # present. Krea 2 support intentionally accepts only full factors.
+            pending_lokr[model_key].append((w1, w2, strength))
+
         for model_key, tensor in direct_tensors.items():
             if tensor.dim() != 1:
                 shape_errors.append(
@@ -313,7 +349,7 @@ class Krea2Loader(LoRALoader):
                 shape_errors=shape_errors,
             )
 
-        if not pending_lora and not pending_direct:
+        if not pending_lora and not pending_direct and not pending_lokr:
             raise _compatibility_error(path, unsupported=["no supported Krea 2 tensors"])
 
         for model_key, entries in pending_lora.items():
@@ -322,6 +358,10 @@ class Krea2Loader(LoRALoader):
             self._affected.add(model_key)
         for model_key, entries in pending_direct.items():
             self._direct_data_by_set[effective_set_id][model_key].extend(entries)
+            self._affected_by_set[effective_set_id].add(model_key)
+            self._affected.add(model_key)
+        for model_key, entries in pending_lokr.items():
+            self._lokr_data_by_set[effective_set_id][model_key].extend(entries)
             self._affected_by_set[effective_set_id].add(model_key)
             self._affected.add(model_key)
 
@@ -371,6 +411,15 @@ class Krea2Loader(LoRALoader):
                                 f"does not match current recipe shape {current_shape}"
                             )
 
+                for set_id, key_data in sorted(self._lokr_data_by_set.items()):
+                    for w1, w2, _scale in key_data.get(model_key, ()):
+                        expected_shape = _expected_lokr_shape(w1, w2)
+                        if expected_shape != current_shape:
+                            shape_errors.append(
+                                f"{model_key} set {set_id} package delta shape {expected_shape} "
+                                f"does not match current recipe shape {current_shape}"
+                            )
+
         if missing:
             shape_errors.insert(
                 0,
@@ -394,6 +443,10 @@ class Krea2Loader(LoRALoader):
             for entries in key_data.values():
                 for tensor, _scale in entries:
                     total += tensor.nbytes
+        for key_data in self._lokr_data_by_set.values():
+            for entries in key_data.values():
+                for w1, w2, _scale in entries:
+                    total += w1.nbytes + w2.nbytes
         return total
 
     def get_delta_specs(
@@ -407,9 +460,11 @@ class Krea2Loader(LoRALoader):
         if set_id is not None:
             lora_sources = [self._lora_data_by_set.get(set_id, {})]
             direct_sources = [self._direct_data_by_set.get(set_id, {})]
+            lokr_sources = [self._lokr_data_by_set.get(set_id, {})]
         else:
             lora_sources = list(self._lora_data_by_set.values())
             direct_sources = list(self._direct_data_by_set.values())
+            lokr_sources = list(self._lokr_data_by_set.values())
 
         for key in keys:
             key_idx = key_indices.get(key)
@@ -439,10 +494,23 @@ class Krea2Loader(LoRALoader):
                         )
                     )
 
+            for lokr_data in lokr_sources:
+                for w1, w2, scale in lokr_data.get(key, ()):
+                    specs.append(
+                        DeltaSpec(
+                            kind="lokr",
+                            key_index=key_idx,
+                            w1=w1,
+                            w2=w2,
+                            scale=scale,
+                        )
+                    )
+
         return specs
 
     def cleanup(self) -> None:
         self._lora_data_by_set.clear()
         self._direct_data_by_set.clear()
+        self._lokr_data_by_set.clear()
         self._affected_by_set.clear()
         self._affected.clear()

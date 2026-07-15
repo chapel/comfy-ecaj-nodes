@@ -165,6 +165,45 @@ def test_native_public_family_loads_lora_and_bias_deltas(tmp_path: Path) -> None
     assert torch.equal(result[0], torch.arange(6, dtype=torch.float32) * 0.25)
 
 
+def test_native_lokr_family_loads_and_applies_kron_delta(tmp_path: Path) -> None:
+    # AC: @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load
+    # AC: @batched-executor ac-7
+    path = _write_lora(
+        tmp_path,
+        {
+            "diffusion_model.blocks.0.attn.gate.lokr_w1": torch.tensor(
+                [[1.0, 2.0], [3.0, 4.0]],
+            ),
+            "diffusion_model.blocks.0.attn.gate.lokr_w2": torch.tensor(
+                [[0.5, 1.5, 2.5], [3.5, 4.5, 5.5]],
+            ),
+            # Full w1/w2 LoKR packages carry alpha metadata, but LyCORIS/ai-toolkit
+            # do not apply alpha scaling when both full factors are present.
+            "diffusion_model.blocks.0.attn.gate.alpha": torch.tensor(9999220736.0),
+        },
+    )
+
+    loader = Krea2Loader()
+    loader.load(path, strength=0.25, set_id="lokr")
+
+    key = "diffusion_model.blocks.0.attn.gate.weight"
+    assert loader.affected_keys_for_set("lokr") == {key}
+    loader.validate_compatible_keys({key}, {key: (4, 6)})
+
+    specs = loader.get_delta_specs([key], {key: 0}, set_id="lokr")
+    assert len(specs) == 1
+    assert specs[0].kind == "lokr"
+    assert specs[0].scale == pytest.approx(0.25)
+
+    base = torch.zeros(1, 4, 6)
+    result = apply_lora_batch_gpu([key], base, specs, "cpu", torch.float32)
+    expected = 0.25 * torch.kron(
+        torch.tensor([[1.0, 2.0], [3.0, 4.0]]),
+        torch.tensor([[0.5, 1.5, 2.5], [3.5, 4.5, 5.5]]),
+    )
+    assert torch.allclose(result[0], expected)
+
+
 def test_strength_changes_only_scales_deterministically(tmp_path: Path) -> None:
     # AC: @krea2-lora-package-compatibility ac-krea2-lora-strength-controls-are-stable
     path = _write_lora(
