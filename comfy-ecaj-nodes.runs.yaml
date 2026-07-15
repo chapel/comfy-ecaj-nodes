@@ -10475,9 +10475,19 @@ runs:
     completed_at: 2026-07-15T21:48:37.643Z
   - _ulid: 01KXKWQBYB9DC7WT5TSACE9B0T
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-07-15T22:00:29.899Z
+        completed_at: 2026-07-15T22:06:51.926Z
+        notes: Reviewed the narrow two-file diff against all Krea 2 compatibility ACs and added behavioral
+          AC annotations for unsupported alpha rejection and mixed-family acceptance.
+      - status: completed
+        step_index: 1
+        started_at: 2026-07-15T22:06:51.926Z
+        completed_at: 2026-07-15T22:06:51.926Z
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
     started_at: 2026-07-15T22:00:29.899Z
