@@ -99,7 +99,7 @@ description: >-
 spec_ref: "@krea2-lora-package-compatibility"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -115,8 +115,8 @@ review_ref: "@01KXKT5K83FMVN9BV6RNYRRFYS"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf
-  captured_at: 2026-07-15T21:12:02.496Z
-  commit: 8f7fca184225b4bc49b62406f85c48727f9c33a2
+  captured_at: 2026-07-15T21:49:12.747Z
+  commit: 699cf74c2128e814a551c2f9a41306acdb9e63b1
   remote: null
   remote_url: null
   upstream_ref: dev
@@ -178,8 +178,35 @@ history:
         previous: 2026-07-15T21:10:23.483Z
     command: task-start
     timestamp: 2026-07-15T21:30:18.038Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf
+          captured_at: 2026-07-15T21:49:12.747Z
+          commit: 699cf74c2128e814a551c2f9a41306acdb9e63b1
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous:
+          review_url: null
+          branch: dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf
+          captured_at: 2026-07-15T21:12:02.496Z
+          commit: 8f7fca184225b4bc49b62406f85c48727f9c33a2
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+      submitted_at:
+        new: 2026-07-15T21:49:12.753Z
+        previous: 2026-07-15T21:12:02.500Z
+    command: task-submit
+    timestamp: 2026-07-15T21:49:12.753Z
 created_at: 2026-07-15T21:09:45.833Z
 started_at: 2026-07-15T21:30:18.037Z
-submitted_at: 2026-07-15T21:12:02.500Z
+submitted_at: 2026-07-15T21:49:12.753Z
 todos: []
 automation: manual_only

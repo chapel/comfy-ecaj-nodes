@@ -43,3 +43,18 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-07-15T21:32:14.478Z
+  - _ulid: 01KXKW2PGZQFS34DVW5SRD7RTS
+    content: "Fix cycle 1 completed in 699cf74c. Addressed and resolved all 4 threads from
+      @01KXKT5K83FMVN9BV6RNYRRFYS. RED: focused loader/recipe tests initially had 2 failures and 25
+      passes on missing-LoKR-factor diagnostics; header-probe diagnostic test separately failed 1/1
+      before its factor-neutral fix. GREEN: Krea-focused loader/recipe/header suite 33 passed in
+      0.15s. Final CPU-only gates: compileall exit 0; full pytest 1780 passed in 21.83s; ruff check
+      all passed; ruff format check 112 files already formatted; git diff --check clean; kspec refs
+      passed (142 files, 59 items, 139 tasks); alignment exited 0 with 3 accepted pre-existing
+      warnings; completeness exited 0 with 12 accepted pre-existing warnings; full validation exited
+      0 with the same 3 alignment and 12 completeness warnings, skills OK (14 files). Local-review
+      workflow @01KXKV1N completed 5/5 with no remaining MUST-FIX findings. No GPU, ComfyUI,
+      services, operator model files, or non-project fixtures used."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-07-15T21:49:12.607Z
