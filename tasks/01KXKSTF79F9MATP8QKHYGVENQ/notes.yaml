@@ -141,3 +141,21 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-07-15T22:50:36.523Z
+  - _ulid: 01KXKZYZ7MK0NGMASJSH44M2S0
+    content: "Fix cycle 4 completed in a0feb7f091507d8b508c0762b799f946eb33085e. Enforced rank > 0 at
+      both Krea2Loader standard-factor validation and the header-only probe before scaling/division;
+      zero-rank standard-only and mixed-valid-LoKR packages now reject atomically through matching
+      shape-incompatible paths with no ZeroDivisionError. Same-fixture RED: exact slice 2 failed/2
+      (both unclassified ZeroDivisionError); GREEN: exact slice 2 passed and focused Krea2
+      loader/recipe/header suite 43 passed. Final CPU-only gates after formatting: compileall exit
+      0; full pytest 1790 passed in 22.36s; ruff check passed; ruff format check 112 files already
+      formatted; git diff --check clean; kspec refs passed (142 files, 59 items, 139 tasks);
+      alignment exit 0 with 3 accepted warnings; completeness exit 0 with 12 accepted warnings; full
+      validation exit 0 with the same 3 alignment/12 completeness warnings and skills OK (14 files).
+      Local-review @01KXKZV8 completed 5/5 with no remaining MUST-FIX findings. Review blocker
+      thread 01KXKZ03BPSCCJ65548KJZXCK7 on @01KXKYSA45PYN0R2V1QCWBJWS9 was replied to and resolved;
+      historical review now has 0 unresolved/0 blockers. No GPU, ComfyUI, services, prompts,
+      operator model files, or external fixtures used; CUDA_VISIBLE_DEVICES= for tests."
+    supersedes: null
+    author: Hermes Reviewer
+    created_at: 2026-07-15T22:57:04.757Z

@@ -99,7 +99,7 @@ description: >-
 spec_ref: "@krea2-lora-package-compatibility"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -115,8 +115,8 @@ review_ref: "@01KXKYSA45PYN0R2V1QCWBJWS9"
 submission_linkage:
   review_url: null
   branch: dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf
-  captured_at: 2026-07-15T22:30:20.800Z
-  commit: b659796fbc93980480e089a1ce3a0b675aa35c6b
+  captured_at: 2026-07-15T22:57:04.898Z
+  commit: a0feb7f091507d8b508c0762b799f946eb33085e
   remote: null
   remote_url: null
   upstream_ref: dev
@@ -347,8 +347,35 @@ history:
         previous: 2026-07-15T22:24:06.011Z
     command: task-start
     timestamp: 2026-07-15T22:50:14.485Z
+  - author: Hermes Reviewer
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf
+          captured_at: 2026-07-15T22:57:04.898Z
+          commit: a0feb7f091507d8b508c0762b799f946eb33085e
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+        previous:
+          review_url: null
+          branch: dispatch/task/task-krea2-native-full-factor-lokr-compatibility/01kxkstf
+          captured_at: 2026-07-15T22:30:20.800Z
+          commit: b659796fbc93980480e089a1ce3a0b675aa35c6b
+          remote: null
+          remote_url: null
+          upstream_ref: dev
+      submitted_at:
+        new: 2026-07-15T22:57:04.903Z
+        previous: 2026-07-15T22:30:20.807Z
+    command: task-submit
+    timestamp: 2026-07-15T22:57:04.904Z
 created_at: 2026-07-15T21:09:45.833Z
 started_at: 2026-07-15T22:50:14.485Z
-submitted_at: 2026-07-15T22:30:20.807Z
+submitted_at: 2026-07-15T22:57:04.903Z
 todos: []
 automation: manual_only
