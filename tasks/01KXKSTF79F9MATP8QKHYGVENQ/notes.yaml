@@ -31,3 +31,15 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-07-15T21:17:44.657Z
+  - _ulid: 01KXKV3M8D0S02X8WB4M7J0W9A
+    content: "Fix-cycle TDD approach: add exact new Krea 2 AC-annotated behavioral tests for native LoKR
+      parser/mapping, full-factor Kronecker/alpha semantics, expanded-shape and complete-or-reject
+      failures (missing w1/w2 and decomposed forms), recipe-level analyze_recipe + evaluate_recipe
+      additive chains/isolated branches/deterministic replay, and exact two-package LoKR loaded-byte
+      cleanup under @loader-memory-measurement ac-1/ac-3/ac-6. First capture a focused RED on the
+      inaccurate incomplete-factor diagnostic, then minimally separate up/down and w1/w2 diagnostics
+      while preserving existing LoRA/executor behavior. CPU-only synthetic safetensors;
+      CUDA_VISIBLE_DEVICES='' and no ComfyUI/GPU/model access."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-07-15T21:32:14.478Z
