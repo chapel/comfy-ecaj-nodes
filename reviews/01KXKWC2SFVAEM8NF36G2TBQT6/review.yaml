@@ -306,6 +306,12 @@ events:
     payload:
       thread_ulid: 01KXKWGVWY96KK35M9BV0A3GKR
     timestamp: 2026-07-15T22:09:05.291Z
+  - _ulid: 01KXKX77XSJJXYJBCMTMWH42A3
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KXKWGW4J1P82D47AFHHZ2324
+    timestamp: 2026-07-15T22:09:10.073Z
 examined_commit: 699cf74c2128e814a551c2f9a41306acdb9e63b1
 external_links: []
 lifecycle_state: closed
@@ -366,6 +372,13 @@ threads:
           the shape in the loader/spec); the header and runtime compatibility decisions must agree,
           with a regression test."
         created_at: 2026-07-15T21:56:57.107Z
+      - _ulid: 01KXKX77TS8H4BJ0Y39HAA09QT
+        author: Jacob Chapel
+        body: "Fixed in 5d75a5faa968bed24e55803e6f3e83da0b384dc4: standard up/down and LoKR w1/w2 directions
+          are tracked and completed independently, then their mapped supported keys are
+          deduplicated. The mixed-package regression proves the probe accepts the package and
+          runtime emits both standard and lokr DeltaSpecs."
+        created_at: 2026-07-15T22:09:09.977Z
     kind: blocker
 verdicts:
   - applies_to_version:
@@ -376,5 +389,5 @@ verdicts:
     role: independent project-native reviewer
     created_at: 2026-07-15T21:57:13.086Z
 created_at: 2026-07-15T21:54:20.079Z
-updated_at: 2026-07-15T22:09:05.193Z
+updated_at: 2026-07-15T22:09:09.977Z
 notes: []
