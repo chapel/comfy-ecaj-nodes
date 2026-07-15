@@ -10436,7 +10436,7 @@ runs:
     completed_at: 2026-06-26T16:13:13.009Z
   - _ulid: 01KXKV1NCJHAVFDKBJY1F6AR4R
     status: active
-    current_step: 3
+    current_step: 4
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10460,7 +10460,13 @@ runs:
       - status: completed
         step_index: 3
         started_at: 2026-07-15T21:48:30.917Z
-        completed_at: 2026-07-15T21:48:30.917Z
+        completed_at: 2026-07-15T21:48:34.862Z
+        notes: Tests use tmp_path-owned synthetic safetensors, fresh loaders/recipes, CPU tensors, and no
+          shared mutable state, ComfyUI, GPU, or operator files.
+      - status: completed
+        step_index: 4
+        started_at: 2026-07-15T21:48:34.862Z
+        completed_at: 2026-07-15T21:48:34.862Z
     task_ref: "@01KXKSTF79F9MATP8QKHYGVENQ"
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
