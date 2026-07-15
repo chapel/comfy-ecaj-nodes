@@ -10517,7 +10517,7 @@ runs:
     completed_at: 2026-07-15T22:07:47.611Z
   - _ulid: 01KXKYAHCDZX1PEHC73JGB962B
     status: active
-    current_step: 1
+    current_step: 2
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10530,7 +10530,15 @@ runs:
       - status: completed
         step_index: 1
         started_at: 2026-07-15T22:28:42.543Z
-        completed_at: 2026-07-15T22:28:42.543Z
+        completed_at: 2026-07-15T22:28:45.499Z
+        notes: Verified exact standalone AC annotations. New parameterized differential test covers five
+          malformed shape classes and a separate differential test covers non-scalar alpha
+          reason-category parity under ac-lora-compatibility-is-complete-or-rejected. Existing suite
+          retains all other task AC annotations.
+      - status: completed
+        step_index: 2
+        started_at: 2026-07-15T22:28:45.499Z
+        completed_at: 2026-07-15T22:28:45.499Z
     task_ref: "@01KXKSTF79F9MATP8QKHYGVENQ"
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
