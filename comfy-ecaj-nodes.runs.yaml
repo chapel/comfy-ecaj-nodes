@@ -10435,9 +10435,10 @@ runs:
     started_at: 2026-06-26T16:11:39.446Z
     completed_at: 2026-06-26T16:13:13.009Z
   - _ulid: 01KXKV1NCJHAVFDKBJY1F6AR4R
-    status: active
+    status: completed
     current_step: 4
     initiated_by: Jacob Chapel
+    result: success
     step_results:
       - status: completed
         step_index: 0
@@ -10471,3 +10472,4 @@ runs:
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
     started_at: 2026-07-15T21:31:10.098Z
+    completed_at: 2026-07-15T21:48:37.643Z
