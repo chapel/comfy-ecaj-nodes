@@ -320,6 +320,9 @@ class Krea2Loader(LoRALoader):
                 continue
 
             rank = down.shape[0]
+            if rank <= 0:
+                shape_errors.append(f"{model_key} rank must be positive")
+                continue
             alpha = alpha_values.get(model_key, float(rank))
             scale = strength * alpha / rank
             pending_lora[model_key].append((up, down, scale))

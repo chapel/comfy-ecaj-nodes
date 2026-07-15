@@ -241,6 +241,8 @@ def inspect_lora_header(path: str) -> HeaderProbe:
             shape_errors.append(
                 f"{group} rank mismatch: up {tuple(up_shape)} vs down {tuple(down_shape)}"
             )
+        elif down_shape[0] <= 0:
+            shape_errors.append(f"{group} rank must be positive")
         else:
             supported_groups.add(group)
 
