@@ -1910,7 +1910,7 @@ reviews:
       ref: "@task-krea2-native-full-factor-lokr-compatibility"
       shadow_commit: ""
     thread_count: 1
-    unresolved_blocker_count: 1
+    unresolved_blocker_count: 0
     verdict_count: 1
     created_at: 2026-07-15T22:36:30.725Z
-    updated_at: 2026-07-15T22:40:29.077Z
+    updated_at: 2026-07-15T22:56:40.681Z

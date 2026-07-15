@@ -394,6 +394,18 @@ events:
       from: open
       to: closed
     timestamp: 2026-07-15T22:40:29.077Z
+  - _ulid: 01KXKZY7D61XYABY6NDTNG957Q
+    actor: Hermes Reviewer
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KXKZ03BPSCCJ65548KJZXCK7
+    timestamp: 2026-07-15T22:56:40.358Z
+  - _ulid: 01KXKZY7R49HH7HSK2SK3ZN2TG
+    actor: Hermes Reviewer
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KXKZ03BPSCCJ65548KJZXCK7
+    timestamp: 2026-07-15T22:56:40.708Z
 examined_commit: b659796fbc93980480e089a1ce3a0b675aa35c6b
 external_links: []
 lifecycle_state: closed
@@ -426,7 +438,19 @@ threads:
           shape-incompatible before division and mirror that header-visible rule in the probe, with
           same-fixture regressions."
         created_at: 2026-07-15T22:40:13.174Z
+      - _ulid: 01KXKZY7C68V396PN86KDZCJTN
+        author: Hermes Reviewer
+        body: "Fixed in a0feb7f091507d8b508c0762b799f946eb33085e: Krea2Loader now rejects rank <= 0 through
+          the existing shape-incompatible compatibility error before alpha scaling/division, and the
+          header-only probe mirrors the same header-decidable invariant without materializing
+          payloads. The same synthetic safetensors regression covers both standard-only and
+          malformed-standard + valid-LoKR packages; RED was 2 failed with ZeroDivisionError, GREEN
+          is 2 passed with matching shape-incompatible classification and atomic empty loader
+          state."
+        created_at: 2026-07-15T22:56:40.323Z
     kind: blocker
+    resolved_at: 2026-07-15T22:56:40.681Z
+    resolved_by: Hermes Reviewer
 verdicts:
   - applies_to_version:
       type: entity_version
@@ -436,5 +460,5 @@ verdicts:
     role: independent project-native reviewer
     created_at: 2026-07-15T22:40:29.076Z
 created_at: 2026-07-15T22:36:30.725Z
-updated_at: 2026-07-15T22:40:29.077Z
+updated_at: 2026-07-15T22:56:40.681Z
 notes: []
