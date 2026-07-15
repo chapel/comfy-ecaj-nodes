@@ -202,6 +202,57 @@ def test_optional_probe_reports_lora_header_compatibility_without_loading_payloa
     assert any("incomplete" in error for error in unsupported.errors)
 
 
+# AC: @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
+def test_optional_probe_rejects_unmapped_alpha_alongside_valid_lokr(tmp_path: Path) -> None:
+    package_path = write_safetensors(
+        tmp_path / "lokr_with_unmapped_alpha.safetensors",
+        {
+            "diffusion_model.blocks.0.attn.gate.lokr_w1": torch.ones(2, 2),
+            "diffusion_model.blocks.0.attn.gate.lokr_w2": torch.ones(2, 3),
+            "unrelated.unsupported.alpha": torch.tensor(1.0),
+        },
+    )
+
+    result = probe.inspect_lora_header(package_path)
+
+    assert result.supported_lora_groups == ["diffusion_model.blocks.0.attn.gate.weight"]
+    assert result.unsupported_lora_groups == ["unrelated.unsupported.alpha"]
+    assert "unsupported Krea 2 LoRA tensor groups detected" in result.errors
+
+    with pytest.raises(Krea2CompatibilityError, match="unrelated.unsupported.alpha"):
+        Krea2Loader().load(package_path)
+
+
+# AC: @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load
+# AC: @krea2-lora-package-compatibility ac-native-full-factor-lokr-packages-load
+def test_optional_probe_accepts_complete_lora_and_lokr_for_same_mapped_key(
+    tmp_path: Path,
+) -> None:
+    package_path = write_safetensors(
+        tmp_path / "mixed_lora_lokr.safetensors",
+        {
+            "diffusion_model.blocks.0.attn.gate.lora_down.weight": torch.ones(2, 6),
+            "diffusion_model.blocks.0.attn.gate.lora_up.weight": torch.ones(4, 2),
+            "diffusion_model.blocks.0.attn.gate.lokr_w1": torch.ones(2, 2),
+            "diffusion_model.blocks.0.attn.gate.lokr_w2": torch.ones(2, 3),
+            "diffusion_model.blocks.0.attn.gate.alpha": torch.tensor(4.0),
+        },
+    )
+
+    result = probe.inspect_lora_header(package_path)
+
+    assert result.supported_lora_groups == ["diffusion_model.blocks.0.attn.gate.weight"]
+    assert result.unsupported_lora_groups == []
+    assert result.incomplete_lora_groups == []
+    assert result.errors == []
+
+    loader = Krea2Loader()
+    loader.load(package_path)
+    model_key = "diffusion_model.blocks.0.attn.gate.weight"
+    specs = loader.get_delta_specs([model_key], {model_key: 0})
+    assert [spec.kind for spec in specs] == ["standard", "lokr"]
+
+
 # AC: @krea2-architecture-support ac-krea2-recipe-uses-krea-compatible-paths
 def test_optional_probe_requires_explicit_operator_inputs(tmp_path: Path) -> None:
     model_path = write_safetensors(tmp_path / "krea_model.safetensors", krea2_state_tensors())

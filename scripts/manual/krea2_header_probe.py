@@ -27,7 +27,11 @@ from lib.architecture import (
     format_architecture_evidence,
     match_architecture_evidence,
 )
-from lib.lora.krea2 import KREA2_COMPATIBILITY_FAMILIES, _parse_krea2_lora_key
+from lib.lora.krea2 import (
+    KREA2_COMPATIBILITY_FAMILIES,
+    _normalize_base_path,
+    _parse_krea2_lora_key,
+)
 
 ENV_VAR = "COMFY_ECAJ_KREA2_PROBE"
 CLI_FLAG = "--run-krea2-probe"
@@ -189,36 +193,46 @@ def inspect_model_header(path: str) -> HeaderProbe:
 def inspect_lora_header(path: str) -> HeaderProbe:
     probe = HeaderProbe(path=path, kind="lora")
     try:
-        keys, dtypes, _shapes = _read_header(path)
+        keys, dtypes, shapes = _read_header(path)
     except Exception as exc:  # pragma: no cover - defensive for operator files.
         probe.errors.append(f"Could not read safetensors header: {exc}")
         return probe
 
-    grouped: dict[str, set[str]] = defaultdict(set)
+    lora_groups: dict[str, set[str]] = defaultdict(set)
+    lokr_groups: dict[str, set[str]] = defaultdict(set)
     unsupported: list[str] = []
     direct_groups: set[str] = set()
     for key in keys:
         if key.endswith(".alpha"):
+            alpha_base_key = key[: -len(".alpha")]
+            if _normalize_base_path(alpha_base_key) is None or not all(
+                dimension == 1 for dimension in shapes[key]
+            ):
+                unsupported.append(key)
             continue
         parsed = _parse_krea2_lora_key(key)
         if parsed is None:
             unsupported.append(key)
         elif parsed.direct_delta:
             direct_groups.add(parsed.group_key)
+        elif parsed.direction in ("lokr_w1", "lokr_w2"):
+            lokr_groups[parsed.group_key].add(parsed.direction)
         else:
-            grouped[parsed.group_key].add(parsed.direction)
+            lora_groups[parsed.group_key].add(parsed.direction)
 
-    incomplete = [
-        group
-        for group, directions in grouped.items()
-        if directions not in ({"down", "up"}, {"lokr_w1", "lokr_w2"})
-    ]
-    supported_groups = sorted(
-        group
-        for group, directions in grouped.items()
-        if directions in ({"down", "up"}, {"lokr_w1", "lokr_w2"})
+    incomplete = {
+        group for group, directions in lora_groups.items() if directions != {"down", "up"}
+    }
+    incomplete.update(
+        group for group, directions in lokr_groups.items() if directions != {"lokr_w1", "lokr_w2"}
     )
-    supported_groups.extend(sorted(direct_groups))
+    supported_groups = {
+        group for group, directions in lora_groups.items() if directions == {"down", "up"}
+    }
+    supported_groups.update(
+        group for group, directions in lokr_groups.items() if directions == {"lokr_w1", "lokr_w2"}
+    )
+    supported_groups.update(direct_groups)
 
     probe.tensor_count = len(keys)
     probe.dtypes = dtypes
