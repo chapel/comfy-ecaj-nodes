@@ -318,6 +318,12 @@ events:
     payload:
       thread_ulid: 01KXKWGVWY96KK35M9BV0A3GKR
     timestamp: 2026-07-15T22:09:15.202Z
+  - _ulid: 01KXKX7N0M81XTW4CY1A7CWR66
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KXKWGW4J1P82D47AFHHZ2324
+    timestamp: 2026-07-15T22:09:23.476Z
 examined_commit: 699cf74c2128e814a551c2f9a41306acdb9e63b1
 external_links: []
 lifecycle_state: closed
@@ -388,6 +394,8 @@ threads:
           runtime emits both standard and lokr DeltaSpecs."
         created_at: 2026-07-15T22:09:09.977Z
     kind: blocker
+    resolved_at: 2026-07-15T22:09:23.279Z
+    resolved_by: Jacob Chapel
 verdicts:
   - applies_to_version:
       type: entity_version
@@ -397,5 +405,5 @@ verdicts:
     role: independent project-native reviewer
     created_at: 2026-07-15T21:57:13.086Z
 created_at: 2026-07-15T21:54:20.079Z
-updated_at: 2026-07-15T22:09:14.951Z
+updated_at: 2026-07-15T22:09:23.279Z
 notes: []
