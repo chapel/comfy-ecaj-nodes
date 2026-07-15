@@ -1,0 +1,15 @@
+notes:
+  - _ulid: 01KXKSTFA9JNQ5B2FK47VBYFRG
+    content: Task created after investigation-only implementation had already begun. Existing
+      uncommitted work is limited to lib/lora/krea2.py, scripts/manual/krea2_header_probe.py,
+      tests/test_krea2_lora_loader.py, and tests/test_krea2_validation_fixtures.py. CPU/header
+      investigation showed the reported native package shape family consists of complete direct
+      w1/w2 pairs and that generic executor LoKR math already exists. Targeted CPU tests passed for
+      the currently implemented parser/loader/probe path, but the work has not yet been
+      independently reviewed against all new ACs and must not be treated as complete. No GPU or
+      ComfyUI validation is authorized; any such validation requires explicit operator approval.
+      This task remains manual_only and will use a fresh subagent following the project
+      kspec-review/local-review skills to create a first-party review record.
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-07-15T21:09:45.929Z

@@ -1,0 +1,116 @@
+_ulid: 01KXKSTF79F9MATP8QKHYGVENQ
+slugs:
+  - task-krea2-native-full-factor-lokr-compatibility
+title: Support native full-factor LoKR packages in Krea 2 recipes
+type: bug
+description: >-
+  Implement and reconcile official native full-factor Krea 2 LoKR compatibility.
+
+
+  Covers:
+
+  - @krea2-lora-package-compatibility ac-native-full-factor-lokr-packages-load
+
+  - @krea2-lora-package-compatibility ac-chained-krea2-adapters-compose-additively
+
+  - @krea2-lora-package-compatibility ac-branched-krea2-adapters-remain-isolated
+
+  - @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
+
+  - @krea2-lora-package-compatibility ac-krea2-lora-strength-controls-are-stable
+
+  - @batched-executor ac-7
+
+  - @loader-memory-measurement ac-1
+
+  - @loader-memory-measurement ac-3
+
+  - @loader-memory-measurement ac-6
+
+
+  What:
+
+  - Recognize complete native Krea 2 diffusion_model.*.lokr_w1 and diffusion_model.*.lokr_w2
+  full-factor pairs.
+
+  - Map them to Krea 2 base-weight keys and emit existing LoKR-compatible delta specifications
+  without expanding full deltas during package loading.
+
+  - Preserve additive chained contributions and isolated branched target contributions, including
+  overlapping keys.
+
+  - Validate dimensions and expanded Kronecker shapes against current recipe shapes.
+
+  - Apply user strength without using scalar alpha metadata as an additional multiplier for complete
+  direct factors.
+
+  - Include LoKR factors in loaded-byte reporting and cleanup.
+
+  - Update the header-only compatibility probe.
+
+  - Preserve complete-or-reject behavior for incomplete, unsupported, unmapped, or
+  shape-incompatible packages.
+
+
+  Required tests:
+
+  - Parser/mapping and exact synthetic Kronecker/strength behavior.
+
+  - Large or placeholder alpha does not amplify complete direct factors.
+
+  - Expanded-shape mismatch, missing-factor, and unsupported-decomposed-form rejection.
+
+  - Recipe-level analyze_recipe/evaluation tests for additive chains and isolated branches with
+  overlapping keys and deterministic replay.
+
+  - Exact two-package loaded-byte accounting and cleanup to zero bytes/no affected keys.
+
+  - Project-owned synthetic header fixture.
+
+
+  Verification:
+
+  - uv run python -m compileall lib nodes tests
+
+  - uv run pytest
+
+  - uv run ruff check .
+
+  - uv run ruff format --check .
+
+  - kspec validate --refs --warnings-ok
+
+  - kspec validate --alignment --warnings-ok
+
+  - kspec validate --completeness --warnings-ok
+
+  - kspec validate --warnings-ok
+
+
+  Out of scope:
+
+  - Decomposed LoKR variants (lokr_w1_a/b, lokr_w2_a/b, lokr_t1/t2).
+
+  - LoHa/Hada, IA3, and other LyCORIS algorithms.
+
+  - Model training or conversion tooling.
+
+  - ComfyUI/GPU validation without explicit operator approval.
+spec_ref: "@krea2-lora-package-compatibility"
+meta_ref: null
+plan_ref: null
+status: pending
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags:
+  - krea2
+  - lokr
+  - lora
+  - compatibility
+  - manual-review
+vcs_refs: []
+created_at: 2026-07-15T21:09:45.833Z
+todos: []
+automation: manual_only
