@@ -1,0 +1,26 @@
+_ulid: 01KXKYQAG8V8CF78YZNQZ2JP6Z
+slugs: []
+title: "Fresh class-level review: Krea 2 native full-factor LoKR compatibility"
+author: Jacob Chapel
+checks: []
+events:
+  - _ulid: 01KXKYQAG8QC2ZBVZ0N8XRK65K
+    actor: Jacob Chapel
+    event_type: lifecycle_change
+    payload:
+      to: draft
+    timestamp: 2026-07-15T22:35:25.576Z
+examined_commit: null
+external_links: []
+lifecycle_state: draft
+related_refs: []
+subject:
+  type: task
+  content_hash: ""
+  ref: "@task-krea2-native-full-factor-lokr-compatibility"
+  shadow_commit: ""
+threads: []
+verdicts: []
+created_at: 2026-07-15T22:35:25.576Z
+updated_at: null
+notes: []
