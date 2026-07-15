@@ -10563,7 +10563,7 @@ runs:
     completed_at: 2026-07-15T22:28:54.532Z
   - _ulid: 01KXKZV8S24WPZQNMMRR21T156
     status: active
-    current_step: 2
+    current_step: 3
     initiated_by: Jacob Chapel
     step_results:
       - status: completed
@@ -10583,7 +10583,13 @@ runs:
       - status: completed
         step_index: 2
         started_at: 2026-07-15T22:55:31.402Z
-        completed_at: 2026-07-15T22:55:31.402Z
+        completed_at: 2026-07-15T22:55:36.037Z
+        notes: Behavioral same-fixture tests exercise safetensors probe and runtime loader for standard-only
+          and mixed-valid-LoKR zero-rank packages; no source scanning or placeholders.
+      - status: completed
+        step_index: 3
+        started_at: 2026-07-15T22:55:36.037Z
+        completed_at: 2026-07-15T22:55:36.037Z
     task_ref: "@01KXKSTF79F9MATP8QKHYGVENQ"
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
