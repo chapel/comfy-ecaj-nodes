@@ -10517,9 +10517,20 @@ runs:
     completed_at: 2026-07-15T22:07:47.611Z
   - _ulid: 01KXKYAHCDZX1PEHC73JGB962B
     status: active
-    current_step: 0
+    current_step: 1
     initiated_by: Jacob Chapel
-    step_results: []
+    step_results:
+      - status: completed
+        step_index: 0
+        started_at: 2026-07-15T22:28:26.638Z
+        completed_at: 2026-07-15T22:28:42.543Z
+        notes: Read @krea2-lora-package-compatibility and all six ACs. This narrow fix adds behavioral
+          coverage for complete-or-reject header/runtime shape parity while preserving existing
+          native full-factor LoKR and mixed-family behavior.
+      - status: completed
+        step_index: 1
+        started_at: 2026-07-15T22:28:42.543Z
+        completed_at: 2026-07-15T22:28:42.543Z
     task_ref: "@01KXKSTF79F9MATP8QKHYGVENQ"
     total_steps: 5
     workflow_ref: "@01KH4D44TWNR22J821DBRS9YPV"
