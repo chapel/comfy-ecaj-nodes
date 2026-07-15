@@ -107,3 +107,20 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-07-15T22:25:01.489Z
+  - _ulid: 01KXKYE0QETFERZJBNVA19JT60
+    content: "Fix cycle 3 completed in b659796fbc93980480e089a1ce3a0b675aa35c6b. Added a header-only
+      shape-incompatible report category and matched Krea2Loader validation for 2D standard
+      factors/rank compatibility, 2D full LoKR factors, 1D direct bias deltas, and scalar alpha
+      numel while preserving independent standard/LoKR families. Behavioral differential RED: exact
+      six-case slice failed 6/6 before production changes. GREEN: exact slice 6 passed; focused
+      Krea2 loader/recipe/header suite 41 passed. Final CPU-only gates: compileall exit 0; full
+      pytest exit 0 with 1788 collected tests; ruff check passed; ruff format check 112 files
+      already formatted; git diff --check clean; kspec refs passed (142 files, 59 items, 139 tasks);
+      alignment exited 0 with 3 accepted pre-existing warnings; completeness exited 0 with 12
+      accepted pre-existing warnings; full validation exited 0 with the same warnings and skills OK
+      (14 files). Local-review @01KXKYAH completed 5/5 with no remaining MUST-FIX findings. Review
+      blocker @01KXKXMQ2Z4DW41752ZE640W04 replied to and resolved. No GPU, ComfyUI, services,
+      prompts, operator model files, or external fixtures used; CUDA_VISIBLE_DEVICES='' for tests."
+    supersedes: null
+    author: Hermes Worker
+    created_at: 2026-07-15T22:30:20.654Z

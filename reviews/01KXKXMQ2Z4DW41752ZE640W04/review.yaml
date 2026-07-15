@@ -343,6 +343,18 @@ events:
       from: open
       to: closed
     timestamp: 2026-07-15T22:21:50.953Z
+  - _ulid: 01KXKYE0ASRPQQFRHKZ26EZ0A8
+    actor: Jacob Chapel
+    event_type: thread_replied
+    payload:
+      thread_ulid: 01KXKXYEP02EGZZ71VKMDC3T7B
+    timestamp: 2026-07-15T22:30:20.249Z
+  - _ulid: 01KXKYE0KDECVKKAHXBT26ZC42
+    actor: Jacob Chapel
+    event_type: thread_resolved
+    payload:
+      thread_ulid: 01KXKXYEP02EGZZ71VKMDC3T7B
+    timestamp: 2026-07-15T22:30:20.526Z
 examined_commit: null
 external_links: []
 lifecycle_state: closed
@@ -375,7 +387,22 @@ threads:
           matching Krea2Loader, with same-fixture behavioral regressions; do not materialize
           payloads."
         created_at: 2026-07-15T22:21:50.656Z
+      - _ulid: 01KXKYE0A2J8KHBKX6Z3B4PAZS
+        author: Jacob Chapel
+        body: "Fixed in b659796fbc93980480e089a1ce3a0b675aa35c6b. The probe now validates shapes exclusively
+          from safetensors get_slice/get_shape metadata: standard factors must both be 2D with
+          up.shape[1] == down.shape[0], full LoKR w1/w2 must both be 2D, direct bias deltas must be
+          1D, and alpha must have header numel 1. Shape failures are reported through the new
+          backward-readable shape_incompatible_lora_groups field rather than unsupported;
+          independent standard-LoRA and LoKR family validation remains intact for shared mapped
+          keys. Same-fixture behavioral differentials compare inspect_lora_header with
+          Krea2Loader.load for all five reported malformed shapes plus non-scalar alpha category
+          parity. Exact slice was RED 6 failed, GREEN 6 passed; focused Krea2 suite 41 passed. No
+          tensor payload is materialized by the probe."
+        created_at: 2026-07-15T22:30:20.225Z
     kind: blocker
+    resolved_at: 2026-07-15T22:30:20.504Z
+    resolved_by: Jacob Chapel
 verdicts:
   - applies_to_version:
       type: entity_version
@@ -385,5 +412,5 @@ verdicts:
     role: independent project-native reviewer
     created_at: 2026-07-15T22:21:50.953Z
 created_at: 2026-07-15T22:16:31.583Z
-updated_at: 2026-07-15T22:21:50.953Z
+updated_at: 2026-07-15T22:30:20.504Z
 notes: []

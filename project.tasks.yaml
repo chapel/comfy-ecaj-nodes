@@ -2719,7 +2719,7 @@
   title: Support native full-factor LoKR packages in Krea 2 recipes
   type: bug
   spec_ref: "@krea2-lora-package-compatibility"
-  status: in_progress
+  status: pending_review
   blocked_by: []
   depends_on: []
   priority: 1
@@ -2730,9 +2730,9 @@
     - compatibility
     - manual-review
   review_ref: "@01KXKXMQ2Z4DW41752ZE640W04"
-  notes_count: 10
+  notes_count: 11
   todos_count: 0
   created_at: 2026-07-15T21:09:45.833Z
   started_at: 2026-07-15T22:24:06.011Z
-  submitted_at: 2026-07-15T22:09:45.992Z
+  submitted_at: 2026-07-15T22:30:20.807Z
   automation: manual_only
