@@ -45,6 +45,21 @@ def test_parse_native_keys_and_bias_deltas() -> None:
     assert bias.direct_delta is True
 
 
+def test_parse_native_full_factor_lokr_keys_maps_to_base_weight() -> None:
+    # AC: @krea2-lora-package-compatibility ac-native-full-factor-lokr-packages-load
+    w1 = _parse_krea2_lora_key("diffusion_model.blocks.7.attn.gate.lokr_w1")
+    w2 = _parse_krea2_lora_key("diffusion_model.blocks.7.attn.gate.lokr_w2")
+
+    assert w1 is not None
+    assert w2 is not None
+    assert w1.model_key == "diffusion_model.blocks.7.attn.gate.weight"
+    assert w2.model_key == w1.model_key
+    assert w1.group_key == w2.group_key == w1.model_key
+    assert (w1.direction, w2.direction) == ("lokr_w1", "lokr_w2")
+    assert not w1.direct_delta
+    assert not w2.direct_delta
+
+
 def test_diffusers_public_family_loads_without_manual_renaming(tmp_path: Path) -> None:
     # AC: @krea2-lora-package-compatibility ac-supported-krea2-lora-packages-load
     path = _write_lora(
@@ -163,6 +178,152 @@ def test_native_public_family_loads_lora_and_bias_deltas(tmp_path: Path) -> None
     direct_specs = loader.get_delta_specs([direct_key], {direct_key: 0}, set_id="native")
     result = apply_lora_batch_gpu([direct_key], base, direct_specs, "cpu", torch.float32)
     assert torch.equal(result[0], torch.arange(6, dtype=torch.float32) * 0.25)
+
+
+def test_native_lokr_family_loads_and_applies_kron_delta(tmp_path: Path) -> None:
+    # AC: @krea2-lora-package-compatibility ac-native-full-factor-lokr-packages-load
+    # AC: @krea2-lora-package-compatibility ac-krea2-lora-strength-controls-are-stable
+    # AC: @batched-executor ac-7
+    path = _write_lora(
+        tmp_path,
+        {
+            "diffusion_model.blocks.0.attn.gate.lokr_w1": torch.tensor(
+                [[1.0, 2.0], [3.0, 4.0]],
+            ),
+            "diffusion_model.blocks.0.attn.gate.lokr_w2": torch.tensor(
+                [[0.5, 1.5, 2.5], [3.5, 4.5, 5.5]],
+            ),
+            # Full w1/w2 LoKR packages carry alpha metadata, but LyCORIS/ai-toolkit
+            # do not apply alpha scaling when both full factors are present.
+            "diffusion_model.blocks.0.attn.gate.alpha": torch.tensor(9999220736.0),
+        },
+    )
+
+    loader = Krea2Loader()
+    loader.load(path, strength=0.25, set_id="lokr")
+
+    key = "diffusion_model.blocks.0.attn.gate.weight"
+    assert loader.affected_keys_for_set("lokr") == {key}
+    loader.validate_compatible_keys({key}, {key: (4, 6)})
+
+    specs = loader.get_delta_specs([key], {key: 0}, set_id="lokr")
+    assert len(specs) == 1
+    assert specs[0].kind == "lokr"
+    assert specs[0].scale == pytest.approx(0.25)
+
+    base = torch.zeros(1, 4, 6)
+    result = apply_lora_batch_gpu([key], base, specs, "cpu", torch.float32)
+    expected = 0.25 * torch.kron(
+        torch.tensor([[1.0, 2.0], [3.0, 4.0]]),
+        torch.tensor([[0.5, 1.5, 2.5], [3.5, 4.5, 5.5]]),
+    )
+    assert torch.allclose(result[0], expected)
+
+
+def test_native_lokr_expanded_shape_mismatch_is_rejected(tmp_path: Path) -> None:
+    # AC: @krea2-lora-package-compatibility ac-native-full-factor-lokr-packages-load
+    # AC: @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
+    path = _write_lora(
+        tmp_path,
+        {
+            "diffusion_model.blocks.0.attn.gate.lokr_w1": torch.ones(2, 2),
+            "diffusion_model.blocks.0.attn.gate.lokr_w2": torch.ones(2, 3),
+        },
+    )
+    key = "diffusion_model.blocks.0.attn.gate.weight"
+    loader = Krea2Loader()
+    loader.load(path, set_id="mismatch")
+
+    with pytest.raises(Krea2CompatibilityError) as exc_info:
+        loader.validate_compatible_keys({key}, {key: (4, 5)})
+
+    message = str(exc_info.value)
+    assert "package delta shape (4, 6)" in message
+    assert "current recipe shape (4, 5)" in message
+
+
+@pytest.mark.parametrize("present_factor", ["lokr_w1", "lokr_w2"])
+def test_native_lokr_missing_factor_is_rejected(
+    tmp_path: Path,
+    present_factor: str,
+) -> None:
+    # AC: @krea2-lora-package-compatibility ac-native-full-factor-lokr-packages-load
+    # AC: @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
+    path = _write_lora(
+        tmp_path / present_factor,
+        {f"diffusion_model.blocks.0.attn.gate.{present_factor}": torch.ones(2, 2)},
+    )
+    loader = Krea2Loader()
+
+    with pytest.raises(Krea2CompatibilityError) as exc_info:
+        loader.load(path)
+
+    message = str(exc_info.value)
+    assert "incomplete LoKR w1/w2 groups" in message
+    assert "diffusion_model.blocks.0.attn.gate.weight" in message
+    assert "incomplete up/down groups" not in message
+    assert loader.affected_keys == frozenset()
+
+
+@pytest.mark.parametrize(
+    "unsupported_suffix",
+    ["lokr_w1_a", "lokr_w1_b", "lokr_w2_a", "lokr_w2_b", "lokr_t1", "lokr_t2"],
+)
+def test_native_lokr_decomposed_forms_fail_closed(
+    tmp_path: Path,
+    unsupported_suffix: str,
+) -> None:
+    # AC: @krea2-lora-package-compatibility ac-lora-compatibility-is-complete-or-rejected
+    path = _write_lora(
+        tmp_path / unsupported_suffix,
+        {
+            "diffusion_model.blocks.0.attn.gate.lokr_w1": torch.ones(1, 1),
+            "diffusion_model.blocks.0.attn.gate.lokr_w2": torch.ones(2, 3),
+            f"diffusion_model.blocks.0.attn.gate.{unsupported_suffix}": torch.ones(1, 1),
+        },
+    )
+    loader = Krea2Loader()
+
+    with pytest.raises(Krea2CompatibilityError) as exc_info:
+        loader.load(path)
+
+    assert "unsupported tensor groups" in str(exc_info.value)
+    assert unsupported_suffix in str(exc_info.value)
+    assert loader.affected_keys == frozenset()
+
+
+def test_native_lokr_two_package_loaded_bytes_and_cleanup_are_exact(tmp_path: Path) -> None:
+    # AC: @loader-memory-measurement ac-1
+    # AC: @loader-memory-measurement ac-3
+    # AC: @loader-memory-measurement ac-6
+    first = {
+        "diffusion_model.blocks.0.attn.gate.lokr_w1": torch.zeros(2, 2),
+        "diffusion_model.blocks.0.attn.gate.lokr_w2": torch.zeros(2, 3),
+    }
+    second = {
+        "diffusion_model.blocks.1.attn.gate.lokr_w1": torch.zeros(1, 2, dtype=torch.float64),
+        "diffusion_model.blocks.1.attn.gate.lokr_w2": torch.zeros(3, 2, dtype=torch.float64),
+    }
+    path_a = _write_lora(tmp_path / "a", first)
+    path_b = _write_lora(tmp_path / "b", second)
+    loader = Krea2Loader()
+
+    loader.load(path_a, set_id="a")
+    loader.load(path_b, set_id="b")
+
+    expected_bytes = sum(tensor.nbytes for tensor in (*first.values(), *second.values()))
+    assert loader.loaded_bytes == expected_bytes
+    assert loader.affected_keys == {
+        "diffusion_model.blocks.0.attn.gate.weight",
+        "diffusion_model.blocks.1.attn.gate.weight",
+    }
+
+    loader.cleanup()
+
+    assert loader.loaded_bytes == 0
+    assert loader.affected_keys == frozenset()
+    assert loader.affected_keys_for_set("a") == set()
+    assert loader.affected_keys_for_set("b") == set()
 
 
 def test_strength_changes_only_scales_deterministically(tmp_path: Path) -> None:
