@@ -139,9 +139,7 @@ def _make_entry(arch: str = "sdxl") -> tuple[RecipeBase, MockModelPatcher]:
     return recipe, patcher
 
 
-def _make_lora(
-    name: str, strength: float = 1.0, prev: RecipeLoRA | None = None
-) -> RecipeLoRA:
+def _make_lora(name: str, strength: float = 1.0, prev: RecipeLoRA | None = None) -> RecipeLoRA:
     """Create a RecipeLoRA through the LoRA node."""
     lora_node = WIDENLoRANode()
     (recipe,) = lora_node.add_lora(name, strength, prev=prev)
@@ -398,9 +396,7 @@ class TestInvalidGraphValidation:
 
         # Manually craft an invalid tree: RecipeBase in compose branches
         invalid_compose = RecipeCompose(branches=(base,))
-        invalid_merge = RecipeMerge(
-            base=base, target=invalid_compose, backbone=None, t_factor=1.0
-        )
+        invalid_merge = RecipeMerge(base=base, target=invalid_compose, backbone=None, t_factor=1.0)
 
         with pytest.raises(ValueError, match=r"root\.target\.branches\[0\]") as exc_info:
             _validate_recipe_tree(invalid_merge)

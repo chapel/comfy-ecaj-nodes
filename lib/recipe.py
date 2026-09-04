@@ -9,6 +9,7 @@ from types import MappingProxyType
 
 __all__ = [
     "BlockConfig",
+    "CheckpointComponents",
     "RecipeBase",
     "RecipeLoRA",
     "RecipeModel",
@@ -32,12 +33,26 @@ class BlockConfig:
 
 
 @dataclass(frozen=True)
+class CheckpointComponents:
+    """Companion components for checkpoint-style saves (CLIP, VAE).
+
+    Stored on RecipeBase when the user connects CheckpointLoaderSimple
+    MODEL, CLIP, and VAE outputs to WIDEN Entry. Both fields are required
+    for a checkpoint-style save_model artifact.
+    """
+
+    clip: object  # ComfyUI CLIP model
+    vae: object  # ComfyUI VAE model
+
+
+@dataclass(frozen=True)
 class RecipeBase:
     """Entry node output — wraps the ModelPatcher reference."""
 
     model_patcher: object  # ComfyUI ModelPatcher (holds state dict ref)
-    arch: str  # auto-detected: "sdxl", "zimage", "flux", "qwen"
+    arch: str  # auto-detected: "sdxl", "zimage", "flux", "qwen", "krea2"
     domain: str = "diffusion"  # "diffusion" or "clip" — AC: @recipe-domain-field ac-1, ac-2
+    checkpoint_components: object = None  # CheckpointComponents or None
 
 
 @dataclass(frozen=True)
@@ -53,9 +68,7 @@ class RecipeLoRA:
 
     def __post_init__(self) -> None:
         """Freeze mutable dicts in loras to prevent post-construction mutation."""
-        frozen = tuple(
-            MappingProxyType(d) if isinstance(d, dict) else d for d in self.loras
-        )
+        frozen = tuple(MappingProxyType(d) if isinstance(d, dict) else d for d in self.loras)
         object.__setattr__(self, "loras", frozen)
 
 

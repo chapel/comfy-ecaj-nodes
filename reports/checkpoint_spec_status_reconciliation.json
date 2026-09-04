@@ -1,0 +1,62 @@
+{
+  "reconciliation": "checkpoint-save-spec-status",
+  "task": "@task-checkpoint-save-final-spec-status-reconciliation",
+  "plan": "@plan-checkpoint-save-reconciliation-plan-2",
+  "validation_evidence": "@task-checkpoint-save-live-validation-manual-run",
+  "timestamp": "2026-04-29T13:40:00Z",
+  "live_validation_result": "pass",
+  "status_changes": [
+    {
+      "spec": "@comfy-memory-manager-compatibility",
+      "from": "in_progress",
+      "to": "implemented",
+      "reason": "Live checkpoint-style ComfyUI validation passed in default memory mode without mode changes"
+    },
+    {
+      "spec": "@live-comfy-saved-output-validation",
+      "from": "in_progress",
+      "to": "implemented",
+      "reason": "All 7 ACs covered by live validation evidence; harness, report, and manual run complete"
+    },
+    {
+      "spec": "@exit-model-persistence",
+      "from": "in_progress",
+      "to": "implemented",
+      "reason": "Live validation confirmed terminal save, checkpoint save, cache reuse, and downstream round-trip"
+    },
+    {
+      "spec": "@full-saved-model-output",
+      "from": "implemented",
+      "to": "implemented",
+      "reason": "Already implemented; confirmed by live checkpoint validation"
+    },
+    {
+      "spec": "@checkpoint-loadable-saved-model-output",
+      "from": "implemented",
+      "to": "implemented",
+      "reason": "Already implemented; confirmed by live checkpoint validation"
+    },
+    {
+      "spec": "@saved-model-artifact-safety",
+      "from": "implemented",
+      "to": "implemented",
+      "reason": "Already implemented; confirmed by live checkpoint validation"
+    },
+    {
+      "spec": "@streaming-full-model-materialization",
+      "from": "implemented",
+      "to": "implemented",
+      "reason": "Already implemented; streaming materialization validated by unit tests"
+    },
+    {
+      "spec": "@manual-comfy-memory-validation",
+      "from": "implemented",
+      "to": "implemented",
+      "reason": "Already implemented; harness and opt-in guards validated"
+    }
+  ],
+  "supersession": {
+    "prior_plan": "@plan-full-saved-model-output-plan",
+    "statement": "Primitive helper validation was superseded by checkpoint-style live validation. Diffusion-only loadability is not sufficient for checkpoint-style models. The checkpoint-save reconciliation plan is now the authoritative validation baseline for checkpoint-style saved output."
+  }
+}

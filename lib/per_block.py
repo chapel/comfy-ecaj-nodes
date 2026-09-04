@@ -229,7 +229,11 @@ def _apply_widen_filter_per_block(
 
     # Get per-block t_factor groupings
     t_factor_groups = _get_block_t_factors(
-        keys, block_config, arch, default_t_factor, domain,
+        keys,
+        block_config,
+        arch,
+        default_t_factor,
+        domain,
     )
 
     # If all keys have the same t_factor, use simple path
@@ -304,7 +308,11 @@ def _apply_widen_merge_per_block(
 
     # Get per-block t_factor groupings
     t_factor_groups = _get_block_t_factors(
-        keys, block_config, arch, default_t_factor, domain,
+        keys,
+        block_config,
+        arch,
+        default_t_factor,
+        domain,
     )
 
     # If all keys have the same t_factor, use simple path

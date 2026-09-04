@@ -104,9 +104,7 @@ class TestOpSignatureGrouping:
             "layer1.weight": torch.randn(4, 4),
         }
 
-        groups = compile_batch_groups(
-            ["layer1.weight", "missing_key"], base_state
-        )
+        groups = compile_batch_groups(["layer1.weight", "missing_key"], base_state)
 
         # Only layer1.weight should be in groups
         assert len(groups) == 1
@@ -200,9 +198,7 @@ class TestBmmLoraApplication:
             DeltaSpec(kind="standard", key_index=1, up=up1, down=down1, scale=1.0),
         ]
 
-        result = apply_lora_batch_gpu(
-            ["k0", "k1"], base, specs, device="cpu", dtype=torch.float32
-        )
+        result = apply_lora_batch_gpu(["k0", "k1"], base, specs, device="cpu", dtype=torch.float32)
 
         expected0 = base[0] + (up0 @ down0)
         expected1 = base[1] + (up1 @ down1)
@@ -241,9 +237,7 @@ class TestBmmLoraApplication:
             ),
         ]
 
-        result = apply_lora_batch_gpu(
-            ["k0"], base, specs, device="cpu", dtype=torch.float32
-        )
+        result = apply_lora_batch_gpu(["k0"], base, specs, device="cpu", dtype=torch.float32)
 
         # Delta should be reshaped to match base
         flat_delta = up @ down
@@ -616,9 +610,7 @@ class TestLokrKron:
             DeltaSpec(kind="lokr", key_index=0, w1=w1, w2=w2, scale=scale),
         ]
 
-        result = apply_lora_batch_gpu(
-            ["k0", "k1"], base, specs, device="cpu", dtype=torch.float32
-        )
+        result = apply_lora_batch_gpu(["k0", "k1"], base, specs, device="cpu", dtype=torch.float32)
 
         expected_delta = scale * torch.kron(w1, w2)
         assert torch.allclose(result[0], base[0] + expected_delta, atol=1e-5)
@@ -641,9 +633,7 @@ class TestLokrKron:
             ),
         ]
 
-        result = apply_lora_batch_gpu(
-            ["k0"], base, specs, device="cpu", dtype=torch.float32
-        )
+        result = apply_lora_batch_gpu(["k0"], base, specs, device="cpu", dtype=torch.float32)
 
         expected_delta = torch.kron(w1, w2).view(target_shape)
         assert torch.allclose(result[0], base[0] + expected_delta, atol=1e-5)
@@ -662,9 +652,7 @@ class TestLokrKron:
             DeltaSpec(kind="lokr", key_index=1, w1=w1b, w2=w2b, scale=0.5),
         ]
 
-        result = apply_lora_batch_gpu(
-            ["k0", "k1"], base, specs, device="cpu", dtype=torch.float32
-        )
+        result = apply_lora_batch_gpu(["k0", "k1"], base, specs, device="cpu", dtype=torch.float32)
 
         expected0 = base[0] + torch.kron(w1a, w2a)
         expected1 = base[1] + 0.5 * torch.kron(w1b, w2b)
@@ -1269,10 +1257,12 @@ class TestMultiSetShapeOnlyGrouping:
         delta_a = self._rank1_delta([1.0, 2.0, 3.0, 4.0], 4)
         delta_b = self._rank1_delta([5.0, 6.0, 7.0, 8.0], 4)
 
-        loader = SetAwareMockLoRALoader({
-            "set_a": {"k0": delta_a, "k1": delta_a},
-            "set_b": {"k2": delta_b, "k3": delta_b},
-        })
+        loader = SetAwareMockLoRALoader(
+            {
+                "set_a": {"k0": delta_a, "k1": delta_a},
+                "set_b": {"k2": delta_b, "k3": delta_b},
+            }
+        )
 
         base_node = RecipeBase(model_patcher=None, arch="sdxl")
         lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
@@ -1322,10 +1312,12 @@ class TestMultiSetShapeOnlyGrouping:
         delta_a = self._rank1_delta([1.0, 2.0, 3.0, 4.0], 4)
         delta_b = self._rank1_delta([5.0, 6.0, 7.0, 8.0], 4)
 
-        loader = SetAwareMockLoRALoader({
-            "set_a": {"k0": delta_a, "k1": delta_a},
-            "set_b": {"k2": delta_b, "k3": delta_b},
-        })
+        loader = SetAwareMockLoRALoader(
+            {
+                "set_a": {"k0": delta_a, "k1": delta_a},
+                "set_b": {"k2": delta_b, "k3": delta_b},
+            }
+        )
 
         base_node = RecipeBase(model_patcher=None, arch="sdxl")
         lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
@@ -1364,10 +1356,12 @@ class TestMultiSetShapeOnlyGrouping:
         delta_a = self._rank1_delta([1.0, 0.0, 0.0, 0.0], 4)
         delta_b = self._rank1_delta([0.0, 0.0, 0.0, 9.0], 4)
 
-        loader = SetAwareMockLoRALoader({
-            "set_a": {"k_a0": delta_a, "k_a1": delta_a},
-            "set_b": {"k_b0": delta_b, "k_b1": delta_b},
-        })
+        loader = SetAwareMockLoRALoader(
+            {
+                "set_a": {"k_a0": delta_a, "k_a1": delta_a},
+                "set_b": {"k_b0": delta_b, "k_b1": delta_b},
+            }
+        )
 
         base_node = RecipeBase(model_patcher=None, arch="sdxl")
         lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
@@ -1416,10 +1410,12 @@ class TestMultiSetShapeOnlyGrouping:
         delta_a = self._rank1_delta([2.0, 2.0, 2.0, 2.0], 4)
         delta_b = self._rank1_delta([4.0, 4.0, 4.0, 4.0], 4)
 
-        loader = SetAwareMockLoRALoader({
-            "set_a": {"k0": delta_a, "k1": delta_a},
-            "set_b": {"k2": delta_b, "k3": delta_b},
-        })
+        loader = SetAwareMockLoRALoader(
+            {
+                "set_a": {"k0": delta_a, "k1": delta_a},
+                "set_b": {"k2": delta_b, "k3": delta_b},
+            }
+        )
 
         base_node = RecipeBase(model_patcher=None, arch="sdxl")
         lora_a = RecipeLoRA(loras=({"path": "a.safetensors", "strength": 1.0},))
@@ -1579,9 +1575,7 @@ class TestCompileBatchGroupsKeyShapes:
         """Keys not in key_shapes should be skipped (same as base_state behavior)."""
         key_shapes = {"layer1.weight": (4, 4)}
 
-        groups = compile_batch_groups(
-            ["layer1.weight", "missing_key"], key_shapes=key_shapes
-        )
+        groups = compile_batch_groups(["layer1.weight", "missing_key"], key_shapes=key_shapes)
 
         assert len(groups) == 1
         sig = list(groups.keys())[0]

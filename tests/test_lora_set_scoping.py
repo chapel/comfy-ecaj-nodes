@@ -427,9 +427,7 @@ class TestGetDeltaSpecsScoping:
     Then: only deltas from that set are returned
     """
 
-    def test_nonexistent_set_returns_empty(
-        self, overlapping_sdxl_lora_a: str
-    ):
+    def test_nonexistent_set_returns_empty(self, overlapping_sdxl_lora_a: str):
         """Querying a non-existent set returns no specs.
 
         # AC: @fix-lora-set-scoping ac-3
@@ -483,9 +481,7 @@ class TestGetDeltaSpecsScoping:
         finally:
             Path(path_b_different).unlink(missing_ok=True)
 
-    def test_cleanup_clears_all_set_data(
-        self, overlapping_sdxl_lora_a: str
-    ):
+    def test_cleanup_clears_all_set_data(self, overlapping_sdxl_lora_a: str):
         """cleanup() clears all per-set data.
 
         # AC: @fix-lora-set-scoping ac-3
@@ -500,9 +496,7 @@ class TestGetDeltaSpecsScoping:
         assert len(loader.affected_keys) == 0
         assert len(loader.affected_keys_for_set("set_a")) == 0
 
-    def test_default_set_id_when_none_provided(
-        self, overlapping_sdxl_lora_a: str
-    ):
+    def test_default_set_id_when_none_provided(self, overlapping_sdxl_lora_a: str):
         """load() with set_id=None uses __default__ internally.
 
         # AC: @fix-lora-set-scoping ac-3
@@ -555,12 +549,8 @@ class TestAnalysisSetWiring:
         mock_patcher = MockModelPatcher()
         base = RecipeBase(model_patcher=mock_patcher, arch="sdxl")
 
-        lora_a = RecipeLoRA(
-            loras=({"path": Path(overlapping_sdxl_lora_a).name, "strength": 1.0},)
-        )
-        lora_b = RecipeLoRA(
-            loras=({"path": Path(overlapping_sdxl_lora_b).name, "strength": 0.5},)
-        )
+        lora_a = RecipeLoRA(loras=({"path": Path(overlapping_sdxl_lora_a).name, "strength": 1.0},))
+        lora_b = RecipeLoRA(loras=({"path": Path(overlapping_sdxl_lora_b).name, "strength": 0.5},))
         compose = RecipeCompose(branches=(lora_a, lora_b))
         merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=1.0)
 
@@ -577,16 +567,12 @@ class TestAnalysisSetWiring:
         # Both sets should contain the overlapping key
         overlapping_key = "diffusion_model.input_blocks.0.0.weight"
         for set_id, keys in result.set_affected.items():
-            assert overlapping_key in keys, (
-                f"Set {set_id} should include {overlapping_key}"
-            )
+            assert overlapping_key in keys, f"Set {set_id} should include {overlapping_key}"
 
         # The loader should have set-scoped data
         key_indices = {overlapping_key: 0}
         for set_key in result.set_affected:
-            specs = result.loader.get_delta_specs(
-                [overlapping_key], key_indices, set_id=set_key
-            )
+            specs = result.loader.get_delta_specs([overlapping_key], key_indices, set_id=set_key)
             assert len(specs) == 1, (
                 f"Set {set_key} should have exactly 1 spec for the overlapping key"
             )

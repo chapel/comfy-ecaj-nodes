@@ -12,6 +12,8 @@ from lib.persistence import (
     atomic_save,
     build_metadata,
     check_cache,
+    check_checkpoint_cache,
+    check_full_model_cache,
     compute_base_identity,
     compute_lora_stats,
     compute_recipe_hash,
@@ -205,9 +207,7 @@ class TestSerializeRecipe:
     # AC: @diffusion-model-path-resolution ac-6
     def test_recipe_model_source_dir_affects_hash(self):
         """Same path with different source_dir should produce different serialization."""
-        model_ckpt = RecipeModel(
-            path="model.safetensors", strength=1.0, source_dir="checkpoints"
-        )
+        model_ckpt = RecipeModel(path="model.safetensors", strength=1.0, source_dir="checkpoints")
         model_diff = RecipeModel(
             path="model.safetensors", strength=1.0, source_dir="diffusion_models"
         )
@@ -259,6 +259,91 @@ class TestComputeBaseIdentity:
         state1 = {"key_a": torch.ones(4, 4)}
         state2 = {"key_a": torch.zeros(4, 4)}
         assert compute_base_identity(state1) != compute_base_identity(state2)
+
+    # AC: @exit-model-persistence ac-bounded-identity-preparation
+    def test_large_tensor_sampling_converts_only_bounded_slice(self):
+        """Base identity sampling must slice before dtype/device conversion."""
+
+        class FakeLargeTensor:
+            def __init__(
+                self,
+                *,
+                shape: tuple[int, ...],
+                dtype: torch.dtype,
+                conversions: list[int],
+                numel: int | None = None,
+            ) -> None:
+                self.shape = shape
+                self.dtype = dtype
+                self._numel = numel if numel is not None else torch.Size(shape).numel()
+                self._conversions = conversions
+
+            def detach(self):
+                return self
+
+            def is_contiguous(self) -> bool:
+                return True
+
+            def view(self, *_shape: int):
+                return FakeLargeTensor(
+                    shape=(self._numel,),
+                    dtype=self.dtype,
+                    conversions=self._conversions,
+                    numel=self._numel,
+                )
+
+            def __getitem__(self, item: slice):
+                if not isinstance(item, slice):
+                    raise AssertionError(f"unexpected index: {item!r}")
+                start, stop, step = item.indices(self._numel)
+                sliced_numel = max(0, (stop - start + (step - 1)) // step)
+                return FakeLargeTensor(
+                    shape=(sliced_numel,),
+                    dtype=self.dtype,
+                    conversions=self._conversions,
+                    numel=sliced_numel,
+                )
+
+            def to(self, *, device: str, dtype: torch.dtype):
+                assert device == "cpu"
+                assert dtype is torch.float32
+                self._conversions.append(self._numel)
+                if self._numel > 64:
+                    raise AssertionError(
+                        f"converted full sample tensor with {self._numel} elements"
+                    )
+                return FakeConvertedSample(self._numel)
+
+        class FakeConvertedSample:
+            def __init__(self, numel: int) -> None:
+                self._numel = numel
+
+            def contiguous(self):
+                return self
+
+            def untyped_storage(self):
+                return b"\x00" * (self._numel * self.element_size())
+
+            def nelement(self) -> int:
+                return self._numel
+
+            def element_size(self) -> int:
+                return 4
+
+        conversions: list[int] = []
+        state = {
+            f"key_{idx}": FakeLargeTensor(
+                shape=(1_000_000, 1_000),
+                dtype=torch.float16,
+                conversions=conversions,
+            )
+            for idx in range(3)
+        }
+
+        identity = compute_base_identity(state)
+
+        assert len(identity) == 64
+        assert conversions == [64, 64, 64]
 
 
 # =============================================================================
@@ -344,9 +429,7 @@ class TestComputeLoraStats:
         model_file.parent.mkdir(parents=True, exist_ok=True)
         model_file.write_bytes(b"x" * 200)
 
-        model = RecipeModel(
-            path="test.safetensors", strength=1.0, source_dir="checkpoints"
-        )
+        model = RecipeModel(path="test.safetensors", strength=1.0, source_dir="checkpoints")
 
         received_args = []
 
@@ -371,9 +454,7 @@ class TestComputeLoraStats:
         diff_dir.mkdir(parents=True, exist_ok=True)
         (diff_dir / "flux.safetensors").write_bytes(b"y" * 300)
 
-        model = RecipeModel(
-            path="flux.safetensors", strength=1.0, source_dir="diffusion_models"
-        )
+        model = RecipeModel(path="flux.safetensors", strength=1.0, source_dir="diffusion_models")
 
         def lora_resolver(name):
             return None
@@ -395,9 +476,7 @@ class TestComputeLoraStats:
 
         base = RecipeBase(model_patcher=object(), arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},))
-        model = RecipeModel(
-            path="model.safetensors", strength=0.5, source_dir="checkpoints"
-        )
+        model = RecipeModel(path="model.safetensors", strength=0.5, source_dir="checkpoints")
         compose = RecipeCompose(branches=(lora, model))
         merge = RecipeMerge(base=base, target=compose, backbone=None, t_factor=0.5)
 
@@ -634,3 +713,603 @@ class TestAtomicSave:
             saved_meta = f.metadata()
         assert saved_meta["__ecaj_version__"] == "1"
         assert saved_meta["__ecaj_recipe_hash__"] == "test_hash"
+
+
+# =============================================================================
+# AC: @exit-model-persistence ac-6 — build_metadata artifact_kind fields
+# =============================================================================
+
+
+class TestBuildMetadataArtifactKind:
+    """AC: @exit-model-persistence ac-6 — artifact kind and checkpoint metadata."""
+
+    # AC: @exit-model-persistence ac-6
+    def test_artifact_kind_included(self):
+        """artifact_kind should be stored in metadata."""
+        metadata = build_metadata("{}", "abc", [], artifact_kind="checkpoint")
+        assert metadata["__ecaj_artifact_kind__"] == "checkpoint"
+
+    # AC: @exit-model-persistence ac-6
+    def test_base_identity_included(self):
+        """base_identity should be stored in metadata."""
+        metadata = build_metadata("{}", "abc", [], base_identity="sha256hash")
+        assert metadata["__ecaj_base_identity__"] == "sha256hash"
+
+    # AC: @exit-model-persistence ac-6
+    def test_dependency_fingerprints_included(self):
+        """dependency_fingerprints should be stored in metadata."""
+        deps = json.dumps({"lora.safetensors": [1234.5, 100]})
+        metadata = build_metadata("{}", "abc", [], dependency_fingerprints=deps)
+        assert metadata["__ecaj_dependency_fingerprints__"] == deps
+
+    # AC: @exit-model-persistence ac-6
+    def test_checkpoint_components_flag(self):
+        """checkpoint_components=True should set classification metadata."""
+        metadata = build_metadata("{}", "abc", [], checkpoint_components=True)
+        assert metadata["__ecaj_checkpoint_components__"] == "true"
+
+    # AC: @exit-model-persistence ac-6
+    def test_checkpoint_components_false_omitted(self):
+        """checkpoint_components=False should not include the key."""
+        metadata = build_metadata("{}", "abc", [], checkpoint_components=False)
+        assert "__ecaj_checkpoint_components__" not in metadata
+
+    # AC: @exit-model-persistence ac-6
+    def test_omitted_optional_fields(self):
+        """Optional fields should not appear when not provided."""
+        metadata = build_metadata("{}", "abc", [])
+        assert "__ecaj_artifact_kind__" not in metadata
+        assert "__ecaj_base_identity__" not in metadata
+        assert "__ecaj_dependency_fingerprints__" not in metadata
+        assert "__ecaj_checkpoint_components__" not in metadata
+
+    # AC: @exit-model-persistence ac-6
+    def test_full_checkpoint_metadata(self):
+        """All checkpoint fields should be present together."""
+        deps = json.dumps({"lora.safetensors": [1234.5, 100]})
+        metadata = build_metadata(
+            '{"recipe": true}',
+            "hash123",
+            ["key_a"],
+            artifact_kind="checkpoint",
+            base_identity="base_sha256",
+            dependency_fingerprints=deps,
+            checkpoint_components=True,
+        )
+        assert metadata["__ecaj_version__"] == "1"
+        assert metadata["__ecaj_recipe__"] == '{"recipe": true}'
+        assert metadata["__ecaj_recipe_hash__"] == "hash123"
+        assert metadata["__ecaj_artifact_kind__"] == "checkpoint"
+        assert metadata["__ecaj_base_identity__"] == "base_sha256"
+        assert metadata["__ecaj_dependency_fingerprints__"] == deps
+        assert metadata["__ecaj_checkpoint_components__"] == "true"
+
+
+# =============================================================================
+# AC: @saved-model-artifact-safety, @exit-model-persistence — check_checkpoint_cache
+# =============================================================================
+
+
+class TestCheckCheckpointCache:
+    """AC: @saved-model-artifact-safety ac-missing-metadata-not-reused,
+    ac-wrong-artifact-kind-not-reused, ac-internal-format-not-checkpoint-cache;
+    @exit-model-persistence ac-3, ac-4, ac-6, ac-9."""
+
+    # Checkpoint-style tensors include non-diffusion keys (CLIP/VAE components)
+    _CHECKPOINT_TENSORS = {
+        "diffusion_model.input.weight": torch.randn(4, 4),
+        "first_stage_model.decoder.weight": torch.randn(4, 4),  # VAE
+        "cond_stage_model.transformer.weight": torch.randn(4, 4),  # CLIP
+    }
+
+    _BASE_IDENTITY = "base_sha256_abc"
+    _DEPS = json.dumps({"lora.safetensors": [1234.5, 100]})
+
+    def _make_checkpoint_file(
+        self,
+        path,
+        *,
+        recipe_hash="abc123",
+        artifact_kind="checkpoint",
+        base_identity=None,
+        dependency_fingerprints=None,
+        checkpoint_components=True,
+        version="1",
+        tensors=None,
+        extra_metadata=None,
+    ):
+        """Helper to create a valid checkpoint-style safetensors file."""
+        if base_identity is None:
+            base_identity = self._BASE_IDENTITY
+        if dependency_fingerprints is None:
+            dependency_fingerprints = self._DEPS
+        if tensors is None:
+            tensors = self._CHECKPOINT_TENSORS
+
+        metadata = {
+            "__ecaj_version__": version,
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": recipe_hash,
+            "__ecaj_affected_keys__": '["diffusion_model.input.weight"]',
+            "__ecaj_artifact_kind__": artifact_kind,
+            "__ecaj_base_identity__": base_identity,
+            "__ecaj_dependency_fingerprints__": dependency_fingerprints,
+        }
+        if checkpoint_components:
+            metadata["__ecaj_checkpoint_components__"] = "true"
+        if extra_metadata:
+            metadata.update(extra_metadata)
+        save_file(tensors, str(path), metadata=metadata)
+
+    # AC: @exit-model-persistence ac-3
+    def test_valid_checkpoint_cache_hit(self, tmp_path):
+        """Matching checkpoint artifact kind and matching metadata are accepted."""
+        path = tmp_path / "model.safetensors"
+        self._make_checkpoint_file(path)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is True
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    def test_missing_artifact_kind_is_cache_miss(self, tmp_path):
+        """Missing artifact kind metadata causes cache miss."""
+        path = tmp_path / "model.safetensors"
+        tensors = self._CHECKPOINT_TENSORS
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": "[]",
+            "__ecaj_base_identity__": self._BASE_IDENTITY,
+            "__ecaj_dependency_fingerprints__": self._DEPS,
+            "__ecaj_checkpoint_components__": "true",
+            # No __ecaj_artifact_kind__
+        }
+        save_file(tensors, str(path), metadata=metadata)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+    def test_wrong_artifact_kind_is_cache_miss(self, tmp_path):
+        """Wrong artifact kind (e.g. 'diffusion' instead of 'checkpoint') is cache miss."""
+        path = tmp_path / "model.safetensors"
+        self._make_checkpoint_file(path, artifact_kind="diffusion")
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    def test_missing_checkpoint_components_is_cache_miss(self, tmp_path):
+        """Missing checkpoint component classification is cache miss."""
+        path = tmp_path / "model.safetensors"
+        self._make_checkpoint_file(path, checkpoint_components=False)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    def test_unsupported_ecaj_version_is_cache_miss(self, tmp_path):
+        """Unsupported ecaj version causes cache miss."""
+        path = tmp_path / "model.safetensors"
+        self._make_checkpoint_file(path, version="999")
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_internal_format_diffusion_only_rejected(self, tmp_path):
+        """Older internal-format with diffusion_model-only keys is rejected."""
+        path = tmp_path / "model.safetensors"
+        internal_tensors = {
+            "diffusion_model.input_blocks.0.0.weight": torch.randn(4, 4),
+            "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
+            "diffusion_model.output_blocks.0.0.weight": torch.randn(4, 4),
+        }
+        self._make_checkpoint_file(path, tensors=internal_tensors)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_internal_format_noise_augmentor_only_rejected(self, tmp_path):
+        """Internal artifact with noise_augmentor/model_sampling keys only is rejected."""
+        path = tmp_path / "model.safetensors"
+        internal_tensors = {
+            "diffusion_model.layers.0.weight": torch.randn(4, 4),
+            "noise_augmentor.weight": torch.randn(4, 4),
+            "model_sampling.sigmas": torch.randn(4),
+        }
+        self._make_checkpoint_file(path, tensors=internal_tensors)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    def test_model_prefix_diffusion_only_rejected(self, tmp_path):
+        """Internal artifact with model.diffusion_model.* prefix only is rejected."""
+        path = tmp_path / "model.safetensors"
+        internal_tensors = {
+            "model.diffusion_model.input_blocks.0.weight": torch.randn(4, 4),
+            "model.diffusion_model.output_blocks.0.weight": torch.randn(4, 4),
+        }
+        self._make_checkpoint_file(path, tensors=internal_tensors)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @exit-model-persistence ac-9
+    def test_non_ecaj_file_raises(self, tmp_path):
+        """Existing non-ecaj file raises/refuses overwrite."""
+        path = tmp_path / "model.safetensors"
+        save_file({"key_a": torch.randn(4, 4)}, str(path))
+        with pytest.raises(ValueError, match="not an ecaj-saved model"):
+            check_checkpoint_cache(
+                str(path),
+                "abc123",
+                self._BASE_IDENTITY,
+                self._DEPS,
+            )
+
+    # AC: @exit-model-persistence ac-9
+    def test_non_ecaj_empty_metadata_raises(self, tmp_path):
+        """Existing file with empty metadata raises ValueError."""
+        path = tmp_path / "model.safetensors"
+        save_file({"key_a": torch.randn(4, 4)}, str(path), metadata={})
+        with pytest.raises(ValueError, match="not an ecaj-saved model"):
+            check_checkpoint_cache(
+                str(path),
+                "abc123",
+                self._BASE_IDENTITY,
+                self._DEPS,
+            )
+
+    # AC: @exit-model-persistence ac-4
+    def test_recipe_hash_mismatch_is_cache_miss(self, tmp_path):
+        """Different recipe hash causes cache miss."""
+        path = tmp_path / "model.safetensors"
+        self._make_checkpoint_file(path, recipe_hash="abc123")
+        result = check_checkpoint_cache(
+            str(path),
+            "different_hash",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @exit-model-persistence ac-4
+    def test_base_identity_mismatch_is_cache_miss(self, tmp_path):
+        """Different base model identity causes cache miss."""
+        path = tmp_path / "model.safetensors"
+        self._make_checkpoint_file(path)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            "different_base_identity",
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @exit-model-persistence ac-4
+    def test_dependency_fingerprints_mismatch_is_cache_miss(self, tmp_path):
+        """Different dependency fingerprints cause cache miss."""
+        path = tmp_path / "model.safetensors"
+        self._make_checkpoint_file(path)
+        different_deps = json.dumps({"lora.safetensors": [9999.9, 200]})
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            different_deps,
+        )
+        assert result is False
+
+    def test_missing_file_returns_false(self, tmp_path):
+        """Non-existent file returns False (not an error)."""
+        result = check_checkpoint_cache(
+            str(tmp_path / "nonexistent.safetensors"),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @exit-model-persistence ac-4
+    def test_missing_base_identity_metadata_is_cache_miss(self, tmp_path):
+        """Artifact without base_identity metadata causes cache miss."""
+        path = tmp_path / "model.safetensors"
+        tensors = self._CHECKPOINT_TENSORS
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": "[]",
+            "__ecaj_artifact_kind__": "checkpoint",
+            "__ecaj_checkpoint_components__": "true",
+            "__ecaj_dependency_fingerprints__": self._DEPS,
+            # No __ecaj_base_identity__
+        }
+        save_file(tensors, str(path), metadata=metadata)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @exit-model-persistence ac-4
+    def test_missing_dependency_fingerprints_metadata_is_cache_miss(self, tmp_path):
+        """Artifact without dependency_fingerprints metadata causes cache miss."""
+        path = tmp_path / "model.safetensors"
+        tensors = self._CHECKPOINT_TENSORS
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": "[]",
+            "__ecaj_artifact_kind__": "checkpoint",
+            "__ecaj_checkpoint_components__": "true",
+            "__ecaj_base_identity__": self._BASE_IDENTITY,
+            # No __ecaj_dependency_fingerprints__
+        }
+        save_file(tensors, str(path), metadata=metadata)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    def test_checkpoint_components_false_is_cache_miss(self, tmp_path):
+        """Artifact with __ecaj_checkpoint_components__='false' is cache miss."""
+        path = tmp_path / "model.safetensors"
+        tensors = self._CHECKPOINT_TENSORS
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": "[]",
+            "__ecaj_artifact_kind__": "checkpoint",
+            "__ecaj_base_identity__": self._BASE_IDENTITY,
+            "__ecaj_dependency_fingerprints__": self._DEPS,
+            "__ecaj_checkpoint_components__": "false",
+        }
+        save_file(tensors, str(path), metadata=metadata)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    def test_missing_recipe_metadata_is_cache_miss(self, tmp_path):
+        """Artifact without __ecaj_recipe__ metadata is cache miss."""
+        path = tmp_path / "model.safetensors"
+        tensors = self._CHECKPOINT_TENSORS
+        metadata = {
+            "__ecaj_version__": "1",
+            # No __ecaj_recipe__
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": "[]",
+            "__ecaj_artifact_kind__": "checkpoint",
+            "__ecaj_base_identity__": self._BASE_IDENTITY,
+            "__ecaj_dependency_fingerprints__": self._DEPS,
+            "__ecaj_checkpoint_components__": "true",
+        }
+        save_file(tensors, str(path), metadata=metadata)
+        result = check_checkpoint_cache(
+            str(path),
+            "abc123",
+            self._BASE_IDENTITY,
+            self._DEPS,
+        )
+        assert result is False
+
+
+# AC: @exit-model-persistence ac-4, ac-6 — check_full_model_cache artifact classification
+# =============================================================================
+
+
+class TestCheckFullModelCacheClassification:
+    """AC: @exit-model-persistence ac-4, ac-6;
+    @saved-model-artifact-safety ac-missing-metadata-not-reused,
+    ac-wrong-artifact-kind-not-reused."""
+
+    _TENSORS = {
+        "diffusion_model.input.weight": torch.randn(4, 4),
+        "diffusion_model.output.weight": torch.randn(4, 4),
+    }
+    _BASE_IDENTITY = "base_sha256_xyz"
+    _DEPS = json.dumps({"lora.safetensors": [5678.0, 200]})
+
+    def _make_full_file(
+        self,
+        path,
+        *,
+        recipe_hash="abc123",
+        artifact_kind="diffusion",
+        base_identity=None,
+        dependency_fingerprints=None,
+    ):
+        """Helper to create a full-model safetensors file with classification metadata."""
+        if base_identity is None:
+            base_identity = self._BASE_IDENTITY
+        if dependency_fingerprints is None:
+            dependency_fingerprints = self._DEPS
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": recipe_hash,
+            "__ecaj_affected_keys__": '["diffusion_model.input.weight"]',
+            "__ecaj_output_mode__": "full",
+            "__ecaj_artifact_kind__": artifact_kind,
+            "__ecaj_base_identity__": base_identity,
+            "__ecaj_dependency_fingerprints__": dependency_fingerprints,
+        }
+        save_file(self._TENSORS, str(path), metadata=metadata)
+
+    # AC: @exit-model-persistence ac-3
+    def test_valid_full_model_with_classification_hit(self, tmp_path):
+        """Matching artifact kind, base identity, and deps are accepted."""
+        path = tmp_path / "model.safetensors"
+        self._make_full_file(path)
+        result = check_full_model_cache(
+            str(path),
+            "abc123",
+            expected_artifact_kind="diffusion",
+            expected_base_identity=self._BASE_IDENTITY,
+            expected_dependency_fingerprints=self._DEPS,
+        )
+        assert result is True
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    def test_missing_artifact_kind_is_miss(self, tmp_path):
+        """Full artifact without __ecaj_artifact_kind__ fails when caller expects it."""
+        path = tmp_path / "model.safetensors"
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": '["diffusion_model.input.weight"]',
+            "__ecaj_output_mode__": "full",
+            # No __ecaj_artifact_kind__
+            "__ecaj_base_identity__": self._BASE_IDENTITY,
+            "__ecaj_dependency_fingerprints__": self._DEPS,
+        }
+        save_file(self._TENSORS, str(path), metadata=metadata)
+        result = check_full_model_cache(
+            str(path),
+            "abc123",
+            expected_artifact_kind="diffusion",
+            expected_base_identity=self._BASE_IDENTITY,
+            expected_dependency_fingerprints=self._DEPS,
+        )
+        assert result is False
+
+    # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+    def test_wrong_artifact_kind_is_miss(self, tmp_path):
+        """Full artifact with wrong artifact kind fails."""
+        path = tmp_path / "model.safetensors"
+        self._make_full_file(path, artifact_kind="checkpoint")
+        result = check_full_model_cache(
+            str(path),
+            "abc123",
+            expected_artifact_kind="diffusion",
+            expected_base_identity=self._BASE_IDENTITY,
+            expected_dependency_fingerprints=self._DEPS,
+        )
+        assert result is False
+
+    # AC: @exit-model-persistence ac-4
+    def test_missing_base_identity_is_miss(self, tmp_path):
+        """Full artifact without __ecaj_base_identity__ fails when caller expects it."""
+        path = tmp_path / "model.safetensors"
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": '["diffusion_model.input.weight"]',
+            "__ecaj_output_mode__": "full",
+            "__ecaj_artifact_kind__": "diffusion",
+            # No __ecaj_base_identity__
+            "__ecaj_dependency_fingerprints__": self._DEPS,
+        }
+        save_file(self._TENSORS, str(path), metadata=metadata)
+        result = check_full_model_cache(
+            str(path),
+            "abc123",
+            expected_artifact_kind="diffusion",
+            expected_base_identity=self._BASE_IDENTITY,
+            expected_dependency_fingerprints=self._DEPS,
+        )
+        assert result is False
+
+    # AC: @exit-model-persistence ac-4
+    def test_missing_dependency_fingerprints_is_miss(self, tmp_path):
+        """Full artifact without __ecaj_dependency_fingerprints__ fails when caller expects it."""
+        path = tmp_path / "model.safetensors"
+        metadata = {
+            "__ecaj_version__": "1",
+            "__ecaj_recipe__": "{}",
+            "__ecaj_recipe_hash__": "abc123",
+            "__ecaj_affected_keys__": '["diffusion_model.input.weight"]',
+            "__ecaj_output_mode__": "full",
+            "__ecaj_artifact_kind__": "diffusion",
+            "__ecaj_base_identity__": self._BASE_IDENTITY,
+            # No __ecaj_dependency_fingerprints__
+        }
+        save_file(self._TENSORS, str(path), metadata=metadata)
+        result = check_full_model_cache(
+            str(path),
+            "abc123",
+            expected_artifact_kind="diffusion",
+            expected_base_identity=self._BASE_IDENTITY,
+            expected_dependency_fingerprints=self._DEPS,
+        )
+        assert result is False
+
+    # AC: @exit-model-persistence ac-4
+    def test_base_identity_mismatch_is_miss(self, tmp_path):
+        """Full artifact with wrong base identity fails."""
+        path = tmp_path / "model.safetensors"
+        self._make_full_file(path)
+        result = check_full_model_cache(
+            str(path),
+            "abc123",
+            expected_artifact_kind="diffusion",
+            expected_base_identity="different_base",
+            expected_dependency_fingerprints=self._DEPS,
+        )
+        assert result is False
+
+    # AC: @exit-model-persistence ac-4
+    def test_dependency_fingerprints_mismatch_is_miss(self, tmp_path):
+        """Full artifact with wrong dependency fingerprints fails."""
+        path = tmp_path / "model.safetensors"
+        self._make_full_file(path)
+        different_deps = json.dumps({"lora.safetensors": [9999.0, 999]})
+        result = check_full_model_cache(
+            str(path),
+            "abc123",
+            expected_artifact_kind="diffusion",
+            expected_base_identity=self._BASE_IDENTITY,
+            expected_dependency_fingerprints=different_deps,
+        )
+        assert result is False

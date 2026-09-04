@@ -34,6 +34,7 @@ from nodes.exit import (
 # Shared helper: build mocks for WIDENExitNode.execute()
 # ===========================================================================
 
+
 def _make_exit_mocks(mock_model_patcher, keys_to_process, *, recipe=None, arch="sdxl"):
     """Create mocks for WIDENExitNode.execute() — adapted from test_incremental_recompute."""
     mock_loader = MagicMock()
@@ -43,6 +44,7 @@ def _make_exit_mocks(mock_model_patcher, keys_to_process, *, recipe=None, arch="
 
     set_affected = {}
     if recipe is not None:
+
         def _find_loras(n):
             if isinstance(n, RecipeLoRA):
                 set_affected[str(id(n))] = set(keys_to_process)
@@ -54,6 +56,7 @@ def _make_exit_mocks(mock_model_patcher, keys_to_process, *, recipe=None, arch="
                 _find_loras(n.target)
                 if n.backbone is not None:
                     _find_loras(n.backbone)
+
         _find_loras(recipe)
     if not set_affected:
         set_affected = {str(id(None)): set(keys_to_process)}
@@ -78,7 +81,9 @@ def _make_exit_mocks(mock_model_patcher, keys_to_process, *, recipe=None, arch="
 def _run_exit_node(recipe, mock_model_patcher, keys, *, extra_patches=None, **execute_kwargs):
     """Run WIDENExitNode.execute() with full mocking. Returns (result, mocks_dict)."""
     mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
-        mock_model_patcher, keys, recipe=recipe,
+        mock_model_patcher,
+        keys,
+        recipe=recipe,
     )
     merged = {k: torch.randn(4, 4) for k in keys}
     sig = OpSignature(shape=(4, 4), ndim=2)
@@ -131,6 +136,7 @@ def _run_exit_node(recipe, mock_model_patcher, keys, *, extra_patches=None, **ex
         "mock_model_analysis": mock_model_analysis,
         "merged": merged,
     }
+
 
 # =============================================================================
 # AC-1: Per-chunk GPU tensor cleanup
@@ -412,7 +418,9 @@ class TestLoaderCleanup:
         )
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
 
@@ -763,9 +771,7 @@ class TestStreamingSave:
             "__ecaj_affected_keys__": '["weight","bias"]',
         }
 
-        with tempfile.NamedTemporaryFile(
-            suffix=".safetensors", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
             path = f.name
 
         try:
@@ -800,14 +806,18 @@ class TestGpuOffloadAfterSave:
 
         keys = list(mock_model_patcher.model_state_dict().keys())
         recipe = RecipeMerge(
-            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            base=RecipeBase(
+                model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+            ),
             target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
             backbone=None,
             t_factor=1.0,
         )
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         merged = {k: torch.randn(4, 4) for k in keys}
         sig = OpSignature(shape=(4, 4), ndim=2)
@@ -815,7 +825,9 @@ class TestGpuOffloadAfterSave:
         # Track call order
         call_order = []
 
-        mock_atomic_save = MagicMock(side_effect=lambda *a, **kw: call_order.append("atomic_save"))
+        mock_sink = MagicMock()
+        mock_sink.write_tensor = MagicMock()
+        mock_sink.finalize = MagicMock(side_effect=lambda *a, **kw: call_order.append("finalize"))
 
         # Inject comfy.model_management with trackable functions
         mm_mod = sys.modules.get("comfy.model_management")
@@ -837,21 +849,24 @@ class TestGpuOffloadAfterSave:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.validate_model_name", return_value="test.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path", return_value="/tmp/test.safetensors"),
+            patch("nodes.exit._resolve_save_path", return_value="/tmp/test.safetensors"),
             patch("nodes.exit.serialize_recipe", return_value="{}"),
             patch("nodes.exit.compute_recipe_hash", return_value="hash"),
-            patch("nodes.exit.check_cache", return_value=None),
-            patch("nodes.exit.build_metadata", return_value={"__ecaj_version__": "1"}),
-            patch("nodes.exit.atomic_save", mock_atomic_save),
+            patch("nodes.exit.validate_checkpoint_components"),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
+            patch("nodes.exit._load_model_from_artifact", return_value=mock_model_patcher.clone()),
+            patch("nodes.exit.ProgressBar", None),
         ):
             node = WIDENExitNode()
             node.execute(recipe, save_model=True, model_name="test")
 
-        assert "atomic_save" in call_order
+        assert "finalize" in call_order
         assert "free_memory" in call_order
         assert "soft_empty_cache" in call_order
-        # Ordering: save before free_memory before soft_empty_cache
-        assert call_order.index("atomic_save") < call_order.index("free_memory")
+        # Ordering: finalize before free_memory before soft_empty_cache
+        assert call_order.index("finalize") < call_order.index("free_memory")
         assert call_order.index("free_memory") < call_order.index("soft_empty_cache")
 
 
@@ -1240,9 +1255,13 @@ class TestBroaderExceptionHandling:
         with patch("lib.gpu_ops.gc.collect", mock_gc):
             with pytest.raises(RuntimeError, match="System memory exhausted") as exc_info:
                 chunked_evaluation(
-                    keys, base, eval_fn_oom,
-                    batch_size=1, device="cpu",
-                    dtype=torch.float32, storage_dtype=torch.float32,
+                    keys,
+                    base,
+                    eval_fn_oom,
+                    batch_size=1,
+                    device="cpu",
+                    dtype=torch.float32,
+                    storage_dtype=torch.float32,
                 )
 
         assert exc_info.value.__cause__ is not None
@@ -1262,9 +1281,13 @@ class TestBroaderExceptionHandling:
 
         with pytest.raises(RuntimeError, match="System memory exhausted") as exc_info:
             chunked_evaluation(
-                keys, base, eval_fn_oom,
-                batch_size=1, device="cpu",
-                dtype=torch.float32, storage_dtype=torch.float32,
+                keys,
+                base,
+                eval_fn_oom,
+                batch_size=1,
+                device="cpu",
+                dtype=torch.float32,
+                storage_dtype=torch.float32,
             )
 
         assert exc_info.value.__cause__ is not None
@@ -1282,9 +1305,13 @@ class TestBroaderExceptionHandling:
 
         with pytest.raises(RuntimeError, match="shape mismatch"):
             chunked_evaluation(
-                keys, base, eval_fn_bad,
-                batch_size=1, device="cpu",
-                dtype=torch.float32, storage_dtype=torch.float32,
+                keys,
+                base,
+                eval_fn_bad,
+                batch_size=1,
+                device="cpu",
+                dtype=torch.float32,
+                storage_dtype=torch.float32,
             )
 
 
@@ -1483,7 +1510,9 @@ class TestExitNodeRamPreflight:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         sig = OpSignature(shape=(4, 4), ndim=2)
         chunked_mock = MagicMock()
@@ -1613,7 +1642,9 @@ class TestExitNodePreflightByteCalculation:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, all_keys, recipe=recipe,
+            mock_model_patcher,
+            all_keys,
+            recipe=recipe,
         )
         preflight_mock = MagicMock()
 
@@ -1647,8 +1678,8 @@ class TestExitNodePreflightByteCalculation:
         all_keys = list(state.keys())
 
         # Two signatures: small shape gets large batch, large shape gets small batch
-        sig_small = OpSignature(shape=(4, 4), ndim=2)       # numel=16
-        sig_large = OpSignature(shape=(16, 16), ndim=2)     # numel=256
+        sig_small = OpSignature(shape=(4, 4), ndim=2)  # numel=16
+        sig_large = OpSignature(shape=(16, 16), ndim=2)  # numel=256
         batch_groups = {
             sig_small: [all_keys[0]],
             sig_large: [all_keys[1]] if len(all_keys) > 1 else [all_keys[0]],
@@ -1669,7 +1700,9 @@ class TestExitNodePreflightByteCalculation:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, all_keys, recipe=recipe,
+            mock_model_patcher,
+            all_keys,
+            recipe=recipe,
         )
         preflight_mock = MagicMock()
 
@@ -1694,8 +1727,8 @@ class TestExitNodePreflightByteCalculation:
         # Per-sig: small = 4 * 16 * 100 = 6400, large = 4 * 256 * 2 = 2048
         # worst_chunk = max(6400, 2048) = 6400
         expected_worst = max(
-            element_size * 16 * 100,   # sig_small
-            element_size * 256 * 2,    # sig_large
+            element_size * 16 * 100,  # sig_small
+            element_size * 256 * 2,  # sig_large
         )
         assert expected_worst == 6400  # sanity check
         assert call_kwargs.kwargs["worst_chunk_bytes"] == expected_worst
@@ -1787,6 +1820,7 @@ class TestGetAvailableRamBytes:
         with patch("builtins.open", side_effect=OSError("No such file")):
             # Reset warning flag so it doesn't affect output
             import lib.gpu_ops
+
             lib.gpu_ops._meminfo_warned = True  # Suppress warning
             result = get_available_ram_bytes()
 
@@ -1832,10 +1866,13 @@ class TestBaseStateFreedBeforeSave:
 
     # AC: @memory-management ac-13
     def test_base_state_freed_before_save(self, mock_model_patcher):
-        """model_state_dict called twice (setup + save) when save_model=True."""
+        """model_state_dict called once in full saved model mode — streaming
+        path uses base_state directly without re-acquiring."""
         keys = list(mock_model_patcher.model_state_dict().keys())
         recipe = RecipeMerge(
-            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            base=RecipeBase(
+                model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+            ),
             target=RecipeLoRA(loras=({"path": "lora.safetensors", "strength": 1.0},)),
             backbone=None,
             t_factor=1.0,
@@ -1851,22 +1888,31 @@ class TestBaseStateFreedBeforeSave:
 
         mock_model_patcher.model_state_dict = tracking_msd
 
+        mock_sink = MagicMock()
+        mock_sink.write_tensor = MagicMock()
+
         _run_exit_node(
-            recipe, mock_model_patcher, keys,
+            recipe,
+            mock_model_patcher,
+            keys,
             extra_patches={
                 "nodes.exit.validate_model_name": "test.safetensors",
-                "nodes.exit._resolve_checkpoints_path": "/tmp/test.safetensors",
+                "nodes.exit._resolve_save_path": "/tmp/test.safetensors",
                 "nodes.exit.serialize_recipe": "{}",
                 "nodes.exit.compute_recipe_hash": "hash",
-                "nodes.exit.check_cache": None,
-                "nodes.exit.build_metadata": {"__ecaj_version__": "1"},
-                "nodes.exit.atomic_save": MagicMock(),
+                "nodes.exit.validate_checkpoint_components": None,
+                "nodes.exit.check_full_model_cache": False,
+                "nodes.exit.check_ram_preflight": None,
+                "nodes.exit.MaterializationSink": mock_sink,
+                "nodes.exit._load_model_from_artifact": mock_model_patcher.clone(),
+                "nodes.exit.ProgressBar": None,
             },
             save_model=True,
             model_name="test",
         )
 
-        # Called once at setup (line 445) and once for save re-acquisition
-        assert call_count[0] == 2, (
-            f"Expected 2 model_state_dict calls (setup + save), got {call_count[0]}"
+        # Streaming path calls model_state_dict once at setup — no
+        # second re-acquisition because base_state is consumed by the sink
+        assert call_count[0] == 1, (
+            f"Expected 1 model_state_dict call (setup only), got {call_count[0]}"
         )

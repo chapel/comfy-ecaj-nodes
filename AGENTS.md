@@ -1,5 +1,11 @@
 # Agent Guide
 
+@kspec-agents.md
+
+## Required Include
+
+For Codex and any harness that does not auto-resolve `@file` references: **read `kspec-agents.md` explicitly before doing project work**. Treat `AGENTS.md` + `kspec-agents.md` as one instruction set. `kspec-agents.md` is generated from kspec meta with `kspec agents generate`; do not edit it manually.
+
 ## What This Project Is
 
 **comfy-ecaj-nodes** is a ComfyUI custom node pack for advanced model merging. The first (and flagship) feature set implements **WIDEN-based merging** — weight disentanglement for intelligent parameter-level model composition. Unlike simple linear interpolation, WIDEN analyzes per-parameter importance across models and routes each parameter to the most-relevant contributor.
@@ -12,24 +18,21 @@ It uses **kspec** (Kynetic Spec) for specification and task management. Spec fil
 
 ## Finding Information
 
-AGENTS.md provides **project architecture, gotchas, and decision frameworks**. For detailed workflows and command syntax, use skills and CLI help:
+AGENTS.md provides **project architecture, gotchas, and decision frameworks**. `kspec-agents.md` provides generated kspec conventions/workflows/skills and should be read alongside this file. For detailed workflows and command syntax, use kspec CLI help and the rendered kspec skills:
 
 | Need | Where to look |
 |------|---------------|
-| CLI command syntax | `kspec help <command>` or invoke `/kspec` skill |
-| Task lifecycle (start → submit → PR → complete) | `/task-work` skill |
-| Creating PRs | `/pr` skill, then `/pr-review` for merge gates |
-| Spec authoring (items, ACs, traits) | `/spec` skill |
-| Plan-to-spec translation | `/spec-plan` skill |
-| Session context (focus, threads, observations) | `/meta` skill |
-| Inbox/observation processing | `/triage` skill |
-| Pre-PR quality checks | `/local-review` skill |
-| Session reflection | `/reflect` skill |
-| Comprehensive audit | `/audit` skill |
-| Creating workflows | `/create-workflow` skill |
-| WIDEN algorithm (source) | `~/Projects/merge-router/src/core/widen.py` |
+| Generated kspec instructions | `kspec-agents.md` |
+| CLI command syntax | `kspec help <command>` or the `kspec-help` skill |
+| Task lifecycle (start → submit → review → merge → complete) | `kspec-task-work` skill |
+| Spec authoring (items, ACs, traits) | `kspec-writing-specs` skill |
+| Plan-to-spec translation and plan review | `kspec-plan` and `kspec-review-plan` skills |
+| Session context, focus, threads, observations | `kspec-observe`, `kspec-reflect`, and `kspec-triage` skills |
+| Inbox/observation processing | `kspec-triage`, `kspec-triage-inbox`, `kspec-triage-automation` skills |
+| Review/merge gates | `kspec-review` and `kspec-merge` skills |
+| WIDEN algorithm (source) | `lib/widen.py`; historical upstream in `~/Projects/merge-router/src/core/widen.py` |
 
-Skills inject their full documentation when invoked — you don't need to memorize their contents.
+Rendered core skills live under `.agents/skills/kspec-*` and `.factory/skills/kspec-*`; project-local source skills live in `.kspec/skills/`. Do not edit rendered skill output directly — update source skills/meta and regenerate with `kspec skill render` / `kspec setup`.
 
 ## Quick Start
 

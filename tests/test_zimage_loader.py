@@ -43,26 +43,14 @@ class TestAC1QKVFusing:
             out_dim = 32
             tensors = {
                 # Q component
-                "transformer.layers.0.attention.to_q.lora_A.weight": torch.randn(
-                    rank, in_dim
-                ),
-                "transformer.layers.0.attention.to_q.lora_B.weight": torch.randn(
-                    out_dim, rank
-                ),
+                "transformer.layers.0.attention.to_q.lora_A.weight": torch.randn(rank, in_dim),
+                "transformer.layers.0.attention.to_q.lora_B.weight": torch.randn(out_dim, rank),
                 # K component
-                "transformer.layers.0.attention.to_k.lora_A.weight": torch.randn(
-                    rank, in_dim
-                ),
-                "transformer.layers.0.attention.to_k.lora_B.weight": torch.randn(
-                    out_dim, rank
-                ),
+                "transformer.layers.0.attention.to_k.lora_A.weight": torch.randn(rank, in_dim),
+                "transformer.layers.0.attention.to_k.lora_B.weight": torch.randn(out_dim, rank),
                 # V component
-                "transformer.layers.0.attention.to_v.lora_A.weight": torch.randn(
-                    rank, in_dim
-                ),
-                "transformer.layers.0.attention.to_v.lora_B.weight": torch.randn(
-                    out_dim, rank
-                ),
+                "transformer.layers.0.attention.to_v.lora_A.weight": torch.randn(rank, in_dim),
+                "transformer.layers.0.attention.to_v.lora_B.weight": torch.randn(out_dim, rank),
             }
             save_file(tensors, f.name)
             yield f.name

@@ -281,11 +281,7 @@ class CLIPModelLoader:
             raise KeyError(
                 f"Checkpoint '{self._path}' is missing {len(missing_keys)} CLIP key(s):\n"
                 + "\n".join(f"  - {k}" for k in missing_keys[:10])
-                + (
-                    f"\n  ... and {len(missing_keys) - 10} more"
-                    if len(missing_keys) > 10
-                    else ""
-                )
+                + (f"\n  ... and {len(missing_keys) - 10} more" if len(missing_keys) > 10 else "")
             )
 
         return tensors

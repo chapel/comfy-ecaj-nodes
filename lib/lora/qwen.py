@@ -92,7 +92,7 @@ def _normalize_lycoris_key(key: str) -> str:
         return key
 
     # Strip lycoris_ prefix
-    key = key[len("lycoris_"):]
+    key = key[len("lycoris_") :]
 
     # Convert numeric indices: _N_ -> .N. and _N at end -> .N
     key = re.sub(r"_(\d+)_", r".\1.", key)
@@ -129,7 +129,7 @@ def _normalize_kohya_key(key: str) -> str:
         return key
 
     # Strip lora_unet_ prefix
-    key = key[len("lora_unet_"):]
+    key = key[len("lora_unet_") :]
 
     # Convert numeric indices
     key = re.sub(r"_(\d+)_", r".\1.", key)
@@ -196,11 +196,11 @@ def _parse_qwen_lora_key(lora_key: str) -> tuple[str | None, str]:
 
     # Handle diffusion_model prefix
     if base_path.startswith("diffusion_model."):
-        base_path = base_path[len("diffusion_model."):]
+        base_path = base_path[len("diffusion_model.") :]
 
     # Handle transformer prefix
     if base_path.startswith("transformer."):
-        base_path = base_path[len("transformer."):]
+        base_path = base_path[len("transformer.") :]
 
     # Handle LyCORIS format
     if base_path.startswith("lycoris_"):
@@ -273,7 +273,7 @@ class QwenLoader(LoRALoader):
                 if lora_key.endswith(".alpha"):
                     alpha_tensor = f.get_tensor(lora_key)
                     if alpha_tensor.numel() == 1:
-                        alpha_values[lora_key[:-len(".alpha")]] = alpha_tensor.item()
+                        alpha_values[lora_key[: -len(".alpha")]] = alpha_tensor.item()
                     continue
 
                 model_key, direction = _parse_qwen_lora_key(lora_key)
@@ -285,10 +285,14 @@ class QwenLoader(LoRALoader):
 
                 # Extract LoRA base path for alpha lookup
                 lora_base = lora_key
-                for suffix in (".lora_A.weight", ".lora_B.weight",
-                               ".lora_down.weight", ".lora_up.weight"):
+                for suffix in (
+                    ".lora_A.weight",
+                    ".lora_B.weight",
+                    ".lora_down.weight",
+                    ".lora_up.weight",
+                ):
                     if lora_base.endswith(suffix):
-                        lora_base = lora_base[:-len(suffix)]
+                        lora_base = lora_base[: -len(suffix)]
                         break
                 lora_base_paths[model_key] = lora_base
 

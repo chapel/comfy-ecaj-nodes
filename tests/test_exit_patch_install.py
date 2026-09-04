@@ -169,9 +169,7 @@ class TestUnpatchLoadedClones:
         assert len(_patch_loaded_models) == 0
 
     # AC: @exit-patch-install ac-7
-    def test_preserves_non_matching_entries(
-        self, _patch_loaded_models
-    ):
+    def test_preserves_non_matching_entries(self, _patch_loaded_models):
         """Non-matching entries are not touched."""
         other_patcher = MockModelPatcher()
         target_patcher = MockModelPatcher()

@@ -74,17 +74,24 @@ def _make_recipe(
     )
     if include_model:
         model = RecipeModel(
-            path="model_b.safetensors", strength=0.8,
+            path="model_b.safetensors",
+            strength=0.8,
             block_config=block_config_model,
         )
         compose = RecipeCompose(branches=(lora, model))
         return RecipeMerge(
-            base=base, target=compose, backbone=None,
-            t_factor=t_factor, block_config=block_config_merge,
+            base=base,
+            target=compose,
+            backbone=None,
+            t_factor=t_factor,
+            block_config=block_config_merge,
         )
     return RecipeMerge(
-        base=base, target=lora, backbone=None,
-        t_factor=t_factor, block_config=block_config_merge,
+        base=base,
+        target=lora,
+        backbone=None,
+        t_factor=t_factor,
+        block_config=block_config_merge,
     )
 
 
@@ -155,12 +162,8 @@ class TestStructuralFingerprint:
         bc = BlockConfig(arch="sdxl", block_overrides=(("IN00", 0.5),))
         r_with = _make_recipe(block_config_lora=bc)
         r_without = _make_recipe()
-        s1 = serialize_recipe(
-            r_with, _base_identity(), _lora_stats(), strip_block_config=True
-        )
-        s2 = serialize_recipe(
-            r_without, _base_identity(), _lora_stats(), strip_block_config=True
-        )
+        s1 = serialize_recipe(r_with, _base_identity(), _lora_stats(), strip_block_config=True)
+        s2 = serialize_recipe(r_without, _base_identity(), _lora_stats(), strip_block_config=True)
         assert s1 == s2
 
 
@@ -222,9 +225,7 @@ class TestCollectBlockConfigs:
         bc = BlockConfig(arch="sdxl", block_overrides=(("OUT03", 0.5),))
         recipe = _make_recipe(include_model=True, block_config_model=bc)
         configs = collect_block_configs(recipe)
-        model_configs = [
-            (p, b) for p, b in configs if b is not None and "OUT03" in str(b)
-        ]
+        model_configs = [(p, b) for p, b in configs if b is not None and "OUT03" in str(b)]
         assert len(model_configs) == 1
 
 
@@ -356,6 +357,7 @@ class TestFilterChangedKeys:
         # Only IN00 keys + unclassified keys
         for k in result:
             from lib.block_classify import classify_key
+
             block = classify_key(k, "sdxl")
             assert block == "IN00" or block is None
 
@@ -487,6 +489,7 @@ def _make_exit_mocks(
     # Build set_affected from actual RecipeLoRA objects in the recipe tree
     set_affected = {}
     if recipe is not None:
+
         def _find_loras(n):
             if isinstance(n, RecipeLoRA):
                 key = str(id(n))
@@ -499,6 +502,7 @@ def _make_exit_mocks(
                 _find_loras(n.target)
                 if n.backbone is not None:
                     _find_loras(n.backbone)
+
         _find_loras(recipe)
     if not set_affected:
         set_affected = {str(id(None)): set(keys_to_process)}
@@ -547,11 +551,14 @@ class TestExitNodeIncrementalCache:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
 
         merged = {k: torch.randn(4, 4) for k in keys}
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         with (
@@ -600,7 +607,9 @@ class TestExitNodeIncrementalCache:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
 
         chunked_eval_mock = MagicMock()
@@ -629,9 +638,7 @@ class TestExitNodeIncrementalCache:
             set_tuple = patch_entry[1]  # ("set", (tensor,))
             output_tensor = set_tuple[1][0]
             expected = cached_state[key].to(torch.float32)
-            assert torch.equal(output_tensor, expected), (
-                f"Value mismatch for {key}"
-            )
+            assert torch.equal(output_tensor, expected), f"Value mismatch for {key}"
 
     # AC: @incremental-block-recompute ac-3
     def test_single_block_change_partial_recompute(self, mock_model_patcher):
@@ -670,7 +677,9 @@ class TestExitNodeIncrementalCache:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe_new,
+            mock_model_patcher,
+            keys,
+            recipe=recipe_new,
         )
 
         batch_groups_calls = []
@@ -678,6 +687,7 @@ class TestExitNodeIncrementalCache:
         def track_batch_groups(key_list, *args, **kwargs):
             batch_groups_calls.append(list(key_list))
             from lib.batch_groups import OpSignature
+
             sig = OpSignature(shape=(4, 4), ndim=2)
             return {sig: key_list}
 
@@ -704,6 +714,7 @@ class TestExitNodeIncrementalCache:
         assert len(batch_groups_calls) == 2
         recomputed_keys = batch_groups_calls[1]  # second call = filtered
         from lib.block_classify import classify_key
+
         for k in recomputed_keys:
             block = classify_key(k, "sdxl")
             assert block in ("IN00", None), f"Key {k} classified as {block}, expected IN00 or None"
@@ -714,9 +725,9 @@ class TestExitNodeIncrementalCache:
             block = classify_key(k, "sdxl")
             if block not in ("IN00", None):
                 # Unchanged key — should match original cached value
-                assert torch.equal(
-                    entry.merged_state[k], cached_state[k]
-                ), f"Unchanged key {k} should match cache"
+                assert torch.equal(entry.merged_state[k], cached_state[k]), (
+                    f"Unchanged key {k} should match cache"
+                )
 
     # AC: @accurate-ram-preflight ac-2
     def test_incremental_preflight_uses_subset_bytes(self, mock_model_patcher):
@@ -754,12 +765,15 @@ class TestExitNodeIncrementalCache:
         )
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe_new,
+            mock_model_patcher,
+            keys,
+            recipe=recipe_new,
         )
         mock_loader.loaded_bytes = 0
 
         # Track which keys end up in batch_groups for incremental recompute
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         def track_batch_groups(key_list, *args, **kwargs):
@@ -780,8 +794,10 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.compile_batch_groups", side_effect=track_batch_groups),
-            patch("nodes.exit.chunked_evaluation",
-                  side_effect=lambda keys, **kw: {k: new_results[k] for k in keys}),
+            patch(
+                "nodes.exit.chunked_evaluation",
+                side_effect=lambda keys, **kw: {k: new_results[k] for k in keys},
+            ),
             patch("nodes.exit.check_ram_preflight", side_effect=capture_preflight),
         ):
             node = WIDENExitNode()
@@ -836,7 +852,9 @@ class TestExitNodeIncrementalCache:
 
         # --- Run 1: first execution stores cache ---
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe_old,
+            mock_model_patcher,
+            keys,
+            recipe=recipe_old,
         )
         mock_loader.loaded_bytes = 0
 
@@ -847,6 +865,7 @@ class TestExitNodeIncrementalCache:
         merged_run1 = {k: torch.zeros(elems_per_key) for k in keys}
 
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(elems_per_key,), ndim=1)
 
         # avail = 600 MB: above 512 MB safety margin (new: stores)
@@ -873,7 +892,9 @@ class TestExitNodeIncrementalCache:
 
         # --- Run 2: change IN00, preflight should use subset ---
         mock_analyze2, mock_model_analysis2, mock_loader2, dummy_plan2 = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe_new,
+            mock_model_patcher,
+            keys,
+            recipe=recipe_new,
         )
         mock_loader2.loaded_bytes = 0
 
@@ -898,8 +919,10 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.compile_batch_groups", side_effect=track_batch_groups),
-            patch("nodes.exit.chunked_evaluation",
-                  side_effect=lambda keys, **kw: {k: new_results[k] for k in keys}),
+            patch(
+                "nodes.exit.chunked_evaluation",
+                side_effect=lambda keys, **kw: {k: new_results[k] for k in keys},
+            ),
             patch("nodes.exit.check_ram_preflight", side_effect=capture_preflight),
             patch("nodes.exit.get_available_ram_bytes", return_value=avail_bytes),
         ):
@@ -942,10 +965,13 @@ class TestExitNodeIncrementalCache:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
 
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         with (
@@ -956,8 +982,9 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation",
-                  return_value={k: torch.randn(4, 4) for k in keys}),
+            patch(
+                "nodes.exit.chunked_evaluation", return_value={k: torch.randn(4, 4) for k in keys}
+            ),
         ):
             node = WIDENExitNode()
             node.execute(recipe)
@@ -990,9 +1017,12 @@ class TestExitNodeIncrementalCache:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         with (
@@ -1003,8 +1033,9 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation",
-                  return_value={k: torch.randn(4, 4) for k in keys}),
+            patch(
+                "nodes.exit.chunked_evaluation", return_value={k: torch.randn(4, 4) for k in keys}
+            ),
         ):
             node = WIDENExitNode()
             node.execute(recipe)
@@ -1039,9 +1070,12 @@ class TestExitNodeIncrementalCache:
         # Use a different fingerprint to force full recompute
         new_fp = "different_fp"
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         with (
@@ -1070,14 +1104,18 @@ class TestExitNodeIncrementalCache:
         """save_model=True with partial recompute saves complete state."""
         keys = list(mock_model_patcher.model_state_dict().keys())
         bc_old = BlockConfig(
-            arch="sdxl", block_overrides=(("IN00", 0.5), ("MID", 1.0)),
+            arch="sdxl",
+            block_overrides=(("IN00", 0.5), ("MID", 1.0)),
         )
         bc_new = BlockConfig(
-            arch="sdxl", block_overrides=(("IN00", 0.7), ("MID", 1.0)),
+            arch="sdxl",
+            block_overrides=(("IN00", 0.7), ("MID", 1.0)),
         )
 
         recipe = RecipeMerge(
-            base=RecipeBase(model_patcher=mock_model_patcher, arch="sdxl"),
+            base=RecipeBase(
+                model_patcher=mock_model_patcher, arch="sdxl", checkpoint_components=None
+            ),
             target=RecipeLoRA(
                 loras=({"path": "lora_a.safetensors", "strength": 1.0},),
                 block_config=bc_new,
@@ -1106,55 +1144,63 @@ class TestExitNodeIncrementalCache:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
 
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         new_results = {k: torch.randn(4, 4) for k in keys}
-        atomic_save_mock = MagicMock()
+
+        # Track which tensor names the MaterializationSink writes
+        written_keys = []
+        mock_sink = MagicMock()
+        mock_sink.write_tensor = MagicMock(
+            side_effect=lambda name, tensor: written_keys.append(name)
+        )
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
-            patch("nodes.exit.analyze_recipe_models",
-                  return_value=mock_model_analysis),
+            patch("nodes.exit.analyze_recipe_models", return_value=mock_model_analysis),
             patch("nodes.exit.compile_plan", return_value=dummy_plan),
-            patch("nodes.exit.compute_structural_fingerprint",
-                  return_value=fp),
-            patch("nodes.exit.compute_base_identity",
-                  return_value="base_id"),
+            patch("nodes.exit.compute_structural_fingerprint", return_value=fp),
+            patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
-            patch("nodes.exit.compile_batch_groups",
-                  return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation",
-                  return_value=new_results),
-            patch("nodes.exit.validate_model_name",
-                  return_value="test.safetensors"),
-            patch("nodes.exit._resolve_checkpoints_path",
-                  return_value="/tmp/test.safetensors"),
-            patch("nodes.exit.serialize_recipe",
-                  return_value='{"test": true}'),
-            patch("nodes.exit.compute_recipe_hash",
-                  return_value="recipe_hash"),
-            patch("nodes.exit.check_cache", return_value=None),
-            patch("nodes.exit.build_metadata",
-                  return_value={"__ecaj_version__": "1"}),
-            patch("nodes.exit.atomic_save", atomic_save_mock),
+            patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
+            patch("nodes.exit.chunked_evaluation", return_value=new_results),
+            patch("nodes.exit.validate_model_name", return_value="test.safetensors"),
+            patch("nodes.exit._resolve_save_path", return_value="/tmp/test.safetensors"),
+            patch("nodes.exit.serialize_recipe", return_value='{"test": true}'),
+            patch("nodes.exit.compute_recipe_hash", return_value="recipe_hash"),
+            patch("nodes.exit.validate_checkpoint_components"),
+            patch("nodes.exit.check_full_model_cache", return_value=False),
+            patch("nodes.exit.check_ram_preflight"),
+            patch("nodes.exit.MaterializationSink", return_value=mock_sink),
+            patch("nodes.exit._load_model_from_artifact", return_value=mock_model_patcher.clone()),
+            patch("nodes.exit.ProgressBar", None),
         ):
             node = WIDENExitNode()
             node.execute(
-                recipe, save_model=True, model_name="test",
+                recipe,
+                save_model=True,
+                model_name="test",
             )
 
-        # atomic_save should have been called
-        atomic_save_mock.assert_called_once()
-        saved_state = atomic_save_mock.call_args[0][0]
+        # MaterializationSink.finalize should have been called
+        mock_sink.finalize.assert_called_once()
 
-        # Saved state should contain ALL keys (complete merged state)
-        for k in keys:
-            assert k in saved_state, (
-                f"Key {k} missing from saved state"
+        # All keys (base + affected) should have been written to the sink
+        # under the EXTERNAL Comfy-loadable layout (model.diffusion_model.*).
+        base_keys = set(mock_model_patcher.model_state_dict().keys())
+        for k in base_keys:
+            external = "model.diffusion_model." + k.removeprefix(
+                "diffusion_model.",
+            )
+            assert external in written_keys, (
+                f"Key {external} missing from MaterializationSink writes"
             )
 
 
@@ -1197,10 +1243,16 @@ class TestEdgeCases:
         model_old = RecipeModel(path="m.safetensors", block_config=bc_old)
         model_new = RecipeModel(path="m.safetensors", block_config=bc_new)
         recipe_old = RecipeMerge(
-            base=base, target=model_old, backbone=None, t_factor=1.0,
+            base=base,
+            target=model_old,
+            backbone=None,
+            t_factor=1.0,
         )
         recipe_new = RecipeMerge(
-            base=base, target=model_new, backbone=None, t_factor=1.0,
+            base=base,
+            target=model_new,
+            backbone=None,
+            t_factor=1.0,
         )
 
         old_configs = collect_block_configs(recipe_old)
@@ -1225,7 +1277,9 @@ class TestEdgeCases:
                 loras=({"path": "lora.safetensors", "strength": 1.0},),
                 block_config=bc_lora_old,
             ),
-            backbone=None, t_factor=1.0, block_config=bc_merge,
+            backbone=None,
+            t_factor=1.0,
+            block_config=bc_merge,
         )
         recipe_new = RecipeMerge(
             base=base,
@@ -1233,7 +1287,9 @@ class TestEdgeCases:
                 loras=({"path": "lora.safetensors", "strength": 1.0},),
                 block_config=bc_lora_new,
             ),
-            backbone=None, t_factor=1.0, block_config=bc_merge,
+            backbone=None,
+            t_factor=1.0,
+            block_config=bc_merge,
         )
 
         old_configs = collect_block_configs(recipe_old)
@@ -1307,14 +1363,15 @@ class TestEdgeCases:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
-        chunked_eval_mock = MagicMock(
-            return_value={k: torch.randn(4, 4) for k in keys}
-        )
+        chunked_eval_mock = MagicMock(return_value={k: torch.randn(4, 4) for k in keys})
 
         with (
             patch("nodes.exit.analyze_recipe", return_value=mock_analyze),
@@ -1357,9 +1414,12 @@ class TestEdgeCases:
         assert len(_incremental_cache) == 1
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         with (
@@ -1370,8 +1430,9 @@ class TestEdgeCases:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation",
-                  return_value={k: torch.randn(4, 4) for k in keys}),
+            patch(
+                "nodes.exit.chunked_evaluation", return_value={k: torch.randn(4, 4) for k in keys}
+            ),
         ):
             node = WIDENExitNode()
             node.execute(recipe, enable_cache=False)
@@ -1393,9 +1454,12 @@ class TestEdgeCases:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         with (
@@ -1406,8 +1470,9 @@ class TestEdgeCases:
             patch("nodes.exit.compute_base_identity", return_value="base_id"),
             patch("nodes.exit.compute_lora_stats", return_value={}),
             patch("nodes.exit.compile_batch_groups", return_value={sig: keys}),
-            patch("nodes.exit.chunked_evaluation",
-                  return_value={k: torch.randn(4, 4) for k in keys}),
+            patch(
+                "nodes.exit.chunked_evaluation", return_value={k: torch.randn(4, 4) for k in keys}
+            ),
         ):
             node = WIDENExitNode()
             node.execute(recipe, enable_cache=True)
@@ -1471,12 +1536,15 @@ class TestCacheLoaderMetadata:
         )
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         mock_loader.loaded_bytes = 1024 * 1024  # 1 MB
 
         merged = {k: torch.randn(4, 4) for k in keys}
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         with (
@@ -1523,7 +1591,9 @@ class TestCacheLoaderMetadata:
         )
 
         mock_analyze, mock_model_analysis, _, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
 
         with (
@@ -1540,10 +1610,9 @@ class TestCacheLoaderMetadata:
             node = WIDENExitNode()
             node.execute(recipe)
 
-        assert any(
-            "loader_bytes=2048" in record.message
-            for record in caplog.records
-        ), f"Expected loader_bytes=2048 in log, got: {[r.message for r in caplog.records]}"
+        assert any("loader_bytes=2048" in record.message for record in caplog.records), (
+            f"Expected loader_bytes=2048 in log, got: {[r.message for r in caplog.records]}"
+        )
 
     # AC: @cache-loader-metadata ac-3
     def test_new_run_stores_new_loader_bytes(self, mock_model_patcher):
@@ -1571,12 +1640,15 @@ class TestCacheLoaderMetadata:
         )
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         mock_loader.loaded_bytes = 5000  # Different loader size
 
         merged = {k: torch.randn(4, 4) for k in keys}
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         with (
@@ -1632,12 +1704,15 @@ class TestCacheLoaderMetadata:
         )
 
         mock_analyze, mock_model_analysis, mock_loader, dummy_plan = _make_exit_mocks(
-            mock_model_patcher, keys, recipe=recipe,
+            mock_model_patcher,
+            keys,
+            recipe=recipe,
         )
         mock_loader.loaded_bytes = 100
 
         merged = {k: torch.randn(4, 4) for k in keys}
         from lib.batch_groups import OpSignature
+
         sig = OpSignature(shape=(4, 4), ndim=2)
 
         preflight_calls = []

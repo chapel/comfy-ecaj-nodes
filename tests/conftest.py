@@ -8,7 +8,7 @@ from types import ModuleType
 import pytest
 import torch
 
-from lib.recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
+from lib.recipe import CheckpointComponents, RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge
 
 _DIFFUSION_PREFIX = "diffusion_model."
 
@@ -132,6 +132,18 @@ class MockModelPatcher:
 
 
 # ---------------------------------------------------------------------------
+# Checkpoint component stubs — for save_model=True tests
+# ---------------------------------------------------------------------------
+
+
+def make_checkpoint_components() -> CheckpointComponents:
+    """Create stub CheckpointComponents with MagicMock CLIP and VAE."""
+    from unittest.mock import MagicMock
+
+    return CheckpointComponents(clip=MagicMock(name="clip"), vae=MagicMock(name="vae"))
+
+
+# ---------------------------------------------------------------------------
 # Recipe fixtures (AC-3)
 # ---------------------------------------------------------------------------
 
@@ -242,11 +254,27 @@ def _mock_comfyui_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     # Mock get_folder_paths — returns empty list
     folder_paths_mod.get_folder_paths = lambda folder: []
 
+    comfy_mod = _make_stub_module("comfy")
+    comfy_sd_mod = _make_stub_module("comfy.sd")
+    comfy_sd_mod.save_checkpoint = lambda *args, **kwargs: None
+    comfy_sd_mod.load_checkpoint_guess_config = lambda *args, **kwargs: [None, None, None]
+    # Default stub returns a fresh MagicMock so callers that hit the diffusion
+    # loader path (e.g. WIDEN Exit's diffusion-only return) get a non-None
+    # MODEL.  Tests that need to assert on loader arguments patch
+    # nodes.exit._comfy_load_diffusion_model directly.
+    from unittest.mock import MagicMock as _MagicMock
+
+    comfy_sd_mod.load_diffusion_model = lambda *args, **kwargs: _MagicMock(
+        name="comfy_load_diffusion_model_stub",
+    )
+    comfy_mod.sd = comfy_sd_mod
+
     stubs = {
         "folder_paths": folder_paths_mod,
-        "comfy": _make_stub_module("comfy"),
+        "comfy": comfy_mod,
         "comfy.utils": _make_stub_module("comfy.utils"),
         "comfy.model_management": _make_stub_module("comfy.model_management"),
+        "comfy.sd": comfy_sd_mod,
     }
     for name, mod in stubs.items():
         monkeypatch.setitem(sys.modules, name, mod)

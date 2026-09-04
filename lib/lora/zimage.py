@@ -38,8 +38,8 @@ _ZIMAGE_HIDDEN_DIM = 3840
 # QKV offset mapping: component -> (start_row, length)
 # # AC: @zimage-loader ac-3
 _QKV_OFFSETS = {
-    "q": (0, _ZIMAGE_HIDDEN_DIM),           # rows 0:3840
-    "k": (_ZIMAGE_HIDDEN_DIM, _ZIMAGE_HIDDEN_DIM),      # rows 3840:7680
+    "q": (0, _ZIMAGE_HIDDEN_DIM),  # rows 0:3840
+    "k": (_ZIMAGE_HIDDEN_DIM, _ZIMAGE_HIDDEN_DIM),  # rows 3840:7680
     "v": (2 * _ZIMAGE_HIDDEN_DIM, _ZIMAGE_HIDDEN_DIM),  # rows 7680:11520
 }
 
@@ -99,7 +99,7 @@ def _normalize_lycoris_key(key: str) -> str:
 
     # Convert numeric indices: _N_ -> .N. and _N at end -> .N
     key = re.sub(r"_(\d+)_", r".\1.", key)  # _N_ -> .N.
-    key = re.sub(r"_(\d+)$", r".\1", key)   # _N at end -> .N
+    key = re.sub(r"_(\d+)$", r".\1", key)  # _N at end -> .N
 
     # Replace compound names with placeholders (using markers without underscores)
     placeholders = {}
@@ -279,8 +279,12 @@ class ZImageLoader(LoRALoader):
                 # e.g. "transformer.layers.0.attention.to_q.lora_A.weight"
                 #    → "transformer.layers.0.attention.to_q"
                 lora_base = lora_key
-                for suffix in (".lora_A.weight", ".lora_B.weight",
-                               ".lora_down.weight", ".lora_up.weight"):
+                for suffix in (
+                    ".lora_A.weight",
+                    ".lora_B.weight",
+                    ".lora_down.weight",
+                    ".lora_up.weight",
+                ):
                     if lora_base.endswith(suffix):
                         lora_base = lora_base[: -len(suffix)]
                         break
@@ -325,9 +329,7 @@ class ZImageLoader(LoRALoader):
                 self._affected.add(model_key)
             else:
                 # Standard LoRA
-                self._lora_data_by_set[effective_set_id][layer_key].append(
-                    (up, down, scale)
-                )
+                self._lora_data_by_set[effective_set_id][layer_key].append((up, down, scale))
                 self._affected_by_set[effective_set_id].add(layer_key)
                 self._affected.add(layer_key)
 

@@ -154,7 +154,9 @@ class TestCLIPLoRALoaderSelection:
 
     # AC: @clip-exit-node ac-2
     def test_analyze_recipe_dispatches_to_clip_lora_loader(
-        self, clip_recipe_base: RecipeBase, tmp_path,
+        self,
+        clip_recipe_base: RecipeBase,
+        tmp_path,
     ):
         """analyze_recipe dispatches to SDXL CLIP LoRA loader when domain='clip'."""
         from lib.analysis import analyze_recipe
@@ -175,7 +177,10 @@ class TestCLIPLoRALoaderSelection:
 
         lora = RecipeLoRA(loras=({"path": str(lora_path), "strength": 1.0},))
         merge = RecipeMerge(
-            base=clip_recipe_base, target=lora, backbone=None, t_factor=1.0,
+            base=clip_recipe_base,
+            target=lora,
+            backbone=None,
+            t_factor=1.0,
         )
 
         result = analyze_recipe(merge)
@@ -241,7 +246,10 @@ class TestCLIPModelLoaderSelection:
         ckpt_path = tmp_path / "model.safetensors"
         tensors = {
             "model.diffusion_model.input_blocks.0.0.weight": torch.randn(
-                320, 4, 3, 3,
+                320,
+                4,
+                3,
+                3,
             ),
         }
         save_file(tensors, str(ckpt_path))
@@ -628,19 +636,29 @@ class TestProgressReporting:
         monkeypatch.setattr(clip_exit_mod, "ProgressBar", FakeProgressBar)
         monkeypatch.setattr(clip_exit_mod, "_build_lora_resolver", lambda: lambda name: name)
         monkeypatch.setattr(
-            clip_exit_mod, "_build_clip_model_resolver", lambda: lambda name, sd: name,
+            clip_exit_mod,
+            "_build_clip_model_resolver",
+            lambda: lambda name, sd: name,
         )
         monkeypatch.setattr(
-            clip_exit_mod, "analyze_recipe", lambda *a, **kw: FakeAnalysis(),
+            clip_exit_mod,
+            "analyze_recipe",
+            lambda *a, **kw: FakeAnalysis(),
         )
         monkeypatch.setattr(
-            clip_exit_mod, "analyze_recipe_models", lambda *a, **kw: FakeModelAnalysis(),
+            clip_exit_mod,
+            "analyze_recipe_models",
+            lambda *a, **kw: FakeModelAnalysis(),
         )
         monkeypatch.setattr(
-            clip_exit_mod, "get_keys_to_process", lambda all_k, aff: affected,
+            clip_exit_mod,
+            "get_keys_to_process",
+            lambda all_k, aff: affected,
         )
         monkeypatch.setattr(
-            clip_exit_mod, "compile_batch_groups", lambda *a, **kw: fake_batch_groups,
+            clip_exit_mod,
+            "compile_batch_groups",
+            lambda *a, **kw: fake_batch_groups,
         )
         monkeypatch.setattr(clip_exit_mod, "compile_plan", lambda *a, **kw: object())
         monkeypatch.setattr(clip_exit_mod, "compute_batch_size", lambda *a, **kw: 32)
@@ -689,9 +707,7 @@ class TestUnpatchLoadedClipClones:
         """Does not crash when comfy.model_management has no current_loaded_models."""
         _unpatch_loaded_clip_clones(mock_clip)
 
-    def test_noop_with_empty_loaded_models(
-        self, mock_clip: MockCLIP, _patch_loaded_models
-    ):
+    def test_noop_with_empty_loaded_models(self, mock_clip: MockCLIP, _patch_loaded_models):
         """Safe when current_loaded_models is empty."""
         _unpatch_loaded_clip_clones(mock_clip)
         assert _patch_loaded_models == []
@@ -752,7 +768,13 @@ class TestDomainPropagation:
 
         # Without domain="clip", classify_key returns None → override is ignored
         result_diffusion = _apply_per_block_lora_strength(
-            keys, base, lora_applied, block_config, "sdxl", "cpu", torch.float32,
+            keys,
+            base,
+            lora_applied,
+            block_config,
+            "sdxl",
+            "cpu",
+            torch.float32,
             domain="diffusion",
         )
         # delta preserved (override not matched)
@@ -760,7 +782,13 @@ class TestDomainPropagation:
 
         # With domain="clip", classify_key returns "CL00" → override applies
         result_clip = _apply_per_block_lora_strength(
-            keys, base, lora_applied, block_config, "sdxl", "cpu", torch.float32,
+            keys,
+            base,
+            lora_applied,
+            block_config,
+            "sdxl",
+            "cpu",
+            torch.float32,
             domain="clip",
         )
         # delta zeroed out (strength 0.0)
@@ -799,6 +827,7 @@ class TestDomainPropagation:
             return orig_fn(*args, **kwargs)
 
         import lib.recipe_eval as recipe_eval_mod
+
         monkeypatch.setattr(recipe_eval_mod, "_apply_per_block_lora_strength", tracking_per_block)
 
         # Build a minimal plan with an OpApplyLoRA that has a block_config
@@ -815,9 +844,15 @@ class TestDomainPropagation:
                 return []
 
         execute_plan(
-            plan=plan, keys=keys, base_batch=base_batch,
-            loader=FakeLoader(), widen=None, device="cpu", dtype=torch.float32,
-            arch="sdxl", domain="clip",
+            plan=plan,
+            keys=keys,
+            base_batch=base_batch,
+            loader=FakeLoader(),
+            widen=None,
+            device="cpu",
+            dtype=torch.float32,
+            arch="sdxl",
+            domain="clip",
         )
 
         assert captured_domains == ["clip"]

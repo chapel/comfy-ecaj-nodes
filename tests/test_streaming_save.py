@@ -13,7 +13,7 @@ import pytest
 import torch
 from safetensors import safe_open
 
-from lib.streaming_save import stream_save_file
+from lib.streaming_save import MaterializationSink, _tensor_bytes, stream_save_file
 
 
 class TestStreamingSaveRoundTrip:
@@ -234,3 +234,193 @@ class TestStreamingSaveErrorCases:
                 assert meta is None or len(meta) == 0
         finally:
             os.unlink(path)
+
+
+class TestStreamingSaveBF16RawBytes:
+    """BF16 raw-byte preservation through streaming materialization.
+
+    The BF16 path must serialize via uint8 bitcast reinterpretation rather
+    than numeric dtype conversion, and the safetensors header must still
+    record dtype BF16 with bit-identical data.
+
+    AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    """
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_bf16_round_trip_preserves_dtype_shape_values(self):
+        """BF16 tensor saved through stream_save_file loads with BF16 dtype."""
+        tensors = {"weight": torch.randn(64, 64, dtype=torch.bfloat16)}
+        with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+            path = f.name
+        try:
+            stream_save_file(tensors, path)
+            with safe_open(path, framework="pt", device="cpu") as sf:
+                loaded = sf.get_tensor("weight")
+                assert loaded.dtype == torch.bfloat16
+                assert loaded.shape == tensors["weight"].shape
+                assert torch.equal(loaded, tensors["weight"])
+        finally:
+            os.unlink(path)
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_bf16_scalar_round_trip(self):
+        """0-dim BF16 tensor round-trips with dtype and value preserved."""
+        tensors = {"scalar": torch.tensor(2.25, dtype=torch.bfloat16)}
+        with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+            path = f.name
+        try:
+            stream_save_file(tensors, path)
+            with safe_open(path, framework="pt", device="cpu") as sf:
+                loaded = sf.get_tensor("scalar")
+                assert loaded.dtype == torch.bfloat16
+                assert loaded.shape == ()
+                assert torch.equal(loaded, tensors["scalar"])
+        finally:
+            os.unlink(path)
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_bf16_non_contiguous_round_trip(self):
+        """Non-contiguous (transposed) BF16 tensor round-trips correctly."""
+        base = torch.randn(8, 16, dtype=torch.bfloat16)
+        transposed = base.t()
+        assert not transposed.is_contiguous()
+        tensors = {"transposed": transposed}
+        with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+            path = f.name
+        try:
+            stream_save_file(tensors, path)
+            with safe_open(path, framework="pt", device="cpu") as sf:
+                loaded = sf.get_tensor("transposed")
+                assert loaded.dtype == torch.bfloat16
+                assert loaded.shape == transposed.shape
+                assert torch.equal(loaded, transposed)
+        finally:
+            os.unlink(path)
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_bf16_storage_offset_view_round_trip(self):
+        """BF16 view with non-zero storage_offset round-trips without leaking
+        bytes from before the view start."""
+        base = torch.randn(20, dtype=torch.bfloat16)
+        view = base[5:15]
+        assert view.storage_offset() > 0
+        tensors = {"view": view}
+        with tempfile.NamedTemporaryFile(suffix=".safetensors", delete=False) as f:
+            path = f.name
+        try:
+            stream_save_file(tensors, path)
+            with safe_open(path, framework="pt", device="cpu") as sf:
+                loaded = sf.get_tensor("view")
+                assert loaded.dtype == torch.bfloat16
+                assert loaded.shape == view.shape
+                assert torch.equal(loaded, view)
+        finally:
+            os.unlink(path)
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_tensor_bytes_uses_uint8_bitcast_for_bf16(self):
+        """_tensor_bytes(bf16) is byte-identical to a uint8-view reinterpretation.
+
+        This is the contract that proves the fallback is a raw-byte bitcast and
+        not a numeric dtype conversion: the bytes must equal the bit pattern of
+        the source tensor when viewed as uint8.
+        """
+        t = torch.randn(32, 64, dtype=torch.bfloat16)
+        expected = t.contiguous().reshape(-1).view(torch.uint8).numpy().tobytes()
+        actual = _tensor_bytes(t)
+        assert actual == expected
+        assert len(actual) == t.nelement() * t.element_size()
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_tensor_bytes_bf16_scalar_byte_identity(self):
+        """_tensor_bytes on a 0-dim BF16 tensor produces 2 raw bytes."""
+        t = torch.tensor(-0.5, dtype=torch.bfloat16)
+        expected = t.contiguous().reshape(-1).view(torch.uint8).numpy().tobytes()
+        actual = _tensor_bytes(t)
+        assert actual == expected
+        assert len(actual) == 2
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_tensor_bytes_bf16_view_byte_identity(self):
+        """_tensor_bytes on a BF16 view returns only the view's bytes."""
+        base = torch.randn(30, dtype=torch.bfloat16)
+        view = base[10:20]
+        assert view.storage_offset() > 0
+        expected = view.contiguous().reshape(-1).view(torch.uint8).numpy().tobytes()
+        assert _tensor_bytes(view) == expected
+
+
+class TestMaterializationSinkBF16RawBytes:
+    """BF16 raw-byte preservation through MaterializationSink.
+
+    AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    """
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_sink_bf16_round_trip(self, tmp_path):
+        """BF16 tensors written through the sink load with BF16 dtype."""
+        save_path = str(tmp_path / "model.safetensors")
+        weight = torch.randn(32, 32, dtype=torch.bfloat16)
+        bias = torch.randn(32, dtype=torch.bfloat16)
+        manifest = {
+            "weight": (torch.bfloat16, tuple(weight.shape)),
+            "bias": (torch.bfloat16, tuple(bias.shape)),
+        }
+        sink = MaterializationSink()
+        sink.open(manifest, save_path)
+        sink.write_tensor("weight", weight)
+        sink.write_tensor("bias", bias)
+        sink.finalize(save_path)
+        with safe_open(save_path, framework="pt", device="cpu") as sf:
+            for name, expected in (("weight", weight), ("bias", bias)):
+                loaded = sf.get_tensor(name)
+                assert loaded.dtype == torch.bfloat16
+                assert loaded.shape == expected.shape
+                assert torch.equal(loaded, expected)
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_sink_bf16_non_contiguous_round_trip(self, tmp_path):
+        """Sink correctly serializes a non-contiguous BF16 tensor."""
+        save_path = str(tmp_path / "model.safetensors")
+        base = torch.randn(8, 16, dtype=torch.bfloat16)
+        transposed = base.t()
+        assert not transposed.is_contiguous()
+        manifest = {"transposed": (torch.bfloat16, tuple(transposed.shape))}
+        sink = MaterializationSink()
+        sink.open(manifest, save_path)
+        sink.write_tensor("transposed", transposed)
+        sink.finalize(save_path)
+        with safe_open(save_path, framework="pt", device="cpu") as sf:
+            loaded = sf.get_tensor("transposed")
+            assert loaded.dtype == torch.bfloat16
+            assert loaded.shape == transposed.shape
+            assert torch.equal(loaded, transposed)
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_sink_bf16_scalar_round_trip(self, tmp_path):
+        """0-dim BF16 tensor round-trips through the sink."""
+        save_path = str(tmp_path / "model.safetensors")
+        scalar = torch.tensor(0.125, dtype=torch.bfloat16)
+        manifest = {"scalar": (torch.bfloat16, tuple(scalar.shape))}
+        sink = MaterializationSink()
+        sink.open(manifest, save_path)
+        sink.write_tensor("scalar", scalar)
+        sink.finalize(save_path)
+        with safe_open(save_path, framework="pt", device="cpu") as sf:
+            loaded = sf.get_tensor("scalar")
+            assert loaded.dtype == torch.bfloat16
+            assert loaded.shape == ()
+            assert torch.equal(loaded, scalar)
+
+    # AC: @streaming-full-model-materialization ac-raw-byte-dtype-preservation
+    def test_sink_bf16_dtype_mismatch_still_rejected(self, tmp_path):
+        """Sink validation still rejects a dtype mismatch on BF16 manifests."""
+        save_path = str(tmp_path / "model.safetensors")
+        manifest = {"x": (torch.bfloat16, (4,))}
+        sink = MaterializationSink()
+        sink.open(manifest, save_path)
+        try:
+            with pytest.raises(ValueError, match="dtype mismatch"):
+                sink.write_tensor("x", torch.zeros(4, dtype=torch.float16))
+        finally:
+            sink.abort()

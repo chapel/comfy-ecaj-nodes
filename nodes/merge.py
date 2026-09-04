@@ -76,9 +76,7 @@ class WIDENMergeNode:
 
         # Validate base is a known recipe type
         if not isinstance(base, (RecipeBase, RecipeMerge)):
-            raise TypeError(
-                f"base must be RecipeBase or RecipeMerge, got {type(base).__name__}"
-            )
+            raise TypeError(f"base must be RecipeBase or RecipeMerge, got {type(base).__name__}")
 
         # Validate target is a valid merge target
         if not isinstance(target, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):

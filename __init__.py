@@ -5,6 +5,7 @@
 # In pytest, __init__.py is loaded standalone — skip registration.
 if __package__:
     from .nodes.block_config_flux import WIDENBlockConfigFluxNode
+    from .nodes.block_config_krea2 import WIDENBlockConfigKrea2Node
     from .nodes.block_config_qwen import WIDENBlockConfigQwenNode
     from .nodes.block_config_sdxl import WIDENBlockConfigSDXLNode
     from .nodes.block_config_sdxl_clip import WIDENBlockConfigSDXLCLIPNode
@@ -38,6 +39,7 @@ if __package__:
         "WIDENBlockConfigZImage": WIDENBlockConfigZImageNode,
         "WIDENBlockConfigQwen": WIDENBlockConfigQwenNode,
         "WIDENBlockConfigFlux": WIDENBlockConfigFluxNode,
+        "WIDENBlockConfigKrea2": WIDENBlockConfigKrea2Node,
         "WIDENModelInput": WIDENModelInputNode,
         "WIDENDiffusionModelInput": WIDENDiffusionModelInputNode,
         "WIDENCLIPLoRA": WIDENCLIPLoRANode,
@@ -59,6 +61,7 @@ if __package__:
         "WIDENBlockConfigZImage": "WIDEN Block Config (Z-Image)",
         "WIDENBlockConfigQwen": "WIDEN Block Config (Qwen)",
         "WIDENBlockConfigFlux": "WIDEN Block Config (Flux)",
+        "WIDENBlockConfigKrea2": "WIDEN Block Config (Krea 2)",
         "WIDENModelInput": "WIDEN Checkpoint Input",
         "WIDENDiffusionModelInput": "WIDEN Diffusion Model Input",
         "WIDENCLIPLoRA": "WIDEN CLIP LoRA",

@@ -263,9 +263,7 @@ class _PlanCompiler:
         )
         return out
 
-    def _compile_compose(
-        self, node: RecipeCompose, current_base_reg: int
-    ) -> list[int]:
+    def _compile_compose(self, node: RecipeCompose, current_base_reg: int) -> list[int]:
         branch_regs: list[int] = []
         for branch in node.branches:
             r = self.compile_node(branch, current_base_reg)
@@ -402,6 +400,7 @@ def _get_widen_for_op(widen: object, widen_config: object | None, op_t_factor: f
     if widen.t_factor == op_t_factor:
         return widen
     from .widen import WIDEN, WIDENConfig
+
     # Prefer widen_config, then widen.config, then defaults
     base_cfg = widen_config or getattr(widen, "config", None)
     if base_cfg is not None:
@@ -468,7 +467,13 @@ def execute_plan(
             # AC: @lora-block-config ac-1, ac-2
             if op.block_config is not None and arch is not None:
                 result = _apply_per_block_lora_strength(
-                    keys, current, result, op.block_config, arch, device, dtype,
+                    keys,
+                    current,
+                    result,
+                    op.block_config,
+                    arch,
+                    device,
+                    dtype,
                     domain,
                 )
 
@@ -507,7 +512,13 @@ def execute_plan(
             # Apply per-block strength scaling to model deltas
             if op.block_config is not None and arch is not None:
                 stacked = _apply_per_block_lora_strength(
-                    keys, regs[op.input_reg], stacked, op.block_config, arch, device, dtype,
+                    keys,
+                    regs[op.input_reg],
+                    stacked,
+                    op.block_config,
+                    arch,
+                    device,
+                    dtype,
                     domain,
                 )
 
@@ -519,8 +530,14 @@ def execute_plan(
 
             if op.use_per_block:
                 regs[op.out_reg] = _apply_widen_filter_per_block(
-                    keys, lora_applied, backbone,
-                    op.block_config, arch, op.t_factor, widen_config, domain,
+                    keys,
+                    lora_applied,
+                    backbone,
+                    op.block_config,
+                    arch,
+                    op.t_factor,
+                    widen_config,
+                    domain,
                 )
             else:
                 w = _get_widen_for_op(widen, widen_config, op.t_factor)
@@ -532,8 +549,14 @@ def execute_plan(
 
             if op.use_per_block:
                 regs[op.out_reg] = _apply_widen_merge_per_block(
-                    keys, branch_tensors, backbone,
-                    op.block_config, arch, op.t_factor, widen_config, domain,
+                    keys,
+                    branch_tensors,
+                    backbone,
+                    op.block_config,
+                    arch,
+                    op.t_factor,
+                    widen_config,
+                    domain,
                 )
             else:
                 w = _get_widen_for_op(widen, widen_config, op.t_factor)
@@ -623,6 +646,15 @@ def evaluate_recipe(
     # AC: @exit-batched-eval ac-4
     # Evaluate and return - result stays on GPU
     return execute_plan(
-        plan, keys, base_batch, loader, widen,
-        device, dtype, arch, widen_config, model_loaders, domain,
+        plan,
+        keys,
+        base_batch,
+        loader,
+        widen,
+        device,
+        dtype,
+        arch,
+        widen_config,
+        model_loaders,
+        domain,
     )

@@ -15,6 +15,8 @@ import secrets
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+import torch
+
 from .streaming_save import stream_save_file
 
 if TYPE_CHECKING:
@@ -26,6 +28,8 @@ __all__ = [
     "atomic_save",
     "build_metadata",
     "check_cache",
+    "check_checkpoint_cache",
+    "check_full_model_cache",
     "collect_block_configs",
     "compute_base_identity",
     "compute_lora_stats",
@@ -188,6 +192,7 @@ def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
     """Compute a stable identity hash for a base model.
 
     AC: @exit-model-persistence ac-6
+    AC: @exit-model-persistence ac-bounded-identity-preparation
 
     Uses sorted key signatures (key|shape|dtype) plus tensor data samples
     from first, middle, and last keys to distinguish models with identical
@@ -211,11 +216,17 @@ def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
     if sorted_keys:
         sample_indices = {0, len(sorted_keys) // 2, len(sorted_keys) - 1}
         for idx in sorted(sample_indices):
-            sample_tensor = base_state[sorted_keys[idx]]
-            flat = sample_tensor.detach().float().reshape(-1)[:64].contiguous().cpu()
-            hasher.update(
-                bytes(flat.untyped_storage())[:flat.nelement() * flat.element_size()]
-            )
+            sample_tensor = base_state[sorted_keys[idx]].detach()
+            # Slice before dtype conversion / CPU transfer.  Krea 2 has very
+            # large matrix tensors; converting the full sampled tensors before
+            # slicing can spend minutes materializing hundreds of MB per key
+            # before WIDEN Exit has published any progress.
+            if sample_tensor.is_contiguous():
+                sample = sample_tensor.view(-1)[:64]
+            else:
+                sample = sample_tensor.reshape(-1)[:64]
+            flat = sample.to(device="cpu", dtype=torch.float32).contiguous()
+            hasher.update(bytes(flat.untyped_storage())[: flat.nelement() * flat.element_size()])
 
     return hasher.hexdigest()
 
@@ -372,16 +383,37 @@ def build_metadata(
     recipe_hash: str,
     affected_keys: list[str],
     workflow_json: str | None = None,
+    output_mode: str = "patch",
+    *,
+    artifact_kind: str | None = None,
+    source_model_kind: str | None = None,
+    base_identity: str | None = None,
+    dependency_fingerprints: str | None = None,
+    checkpoint_components: bool = False,
 ) -> dict[str, str]:
     """Assemble safetensors metadata dict.
 
     AC: @exit-model-persistence ac-6, ac-13, ac-14
+    AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
 
     Args:
         serialized: Deterministic JSON recipe
         recipe_hash: SHA-256 of serialized
         affected_keys: Sorted list of keys that were merged (not base-only)
         workflow_json: Optional workflow JSON string
+        output_mode: "patch" or "full" — stored in metadata for cache validation
+        artifact_kind: Artifact classification (e.g. "checkpoint", "diffusion")
+        source_model_kind: ComfyUI model kind the source workflow loads as
+            ("checkpoint", "diffusion_model"). Required for diffusion-model
+            round-trip cache validation.
+        base_identity: SHA-256 identity of the base model for cache validation
+        dependency_fingerprints: JSON string of dependency file stats for cache
+            validation (e.g. LoRA mtimes/sizes)
+        checkpoint_components: If True, records that the artifact was written
+            with checkpoint companion components (CLIP, VAE)
 
     Returns:
         Metadata dict with string values (safetensors requirement)
@@ -391,10 +423,391 @@ def build_metadata(
         "__ecaj_recipe__": serialized,
         "__ecaj_recipe_hash__": recipe_hash,
         "__ecaj_affected_keys__": json.dumps(affected_keys),
+        "__ecaj_output_mode__": output_mode,
     }
     if workflow_json is not None:
         metadata["__ecaj_workflow__"] = workflow_json
+    if artifact_kind is not None:
+        metadata["__ecaj_artifact_kind__"] = artifact_kind
+    if source_model_kind is not None:
+        metadata["__ecaj_source_model_kind__"] = source_model_kind
+    if base_identity is not None:
+        metadata["__ecaj_base_identity__"] = base_identity
+    if dependency_fingerprints is not None:
+        metadata["__ecaj_dependency_fingerprints__"] = dependency_fingerprints
+    if checkpoint_components:
+        metadata["__ecaj_checkpoint_components__"] = "true"
     return metadata
+
+
+def check_full_model_cache(
+    save_path: str,
+    expected_hash: str,
+    expected_manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] | None = None,
+    *,
+    expected_artifact_kind: str | None = None,
+    expected_source_model_kind: str | None = None,
+    expected_base_identity: str | None = None,
+    expected_dependency_fingerprints: str | None = None,
+) -> bool:
+    """Check if a saved artifact is a valid full-model cache hit.
+
+    AC: @full-saved-model-output ac-cache-reuses-artifact
+    AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
+    AC: @full-saved-model-output ac-complete-artifact
+    AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    AC: @exit-model-persistence ac-4, ac-6, ac-9
+    AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+
+    Validates:
+    - File exists
+    - File is a valid safetensors file with ecaj metadata (AC-9: raises on
+      non-ecaj or corrupt files, same as check_cache)
+    - Recipe hash matches
+    - Output mode is "full" (not "patch")
+    - Affected keys metadata is present and valid JSON
+    - Artifact kind matches expected (when provided)
+    - Base model identity matches expected (when provided)
+    - Dependency fingerprints match expected (when provided)
+    - Artifact tensor keys, shapes, and dtypes match the expected manifest
+
+    Args:
+        save_path: Path to the safetensors file
+        expected_hash: Expected recipe hash
+        expected_manifest: If provided, maps each expected tensor key to its
+            (dtype, shape).  The artifact must contain exactly these keys with
+            matching dtypes and shapes.  Incomplete, extra, or mismatched
+            tensors cause rejection.
+        expected_artifact_kind: If provided, the artifact must have a matching
+            __ecaj_artifact_kind__ metadata value.
+        expected_base_identity: If provided, the artifact must have a matching
+            __ecaj_base_identity__ metadata value.
+        expected_dependency_fingerprints: If provided, the artifact must have a
+            matching __ecaj_dependency_fingerprints__ metadata value.
+
+    Returns:
+        True if the artifact is a valid full-model cache hit
+
+    Raises:
+        ValueError: If file exists but is not a valid ecaj-saved model (AC-9).
+            This prevents silent overwriting of user files.
+    """
+    if not os.path.exists(save_path):
+        return False
+
+    from safetensors import safe_open
+
+    # AC: @exit-model-persistence ac-9
+    # If the file exists but is corrupt or not a safetensors file, raise
+    # rather than returning False (which would cause the caller to overwrite).
+    try:
+        with safe_open(save_path, framework="pt") as f:
+            metadata = f.metadata()
+            artifact_keys = set(f.keys())
+            # Read tensor metadata (shape/dtype) for validation if needed.
+            artifact_specs: dict[str, tuple[str, list[int]]] = {}
+            if expected_manifest is not None:
+                for key in f.keys():
+                    t = f.get_slice(key)
+                    artifact_specs[key] = (t.get_dtype(), t.get_shape())
+    except Exception as exc:
+        raise ValueError(
+            f"File exists but is not a valid safetensors file: {save_path}\n"
+            f"Refusing to overwrite. Choose a different model_name.\n"
+            f"Underlying error: {exc}"
+        ) from exc
+
+    # AC: @exit-model-persistence ac-9
+    if metadata is None or "__ecaj_version__" not in metadata:
+        raise ValueError(
+            f"File exists but is not an ecaj-saved model: {save_path}\n"
+            f"Refusing to overwrite a file without ecaj metadata. "
+            f"Choose a different model_name."
+        )
+
+    stored_hash = metadata.get("__ecaj_recipe_hash__", "")
+    if stored_hash != expected_hash:
+        return False
+
+    stored_mode = metadata.get("__ecaj_output_mode__", "")
+    if stored_mode != "full":
+        return False
+
+    # Validate that affected keys metadata is present and parseable.
+    affected_raw = metadata.get("__ecaj_affected_keys__")
+    if affected_raw is None:
+        return False
+    try:
+        parsed = json.loads(affected_raw)
+        if not isinstance(parsed, list):
+            return False
+    except (json.JSONDecodeError, TypeError):
+        return False
+
+    # AC: @exit-model-persistence ac-4, ac-6
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+    # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+    # Validate artifact classification and cache identity metadata when
+    # the caller provides expected values.
+    if expected_artifact_kind is not None:
+        stored_kind = metadata.get("__ecaj_artifact_kind__")
+        if stored_kind is None or stored_kind != expected_artifact_kind:
+            return False
+    if expected_source_model_kind is not None:
+        stored_source_kind = metadata.get("__ecaj_source_model_kind__")
+        if stored_source_kind is None or stored_source_kind != expected_source_model_kind:
+            return False
+    if expected_base_identity is not None:
+        stored_base = metadata.get("__ecaj_base_identity__")
+        if stored_base is None or stored_base != expected_base_identity:
+            return False
+    if expected_dependency_fingerprints is not None:
+        stored_deps = metadata.get("__ecaj_dependency_fingerprints__")
+        if stored_deps is None or stored_deps != expected_dependency_fingerprints:
+            return False
+
+    # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
+    # AC: @full-saved-model-output ac-complete-artifact
+    # Verify artifact completeness and correctness: the file must contain
+    # exactly the expected keys with matching dtypes and shapes.
+    if expected_manifest is not None:
+        expected_keys = set(expected_manifest.keys())
+        if artifact_keys != expected_keys:
+            return False
+
+        # Map safetensors dtype strings to torch dtypes for comparison.
+        # Reuse the canonical map from streaming_save (which covers all
+        # dtypes the writer supports, including BOOL, C64, float8, U16/U32/U64).
+        from .streaming_save import _DTYPE_MAP as _WRITER_DTYPE_MAP
+
+        _ST_DTYPE_MAP = {v: k for k, v in _WRITER_DTYPE_MAP.items()}
+
+        for key, (expected_dtype, expected_shape) in expected_manifest.items():
+            if key not in artifact_specs:
+                return False
+            st_dtype_str, st_shape = artifact_specs[key]
+            # Convert safetensors dtype string to torch dtype.
+            artifact_dtype = _ST_DTYPE_MAP.get(str(st_dtype_str))
+            if artifact_dtype != expected_dtype:
+                return False
+            if tuple(st_shape) != tuple(expected_shape):
+                return False
+
+    return True
+
+
+# Key prefixes that identify internal diffusion-only artifacts. An artifact
+# whose tensor keys all start with one of these prefixes (and nothing else)
+# is an internal-format file that cannot serve as a checkpoint-style artifact.
+_INTERNAL_ONLY_KEY_PREFIXES = (
+    "diffusion_model.",
+    "model.diffusion_model.",
+    "noise_augmentor.",
+    "model_sampling",
+)
+
+
+def _is_internal_only_artifact(tensor_keys: set[str]) -> bool:
+    """Check if all tensor keys belong to internal diffusion-only prefixes.
+
+    AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+
+    A checkpoint-style artifact must contain keys beyond the diffusion model
+    (e.g. CLIP, VAE components). If every key matches an internal-only prefix,
+    the artifact is not a valid checkpoint.
+
+    Args:
+        tensor_keys: Set of tensor key names from the safetensors file
+
+    Returns:
+        True if ALL keys match internal-only prefixes (diffusion-only artifact)
+    """
+    if not tensor_keys:
+        return True
+    return all(
+        any(k.startswith(prefix) for prefix in _INTERNAL_ONLY_KEY_PREFIXES) for k in tensor_keys
+    )
+
+
+# Required checkpoint component prefix groups.  A valid checkpoint artifact
+# must contain at least one tensor key matching each group.  Each group is a
+# tuple of alternative prefixes (any one match suffices for that component).
+_CHECKPOINT_COMPONENT_PREFIXES: tuple[tuple[str, ...], ...] = (
+    # Diffusion / model weights — Comfy checkpoints use model.diffusion_model.*,
+    # older SD checkpoints use bare diffusion_model.*
+    ("model.diffusion_model.", "model.", "diffusion_model."),
+    # Conditioning / text encoder (SDXL uses conditioner.*, SD1 uses cond_stage_model.*)
+    ("conditioner.", "cond_stage_model."),
+    # VAE / decode
+    ("first_stage_model.",),
+)
+
+
+def _has_checkpoint_component_prefixes(tensor_keys: set[str]) -> bool:
+    """Return True if *tensor_keys* contain all required checkpoint components.
+
+    AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+
+    A checkpoint artifact must include diffusion-model, conditioning/text-
+    encoder, and VAE/decode content.  This function verifies that at least one
+    tensor key matches each required component prefix group.
+    """
+    if not tensor_keys:
+        return False
+    for prefix_group in _CHECKPOINT_COMPONENT_PREFIXES:
+        if not any(k.startswith(p) for k in tensor_keys for p in prefix_group):
+            return False
+    return True
+
+
+def check_checkpoint_cache(
+    save_path: str,
+    expected_hash: str,
+    expected_base_identity: str,
+    expected_dependency_fingerprints: str,
+    *,
+    expected_manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] | None = None,
+) -> bool:
+    """Check if a saved artifact is a valid checkpoint-style cache hit.
+
+    AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+    AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    AC: @exit-model-persistence ac-3, ac-4, ac-6, ac-9
+
+    Validates all checkpoint-specific metadata fields:
+    - File exists and is valid safetensors
+    - ecaj metadata present with supported version
+    - Recipe hash matches
+    - Artifact kind is "checkpoint"
+    - Checkpoint component classification is present
+    - Base model identity matches
+    - Dependency fingerprints match
+    - Not an internal diffusion-only artifact
+    - Optional manifest validation (key/shape/dtype)
+
+    Preserves non-ecaj overwrite protection: raises ValueError on files
+    without ecaj metadata.
+
+    Args:
+        save_path: Path to the safetensors file
+        expected_hash: Expected recipe hash
+        expected_base_identity: Expected base model identity hash
+        expected_dependency_fingerprints: Expected dependency fingerprints JSON
+        expected_manifest: If provided, validates tensor keys/shapes/dtypes
+
+    Returns:
+        True if the artifact is a valid checkpoint-style cache hit
+
+    Raises:
+        ValueError: If file exists but is not a valid ecaj-saved model (AC-9)
+    """
+    if not os.path.exists(save_path):
+        return False
+
+    from safetensors import safe_open
+
+    # AC: @exit-model-persistence ac-9
+    try:
+        with safe_open(save_path, framework="pt") as f:
+            metadata = f.metadata()
+            artifact_keys = set(f.keys())
+            artifact_specs: dict[str, tuple[str, list[int]]] = {}
+            if expected_manifest is not None:
+                for key in f.keys():
+                    t = f.get_slice(key)
+                    artifact_specs[key] = (t.get_dtype(), t.get_shape())
+    except Exception as exc:
+        raise ValueError(
+            f"File exists but is not a valid safetensors file: {save_path}\n"
+            f"Refusing to overwrite. Choose a different model_name.\n"
+            f"Underlying error: {exc}"
+        ) from exc
+
+    # AC: @exit-model-persistence ac-9 — non-ecaj overwrite protection
+    if metadata is None or "__ecaj_version__" not in metadata:
+        raise ValueError(
+            f"File exists but is not an ecaj-saved model: {save_path}\n"
+            f"Refusing to overwrite a file without ecaj metadata. "
+            f"Choose a different model_name."
+        )
+
+    # Unsupported ecaj version
+    stored_version = metadata.get("__ecaj_version__", "")
+    if stored_version != _ECAJ_VERSION:
+        return False
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    # Require serialized recipe metadata — files missing required saved-model
+    # metadata must not be reused.
+    if "__ecaj_recipe__" not in metadata:
+        return False
+
+    # AC: @exit-model-persistence ac-3, ac-4 — recipe identity
+    stored_hash = metadata.get("__ecaj_recipe_hash__", "")
+    if stored_hash != expected_hash:
+        return False
+
+    # AC: @saved-model-artifact-safety ac-missing-metadata-not-reused
+    # AC: @saved-model-artifact-safety ac-wrong-artifact-kind-not-reused
+    stored_kind = metadata.get("__ecaj_artifact_kind__")
+    if stored_kind is None:
+        return False
+    if stored_kind != "checkpoint":
+        return False
+
+    # Checkpoint component classification must be present and truthy.
+    # A value of "false" explicitly says the artifact was NOT written with
+    # checkpoint companion components, so it must not be accepted.
+    stored_components = metadata.get("__ecaj_checkpoint_components__")
+    if stored_components != "true":
+        return False
+
+    # AC: @exit-model-persistence ac-6 — base model identity
+    stored_base = metadata.get("__ecaj_base_identity__")
+    if stored_base is None or stored_base != expected_base_identity:
+        return False
+
+    # AC: @exit-model-persistence ac-6 — dependency fingerprints
+    stored_deps = metadata.get("__ecaj_dependency_fingerprints__")
+    if stored_deps is None or stored_deps != expected_dependency_fingerprints:
+        return False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    if _is_internal_only_artifact(artifact_keys):
+        return False
+
+    # AC: @saved-model-artifact-safety ac-internal-format-not-checkpoint-cache
+    # Positive component-prefix check: the artifact must contain keys for
+    # all three checkpoint components (diffusion, conditioning, VAE).
+    # A metadata-valid file that is missing one or more component groups
+    # (e.g. only conditioner.* tensors) must not be accepted.
+    if not _has_checkpoint_component_prefixes(artifact_keys):
+        return False
+
+    # Manifest validation (key/shape/dtype) — preserve existing pattern
+    if expected_manifest is not None:
+        expected_keys = set(expected_manifest.keys())
+        if artifact_keys != expected_keys:
+            return False
+
+        from .streaming_save import _DTYPE_MAP as _WRITER_DTYPE_MAP
+
+        _ST_DTYPE_MAP = {v: k for k, v in _WRITER_DTYPE_MAP.items()}
+
+        for key, (expected_dtype, expected_shape) in expected_manifest.items():
+            if key not in artifact_specs:
+                return False
+            st_dtype_str, st_shape = artifact_specs[key]
+            artifact_dtype = _ST_DTYPE_MAP.get(str(st_dtype_str))
+            if artifact_dtype != expected_dtype:
+                return False
+            if tuple(st_shape) != tuple(expected_shape):
+                return False
+
+    return True
 
 
 def atomic_save(
@@ -463,9 +876,7 @@ def compute_structural_fingerprint(
     Returns:
         SHA-256 hex digest
     """
-    serialized = serialize_recipe(
-        node, base_identity, lora_stats, strip_block_config=True
-    )
+    serialized = serialize_recipe(node, base_identity, lora_stats, strip_block_config=True)
     return hashlib.sha256(serialized.encode()).hexdigest()
 
 
