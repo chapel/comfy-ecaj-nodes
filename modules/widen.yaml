@@ -1449,7 +1449,7 @@ features:
       Pure algorithm code with no ComfyUI imports.
     status:
       maturity: draft
-      implementation: implemented
+      implementation: in_progress
     depends_on: []
     implements: []
     relates_to: []
