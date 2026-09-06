@@ -13,13 +13,21 @@ description: Preserve simultaneous nine-model FP32 WIDEN semantics while releasi
 spec_ref: "@widen-core"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
 priority: 3
 tags: []
 vcs_refs: []
+submission_linkage:
+  review_url: null
+  branch: dev
+  captured_at: 2026-09-06T18:17:50.723Z
+  commit: 0afbd07ac9ae247ffe5e09038d9f36ab8ba2ffae
+  remote: origin
+  remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+  upstream_ref: refs/heads/dev
 history:
   - author: Jacob Chapel
     changes:
@@ -31,6 +39,27 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-09-06T18:09:17.352Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dev
+          captured_at: 2026-09-06T18:17:50.723Z
+          commit: 0afbd07ac9ae247ffe5e09038d9f36ab8ba2ffae
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dev
+        previous: null
+      submitted_at:
+        new: 2026-09-06T18:17:50.743Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-09-06T18:17:50.743Z
 created_at: 2026-09-06T18:09:14.193Z
 started_at: 2026-09-06T18:09:17.351Z
+submitted_at: 2026-09-06T18:17:50.743Z
 todos: []
