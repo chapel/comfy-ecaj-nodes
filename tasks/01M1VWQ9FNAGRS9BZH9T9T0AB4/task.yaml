@@ -10,7 +10,7 @@ description: Repair native Krea2 header-key mapping in the full model loader und
 spec_ref: "@full-model-loader"
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
@@ -20,8 +20,8 @@ vcs_refs: []
 submission_linkage:
   review_url: null
   branch: dev
-  captured_at: 2026-09-06T17:38:19.469Z
-  commit: b5927a077863a8ba717acc5c1b3e792309af092c
+  captured_at: 2026-09-06T17:39:00.327Z
+  commit: ca35bab6636d0710bbcc58a48ec3633ad98152e9
   remote: origin
   remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
   upstream_ref: refs/heads/dev
@@ -76,7 +76,34 @@ history:
         previous: 2026-09-06T17:37:53.700Z
     command: task-start
     timestamp: 2026-09-06T17:38:58.520Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      submission_linkage:
+        new:
+          review_url: null
+          branch: dev
+          captured_at: 2026-09-06T17:39:00.327Z
+          commit: ca35bab6636d0710bbcc58a48ec3633ad98152e9
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dev
+        previous:
+          review_url: null
+          branch: dev
+          captured_at: 2026-09-06T17:38:19.469Z
+          commit: b5927a077863a8ba717acc5c1b3e792309af092c
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dev
+      submitted_at:
+        new: 2026-09-06T17:39:00.339Z
+        previous: 2026-09-06T17:38:19.477Z
+    command: task-submit
+    timestamp: 2026-09-06T17:39:00.340Z
 created_at: 2026-09-06T17:37:10.133Z
 started_at: 2026-09-06T17:38:58.519Z
-submitted_at: 2026-09-06T17:38:19.477Z
+submitted_at: 2026-09-06T17:39:00.339Z
 todos: []
