@@ -2753,3 +2753,17 @@
   created_at: 2026-09-06T17:37:10.133Z
   started_at: 2026-09-06T17:38:58.519Z
   submitted_at: 2026-09-06T17:39:00.339Z
+- _ulid: 01M1VYJ0EHX8KFNYWPCTVWECKX
+  slugs:
+    - task-widen-multimodel-oom
+  title: Reduce WIDEN multi-model merge intermediates and release failed OOM attempts
+  type: bug
+  spec_ref: "@widen-core"
+  status: pending
+  blocked_by: []
+  depends_on: []
+  priority: 3
+  tags: []
+  notes_count: 0
+  todos_count: 0
+  created_at: 2026-09-06T18:09:14.193Z
