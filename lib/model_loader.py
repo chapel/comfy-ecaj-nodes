@@ -70,11 +70,19 @@ _ARCH_PATTERNS = tuple(
 )
 
 
-def _normalize_key(file_key: str) -> str | None:
+# Native Krea 2 denoiser roots; enabled only after complete header detection.
+# Do not treat arbitrary bare checkpoint tensors as diffusion model weights.
+_KREA2_BARE_PREFIXES = (
+    "blocks.", "first.", "last.", "tmlp.", "tproj.", "txtfusion.", "txtmlp.",
+)
+
+
+def _normalize_key(file_key: str, *, bare_arch: str | None = None) -> str | None:
     """Normalize a checkpoint file key to base model format.
 
     Args:
         file_key: Key from checkpoint safetensors file
+        bare_arch: Header-detected architecture permitting native bare keys
 
     Returns:
         Normalized key in base model format (with diffusion_model. prefix),
@@ -100,10 +108,9 @@ def _normalize_key(file_key: str) -> str | None:
             normalized = f"diffusion_model.{suffix}"
             break
     else:
-        # If no prefix matched but key starts with diffusion_model, keep as-is
-        if not file_key.startswith("diffusion_model."):
-            # Not a diffusion model key we recognize
-            return None
+        if bare_arch == "krea2" and file_key.startswith(_KREA2_BARE_PREFIXES):
+            return f"diffusion_model.{file_key}"
+        return None
 
     return normalized
 
@@ -177,8 +184,17 @@ class ModelLoader:
         self._file_to_normalized: dict[str, str] = {}
         self._normalized_to_file: dict[str, str] = {}
 
-        for file_key in self._handle.keys():
-            normalized = _normalize_key(file_key)
+        file_keys = self._handle.keys()
+        # Probe only recognized roots, using the existing complete/unique
+        # architecture signature. This reads headers, never tensor payloads.
+        candidate_keys = frozenset(
+            key for file_key in file_keys
+            if (key := _normalize_key(file_key, bare_arch="krea2")) is not None
+        )
+        bare_arch = _detect_architecture_from_keys(candidate_keys)
+
+        for file_key in file_keys:
+            normalized = _normalize_key(file_key, bare_arch=bare_arch)
             if normalized is not None:
                 self._file_to_normalized[file_key] = normalized
                 self._normalized_to_file[normalized] = file_key
