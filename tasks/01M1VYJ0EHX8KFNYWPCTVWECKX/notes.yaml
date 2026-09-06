@@ -1,1 +1,13 @@
-notes: []
+notes:
+  - _ulid: 01M1VZ0DDGXQ5ARFX5Y9KRP03X
+    content: "Implemented lower-retention simultaneous merge and retry attempt lifetime repair in two
+      disjoint worker slices. Controller verified full CPU suite 2358 passed; Ruff and diff checks
+      clean. Actual loader + compiled nine-branch plan + chunked retry integration with tiny native
+      safetensors passes: injected OOM releases failed refs before retries and BF16 outputs exactly
+      equal pre-change math. Meta-only largest-Krea2 shape live-storage trace
+      baseline26.1579GiB/current11.8129GiB; this is not CUDA peak measurement, excludes opaque
+      workspaces, and assumes nonzero columns. No live GPU merge/restart or real checkpoint
+      modifications. Independent review underway."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-09-06T18:17:06.225Z
