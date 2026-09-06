@@ -1,1 +1,12 @@
-notes: []
+notes:
+  - _ulid: 01M1VWQZKT0MZ1KFTJ38CX7EN0
+    content: "Direct CLI recovered tracking after atomic batch task creation failed with
+      undefined.replace and no record. Local fix is limited to lib/model_loader.py and
+      tests/test_krea2_model_loader.py. Implementer RED: 11 failed, 8 passed for missing native
+      mapping; focused GREEN: 152 passed. Controller full post-edit CPU suite: 1809 passed; Ruff and
+      diff-check clean. Installed-path ModelLoader verified all 12 local Krea2 checkpoint headers:
+      430 mapped keys each, base-compatible shapes, exact bitwise reads of the nine reported norms.
+      Independent review underway. No checkpoint writes, GPU merge, restart, commit, or push."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-09-06T17:37:32.795Z
