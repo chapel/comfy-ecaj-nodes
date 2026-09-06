@@ -10,7 +10,7 @@ description: Repair native Krea2 header-key mapping in the full model loader und
 spec_ref: "@full-model-loader"
 meta_ref: null
 plan_ref: null
-status: needs_work
+status: in_progress
 blocked_by: []
 depends_on: []
 context: []
@@ -66,7 +66,17 @@ history:
         previous: null
     command: task-needs-work
     timestamp: 2026-09-06T17:38:56.236Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: in_progress
+        previous: needs_work
+      started_at:
+        new: 2026-09-06T17:38:58.519Z
+        previous: 2026-09-06T17:37:53.700Z
+    command: task-start
+    timestamp: 2026-09-06T17:38:58.520Z
 created_at: 2026-09-06T17:37:10.133Z
-started_at: 2026-09-06T17:37:53.700Z
+started_at: 2026-09-06T17:38:58.519Z
 submitted_at: 2026-09-06T17:38:19.477Z
 todos: []

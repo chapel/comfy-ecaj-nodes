@@ -2743,7 +2743,7 @@
   title: Normalize native bare Krea2 full-checkpoint keys
   type: bug
   spec_ref: "@full-model-loader"
-  status: needs_work
+  status: in_progress
   blocked_by: []
   depends_on: []
   priority: 3
@@ -2751,5 +2751,5 @@
   notes_count: 3
   todos_count: 0
   created_at: 2026-09-06T17:37:10.133Z
-  started_at: 2026-09-06T17:37:53.700Z
+  started_at: 2026-09-06T17:38:58.519Z
   submitted_at: 2026-09-06T17:38:19.477Z
