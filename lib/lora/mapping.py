@@ -116,4 +116,27 @@ def flux_module(path):
             if module in (alias, alias.replace(".", "_")):
                 return f"{target}.{index}.{native}"
         raise ValueError(f"Unsupported Flux Diffusers module: {path}")
-    return _FLUX_BASIC.get(path, path)
+    # Resolve both source and native global aliases before lossy tokenization.
+    for alias, native in _FLUX_BASIC.items():
+        if path in (alias, alias.replace(".", "_"), native, native.replace(".", "_")):
+            return native
+    # Native modulation does not need the Diffusers scale/shift permutation.
+    native = "final_layer.adaLN_modulation.1"
+    if path in (native, native.replace(".", "_")):
+        return native
+    return path
+
+
+_ZIMAGE_BASIC = {
+    "all_x_embedder.2-1": "x_embedder",
+    "all_final_layer.2-1.linear": "final_layer.linear",
+    "all_final_layer.2-1.adaLN_modulation.1": "final_layer.adaLN_modulation.1",
+}
+
+
+def zimage_module(path):
+    """Resolve Comfy's input/output linear aliases before LyCORIS tokenization."""
+    for alias, native in _ZIMAGE_BASIC.items():
+        if path in (alias, alias.replace(".", "_"), native, native.replace(".", "_")):
+            return native
+    return path

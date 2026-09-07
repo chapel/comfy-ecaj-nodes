@@ -26,6 +26,7 @@ import torch
 
 from ..executor import DeltaSpec
 from .base import LoRALoader
+from .mapping import zimage_module
 from .validation import read_pairs
 
 __all__ = ["ZImageLoader"]
@@ -177,6 +178,13 @@ def _parse_zimage_lora_key(lora_key: str) -> tuple[str | None, str, str | None]:
     if base_path.startswith("transformer."):
         base_path = base_path[len("transformer.") :]
 
+    # Resolve explicit globals before the lossy LyCORIS tokenizer.
+    raw = base_path.removeprefix("lycoris_")
+    mapped = zimage_module(raw)
+    if mapped != raw:
+        base_path = mapped
+    else:
+        base_path = zimage_module(base_path)
     # Handle LyCORIS format
     base_path = _normalize_lycoris_key(base_path)
 

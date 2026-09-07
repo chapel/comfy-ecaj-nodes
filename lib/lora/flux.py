@@ -467,26 +467,14 @@ class FluxLoader(LoRALoader):
                         if up.dim() != 2 or down.dim() != 2:
                             continue
 
-                        # Calculate offset based on component
-                        # Use hidden dimension from the up tensor
-                        hidden_dim = up.shape[0]
+                        # Flux attention hidden width is the input width, not
+                        # this component's potentially malformed output rows.
+                        hidden_dim = down.shape[1]
 
-                        # Determine kind and offset based on component
                         if qkv_comp in ("q", "k", "v"):
                             kind = f"qkv_{qkv_comp}"
-                            # For double_blocks: simple 3-way split per stream
-                            # For single_blocks linear1: 4-way split (Q/K/V/MLP)
-                            if "single_blocks" in key and "linear1" in key:
-                                # 4-way split: Q, K, V, MLP
-                                # Each takes hidden_dim slice
-                                qkv_map = {"q": 0, "k": 1, "v": 2}
-                                section_idx = qkv_map[qkv_comp]
-                                offset = (section_idx * hidden_dim, hidden_dim)
-                            else:
-                                # 3-way split for double_blocks: Q, K, V
-                                qkv_map = {"q": 0, "k": 1, "v": 2}
-                                section_idx = qkv_map[qkv_comp]
-                                offset = (section_idx * hidden_dim, hidden_dim)
+                            section_idx = {"q": 0, "k": 1, "v": 2}[qkv_comp]
+                            offset = (section_idx * hidden_dim, hidden_dim)
                         elif qkv_comp == "mlp":
                             kind = "offset_mlp"
                             # MLP is the 4th component in single_blocks linear1
@@ -505,6 +493,22 @@ class FluxLoader(LoRALoader):
                         specs.append(spec)
 
         return specs
+
+    def validate_compatible_keys(self, base_keys, key_shapes=None) -> None:
+        """Flux Q/K/V each occupy one hidden-width interval, unlike the MLP."""
+        super().validate_compatible_keys(base_keys, key_shapes)
+        if key_shapes is None:
+            return
+        for data in self._qkv_data_by_set.values():
+            for key, entries in data.items():
+                # Native Flux QKV/linear1 inputs are the attention hidden width.
+                hidden = key_shapes[key][1]
+                for up, down, _scale, component, _stream in entries:
+                    if component in ("q", "k", "v") and up.shape[0] != hidden:
+                        raise ValueError(
+                            f"Flux {component.upper()} width mismatch for {key}: "
+                            f"{up.shape[0]} vs target hidden width {hidden}"
+                        )
 
     def cleanup(self) -> None:
         """Release loaded tensors.
