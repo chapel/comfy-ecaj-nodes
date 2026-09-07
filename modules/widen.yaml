@@ -1555,6 +1555,15 @@ features:
         id: ac-7
         then: LoKr weights use per-key torch.kron on GPU instead of bmm
         when: batched apply runs
+      - given: An evaluator completes a requested key, including normal batching or single-key OOM retry.
+        id: ac-finite-computed-output
+        then: Reject NaN or infinity in either computed or storage-cast results before delivering that key,
+          with an actionable key/stage diagnostic and bounded validation temporaries. Do not clamp
+          or replace invalid values, replay earlier sink writes, or alter ordinary WIDEN fallback
+          behavior. Unrelated base passthrough keys need not be scanned. Saved-output callers abort
+          unfinished publication and preserve an existing valid artifact.
+        when: The computed tensor and its conversion to the output storage dtype are prepared for sink
+          delivery.
     tags: []
     created: 2026-02-10T19:44:03.192Z
     notes: []
