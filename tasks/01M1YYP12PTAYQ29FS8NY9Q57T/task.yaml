@@ -14,13 +14,22 @@ description: User approved orchestration of audited comfy-ecaj-nodes fixes with 
 spec_ref: null
 meta_ref: null
 plan_ref: null
-status: in_progress
+status: pending_review
 blocked_by: []
 depends_on: []
 context: []
 priority: 1
 tags: []
 vcs_refs: []
+review_url: https://github.com/chapel/comfy-ecaj-nodes/pull/124
+submission_linkage:
+  review_url: https://github.com/chapel/comfy-ecaj-nodes/pull/124
+  branch: dev
+  captured_at: 2026-09-07T23:42:37.049Z
+  commit: 442b1aafc8cba7419a9d3a1ac900be0d777031ac
+  remote: origin
+  remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+  upstream_ref: refs/heads/dev
 history:
   - author: Jacob Chapel
     changes:
@@ -32,6 +41,30 @@ history:
         previous: null
     command: task-start
     timestamp: 2026-09-07T22:09:09.326Z
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: pending_review
+        previous: in_progress
+      review_url:
+        new: https://github.com/chapel/comfy-ecaj-nodes/pull/124
+        previous: null
+      submission_linkage:
+        new:
+          review_url: https://github.com/chapel/comfy-ecaj-nodes/pull/124
+          branch: dev
+          captured_at: 2026-09-07T23:42:37.049Z
+          commit: 442b1aafc8cba7419a9d3a1ac900be0d777031ac
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dev
+        previous: null
+      submitted_at:
+        new: 2026-09-07T23:42:37.081Z
+        previous: null
+    command: task-submit
+    timestamp: 2026-09-07T23:42:37.082Z
 created_at: 2026-09-07T22:09:09.201Z
 started_at: 2026-09-07T22:09:09.326Z
+submitted_at: 2026-09-07T23:42:37.081Z
 todos: []
