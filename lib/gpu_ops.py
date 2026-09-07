@@ -411,6 +411,37 @@ def _is_host_memory_error(error: MemoryError | RuntimeError) -> bool:
     )
 
 
+_FINITE_CHECK_ELEMENTS = 65536
+
+
+def _check_finite_output(key: str, tensor: torch.Tensor, stage: str) -> None:
+    """Check completed CPU output with bounded boolean temporaries.
+
+    Split views rather than flattening: noncontiguous evaluator outputs must
+    not trigger a whole-tensor contiguous or FP32 copy just for validation.
+    Only evaluator results enter here, never unrelated base passthrough keys.
+    """
+    pending = [tensor]
+    while pending:
+        part = pending.pop()
+        if part.numel() > _FINITE_CHECK_ELEMENTS:
+            dim = max(range(part.ndim), key=lambda d: part.shape[d])
+            midpoint = part.shape[dim] // 2
+            pending.append(part.narrow(dim, midpoint, part.shape[dim] - midpoint))
+            pending.append(part.narrow(dim, 0, midpoint))
+            continue
+        # Some ordinary float8 storage dtypes lack a CPU isfinite kernel.
+        # Widen only this bounded window, never the complete output tensor.
+        if part.is_floating_point() and part.element_size() < 2:
+            part = part.float()
+        if not torch.isfinite(part).all().item():
+            raise ValueError(
+                f"Non-finite evaluator output for key '{key}' ({stage}, {tensor.dtype}). "
+                "Check source weights, LoRA strengths and merge settings for overflow "
+                "or invalid arithmetic; the result cannot be installed or saved."
+            )
+
+
 def _chunked_eval_to_sink_impl(
     keys: list[str],
     base_tensors: Mapping[str, torch.Tensor],
@@ -468,7 +499,17 @@ def _chunked_eval_to_sink_impl(
 
         return merged_cpu, key_dtypes
 
-    def evaluate_single(key: str) -> torch.Tensor:
+    def deliver(key: str, computed: torch.Tensor, key_dtype: torch.dtype) -> None:
+        # Outside evaluation/fallback handlers: invalid results are not ordinary
+        # algorithm errors or retryable capacity errors. Check before casting too,
+        # so a conversion cannot hide invalid computed values.
+        _check_finite_output(key, computed, "computed")
+        completed = computed.to(dtype=key_dtype)
+        if completed is not computed:
+            _check_finite_output(key, completed, "storage cast")
+        receive_fn(key, completed)
+
+    def evaluate_single(key: str) -> tuple[torch.Tensor, torch.dtype]:
         # Keep the source and any no-op conversion/view aliases in a short-lived
         # frame, so successful retries release them before the next lazy fetch.
         base_tensor = base_tensors[key]
@@ -477,7 +518,7 @@ def _chunked_eval_to_sink_impl(
         del base_tensor
         merged_gpu = eval_fn([key], base_gpu)
         del base_gpu
-        return merged_gpu.to("cpu", dtype=key_dtype)[0]
+        return merged_gpu.cpu()[0], key_dtype
 
     for chunk_keys in chunked(keys, batch_size):
         try:
@@ -511,7 +552,7 @@ def _chunked_eval_to_sink_impl(
             # been persisted. Never replay successful writes on a sink error.
             # AC: @batched-executor ac-5, ac-6
             for i, key in enumerate(chunk_keys):
-                receive_fn(key, merged_cpu[i].to(dtype=key_dtypes[i]))
+                deliver(key, merged_cpu[i], key_dtypes[i])
             del merged_cpu, key_dtypes
             continue
 
@@ -524,7 +565,7 @@ def _chunked_eval_to_sink_impl(
 
         for key in chunk_keys:
             try:
-                merged_cpu = evaluate_single(key)
+                merged_cpu, key_dtype = evaluate_single(key)
 
             except torch.cuda.OutOfMemoryError:
                 # Even single-key evaluation failed; propagate
@@ -545,7 +586,7 @@ def _chunked_eval_to_sink_impl(
 
             # Delivery stays outside evaluation error handling on retries too:
             # preserve sink exceptions and never reinterpret them as capacity.
-            receive_fn(key, merged_cpu)
+            deliver(key, merged_cpu, key_dtype)
             del merged_cpu
             # AC: @memory-management ac-1
             gc.collect()
