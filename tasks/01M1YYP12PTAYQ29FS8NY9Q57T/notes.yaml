@@ -10,3 +10,13 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-09-07T22:14:40.964Z
+  - _ulid: 01M1YZJ56S208H8R93HV6ZZC51
+    content: "User explicitly chose full streaming digest when caching is enabled and authorized spec
+      amendment. Updated/read back @exit-model-persistence ac-bounded-identity-preparation: all
+      effective base/recipe/companion tensor content, bounded temporary memory, accepted full read
+      cost; cache-disabled preparation avoids full-content identity scans. Identity and saves
+      implementers steered to this approved contract, recorded in shared handoff. No agent
+      configuration changes needed; user invited asking if needed."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-09-07T22:24:30.938Z
