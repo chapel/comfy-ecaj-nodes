@@ -24,12 +24,10 @@ from ..lib.executor import (
 )
 from ..lib.recipe import (
     RecipeBase,
-    RecipeCompose,
-    RecipeLoRA,
     RecipeMerge,
-    RecipeModel,
     RecipeNode,
 )
+from ..lib.recipe_validation import validate_recipe_tree
 from ..lib.widen import WIDEN, WIDENConfig
 
 try:
@@ -44,74 +42,8 @@ __all__ = [
 
 
 def _validate_clip_recipe_tree(node: RecipeNode, path: str = "root") -> None:
-    """Recursively validate the CLIP recipe tree structure.
-
-    AC: @clip-exit-node ac-6
-    Raises ValueError naming the invalid type and its position in the tree.
-
-    Args:
-        node: Recipe node to validate
-        path: Current position in tree (for error messages)
-
-    Raises:
-        ValueError: If tree structure is invalid with position info
-    """
-    if isinstance(node, RecipeBase):
-        # Valid leaf node — verify it has domain="clip"
-        if getattr(node, "domain", "diffusion") != "clip":
-            raise ValueError(
-                f"RecipeBase at {path} has domain='{getattr(node, 'domain', 'diffusion')}', "
-                f"expected domain='clip'. Use CLIP Entry node to create CLIP recipes."
-            )
-        return
-
-    elif isinstance(node, RecipeLoRA):
-        # Valid branch node
-        return
-
-    elif isinstance(node, RecipeModel):
-        # Valid branch node for full model merging
-        return
-
-    elif isinstance(node, RecipeCompose):
-        # Validate each branch
-        if not node.branches:
-            raise ValueError(f"RecipeCompose at {path} has no branches")
-        for i, branch in enumerate(node.branches):
-            branch_path = f"{path}.branches[{i}]"
-            if not isinstance(branch, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
-                raise ValueError(
-                    f"Invalid branch type at {branch_path}: expected RecipeLoRA, "
-                    f"RecipeModel, RecipeCompose, or RecipeMerge, got {type(branch).__name__}"
-                )
-            _validate_clip_recipe_tree(branch, branch_path)
-
-    elif isinstance(node, RecipeMerge):
-        # Validate base
-        base_path = f"{path}.base"
-        if not isinstance(node.base, (RecipeBase, RecipeMerge)):
-            raise ValueError(
-                f"Invalid base type at {base_path}: expected RecipeBase or "
-                f"RecipeMerge, got {type(node.base).__name__}"
-            )
-        _validate_clip_recipe_tree(node.base, base_path)
-
-        # Validate target
-        target_path = f"{path}.target"
-        if not isinstance(node.target, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
-            raise ValueError(
-                f"Invalid target type at {target_path}: expected RecipeLoRA, "
-                f"RecipeModel, RecipeCompose, or RecipeMerge, got {type(node.target).__name__}"
-            )
-        _validate_clip_recipe_tree(node.target, target_path)
-
-        # Validate backbone (optional)
-        if node.backbone is not None:
-            backbone_path = f"{path}.backbone"
-            _validate_clip_recipe_tree(node.backbone, backbone_path)
-
-    else:
-        raise ValueError(f"Unknown recipe node type at {path}: {type(node).__name__}")
+    """Validate CLIP structure and domain. AC: @clip-exit-node ac-6."""
+    validate_recipe_tree(node, path, expected_domain="clip")
 
 
 def _unpatch_loaded_clip_clones(clip: object) -> None:
