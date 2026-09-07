@@ -95,7 +95,10 @@ def serialize_recipe(
         node: Recipe tree root (RecipeNode)
         base_identity: SHA-256 identity of the base model
         lora_stats: Namespaced dependency metadata from compute_lora_stats;
-            legacy flat path -> (mtime, size) input is also accepted.
+            legacy flat path -> (mtime, size) input is also accepted as metadata,
+            but cannot establish reusable equality. Missing content digests or
+            cacheable=False add a fresh unavailable_identity nonce each call.
+            Cache-disabled callers can pass {} without collecting dependencies.
         companion_identities: Trusted effective CLIP and VAE source revisions,
             keyed by "clip" and "vae". Must include all patches/content and source
             generations. Missing identities force a conservative cache miss for
@@ -234,6 +237,9 @@ def compute_base_identity(
     Key names, shapes and dtypes are length-framed to prevent structural ambiguity.
     Skip this scan when caching is disabled and identity metadata is not needed.
     Inputs must remain unchanged for the duration of the digest/evaluation.
+    Complex lazy negative views are not guaranteed chunk-size-independent:
+    PyTorch resolve_neg kernels can produce different signed-zero bytes. This
+    exotic view may cause false cache misses; no zero canonicalization is done.
     """
     if not isinstance(chunk_bytes, int) or chunk_bytes < 1:
         raise ValueError("chunk_bytes must be a positive integer")
@@ -251,11 +257,18 @@ def compute_base_identity(
         ).encode()
         hasher.update(len(signature).to_bytes(8, "big"))
         hasher.update(signature)
+        if tensor.numel() == 0:
+            del tensor
+            continue
         for chunk in _tensor_chunks(tensor.detach(), chunk_bytes // tensor.element_size()):
-            cpu = chunk.to(device="cpu").resolve_conj().resolve_neg().contiguous()
+            cpu = chunk.to(device="cpu").resolve_conj().resolve_neg().contiguous().reshape(-1)
+            # Singleton views can be "contiguous" yet retain a non-unit stride.
+            # Only clone this bounded chunk, never flatten/copy the full source.
+            if cpu.stride(0) != 1:
+                cpu = cpu.clone(memory_format=torch.contiguous_format)
             # numpy observes this view's offset/extent, not the backing storage.
             # Byte reinterpretation also supports bfloat16/float8 without FP32.
-            raw = cpu.reshape(-1).view(torch.uint8).numpy()
+            raw = cpu.view(torch.uint8).numpy()
             hasher.update(memoryview(raw))
             del raw, cpu, chunk
         del tensor
@@ -268,14 +281,22 @@ def dependency_key(source_dir: str, path: str) -> str:
 
 
 def _dependency_fields(stats: Mapping, source_dir: str, path: str) -> dict:
-    # Legacy flat stats are accepted as input; new collection is namespaced.
+    # Legacy flat stats remain readable metadata, not trusted content equality.
     value = stats.get(dependency_key(source_dir, path), stats.get(path))
     if value is None:
-        return {}
-    if isinstance(value, Mapping):
-        return dict(value)
-    mtime, size = value
-    return {"mtime": mtime, "size": size}
+        fields = {}
+    elif isinstance(value, Mapping):
+        fields = dict(value)
+    else:
+        mtime, size = value
+        fields = {"mtime": mtime, "size": size}
+    if not fields.get("sha256") or fields.get("cacheable") is False:
+        # Refresh on every serialization, even if callers retain the same stats.
+        # Like unavailable companion identities, this permits saving metadata
+        # without permitting a later evaluation to reuse the artifact.
+        fields["cacheable"] = False
+        fields["unavailable_identity"] = secrets.token_hex(32)
+    return fields
 
 
 def compute_lora_stats(
@@ -292,12 +313,17 @@ def compute_lora_stats(
     Args:
         node: Recipe tree root
         resolver: Resolves LoRA name to full filesystem path
-        model_resolver: Resolves (model_name, source_dir) to full filesystem path
+        model_resolver: Resolves (model_name, source_dir) to full filesystem path.
+            If omitted, model dependencies are unavailable (no CWD fallback).
 
     Returns:
         Namespaced dependency_key(source_dir, path) -> file metadata. Resolution
         failure never falls back to a CWD file. Content is streamed in bounded
         chunks (O(file size) time); timestamps alone are not equality evidence.
+        Unresolved/unreadable dependencies retain diagnostic path/zero stats and
+        cacheable=False. serialize_recipe turns unavailable content into a fresh
+        nonce miss, not reusable equality. Skip this collector when caching is
+        disabled; serialize_recipe accepts {} for that metadata-only path.
     """
     from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeModel
 
@@ -338,6 +364,8 @@ def compute_lora_stats(
                 )
             except OSError:
                 pass
+        if "sha256" not in fields:
+            fields["cacheable"] = False
         stats[key] = fields
 
     def _walk(n: RecipeNode) -> None:
@@ -355,7 +383,7 @@ def compute_lora_stats(
             _record(
                 n.source_dir,
                 path,
-                lambda: model_resolver(path, n.source_dir) if model_resolver else path,
+                lambda: model_resolver(path, n.source_dir) if model_resolver else None,
             )
         elif isinstance(n, RecipeCompose):
             for branch in n.branches:
@@ -937,7 +965,9 @@ def compute_structural_fingerprint(
     AC: @incremental-block-recompute ac-1, ac-4, ac-9, ac-13, ac-14
 
     Two recipe trees differing only in BlockConfig values produce the same
-    fingerprint. Changes to LoRA paths/strengths, model paths/strengths,
+    fingerprint when dependency and companion content identities are available.
+    Unavailable content forces a fresh nonce miss, just as in serialize_recipe.
+    Changes to LoRA paths/strengths, model paths/strengths,
     t_factor, arch, compose topology, base_identity, or file stats produce
     different fingerprints.
 

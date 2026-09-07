@@ -163,12 +163,14 @@ class TestSerializeRecipe:
         assert parsed["block_config"]["block_overrides"] == [["IN00-02", 0.5]]
 
     # AC: @exit-model-persistence ac-6
-    def test_deterministic_output(self):
-        """Same recipe should always produce the same JSON."""
+    def test_deterministic_output(self, tmp_path):
+        """Same recipe with trusted content produces the same JSON."""
         base = RecipeBase(model_patcher=object(), arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "x.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=0.5)
-        stats = {"x.safetensors": (100.0, 200)}
+        dependency = tmp_path / "x.safetensors"
+        dependency.write_bytes(b"tiny")
+        stats = compute_lora_stats(merge, lambda _: str(dependency))
 
         r1 = serialize_recipe(merge, "abc", stats)
         r2 = serialize_recipe(merge, "abc", stats)

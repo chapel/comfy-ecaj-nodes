@@ -202,13 +202,16 @@ def test_v1_hash_does_not_reuse_real_persisted_cache(tmp_path):
 
 # AC: @recipe-system ac-1
 @pytest.mark.parametrize("proxy", [False, True])
-def test_lora_snapshot_does_not_alias_callers_mapping(proxy):
+def test_lora_snapshot_does_not_alias_callers_mapping(proxy, tmp_path):
     source = {"path": "a.safetensors", "strength": 1.0}
     recipe = RecipeLoRA((MappingProxyType(source) if proxy else source,))
-    before = serialize_recipe(recipe, "base", {})
+    dependency = tmp_path / "a.safetensors"
+    dependency.write_bytes(b"tiny")
+    stats = compute_lora_stats(recipe, lambda _: str(dependency))
+    before = serialize_recipe(recipe, "base", stats)
     source["strength"] = 9.0
     assert recipe.loras[0]["strength"] == 1.0
-    assert serialize_recipe(recipe, "base", {}) == before
+    assert serialize_recipe(recipe, "base", stats) == before
     with pytest.raises(TypeError):
         recipe.loras[0]["strength"] = 2.0
 
