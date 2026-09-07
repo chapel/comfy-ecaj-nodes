@@ -1284,13 +1284,18 @@ features:
             id: ac-14
             then: no workflow JSON is included in safetensors metadata
             when: saving merged model to disk
-          - given: A saved-model workflow runs on a model whose state dict contains very large tensors.
+          - given: A saved-model workflow runs on inputs whose state dicts contain very large tensors.
             id: ac-bounded-identity-preparation
-            then: Identity and metadata preparation inspect bounded samples or metadata only and do not
-              materialize full tensor dtype/device conversions solely for identity or cache
-              validation.
-            when: The Exit node computes recipe identity, base model identity, or dependency metadata before
-              artifact materialization.
+            then: When caching is enabled, identity covers all effective input tensor content, including
+              deferred MODEL/CLIP patches and checkpoint companions, using streaming digests with
+              bounded temporary memory rather than whole-model or whole-large-tensor dtype/device
+              copies. The additional full input read is an accepted caching cost. When caching is
+              disabled, metadata preparation does not scan full tensor content solely for identity,
+              and its identity cannot be reused as proof of cache equality. Tensor shape, dtype,
+              logical offsets and strides are handled correctly; untrackable or unsupported content
+              is not treated as equal by sparse sampling.
+            when: The Exit node prepares base, recipe, and checkpoint companion identities for artifact metadata
+              or cache validation.
         tags: []
         created: 2026-02-14T00:26:32.026Z
         notes:
