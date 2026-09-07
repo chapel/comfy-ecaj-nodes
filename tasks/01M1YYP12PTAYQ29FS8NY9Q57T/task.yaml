@@ -1,0 +1,37 @@
+_ulid: 01M1YYP12PTAYQ29FS8NY9Q57T
+slugs:
+  - task-audit-hardening
+title: Repair audited correctness and memory gaps and remove cruft
+type: bug
+description: User approved orchestration of audited comfy-ecaj-nodes fixes with parallel worktrees,
+  fresh implementers/reviewers/fixers and one final PR against dev. Source audit
+  /home/chapel/Projects/comfy-ecaj-audit/AUDIT.md and lane reports. Repair confirmed memory
+  ownership, numerical invariance, save safety/cancellation, effective patched inputs/cache
+  identity, source-real loaders and test/CI gaps; remove obsolete paths without breaking node IDs or
+  supported behavior. Minimal process, existing specs checked before edits, ask for actual spec
+  contract gaps. No GPU, real model loads, service operations or live checkout changes. Integration
+  branch fix/audit-hardening; root dev untouched.
+spec_ref: null
+meta_ref: null
+plan_ref: null
+status: in_progress
+blocked_by: []
+depends_on: []
+context: []
+priority: 1
+tags: []
+vcs_refs: []
+history:
+  - author: Jacob Chapel
+    changes:
+      status:
+        new: in_progress
+        previous: pending
+      started_at:
+        new: 2026-09-07T22:09:09.326Z
+        previous: null
+    command: task-start
+    timestamp: 2026-09-07T22:09:09.326Z
+created_at: 2026-09-07T22:09:09.201Z
+started_at: 2026-09-07T22:09:09.326Z
+todos: []
