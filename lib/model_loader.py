@@ -73,7 +73,13 @@ _ARCH_PATTERNS = tuple(
 # Native Krea 2 denoiser roots; enabled only after complete header detection.
 # Do not treat arbitrary bare checkpoint tensors as diffusion model weights.
 _KREA2_BARE_PREFIXES = (
-    "blocks.", "first.", "last.", "tmlp.", "tproj.", "txtfusion.", "txtmlp.",
+    "blocks.",
+    "first.",
+    "last.",
+    "tmlp.",
+    "tproj.",
+    "txtfusion.",
+    "txtmlp.",
 )
 
 
@@ -188,7 +194,8 @@ class ModelLoader:
         # Probe only recognized roots, using the existing complete/unique
         # architecture signature. This reads headers, never tensor payloads.
         candidate_keys = frozenset(
-            key for file_key in file_keys
+            key
+            for file_key in file_keys
             if (key := _normalize_key(file_key, bare_arch="krea2")) is not None
         )
         bare_arch = _detect_architecture_from_keys(candidate_keys)

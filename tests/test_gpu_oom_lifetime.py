@@ -62,14 +62,19 @@ def test_failed_attempt_tensors_die_before_retry(entry, storage_dtype, monkeypat
             failed_refs.update(base=weakref.ref(batch), temporary=weakref.ref(temporary))
             raise torch.cuda.OutOfMemoryError("injected batch capacity failure")
         assert {name: ref() is None for name, ref in failed_refs.items()} == {
-            "base": True, "temporary": True,
+            "base": True,
+            "temporary": True,
         }, "failed attempt tensors are still live at retry entry"
         if entry == "sink" and batch_keys == ["b"]:
             assert delivered == ["a"]
         return batch * 2 + 0.25
 
     results = _run(
-        entry, keys, base, evaluate, storage_dtype=storage_dtype,
+        entry,
+        keys,
+        base,
+        evaluate,
+        storage_dtype=storage_dtype,
         receive=lambda key, tensor: delivered.append(key),
     )
     assert calls == [["a", "b"], ["a"], ["b"], ["c", "d"]]
@@ -133,8 +138,13 @@ def test_sink_oom_does_not_replay_successful_writes():
         delivered.append(key)
 
     with pytest.raises(torch.cuda.OutOfMemoryError) as caught:
-        _run("sink", ["a", "b"], {key: torch.ones(2) for key in ["a", "b"]},
-             evaluate, receive=receive)
+        _run(
+            "sink",
+            ["a", "b"],
+            {key: torch.ones(2) for key in ["a", "b"]},
+            evaluate,
+            receive=receive,
+        )
     assert caught.value is error
     assert calls == [["a", "b"]]
     assert delivered == ["a"]

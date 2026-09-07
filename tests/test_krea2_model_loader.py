@@ -70,8 +70,8 @@ def _native_tensors():
 # AC: @full-model-loader ac-8
 # AC: @krea2-architecture-support ac-krea2-recipe-uses-krea-compatible-paths
 @pytest.mark.parametrize(
-    "prefix", ["", "model.diffusion_model.", "diffusion_model.",
-               "model.transformer.", "transformer."]
+    "prefix",
+    ["", "model.diffusion_model.", "diffusion_model.", "model.transformer.", "transformer."],
 )
 def test_krea2_checkpoint_maps_values_and_request_order(tmp_path, prefix):
     source = _native_tensors()
@@ -109,12 +109,15 @@ def test_native_checkpoint_missing_norm_still_raises(tmp_path, missing):
 
 # AC: @full-model-loader ac-5
 # AC: @full-model-loader ac-8
-@pytest.mark.parametrize("keys", [
-    ("blocks.0.attn.wq.weight", "first.weight", "txtmlp.0.scale"),
-    ("layers.0.attention.qkv.weight", "noise_refiner.0.attn.weight"),
-    ("input_blocks.0.weight", "middle_block.0.weight", "output_blocks.0.weight"),
-    ("double_blocks.0.img_attn.qkv.weight",),
-])
+@pytest.mark.parametrize(
+    "keys",
+    [
+        ("blocks.0.attn.wq.weight", "first.weight", "txtmlp.0.scale"),
+        ("layers.0.attention.qkv.weight", "noise_refiner.0.attn.weight"),
+        ("input_blocks.0.weight", "middle_block.0.weight", "output_blocks.0.weight"),
+        ("double_blocks.0.img_attn.qkv.weight",),
+    ],
+)
 def test_bare_keys_require_complete_krea2_signature(tmp_path, keys):
     path = tmp_path / "not-krea2.safetensors"
     save_file({key: torch.ones(2) for key in keys}, str(path))
