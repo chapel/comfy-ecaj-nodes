@@ -32,3 +32,15 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-09-07T22:38:08.834Z
+  - _ulid: 01M1Z20A9E4VE8VKC3X3G4BBEB
+    content: Integrated approved memory/math/identity repairs and loader followups on
+      fix/audit-hardening (2cd57aaf); fresh final loader review active. Prior combined Python3.10
+      CPU suite 3028 passed/1 optional skip; real Comfy CPU focused79 passed. Independent saves
+      review approved effective-input and lazy-lifetime contracts but reproduced checkpoint
+      cancellation after replacement (SR1); fresh isolated fixer assigned. Completed-output
+      finiteness fixer active. CI followup keeps Ruff0.16 Markdown formatting out of Python gate and
+      documents approved full-hash cost. Final combined checks/review and single PR against dev
+      remain pending; live dev unchanged.
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-09-07T23:07:12.047Z
