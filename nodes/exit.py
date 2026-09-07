@@ -70,6 +70,11 @@ try:
 except ImportError:  # testing without ComfyUI
     ProgressBar = None  # type: ignore[assignment,misc]
 
+try:
+    from comfy.model_management import throw_exception_if_processing_interrupted
+except ImportError:  # testing without ComfyUI
+    throw_exception_if_processing_interrupted = None
+
 if TYPE_CHECKING:
     from ..lib.recipe import BlockConfig
 
@@ -815,6 +820,11 @@ def save_comfy_checkpoint(
         # Classify the temp artifact before publishing — verify ecaj metadata
         # and artifact kind are present and correct.
         _classify_temp_artifact(tmp_path, expected_kind="checkpoint")
+
+        # Cancellation during serialization must abort inside temp cleanup,
+        # before replacing a previously valid artifact (both Exit paths).
+        if throw_exception_if_processing_interrupted is not None:
+            throw_exception_if_processing_interrupted()
 
         # Atomic replace — existing valid artifact is only replaced after
         # the temp file is completely written, synced, and classified.
