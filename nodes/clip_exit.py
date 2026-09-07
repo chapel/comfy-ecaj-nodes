@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import gc
 from collections.abc import Callable
+from contextlib import ExitStack
 
 import torch
 
@@ -29,6 +30,7 @@ from ..lib.recipe import (
 )
 from ..lib.recipe_validation import validate_recipe_tree
 from ..lib.widen import WIDEN, WIDENConfig
+from .effective_weights import EffectiveWeights, SelectedWeights, weight_metadata
 
 try:
     from comfy.utils import ProgressBar
@@ -223,20 +225,21 @@ class WIDENCLIPExitNode:
         _unpatch_loaded_clip_clones(clip)
 
         # Get CLIP state dict via patcher
-        base_state = clip.patcher.model_state_dict()  # type: ignore[attr-defined]
-        storage_dtype = next(iter(base_state.values())).dtype
+        base_state = EffectiveWeights(clip.patcher)
+        storage_dtype = next(iter(weight_metadata(base_state).values())).dtype
 
         # Extract shape/size metadata so compile_batch_groups and preflight
         # don't need to hold tensor refs after GPU eval completes.
         # AC: @memory-management ac-13
-        key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
-        key_byte_sizes = {k: v.nelement() * v.element_size() for k, v in base_state.items()}
+        key_shapes = {k: tuple(v.shape) for k, v in weight_metadata(base_state).items()}
+        key_byte_sizes = {
+            k: v.nelement() * v.element_size() for k, v in weight_metadata(base_state).items()
+        }
 
         # --- AC-2: Analyze recipe with domain="clip" to get CLIP LoRA loader ---
-        analysis = analyze_recipe(widen_clip, lora_path_resolver=lora_path_resolver)
-        model_analysis = None
-
-        try:
+        with ExitStack() as resources:
+            analysis = analyze_recipe(widen_clip, lora_path_resolver=lora_path_resolver)
+            resources.callback(analysis.loader.cleanup)
             # AC-3: Analyze recipe for CLIP model checkpoints via domain dispatch
             model_analysis = analyze_recipe_models(
                 widen_clip,
@@ -244,6 +247,8 @@ class WIDENCLIPExitNode:
                 model_path_resolver=model_path_resolver,
                 domain="clip",
             )
+            for model_loader in model_analysis.model_loaders.values():
+                resources.callback(model_loader.cleanup)
 
             loader = analysis.loader
             set_affected = analysis.set_affected
@@ -321,7 +326,10 @@ class WIDENCLIPExitNode:
                 worst_chunk_bytes = max(
                     element_size
                     * torch.Size(sig.shape).numel()
-                    * compute_batch_size(sig.shape, n_models, compute_dtype)
+                    * min(
+                        len(batch_groups[sig]),
+                        compute_batch_size(sig.shape, n_models, compute_dtype),
+                    )
                     for sig in batch_groups
                 )
                 check_ram_preflight(
@@ -379,7 +387,7 @@ class WIDENCLIPExitNode:
                 )
 
                 # Run chunked evaluation with OOM backoff
-                group_base = {k: base_state[k] for k in group_keys}
+                group_base = SelectedWeights(base_state, group_keys)
                 group_results = chunked_evaluation(
                     keys=group_keys,
                     base_tensors=group_base,
@@ -391,6 +399,7 @@ class WIDENCLIPExitNode:
                 )
 
                 merged_state.update(group_results)
+                del group_results, group_base
 
                 # AC-9: Update progress after each batch group
                 if pbar is not None:
@@ -404,15 +413,6 @@ class WIDENCLIPExitNode:
             # AC: @memory-management ac-13
             # Free base_state after GPU eval — no longer needed (no save in CLIP exit).
             del base_state
-
-        finally:
-            # Cleanup LoRA loader
-            analysis.loader.cleanup()
-
-            # Cleanup CLIP model loaders (if they were opened)
-            if model_analysis is not None:
-                for model_loader in model_analysis.model_loaders.values():
-                    model_loader.cleanup()
 
         # Phase 3: Install merged weights as set patches
         # AC-4, AC-5: Returns CLIP with set patches

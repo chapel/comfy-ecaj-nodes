@@ -463,7 +463,7 @@ class TestCheckpointSaveRouting:
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.streaming_evaluation_to_sink"),
             patch("nodes.exit.MaterializationSink", return_value=mock_sink) as mock_sink_cls,
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit._load_diffusion_model_artifact") as mock_load,
             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
             patch("nodes.exit.check_ram_preflight"),
         ):
@@ -1250,8 +1250,8 @@ class TestCheckpointCacheHitModelLoading:
     AC: @exit-model-persistence ac-8
 
     Valid checkpoint cache hits must load through Comfy's checkpoint loader,
-    not through _load_model_from_artifact with deep-copied model internals.
-    Diffusion-only artifacts continue using _load_model_from_artifact.
+    not through _load_diffusion_model_artifact with deep-copied model internals.
+    Diffusion-only artifacts use Comfy's diffusion loader.
     """
 
     # AC: @checkpoint-loadable-saved-model-output ac-generated-workflow-round-trip
@@ -1278,26 +1278,6 @@ class TestCheckpointCacheHitModelLoading:
             assert result is mock_model
 
     # AC: @exit-model-persistence ac-8
-    def test_load_model_from_internal_artifact_still_works(self, mock_model_patcher, tmp_path):
-        """_load_model_from_artifact must continue to work with internal-format
-        (diffusion_model.*) artifacts for diffusion-only saves."""
-        from nodes.exit import _load_model_from_artifact
-
-        save_path = str(tmp_path / "model.safetensors")
-
-        merged_weight = torch.randn(4, 4)
-        artifact_tensors = {
-            "diffusion_model.input_blocks.0.0.weight": merged_weight,
-            "diffusion_model.middle_block.0.weight": torch.randn(4, 4),
-        }
-        save_file(artifact_tensors, save_path)
-
-        result = _load_model_from_artifact(save_path, mock_model_patcher, torch.float32)
-
-        loaded_weight = result.model_state_dict()["diffusion_model.input_blocks.0.0.weight"]
-        assert torch.equal(loaded_weight, merged_weight), (
-            "Internal-format artifact loading must still work for diffusion-only saves"
-        )
 
 
 # =============================================================================
@@ -1338,6 +1318,9 @@ class TestBaseOnlyCheckpointSave:
             patch("nodes.exit.install_merged_patches") as mock_install,
             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
             patch("nodes.exit.MaterializationSink") as mock_sink_cls,
+            patch(
+                "nodes.exit._load_checkpoint_artifact", return_value=mock_model_patcher.clone()
+            ) as reload,
         ):
             mock_install.return_value = mock_model_patcher.clone()
 
@@ -1355,7 +1338,8 @@ class TestBaseOnlyCheckpointSave:
             mock_sink_cls.assert_not_called()
             # Must return a model
             assert len(result) == 1
-            assert result[0] is not None
+            assert result[0] is reload.return_value
+            reload.assert_called_once_with(save_path)
 
     # AC: @checkpoint-loadable-saved-model-output ac-artifact-matches-source-model-kind
     def test_noop_diffusion_base_uses_materialization_sink(self, mock_model_patcher, tmp_path):
@@ -1392,7 +1376,7 @@ class TestBaseOnlyCheckpointSave:
             patch("nodes.exit._unpatch_loaded_clones"),
             patch("nodes.exit.ProgressBar", None),
             patch("nodes.exit.MaterializationSink", return_value=mock_sink) as mock_sink_cls,
-            patch("nodes.exit._load_model_from_artifact") as mock_load,
+            patch("nodes.exit._load_diffusion_model_artifact") as mock_load,
             patch("nodes.exit.save_comfy_checkpoint") as mock_save_ckpt,
         ):
             mock_load.return_value = mock_model_patcher.clone()

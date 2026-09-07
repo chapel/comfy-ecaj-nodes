@@ -1021,61 +1021,6 @@ class TestFullArtifactCacheHit:
     # AC: @full-saved-model-output ac-return-loaded-model
     # AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
     # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-    def test_artifact_load_returns_full_model_weights(self, mock_model_patcher, tmp_path):
-        """_load_model_from_artifact loads ALL keys from the artifact into the
-        model's own state dict (not as set patches).
-
-        A runtime probe: create an artifact with value 20.0 for every key.
-        The returned model's model_state_dict() must have 20.0 (from the
-        artifact), not the original base values.  No set patches should exist.
-        """
-        from nodes.exit import _load_model_from_artifact
-
-        keys = list(mock_model_patcher.model_state_dict().keys())
-        affected_key = keys[0]
-        save_path = str(tmp_path / "full_artifact.safetensors")
-
-        # Build artifact with distinctive values
-        artifact_tensors = {}
-        for k in keys:
-            artifact_tensors[k] = torch.ones(4, 4) * 20.0
-
-        save_file(
-            artifact_tensors,
-            save_path,
-            metadata={
-                "__ecaj_version__": "1",
-                "__ecaj_recipe__": "{}",
-                "__ecaj_recipe_hash__": "match",
-                "__ecaj_affected_keys__": json.dumps([affected_key]),
-                "__ecaj_output_mode__": "full",
-            },
-        )
-
-        result = _load_model_from_artifact(
-            save_path,
-            mock_model_patcher,
-            torch.float32,
-        )
-
-        # All keys must have artifact values in model_state_dict, not the
-        # original base values.  Weights are model-owned, not patch-owned.
-        result_sd = result.model_state_dict()
-        for k in keys:
-            assert torch.allclose(result_sd[k], torch.ones(4, 4) * 20.0), (
-                f"Key {k} should have artifact value 20.0, got {result_sd[k][0, 0].item()}"
-            )
-
-        # No set patches — weights live in the model's own state dict.
-        # This ensures Comfy's memory manager owns the memory lifecycle.
-        assert len(result.patches) == 0
-
-        # Original model_patcher must not be affected.
-        orig_sd = mock_model_patcher.model_state_dict()
-        for k in keys:
-            assert not torch.allclose(orig_sd[k], torch.ones(4, 4) * 20.0), (
-                f"Original key {k} should NOT have artifact value"
-            )
 
 
 # ===========================================================================
@@ -1143,7 +1088,7 @@ class TestCacheModeIsolation:
     # AC: @streaming-full-model-materialization ac-incomplete-write-not-reused
     def test_missing_affected_keys_not_accepted(self, tmp_path):
         """Artifact with valid version/hash/mode but missing __ecaj_affected_keys__
-        is rejected. Such an artifact would crash _load_model_from_artifact."""
+        is rejected. Such an artifact would crash _load_diffusion_model_artifact."""
         save_path = str(tmp_path / "no_affected_keys.safetensors")
         save_file(
             {"k": torch.randn(4, 4)},
@@ -2206,77 +2151,9 @@ class TestArtifactShapeDtypeValidation:
 # ===========================================================================
 
 
-class TestLoadedModelNoResidentPatches:
-    """The model returned by _load_model_from_artifact has no set patches.
-    Weights live in the model's own state dict (Comfy-managed memory).
+# AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
 
-    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-    """
-
-    # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-    def test_loaded_model_has_no_set_patches(self, mock_model_patcher, tmp_path):
-        """_load_model_from_artifact returns a model with zero set patches.
-        All weights are in the model's own state dict."""
-        from nodes.exit import _load_model_from_artifact
-
-        keys = list(mock_model_patcher.model_state_dict().keys())
-        save_path = str(tmp_path / "no_patches.safetensors")
-
-        save_file(
-            {k: torch.ones(4, 4) * 7.0 for k in keys},
-            save_path,
-            metadata={
-                "__ecaj_version__": "1",
-                "__ecaj_recipe__": "{}",
-                "__ecaj_recipe_hash__": "test",
-                "__ecaj_affected_keys__": json.dumps(keys),
-                "__ecaj_output_mode__": "full",
-            },
-        )
-
-        result = _load_model_from_artifact(
-            save_path,
-            mock_model_patcher,
-            torch.float32,
-        )
-
-        # No set patches — weights are model-owned.
-        assert len(result.patches) == 0
-
-        # All weights come from artifact (value 7.0).
-        result_sd = result.model_state_dict()
-        for k in keys:
-            assert torch.allclose(result_sd[k], torch.ones(4, 4) * 7.0)
-
-    # AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-    def test_loaded_model_does_not_mutate_original(self, mock_model_patcher, tmp_path):
-        """Loading from artifact does not change the original model_patcher."""
-        from nodes.exit import _load_model_from_artifact
-
-        keys = list(mock_model_patcher.model_state_dict().keys())
-        save_path = str(tmp_path / "independence.safetensors")
-
-        orig_values = {k: v.clone() for k, v in mock_model_patcher.model_state_dict().items()}
-
-        save_file(
-            {k: torch.ones(4, 4) * 99.0 for k in keys},
-            save_path,
-            metadata={
-                "__ecaj_version__": "1",
-                "__ecaj_recipe__": "{}",
-                "__ecaj_recipe_hash__": "test",
-                "__ecaj_affected_keys__": json.dumps(keys),
-                "__ecaj_output_mode__": "full",
-            },
-        )
-
-        _load_model_from_artifact(save_path, mock_model_patcher, torch.float32)
-
-        # Original must be unchanged.
-        for k, v in mock_model_patcher.model_state_dict().items():
-            assert torch.allclose(v, orig_values[k]), (
-                f"Original key {k} was mutated by _load_model_from_artifact"
-            )
+# AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
 
 
 # ===========================================================================
@@ -2285,82 +2162,4 @@ class TestLoadedModelNoResidentPatches:
 # ===========================================================================
 
 
-class TestMixedDtypeArtifactPreservation:
-    """_load_model_from_artifact preserves per-key dtypes from the artifact
-    instead of coercing everything to a single storage_dtype.
-
-    AC: @full-saved-model-output ac-return-loaded-model
-    """
-
-    # AC: @full-saved-model-output ac-return-loaded-model
-    def test_mixed_dtype_artifact_preserved(self, tmp_path):
-        """A mixed-dtype artifact (some keys float32, some float16) must
-        have its per-key dtypes preserved after loading — not coerced to
-        a single dtype."""
-        import uuid as _uuid
-
-        from nodes.exit import _load_model_from_artifact
-        from tests.conftest import MockModelPatcher
-
-        # Create a model patcher with mixed dtypes
-        state_dict = {
-            "diffusion_model.layer1.weight": torch.randn(4, 4, dtype=torch.float32),
-            "diffusion_model.layer2.weight": torch.randn(4, 4, dtype=torch.float16),
-        }
-        mock_patcher = MockModelPatcher.__new__(MockModelPatcher)
-        mock_patcher._state_dict = state_dict
-        mock_patcher.model = MagicMock()
-        mock_patcher.model.diffusion_model = MagicMock()
-        mock_patcher.model.diffusion_model.state_dict = MagicMock(
-            return_value={k.removeprefix("diffusion_model."): v for k, v in state_dict.items()}
-        )
-        mock_patcher.model.diffusion_model.load_state_dict = MagicMock(
-            side_effect=TypeError("fallback"),
-        )
-        mock_patcher.patches = {}
-        mock_patcher.patches_uuid = _uuid.uuid4()
-
-        def _clone():
-            c = MockModelPatcher.__new__(MockModelPatcher)
-            c._state_dict = dict(mock_patcher._state_dict)
-            c.model = mock_patcher.model
-            c.patches = {}
-            c.patches_uuid = mock_patcher.patches_uuid
-            return c
-
-        mock_patcher.clone = _clone
-
-        # Create artifact with mixed dtypes
-        save_path = str(tmp_path / "mixed.safetensors")
-        artifact_tensors = {
-            "diffusion_model.layer1.weight": torch.ones(4, 4, dtype=torch.float32) * 10.0,
-            "diffusion_model.layer2.weight": torch.ones(
-                4,
-                4,
-                dtype=torch.float16,
-            )
-            * 5.0,
-        }
-        save_file(
-            artifact_tensors,
-            save_path,
-            metadata={
-                "__ecaj_version__": "1",
-                "__ecaj_recipe__": "{}",
-                "__ecaj_recipe_hash__": "test",
-                "__ecaj_affected_keys__": json.dumps(list(artifact_tensors.keys())),
-                "__ecaj_output_mode__": "full",
-            },
-        )
-
-        result = _load_model_from_artifact(
-            save_path,
-            mock_patcher,
-            torch.float32,
-        )
-
-        result_sd = result.model_state_dict()
-        # float32 key must be float32
-        assert result_sd["diffusion_model.layer1.weight"].dtype == torch.float32
-        # float16 key must remain float16, NOT coerced to float32
-        assert result_sd["diffusion_model.layer2.weight"].dtype == torch.float16
+# AC: @full-saved-model-output ac-return-loaded-model

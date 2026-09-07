@@ -455,7 +455,7 @@ class TestCacheHitUsesComfyCheckpointLoader:
     # AC: @checkpoint-loadable-saved-model-output ac-generated-workflow-round-trip
     def test_cache_hit_calls_load_checkpoint_artifact(self, mock_model_patcher, tmp_path):
         """Checkpoint cache hit must call _load_checkpoint_artifact, not
-        _load_model_from_artifact."""
+        _load_diffusion_model_artifact."""
         cc = make_checkpoint_components()
         base = RecipeBase(
             model_patcher=mock_model_patcher,
@@ -485,7 +485,7 @@ class TestCacheHitUsesComfyCheckpointLoader:
                 "nodes.exit._load_checkpoint_artifact",
                 return_value=mock_loaded_model,
             ) as mock_ckpt_load,
-            patch("nodes.exit._load_model_from_artifact") as mock_diffusion_load,
+            patch("nodes.exit._load_diffusion_model_artifact") as mock_diffusion_load,
         ):
             result = node.execute(merge, save_model=True, model_name="model")
 
@@ -559,7 +559,7 @@ class TestCacheHitUsesComfyCheckpointLoader:
                 "nodes.exit._load_checkpoint_artifact",
                 return_value=mock_loaded_model,
             ) as mock_ckpt_load,
-            patch("nodes.exit._load_model_from_artifact") as mock_diffusion_load,
+            patch("nodes.exit._load_diffusion_model_artifact") as mock_diffusion_load,
         ):
             result = node.execute(base, save_model=True, model_name="model")
 
@@ -873,7 +873,7 @@ class TestPatchModeUnchanged:
             patch("nodes.exit.install_merged_patches", return_value=mock_model_patcher.clone()),
             patch("nodes.exit.check_ram_preflight"),
             patch("nodes.exit._load_checkpoint_artifact") as mock_ckpt_load,
-            patch("nodes.exit._load_model_from_artifact") as mock_diffusion_load,
+            patch("nodes.exit._load_diffusion_model_artifact") as mock_diffusion_load,
         ):
             mock_loader = MagicMock()
             mock_loader.cleanup = MagicMock()

@@ -461,7 +461,7 @@ class TestCpuOnlyPatches:
         from nodes.exit import install_merged_patches
 
         # Create mock model patcher
-        mock_patcher = MagicMock()
+        mock_patcher = MagicMock(spec=["model_state_dict", "clone", "add_patches"])
         mock_patcher.model_state_dict.return_value = {
             "diffusion_model.layer.weight": torch.randn(4, 4, dtype=torch.float16)
         }
@@ -515,7 +515,7 @@ class TestCpuOnlyPatches:
         # AC: @memory-management ac-4
         from nodes.exit import install_merged_patches
 
-        mock_patcher = MagicMock()
+        mock_patcher = MagicMock(spec=["model_state_dict", "clone", "add_patches"])
         mock_patcher.model_state_dict.return_value = {
             "diffusion_model.layer.weight": torch.randn(4, 4, dtype=torch.bfloat16)
         }
@@ -856,7 +856,10 @@ class TestGpuOffloadAfterSave:
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
             patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact", return_value=mock_model_patcher.clone()),
+            patch(
+                "nodes.exit._load_diffusion_model_artifact",
+                return_value=mock_model_patcher.clone(),
+            ),
             patch("nodes.exit.ProgressBar", None),
         ):
             node = WIDENExitNode()
@@ -1168,7 +1171,7 @@ class TestAccurateRamPreflight:
         from nodes.clip_exit import WIDENCLIPExitNode
 
         mock_clip = MagicMock()
-        mock_patcher = MagicMock()
+        mock_patcher = MagicMock(spec=["model_state_dict", "clone", "add_patches"])
         state = {
             "clip_l.transformer.text_model.weight": torch.randn(4, 4, dtype=torch.float32),
         }
@@ -1555,7 +1558,7 @@ class TestClipExitNodeRamPreflight:
 
         # Build a CLIP-compatible mock
         mock_clip = MagicMock()
-        mock_patcher = MagicMock()
+        mock_patcher = MagicMock(spec=["model_state_dict", "clone", "add_patches"])
         mock_patcher.model_state_dict.return_value = {
             "clip_l.transformer.text_model.weight": torch.randn(4, 4, dtype=torch.float32),
         }
@@ -1724,13 +1727,12 @@ class TestExitNodePreflightByteCalculation:
         call_kwargs = preflight_mock.call_args
 
         element_size = torch.finfo(torch.float32).bits // 8  # 4
-        # Per-sig: small = 4 * 16 * 100 = 6400, large = 4 * 256 * 2 = 2048
-        # worst_chunk = max(6400, 2048) = 6400
+        # Cap each nominal batch to the actual keys in its group.
         expected_worst = max(
-            element_size * 16 * 100,  # sig_small
-            element_size * 256 * 2,  # sig_large
+            element_size * 16 * min(100, len(batch_groups[sig_small])),
+            element_size * 256 * min(2, len(batch_groups[sig_large])),
         )
-        assert expected_worst == 6400  # sanity check
+        assert expected_worst == 1024
         assert call_kwargs.kwargs["worst_chunk_bytes"] == expected_worst
 
 
@@ -1743,7 +1745,7 @@ class TestClipExitNodePreflightByteCalculation:
         from nodes.clip_exit import WIDENCLIPExitNode
 
         mock_clip = MagicMock()
-        mock_patcher = MagicMock()
+        mock_patcher = MagicMock(spec=["model_state_dict", "clone", "add_patches"])
         state = {
             "clip_l.transformer.text_model.weight": torch.randn(4, 4, dtype=torch.float32),
             "clip_l.transformer.text_model.bias": torch.randn(4, dtype=torch.float32),
@@ -1904,7 +1906,7 @@ class TestBaseStateFreedBeforeSave:
                 "nodes.exit.check_full_model_cache": False,
                 "nodes.exit.check_ram_preflight": None,
                 "nodes.exit.MaterializationSink": mock_sink,
-                "nodes.exit._load_model_from_artifact": mock_model_patcher.clone(),
+                "nodes.exit._load_diffusion_model_artifact": mock_model_patcher.clone(),
                 "nodes.exit.ProgressBar": None,
             },
             save_model=True,

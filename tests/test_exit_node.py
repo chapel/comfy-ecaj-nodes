@@ -927,7 +927,7 @@ class TestSaveModelCacheHit:
         node = WIDENExitNode()
 
         # Mock the checkpoint loader — cache hit returns via Comfy's
-        # load_checkpoint_guess_config, not _load_model_from_artifact.
+        # load_checkpoint_guess_config, not _load_diffusion_model_artifact.
         loaded_model = mock_model_patcher.clone()
 
         with (

@@ -1185,7 +1185,10 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
             patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact", return_value=mock_model_patcher.clone()),
+            patch(
+                "nodes.exit._load_diffusion_model_artifact",
+                return_value=mock_model_patcher.clone(),
+            ),
             patch("nodes.exit.ProgressBar", None),
         ):
             node = WIDENExitNode()
