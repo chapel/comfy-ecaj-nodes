@@ -67,3 +67,12 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-09-07T23:29:11.300Z
+  - _ulid: 01M1Z3VD9TK9FEK9B41RP897F5
+    content: User explicitly approved finite computed/storage-cast guard and specification amendment.
+      Added/readback @batched-executor ac-finite-computed-output; integrated independently
+      reviewed2751d356 as290b0147 with annotation8b029216. Fresh narrow integration reviewer
+      assigned; Python3.10/3.12 full suites and lint/format/compile/diff passed after integration,
+      XML totals pending aggregation. Final Comfy CPU suite and PR publication follow.
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-09-07T23:39:28.442Z
