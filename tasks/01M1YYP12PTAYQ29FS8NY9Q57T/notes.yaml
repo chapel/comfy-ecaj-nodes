@@ -44,3 +44,14 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-09-07T23:07:12.047Z
+  - _ulid: 01M1Z2ZZW6C7TVM1XW8PV85EPR
+    content: "Assembly6a03827f contains SR1 prepublication cancellation and any-branch CI trigger
+      repair; fresh finalintegration reviewer rechecking both. Loader/math/identity finalreview
+      approved at2cd57aaf. Python3.10/3.12 each3202passed4optional-skipped at2b7c38ad; separate
+      existingComfyCPU161passed0skip; new CI contract1pass/lintformatpass. Outputguard2751d356 stays
+      isolated: no explicit invalid-result AC exists and required user specapproval question
+      timedout. Other authorized work continues; guard not represented as integrated. FinalPR still
+      withheld pending gates."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-09-07T23:24:29.959Z
