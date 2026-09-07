@@ -12,22 +12,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
+        with:
+          args: check .
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: format --check .
 
   test:
     # AC: @ci-pipeline ac-1, ac-3
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    env:
+      CUDA_VISIBLE_DEVICES: ""
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
-      - name: Install dependencies
-        run: uv pip install --system -e ".[dev]" --find-links https://download.pytorch.org/whl/cpu
+      - name: Install CPU test dependencies
+        run: uv sync --extra dev --python "${{ matrix.python-version }}"
+
+      - name: Verify CPU-only PyTorch
+        run: uv run --no-sync python -c "import torch; assert torch.version.cuda is None"
 
       - name: Run tests
-        run: pytest -v
+        run: uv run --no-sync pytest -v
