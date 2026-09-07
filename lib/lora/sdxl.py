@@ -51,7 +51,6 @@ _COMPOUND_TOKENS = [
     ("attn1", "attn1"),
     ("attn2", "attn2"),
     # Feed-forward
-    ("ff_net", "ff_net"),
     ("time_embed", "time_embed"),
     ("label_emb", "label_emb"),
     ("out_layers", "out_layers"),
@@ -313,7 +312,7 @@ class SDXLLoader(LoRALoader):
                         )
                     elif up.dim() == 4 and down.dim() == 4:
                         # Conv2d LoRA - flatten for bmm, store target shape
-                        target_shape = (up.shape[0], down.shape[1], *up.shape[2:])
+                        target_shape = (up.shape[0], down.shape[1], *down.shape[2:])
                         up_flat = up.view(up.shape[0], -1)
                         down_flat = down.view(down.shape[0], -1)
                         spec = DeltaSpec(

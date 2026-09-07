@@ -124,7 +124,10 @@ ARCHITECTURE_RULES: tuple[ArchitectureRule, ...] = (
         (
             (
                 "transformer_blocks_60_plus",
-                lambda keys: sum(1 for key in keys if "transformer_blocks" in key) >= 60,
+                lambda keys: (
+                    sum(1 for key in keys if key.startswith("diffusion_model.transformer_blocks."))
+                    >= 60
+                ),
             ),
         ),
     ),

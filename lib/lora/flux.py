@@ -555,7 +555,7 @@ class FluxLoader(LoRALoader):
                         elif qkv_comp == "mlp":
                             kind = "offset_mlp"
                             # MLP is the 4th component in single_blocks linear1
-                            offset = (3 * hidden_dim, hidden_dim)
+                            offset = (3 * down.shape[1], up.shape[0])
                         else:
                             continue
 
