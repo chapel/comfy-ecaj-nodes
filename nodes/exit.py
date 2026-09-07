@@ -9,7 +9,7 @@ import logging
 import os
 import secrets
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from contextlib import ExitStack
 from typing import TYPE_CHECKING
 
@@ -29,6 +29,7 @@ from ..lib.executor import (
     compile_batch_groups,
     compile_plan,
     compute_batch_size,
+    estimate_worst_chunk_bytes,
     execute_plan,
     get_available_ram_bytes,
     streaming_evaluation_to_sink,
@@ -57,7 +58,12 @@ from ..lib.recipe_validation import validate_recipe_tree
 from ..lib.save_progress import SavedModelProgress
 from ..lib.streaming_save import MaterializationSink
 from ..lib.widen import WIDEN, WIDENConfig
-from .effective_weights import EffectiveWeights, SelectedWeights, weight_metadata
+from .effective_weights import (
+    EffectiveWeights,
+    SelectedWeights,
+    validate_static_patcher,
+    weight_metadata,
+)
 
 try:
     from comfy.utils import ProgressBar
@@ -407,6 +413,46 @@ def _build_model_resolver() -> Callable[[str, str], str | None]:
         return folder_paths.get_full_path(source_dir, model_name)
 
     return resolver
+
+
+def _checkpoint_companion_identities(base: RecipeBase, *, enable_cache: bool):
+    """Hash the states Comfy checkpoint serialization actually consumes.
+
+    CLIP uses its patcher saving contract (effective weights); VAE.get_sd()
+    exposes the saved module state. A deferred VAE patch is not part of that
+    contract and must not masquerade as an effective static artifact.
+    Opaque companion APIs conservatively disable reuse via missing identities.
+    """
+    components = base.checkpoint_components
+    if components is None:
+        return None
+    clip_patcher = getattr(components.clip, "patcher", None)
+    get_clip_state = getattr(clip_patcher, "model_state_dict", None)
+    get_vae_state = getattr(components.vae, "get_sd", None)
+    if not callable(get_clip_state) or not callable(get_vae_state):
+        return None
+    # Do not mistake opaque API return objects for a trustworthy empty state.
+    if not isinstance(get_clip_state(), Mapping):
+        return None
+    _unpatch_loaded_clones(clip_patcher)
+    validate_static_patcher(clip_patcher, for_serialization=True)
+    vae_patcher = getattr(components.vae, "patcher", None)
+    if vae_patcher is not None:
+        validate_static_patcher(vae_patcher, for_serialization=True)
+        if getattr(vae_patcher, "patches", {}):
+            raise ValueError(
+                "Deferred VAE patches are not serialized by VAE.get_sd(); "
+                "unsupported effective checkpoint companion"
+            )
+    if not enable_cache:
+        return None
+    vae_state = get_vae_state()
+    if not isinstance(vae_state, Mapping) or not vae_state:
+        return None
+    return {
+        "clip": compute_base_identity(EffectiveWeights(clip_patcher, for_serialization=True)),
+        "vae": compute_base_identity(vae_state),
+    }
 
 
 def _trim_native_heap() -> None:
@@ -971,7 +1017,7 @@ class WIDENExitNode:
         """
         model_patcher = widen.model_patcher
         _unpatch_loaded_clones(model_patcher)
-        base_state = EffectiveWeights(model_patcher)
+        base_state = EffectiveWeights(model_patcher, for_serialization=True)
         storage_dtype = next(iter(weight_metadata(base_state).values())).dtype
 
         lora_path_resolver = _build_lora_resolver()
@@ -982,7 +1028,11 @@ class WIDENExitNode:
         base_identity = (
             compute_base_identity(base_state) if enable_cache else secrets.token_hex(32)
         )
-        lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+        lora_stats = (
+            compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+            if enable_cache
+            else {}
+        )
 
         validated_name = validate_model_name(model_name)
         # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
@@ -993,7 +1043,14 @@ class WIDENExitNode:
         save_path = _resolve_save_path(validated_name, is_checkpoint=is_checkpoint)
         if not is_checkpoint:
             _guard_non_ecaj_overwrite(save_path)
-        serialized = serialize_recipe(widen, base_identity, lora_stats)
+        companion_identities = (
+            _checkpoint_companion_identities(walk_to_base(widen), enable_cache=enable_cache)
+            if is_checkpoint
+            else None
+        )
+        serialized = serialize_recipe(
+            widen, base_identity, lora_stats, companion_identities=companion_identities
+        )
         recipe_hash = compute_recipe_hash(serialized)
         dependency_fingerprints_json = json.dumps(
             lora_stats,
@@ -1186,7 +1243,7 @@ class WIDENExitNode:
         timer.mark("base-walked")
         _unpatch_loaded_clones(model_patcher)
         timer.mark("loaded-clones-unpatched")
-        base_state = EffectiveWeights(model_patcher)
+        base_state = EffectiveWeights(model_patcher, for_serialization=True)
         timer.mark(f"base-state-read keys={len(base_state)}")
         storage_dtype = next(iter(weight_metadata(base_state).values())).dtype
 
@@ -1200,7 +1257,11 @@ class WIDENExitNode:
             compute_base_identity(base_state) if enable_cache else secrets.token_hex(32)
         )
         timer.mark("base-identity-computed")
-        lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+        lora_stats = (
+            compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+            if enable_cache
+            else {}
+        )
         timer.mark(f"dependency-stats-computed count={len(lora_stats)}")
 
         validated_name = validate_model_name(model_name)
@@ -1214,7 +1275,14 @@ class WIDENExitNode:
         if not is_checkpoint:
             _guard_non_ecaj_overwrite(save_path)
         timer.mark(f"save-path-resolved checkpoint={is_checkpoint}")
-        serialized = serialize_recipe(widen, base_identity, lora_stats)
+        companion_identities = (
+            _checkpoint_companion_identities(walk_to_base(widen), enable_cache=enable_cache)
+            if is_checkpoint
+            else None
+        )
+        serialized = serialize_recipe(
+            widen, base_identity, lora_stats, companion_identities=companion_identities
+        )
         recipe_hash = compute_recipe_hash(serialized)
         timer.mark("recipe-hash-computed")
 
@@ -1357,6 +1425,8 @@ class WIDENExitNode:
            conditioner.*, first_stage_model.*) and is loadable by
            CheckpointLoaderSimple.
         """
+        # AC: @comfy-memory-manager-compatibility ac-checkpoint-save-failure-releases-temp-payload
+        # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
         # --- GPU pipeline: compute merged diffusion weights ---
         with ExitStack() as resources:
             analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
@@ -1370,11 +1440,9 @@ class WIDENExitNode:
             for model_loader in model_analysis.model_loaders.values():
                 resources.callback(model_loader.cleanup)
 
-        # AC: @comfy-memory-manager-compatibility ac-checkpoint-save-failure-releases-temp-payload
-        # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
             # AC: @saved-model-artifact-safety ac-failed-return-not-successful
             # Track the temporary save-time merge payload separately from the
-            # artifact-loaded return model so release runs in finally on success
+            # artifact-loaded return model. ExitStack releases it on success
             # and on save/publication/finalization failures, exactly once.
             temporary_model: object | None = None
             merged_state: dict[str, torch.Tensor] = {}
@@ -1430,15 +1498,8 @@ class WIDENExitNode:
 
             if batch_groups:
                 n_models = len(set_affected) + len(model_loaders)
-                storage_element_size = torch.finfo(compute_dtype).bits // 8
-                worst_chunk_bytes = max(
-                    storage_element_size
-                    * torch.Size(sig.shape).numel()
-                    * min(
-                        len(batch_groups[sig]),
-                        compute_batch_size(sig.shape, n_models, compute_dtype),
-                    )
-                    for sig in batch_groups
+                worst_chunk_bytes = estimate_worst_chunk_bytes(
+                    batch_groups, n_models, compute_dtype
                 )
                 # Checkpoint save accumulates merged_state (needs model in memory
                 # for Comfy save), so budget the full merged state size.
@@ -1755,15 +1816,8 @@ class WIDENExitNode:
 
                 if batch_groups:
                     n_models = len(set_affected) + len(model_loaders)
-                    storage_element_size = torch.finfo(compute_dtype).bits // 8
-                    worst_chunk_bytes = max(
-                        storage_element_size
-                        * torch.Size(sig.shape).numel()
-                        * min(
-                            len(batch_groups[sig]),
-                            compute_batch_size(sig.shape, n_models, compute_dtype),
-                        )
-                        for sig in batch_groups
+                    worst_chunk_bytes = estimate_worst_chunk_bytes(
+                        batch_groups, n_models, compute_dtype
                     )
                     check_ram_preflight(
                         merged_state_bytes=worst_chunk_bytes,
@@ -1933,7 +1987,11 @@ class WIDENExitNode:
         base_identity = (
             compute_base_identity(base_state) if enable_cache else secrets.token_hex(32)
         )
-        lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+        lora_stats = (
+            compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+            if enable_cache
+            else {}
+        )
 
         # --- Normal GPU pipeline ---
         with ExitStack() as resources:
@@ -1996,7 +2054,13 @@ class WIDENExitNode:
             plan = compile_plan(widen, set_id_map, arch, model_id_map)
 
             # --- Incremental cache: detect which blocks changed ---
-            structural_fp = compute_structural_fingerprint(widen, base_identity, lora_stats)
+            # MODEL patch returns do not consume checkpoint companions.
+            structural_fp = compute_structural_fingerprint(
+                widen,
+                base_identity,
+                lora_stats,
+                companion_identities={"clip": "not-consumed", "vae": "not-consumed"},
+            )
             current_block_configs = collect_block_configs(widen)
             current_loader_bytes = loader.loaded_bytes + sum(
                 ml.loaded_bytes for ml in model_loaders.values()
@@ -2055,15 +2119,8 @@ class WIDENExitNode:
                 processed_keys = {k for keys in batch_groups.values() for k in keys}
                 merged_state_bytes = sum(key_byte_sizes[k] for k in processed_keys)
                 n_models = len(set_affected) + len(model_loaders)
-                storage_element_size = torch.finfo(compute_dtype).bits // 8
-                worst_chunk_bytes = max(
-                    storage_element_size
-                    * torch.Size(sig.shape).numel()
-                    * min(
-                        len(batch_groups[sig]),
-                        compute_batch_size(sig.shape, n_models, compute_dtype),
-                    )
-                    for sig in batch_groups
+                worst_chunk_bytes = estimate_worst_chunk_bytes(
+                    batch_groups, n_models, compute_dtype
                 )
                 check_ram_preflight(
                     merged_state_bytes=merged_state_bytes,

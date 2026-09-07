@@ -18,7 +18,7 @@ def _active(value):
     return bool(value)
 
 
-def validate_static_patcher(patcher: object) -> None:
+def validate_static_patcher(patcher: object, *, for_serialization: bool = False) -> None:
     """Reject behavior which cannot be represented by one static weight mapping.
 
     ModelPatcherDynamic inherits the supported per-key API: its class is not a
@@ -32,7 +32,6 @@ def validate_static_patcher(patcher: object) -> None:
         "forced_hooks",
         "hook_backup",
         "weight_wrapper_patches",
-        "object_patches",
         "injections",
     ):
         if _active(getattr(patcher, field, None)):
@@ -40,6 +39,14 @@ def validate_static_patcher(patcher: object) -> None:
                 f"WIDEN cannot materialize effective weights with {field}; "
                 "scheduled/dynamic/opaque patch behavior is unsupported"
             )
+    object_patches = getattr(patcher, "object_patches", {})
+    # ModelSampling/latent-format configuration is not weight arithmetic and
+    # remains on returned patch-mode clones. Static artifacts cannot encode
+    # those runtime objects. Replacing arbitrary modules may change weights.
+    if object_patches and (
+        for_serialization or set(object_patches) - {"model_sampling", "latent_format"}
+    ):
+        raise ValueError("Unsupported object_patches for this effective-weight output path")
     if getattr(patcher, "backup", None):
         raise ValueError(
             "WIDEN requires unloaded input weights; resident patch backups "
@@ -66,10 +73,10 @@ def validate_static_patcher(patcher: object) -> None:
 
 
 class EffectiveWeights(Mapping[str, torch.Tensor]):
-    """Lazy per-key weights; ``raw`` is the cheap metadata/identity view."""
+    """Lazy per-key weights; ``raw`` is metadata only, never effective identity."""
 
-    def __init__(self, patcher: object):
-        validate_static_patcher(patcher)
+    def __init__(self, patcher: object, *, for_serialization: bool = False):
+        validate_static_patcher(patcher, for_serialization=for_serialization)
         self.patcher = patcher
         self.raw = patcher.model_state_dict()
         for key, tensor in self.raw.items():

@@ -21,6 +21,7 @@ from ..lib.executor import (
     compile_batch_groups,
     compile_plan,
     compute_batch_size,
+    estimate_worst_chunk_bytes,
     execute_plan,
 )
 from ..lib.recipe import (
@@ -320,17 +321,8 @@ class WIDENCLIPExitNode:
                 processed_keys = {k for keys in batch_groups.values() for k in keys}
                 merged_state_bytes = sum(key_byte_sizes[k] for k in processed_keys)
                 n_models = len(set_affected) + len(clip_model_loaders)
-                element_size = torch.finfo(compute_dtype).bits // 8
-                # Compute worst-case chunk bytes: pair each group's batch_size
-                # with its own shape (not max_batch * max_shape).
-                worst_chunk_bytes = max(
-                    element_size
-                    * torch.Size(sig.shape).numel()
-                    * min(
-                        len(batch_groups[sig]),
-                        compute_batch_size(sig.shape, n_models, compute_dtype),
-                    )
-                    for sig in batch_groups
+                worst_chunk_bytes = estimate_worst_chunk_bytes(
+                    batch_groups, n_models, compute_dtype
                 )
                 check_ram_preflight(
                     merged_state_bytes=merged_state_bytes,

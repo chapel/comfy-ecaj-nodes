@@ -603,7 +603,7 @@ def run_validation(
                 dm_state[unprefixed] = t
 
             class _HarnessDiffusionModel:
-                """Minimal diffusion_model satisfying state_dict()/load_state_dict()."""
+                """Minimal diffusion_model satisfying state_dict()."""
 
                 def __init__(self, unprefixed_state: dict[str, torch.Tensor]):
                     self._sd = dict(unprefixed_state)
@@ -611,17 +611,10 @@ def run_validation(
                 def state_dict(self) -> dict[str, torch.Tensor]:
                     return dict(self._sd)
 
-                def load_state_dict(
-                    self, state_dict: dict[str, torch.Tensor], strict: bool = True
-                ) -> None:
-                    for k, v in state_dict.items():
-                        if k in self._sd:
-                            self._sd[k] = v
-
             class _HarnessModel:
                 """Minimal model wrapper satisfying ModelPatcher's interface.
 
-                Exposes ``diffusion_model`` (with state_dict/load_state_dict)
+                Exposes ``diffusion_model`` (with state_dict)
                 and a top-level ``state_dict()`` returning the full prefixed
                 tensor dict — matching the contract that real ComfyUI
                 ModelPatcher.clone() / model_state_dict() relies on.
@@ -637,13 +630,6 @@ def run_validation(
 
                 def state_dict(self) -> dict[str, torch.Tensor]:
                     return dict(self._full_state)
-
-                def load_state_dict(
-                    self, state_dict: dict[str, torch.Tensor], strict: bool = True
-                ) -> None:
-                    for k, v in state_dict.items():
-                        if k in self._full_state:
-                            self._full_state[k] = v
 
             harness_dm = _HarnessDiffusionModel(dm_state)
             harness_model = _HarnessModel(harness_dm, dict(tensors))

@@ -104,3 +104,13 @@ def test_real_comfy_cpu_contract_optional(tmp_path):
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
     assert "MODEL=17 CLIP=17 untouched=26 CUDA_initialized=False" in completed.stdout
+    assert "REAL_WIDEN_SDXL=17 (analyzer/compiler/evaluator unmodified)" in completed.stdout
+
+
+# AC: @comfy-memory-manager-compatibility ac-memory-mode-preserved
+def test_sampling_object_patch_is_preserved_in_patch_mode_not_static_save():
+    patcher = StaticPatcher()
+    patcher.object_patches = {"model_sampling": object()}
+    torch.testing.assert_close(EffectiveWeights(patcher)["w0"], torch.ones(2, 2))
+    with pytest.raises(ValueError, match="object_patches"):
+        EffectiveWeights(patcher, for_serialization=True)

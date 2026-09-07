@@ -108,7 +108,8 @@ def test_noop_checkpoint_releases_before_artifact_reload(save_setup, monkeypatch
 
 # AC: @memory-management ac-13
 @pytest.mark.parametrize("mode", ["patch", "diffusion", "checkpoint"])
-def test_second_acquisition_failure_cleans_first(save_setup, monkeypatch, mode):
+@pytest.mark.parametrize("error_type", [RuntimeError, KeyboardInterrupt])
+def test_second_acquisition_failure_cleans_first(save_setup, monkeypatch, mode, error_type):
     _, base = save_setup
     if mode == "checkpoint":
         base = RecipeBase(
@@ -124,10 +125,10 @@ def test_second_acquisition_failure_cleans_first(save_setup, monkeypatch, mode):
     )
 
     def fail(*a, **kw):
-        raise RuntimeError("second acquisition")
+        raise error_type("second acquisition")
 
     monkeypatch.setattr(exit_module, "analyze_recipe_models", fail)
-    with pytest.raises(RuntimeError, match="second acquisition"):
+    with pytest.raises(error_type, match="second acquisition"):
         exit_module.WIDENExitNode().execute(
             merge(base), save_model=mode != "patch", model_name="output", enable_cache=False
         )
@@ -249,3 +250,136 @@ def test_selected_artifact_return_has_artifact_weights_and_dtypes(tmp_path, monk
         actual = result.model_state_dict()[key.rsplit(".", 1)[-1]]
         torch.testing.assert_close(actual, value)
         assert actual.dtype == value.dtype
+
+
+# AC: @exit-model-persistence ac-6
+def test_checkpoint_companion_only_changes_invalidate_artifact(save_setup, monkeypatch):
+    from safetensors.torch import load_file
+
+    from tests.test_effective_weights_contract import StaticPatcher
+
+    path, base = save_setup
+    clip_patcher = StaticPatcher()
+    clip = SimpleNamespace(patcher=clip_patcher)
+    vae_state = {"decoder.weight": torch.full((2, 2), 8.0)}
+    vae = SimpleNamespace(get_sd=lambda: vae_state)
+    recipe = RecipeBase(
+        model_patcher=base.model_patcher,
+        arch="sdxl",
+        checkpoint_components=CheckpointComponents(clip=clip, vae=vae),
+    )
+    writes = []
+
+    def comfy_save(filename, model, *, clip, vae, metadata, **kw):
+        from nodes.effective_weights import EffectiveWeights
+
+        tensors = {"model." + k: v for k, v in model.model_state_dict().items()}
+        tensors["conditioner.embedders.0.weight"] = EffectiveWeights(clip.patcher)["w0"]
+        tensors["first_stage_model.decoder.weight"] = vae.get_sd()["decoder.weight"]
+        save_file(tensors, filename, metadata=metadata)
+        writes.append(filename)
+
+    monkeypatch.setattr("comfy.sd.save_checkpoint", comfy_save)
+    monkeypatch.setattr(exit_module, "_load_checkpoint_artifact", lambda path: object())
+    node = exit_module.WIDENExitNode()
+    node.execute(recipe, save_model=True, model_name="output", enable_cache=True)
+    first = path.read_bytes()
+    node.execute(recipe, save_model=True, model_name="output", enable_cache=True)
+    assert len(writes) == 1 and path.read_bytes() == first
+    clip_patcher.patches["w0"][0][1][1][0].add_(2)
+    node.execute(recipe, save_model=True, model_name="output", enable_cache=True)
+    assert len(writes) == 2 and path.read_bytes() != first
+    torch.testing.assert_close(
+        load_file(str(path))["conditioner.embedders.0.weight"], torch.full((2, 2), 3.0)
+    )
+    second = path.read_bytes()
+    vae_state["decoder.weight"].add_(1)
+    node.execute(recipe, save_model=True, model_name="output", enable_cache=True)
+    assert len(writes) == 3 and path.read_bytes() != second
+    torch.testing.assert_close(
+        load_file(str(path))["first_stage_model.decoder.weight"], torch.full((2, 2), 9.0)
+    )
+
+
+# AC: @exit-model-persistence ac-bounded-identity-preparation
+@pytest.mark.parametrize("mode", ["noop", "diffusion", "checkpoint", "patch"])
+def test_disabled_cache_never_scans_input_content(save_setup, monkeypatch, mode):
+    _, base = save_setup
+    if mode == "checkpoint":
+        base = RecipeBase(
+            model_patcher=base.model_patcher,
+            arch="sdxl",
+            checkpoint_components=CheckpointComponents(clip=object(), vae=object()),
+        )
+        monkeypatch.setattr(exit_module, "save_comfy_checkpoint", lambda *a, **kw: None)
+        monkeypatch.setattr(exit_module, "_load_checkpoint_artifact", lambda *a: object())
+
+    def forbidden(*a, **kw):
+        raise AssertionError("cache-disabled full scan")
+
+    monkeypatch.setattr(exit_module, "compute_base_identity", forbidden)
+    monkeypatch.setattr(exit_module, "compute_lora_stats", forbidden)
+    result = exit_module.WIDENExitNode().execute(
+        base if mode == "noop" else merge(base),
+        save_model=mode != "patch",
+        model_name="output",
+        enable_cache=False,
+    )
+    assert len(result) == 1 and result[0] is not None
+
+
+# AC: @accurate-ram-preflight ac-2
+@pytest.mark.parametrize("mode", ["patch", "diffusion", "checkpoint", "clip"])
+def test_node_preflight_caps_tiny_actual_group(save_setup, monkeypatch, mode):
+    from nodes import clip_exit
+
+    _, base = save_setup
+    module = clip_exit if mode == "clip" else exit_module
+    if mode == "clip":
+        clip = SimpleNamespace(
+            patcher=base.model_patcher,
+            clone=lambda: SimpleNamespace(add_patches=lambda *a, **kw: None),
+        )
+        base = RecipeBase(model_patcher=clip, arch="sdxl", domain="clip")
+        key = next(iter(clip.patcher._state_dict))
+    else:
+        key = next(iter(base.model_patcher._state_dict))
+    if mode == "checkpoint":
+        base = RecipeBase(
+            model_patcher=base.model_patcher,
+            arch="sdxl",
+            checkpoint_components=CheckpointComponents(clip=object(), vae=object()),
+        )
+        monkeypatch.setattr(module, "save_comfy_checkpoint", lambda *a, **kw: None)
+        monkeypatch.setattr(module, "_load_checkpoint_artifact", lambda *a: object())
+    recipe = merge(base)
+    loader = SimpleNamespace(cleanup=lambda: None, loaded_bytes=0)
+    monkeypatch.setattr(
+        module,
+        "analyze_recipe",
+        lambda *a, **kw: SimpleNamespace(
+            loader=loader,
+            arch="sdxl",
+            affected_keys={key},
+            set_affected={str(id(recipe.target)): {key}},
+        ),
+    )
+    monkeypatch.setattr(
+        module,
+        "analyze_recipe_models",
+        lambda *a, **kw: SimpleNamespace(
+            model_loaders={}, model_affected={}, all_model_keys=set()
+        ),
+    )
+    monkeypatch.setattr(module, "compile_plan", lambda *a: SimpleNamespace(ops=()))
+    monkeypatch.setattr(module, "execute_plan", lambda **kw: kw["base_batch"] + 1)
+    preflight = Mock()
+    monkeypatch.setattr(module, "check_ram_preflight", preflight)
+    if mode == "clip":
+        module.WIDENCLIPExitNode().execute(recipe)
+    else:
+        module.WIDENExitNode().execute(
+            recipe, save_model=mode != "patch", model_name="output", enable_cache=False
+        )
+    preflight.assert_called_once()
+    assert preflight.call_args.kwargs["worst_chunk_bytes"] == 64  # one actual 4x4 fp32 key

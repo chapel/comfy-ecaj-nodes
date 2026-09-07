@@ -2143,23 +2143,3 @@ class TestArtifactShapeDtypeValidation:
             )
             is False
         )
-
-
-# ===========================================================================
-# AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-# Loaded model has no resident set patches
-# ===========================================================================
-
-
-# AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-
-# AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-
-
-# ===========================================================================
-# AC: @full-saved-model-output ac-return-loaded-model
-# Mixed-dtype artifact preservation
-# ===========================================================================
-
-
-# AC: @full-saved-model-output ac-return-loaded-model

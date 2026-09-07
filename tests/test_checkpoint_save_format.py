@@ -1250,7 +1250,7 @@ class TestCheckpointCacheHitModelLoading:
     AC: @exit-model-persistence ac-8
 
     Valid checkpoint cache hits must load through Comfy's checkpoint loader,
-    not through _load_diffusion_model_artifact with deep-copied model internals.
+    not through the diffusion-only loader.
     Diffusion-only artifacts use Comfy's diffusion loader.
     """
 
