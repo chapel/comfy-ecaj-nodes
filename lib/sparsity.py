@@ -151,6 +151,36 @@ class EntmaxFunction(Function):
             # Special case: sparsemax (no ctx saved — delegates to SparsemaxFunction)
             return SparsemaxFunction.apply(input, dim)
 
+        if alpha < 1.1:
+            # With a=alpha-1, the ordinary base a*x-tau rounds away logit
+            # differences near tau=-1 (error amplified by 1/a). Reparameterize
+            # tau=-1+a*t and evaluate exp(log1p(a*(x-t))/a) instead: no addition
+            # to one, and the exact softmax limit as a approaches zero.
+            # Promote low-precision inputs before subtracting/scaling; FP64
+            # stays FP64. The default alpha=1.5 path is unchanged.
+            work = input.float() if input.dtype in (torch.float16, torch.bfloat16) else input
+            shifted = work - work.max(dim=dim, keepdim=True)[0]
+            a = alpha - 1
+            lo = torch.zeros_like(shifted.sum(dim=dim, keepdim=True))
+            # At t=0 max-logit mass is one. At t=log(n), log1p(u)<=u
+            # bounds each probability by exp(x-t), so total mass is <=1.
+            hi = lo + math.log(input.size(dim))
+
+            def probabilities(threshold):
+                return torch.exp(torch.log1p(torch.clamp(a * (shifted - threshold), min=-1)) / a)
+
+            for _ in range(n_iter):
+                mid = (lo + hi) / 2
+                excess = probabilities(mid).sum(dim=dim, keepdim=True) > 1
+                lo = torch.where(excess, mid, lo)
+                hi = torch.where(excess, hi, mid)
+            output = probabilities((lo + hi) / 2)
+            output = (output / output.sum(dim=dim, keepdim=True)).to(input.dtype)
+            ctx.save_for_backward(output)
+            ctx.alpha = alpha
+            ctx.dim = dim
+            return output
+
         # General case: use bisection algorithm
         input_shifted = input - input.max(dim=dim, keepdim=True)[0]
 

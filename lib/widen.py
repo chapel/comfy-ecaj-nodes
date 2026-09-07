@@ -383,7 +383,10 @@ class WIDEN:
                 mag_delta = torch.abs(delta)
 
                 # Per-sample variance check -- flat samples pass through
-                var = mag_delta.var(dim=1, keepdim=True)  # [B, 1]
+                # A singleton is flat; retain sample variance otherwise.
+                var = mag_delta.var(
+                    dim=1, keepdim=True, correction=int(mag_delta.shape[1] > 1)
+                )  # [B, 1]
                 flat_mask = var < eps  # [B, 1] bool
 
                 # Early exit only if ALL samples are flat
@@ -418,7 +421,11 @@ class WIDEN:
             # Per-sample variance check
             combined_raw = delta_m + delta_D
             spatial_dims = tuple(range(1, combined_raw.ndim))
-            var = combined_raw.var(dim=spatial_dims, keepdim=True)  # [B, 1, ...]
+            var = combined_raw.var(
+                dim=spatial_dims,
+                keepdim=True,
+                correction=int(combined_raw[0].numel() > 1),
+            )  # [B, 1, ...]; singleton is flat, otherwise sample variance
             flat_mask = var < eps  # [B, 1, ...] bool
 
             # Early exit only if ALL samples are flat
