@@ -10,6 +10,8 @@ _SUFFIXES = {
     ".lora_B.weight": "up",
     ".lora_down.weight": "down",
     ".lora_A.weight": "down",
+    ".lora_B.default.weight": "up",
+    ".lora_A.default.weight": "down",
 }
 _TEXT_PREFIXES = ("lora_te", "text_encoder", "clip_l.", "clip_g.")
 
@@ -22,6 +24,23 @@ def validate_tensor(tensor, name):
     for chunk in tensor.reshape(-1).split(262144):
         if not torch.isfinite(chunk).all():
             raise ValueError(f"Non-finite LoRA tensor: {name}")
+
+
+def validate_alpha(tensor, name):
+    """Return finite real scalar metadata, independently of factor dtype policy.
+
+    Preserve the existing single-element (.item()) convention, including integer
+    metadata. Boolean and complex values are not alpha scaling coefficients.
+    """
+    if tensor.numel() != 1:
+        raise ValueError(f"LoRA alpha must be scalar for {name}")
+    value = tensor.item()
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"LoRA alpha must be a real numeric scalar for {name}")
+    value = float(value)
+    if not math.isfinite(value):
+        raise ValueError(f"Non-finite LoRA alpha for {name}")
+    return value
 
 
 def read_pairs(path, strength, parser, *, clip=False, conv=False):
@@ -49,7 +68,10 @@ def read_pairs(path, strength, parser, *, clip=False, conv=False):
                     )
                 stem, direction = name[: -len(suffix)], _SUFFIXES[suffix]
             tensor = handle.get_tensor(name)
-            validate_tensor(tensor, name)
+            if direction == "alpha":
+                tensor = validate_alpha(tensor, name)
+            else:
+                validate_tensor(tensor, name)
             group = groups.setdefault(stem, {})
             if direction in group:
                 raise ValueError(f"Duplicate LoRA factor aliases for {stem}: {direction}")
@@ -79,9 +101,7 @@ def read_pairs(path, strength, parser, *, clip=False, conv=False):
                 f"Unsupported spatial-up/LoCon adapter {stem}; requires 1x1 up factor"
             )
         alpha = factors.get("alpha")
-        if alpha is not None and alpha.numel() != 1:
-            raise ValueError(f"LoRA alpha must be scalar for {stem}")
-        scale = strength * (alpha.item() if alpha is not None else down.shape[0]) / down.shape[0]
+        scale = strength * (alpha if alpha is not None else down.shape[0]) / down.shape[0]
         if not math.isfinite(scale):
             raise ValueError(f"Non-finite LoRA scale for {stem}")
         pending.append((key, up, down, scale, extra))

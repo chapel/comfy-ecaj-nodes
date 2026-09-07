@@ -25,7 +25,7 @@ from safetensors import safe_open
 
 from ..executor import DeltaSpec
 from .base import LoRALoader
-from .validation import validate_tensor
+from .validation import validate_alpha, validate_tensor
 
 __all__ = [
     "KREA2_COMPATIBILITY_FAMILIES",
@@ -266,6 +266,7 @@ class Krea2Loader(LoRALoader):
         lokr_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
         direct_tensors: dict[str, torch.Tensor] = {}
         alpha_values: dict[str, float] = {}
+        alpha_stems: dict[str, str] = {}
         unsupported: list[str] = []
         shape_errors: list[str] = []
 
@@ -273,18 +274,21 @@ class Krea2Loader(LoRALoader):
             for lora_key in f.keys():
                 if lora_key.endswith(".alpha"):
                     alpha_tensor = f.get_tensor(lora_key)
-                    validate_tensor(alpha_tensor, lora_key)
+                    try:
+                        alpha = validate_alpha(alpha_tensor, lora_key)
+                    except ValueError as exc:
+                        shape_errors.append(str(exc))
+                        continue
                     alpha_base_key = lora_key[: -len(".alpha")]
                     normalized_alpha = _normalize_base_path(alpha_base_key)
                     if normalized_alpha is None:
                         unsupported.append(lora_key)
-                    elif alpha_tensor.numel() != 1:
-                        shape_errors.append(f"{lora_key} alpha must be scalar")
                     else:
                         model_key = f"diffusion_model.{normalized_alpha}.weight"
                         if model_key in alpha_values:
                             raise ValueError(f"Duplicate alpha aliases for {model_key}")
-                        alpha_values[model_key] = float(alpha_tensor.item())
+                        alpha_values[model_key] = alpha
+                        alpha_stems[model_key] = alpha_base_key
                     continue
 
                 parsed = _parse_krea2_lora_key(lora_key)
@@ -312,6 +316,12 @@ class Krea2Loader(LoRALoader):
                     lokr_tensors[parsed.group_key][parsed.direction] = tensor
                 else:
                     layer_tensors[parsed.group_key][parsed.direction] = tensor
+
+        for model_key, stem in alpha_stems.items():
+            if model_key not in layer_tensors and model_key not in lokr_tensors:
+                unsupported.append(f"orphan alpha: {stem}.alpha")
+            elif source_stems[model_key] != stem:
+                raise ValueError(f"Duplicate LoRA group aliases for {model_key}: alpha {stem}")
 
         incomplete_lora = [
             key
