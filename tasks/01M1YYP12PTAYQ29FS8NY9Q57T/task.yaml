@@ -22,14 +22,7 @@ priority: 1
 tags: []
 vcs_refs: []
 review_url: https://github.com/chapel/comfy-ecaj-nodes/pull/124
-submission_linkage:
-  review_url: https://github.com/chapel/comfy-ecaj-nodes/pull/124
-  branch: dev
-  captured_at: 2026-09-07T23:42:37.049Z
-  commit: 442b1aafc8cba7419a9d3a1ac900be0d777031ac
-  remote: origin
-  remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
-  upstream_ref: refs/heads/dev
+submission_linkage: null
 history:
   - author: Jacob Chapel
     changes:
@@ -64,6 +57,20 @@ history:
         previous: null
     command: task-submit
     timestamp: 2026-09-07T23:42:37.082Z
+  - author: Jacob Chapel
+    changes:
+      submission_linkage:
+        new: null
+        previous:
+          review_url: https://github.com/chapel/comfy-ecaj-nodes/pull/124
+          branch: dev
+          captured_at: 2026-09-07T23:42:37.049Z
+          commit: 442b1aafc8cba7419a9d3a1ac900be0d777031ac
+          remote: origin
+          remote_url: git@github.com:chapel/comfy-ecaj-nodes.git
+          upstream_ref: refs/heads/dev
+    command: task-set
+    timestamp: 2026-09-07T23:44:29.564Z
 created_at: 2026-09-07T22:09:09.201Z
 started_at: 2026-09-07T22:09:09.326Z
 submitted_at: 2026-09-07T23:42:37.081Z
