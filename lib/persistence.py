@@ -12,7 +12,7 @@ import hashlib
 import json
 import os
 import secrets
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING
 
 import torch
@@ -35,6 +35,7 @@ __all__ = [
     "compute_lora_stats",
     "compute_recipe_hash",
     "compute_structural_fingerprint",
+    "dependency_key",
     "load_affected_keys",
     "serialize_recipe",
     "validate_model_name",
@@ -78,11 +79,12 @@ def validate_model_name(name: str) -> str:
 def serialize_recipe(
     node: RecipeNode,
     base_identity: str,
-    lora_stats: dict[str, tuple[float, int]],
+    lora_stats: Mapping[str, tuple[float, int] | dict],
     *,
     strip_block_config: bool = False,
+    companion_identities: Mapping[str, str] | None = None,
 ) -> str:
-    """Serialize a recipe tree to deterministic JSON.
+    """Serialize a recipe tree to JSON (deterministic with trusted identities).
 
     AC: @exit-model-persistence ac-6, ac-7
 
@@ -92,7 +94,12 @@ def serialize_recipe(
     Args:
         node: Recipe tree root (RecipeNode)
         base_identity: SHA-256 identity of the base model
-        lora_stats: Map of resolved LoRA path -> (mtime, size)
+        lora_stats: Namespaced dependency metadata from compute_lora_stats;
+            legacy flat path -> (mtime, size) input is also accepted.
+        companion_identities: Trusted effective CLIP and VAE source revisions,
+            keyed by "clip" and "vae". Must include all patches/content and source
+            generations. Missing identities force a conservative cache miss for
+            checkpoint recipes. No model objects are inspected by this module.
         strip_block_config: If True, omit all block_config fields from
             serialization. Used by compute_structural_fingerprint() so
             that two trees differing only in BlockConfig values produce
@@ -113,12 +120,25 @@ def serialize_recipe(
     def _serialize_node(n: RecipeNode) -> dict:
         if isinstance(n, RecipeBase):
             # AC: @recipe-domain-field ac-7
-            return {
+            result = {
                 "type": "RecipeBase",
                 "arch": n.arch,
                 "domain": getattr(n, "domain", "diffusion"),  # Backward compat
                 "base_identity": base_identity,
             }
+            if n.checkpoint_components is not None:
+                if companion_identities is None:
+                    # Unknown companions must never cause a persistent cache hit.
+                    result["checkpoint_identity_unavailable"] = secrets.token_hex(32)
+                else:
+                    if set(companion_identities) != {"clip", "vae"} or not all(
+                        isinstance(v, str) and v for v in companion_identities.values()
+                    ):
+                        raise ValueError(
+                            "companion_identities must contain nonempty clip and vae identities"
+                        )
+                    result["checkpoint_components"] = dict(companion_identities)
+            return result
         elif isinstance(n, RecipeLoRA):
             loras = []
             for spec in n.loras:
@@ -127,11 +147,7 @@ def serialize_recipe(
                     "path": path,
                     "strength": spec["strength"],
                 }
-                # Include file stats if available
-                if path in lora_stats:
-                    mtime, size = lora_stats[path]
-                    entry["mtime"] = mtime
-                    entry["size"] = size
+                entry.update(_dependency_fields(lora_stats, "loras", path))
                 loras.append(entry)
             result: dict = {"type": "RecipeLoRA", "loras": loras}
             if not strip_block_config and n.block_config is not None:
@@ -146,11 +162,7 @@ def serialize_recipe(
                 "strength": n.strength,
                 "source_dir": n.source_dir,
             }
-            # Include file stats if available (using lora_stats which also has model stats)
-            if n.path in lora_stats:
-                mtime, size = lora_stats[n.path]
-                result["mtime"] = mtime
-                result["size"] = size
+            result.update(_dependency_fields(lora_stats, n.source_dir, n.path))
             if not strip_block_config and n.block_config is not None:
                 result["block_config"] = _serialize_block_config(n.block_config)
             return result
@@ -188,54 +200,89 @@ def serialize_recipe(
     return json.dumps(tree, sort_keys=True, separators=(",", ":"))
 
 
-def compute_base_identity(base_state: dict[str, torch.Tensor]) -> str:
-    """Compute a stable identity hash for a base model.
+def _tensor_chunks(tensor: torch.Tensor, max_elements: int):
+    """Yield logical-order views without flattening a full strided tensor."""
+    if tensor.numel() <= max_elements:
+        yield tensor
+    elif tensor.is_contiguous():
+        flat = tensor.view(-1)
+        for start in range(0, flat.numel(), max_elements):
+            yield flat[start : start + max_elements]
+    else:
+        # Split the first non-singleton axis: concatenation remains logical
+        # row-major order, including transposes, offset and expanded views.
+        axis = next(i for i, size in enumerate(tensor.shape) if size > 1)
+        middle = tensor.shape[axis] // 2
+        yield from _tensor_chunks(tensor.narrow(axis, 0, middle), max_elements)
+        yield from _tensor_chunks(
+            tensor.narrow(axis, middle, tensor.shape[axis] - middle), max_elements
+        )
+
+
+def compute_base_identity(
+    base_state: Mapping[str, torch.Tensor], *, chunk_bytes: int = 1024 * 1024
+) -> str:
+    """Digest ALL effective content in O(content) time and bounded extra memory.
 
     AC: @exit-model-persistence ac-6
     AC: @exit-model-persistence ac-bounded-identity-preparation
 
-    Uses sorted key signatures (key|shape|dtype) plus tensor data samples
-    from first, middle, and last keys to distinguish models with identical
-    architecture but different weights.
-
-    Args:
-        base_state: Base model state dict
-
-    Returns:
-        SHA-256 hex digest
+    The caller supplies effective weights (including patches) via per-key Mapping
+    access. Values are released before fetching the next key; no model-sized dict,
+    dtype conversion, storage export, or memoization is used. Logical tensor bytes
+    are streamed in original dtype through CPU chunks of at most ``chunk_bytes``.
+    Key names, shapes and dtypes are length-framed to prevent structural ambiguity.
+    Skip this scan when caching is disabled and identity metadata is not needed.
+    Inputs must remain unchanged for the duration of the digest/evaluation.
     """
-    hasher = hashlib.sha256()
-
-    sorted_keys = sorted(base_state.keys())
-    for key in sorted_keys:
+    if not isinstance(chunk_bytes, int) or chunk_bytes < 1:
+        raise ValueError("chunk_bytes must be a positive integer")
+    hasher = hashlib.sha256(b"ecaj-base-v2\0")
+    for key in sorted(base_state):
         tensor = base_state[key]
-        hasher.update(f"{key}|{tuple(tensor.shape)}|{tensor.dtype}\n".encode())
-
-    # Sample tensor data from first, middle, and last keys to catch weight
-    # differences between models with identical architecture (~768 bytes total)
-    if sorted_keys:
-        sample_indices = {0, len(sorted_keys) // 2, len(sorted_keys) - 1}
-        for idx in sorted(sample_indices):
-            sample_tensor = base_state[sorted_keys[idx]].detach()
-            # Slice before dtype conversion / CPU transfer.  Krea 2 has very
-            # large matrix tensors; converting the full sampled tensors before
-            # slicing can spend minutes materializing hundreds of MB per key
-            # before WIDEN Exit has published any progress.
-            if sample_tensor.is_contiguous():
-                sample = sample_tensor.view(-1)[:64]
-            else:
-                sample = sample_tensor.reshape(-1)[:64]
-            flat = sample.to(device="cpu", dtype=torch.float32).contiguous()
-            hasher.update(bytes(flat.untyped_storage())[: flat.nelement() * flat.element_size()])
-
+        if not isinstance(tensor, torch.Tensor) or tensor.layout != torch.strided:
+            raise ValueError(f"Unsupported identity tensor at {key!r}: expected strided tensor")
+        if tensor.is_quantized or tensor.device.type == "meta":
+            raise ValueError(f"Unsupported identity tensor at {key!r}: quantized or meta")
+        if tensor.element_size() > chunk_bytes:
+            raise ValueError("chunk_bytes must fit at least one tensor element")
+        signature = json.dumps(
+            [key, list(tensor.shape), str(tensor.dtype)], separators=(",", ":")
+        ).encode()
+        hasher.update(len(signature).to_bytes(8, "big"))
+        hasher.update(signature)
+        for chunk in _tensor_chunks(tensor.detach(), chunk_bytes // tensor.element_size()):
+            cpu = chunk.to(device="cpu").resolve_conj().resolve_neg().contiguous()
+            # numpy observes this view's offset/extent, not the backing storage.
+            # Byte reinterpretation also supports bfloat16/float8 without FP32.
+            raw = cpu.reshape(-1).view(torch.uint8).numpy()
+            hasher.update(memoryview(raw))
+            del raw, cpu, chunk
+        del tensor
     return hasher.hexdigest()
+
+
+def dependency_key(source_dir: str, path: str) -> str:
+    """Unambiguous, JSON-compatible dependency namespace key."""
+    return json.dumps([source_dir, path], separators=(",", ":"))
+
+
+def _dependency_fields(stats: Mapping, source_dir: str, path: str) -> dict:
+    # Legacy flat stats are accepted as input; new collection is namespaced.
+    value = stats.get(dependency_key(source_dir, path), stats.get(path))
+    if value is None:
+        return {}
+    if isinstance(value, Mapping):
+        return dict(value)
+    mtime, size = value
+    return {"mtime": mtime, "size": size}
 
 
 def compute_lora_stats(
     node: RecipeNode,
     resolver: Callable[[str], str | None],
     model_resolver: Callable[[str, str], str | None] | None = None,
-) -> dict[str, tuple[float, int]]:
+) -> dict[str, dict]:
     """Walk recipe tree and collect LoRA and model file stats.
 
     AC: @exit-model-persistence ac-7
@@ -248,11 +295,50 @@ def compute_lora_stats(
         model_resolver: Resolves (model_name, source_dir) to full filesystem path
 
     Returns:
-        Dict mapping file path (as in recipe) -> (mtime, size)
+        Namespaced dependency_key(source_dir, path) -> file metadata. Resolution
+        failure never falls back to a CWD file. Content is streamed in bounded
+        chunks (O(file size) time); timestamps alone are not equality evidence.
     """
     from .recipe import RecipeBase, RecipeCompose, RecipeLoRA, RecipeMerge, RecipeModel
 
-    stats: dict[str, tuple[float, int]] = {}
+    stats: dict[str, dict] = {}
+
+    def _record(source_dir: str, path: str, resolve: Callable[[], str | None]) -> None:
+        key = dependency_key(source_dir, path)
+        if key in stats:
+            return
+        resolved = resolve()
+        fields: dict = {
+            "resolved_path": os.path.realpath(resolved) if resolved else None,
+            "mtime": 0.0,
+            "size": 0,
+        }
+        if resolved is not None:
+            try:
+                with open(resolved, "rb") as handle:
+                    st = os.fstat(handle.fileno())
+                    digest = hashlib.sha256()
+                    while data := handle.read(1024 * 1024):
+                        digest.update(data)
+                    after = os.fstat(handle.fileno())
+                    if (st.st_size, st.st_mtime_ns, st.st_ctime_ns) != (
+                        after.st_size,
+                        after.st_mtime_ns,
+                        after.st_ctime_ns,
+                    ):
+                        raise ValueError(f"Dependency changed while hashing: {resolved}")
+                fields["sha256"] = digest.hexdigest()
+                fields.update(
+                    mtime=st.st_mtime,
+                    size=st.st_size,
+                    mtime_ns=st.st_mtime_ns,
+                    ctime_ns=st.st_ctime_ns,
+                    device=st.st_dev,
+                    inode=st.st_ino,
+                )
+            except OSError:
+                pass
+        stats[key] = fields
 
     def _walk(n: RecipeNode) -> None:
         if isinstance(n, RecipeBase):
@@ -260,30 +346,17 @@ def compute_lora_stats(
         elif isinstance(n, RecipeLoRA):
             for spec in n.loras:
                 path = spec["path"]
-                if path not in stats:
-                    resolved = resolver(path)
-                    full_path = resolved if resolved is not None else path
-                    try:
-                        st = os.stat(full_path)
-                        stats[path] = (st.st_mtime, st.st_size)
-                    except OSError:
-                        stats[path] = (0.0, 0)
+                _record("loras", path, lambda: resolver(path))
         elif isinstance(n, RecipeModel):
             # AC: @full-model-execution ac-11
             # AC: @diffusion-model-path-resolution ac-8
             # Include checkpoint file stats for IS_CHANGED hash
             path = n.path
-            if path not in stats:
-                full_path = path
-                if model_resolver is not None:
-                    resolved = model_resolver(path, n.source_dir)
-                    if resolved is not None:
-                        full_path = resolved
-                try:
-                    st = os.stat(full_path)
-                    stats[path] = (st.st_mtime, st.st_size)
-                except OSError:
-                    stats[path] = (0.0, 0)
+            _record(
+                n.source_dir,
+                path,
+                lambda: model_resolver(path, n.source_dir) if model_resolver else path,
+            )
         elif isinstance(n, RecipeCompose):
             for branch in n.branches:
                 _walk(branch)
@@ -308,7 +381,8 @@ def compute_recipe_hash(serialized: str) -> str:
     Returns:
         Hex digest
     """
-    return hashlib.sha256(serialized.encode()).hexdigest()
+    # Domain separation invalidates identities built with unsafe v1 sampling.
+    return hashlib.sha256(("ecaj-recipe-v2\0" + serialized).encode()).hexdigest()
 
 
 def check_cache(save_path: str, expected_hash: str) -> dict | None:
@@ -854,7 +928,9 @@ def atomic_save(
 def compute_structural_fingerprint(
     node: RecipeNode,
     base_identity: str,
-    lora_stats: dict[str, tuple[float, int]],
+    lora_stats: Mapping[str, tuple[float, int] | dict],
+    *,
+    companion_identities: Mapping[str, str] | None = None,
 ) -> str:
     """Compute a structural fingerprint of a recipe tree, ignoring BlockConfig values.
 
@@ -876,8 +952,14 @@ def compute_structural_fingerprint(
     Returns:
         SHA-256 hex digest
     """
-    serialized = serialize_recipe(node, base_identity, lora_stats, strip_block_config=True)
-    return hashlib.sha256(serialized.encode()).hexdigest()
+    serialized = serialize_recipe(
+        node,
+        base_identity,
+        lora_stats,
+        strip_block_config=True,
+        companion_identities=companion_identities,
+    )
+    return compute_recipe_hash(serialized)
 
 
 def collect_block_configs(
