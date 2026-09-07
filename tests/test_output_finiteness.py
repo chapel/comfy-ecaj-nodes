@@ -1,5 +1,7 @@
 """Completed evaluator outputs must be safe before sink delivery."""
 
+# AC: @batched-executor ac-finite-computed-output
+
 import pytest
 import torch
 from safetensors.torch import load_file, save_file
