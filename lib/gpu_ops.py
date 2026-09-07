@@ -14,12 +14,15 @@ from __future__ import annotations
 
 import gc
 import logging
+import math
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import TypeVar
 
 import torch
+
+from .batch_groups import OpSignature
 
 logger = logging.getLogger("ecaj.gpu_ops")
 
@@ -222,6 +225,38 @@ def compute_batch_size(
     return max(1, max_batch)
 
 
+def estimate_worst_chunk_bytes(
+    batch_groups: Mapping[OpSignature, Sequence[str]],
+    n_models: int,
+    compute_dtype: torch.dtype,
+    vram_budget_gb: float = 0.0,
+    *,
+    storage_dtype: torch.dtype | None = None,
+) -> int:
+    """Estimate the largest actual chunk, not unused GPU batch capacity.
+
+    Use the same groups, model count, compute dtype and budget as execution.
+    storage_dtype optionally preserves the caller's storage-byte estimate;
+    otherwise bytes use compute_dtype. This caps cardinality only, not a complete
+    accounting of compute/transfer workspaces or allocator overhead.
+
+    # AC: @accurate-ram-preflight ac-2, ac-7
+    """
+    element_bytes = torch.empty((), dtype=storage_dtype or compute_dtype).element_size()
+    return max(
+        (
+            element_bytes
+            * math.prod(sig.shape)
+            * min(
+                len(keys), compute_batch_size(sig.shape, n_models, compute_dtype, vram_budget_gb)
+            )
+            for sig, keys in batch_groups.items()
+            if keys
+        ),
+        default=0,
+    )
+
+
 def chunked(lst: list[T], n: int):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
@@ -299,7 +334,7 @@ def apply_lora_batch_gpu(
             partitions[("lokr", 0)].append(spec)
         elif spec.kind == "direct":
             partitions[("direct", 0)].append(spec)
-        elif spec.kind in ("qkv_q", "qkv_k", "qkv_v"):
+        elif spec.kind in ("qkv_q", "qkv_k", "qkv_v", "offset_mlp"):
             rank = spec.down.shape[0] if spec.down is not None else 0
             partitions[(spec.kind, rank)].append(spec)
         else:
@@ -345,6 +380,7 @@ def apply_lora_batch_gpu(
                     end = start + hidden
                     result[key_index, start:end] += delta
                 del delta
+            del pairs
 
         else:
             # AC: @batched-executor ac-2
@@ -355,6 +391,7 @@ def apply_lora_batch_gpu(
                     delta = delta.view(spec.target_shape)
                 result[spec.key_index] += delta
                 del delta
+            del pairs
 
     return result
 
@@ -597,51 +634,9 @@ def chunked_evaluation(
     return sink.results
 
 
-def evaluate_affected_group(
-    keys: list[str],
-    base_tensors: dict[str, torch.Tensor],
-    eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
-    batch_size: int,
-    device: str,
-    dtype: torch.dtype,
-    storage_dtype: torch.dtype,
-) -> dict[str, torch.Tensor]:
-    """Evaluate an affected group for full saved model mode.
-
-    Same chunked evaluation with OOM backoff as chunked_evaluation, but
-    used exclusively by full saved model mode. Results are handed to
-    MaterializationSink per-group rather than accumulated into a merged_state
-    dict.
-
-    This is a separate entry point so that monkeypatching chunked_evaluation
-    (used by patch mode) does not affect full saved model mode.
-
-    Args:
-        keys: List of parameter keys to evaluate
-        base_tensors: Dict of key -> CPU tensor for base weights
-        eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu
-        batch_size: Initial batch size for chunking
-        device: GPU device string
-        dtype: Computation dtype (fp32 for numerical stability)
-        storage_dtype: Output dtype (matches base model)
-
-    Returns:
-        Dict of key -> CPU tensor with evaluated affected weights
-    """
-    from .result_sink import DictResultSink
-
-    sink = DictResultSink()
-    _chunked_eval_to_sink_impl(
-        keys,
-        base_tensors,
-        eval_fn,
-        batch_size,
-        device,
-        dtype,
-        storage_dtype,
-        sink.receive,
-    )
-    return sink.results
+# Compatibility name bound once: monkeypatching the public dict entry point
+# does not redirect existing affected-group callers. Both use one sink engine.
+evaluate_affected_group = chunked_evaluation
 
 
 def streaming_evaluation_to_sink(

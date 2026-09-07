@@ -172,7 +172,7 @@ class TestPerChunkCleanup:
             gc_calls.append("gc.collect")
             return original_gc_collect()
 
-        with patch("lib.executor.gc.collect", mock_gc_collect):
+        with patch("lib.gpu_ops.gc.collect", mock_gc_collect):
             chunked_evaluation(
                 keys,
                 base,
@@ -259,7 +259,7 @@ class TestPerChunkCleanup:
             gc_calls.append("gc.collect")
             return original_gc_collect()
 
-        with patch("lib.executor.gc.collect", mock_gc_collect):
+        with patch("lib.gpu_ops.gc.collect", mock_gc_collect):
             results = chunked_evaluation(
                 keys,
                 base,
@@ -657,7 +657,7 @@ class TestMemoryManagementIntegration:
         def eval_fn(batch_keys, batch_gpu):
             return batch_gpu.clone() + 1
 
-        with patch("lib.executor.gc.collect", mock_gc_collect):
+        with patch("lib.gpu_ops.gc.collect", mock_gc_collect):
             results = chunked_evaluation(
                 keys,
                 base,
