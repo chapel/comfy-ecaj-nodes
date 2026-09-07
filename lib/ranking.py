@@ -61,7 +61,7 @@ class RankingMechanism:
         """Z-score normalization with sigmoid."""
         mean = divergences.mean()
         eps = self.numerical_config.get_adaptive_epsilon(divergences)
-        std = divergences.std() + eps
+        std = divergences.std(correction=1 if divergences.numel() > 1 else 0) + eps
         z_scores = (divergences - mean) / std
         return torch.sigmoid(z_scores)
 
@@ -180,9 +180,11 @@ class RankingMechanism:
             Ranked values [B, ...] in (0, 1)
         """
         spatial_dims = tuple(range(1, divergences.ndim))
-        eps = self.numerical_config.get_adaptive_epsilon(divergences)
+        eps = self.numerical_config.get_adaptive_epsilon(divergences, dim=spatial_dims)
         mean = divergences.mean(dim=spatial_dims, keepdim=True)
-        std = divergences.std(dim=spatial_dims, keepdim=True) + eps
+        # Preserve sample-std ranking for ordinary tensors; singleton ranks are neutral.
+        correction = 1 if divergences[0].numel() > 1 else 0
+        std = divergences.std(dim=spatial_dims, keepdim=True, correction=correction) + eps
         z_scores = (divergences - mean) / std
         return torch.sigmoid(z_scores)
 
@@ -196,7 +198,7 @@ class RankingMechanism:
             Normalized values [B, ...] in [0, 1]
         """
         spatial_dims = tuple(range(1, divergences.ndim))
-        eps = self.numerical_config.get_adaptive_epsilon(divergences)
+        eps = self.numerical_config.get_adaptive_epsilon(divergences, dim=spatial_dims)
         min_val = divergences.amin(dim=spatial_dims, keepdim=True)
         max_val = divergences.amax(dim=spatial_dims, keepdim=True)
         range_val = max_val - min_val + eps
