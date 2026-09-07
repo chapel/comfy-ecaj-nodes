@@ -45,3 +45,7 @@ exclude = [".kspec"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
+
+[tool.ruff.format]
+# Keep the Python format gate separate from Markdown (including generated docs).
+exclude = ["*.md"]

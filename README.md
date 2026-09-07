@@ -31,6 +31,8 @@ SDXL text-encoder merging uses a separate **WIDEN CLIP Entry → CLIP Merge → 
 | `save_workflow=true` (default) | Embed available workflow metadata when saving. |
 | `enable_cache=true` (default) | Allow cache reuse; saved-model reuse also checks artifact metadata/kind. This is distinct from ComfyUI's graph cache. |
 
+With `enable_cache=true`, cache identity preparation scans all effective input and dependency content, including patched base weights, recipe files and required checkpoint companions. This costs O(input-content) reads even on a cache hit. Hash buffers are bounded, but effective patch materialization still occurs per key; the hash-buffer bound is not a bound on total model memory. With `enable_cache=false`, no full-content scan is performed solely for cache identity.
+
 For checkpoint-style output, connect the base checkpoint's **CLIP and VAE** to Entry's optional inputs. Checkpoint-intent recipes without required companion components fail validation. Standalone diffusion output uses the diffusion-model folder (`diffusion_models`, with legacy `unet` fallback); checkpoint output uses `checkpoints`. Full artifacts are published with an atomic replace only after writing and validation. Existing non-ECAJ files are not intended overwrite targets.
 
 ## Implemented architecture surfaces
@@ -41,6 +43,8 @@ For checkpoint-style output, connect the base checkpoint's **CLIP and VAE** to E
 | Text encoders | SDXL CLIP (`clip_l` and `clip_g`) |
 
 These entries describe code paths, **not equal levels of real-model validation**. The normal suite uses CPU tensors and bounded safetensors fixtures. Its registration smoke loads all 19 stable node IDs with a small host API stub; it does not prove end-to-end ComfyUI execution, GPU memory bounds, image quality, or support for arbitrary quantized/FP8 model layouts. Real-model/GPU validation is separate, optional evidence.
+
+Scheduled hooks and opaque patch behavior are unsupported effective-weight inputs and fail validation rather than being silently ignored. Quantized/FP8 layouts are not generally supported; implemented architecture detection does not make unsupported quantization formats safe to merge.
 
 ## Development (separate CPU environment)
 
@@ -54,4 +58,4 @@ uv run --no-sync ruff check .
 uv run --no-sync ruff format --check .
 ```
 
-The development PyTorch source is explicitly the CPU index. CI runs Python 3.10 and 3.12, verifies a CPU-only PyTorch build, and runs pytest plus lint/format gates. No running ComfyUI or GPU is required by the normal suite. `uv.lock` is ignored and is not a committed reproducibility contract; dependency resolution remains within the declared ranges.
+The development PyTorch source is explicitly the CPU index. CI runs Python 3.10 and 3.12, verifies a CPU-only PyTorch build, and runs pytest plus lint/format gates. The Ruff format gate targets Python files; Markdown code fences (including generated instructions) are excluded via `tool.ruff.format.exclude`. No running ComfyUI or GPU is required by the normal suite. `uv.lock` is ignored and is not a committed reproducibility contract; dependency resolution remains within the declared ranges.
