@@ -127,6 +127,10 @@ ARCHITECTURE_RULES: tuple[ArchitectureRule, ...] = (
                 lambda keys: (
                     sum(1 for key in keys if key.startswith("diffusion_model.transformer_blocks."))
                     >= 60
+                    or (
+                        "diffusion_model.txt_norm.weight" in keys
+                        and "diffusion_model.img_in.weight" in keys
+                    )
                 ),
             ),
         ),
@@ -137,7 +141,15 @@ SUPPORTED_ARCHITECTURES = frozenset(rule.arch for rule in ARCHITECTURE_RULES)
 
 
 def _as_keyset(keys: Iterable[str]) -> frozenset[str]:
-    return frozenset(keys)
+    # Native denoisers may expose bare state_dict roots; wrappers are not evidence.
+    return frozenset(
+        key.removeprefix("model.")
+        if key.startswith("model.diffusion_model.")
+        else key
+        if key.startswith("diffusion_model.")
+        else "diffusion_model." + key
+        for key in keys
+    )
 
 
 def match_architecture_evidence(keys: Iterable[str], arch: str) -> ArchitectureMatch:

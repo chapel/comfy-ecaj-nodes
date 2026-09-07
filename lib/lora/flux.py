@@ -46,10 +46,11 @@ from collections import defaultdict
 from collections.abc import Sequence
 
 import torch
-from safetensors import safe_open
 
 from ..executor import DeltaSpec
 from .base import LoRALoader
+from .mapping import flux_module
+from .validation import read_pairs
 
 __all__ = ["FluxLoader"]
 
@@ -222,6 +223,22 @@ def _parse_flux_lora_key(
     if base_path.startswith("transformer."):
         base_path = base_path[len("transformer.") :]
 
+    if base_path in ("norm_out.linear", "lora_unet_norm_out_linear", "lycoris_norm_out_linear"):
+        return (
+            "diffusion_model.final_layer.adaLN_modulation.1.weight",
+            direction,
+            None,
+            "swap_scale_shift",
+        )
+    # Resolve source-real Diffusers aliases before lossy underscore tokenization.
+    for prefix in ("lora_unet_", "lycoris_"):
+        if base_path.startswith(prefix):
+            raw = base_path[len(prefix) :]
+            mapped = flux_module(raw)
+            if mapped != raw:
+                base_path = mapped
+                break
+    base_path = flux_module(base_path)
     # Handle BFL/kohya format
     if base_path.startswith("lora_unet_"):
         base_path = _normalize_kohya_key(base_path)
@@ -339,114 +356,32 @@ class FluxLoader(LoRALoader):
         self._affected_by_set: dict[str, set[str]] = defaultdict(set)
         # Global affected keys (union of all sets)
         self._affected: set[str] = set()
-        # Track hidden dimensions per key for offset calculation
-        self._hidden_dims: dict[str, int] = {}
 
     def load(self, path: str, strength: float = 1.0, set_id: str | None = None) -> None:
-        """Load a LoRA safetensors file into the given set.
-
-        # AC: @flux-lora-loader ac-4
-        Handles Flux Klein key mapping from BFL/kohya and diffusers formats.
-
-        # AC: @flux-lora-loader ac-5
-        Double block QKV keys map to fused qkv weights.
-
-        # AC: @flux-lora-loader ac-6
-        Single block linear1 keys map with 4-way offset split.
-        """
-        # Use a default set_id if none provided (backward compat)
-        effective_set_id = set_id if set_id is not None else "__default__"
-
-        # Collect tensors by layer path and direction
-        layer_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
-        # Track QKV component and attn stream for each layer key
-        layer_info: dict[str, tuple[str | None, str | None]] = {}
-        # Collect alpha values
-        alpha_values: dict[str, float] = {}
-        # Map from our layer_key to the LoRA base path (for alpha lookup)
-        lora_base_paths: dict[str, str] = {}
-
-        with safe_open(path, framework="pt", device="cpu") as f:
-            for lora_key in f.keys():
-                # Check for alpha keys
-                if lora_key.endswith(".alpha"):
-                    alpha_tensor = f.get_tensor(lora_key)
-                    if alpha_tensor.numel() == 1:
-                        alpha_values[lora_key[: -len(".alpha")]] = alpha_tensor.item()
-                    continue
-
-                model_key, direction, qkv_comp, attn_stream = _parse_flux_lora_key(lora_key)
-                if model_key is None:
-                    continue
-
-                tensor = f.get_tensor(lora_key)
-
-                # Extract LoRA base path for alpha lookup
-                lora_base = lora_key
-                for suffix in (
-                    ".lora_A.weight",
-                    ".lora_B.weight",
-                    ".lora_down.weight",
-                    ".lora_up.weight",
-                ):
-                    if lora_base.endswith(suffix):
-                        lora_base = lora_base[: -len(suffix)]
-                        break
-
-                # For QKV/MLP, track each component separately
-                if qkv_comp is not None:
-                    layer_key = f"{model_key}:{qkv_comp}"
-                    if attn_stream is not None:
-                        layer_key = f"{model_key}:{attn_stream}:{qkv_comp}"
-                    layer_tensors[layer_key][direction] = tensor
-                    layer_info[layer_key] = (qkv_comp, attn_stream)
-                    lora_base_paths[layer_key] = lora_base
-                else:
-                    layer_tensors[model_key][direction] = tensor
-                    layer_info[model_key] = (None, None)
-                    lora_base_paths[model_key] = lora_base
-
-        # Build delta data for complete up/down pairs
-        for layer_key, tensors in layer_tensors.items():
-            if "up" not in tensors or "down" not in tensors:
-                continue
-
-            up = tensors["up"]
-            down = tensors["down"]
-
-            # Compute scale: strength * alpha / rank
-            rank = down.shape[0]
-            alpha = float(rank)
-            lora_base = lora_base_paths.get(layer_key)
-            if lora_base is not None and lora_base in alpha_values:
-                alpha = alpha_values[lora_base]
-            scale = strength * alpha / rank
-
-            qkv_comp, attn_stream = layer_info.get(layer_key, (None, None))
-
-            if qkv_comp is not None:
-                # QKV/MLP component - extract actual model key
-                # layer_key format: "model_key:attn_stream:qkv_comp" or "model_key:qkv_comp"
-                parts = layer_key.rsplit(":", 2)
-                if len(parts) == 3:
-                    model_key = parts[0]
-                else:
-                    model_key = parts[0]
-                self._qkv_data_by_set[effective_set_id][model_key].append(
-                    (up, down, scale, qkv_comp, attn_stream)
+        """Validate the whole package before publishing factors to this set."""
+        pending = read_pairs(path, strength, _parse_flux_lora_key)
+        # Comfy utils.flux_to_diffusers swaps the output modulation row halves.
+        # Transform factors, not a materialized full-rank delta, before publication.
+        for index, (key, up, down, scale, extra) in enumerate(pending):
+            if extra[1] == "swap_scale_shift":
+                if up.shape[0] % 2:
+                    raise ValueError(f"Flux output modulation requires even row count: {key}")
+                half = up.shape[0] // 2
+                pending[index] = (
+                    key,
+                    torch.cat((up[half:], up[:half])),
+                    down,
+                    scale,
+                    [None, None],
                 )
-                self._affected_by_set[effective_set_id].add(model_key)
-                self._affected.add(model_key)
-
-                # Track hidden dimension from up tensor for offset calculation
-                # up shape is (out, rank), out dimension is hidden
-                if model_key not in self._hidden_dims:
-                    self._hidden_dims[model_key] = up.shape[0]
+        effective_set_id = set_id if set_id is not None else "__default__"
+        for key, up, down, scale, extra in pending:
+            if extra[0] is not None:
+                self._qkv_data_by_set[effective_set_id][key].append((up, down, scale, *extra))
             else:
-                # Standard LoRA
-                self._lora_data_by_set[effective_set_id][layer_key].append((up, down, scale))
-                self._affected_by_set[effective_set_id].add(layer_key)
-                self._affected.add(layer_key)
+                self._lora_data_by_set[effective_set_id][key].append((up, down, scale))
+            self._affected_by_set[effective_set_id].add(key)
+            self._affected.add(key)
 
     @property
     def affected_keys(self) -> frozenset[str]:
@@ -580,4 +515,3 @@ class FluxLoader(LoRALoader):
         self._qkv_data_by_set.clear()
         self._affected_by_set.clear()
         self._affected.clear()
-        self._hidden_dims.clear()

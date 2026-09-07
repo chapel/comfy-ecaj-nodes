@@ -154,6 +154,15 @@ def _clip_sources(normalized: str, shape: tuple[int, ...]):
     """Header-only equivalent of Comfy utils.clip_text_transformers_convert."""
     prefix = "clip_g.model."
     if not normalized.startswith(prefix):
+        if not normalized.startswith(
+            (
+                "clip_l.transformer.text_model.",
+                "clip_g.transformer.text_model.",
+                "clip_l.transformer.text_projection.",
+                "clip_g.transformer.text_projection.",
+            )
+        ):
+            raise CLIPKeyMappingError(f"Unsupported CLIP encoder layout: {normalized}")
         return [(normalized, None, False)]
     rest = normalized[len(prefix) :]
     target = "clip_g.transformer."
@@ -247,7 +256,11 @@ class CLIPModelLoader:
 
         # AC: @clip-model-loader ac-7
         # Validate embedder structure before building mappings
-        has_clip_l, has_clip_g = _validate_embedder_structure(file_keys)
+        try:
+            has_clip_l, has_clip_g = _validate_embedder_structure(file_keys)
+        except BaseException:
+            self.cleanup()
+            raise
 
         # AC: @clip-model-loader ac-6
         # Build key mappings at open time (no tensor loading)
@@ -278,8 +291,11 @@ class CLIPModelLoader:
         self._affected_keys = frozenset(self._normalized_to_file.keys())
 
         # Store encoder presence info
-        self._has_clip_l = has_clip_l
-        self._has_clip_g = has_clip_g
+        self._has_clip_l = any(k.startswith("clip_l.") for k in self._affected_keys)
+        self._has_clip_g = any(k.startswith("clip_g.") for k in self._affected_keys)
+        if (has_clip_l and not self._has_clip_l) or (has_clip_g and not self._has_clip_g):
+            self.cleanup()
+            raise CLIPKeyMappingError("Checkpoint encoder contains no usable CLIP weights")
 
     @property
     def affected_keys(self) -> frozenset[str]:

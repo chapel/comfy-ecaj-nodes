@@ -129,6 +129,31 @@ class LoRALoader(ABC):
         """
         raise NotImplementedError
 
+    def validate_compatible_keys(self, base_keys, key_shapes=None) -> None:
+        """Reject unmapped groups and incompatible reconstructed target slices."""
+        missing = self.affected_keys - set(base_keys)
+        if missing:
+            raise ValueError("Unmapped LoRA target keys: " + ", ".join(sorted(missing)[:10]))
+        if key_shapes is None:
+            return
+        for key in self.affected_keys:
+            shape = tuple(key_shapes[key])
+            for spec in self.get_delta_specs([key], {key: 0}):
+                expected = spec.target_shape or (spec.up.shape[0], spec.down.shape[1])
+                if spec.offset is not None:
+                    start, length = spec.offset
+                    if len(shape) != 2 or start < 0 or start + length > shape[0]:
+                        raise ValueError(
+                            f"LoRA slice outside target {key}: {spec.offset}, {shape}"
+                        )
+                    shape_for_delta = (length, shape[1])
+                else:
+                    shape_for_delta = shape
+                if tuple(expected) != shape_for_delta:
+                    raise ValueError(
+                        f"LoRA shape mismatch for {key}: {expected} vs {shape_for_delta}"
+                    )
+
     def __enter__(self) -> "LoRALoader":
         """Support context manager usage for automatic cleanup."""
         return self

@@ -28,15 +28,14 @@ Compound name preservation maintains correct key structure.
 Standard up/down DeltaSpec production.
 """
 
-import re
 from collections import defaultdict
 from collections.abc import Sequence
 
 import torch
-from safetensors import safe_open
 
 from ..executor import DeltaSpec
 from .base import LoRALoader
+from .validation import read_pairs
 
 __all__ = ["QwenLoader"]
 
@@ -51,6 +50,10 @@ _COMPOUND_NAMES = sorted(
         "lokr_w2_b",
         "lokr_w1",
         "lokr_w2",
+        "add_q_proj",
+        "add_k_proj",
+        "add_v_proj",
+        "to_add_out",
         # LoRA components
         "lora_down",
         "lora_up",
@@ -69,6 +72,8 @@ _COMPOUND_NAMES = sorted(
         "up_proj",
         "down_proj",
         # Modulation components
+        "img_mlp",
+        "txt_mlp",
         "img_mod",
         "txt_mod",
     ],
@@ -93,10 +98,6 @@ def _normalize_lycoris_key(key: str) -> str:
 
     # Strip lycoris_ prefix
     key = key[len("lycoris_") :]
-
-    # Convert numeric indices: _N_ -> .N. and _N at end -> .N
-    key = re.sub(r"_(\d+)_", r".\1.", key)
-    key = re.sub(r"_(\d+)$", r".\1", key)
 
     # Replace compound names with placeholders
     placeholders = {}
@@ -130,10 +131,6 @@ def _normalize_kohya_key(key: str) -> str:
 
     # Strip lora_unet_ prefix
     key = key[len("lora_unet_") :]
-
-    # Convert numeric indices
-    key = re.sub(r"_(\d+)_", r".\1.", key)
-    key = re.sub(r"_(\d+)$", r".\1", key)
 
     # Replace compound names with placeholders
     placeholders = {}
@@ -252,70 +249,13 @@ class QwenLoader(LoRALoader):
         self._affected: set[str] = set()
 
     def load(self, path: str, strength: float = 1.0, set_id: str | None = None) -> None:
-        """Load a LoRA safetensors file into the given set.
-
-        # AC: @qwen-lora-loader ac-4
-        Handles Qwen key mapping from diffusers, kohya, and LyCORIS formats.
-        """
-        # Use a default set_id if none provided (backward compat)
+        """Validate the whole package before publishing factors to this set."""
+        pending = read_pairs(path, strength, _parse_qwen_lora_key, conv=True)
         effective_set_id = set_id if set_id is not None else "__default__"
-
-        # Collect up/down pairs keyed by model key
-        layer_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
-        # Collect alpha values keyed by LoRA base path
-        alpha_values: dict[str, float] = {}
-        # Map from model_key to LoRA base path (for alpha lookup)
-        lora_base_paths: dict[str, str] = {}
-
-        with safe_open(path, framework="pt", device="cpu") as f:
-            for lora_key in f.keys():
-                # Check for alpha keys
-                if lora_key.endswith(".alpha"):
-                    alpha_tensor = f.get_tensor(lora_key)
-                    if alpha_tensor.numel() == 1:
-                        alpha_values[lora_key[: -len(".alpha")]] = alpha_tensor.item()
-                    continue
-
-                model_key, direction = _parse_qwen_lora_key(lora_key)
-                if model_key is None:
-                    continue
-
-                tensor = f.get_tensor(lora_key)
-                layer_tensors[model_key][direction] = tensor
-
-                # Extract LoRA base path for alpha lookup
-                lora_base = lora_key
-                for suffix in (
-                    ".lora_A.weight",
-                    ".lora_B.weight",
-                    ".lora_down.weight",
-                    ".lora_up.weight",
-                ):
-                    if lora_base.endswith(suffix):
-                        lora_base = lora_base[: -len(suffix)]
-                        break
-                lora_base_paths[model_key] = lora_base
-
-        # Build delta specs for complete up/down pairs
-        for model_key, tensors in layer_tensors.items():
-            if "up" not in tensors or "down" not in tensors:
-                continue
-
-            up = tensors["up"]
-            down = tensors["down"]
-
-            # Compute scale: strength * alpha / rank
-            # Alpha defaults to rank if not found
-            rank = down.shape[0]
-            alpha = float(rank)
-            lora_base = lora_base_paths.get(model_key)
-            if lora_base is not None and lora_base in alpha_values:
-                alpha = alpha_values[lora_base]
-            scale = strength * alpha / rank
-
-            self._lora_data_by_set[effective_set_id][model_key].append((up, down, scale))
-            self._affected_by_set[effective_set_id].add(model_key)
-            self._affected.add(model_key)
+        for key, up, down, scale, extra in pending:
+            self._lora_data_by_set[effective_set_id][key].append((up, down, scale))
+            self._affected_by_set[effective_set_id].add(key)
+            self._affected.add(key)
 
     @property
     def affected_keys(self) -> frozenset[str]:

@@ -18,23 +18,32 @@ from collections import defaultdict
 from collections.abc import Sequence
 
 import torch
-from safetensors import safe_open
 
 from ..executor import DeltaSpec
 from .base import LoRALoader
+from .mapping import sdxl_module
+from .validation import read_pairs
 
 __all__ = ["SDXLLoader"]
 
-
-# Prefix mapping: LoRA naming -> model state dict prefix
-_LORA_TO_MODEL_PREFIX = {
-    "lora_unet_": "diffusion_model.",
-}
 
 # Compound token patterns in SDXL UNet LoRA keys.
 # These are ordered longest-first for greedy matching.
 # Pattern: underscore-separated -> dot-separated compound name
 _COMPOUND_TOKENS = [
+    ("down_blocks", "down_blocks"),
+    ("up_blocks", "up_blocks"),
+    ("mid_block", "mid_block"),
+    ("time_emb_proj", "time_emb_proj"),
+    ("conv_shortcut", "conv_shortcut"),
+    ("time_embedding", "time_embedding"),
+    ("add_embedding", "add_embedding"),
+    ("class_embedding", "class_embedding"),
+    ("linear_1", "linear_1"),
+    ("linear_2", "linear_2"),
+    ("conv_in", "conv_in"),
+    ("conv_out", "conv_out"),
+    ("conv_norm_out", "conv_norm_out"),
     # Block structure
     ("input_blocks", "input_blocks"),
     ("output_blocks", "output_blocks"),
@@ -118,6 +127,11 @@ def _parse_lora_key(lora_key: str) -> tuple[str | None, str, str]:
     # AC: @sdxl-loader ac-3
     Handles attention keys (proj_in, proj_out, to_q/to_k/to_v).
     """
+    for prefix in ("unet.", "diffusion_model.", "model.diffusion_model."):
+        if lora_key.startswith(prefix):
+            path = lora_key[len(prefix) :].rsplit(".lora_", 1)[0]
+            direction = "down" if any(s in lora_key for s in (".lora_A.", ".lora_down.")) else "up"
+            return "diffusion_model." + sdxl_module(path) + ".weight", direction, lora_key
     # Skip non-unet keys (text encoders handled separately if needed)
     if not lora_key.startswith("lora_unet_"):
         return None, "", ""
@@ -145,15 +159,9 @@ def _parse_lora_key(lora_key: str) -> tuple[str | None, str, str]:
     model_key = "diffusion_model."
     parts: list[str] = []
 
-    for token in tokens:
-        if token.isdigit():
-            # Numeric index - append with dot
-            parts.append(token)
-        else:
-            # Named segment
-            parts.append(token)
+    parts.extend(tokens)
 
-    model_key += ".".join(parts) + ".weight"
+    model_key += sdxl_module(".".join(parts)) + ".weight"
 
     return model_key, direction, lora_key
 
@@ -185,63 +193,13 @@ class SDXLLoader(LoRALoader):
         self._affected: set[str] = set()
 
     def load(self, path: str, strength: float = 1.0, set_id: str | None = None) -> None:
-        """Load a LoRA safetensors file into the given set.
-
-        # AC: @lora-loaders ac-1
-        Handles SDXL key mapping from kohya format.
-        """
-        # Use a default set_id if none provided (backward compat)
+        """Validate the whole package before publishing factors to this set."""
+        pending = read_pairs(path, strength, lambda name: _parse_lora_key(name)[:2], conv=True)
         effective_set_id = set_id if set_id is not None else "__default__"
-
-        # Collect up/down pairs keyed by layer path
-        layer_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
-        # Collect alpha values keyed by LoRA base path
-        alpha_values: dict[str, float] = {}
-        # Map from model_key to LoRA base path (for alpha lookup)
-        lora_base_paths: dict[str, str] = {}
-
-        with safe_open(path, framework="pt", device="cpu") as f:
-            for lora_key in f.keys():
-                # Check for alpha keys (e.g. "lora_unet_input_blocks_0_0.alpha")
-                if lora_key.endswith(".alpha"):
-                    alpha_tensor = f.get_tensor(lora_key)
-                    if alpha_tensor.numel() == 1:
-                        alpha_values[lora_key[: -len(".alpha")]] = alpha_tensor.item()
-                    continue
-
-                model_key, direction, _ = _parse_lora_key(lora_key)
-                if model_key is None:
-                    continue
-
-                tensor = f.get_tensor(lora_key)
-                layer_tensors[model_key][direction] = tensor
-
-                # Extract LoRA base path for alpha lookup
-                # e.g. "lora_unet_input_blocks_0_0.lora_up.weight"
-                #    → "lora_unet_input_blocks_0_0"
-                lora_base = lora_key.rsplit(".lora_", 1)[0]
-                lora_base_paths[model_key] = lora_base
-
-        # Build delta specs for complete up/down pairs
-        for model_key, tensors in layer_tensors.items():
-            if "up" not in tensors or "down" not in tensors:
-                continue
-
-            up = tensors["up"]
-            down = tensors["down"]
-
-            # Compute scale: strength * alpha / rank
-            # Alpha is read from the file if available, otherwise defaults to rank
-            rank = down.shape[0]
-            alpha = float(rank)
-            lora_base = lora_base_paths.get(model_key)
-            if lora_base is not None and lora_base in alpha_values:
-                alpha = alpha_values[lora_base]
-            scale = strength * alpha / rank
-
-            self._lora_data_by_set[effective_set_id][model_key].append((up, down, scale))
-            self._affected_by_set[effective_set_id].add(model_key)
-            self._affected.add(model_key)
+        for key, up, down, scale, extra in pending:
+            self._lora_data_by_set[effective_set_id][key].append((up, down, scale))
+            self._affected_by_set[effective_set_id].add(key)
+            self._affected.add(key)
 
     @property
     def affected_keys(self) -> frozenset[str]:
