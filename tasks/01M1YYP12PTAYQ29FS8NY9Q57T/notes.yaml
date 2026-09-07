@@ -20,3 +20,15 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-09-07T22:24:30.938Z
+  - _ulid: 01M1Z0B3Y11FVZRGSVE9C99JPV
+    content: Fresh reviews approve memory9370386b and qualitybae9cb16, including authorized descriptive
+      AGENTS blob d5c299c; integrated as02dde8d8/8b8bed3b plus docsd226920d. Separate integration
+      .venv resolved CPU Torch2.14.0 on Python3.10.19 and2372 quality-stage tests passed; live Comfy
+      packages unchanged. Math review found singleton filter attenuation and near1 Entmax precision
+      edges; fresh fixer work/audit-math-fixes assigned. Parent reproduced lazy mapping prior-input
+      retention across successful OOM retries; separate fresh fixer work/audit-lazy-input-fixes
+      assigned. Original saves/loaders still implementing; identity fresh review and small
+      shared-validator cleanup active. Final combined tests/review/PR still pending.
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-09-07T22:38:08.834Z
