@@ -249,27 +249,32 @@ def analyze_recipe(
     # Load each LoRA set and track affected keys per set
     set_affected: dict[str, set[str]] = {}
 
-    for set_id, recipe_lora in lora_sets.items():
-        set_key = str(set_id)  # Convert int id to string key
+    try:
+        for set_id, recipe_lora in lora_sets.items():
+            set_key = str(set_id)  # Convert int id to string key
 
-        # Load all LoRAs in this set, tagged with set_key
-        for lora_spec in recipe_lora.loras:
-            lora_name = lora_spec["path"]
-            strength = lora_spec["strength"]
+            # Load all LoRAs in this set, tagged with set_key
+            for lora_spec in recipe_lora.loras:
+                lora_name = lora_spec["path"]
+                strength = lora_spec["strength"]
 
-            # Resolve path (AC-6: raises FileNotFoundError if missing)
-            full_path = _resolve_lora_path(lora_name, lora_path_resolver)
-            if not os.path.exists(full_path):
-                raise FileNotFoundError(
-                    f"LoRA file not found: {lora_name} "
-                    f"(referenced by LoRA node with strength {strength})"
-                )
+                # Resolve path (AC-6: raises FileNotFoundError if missing)
+                full_path = _resolve_lora_path(lora_name, lora_path_resolver)
+                if not os.path.exists(full_path):
+                    raise FileNotFoundError(
+                        f"LoRA file not found: {lora_name} "
+                        f"(referenced by LoRA node with strength {strength})"
+                    )
 
-            # Load the LoRA file into the specific set
-            loader.load(full_path, strength, set_id=set_key)
+                # Load the LoRA file into the specific set
+                loader.load(full_path, strength, set_id=set_key)
 
-        # AC-4: Keys added by this set (queried from the set-scoped API)
-        set_affected[set_key] = loader.affected_keys_for_set(set_key)
+            # AC-4: Keys added by this set (queried from the set-scoped API)
+            set_affected[set_key] = loader.affected_keys_for_set(set_key)
+
+    except BaseException:
+        loader.cleanup()
+        raise
 
     # All affected keys across all sets
     affected_keys = set(loader.affected_keys)

@@ -59,17 +59,6 @@ _EXCLUDED_PREFIXES = (
     "post_quant_conv.",  # VAE post-quantization
 )
 
-# Architecture detection patterns (applied to NORMALIZED keys).
-# Kept as a compatibility surface for tests that inspect available rules.
-_ARCH_PATTERNS = tuple(
-    (
-        rule.arch,
-        lambda keys, arch=rule.arch: match_architecture_evidence(keys, arch).is_complete,
-    )
-    for rule in ARCHITECTURE_RULES
-)
-
-
 # Native Krea 2 denoiser roots; enabled only after complete header detection.
 # Do not treat arbitrary bare checkpoint tensors as diffusion model weights.
 _KREA2_BARE_PREFIXES = (
@@ -81,6 +70,56 @@ _KREA2_BARE_PREFIXES = (
     "txtfusion.",
     "txtmlp.",
 )
+
+
+_BARE_PREFIXES = {
+    "krea2": _KREA2_BARE_PREFIXES,
+    "flux": (
+        "double_blocks.",
+        "single_blocks.",
+        "img_in.",
+        "txt_in.",
+        "time_in.",
+        "vector_in.",
+        "guidance_in.",
+        "final_layer.",
+        "double_stream_modulation_img.",
+        "double_stream_modulation_txt.",
+        "single_stream_modulation.",
+    ),
+    "zimage": (
+        "layers.",
+        "noise_refiner.",
+        "context_refiner.",
+        "x_embedder.",
+        "cap_embedder.",
+        "t_embedder.",
+        "final_layer.",
+        "all_x_embedder.",
+        "all_final_layer.",
+        "clip_text_pooled_proj.",
+        "time_text_embed.",
+        "siglip_embedder.",
+        "siglip_refiner.",
+    ),
+    "sdxl": (
+        "input_blocks.",
+        "middle_block.",
+        "output_blocks.",
+        "time_embed.",
+        "label_emb.",
+        "out.",
+    ),
+    "qwen": (
+        "transformer_blocks.",
+        "img_in.",
+        "txt_in.",
+        "txt_norm.",
+        "time_text_embed.",
+        "norm_out.",
+        "proj_out.",
+    ),
+}
 
 
 def _normalize_key(file_key: str, *, bare_arch: str | None = None) -> str | None:
@@ -114,7 +153,13 @@ def _normalize_key(file_key: str, *, bare_arch: str | None = None) -> str | None
             normalized = f"diffusion_model.{suffix}"
             break
     else:
-        if bare_arch == "krea2" and file_key.startswith(_KREA2_BARE_PREFIXES):
+        if bare_arch == "zimage" and file_key in {
+            "x_pad_token",
+            "cap_pad_token",
+            "siglip_pad_token",
+        }:
+            return f"diffusion_model.{file_key}"
+        if file_key.startswith(_BARE_PREFIXES.get(bare_arch, ())):
             return f"diffusion_model.{file_key}"
         return None
 
@@ -136,6 +181,14 @@ def _detect_architecture_from_keys(normalized_keys: frozenset[str]) -> str | Non
     try:
         return detect_supported_architecture(normalized_keys)
     except ArchitectureDetectionError:
+        if (
+            sum(
+                match_architecture_evidence(normalized_keys, rule.arch).is_complete
+                for rule in ARCHITECTURE_RULES
+            )
+            > 1
+        ):
+            raise
         return None
 
 
@@ -196,19 +249,32 @@ class ModelLoader:
         candidate_keys = frozenset(
             key
             for file_key in file_keys
-            if (key := _normalize_key(file_key, bare_arch="krea2")) is not None
+            for candidate_arch in _BARE_PREFIXES
+            if (key := _normalize_key(file_key, bare_arch=candidate_arch)) is not None
         )
-        bare_arch = _detect_architecture_from_keys(candidate_keys)
+        try:
+            bare_arch = _detect_architecture_from_keys(candidate_keys)
+        except BaseException:
+            self.cleanup()
+            raise
 
         for file_key in file_keys:
             normalized = _normalize_key(file_key, bare_arch=bare_arch)
             if normalized is not None:
+                if normalized in self._normalized_to_file:
+                    self.cleanup()
+                    raise KeyMismatchError(f"Duplicate checkpoint aliases for {normalized}")
                 self._file_to_normalized[file_key] = normalized
                 self._normalized_to_file[normalized] = file_key
 
         # AC: @full-model-loader ac-5
         # Store affected keys as frozenset
         self._affected_keys = frozenset(self._normalized_to_file.keys())
+        if file_keys and not self._affected_keys:
+            self.cleanup()
+            raise KeyMismatchError(
+                "Nonempty checkpoint contains no usable supported diffusion weights"
+            )
 
         # AC: @full-model-loader ac-8
         # Detect architecture from normalized keys

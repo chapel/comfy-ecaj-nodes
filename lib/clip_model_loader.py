@@ -150,6 +150,59 @@ def _validate_embedder_structure(
     return has_embedder_0, has_embedder_1
 
 
+def _clip_sources(normalized: str, shape: tuple[int, ...]):
+    """Header-only equivalent of Comfy utils.clip_text_transformers_convert."""
+    prefix = "clip_g.model."
+    if not normalized.startswith(prefix):
+        if not normalized.startswith(
+            (
+                "clip_l.transformer.text_model.",
+                "clip_g.transformer.text_model.",
+                "clip_l.transformer.text_projection.",
+                "clip_g.transformer.text_projection.",
+            )
+        ):
+            raise CLIPKeyMappingError(f"Unsupported CLIP encoder layout: {normalized}")
+        return [(normalized, None, False)]
+    rest = normalized[len(prefix) :]
+    target = "clip_g.transformer."
+    basic = {
+        "positional_embedding": "text_model.embeddings.position_embedding.weight",
+        "token_embedding.weight": "text_model.embeddings.token_embedding.weight",
+        "ln_final.weight": "text_model.final_layer_norm.weight",
+        "ln_final.bias": "text_model.final_layer_norm.bias",
+        "text_projection": "text_projection.weight",
+        "text_projection.weight": "text_projection.weight",
+    }
+    if rest in basic:
+        return [(target + basic[rest], None, rest == "text_projection")]
+    if rest.startswith("transformer.resblocks."):
+        index, module = rest[len("transformer.resblocks.") :].split(".", 1)
+        target += f"text_model.encoder.layers.{index}."
+        for source, dest in {
+            "ln_1": "layer_norm1",
+            "ln_2": "layer_norm2",
+            "mlp.c_fc": "mlp.fc1",
+            "mlp.c_proj": "mlp.fc2",
+            "attn.out_proj": "self_attn.out_proj",
+        }.items():
+            if module in (source + ".weight", source + ".bias"):
+                return [(target + dest + module[len(source) :], None, False)]
+        if module in ("attn.in_proj_weight", "attn.in_proj_bias"):
+            if not shape or shape[0] % 3:
+                raise CLIPKeyMappingError(f"Invalid fused QKV shape for {normalized}: {shape}")
+            size = shape[0] // 3
+            suffix = module.rsplit("_", 1)[1]
+            return [
+                (target + f"self_attn.{p}_proj.{suffix}", (i * size, size), False)
+                for i, p in enumerate("qkv")
+            ]
+    # OpenCLIP's scalar logit scale is not a text-model parameter.
+    if rest == "logit_scale":
+        return []
+    raise CLIPKeyMappingError(f"Unsupported OpenCLIP-G key: {normalized}")
+
+
 class CLIPModelLoader:
     """Streaming model loader for CLIP text encoder weights from checkpoints.
 
@@ -203,7 +256,11 @@ class CLIPModelLoader:
 
         # AC: @clip-model-loader ac-7
         # Validate embedder structure before building mappings
-        has_clip_l, has_clip_g = _validate_embedder_structure(file_keys)
+        try:
+            has_clip_l, has_clip_g = _validate_embedder_structure(file_keys)
+        except BaseException:
+            self.cleanup()
+            raise
 
         # AC: @clip-model-loader ac-6
         # Build key mappings at open time (no tensor loading)
@@ -212,19 +269,33 @@ class CLIPModelLoader:
         self._file_to_normalized: dict[str, str] = {}
         self._normalized_to_file: dict[str, str] = {}
 
-        for file_key in file_keys:
-            normalized = _normalize_clip_key(file_key)
-            if normalized is not None:
-                self._file_to_normalized[file_key] = normalized
-                self._normalized_to_file[normalized] = file_key
+        self._transforms = {}
+        try:
+            for file_key in file_keys:
+                normalized = _normalize_clip_key(file_key)
+                if normalized is None:
+                    continue
+                shape = tuple(self._handle.get_slice(file_key).get_shape())
+                for target, rows, transpose in _clip_sources(normalized, shape):
+                    if target in self._normalized_to_file:
+                        raise CLIPKeyMappingError(f"Duplicate checkpoint aliases for {target}")
+                    self._file_to_normalized[file_key] = target
+                    self._normalized_to_file[target] = file_key
+                    self._transforms[target] = (rows, transpose)
+        except BaseException:
+            self.cleanup()
+            raise
 
         # AC: @clip-model-loader ac-3
         # Store affected keys as frozenset
         self._affected_keys = frozenset(self._normalized_to_file.keys())
 
         # Store encoder presence info
-        self._has_clip_l = has_clip_l
-        self._has_clip_g = has_clip_g
+        self._has_clip_l = any(k.startswith("clip_l.") for k in self._affected_keys)
+        self._has_clip_g = any(k.startswith("clip_g.") for k in self._affected_keys)
+        if (has_clip_l and not self._has_clip_l) or (has_clip_g and not self._has_clip_g):
+            self.cleanup()
+            raise CLIPKeyMappingError("Checkpoint encoder contains no usable CLIP weights")
 
     @property
     def affected_keys(self) -> frozenset[str]:
@@ -275,7 +346,15 @@ class CLIPModelLoader:
             if file_key is None:
                 missing_keys.append(key)
             else:
-                tensors.append(self._handle.get_tensor(file_key))
+                rows, transpose = self._transforms[key]
+                if rows is None:
+                    tensor = self._handle.get_tensor(file_key)
+                else:
+                    start, length = rows
+                    tensor = self._handle.get_slice(file_key)[start : start + length].clone()
+                if transpose:
+                    tensor = tensor.transpose(0, 1).contiguous()
+                tensors.append(tensor)
 
         if missing_keys:
             raise KeyError(

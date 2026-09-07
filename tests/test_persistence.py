@@ -17,6 +17,7 @@ from lib.persistence import (
     compute_base_identity,
     compute_lora_stats,
     compute_recipe_hash,
+    dependency_key,
     load_affected_keys,
     serialize_recipe,
     validate_model_name,
@@ -162,12 +163,14 @@ class TestSerializeRecipe:
         assert parsed["block_config"]["block_overrides"] == [["IN00-02", 0.5]]
 
     # AC: @exit-model-persistence ac-6
-    def test_deterministic_output(self):
-        """Same recipe should always produce the same JSON."""
+    def test_deterministic_output(self, tmp_path):
+        """Same recipe with trusted content produces the same JSON."""
         base = RecipeBase(model_patcher=object(), arch="sdxl")
         lora = RecipeLoRA(loras=({"path": "x.safetensors", "strength": 1.0},))
         merge = RecipeMerge(base=base, target=lora, backbone=None, t_factor=0.5)
-        stats = {"x.safetensors": (100.0, 200)}
+        dependency = tmp_path / "x.safetensors"
+        dependency.write_bytes(b"tiny")
+        stats = compute_lora_stats(merge, lambda _: str(dependency))
 
         r1 = serialize_recipe(merge, "abc", stats)
         r2 = serialize_recipe(merge, "abc", stats)
@@ -261,89 +264,32 @@ class TestComputeBaseIdentity:
         assert compute_base_identity(state1) != compute_base_identity(state2)
 
     # AC: @exit-model-persistence ac-bounded-identity-preparation
-    def test_large_tensor_sampling_converts_only_bounded_slice(self):
-        """Base identity sampling must slice before dtype/device conversion."""
+    def test_lazy_state_releases_each_value_before_fetching_next(self):
+        """Content hashing supports effective per-key access without retaining values."""
+        import weakref
+        from collections.abc import Mapping
 
-        class FakeLargeTensor:
-            def __init__(
-                self,
-                *,
-                shape: tuple[int, ...],
-                dtype: torch.dtype,
-                conversions: list[int],
-                numel: int | None = None,
-            ) -> None:
-                self.shape = shape
-                self.dtype = dtype
-                self._numel = numel if numel is not None else torch.Size(shape).numel()
-                self._conversions = conversions
+        refs = []
+        reads = []
 
-            def detach(self):
-                return self
+        class LazyState(Mapping):
+            def __len__(self):
+                return 3
 
-            def is_contiguous(self) -> bool:
-                return True
+            def __iter__(self):
+                return iter(("c", "b", "a"))
 
-            def view(self, *_shape: int):
-                return FakeLargeTensor(
-                    shape=(self._numel,),
-                    dtype=self.dtype,
-                    conversions=self._conversions,
-                    numel=self._numel,
-                )
+            def __getitem__(self, key):
+                assert all(ref() is None for ref in refs)
+                reads.append(key)
+                value = torch.ones(32, 32)
+                refs.append(weakref.ref(value))
+                return value
 
-            def __getitem__(self, item: slice):
-                if not isinstance(item, slice):
-                    raise AssertionError(f"unexpected index: {item!r}")
-                start, stop, step = item.indices(self._numel)
-                sliced_numel = max(0, (stop - start + (step - 1)) // step)
-                return FakeLargeTensor(
-                    shape=(sliced_numel,),
-                    dtype=self.dtype,
-                    conversions=self._conversions,
-                    numel=sliced_numel,
-                )
-
-            def to(self, *, device: str, dtype: torch.dtype):
-                assert device == "cpu"
-                assert dtype is torch.float32
-                self._conversions.append(self._numel)
-                if self._numel > 64:
-                    raise AssertionError(
-                        f"converted full sample tensor with {self._numel} elements"
-                    )
-                return FakeConvertedSample(self._numel)
-
-        class FakeConvertedSample:
-            def __init__(self, numel: int) -> None:
-                self._numel = numel
-
-            def contiguous(self):
-                return self
-
-            def untyped_storage(self):
-                return b"\x00" * (self._numel * self.element_size())
-
-            def nelement(self) -> int:
-                return self._numel
-
-            def element_size(self) -> int:
-                return 4
-
-        conversions: list[int] = []
-        state = {
-            f"key_{idx}": FakeLargeTensor(
-                shape=(1_000_000, 1_000),
-                dtype=torch.float16,
-                conversions=conversions,
-            )
-            for idx in range(3)
-        }
-
-        identity = compute_base_identity(state)
-
-        assert len(identity) == 64
-        assert conversions == [64, 64, 64]
+        identity = compute_base_identity(LazyState(), chunk_bytes=64)
+        assert reads == ["a", "b", "c"]
+        assert all(ref() is None for ref in refs)
+        assert identity == compute_base_identity({key: torch.ones(32, 32) for key in reads})
 
 
 # =============================================================================
@@ -388,8 +334,8 @@ class TestComputeLoraStats:
             return str(tmp_path / name)
 
         stats = compute_lora_stats(lora, resolver)
-        assert "test.safetensors" in stats
-        mtime, size = stats["test.safetensors"]
+        fields = stats[dependency_key("loras", "test.safetensors")]
+        mtime, size = fields["mtime"], fields["size"]
         assert size == 100
         assert mtime > 0
 
@@ -402,7 +348,8 @@ class TestComputeLoraStats:
             return f"/nonexistent/{name}"
 
         stats = compute_lora_stats(lora, resolver)
-        assert stats["missing.safetensors"] == (0.0, 0)
+        fields = stats[dependency_key("loras", "missing.safetensors")]
+        assert (fields["mtime"], fields["size"]) == (0.0, 0)
 
     # AC: @exit-model-persistence ac-7
     def test_walks_merge_tree(self, tmp_path):
@@ -419,8 +366,8 @@ class TestComputeLoraStats:
             return str(tmp_path / name)
 
         stats = compute_lora_stats(merge, resolver)
-        assert "a.safetensors" in stats
-        assert "b.safetensors" in stats
+        assert dependency_key("loras", "a.safetensors") in stats
+        assert dependency_key("loras", "b.safetensors") in stats
 
     # AC: @diffusion-model-path-resolution ac-8
     def test_model_resolver_receives_source_dir(self, tmp_path):
@@ -444,8 +391,7 @@ class TestComputeLoraStats:
 
         stats = compute_lora_stats(model, lora_resolver, model_resolver)
         assert received_args == [("test.safetensors", "checkpoints")]
-        assert "test.safetensors" in stats
-        assert stats["test.safetensors"][1] == 200
+        assert stats[dependency_key("checkpoints", "test.safetensors")]["size"] == 200
 
     # AC: @diffusion-model-path-resolution ac-8
     def test_diffusion_models_source_dir(self, tmp_path):
@@ -463,7 +409,7 @@ class TestComputeLoraStats:
             return str(tmp_path / source_dir / name)
 
         stats = compute_lora_stats(model, lora_resolver, model_resolver)
-        assert stats["flux.safetensors"][1] == 300
+        assert stats[dependency_key("diffusion_models", "flux.safetensors")]["size"] == 300
 
     # AC: @diffusion-model-path-resolution ac-8
     def test_mixed_lora_and_model_stats(self, tmp_path):
@@ -487,8 +433,8 @@ class TestComputeLoraStats:
             return str(tmp_path / source_dir / name)
 
         stats = compute_lora_stats(merge, lora_resolver, model_resolver)
-        assert stats["lora.safetensors"][1] == 100
-        assert stats["model.safetensors"][1] == 500
+        assert stats[dependency_key("loras", "lora.safetensors")]["size"] == 100
+        assert stats[dependency_key("checkpoints", "model.safetensors")]["size"] == 500
 
 
 # =============================================================================

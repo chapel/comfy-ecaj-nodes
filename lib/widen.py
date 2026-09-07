@@ -8,6 +8,7 @@ This module is pure torch and stdlib - no ComfyUI imports.
 """
 
 import logging
+import math
 from dataclasses import dataclass
 
 import torch
@@ -34,6 +35,28 @@ class WIDENConfig:
     sparsity_method: str = "softmax"  # softmax, sparsemax, entmax
     calibration_mode: str = "overwrite"  # overwrite or multiplicative
     dtype: torch.dtype = torch.float32
+
+    def validate(self) -> None:
+        """Reject malformed settings before any numerical fallback can hide them."""
+        for name, options in (
+            ("ranking_strategy", ("percentile", "zscore", "minmax", "soft", "softrank")),
+            ("sparsity_method", ("softmax", "sparsemax", "entmax")),
+            ("calibration_mode", ("overwrite", "multiplicative")),
+        ):
+            if getattr(self, name) not in options:
+                raise ValueError(f"Unknown {name}: {getattr(self, name)!r}; expected {options}")
+        for name in ("t_factor", "s_calibration"):
+            value = getattr(self, name)
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+            ):
+                raise ValueError(f"{name} must be a finite number")
+        if self.s_calibration < 0:
+            raise ValueError("s_calibration must be nonnegative")
+        if self.dtype not in (torch.float16, torch.bfloat16, torch.float32, torch.float64):
+            raise ValueError("dtype must be a supported floating-point dtype")
 
 
 class WeightDisentangler:
@@ -219,6 +242,7 @@ class WIDEN:
         Default config: ranking_strategy=percentile, sparsity_method=softmax, s_calibration=1.0
         """
         config = config or WIDENConfig()
+        config.validate()
         self.config = config
 
         # Create central numerical config and thread through all components
@@ -349,14 +373,20 @@ class WIDEN:
             if self.t_factor <= 0:
                 return backbone
 
-            eps = self.numerical_config.get_adaptive_epsilon(delta)
+            # A key's tolerance must not depend on unrelated keys or OOM chunking.
+            eps = self.numerical_config.get_adaptive_epsilon(
+                delta, dim=tuple(range(1, delta.ndim))
+            )
 
             # 1D path (biases, norms) -- ndim=2 means [B, features]
             if lora_applied.ndim == 2:
                 mag_delta = torch.abs(delta)
 
                 # Per-sample variance check -- flat samples pass through
-                var = mag_delta.var(dim=1, keepdim=True)  # [B, 1]
+                # A singleton is flat; retain sample variance otherwise.
+                var = mag_delta.var(
+                    dim=1, keepdim=True, correction=int(mag_delta.shape[1] > 1)
+                )  # [B, 1]
                 flat_mask = var < eps  # [B, 1] bool
 
                 # Early exit only if ALL samples are flat
@@ -386,11 +416,16 @@ class WIDEN:
 
             delta_m = torch.abs(m_lora - m_base)
             delta_D = self.divergence_calc.compute_direction_divergence_batched(D_lora, D_base)
+            del m_lora, m_base, D_lora, D_base
 
             # Per-sample variance check
             combined_raw = delta_m + delta_D
             spatial_dims = tuple(range(1, combined_raw.ndim))
-            var = combined_raw.var(dim=spatial_dims, keepdim=True)  # [B, 1, ...]
+            var = combined_raw.var(
+                dim=spatial_dims,
+                keepdim=True,
+                correction=int(combined_raw[0].numel() > 1),
+            )  # [B, 1, ...]; singleton is flat, otherwise sample variance
             flat_mask = var < eps  # [B, 1, ...] bool
 
             # Early exit only if ALL samples are flat
@@ -419,9 +454,19 @@ class WIDEN:
 
             return backbone + mask * delta
 
-        except torch.cuda.OutOfMemoryError:
+        except (torch.cuda.OutOfMemoryError, MemoryError):
             raise  # Let OOM propagate
         except Exception as e:
+            if isinstance(e, RuntimeError) and any(
+                message in str(e).lower()
+                for message in (
+                    "not enough memory",
+                    "out of memory",
+                    "can't allocate memory",
+                    "cannot allocate memory",
+                )
+            ):
+                raise
             # AC: @widen-core ac-8
             logger.warning(f"filter_delta_batched error, using passthrough: {e}")
             return lora_applied
@@ -502,9 +547,19 @@ class WIDEN:
 
             return W_merged
 
-        except torch.cuda.OutOfMemoryError:
+        except (torch.cuda.OutOfMemoryError, MemoryError):
             raise  # Let OOM propagate
         except Exception as e:
+            if isinstance(e, RuntimeError) and any(
+                message in str(e).lower()
+                for message in (
+                    "not enough memory",
+                    "out of memory",
+                    "can't allocate memory",
+                    "cannot allocate memory",
+                )
+            ):
+                raise
             # AC: @widen-core ac-9
             logger.warning(f"merge_weights_batched error, using averaging fallback: {e}")
             return torch.stack(weights_list).mean(dim=0)
@@ -555,15 +610,15 @@ class WIDEN:
         backbone: torch.Tensor,
     ) -> torch.Tensor:
         """Batched 1D parameter merge: magnitude-only delta merge."""
-        deltas = [w - backbone for w in weights_list]
-        magnitudes = [torch.abs(d) for d in deltas]
-
-        ranked = [self.ranker.rank_weights_batched(m) for m in magnitudes]
+        # Score each branch immediately; neither full deltas nor magnitudes
+        # need to survive ranking. Recompute deltas in original reduction order.
+        ranked = [self.ranker.rank_weights_batched((w - backbone).abs()) for w in weights_list]
         scores = self.sparsity_fn(torch.stack(ranked), dim=0)
+        del ranked
 
-        merged = scores[0] * deltas[0]
-        for i in range(1, len(deltas)):
-            merged += scores[i] * deltas[i]
+        merged = scores[0] * (weights_list[0] - backbone)
+        for i in range(1, len(weights_list)):
+            merged += scores[i] * (weights_list[i] - backbone)
         merged += backbone
         return merged
 

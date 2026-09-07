@@ -121,11 +121,17 @@ def test_native_checkpoint_missing_norm_still_raises(tmp_path, missing):
 def test_bare_keys_require_complete_krea2_signature(tmp_path, keys):
     path = tmp_path / "not-krea2.safetensors"
     save_file({key: torch.ones(2) for key in keys}, str(path))
-    with ModelLoader(str(path)) as loader:
-        assert loader.arch is None
-        assert loader.affected_keys == frozenset()
-        with pytest.raises(KeyMismatchError):
-            loader.get_weights(["diffusion_model." + keys[0]])
+    if keys[0].startswith("blocks."):
+        with pytest.raises(KeyMismatchError, match="no usable"):
+            ModelLoader(str(path))
+    else:
+        with ModelLoader(str(path)) as loader:
+            assert loader.arch in {"zimage", "sdxl", "flux"}
+            assert loader.arch != "krea2"
+            assert loader.affected_keys == {"diffusion_model." + key for key in keys}
+            torch.testing.assert_close(
+                loader.get_weights(["diffusion_model." + keys[0]])[0], torch.ones(2)
+            )
 
 
 # AC: @full-model-loader ac-1

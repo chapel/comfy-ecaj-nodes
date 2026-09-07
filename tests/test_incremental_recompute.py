@@ -4,6 +4,7 @@ Covers all 16 acceptance criteria with unit tests for library functions
 and integration tests for the exit node cache.
 """
 
+import hashlib
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -52,8 +53,12 @@ def _base_identity() -> str:
     return "base_identity_hash_abc123"
 
 
-def _lora_stats() -> dict[str, tuple[float, int]]:
-    return {"lora_a.safetensors": (1000.0, 5000)}
+def _lora_stats() -> dict[str, dict]:
+    # Trusted content fixtures: isolate structure/mtime changes from nonce misses.
+    return {
+        name: {"mtime": 1000.0, "size": 5000, "sha256": hashlib.sha256(b"tiny").hexdigest()}
+        for name in ("lora_a.safetensors", "lora_b.safetensors")
+    }
 
 
 def _make_recipe(
@@ -151,8 +156,9 @@ class TestStructuralFingerprint:
     def test_different_file_stats_different_fingerprint(self):
         """Different file stats (mtime/size) → different fingerprint."""
         r = _make_recipe()
-        stats1 = {"lora_a.safetensors": (1000.0, 5000)}
-        stats2 = {"lora_a.safetensors": (2000.0, 5000)}
+        stats1 = _lora_stats()
+        stats2 = _lora_stats()
+        stats2["lora_a.safetensors"]["mtime"] = 2000.0
         fp1 = compute_structural_fingerprint(r, _base_identity(), stats1)
         fp2 = compute_structural_fingerprint(r, _base_identity(), stats2)
         assert fp1 != fp2
@@ -1179,7 +1185,10 @@ class TestExitNodeIncrementalCache:
             patch("nodes.exit.check_full_model_cache", return_value=False),
             patch("nodes.exit.check_ram_preflight"),
             patch("nodes.exit.MaterializationSink", return_value=mock_sink),
-            patch("nodes.exit._load_model_from_artifact", return_value=mock_model_patcher.clone()),
+            patch(
+                "nodes.exit._load_diffusion_model_artifact",
+                return_value=mock_model_patcher.clone(),
+            ),
             patch("nodes.exit.ProgressBar", None),
         ):
             node = WIDENExitNode()

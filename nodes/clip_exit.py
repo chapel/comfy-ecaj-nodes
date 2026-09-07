@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import gc
 from collections.abc import Callable
+from contextlib import ExitStack
 
 import torch
 
@@ -20,17 +21,17 @@ from ..lib.executor import (
     compile_batch_groups,
     compile_plan,
     compute_batch_size,
+    estimate_worst_chunk_bytes,
     execute_plan,
 )
 from ..lib.recipe import (
     RecipeBase,
-    RecipeCompose,
-    RecipeLoRA,
     RecipeMerge,
-    RecipeModel,
     RecipeNode,
 )
+from ..lib.recipe_validation import validate_recipe_tree
 from ..lib.widen import WIDEN, WIDENConfig
+from .effective_weights import EffectiveWeights, SelectedWeights, weight_metadata
 
 try:
     from comfy.utils import ProgressBar
@@ -44,74 +45,8 @@ __all__ = [
 
 
 def _validate_clip_recipe_tree(node: RecipeNode, path: str = "root") -> None:
-    """Recursively validate the CLIP recipe tree structure.
-
-    AC: @clip-exit-node ac-6
-    Raises ValueError naming the invalid type and its position in the tree.
-
-    Args:
-        node: Recipe node to validate
-        path: Current position in tree (for error messages)
-
-    Raises:
-        ValueError: If tree structure is invalid with position info
-    """
-    if isinstance(node, RecipeBase):
-        # Valid leaf node — verify it has domain="clip"
-        if getattr(node, "domain", "diffusion") != "clip":
-            raise ValueError(
-                f"RecipeBase at {path} has domain='{getattr(node, 'domain', 'diffusion')}', "
-                f"expected domain='clip'. Use CLIP Entry node to create CLIP recipes."
-            )
-        return
-
-    elif isinstance(node, RecipeLoRA):
-        # Valid branch node
-        return
-
-    elif isinstance(node, RecipeModel):
-        # Valid branch node for full model merging
-        return
-
-    elif isinstance(node, RecipeCompose):
-        # Validate each branch
-        if not node.branches:
-            raise ValueError(f"RecipeCompose at {path} has no branches")
-        for i, branch in enumerate(node.branches):
-            branch_path = f"{path}.branches[{i}]"
-            if not isinstance(branch, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
-                raise ValueError(
-                    f"Invalid branch type at {branch_path}: expected RecipeLoRA, "
-                    f"RecipeModel, RecipeCompose, or RecipeMerge, got {type(branch).__name__}"
-                )
-            _validate_clip_recipe_tree(branch, branch_path)
-
-    elif isinstance(node, RecipeMerge):
-        # Validate base
-        base_path = f"{path}.base"
-        if not isinstance(node.base, (RecipeBase, RecipeMerge)):
-            raise ValueError(
-                f"Invalid base type at {base_path}: expected RecipeBase or "
-                f"RecipeMerge, got {type(node.base).__name__}"
-            )
-        _validate_clip_recipe_tree(node.base, base_path)
-
-        # Validate target
-        target_path = f"{path}.target"
-        if not isinstance(node.target, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
-            raise ValueError(
-                f"Invalid target type at {target_path}: expected RecipeLoRA, "
-                f"RecipeModel, RecipeCompose, or RecipeMerge, got {type(node.target).__name__}"
-            )
-        _validate_clip_recipe_tree(node.target, target_path)
-
-        # Validate backbone (optional)
-        if node.backbone is not None:
-            backbone_path = f"{path}.backbone"
-            _validate_clip_recipe_tree(node.backbone, backbone_path)
-
-    else:
-        raise ValueError(f"Unknown recipe node type at {path}: {type(node).__name__}")
+    """Validate CLIP structure and domain. AC: @clip-exit-node ac-6."""
+    validate_recipe_tree(node, path, expected_domain="clip")
 
 
 def _unpatch_loaded_clip_clones(clip: object) -> None:
@@ -291,20 +226,21 @@ class WIDENCLIPExitNode:
         _unpatch_loaded_clip_clones(clip)
 
         # Get CLIP state dict via patcher
-        base_state = clip.patcher.model_state_dict()  # type: ignore[attr-defined]
-        storage_dtype = next(iter(base_state.values())).dtype
+        base_state = EffectiveWeights(clip.patcher)
+        storage_dtype = next(iter(weight_metadata(base_state).values())).dtype
 
         # Extract shape/size metadata so compile_batch_groups and preflight
         # don't need to hold tensor refs after GPU eval completes.
         # AC: @memory-management ac-13
-        key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
-        key_byte_sizes = {k: v.nelement() * v.element_size() for k, v in base_state.items()}
+        key_shapes = {k: tuple(v.shape) for k, v in weight_metadata(base_state).items()}
+        key_byte_sizes = {
+            k: v.nelement() * v.element_size() for k, v in weight_metadata(base_state).items()
+        }
 
         # --- AC-2: Analyze recipe with domain="clip" to get CLIP LoRA loader ---
-        analysis = analyze_recipe(widen_clip, lora_path_resolver=lora_path_resolver)
-        model_analysis = None
-
-        try:
+        with ExitStack() as resources:
+            analysis = analyze_recipe(widen_clip, lora_path_resolver=lora_path_resolver)
+            resources.callback(analysis.loader.cleanup)
             # AC-3: Analyze recipe for CLIP model checkpoints via domain dispatch
             model_analysis = analyze_recipe_models(
                 widen_clip,
@@ -312,6 +248,8 @@ class WIDENCLIPExitNode:
                 model_path_resolver=model_path_resolver,
                 domain="clip",
             )
+            for model_loader in model_analysis.model_loaders.values():
+                resources.callback(model_loader.cleanup)
 
             loader = analysis.loader
             set_affected = analysis.set_affected
@@ -383,14 +321,8 @@ class WIDENCLIPExitNode:
                 processed_keys = {k for keys in batch_groups.values() for k in keys}
                 merged_state_bytes = sum(key_byte_sizes[k] for k in processed_keys)
                 n_models = len(set_affected) + len(clip_model_loaders)
-                element_size = torch.finfo(compute_dtype).bits // 8
-                # Compute worst-case chunk bytes: pair each group's batch_size
-                # with its own shape (not max_batch * max_shape).
-                worst_chunk_bytes = max(
-                    element_size
-                    * torch.Size(sig.shape).numel()
-                    * compute_batch_size(sig.shape, n_models, compute_dtype)
-                    for sig in batch_groups
+                worst_chunk_bytes = estimate_worst_chunk_bytes(
+                    batch_groups, n_models, compute_dtype
                 )
                 check_ram_preflight(
                     merged_state_bytes=merged_state_bytes,
@@ -447,7 +379,7 @@ class WIDENCLIPExitNode:
                 )
 
                 # Run chunked evaluation with OOM backoff
-                group_base = {k: base_state[k] for k in group_keys}
+                group_base = SelectedWeights(base_state, group_keys)
                 group_results = chunked_evaluation(
                     keys=group_keys,
                     base_tensors=group_base,
@@ -459,6 +391,7 @@ class WIDENCLIPExitNode:
                 )
 
                 merged_state.update(group_results)
+                del group_results, group_base
 
                 # AC-9: Update progress after each batch group
                 if pbar is not None:
@@ -472,15 +405,6 @@ class WIDENCLIPExitNode:
             # AC: @memory-management ac-13
             # Free base_state after GPU eval — no longer needed (no save in CLIP exit).
             del base_state
-
-        finally:
-            # Cleanup LoRA loader
-            analysis.loader.cleanup()
-
-            # Cleanup CLIP model loaders (if they were opened)
-            if model_analysis is not None:
-                for model_loader in model_analysis.model_loaders.values():
-                    model_loader.cleanup()
 
         # Phase 3: Install merged weights as set patches
         # AC-4, AC-5: Returns CLIP with set patches

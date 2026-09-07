@@ -15,9 +15,6 @@ Actual implementations live in:
 
 from __future__ import annotations
 
-# Re-export gc so tests that patch "lib.executor.gc.collect" still work.
-import gc  # noqa: F401
-
 from .batch_groups import OpSignature, compile_batch_groups
 from .gpu_ops import (
     DeltaSpec,
@@ -27,6 +24,7 @@ from .gpu_ops import (
     chunked_evaluation,
     compute_batch_size,
     estimate_peak_ram,
+    estimate_worst_chunk_bytes,
     evaluate_affected_group,
     evaluate_to_sink,
     get_available_ram_bytes,
@@ -57,6 +55,7 @@ __all__ = [
     "evaluate_affected_group",
     "evaluate_to_sink",
     "estimate_peak_ram",
+    "estimate_worst_chunk_bytes",
     "evaluate_recipe",
     "execute_plan",
     "get_available_ram_bytes",

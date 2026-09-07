@@ -455,7 +455,8 @@ def execute_plan(
     # Build key_indices once (used by every OpApplyLoRA)
     key_indices = {k: i for i, k in enumerate(keys)}
 
-    for i, op in enumerate(plan.ops):
+    def execute_op(op: _Op) -> torch.Tensor:
+        # Op-owned aliases must die before the parent releases dead registers.
         # Use type(op) is X for pointer comparison (faster than isinstance)
         op_type = type(op)
 
@@ -477,7 +478,7 @@ def execute_plan(
                     domain,
                 )
 
-            regs[op.out_reg] = result
+            return result
 
         elif op_type is OpApplyModel:
             # AC: @full-model-execution ac-3
@@ -501,6 +502,7 @@ def execute_plan(
 
             # Stack into [B, *shape] tensor and move to GPU
             stacked = torch.stack(weight_tensors, dim=0).to(device=device, dtype=dtype)
+            del weight_tensors
 
             # AC: @full-model-execution ac-14
             # Apply per-model strength: blend toward base register
@@ -522,14 +524,14 @@ def execute_plan(
                     domain,
                 )
 
-            regs[op.out_reg] = stacked
+            return stacked
 
         elif op_type is OpFilterDelta:
             lora_applied = regs[op.input_reg]
             backbone = regs[op.backbone_reg]
 
             if op.use_per_block:
-                regs[op.out_reg] = _apply_widen_filter_per_block(
+                return _apply_widen_filter_per_block(
                     keys,
                     lora_applied,
                     backbone,
@@ -541,14 +543,14 @@ def execute_plan(
                 )
             else:
                 w = _get_widen_for_op(widen, widen_config, op.t_factor)
-                regs[op.out_reg] = w.filter_delta_batched(lora_applied, backbone)
+                return w.filter_delta_batched(lora_applied, backbone)
 
         elif op_type is OpMergeWeights:
             branch_tensors = [regs[r] for r in op.branch_regs]
             backbone = regs[op.backbone_reg]
 
             if op.use_per_block:
-                regs[op.out_reg] = _apply_widen_merge_per_block(
+                return _apply_widen_merge_per_block(
                     keys,
                     branch_tensors,
                     backbone,
@@ -560,11 +562,13 @@ def execute_plan(
                 )
             else:
                 w = _get_widen_for_op(widen, widen_config, op.t_factor)
-                regs[op.out_reg] = w.merge_weights_batched(branch_tensors, backbone)
+                return w.merge_weights_batched(branch_tensors, backbone)
 
         else:
             raise ValueError(f"Unknown op type: {op_type}")
 
+    for i, op in enumerate(plan.ops):
+        regs[op.out_reg] = execute_op(op)
         # Release dead registers to free intermediate GPU tensors
         # AC: @full-model-execution ac-7
         # This frees model weights after they're no longer needed

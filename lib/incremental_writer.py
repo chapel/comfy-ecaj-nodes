@@ -127,17 +127,20 @@ class IncrementalWriter:
         pad = (8 - ((8 + len(header_json)) % 8)) % 8
         padded = header_json + b" " * pad
 
-        self._file = open(self._tmp_path, "wb")
-        self._file.write(struct.pack("<Q", len(padded)))
-        self._file.write(padded)
-
-        # Record where the data region starts (after header).
-        self._data_start = 8 + len(padded)
-
-        # Pre-allocate file to full size so seek-based writes land correctly.
-        if total_data_bytes > 0:
-            self._file.seek(self._data_start + total_data_bytes - 1)
-            self._file.write(b"\x00")
+        # A failed constructor never reaches __enter__/__exit__: it must own
+        # cleanup even when opening, writing the header, or preallocation fails.
+        self._file = None
+        try:
+            self._file = open(self._tmp_path, "wb")
+            self._file.write(struct.pack("<Q", len(padded)))
+            self._file.write(padded)
+            self._data_start = 8 + len(padded)
+            if total_data_bytes > 0:
+                self._file.seek(self._data_start + total_data_bytes - 1)
+                self._file.write(b"\x00")
+        except BaseException:
+            self.abort()
+            raise
 
         self._written: set[str] = set()
         self._total_count = len(sorted_names)

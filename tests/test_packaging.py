@@ -2,7 +2,10 @@
 
 from pathlib import Path
 
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10; test-only dependency
+    import tomli as tomllib
 
 from nodes.compose import WIDENComposeNode  # noqa: I001 — stdlib/local split
 from nodes.entry import WIDENEntryNode

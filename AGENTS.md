@@ -10,7 +10,7 @@ For Codex and any harness that does not auto-resolve `@file` references: **read 
 
 **comfy-ecaj-nodes** is a ComfyUI custom node pack for advanced model merging. The first (and flagship) feature set implements **WIDEN-based merging** — weight disentanglement for intelligent parameter-level model composition. Unlike simple linear interpolation, WIDEN analyzes per-parameter importance across models and routes each parameter to the most-relevant contributor.
 
-The node pack uses a **deferred execution architecture**: recipe-building nodes (Entry, LoRA, Compose, Merge) construct a lightweight recipe tree with zero GPU work. The Exit node receives the complete recipe and runs the full batched GPU pipeline in one shot, preserving optimal `OpSignature` batching and `torch.bmm` LoRA application.
+The node pack uses a **deferred execution architecture**: recipe-building nodes construct a lightweight recipe tree without merge/GPU computation. Entry retains a host model reference; it does not copy weights. Diffusion and CLIP Exit nodes compile and evaluate recipes in bounded groups using `OpSignature` batching and `torch.bmm` LoRA application. Diffusion Exit supports set-patch output or a saved artifact; CLIP Exit returns a patched CLIP.
 
 The core algorithm is ported from the **merge-router** project (`~/Projects/merge-router`).
 
@@ -52,13 +52,17 @@ kspec session start
 
 ### Development Environment
 
-- **Python 3.12** with `uv` package manager
-- **PyTorch** with CUDA (RTX 4090, 24GB VRAM)
-- **ComfyUI** installation required for testing nodes
+- **Python >=3.10** with `uv`; CI targets Python 3.10 and 3.12.
+- Default tests use CPU tensors and bounded safetensors fixtures, without a running ComfyUI or GPU.
+- ComfyUI supplies runtime dependencies. Keep the development environment separate from the host ComfyUI environment.
 
 ```bash
-# Install dependencies
-uv pip install -r requirements.txt
+# Separate CPU development environment
+uv sync --extra dev --python 3.12
+uv run --no-sync pytest
+uv run --no-sync python -m compileall lib nodes tests
+uv run --no-sync ruff check .
+uv run --no-sync ruff format --check .
 
 # Link into ComfyUI custom_nodes/ for testing
 ln -s $(pwd) /path/to/ComfyUI/custom_nodes/comfy-ecaj-nodes
@@ -82,24 +86,26 @@ comfy-ecaj-nodes/
 │   ├── comfy-ecaj-nodes.yaml    # Root manifest
 │   ├── comfy-ecaj-nodes.tasks.yaml
 │   └── modules/                 # Spec items by domain
-├── .claude/skills/              # 13 skill definitions
+├── .agents/skills/              # Rendered kspec and project skills
 ├── nodes/                       # ComfyUI node definitions
-│   ├── entry.py                 # Entry node (MODEL → WIDEN)
-│   ├── lora.py                  # LoRA node (file + strength → WIDEN)
-│   ├── compose.py               # Compose node (branch accumulator)
-│   ├── merge.py                 # Merge node (recipe builder, t_factor)
-│   └── exit.py                  # Exit node (recipe executor → MODEL)
+│   ├── entry.py, exit.py        # Diffusion boundaries (MODEL ↔ WIDEN)
+│   ├── lora.py, compose.py, merge.py # Diffusion recipe builders
+│   ├── model_input.py, diffusion_model_input.py # Deferred model-file inputs
+│   ├── clip_entry.py, clip_exit.py, clip_nodes.py # CLIP recipe family
+│   └── block_config_*.py        # Architecture/domain-specific controls
 ├── lib/                         # Core algorithm library
 │   ├── widen.py                 # WIDEN algorithm (ported from merge-router)
 │   ├── divergence.py            # Divergence metrics
 │   ├── ranking.py               # Ranking mechanisms
 │   ├── numerical_config.py      # Numerical stability config
 │   ├── recipe.py                # Recipe tree dataclasses
-│   ├── executor.py              # Batched pipeline executor
+│   ├── executor.py              # Public execution facade
+│   ├── recipe_eval.py, gpu_ops.py # Compiled ops and chunk evaluation
+│   ├── model_loader.py, clip_model_loader.py # Lazy model-file readers
+│   ├── persistence.py, streaming_save.py, incremental_writer.py # Save/cache
 │   └── lora/                    # Architecture-specific LoRA handling
 │       ├── base.py              # Loader interface
-│       ├── zimage.py            # Z-Image QKV fusing, key mapping
-│       └── sdxl.py              # SDXL key mapping
+│       └── ...                  # SDXL, SDXL CLIP, Z-Image, Flux, Qwen, Krea 2
 ├── examples/                    # Example ComfyUI workflow JSONs
 ├── tests/                       # Test suite
 ├── __init__.py                  # NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
@@ -109,27 +115,25 @@ comfy-ecaj-nodes/
 
 ## Node Architecture
 
-### Five Nodes, One Custom Type
+### Node Families and Socket Types
 
-All WIDEN nodes communicate via a single custom ComfyUI type: **`WIDEN`**. This type wraps lightweight recipe dataclasses — no GPU tensors, pure data.
+The root registry defines 19 stable node IDs. Diffusion recipes use **`WIDEN`**, text-encoder recipes use **`WIDEN_CLIP`**, and architecture-specific controls use **`BLOCK_CONFIG`**. Recipe dataclasses are immutable descriptions, but RecipeBase holds a host model/CLIP reference.
 
-| Node | Inputs | Output | Purpose |
-|------|--------|--------|---------|
-| **Entry** | `MODEL` | `WIDEN` | Boundary in: snapshot base model, auto-detect architecture |
-| **LoRA** | file selector, strength, optional `prev` | `WIDEN` | Declare LoRA spec (chains via `prev` to form sets) |
-| **Compose** | `branch`, optional `compose` | `WIDEN` | Accumulate branches for simultaneous merge |
-| **Merge** | `base`, `target`, optional `backbone`, `t_factor` | `WIDEN` | Define a WIDEN merge step in the recipe |
-| **Exit** | `WIDEN` | `MODEL` | Execute full batched pipeline, return merged model |
+- **Diffusion:** Entry, LoRA, Compose, Merge, Exit, Checkpoint Input, Diffusion Model Input.
+- **CLIP:** Entry, LoRA, Compose, Merge, Exit, Model Input.
+- **Block Config:** SDXL, SDXL CLIP, Z-Image, Flux, Qwen, Krea 2.
+
+Entry establishes the base reference/domain. LoRA and model inputs describe deferred sources; Compose accumulates branches; Merge defines a step; Exit evaluates the graph. Preserve registered IDs and socket contracts when changing internals.
 
 ### Deferred Execution
 
-Entry, LoRA, Compose, and Merge do **zero GPU work**. They build a recipe tree. The Exit node receives the complete recipe and runs the full batched GPU pipeline:
+Recipe construction performs **no merge/GPU computation**. Exit receives the complete recipe and runs the grouped pipeline:
 
-1. Walk recipe tree → assign synthetic set IDs → load LoRAs
+1. Analyze and compile the recipe → assign source IDs → prepare lazy loaders
 2. Group parameters by `OpSignature` (same shape, same affecting sets)
 3. Batched GPU LoRA apply via `torch.bmm`
 4. Batched WIDEN merge (filter_delta for single-target, merge_weights for compose)
-5. Install results as `"set"` patches on a `ModelPatcher.clone()`
+5. Install results as `"set"` patches on a clone, or materialize a complete diffusion/checkpoint artifact and return an artifact-backed MODEL. Checkpoint saves require CLIP/VAE companions. CLIP Exit has no saved-artifact output mode.
 
 ### Key Design Decisions
 
@@ -141,10 +145,10 @@ Entry, LoRA, Compose, and Merge do **zero GPU work**. They build a recipe tree. 
 
 ### Supported Architectures
 
-- **SDXL** — native ComfyUI support
-- **Z-Image** — custom loader (fused QKV attention, Diffusers-style LoRA keys)
-- **Flux** — planned
-- **Qwen** — planned
+- **Diffusion:** SDXL, Z-Image, Flux, Qwen and Krea 2 have implemented detection, loaders and block controls.
+- **Text encoders:** SDXL CLIP-L/CLIP-G have a separate recipe and loader path.
+
+Implemented surfaces are not a claim of compatibility with every adapter/quantized format. CPU numerical and source-layout tests are the normal evidence; real-model generation and GPU capacity require separate validation.
 
 ## Shadow Branch Architecture
 
@@ -363,7 +367,7 @@ When porting code from `~/Projects/merge-router`, follow these guidelines:
 
 - `merge.py` (JSON config runner — replaced by node graph)
 - CLI argument parsing
-- Safetensors save logic (ComfyUI handles this)
+- Upstream CLI save orchestration (this pack has its own atomic streaming safetensors writers and Comfy checkpoint integration)
 - Training infrastructure
 
 ## Environment
