@@ -85,3 +85,12 @@ notes:
     supersedes: null
     author: Jacob Chapel
     created_at: 2026-09-07T23:42:40.060Z
+  - _ulid: 01M1Z44NPVF0EQ7RB7QCT6YQFX
+    content: "Cleared misleading automatic submission linkage: submitting from main captured dev/base,
+      while worktree recapture failed in daemon routing. Review URL is correct and authoritative:
+      PR124, head fix/audit-hardening at8b029216483b01e686668f2b5f31d594533f0ea3, base dev.
+      PR-triggered CI34170925046 and pushCI34170799455 both allgreen; PR OPEN/CLEAN, not merged. No
+      daemon restart or workaround to personal agent configuration."
+    supersedes: null
+    author: Jacob Chapel
+    created_at: 2026-09-07T23:44:31.963Z
