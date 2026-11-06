@@ -567,7 +567,7 @@ def run_validation(
         from lib.streaming_save import MaterializationSink
         from nodes.exit import (
             _incremental_cache,
-            _load_model_from_artifact,
+            _load_diffusion_model_artifact,
             install_merged_patches,
         )
 
@@ -603,7 +603,7 @@ def run_validation(
                 dm_state[unprefixed] = t
 
             class _HarnessDiffusionModel:
-                """Minimal diffusion_model satisfying state_dict()/load_state_dict()."""
+                """Minimal diffusion_model satisfying state_dict()."""
 
                 def __init__(self, unprefixed_state: dict[str, torch.Tensor]):
                     self._sd = dict(unprefixed_state)
@@ -611,17 +611,10 @@ def run_validation(
                 def state_dict(self) -> dict[str, torch.Tensor]:
                     return dict(self._sd)
 
-                def load_state_dict(
-                    self, state_dict: dict[str, torch.Tensor], strict: bool = True
-                ) -> None:
-                    for k, v in state_dict.items():
-                        if k in self._sd:
-                            self._sd[k] = v
-
             class _HarnessModel:
                 """Minimal model wrapper satisfying ModelPatcher's interface.
 
-                Exposes ``diffusion_model`` (with state_dict/load_state_dict)
+                Exposes ``diffusion_model`` (with state_dict)
                 and a top-level ``state_dict()`` returning the full prefixed
                 tensor dict — matching the contract that real ComfyUI
                 ModelPatcher.clone() / model_state_dict() relies on.
@@ -638,13 +631,6 @@ def run_validation(
                 def state_dict(self) -> dict[str, torch.Tensor]:
                     return dict(self._full_state)
 
-                def load_state_dict(
-                    self, state_dict: dict[str, torch.Tensor], strict: bool = True
-                ) -> None:
-                    for k, v in state_dict.items():
-                        if k in self._full_state:
-                            self._full_state[k] = v
-
             harness_dm = _HarnessDiffusionModel(dm_state)
             harness_model = _HarnessModel(harness_dm, dict(tensors))
             model_patcher = ModelPatcher(
@@ -652,11 +638,6 @@ def run_validation(
                 load_device=torch.device("cpu"),
                 offload_device=torch.device("cpu"),
             )
-            # Populate _state_dict so install_merged_patches / clone work.
-            if hasattr(model_patcher, "_state_dict"):
-                model_patcher._state_dict = dict(tensors)
-            elif hasattr(model_patcher, "model_state_dict"):
-                pass  # real patcher builds _state_dict lazily
             have_patcher = True
         except Exception as exc:
             have_patcher = False
@@ -729,24 +710,19 @@ def run_validation(
             report.artifact_reuse = f"cache-check-error: {exc}"
             report.errors.append(f"check_full_model_cache: {exc}")
 
-        # -- Exercise returned-model loading via _load_model_from_artifact
+        # -- Exercise returned-model loading via _load_diffusion_model_artifact
         if have_patcher and os.path.isfile(artifact_path):
             try:
-                returned = _load_model_from_artifact(artifact_path, model_patcher, storage_dtype)
+                returned = _load_diffusion_model_artifact(artifact_path)
                 # Verify the returned patcher has state accessible.
-                if hasattr(returned, "_state_dict") and returned._state_dict:
-                    returned_keys = len(returned._state_dict)
-                elif hasattr(returned, "model_state_dict"):
-                    returned_keys = len(returned.model_state_dict())
-                else:
-                    returned_keys = 0
+                returned_keys = len(returned.model_state_dict())
                 report.returned_model_behavior = (
-                    f"_load_model_from_artifact loaded {returned_keys} keys; "
+                    f"_load_diffusion_model_artifact loaded {returned_keys} keys; "
                     f"patcher type={type(returned).__name__}"
                 )
             except Exception as exc:
-                report.returned_model_behavior = f"_load_model_from_artifact error: {exc}"
-                report.errors.append(f"_load_model_from_artifact: {exc}")
+                report.returned_model_behavior = f"_load_diffusion_model_artifact error: {exc}"
+                report.errors.append(f"_load_diffusion_model_artifact: {exc}")
         else:
             report.returned_model_behavior = "skipped (no ModelPatcher or no artifact written)"
 

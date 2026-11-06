@@ -14,12 +14,15 @@ from __future__ import annotations
 
 import gc
 import logging
+import math
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import TypeVar
 
 import torch
+
+from .batch_groups import OpSignature
 
 logger = logging.getLogger("ecaj.gpu_ops")
 
@@ -222,6 +225,38 @@ def compute_batch_size(
     return max(1, max_batch)
 
 
+def estimate_worst_chunk_bytes(
+    batch_groups: Mapping[OpSignature, Sequence[str]],
+    n_models: int,
+    compute_dtype: torch.dtype,
+    vram_budget_gb: float = 0.0,
+    *,
+    storage_dtype: torch.dtype | None = None,
+) -> int:
+    """Estimate the largest actual chunk, not unused GPU batch capacity.
+
+    Use the same groups, model count, compute dtype and budget as execution.
+    storage_dtype optionally preserves the caller's storage-byte estimate;
+    otherwise bytes use compute_dtype. This caps cardinality only, not a complete
+    accounting of compute/transfer workspaces or allocator overhead.
+
+    # AC: @accurate-ram-preflight ac-2, ac-7
+    """
+    element_bytes = torch.empty((), dtype=storage_dtype or compute_dtype).element_size()
+    return max(
+        (
+            element_bytes
+            * math.prod(sig.shape)
+            * min(
+                len(keys), compute_batch_size(sig.shape, n_models, compute_dtype, vram_budget_gb)
+            )
+            for sig, keys in batch_groups.items()
+            if keys
+        ),
+        default=0,
+    )
+
+
 def chunked(lst: list[T], n: int):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
@@ -299,7 +334,7 @@ def apply_lora_batch_gpu(
             partitions[("lokr", 0)].append(spec)
         elif spec.kind == "direct":
             partitions[("direct", 0)].append(spec)
-        elif spec.kind in ("qkv_q", "qkv_k", "qkv_v"):
+        elif spec.kind in ("qkv_q", "qkv_k", "qkv_v", "offset_mlp"):
             rank = spec.down.shape[0] if spec.down is not None else 0
             partitions[(spec.kind, rank)].append(spec)
         else:
@@ -345,6 +380,7 @@ def apply_lora_batch_gpu(
                     end = start + hidden
                     result[key_index, start:end] += delta
                 del delta
+            del pairs
 
         else:
             # AC: @batched-executor ac-2
@@ -355,18 +391,65 @@ def apply_lora_batch_gpu(
                     delta = delta.view(spec.target_shape)
                 result[spec.key_index] += delta
                 del delta
+            del pairs
 
     return result
 
 
+def _is_host_memory_error(error: MemoryError | RuntimeError) -> bool:
+    if isinstance(error, MemoryError):
+        return True
+    message = str(error).lower()
+    return any(
+        text in message
+        for text in (
+            "not enough memory",
+            "out of memory",
+            "cannot allocate memory",
+            "can't allocate memory",
+        )
+    )
+
+
+_FINITE_CHECK_ELEMENTS = 65536
+
+
+def _check_finite_output(key: str, tensor: torch.Tensor, stage: str) -> None:
+    """Check completed CPU output with bounded boolean temporaries.
+
+    Split views rather than flattening: noncontiguous evaluator outputs must
+    not trigger a whole-tensor contiguous or FP32 copy just for validation.
+    Only evaluator results enter here, never unrelated base passthrough keys.
+    """
+    pending = [tensor]
+    while pending:
+        part = pending.pop()
+        if part.numel() > _FINITE_CHECK_ELEMENTS:
+            dim = max(range(part.ndim), key=lambda d: part.shape[d])
+            midpoint = part.shape[dim] // 2
+            pending.append(part.narrow(dim, midpoint, part.shape[dim] - midpoint))
+            pending.append(part.narrow(dim, 0, midpoint))
+            continue
+        # Some ordinary float8 storage dtypes lack a CPU isfinite kernel.
+        # Widen only this bounded window, never the complete output tensor.
+        if part.is_floating_point() and part.element_size() < 2:
+            part = part.float()
+        if not torch.isfinite(part).all().item():
+            raise ValueError(
+                f"Non-finite evaluator output for key '{key}' ({stage}, {tensor.dtype}). "
+                "Check source weights, LoRA strengths and merge settings for overflow "
+                "or invalid arithmetic; the result cannot be installed or saved."
+            )
+
+
 def _chunked_eval_to_sink_impl(
     keys: list[str],
-    base_tensors: dict[str, torch.Tensor],
+    base_tensors: Mapping[str, torch.Tensor],
     eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
     batch_size: int,
     device: str,
     dtype: torch.dtype,
-    storage_dtype: torch.dtype,
+    storage_dtype: torch.dtype | None,
     receive_fn: Callable[[str, torch.Tensor], None],
 ) -> None:
     """Core sink-based chunked evaluation with OOM backoff.
@@ -383,10 +466,19 @@ def _chunked_eval_to_sink_impl(
     """
     avail_ram = get_available_ram_bytes() if device != "cpu" else 0
 
-    def evaluate_chunk(chunk_keys: list[str]) -> torch.Tensor:
+    def evaluate_chunk(chunk_keys: list[str]) -> tuple[torch.Tensor, list[torch.dtype]]:
+        # Capture metadata during the needed fetch, not by rematerializing lazy
+        # inputs after evaluation. Both lists are bounded by this chunk.
+        key_dtypes = []
+
+        def fetch_cpu(key: str) -> torch.Tensor:
+            tensor = base_tensors[key]
+            key_dtypes.append(tensor.dtype if storage_dtype is None else storage_dtype)
+            return tensor.cpu()
+
         # Stack base tensors and move to GPU
         # AC: @memory-management ac-9 — gate pin_memory on available RAM
-        base_stack = torch.stack([base_tensors[k].cpu() for k in chunk_keys])
+        base_stack = torch.stack([fetch_cpu(k) for k in chunk_keys])
         tensor_bytes = base_stack.nelement() * base_stack.element_size()
         if device != "cpu" and base_stack.numel() > 65536:
             # 3x headroom: original stack + pinned copy + GC margin
@@ -405,11 +497,32 @@ def _chunked_eval_to_sink_impl(
         merged_cpu = merged_gpu.cpu()
         del merged_gpu
 
-        return merged_cpu
+        return merged_cpu, key_dtypes
+
+    def deliver(key: str, computed: torch.Tensor, key_dtype: torch.dtype) -> None:
+        # Outside evaluation/fallback handlers: invalid results are not ordinary
+        # algorithm errors or retryable capacity errors. Check before casting too,
+        # so a conversion cannot hide invalid computed values.
+        _check_finite_output(key, computed, "computed")
+        completed = computed.to(dtype=key_dtype)
+        if completed is not computed:
+            _check_finite_output(key, completed, "storage cast")
+        receive_fn(key, completed)
+
+    def evaluate_single(key: str) -> tuple[torch.Tensor, torch.dtype]:
+        # Keep the source and any no-op conversion/view aliases in a short-lived
+        # frame, so successful retries release them before the next lazy fetch.
+        base_tensor = base_tensors[key]
+        key_dtype = base_tensor.dtype if storage_dtype is None else storage_dtype
+        base_gpu = base_tensor.unsqueeze(0).to(device, dtype=dtype)
+        del base_tensor
+        merged_gpu = eval_fn([key], base_gpu)
+        del base_gpu
+        return merged_gpu.cpu()[0], key_dtype
 
     for chunk_keys in chunked(keys, batch_size):
         try:
-            merged_cpu = evaluate_chunk(chunk_keys)
+            merged_cpu, key_dtypes = evaluate_chunk(chunk_keys)
         except torch.cuda.OutOfMemoryError:
             # AC: @batched-executor ac-4
             # A single key cannot be split further. Preserve the CUDA OOM.
@@ -427,7 +540,7 @@ def _chunked_eval_to_sink_impl(
         except RuntimeError as e:
             # AC: @memory-management ac-11
             # PyTorch CPU allocator OOM or similar
-            if "not enough memory" in str(e).lower() or "out of memory" in str(e).lower():
+            if _is_host_memory_error(e):
                 gc.collect()
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
@@ -439,9 +552,8 @@ def _chunked_eval_to_sink_impl(
             # been persisted. Never replay successful writes on a sink error.
             # AC: @batched-executor ac-5, ac-6
             for i, key in enumerate(chunk_keys):
-                key_dtype = base_tensors[key].dtype if storage_dtype is None else storage_dtype
-                receive_fn(key, merged_cpu[i].to(dtype=key_dtype))
-            del merged_cpu
+                deliver(key, merged_cpu[i], key_dtypes[i])
+            del merged_cpu, key_dtypes
             continue
 
         # Leave the OOM handler before collecting or retrying. Its traceback
@@ -453,25 +565,7 @@ def _chunked_eval_to_sink_impl(
 
         for key in chunk_keys:
             try:
-                base_tensor = base_tensors[key].unsqueeze(0)
-                base_gpu = base_tensor.to(device, dtype=dtype)
-
-                merged_gpu = eval_fn([key], base_gpu)
-                del base_gpu
-
-                # AC: @batched-executor ac-5, ac-6
-                key_dtype = base_tensors[key].dtype if storage_dtype is None else storage_dtype
-                merged_cpu = merged_gpu.to("cpu", dtype=key_dtype)
-                del merged_gpu
-
-                receive_fn(key, merged_cpu[0])
-                del merged_cpu
-
-                # AC: @memory-management ac-1
-                # Free GPU memory after each single-key evaluation in OOM path
-                gc.collect()
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
+                merged_cpu, key_dtype = evaluate_single(key)
 
             except torch.cuda.OutOfMemoryError:
                 # Even single-key evaluation failed; propagate
@@ -484,27 +578,30 @@ def _chunked_eval_to_sink_impl(
                 gc.collect()
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
-                if isinstance(inner_e, MemoryError) or (
-                    isinstance(inner_e, RuntimeError)
-                    and (
-                        "not enough memory" in str(inner_e).lower()
-                        or "out of memory" in str(inner_e).lower()
-                    )
-                ):
+                if _is_host_memory_error(inner_e):
                     raise RuntimeError(
                         f"System memory exhausted during single-key retry for '{key}'"
                     ) from inner_e
                 raise
 
+            # Delivery stays outside evaluation error handling on retries too:
+            # preserve sink exceptions and never reinterpret them as capacity.
+            deliver(key, merged_cpu, key_dtype)
+            del merged_cpu
+            # AC: @memory-management ac-1
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
 
 def evaluate_to_sink(
     keys: list[str],
-    base_tensors: dict[str, torch.Tensor],
+    base_tensors: Mapping[str, torch.Tensor],
     eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
     batch_size: int,
     device: str,
     dtype: torch.dtype,
-    storage_dtype: torch.dtype,
+    storage_dtype: torch.dtype | None,
     sink: object,
 ) -> None:
     """Evaluate keys in chunks and hand each result to *sink.receive()*.
@@ -522,7 +619,7 @@ def evaluate_to_sink(
 
     Args:
         keys: List of parameter keys to evaluate.
-        base_tensors: Dict of key -> CPU tensor for base weights.
+        base_tensors: Mapping of key -> CPU tensor for base weights.
         eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu.
         batch_size: Initial batch size for chunking.
         device: GPU device string.
@@ -545,12 +642,12 @@ def evaluate_to_sink(
 
 def chunked_evaluation(
     keys: list[str],
-    base_tensors: dict[str, torch.Tensor],
+    base_tensors: Mapping[str, torch.Tensor],
     eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
     batch_size: int,
     device: str,
     dtype: torch.dtype,
-    storage_dtype: torch.dtype,
+    storage_dtype: torch.dtype | None,
 ) -> dict[str, torch.Tensor]:
     """Evaluate keys in chunks with OOM backoff, returning CPU tensors.
 
@@ -571,7 +668,7 @@ def chunked_evaluation(
 
     Args:
         keys: List of parameter keys to evaluate
-        base_tensors: Dict of key -> CPU tensor for base weights
+        base_tensors: Mapping of key -> CPU tensor for base weights
         eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu
         batch_size: Initial batch size for chunking
         device: GPU device string
@@ -597,61 +694,19 @@ def chunked_evaluation(
     return sink.results
 
 
-def evaluate_affected_group(
-    keys: list[str],
-    base_tensors: dict[str, torch.Tensor],
-    eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
-    batch_size: int,
-    device: str,
-    dtype: torch.dtype,
-    storage_dtype: torch.dtype,
-) -> dict[str, torch.Tensor]:
-    """Evaluate an affected group for full saved model mode.
-
-    Same chunked evaluation with OOM backoff as chunked_evaluation, but
-    used exclusively by full saved model mode. Results are handed to
-    MaterializationSink per-group rather than accumulated into a merged_state
-    dict.
-
-    This is a separate entry point so that monkeypatching chunked_evaluation
-    (used by patch mode) does not affect full saved model mode.
-
-    Args:
-        keys: List of parameter keys to evaluate
-        base_tensors: Dict of key -> CPU tensor for base weights
-        eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu
-        batch_size: Initial batch size for chunking
-        device: GPU device string
-        dtype: Computation dtype (fp32 for numerical stability)
-        storage_dtype: Output dtype (matches base model)
-
-    Returns:
-        Dict of key -> CPU tensor with evaluated affected weights
-    """
-    from .result_sink import DictResultSink
-
-    sink = DictResultSink()
-    _chunked_eval_to_sink_impl(
-        keys,
-        base_tensors,
-        eval_fn,
-        batch_size,
-        device,
-        dtype,
-        storage_dtype,
-        sink.receive,
-    )
-    return sink.results
+# Compatibility name bound once: monkeypatching the public dict entry point
+# does not redirect existing affected-group callers. Both use one sink engine.
+evaluate_affected_group = chunked_evaluation
 
 
 def streaming_evaluation_to_sink(
     keys: list[str],
-    base_tensors: dict[str, torch.Tensor],
+    base_tensors: Mapping[str, torch.Tensor],
     eval_fn: Callable[[list[str], torch.Tensor], torch.Tensor],
     batch_size: int,
     device: str,
     dtype: torch.dtype,
-    storage_dtype: torch.dtype,
+    storage_dtype: torch.dtype | None,
     write_fn: Callable[[str, torch.Tensor], None],
 ) -> None:
     """Evaluate keys in chunks and stream each result to *write_fn* immediately.
@@ -669,7 +724,7 @@ def streaming_evaluation_to_sink(
 
     Args:
         keys: List of parameter keys to evaluate.
-        base_tensors: Dict of key -> CPU tensor for base weights.
+        base_tensors: Mapping of key -> CPU tensor for base weights.
         eval_fn: Function (keys, base_batch_gpu) -> merged_batch_gpu.
         batch_size: Initial batch size for chunking.
         device: GPU device string.

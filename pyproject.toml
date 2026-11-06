@@ -7,7 +7,24 @@ requires-python = ">=3.10"
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.9", "torch>=2.0", "safetensors>=0.4", "numpy>=1.20"]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.9",
+    "torch>=2.0",
+    "safetensors>=0.4",
+    "numpy>=1.20",
+    "tomli>=2.0; python_version < '3.11'",
+]
+
+# CPU-only development/test resolution. ComfyUI supplies runtime dependencies;
+# do not use the dev extra to replace an existing host's PyTorch installation.
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [tool.setuptools.packages.find]
 include = ["lib*", "nodes*"]
@@ -28,3 +45,7 @@ exclude = [".kspec"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
+
+[tool.ruff.format]
+# Keep the Python format gate separate from Markdown (including generated docs).
+exclude = ["*.md"]

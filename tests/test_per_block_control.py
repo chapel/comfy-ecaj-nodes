@@ -815,10 +815,12 @@ class TestFluxKleinRegistryWiring:
     # AC: @flux-klein-support ac-11
     def test_flux_in_arch_patterns(self):
         """'flux' has an architecture detection pattern."""
-        from lib.model_loader import _ARCH_PATTERNS
+        from lib.architecture import detect_supported_architecture
 
-        arch_names = [arch_name for arch_name, _ in _ARCH_PATTERNS]
-        assert "flux" in arch_names
+        assert (
+            detect_supported_architecture({"diffusion_model.double_blocks.0.img_attn.qkv.weight"})
+            == "flux"
+        )
 
 
 class TestBlockConfigZeroSkipsWiden:

@@ -139,7 +139,8 @@ class NumericalConfig:
             # Global norm
             scale = tensor.abs().max()
             if scale == 0:
-                return torch.zeros(1, dtype=tensor.dtype, device=tensor.device)
+                shape = [1] * tensor.ndim if keepdim else []
+                return tensor.new_zeros(shape)
 
             if use_fp64:
                 tensor_scaled = (tensor / scale).double()
@@ -148,7 +149,8 @@ class NumericalConfig:
                 tensor_scaled = tensor / scale
                 norm_scaled = torch.norm(tensor_scaled.float(), p=2)
 
-            return (scale * norm_scaled).to(tensor.dtype)
+            result = (scale * norm_scaled).to(tensor.dtype)
+            return result.reshape([1] * tensor.ndim) if keepdim else result
         else:
             # Per-dimension norm
             # Internal computation always uses keepdim=True for consistent shapes;

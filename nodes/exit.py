@@ -9,7 +9,8 @@ import logging
 import os
 import secrets
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
+from contextlib import ExitStack
 from typing import TYPE_CHECKING
 
 import torch
@@ -28,6 +29,7 @@ from ..lib.executor import (
     compile_batch_groups,
     compile_plan,
     compute_batch_size,
+    estimate_worst_chunk_bytes,
     execute_plan,
     get_available_ram_bytes,
     streaming_evaluation_to_sink,
@@ -48,19 +50,30 @@ from ..lib.recipe import (
     CheckpointComponents,
     RecipeBase,
     RecipeCompose,
-    RecipeLoRA,
     RecipeMerge,
     RecipeModel,
     RecipeNode,
 )
+from ..lib.recipe_validation import validate_recipe_tree
 from ..lib.save_progress import SavedModelProgress
 from ..lib.streaming_save import MaterializationSink
 from ..lib.widen import WIDEN, WIDENConfig
+from .effective_weights import (
+    EffectiveWeights,
+    SelectedWeights,
+    validate_static_patcher,
+    weight_metadata,
+)
 
 try:
     from comfy.utils import ProgressBar
 except ImportError:  # testing without ComfyUI
     ProgressBar = None  # type: ignore[assignment,misc]
+
+try:
+    from comfy.model_management import throw_exception_if_processing_interrupted
+except ImportError:  # testing without ComfyUI
+    throw_exception_if_processing_interrupted = None
 
 if TYPE_CHECKING:
     from ..lib.recipe import BlockConfig
@@ -262,69 +275,8 @@ def clear_incremental_cache() -> None:
 
 
 def _validate_recipe_tree(node: RecipeNode, path: str = "root") -> None:
-    """Recursively validate the recipe tree structure.
-
-    AC: @exit-node ac-2
-    Raises ValueError naming the invalid type and its position in the tree.
-
-    Args:
-        node: Recipe node to validate
-        path: Current position in tree (for error messages)
-
-    Raises:
-        ValueError: If tree structure is invalid with position info
-    """
-    if isinstance(node, RecipeBase):
-        # Valid leaf node
-        return
-
-    elif isinstance(node, RecipeLoRA):
-        # Valid branch node (must be used as target or branch, not root)
-        return
-
-    elif isinstance(node, RecipeModel):
-        # Valid branch node for full model merging
-        return
-
-    elif isinstance(node, RecipeCompose):
-        # Validate each branch
-        if not node.branches:
-            raise ValueError(f"RecipeCompose at {path} has no branches")
-        for i, branch in enumerate(node.branches):
-            branch_path = f"{path}.branches[{i}]"
-            if not isinstance(branch, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
-                raise ValueError(
-                    f"Invalid branch type at {branch_path}: expected RecipeLoRA, "
-                    f"RecipeModel, RecipeCompose, or RecipeMerge, got {type(branch).__name__}"
-                )
-            _validate_recipe_tree(branch, branch_path)
-
-    elif isinstance(node, RecipeMerge):
-        # Validate base
-        base_path = f"{path}.base"
-        if not isinstance(node.base, (RecipeBase, RecipeMerge)):
-            raise ValueError(
-                f"Invalid base type at {base_path}: expected RecipeBase or "
-                f"RecipeMerge, got {type(node.base).__name__}"
-            )
-        _validate_recipe_tree(node.base, base_path)
-
-        # Validate target
-        target_path = f"{path}.target"
-        if not isinstance(node.target, (RecipeLoRA, RecipeModel, RecipeCompose, RecipeMerge)):
-            raise ValueError(
-                f"Invalid target type at {target_path}: expected RecipeLoRA, "
-                f"RecipeModel, RecipeCompose, or RecipeMerge, got {type(node.target).__name__}"
-            )
-        _validate_recipe_tree(node.target, target_path)
-
-        # Validate backbone (optional)
-        if node.backbone is not None:
-            backbone_path = f"{path}.backbone"
-            _validate_recipe_tree(node.backbone, backbone_path)
-
-    else:
-        raise ValueError(f"Unknown recipe node type at {path}: {type(node).__name__}")
+    """Validate structure without restricting domains. AC: @exit-node ac-2."""
+    validate_recipe_tree(node, path)
 
 
 def validate_checkpoint_components(base: RecipeBase, save_model: bool) -> None:
@@ -468,111 +420,44 @@ def _build_model_resolver() -> Callable[[str, str], str | None]:
     return resolver
 
 
-def _load_model_from_artifact(
-    save_path: str,
-    model_patcher: object,
-    storage_dtype: torch.dtype,
-) -> object:
-    """Load a full saved model from the artifact and return a ModelPatcher.
+def _checkpoint_companion_identities(base: RecipeBase, *, enable_cache: bool):
+    """Hash the states Comfy checkpoint serialization actually consumes.
 
-    AC: @full-saved-model-output ac-return-loaded-model
-    AC: @full-saved-model-output ac-cache-reuse-is-artifact-backed
-    AC: @comfy-memory-manager-compatibility ac-comfy-owns-returned-model-memory
-
-    Loads the artifact weights into the model's own state dict (not as set
-    patches) so that ComfyUI's memory manager can offload/reload the model
-    normally.  The returned clone owns an independent copy of the model
-    whose weights come from the artifact — they are not held as set patches
-    and do not remain resident solely because Exit returned.
-
-    Args:
-        save_path: Path to the full saved model artifact.
-        model_patcher: Original ModelPatcher to clone.
-        storage_dtype: Base model storage dtype.
-
-    Returns:
-        Cloned ModelPatcher whose model weights come from the artifact,
-        loaded through the model's own state dict (Comfy-owned memory).
+    CLIP uses its patcher saving contract (effective weights); VAE.get_sd()
+    exposes the saved module state. A deferred VAE patch is not part of that
+    contract and must not masquerade as an effective static artifact.
+    Opaque companion APIs conservatively disable reuse via missing identities.
     """
-    from copy import deepcopy
-
-    from safetensors import safe_open
-
-    # Clone the model patcher so patches are independent.
-    cloned = model_patcher.clone()  # type: ignore[attr-defined]
-
-    # Clear any inherited patches from the source ModelPatcher (e.g., LoRA
-    # or control patches).  Full mode returns the saved artifact model —
-    # inherited patch-resident tensors must not remain attached.
-    if hasattr(cloned, "patches"):
-        cloned.patches = {}  # type: ignore[attr-defined]
-
-    # Deep-copy the underlying model so the clone owns its own weight
-    # storage — the original model_patcher is not affected.
-    cloned.model = deepcopy(cloned.model)  # type: ignore[attr-defined]
-
-    # Give the clone its own _state_dict if present (clone() shares it).
-    # Without this, updating _state_dict would mutate the original patcher.
-    if hasattr(cloned, "_state_dict"):
-        cloned._state_dict = dict(cloned._state_dict)  # type: ignore[attr-defined]
-
-    # Load artifact weights directly into the clone's model state dict.
-    # This makes the weights model-owned (Comfy-managed) rather than
-    # patch-owned (always resident).
-    # Preserve each tensor's artifact dtype — do NOT coerce to a single
-    # global storage_dtype, which would destroy mixed-dtype artifacts.
-    artifact_state: dict[str, torch.Tensor] = {}
-    with safe_open(save_path, framework="pt", device="cpu") as f:
-        for key in f.keys():
-            artifact_state[key] = f.get_tensor(key)
-
-    # Update the clone's underlying model weights with artifact data.
-    # Try load_state_dict (real nn.Module) first, then fall back to
-    # updating the diffusion_model's internal state dict.
-    #
-    # Checkpoint artifacts from comfy.sd.save_checkpoint use Comfy-style
-    # key prefixes: model.diffusion_model.*, conditioner.*, first_stage_model.*.
-    # Internal-format artifacts use bare diffusion_model.* keys.
-    # We need to extract diffusion weights from either format.
-    _DIFFUSION_PREFIX = "diffusion_model."
-    _COMFY_MODEL_PREFIX = "model.diffusion_model."
-
-    # Extract diffusion weights: try Comfy checkpoint prefix first, then
-    # internal diffusion_model.* prefix.  Strip to bare weight names for
-    # load_state_dict.
-    diffusion_weights: dict[str, torch.Tensor] = {}
-    for k, v in artifact_state.items():
-        if k.startswith(_COMFY_MODEL_PREFIX):
-            diffusion_weights[k.removeprefix(_COMFY_MODEL_PREFIX)] = v
-        elif k.startswith(_DIFFUSION_PREFIX):
-            diffusion_weights[k.removeprefix(_DIFFUSION_PREFIX)] = v
-
-    dm = getattr(cloned.model, "diffusion_model", None)  # type: ignore[attr-defined]
-    if dm is not None and hasattr(dm, "load_state_dict") and diffusion_weights:
-        # Real nn.Module — load via PyTorch API.
-        try:
-            dm.load_state_dict(diffusion_weights, strict=False)
-        except (TypeError, RuntimeError):
-            # Fallback for models without full load_state_dict support.
-            sd = dm.state_dict()
-            for k, v in diffusion_weights.items():
-                if k in sd:
-                    sd[k].copy_(v)
-
-    # Update the patcher's _state_dict if present (MockModelPatcher and
-    # some real patchers use this as the backing store for model_state_dict).
-    # Map checkpoint-style keys back to the patcher's diffusion_model.* keys.
-    if hasattr(cloned, "_state_dict"):
-        for k, v in artifact_state.items():
-            if k in cloned._state_dict:  # type: ignore[attr-defined]
-                cloned._state_dict[k] = v  # type: ignore[attr-defined]
-            elif k.startswith(_COMFY_MODEL_PREFIX):
-                # Map model.diffusion_model.X → diffusion_model.X
-                patcher_key = _DIFFUSION_PREFIX + k.removeprefix(_COMFY_MODEL_PREFIX)
-                if patcher_key in cloned._state_dict:  # type: ignore[attr-defined]
-                    cloned._state_dict[patcher_key] = v  # type: ignore[attr-defined]
-
-    return cloned
+    components = base.checkpoint_components
+    if components is None:
+        return None
+    clip_patcher = getattr(components.clip, "patcher", None)
+    get_clip_state = getattr(clip_patcher, "model_state_dict", None)
+    get_vae_state = getattr(components.vae, "get_sd", None)
+    if not callable(get_clip_state) or not callable(get_vae_state):
+        return None
+    # Do not mistake opaque API return objects for a trustworthy empty state.
+    if not isinstance(get_clip_state(), Mapping):
+        return None
+    _unpatch_loaded_clones(clip_patcher)
+    validate_static_patcher(clip_patcher, for_serialization=True)
+    vae_patcher = getattr(components.vae, "patcher", None)
+    if vae_patcher is not None:
+        validate_static_patcher(vae_patcher, for_serialization=True)
+        if getattr(vae_patcher, "patches", {}):
+            raise ValueError(
+                "Deferred VAE patches are not serialized by VAE.get_sd(); "
+                "unsupported effective checkpoint companion"
+            )
+    if not enable_cache:
+        return None
+    vae_state = get_vae_state()
+    if not isinstance(vae_state, Mapping) or not vae_state:
+        return None
+    return {
+        "clip": compute_base_identity(EffectiveWeights(clip_patcher, for_serialization=True)),
+        "vae": compute_base_identity(vae_state),
+    }
 
 
 def _trim_native_heap() -> None:
@@ -936,6 +821,11 @@ def save_comfy_checkpoint(
         # and artifact kind are present and correct.
         _classify_temp_artifact(tmp_path, expected_kind="checkpoint")
 
+        # Cancellation during serialization must abort inside temp cleanup,
+        # before replacing a previously valid artifact (both Exit paths).
+        if throw_exception_if_processing_interrupted is not None:
+            throw_exception_if_processing_interrupted()
+
         # Atomic replace — existing valid artifact is only replaced after
         # the temp file is completely written, synced, and classified.
         os.replace(tmp_path, save_path)
@@ -1137,13 +1027,22 @@ class WIDENExitNode:
         """
         model_patcher = widen.model_patcher
         _unpatch_loaded_clones(model_patcher)
-        base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
-        storage_dtype = next(iter(base_state.values())).dtype
+        base_state = EffectiveWeights(model_patcher, for_serialization=True)
+        storage_dtype = next(iter(weight_metadata(base_state).values())).dtype
 
         lora_path_resolver = _build_lora_resolver()
         model_path_resolver = _build_model_resolver()
-        base_identity = compute_base_identity(base_state)
-        lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+        # Disabled cache needs metadata, not an O(model) content scan. Its
+        # artifact gets a non-reusable identity; enabled cache hashes effective
+        # weights lazily, one key at a time.
+        base_identity = (
+            compute_base_identity(base_state) if enable_cache else secrets.token_hex(32)
+        )
+        lora_stats = (
+            compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+            if enable_cache
+            else {}
+        )
 
         validated_name = validate_model_name(model_name)
         # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
@@ -1152,7 +1051,16 @@ class WIDENExitNode:
         # Comfy's UNETLoader discovers it, not under checkpoints.
         is_checkpoint = _recipe_has_checkpoint_components(widen)
         save_path = _resolve_save_path(validated_name, is_checkpoint=is_checkpoint)
-        serialized = serialize_recipe(widen, base_identity, lora_stats)
+        if not is_checkpoint:
+            _guard_non_ecaj_overwrite(save_path)
+        companion_identities = (
+            _checkpoint_companion_identities(walk_to_base(widen), enable_cache=enable_cache)
+            if is_checkpoint
+            else None
+        )
+        serialized = serialize_recipe(
+            widen, base_identity, lora_stats, companion_identities=companion_identities
+        )
         recipe_hash = compute_recipe_hash(serialized)
         dependency_fingerprints_json = json.dumps(
             lora_stats,
@@ -1175,7 +1083,7 @@ class WIDENExitNode:
                 # layout (model.diffusion_model.*) — same shape we publish.
                 external_manifest = {
                     _to_external_diffusion_key(k): (v.dtype, tuple(v.shape))
-                    for k, v in base_state.items()
+                    for k, v in weight_metadata(base_state).items()
                 }
                 cache_hit = check_full_model_cache(
                     save_path,
@@ -1211,12 +1119,6 @@ class WIDENExitNode:
             # Checkpoint-style no-op: save via Comfy checkpoint semantics.
             # Install base weights as set patches (no merge needed — this is
             # a no-op save of the original checkpoint).
-            merged_model = install_merged_patches(
-                model_patcher,
-                {},
-                storage_dtype,
-            )
-
             metadata = build_metadata(
                 serialized,
                 recipe_hash,
@@ -1231,19 +1133,28 @@ class WIDENExitNode:
             )
 
             checkpoint_components = widen.checkpoint_components
-            save_comfy_checkpoint(
-                save_path,
-                merged_model,
-                clip=checkpoint_components.clip,
-                vae=checkpoint_components.vae,
-                metadata=metadata,
+            merged_model = install_merged_patches(
+                model_patcher,
+                {},
+                storage_dtype,
             )
 
-            if ProgressBar is not None:
-                pbar = ProgressBar(1)
-                pbar.update(1)
-
-            return (merged_model,)
+            try:
+                save_comfy_checkpoint(
+                    save_path,
+                    merged_model,
+                    clip=checkpoint_components.clip,
+                    vae=checkpoint_components.vae,
+                    metadata=metadata,
+                )
+                if ProgressBar is not None:
+                    pbar = ProgressBar(1)
+                    pbar.update(1)
+            finally:
+                _release_temporary_checkpoint_model(merged_model)
+                del merged_model
+            del base_state
+            return (_load_checkpoint_artifact(save_path),)
         else:
             # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
             # AC: @full-saved-model-output ac-diffusion-model-companion-separation
@@ -1263,7 +1174,7 @@ class WIDENExitNode:
 
             external_manifest = {
                 _to_external_diffusion_key(k): (v.dtype, tuple(v.shape))
-                for k, v in base_state.items()
+                for k, v in weight_metadata(base_state).items()
             }
             # AC: @streaming-materialization-progress ac-no-op-save-progress
             # AC: @streaming-materialization-progress ac-finalization-status-visible
@@ -1342,16 +1253,25 @@ class WIDENExitNode:
         timer.mark("base-walked")
         _unpatch_loaded_clones(model_patcher)
         timer.mark("loaded-clones-unpatched")
-        base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
+        base_state = EffectiveWeights(model_patcher, for_serialization=True)
         timer.mark(f"base-state-read keys={len(base_state)}")
-        storage_dtype = next(iter(base_state.values())).dtype
+        storage_dtype = next(iter(weight_metadata(base_state).values())).dtype
 
-        key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
+        key_shapes = {k: tuple(v.shape) for k, v in weight_metadata(base_state).items()}
         timer.mark("key-shapes-built")
 
-        base_identity = compute_base_identity(base_state)
+        # Disabled cache needs metadata, not an O(model) content scan. Its
+        # artifact gets a non-reusable identity; enabled cache hashes effective
+        # weights lazily, one key at a time.
+        base_identity = (
+            compute_base_identity(base_state) if enable_cache else secrets.token_hex(32)
+        )
         timer.mark("base-identity-computed")
-        lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+        lora_stats = (
+            compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+            if enable_cache
+            else {}
+        )
         timer.mark(f"dependency-stats-computed count={len(lora_stats)}")
 
         validated_name = validate_model_name(model_name)
@@ -1362,13 +1282,24 @@ class WIDENExitNode:
         # (CheckpointLoaderSimple discovery).
         is_checkpoint = _recipe_has_checkpoint_components(widen)
         save_path = _resolve_save_path(validated_name, is_checkpoint=is_checkpoint)
+        if not is_checkpoint:
+            _guard_non_ecaj_overwrite(save_path)
         timer.mark(f"save-path-resolved checkpoint={is_checkpoint}")
-        serialized = serialize_recipe(widen, base_identity, lora_stats)
+        companion_identities = (
+            _checkpoint_companion_identities(walk_to_base(widen), enable_cache=enable_cache)
+            if is_checkpoint
+            else None
+        )
+        serialized = serialize_recipe(
+            widen, base_identity, lora_stats, companion_identities=companion_identities
+        )
         recipe_hash = compute_recipe_hash(serialized)
         timer.mark("recipe-hash-computed")
 
         # Build manifest early for cache validation (shapes + dtypes, not just key names).
-        base_manifest = {k: (v.dtype, tuple(v.shape)) for k, v in base_state.items()}
+        base_manifest = {
+            k: (v.dtype, tuple(v.shape)) for k, v in weight_metadata(base_state).items()
+        }
         timer.mark("base-manifest-built")
 
         dependency_fingerprints_json = json.dumps(
@@ -1504,23 +1435,28 @@ class WIDENExitNode:
            conditioner.*, first_stage_model.*) and is loadable by
            CheckpointLoaderSimple.
         """
-        # --- GPU pipeline: compute merged diffusion weights ---
-        analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
-
-        base = walk_to_base(widen)
-        domain = getattr(base, "domain", "diffusion")
-        model_analysis = analyze_recipe_models(
-            widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
-        )
-
         # AC: @comfy-memory-manager-compatibility ac-checkpoint-save-failure-releases-temp-payload
         # AC: @comfy-memory-manager-compatibility ac-checkpoint-cache-miss-releases-save-payload
-        # AC: @saved-model-artifact-safety ac-failed-return-not-successful
-        # Track the temporary save-time merge payload separately from the
-        # artifact-loaded return model so release runs in finally on success
-        # and on save/publication/finalization failures, exactly once.
-        temporary_model: object | None = None
-        try:
+        # --- GPU pipeline: compute merged diffusion weights ---
+        with ExitStack() as resources:
+            analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
+            resources.callback(analysis.loader.cleanup)
+
+            base = walk_to_base(widen)
+            domain = getattr(base, "domain", "diffusion")
+            model_analysis = analyze_recipe_models(
+                widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
+            )
+            for model_loader in model_analysis.model_loaders.values():
+                resources.callback(model_loader.cleanup)
+
+            # AC: @saved-model-artifact-safety ac-failed-return-not-successful
+            # Track the temporary save-time merge payload separately from the
+            # artifact-loaded return model. ExitStack releases it on success
+            # and on save/publication/finalization failures, exactly once.
+            temporary_model: object | None = None
+            merged_state: dict[str, torch.Tensor] = {}
+            resources.callback(merged_state.clear)
             loader = analysis.loader
             set_affected = analysis.set_affected
             lora_affected_keys = analysis.affected_keys
@@ -1572,17 +1508,14 @@ class WIDENExitNode:
 
             if batch_groups:
                 n_models = len(set_affected) + len(model_loaders)
-                storage_element_size = torch.finfo(storage_dtype).bits // 8
-                worst_chunk_bytes = max(
-                    storage_element_size
-                    * torch.Size(sig.shape).numel()
-                    * compute_batch_size(sig.shape, n_models, compute_dtype)
-                    for sig in batch_groups
+                worst_chunk_bytes = estimate_worst_chunk_bytes(
+                    batch_groups, n_models, compute_dtype
                 )
                 # Checkpoint save accumulates merged_state (needs model in memory
                 # for Comfy save), so budget the full merged state size.
                 merged_state_bytes = sum(
-                    base_state[k].nelement() * base_state[k].element_size()
+                    weight_metadata(base_state)[k].nelement()
+                    * weight_metadata(base_state)[k].element_size()
                     for keys in batch_groups.values()
                     for k in keys
                 )
@@ -1599,7 +1532,6 @@ class WIDENExitNode:
             # Compute merged diffusion weights via dict-returning evaluation.
             # Checkpoint save needs all merged weights in memory to install
             # into the ModelPatcher before calling comfy.sd.save_checkpoint.
-            merged_state: dict[str, torch.Tensor] = {}
 
             if batch_groups:
 
@@ -1643,7 +1575,7 @@ class WIDENExitNode:
                         n_models,
                         compute_dtype,
                     )
-                    group_base = {k: base_state[k] for k in group_keys}
+                    group_base = SelectedWeights(base_state, group_keys)
                     group_results = chunked_evaluation(
                         keys=group_keys,
                         base_tensors=group_base,
@@ -1654,6 +1586,7 @@ class WIDENExitNode:
                         storage_dtype=storage_dtype,
                     )
                     merged_state.update(group_results)
+                    del group_results
 
                     del group_base
                     gc.collect()
@@ -1678,9 +1611,10 @@ class WIDENExitNode:
                 merged_state,
                 storage_dtype,
             )
+            resources.callback(_release_temporary_checkpoint_model, temporary_model)
 
             # Free merged_state — weights are now held as set patches on temporary_model
-            del merged_state
+            merged_state.clear()
             gc.collect()
 
             # Build ecaj metadata for the checkpoint artifact.
@@ -1735,22 +1669,6 @@ class WIDENExitNode:
             if not enable_cache:
                 _incremental_cache.clear()
 
-        finally:
-            # See AC block above the try: release the temporary save-time
-            # merge payload before returning so Comfy's output cache retains
-            # only an artifact-loaded MODEL, matching checkpoint cache-hit
-            # behavior, and so failures during save/publication/finalization
-            # still drop the dense payload before control returns to ComfyUI.
-            # Guarded by `is not None` so we never attempt to release before
-            # the temporary model exists (e.g. failure during merge eval).
-            if temporary_model is not None:
-                _release_temporary_checkpoint_model(temporary_model)
-                temporary_model = None
-                _log_memory("after-checkpoint-temp-model-release")
-            loader.cleanup()
-            for model_loader in model_analysis.model_loaders.values():
-                model_loader.cleanup()
-
         # AC: @checkpoint-loadable-saved-model-output ac-downstream-return-remains-usable
         # Cache-miss return: reload the saved checkpoint through Comfy's loader
         # so downstream consumers get a Comfy-owned MODEL rather than the
@@ -1787,260 +1705,260 @@ class WIDENExitNode:
             ac-failed-materialization-releases-resident-payload
         """
         timer = _PhaseTimer("diffusion-save")
-        analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
-        timer.mark(f"recipe-analyzed affected={len(analysis.affected_keys)}")
+        with ExitStack() as resources:
+            analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
+            resources.callback(analysis.loader.cleanup)
+            timer.mark(f"recipe-analyzed affected={len(analysis.affected_keys)}")
 
-        base = walk_to_base(widen)
-        domain = getattr(base, "domain", "diffusion")
-        model_analysis = analyze_recipe_models(
-            widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
-        )
-        timer.mark(f"recipe-models-analyzed model_loaders={len(model_analysis.model_loaders)}")
-
-        sink = MaterializationSink()
-        # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
-        # AC: @streaming-materialization-progress ac-affected-write-progress
-        # AC: @streaming-materialization-progress ac-no-op-save-progress
-        # AC: @streaming-materialization-progress ac-finalization-status-visible
-        # AC: @streaming-materialization-progress ac-failure-status-not-success
-        # Progress sized from the manifest (one tick per tensor write) plus
-        # explicit phase units for prepare, finalize, and reload.  Created
-        # before any sink work so a failure during `open()` still carries a
-        # progress object the except block can mark as failed.
-        progress = _build_save_progress(
-            manifest_size=len(base_state),
-            artifact_name=os.path.basename(save_path),
-        )
-        timer.mark(f"progress-built manifest_size={len(base_state)}")
-        try:
-            loader = analysis.loader
-            set_affected = analysis.set_affected
-            lora_affected_keys = analysis.affected_keys
-            arch = analysis.arch
-
-            model_affected = model_analysis.model_affected
-            model_loaders = model_analysis.model_loaders
-            all_model_keys = model_analysis.all_model_keys
-            timer.mark(
-                f"analysis-unpacked sets={len(set_affected)} model_keys={len(all_model_keys)}"
+            base = walk_to_base(widen)
+            domain = getattr(base, "domain", "diffusion")
+            model_analysis = analyze_recipe_models(
+                widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
             )
+            for model_loader in model_analysis.model_loaders.values():
+                resources.callback(model_loader.cleanup)
+            timer.mark(f"recipe-models-analyzed model_loaders={len(model_analysis.model_loaders)}")
 
-            compute_dtype = torch.float32
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-
-            all_keys = set(base_state.keys())
-            validate_loader_keys = getattr(loader, "validate_compatible_keys", None)
-            if validate_loader_keys is not None:
-                validate_loader_keys(all_keys, key_shapes)
-            timer.mark(f"loader-compatible keys={len(all_keys)}")
-            lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
-            model_keys = all_keys & all_model_keys
-            keys_to_process = lora_keys | model_keys
-            timer.mark(f"keys-selected lora={len(lora_keys)} model={len(model_keys)}")
-
-            affected_key_set = keys_to_process
-
-            set_id_map: dict[int, str] = {}
-            for set_key, affected in set_affected.items():
-                set_id = int(set_key)
-                set_id_map[set_id] = set_key
-
-            model_id_map: dict[int, str] = {}
-            for model_key in model_affected.keys():
-                model_id = int(model_key)
-                model_id_map[model_id] = model_key
-
-            widen_config = WIDENConfig(
-                t_factor=widen.t_factor,
-                dtype=compute_dtype,
-            )
-            widen_merger = WIDEN(widen_config)
-            timer.mark("widen-config-built")
-
-            plan = compile_plan(widen, set_id_map, arch, model_id_map)
-            timer.mark(f"plan-compiled ops={len(plan.ops)}")
-
-            # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
-            # AC: @full-saved-model-output ac-diffusion-model-companion-separation
-            # Build manifest for entire model in the EXTERNAL Comfy-loadable
-            # layout (model.diffusion_model.*) — the merged internal keys
-            # (diffusion_model.*) are remapped before the manifest and writes
-            # so the published artifact is loadable as a standalone diffusion
-            # model of the same kind as the source.
-            manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] = {}
-            for k, v in base_state.items():
-                manifest[_to_external_diffusion_key(k)] = (v.dtype, tuple(v.shape))
-            timer.mark(f"manifest-built entries={len(manifest)}")
-
-            workflow_json = json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
-            metadata = build_metadata(
-                serialized,
-                recipe_hash,
-                sorted(affected_key_set),
-                workflow_json,
-                output_mode="full",
-                artifact_kind="diffusion",
-                source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
-                base_identity=base_identity,
-                dependency_fingerprints=dependency_fingerprints_json,
-                checkpoint_components=False,
-            )
-
-            progress.prepare()
-            timer.mark("progress-prepare-done")
-            sink.open(manifest, save_path, metadata)
-            timer.mark("sink-opened")
-
-            if keys_to_process:
-                batch_groups = compile_batch_groups(
-                    list(keys_to_process),
-                    arch=arch,
-                    key_shapes=key_shapes,
-                )
-            else:
-                batch_groups = {}
-
-            if batch_groups:
-                n_models = len(set_affected) + len(model_loaders)
-                storage_element_size = torch.finfo(storage_dtype).bits // 8
-                worst_chunk_bytes = max(
-                    storage_element_size
-                    * torch.Size(sig.shape).numel()
-                    * compute_batch_size(sig.shape, n_models, compute_dtype)
-                    for sig in batch_groups
-                )
-                check_ram_preflight(
-                    merged_state_bytes=worst_chunk_bytes,
-                    worst_chunk_bytes=worst_chunk_bytes,
-                    save_model=True,
-                    loader_bytes=loader.loaded_bytes
-                    + sum(ml.loaded_bytes for ml in model_loaders.values()),
-                )
-
-            _log_memory("before-gpu-eval-full")
-
-            affected_key_set_lookup: set[str] = set()
-            for group_keys in batch_groups.values():
-                affected_key_set_lookup.update(group_keys)
-
-            # Unaffected base writes use the EXTERNAL key layout
-            # AC: @streaming-materialization-progress ac-no-op-save-progress
+            sink = MaterializationSink()
             # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
-            for key in base_state:
-                if key not in affected_key_set_lookup:
-                    external_key = _to_external_diffusion_key(key)
-                    sink.write_tensor(external_key, base_state[key])
-                    progress.tensor_written(external_key)
+            # AC: @streaming-materialization-progress ac-affected-write-progress
+            # AC: @streaming-materialization-progress ac-no-op-save-progress
+            # AC: @streaming-materialization-progress ac-finalization-status-visible
+            # AC: @streaming-materialization-progress ac-failure-status-not-success
+            # Progress sized from the manifest (one tick per tensor write) plus
+            # explicit phase units for prepare, finalize, and reload.  Created
+            # before any sink work so a failure during `open()` still carries a
+            # progress object the except block can mark as failed.
+            progress = _build_save_progress(
+                manifest_size=len(base_state),
+                artifact_name=os.path.basename(save_path),
+            )
+            timer.mark(f"progress-built manifest_size={len(base_state)}")
+            try:
+                loader = analysis.loader
+                set_affected = analysis.set_affected
+                lora_affected_keys = analysis.affected_keys
+                arch = analysis.arch
 
-            def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
-                def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
-                    return execute_plan(
-                        plan=p,
-                        keys=keys,
-                        base_batch=base_batch,
-                        loader=ldr,
-                        widen=wdn,
-                        device=dev,
-                        dtype=dtype,
-                        arch=architecture,
-                        widen_config=wcfg,
-                        model_loaders=mdl_ldrs,
-                        domain=dom,
+                model_affected = model_analysis.model_affected
+                model_loaders = model_analysis.model_loaders
+                all_model_keys = model_analysis.all_model_keys
+                timer.mark(
+                    f"analysis-unpacked sets={len(set_affected)} model_keys={len(all_model_keys)}"
+                )
+
+                compute_dtype = torch.float32
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+
+                all_keys = set(base_state.keys())
+                validate_loader_keys = getattr(loader, "validate_compatible_keys", None)
+                if validate_loader_keys is not None:
+                    validate_loader_keys(all_keys, key_shapes)
+                timer.mark(f"loader-compatible keys={len(all_keys)}")
+                lora_keys = get_keys_to_process(all_keys, lora_affected_keys)
+                model_keys = all_keys & all_model_keys
+                keys_to_process = lora_keys | model_keys
+                timer.mark(f"keys-selected lora={len(lora_keys)} model={len(model_keys)}")
+
+                affected_key_set = keys_to_process
+
+                set_id_map: dict[int, str] = {}
+                for set_key, affected in set_affected.items():
+                    set_id = int(set_key)
+                    set_id_map[set_id] = set_key
+
+                model_id_map: dict[int, str] = {}
+                for model_key in model_affected.keys():
+                    model_id = int(model_key)
+                    model_id_map[model_id] = model_key
+
+                widen_config = WIDENConfig(
+                    t_factor=widen.t_factor,
+                    dtype=compute_dtype,
+                )
+                widen_merger = WIDEN(widen_config)
+                timer.mark("widen-config-built")
+
+                plan = compile_plan(widen, set_id_map, arch, model_id_map)
+                timer.mark(f"plan-compiled ops={len(plan.ops)}")
+
+                # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
+                # AC: @full-saved-model-output ac-diffusion-model-companion-separation
+                # Build manifest for entire model in the EXTERNAL Comfy-loadable
+                # layout (model.diffusion_model.*) — the merged internal keys
+                # (diffusion_model.*) are remapped before the manifest and writes
+                # so the published artifact is loadable as a standalone diffusion
+                # model of the same kind as the source.
+                manifest: dict[str, tuple[torch.dtype, tuple[int, ...]]] = {}
+                for k, v in weight_metadata(base_state).items():
+                    manifest[_to_external_diffusion_key(k)] = (v.dtype, tuple(v.shape))
+                timer.mark(f"manifest-built entries={len(manifest)}")
+
+                workflow_json = (
+                    json.dumps(extra_pnginfo) if save_workflow and extra_pnginfo else None
+                )
+                metadata = build_metadata(
+                    serialized,
+                    recipe_hash,
+                    sorted(affected_key_set),
+                    workflow_json,
+                    output_mode="full",
+                    artifact_kind="diffusion",
+                    source_model_kind=_SOURCE_KIND_DIFFUSION_MODEL,
+                    base_identity=base_identity,
+                    dependency_fingerprints=dependency_fingerprints_json,
+                    checkpoint_components=False,
+                )
+
+                progress.prepare()
+                timer.mark("progress-prepare-done")
+                sink.open(manifest, save_path, metadata)
+                timer.mark("sink-opened")
+
+                if keys_to_process:
+                    batch_groups = compile_batch_groups(
+                        list(keys_to_process),
+                        arch=arch,
+                        key_shapes=key_shapes,
+                    )
+                else:
+                    batch_groups = {}
+
+                if batch_groups:
+                    n_models = len(set_affected) + len(model_loaders)
+                    worst_chunk_bytes = estimate_worst_chunk_bytes(
+                        batch_groups, n_models, compute_dtype
+                    )
+                    check_ram_preflight(
+                        merged_state_bytes=worst_chunk_bytes,
+                        worst_chunk_bytes=worst_chunk_bytes,
+                        save_model=True,
+                        loader_bytes=loader.loaded_bytes
+                        + sum(ml.loaded_bytes for ml in model_loaders.values()),
                     )
 
-                return eval_fn
+                _log_memory("before-gpu-eval-full")
 
-            eval_fn = make_eval_fn(
-                plan,
-                loader,
-                widen_merger,
-                device,
-                compute_dtype,
-                arch,
-                widen_config,
-                model_loaders,
-                domain,
-            )
+                affected_key_set_lookup: set[str] = set()
+                for group_keys in batch_groups.values():
+                    affected_key_set_lookup.update(group_keys)
 
-            # streaming_evaluation_to_sink calls write_fn(name, tensor) using
-            # internal keys; remap to external keys at the boundary and
-            # advance progress for each affected tensor handoff.
-            # AC: @streaming-materialization-progress ac-affected-write-progress
-            # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
-            def _external_write(name: str, tensor: torch.Tensor) -> None:
-                external_key = _to_external_diffusion_key(name)
-                sink.write_tensor(external_key, tensor)
-                progress.tensor_written(external_key)
+                # Unaffected base writes use the EXTERNAL key layout
+                # AC: @streaming-materialization-progress ac-no-op-save-progress
+                # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
+                for key in base_state:
+                    if key not in affected_key_set_lookup:
+                        external_key = _to_external_diffusion_key(key)
+                        sink.write_tensor(external_key, base_state[key])
+                        progress.tensor_written(external_key)
 
-            for sig, group_keys in batch_groups.items():
-                n_models = len(set_affected) + len(model_loaders)
-                batch_size = compute_batch_size(
-                    sig.shape,
-                    n_models,
+                def make_eval_fn(p, ldr, wdn, dev, dtype, architecture, wcfg, mdl_ldrs, dom):
+                    def eval_fn(keys: list[str], base_batch: torch.Tensor) -> torch.Tensor:
+                        return execute_plan(
+                            plan=p,
+                            keys=keys,
+                            base_batch=base_batch,
+                            loader=ldr,
+                            widen=wdn,
+                            device=dev,
+                            dtype=dtype,
+                            arch=architecture,
+                            widen_config=wcfg,
+                            model_loaders=mdl_ldrs,
+                            domain=dom,
+                        )
+
+                    return eval_fn
+
+                eval_fn = make_eval_fn(
+                    plan,
+                    loader,
+                    widen_merger,
+                    device,
                     compute_dtype,
-                )
-                group_base = {k: base_state[k] for k in group_keys}
-                streaming_evaluation_to_sink(
-                    keys=group_keys,
-                    base_tensors=group_base,
-                    eval_fn=eval_fn,
-                    batch_size=batch_size,
-                    device=device,
-                    dtype=compute_dtype,
-                    storage_dtype=None,
-                    write_fn=_external_write,
+                    arch,
+                    widen_config,
+                    model_loaders,
+                    domain,
                 )
 
-                del group_base
-                gc.collect()
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
+                # streaming_evaluation_to_sink calls write_fn(name, tensor) using
+                # internal keys; remap to external keys at the boundary and
+                # advance progress for each affected tensor handoff.
+                # AC: @streaming-materialization-progress ac-affected-write-progress
+                # AC: @streaming-materialization-progress ac-progress-during-streaming-writes
+                def _external_write(name: str, tensor: torch.Tensor) -> None:
+                    external_key = _to_external_diffusion_key(name)
+                    sink.write_tensor(external_key, tensor)
+                    progress.tensor_written(external_key)
 
-            _log_memory("after-streaming-full")
+                for sig, group_keys in batch_groups.items():
+                    n_models = len(set_affected) + len(model_loaders)
+                    batch_size = compute_batch_size(
+                        sig.shape,
+                        n_models,
+                        compute_dtype,
+                    )
+                    group_base = SelectedWeights(base_state, group_keys)
+                    streaming_evaluation_to_sink(
+                        keys=group_keys,
+                        base_tensors=group_base,
+                        eval_fn=eval_fn,
+                        batch_size=batch_size,
+                        device=device,
+                        dtype=compute_dtype,
+                        storage_dtype=None,
+                        write_fn=_external_write,
+                    )
 
-            del base_state
+                    del group_base
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
 
-            # Enter finalize phase BEFORE sink.finalize so the visible
-            # status reports the active validation/fsync/atomic-replace
-            # phase while it is in flight, not only after it completes.
-            # AC: @streaming-materialization-progress ac-finalization-status-visible
-            progress.finalize()
-            sink.finalize(
-                save_path,
-                pre_publish_check=lambda p: _classify_temp_artifact(
-                    p,
-                    expected_kind="diffusion",
-                ),
-            )
-            # AC: @streaming-materialization-progress ac-failure-status-not-success
-            progress.mark_published()
-            _log_memory("after-finalize-full")
+                _log_memory("after-streaming-full")
 
-            # Offload GPU models
-            try:
-                from comfy.model_management import (
-                    free_memory,
-                    get_torch_device,
-                    soft_empty_cache,
+                del base_state
+
+                # Enter finalize phase BEFORE sink.finalize so the visible
+                # status reports the active validation/fsync/atomic-replace
+                # phase while it is in flight, not only after it completes.
+                # AC: @streaming-materialization-progress ac-finalization-status-visible
+                progress.finalize()
+                sink.finalize(
+                    save_path,
+                    pre_publish_check=lambda p: _classify_temp_artifact(
+                        p,
+                        expected_kind="diffusion",
+                    ),
                 )
+                # AC: @streaming-materialization-progress ac-failure-status-not-success
+                progress.mark_published()
+                _log_memory("after-finalize-full")
 
-                free_memory(1e30, get_torch_device())
-                soft_empty_cache()
-            except (ImportError, AttributeError):
-                pass
+                # Offload GPU models
+                try:
+                    from comfy.model_management import (
+                        free_memory,
+                        get_torch_device,
+                        soft_empty_cache,
+                    )
 
-            if not enable_cache:
-                _incremental_cache.clear()
+                    free_memory(1e30, get_torch_device())
+                    soft_empty_cache()
+                except (ImportError, AttributeError):
+                    pass
 
-        except BaseException as exc:
-            # AC: @streaming-materialization-progress ac-failure-status-not-success
-            progress.failure(type(exc).__name__)
-            sink.abort()
-            raise
-        finally:
-            loader.cleanup()
-            for model_loader in model_analysis.model_loaders.values():
-                model_loader.cleanup()
+                if not enable_cache:
+                    _incremental_cache.clear()
+
+            except BaseException as exc:
+                # AC: @streaming-materialization-progress ac-failure-status-not-success
+                progress.failure(type(exc).__name__)
+                sink.abort()
+                raise
+            finally:
+                resources.close()
 
         # AC: @full-saved-model-output ac-return-loaded-model
         # AC: @full-saved-model-output ac-diffusion-model-source-kind-round-trip
@@ -2065,25 +1983,39 @@ class WIDENExitNode:
 
         model_patcher = walk_to_base(widen).model_patcher
         _unpatch_loaded_clones(model_patcher)
-        base_state = model_patcher.model_state_dict()  # type: ignore[attr-defined]
-        storage_dtype = next(iter(base_state.values())).dtype
+        base_state = EffectiveWeights(model_patcher)
+        storage_dtype = next(iter(weight_metadata(base_state).values())).dtype
 
-        key_shapes = {k: tuple(v.shape) for k, v in base_state.items()}
-        key_byte_sizes = {k: v.nelement() * v.element_size() for k, v in base_state.items()}
+        key_shapes = {k: tuple(v.shape) for k, v in weight_metadata(base_state).items()}
+        key_byte_sizes = {
+            k: v.nelement() * v.element_size() for k, v in weight_metadata(base_state).items()
+        }
 
-        base_identity = compute_base_identity(base_state)
-        lora_stats = compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
-
-        # --- Normal GPU pipeline ---
-        analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
-
-        base = walk_to_base(widen)
-        domain = getattr(base, "domain", "diffusion")
-        model_analysis = analyze_recipe_models(
-            widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
+        # Disabled cache needs metadata, not an O(model) content scan. Its
+        # artifact gets a non-reusable identity; enabled cache hashes effective
+        # weights lazily, one key at a time.
+        base_identity = (
+            compute_base_identity(base_state) if enable_cache else secrets.token_hex(32)
+        )
+        lora_stats = (
+            compute_lora_stats(widen, lora_path_resolver, model_path_resolver)
+            if enable_cache
+            else {}
         )
 
-        try:
+        # --- Normal GPU pipeline ---
+        with ExitStack() as resources:
+            analysis = analyze_recipe(widen, lora_path_resolver=lora_path_resolver)
+            resources.callback(analysis.loader.cleanup)
+
+            base = walk_to_base(widen)
+            domain = getattr(base, "domain", "diffusion")
+            model_analysis = analyze_recipe_models(
+                widen, base.arch, model_path_resolver=model_path_resolver, domain=domain
+            )
+            for model_loader in model_analysis.model_loaders.values():
+                resources.callback(model_loader.cleanup)
+
             loader = analysis.loader
             set_affected = analysis.set_affected
             lora_affected_keys = analysis.affected_keys
@@ -2132,7 +2064,13 @@ class WIDENExitNode:
             plan = compile_plan(widen, set_id_map, arch, model_id_map)
 
             # --- Incremental cache: detect which blocks changed ---
-            structural_fp = compute_structural_fingerprint(widen, base_identity, lora_stats)
+            # MODEL patch returns do not consume checkpoint companions.
+            structural_fp = compute_structural_fingerprint(
+                widen,
+                base_identity,
+                lora_stats,
+                companion_identities={"clip": "not-consumed", "vae": "not-consumed"},
+            )
             current_block_configs = collect_block_configs(widen)
             current_loader_bytes = loader.loaded_bytes + sum(
                 ml.loaded_bytes for ml in model_loaders.values()
@@ -2191,12 +2129,8 @@ class WIDENExitNode:
                 processed_keys = {k for keys in batch_groups.values() for k in keys}
                 merged_state_bytes = sum(key_byte_sizes[k] for k in processed_keys)
                 n_models = len(set_affected) + len(model_loaders)
-                storage_element_size = torch.finfo(storage_dtype).bits // 8
-                worst_chunk_bytes = max(
-                    storage_element_size
-                    * torch.Size(sig.shape).numel()
-                    * compute_batch_size(sig.shape, n_models, compute_dtype)
-                    for sig in batch_groups
+                worst_chunk_bytes = estimate_worst_chunk_bytes(
+                    batch_groups, n_models, compute_dtype
                 )
                 check_ram_preflight(
                     merged_state_bytes=merged_state_bytes,
@@ -2248,7 +2182,7 @@ class WIDENExitNode:
                         domain,
                     )
 
-                    group_base = {k: base_state[k] for k in group_keys}
+                    group_base = SelectedWeights(base_state, group_keys)
                     group_results = chunked_evaluation(
                         keys=group_keys,
                         base_tensors=group_base,
@@ -2260,6 +2194,7 @@ class WIDENExitNode:
                     )
 
                     merged_state.update(group_results)
+                    del group_results
 
                     if pbar is not None:
                         pbar.update(1)
@@ -2306,11 +2241,6 @@ class WIDENExitNode:
                     _incremental_cache.clear()
                     _incremental_cache[structural_fp] = new_entry
             _log_memory("before-cache-write")
-
-        finally:
-            loader.cleanup()
-            for model_loader in model_analysis.model_loaders.values():
-                model_loader.cleanup()
 
         result = install_merged_patches(model_patcher, merged_state, storage_dtype)
         return (result,)

@@ -202,7 +202,6 @@ class SavedModelProgress:
             return
         self._advanced += 1
         if self._pbar is not None:
-            try:
-                self._pbar.update(1)
-            except Exception:  # pragma: no cover - defensive
-                logger.debug("ProgressBar.update raised", exc_info=True)
+            # Comfy's progress hook is also a cancellation boundary. Never
+            # consume the interrupt (Comfy clears its flag before raising).
+            self._pbar.update(1)

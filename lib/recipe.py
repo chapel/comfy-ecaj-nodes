@@ -68,7 +68,7 @@ class RecipeLoRA:
 
     def __post_init__(self) -> None:
         """Freeze mutable dicts in loras to prevent post-construction mutation."""
-        frozen = tuple(MappingProxyType(d) if isinstance(d, dict) else d for d in self.loras)
+        frozen = tuple(MappingProxyType(dict(d)) for d in self.loras)
         object.__setattr__(self, "loras", frozen)
 
 

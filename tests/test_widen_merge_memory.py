@@ -15,7 +15,9 @@ def _prechange_merge(weights, backbone, config):
     """Frozen ca35bab6 equations; never call WIDEN or its math helpers.
 
     Deliberately retains all directions/deltas as the prechange implementation
-    did. The unchanged standalone sparsity operators are shared for alternates.
+    did. LM-10 deliberately corrects the pre-existing global epsilon to per-key
+    statistics. Standalone sparsity operators are shared for alternates; LM-06
+    is independently checked against active-set equations in test_audit_math.
     """
 
     def disentangle(w):
@@ -37,7 +39,8 @@ def _prechange_merge(weights, backbone, config):
     def rank(values):
         dims = tuple(range(1, values.ndim))
         eps = torch.maximum(
-            torch.tensor(1e-12, dtype=values.dtype), 1e-8 * values.float().abs().mean()
+            torch.tensor(1e-12, dtype=values.dtype),
+            1e-8 * values.float().abs().mean(dim=dims, keepdim=True),
         )
         if config.ranking_strategy == "zscore":
             return torch.sigmoid(
@@ -242,6 +245,44 @@ def test_delta_storage_released_before_next_subtraction(shape):
     assert observed.branch_order == list(range(9))
     assert observed.live_before_subtract == [0] * 9, "do not retain branch deltas"
     assert all(ref() is None for ref in observed.refs)
+
+
+# AC: @widen-core ac-2
+def test_1d_deltas_released_between_scoring_and_accumulation():
+    weights, backbone = _inputs((2, 8), "random")
+    config = WIDENConfig(t_factor=1.25)
+    with _DeltaLifetimes(weights, backbone) as observed:
+        actual = WIDEN(config).merge_weights_batched(weights, backbone)
+    torch.testing.assert_close(actual, _prechange_merge(weights, backbone, config), rtol=0, atol=0)
+    assert observed.live_before_subtract == [0] * 18
+    assert observed.branch_order == list(range(9)) * 2
+    assert all(ref() is None for ref in observed.refs)
+
+
+# AC: @widen-core ac-1
+def test_filter_directions_released_before_ranking(monkeypatch):
+    weights, backbone = _inputs((2, 5, 8), "random")
+    merger = WIDEN(WIDENConfig(t_factor=1.25))
+    expected = merger.filter_delta_batched(weights[0], backbone)
+    disentangle = merger._disentangle_batched
+    rank = merger.ranker.rank_weights_batched
+    refs, live_at_rank = [], []
+
+    def observe_disentangle(w):
+        magnitude, direction = disentangle(w)
+        refs.append(weakref.ref(_storage_owner(direction)))
+        return magnitude, direction
+
+    def observe_rank(values):
+        live_at_rank.append(sum(ref() is not None for ref in refs))
+        return rank(values)
+
+    monkeypatch.setattr(merger, "_disentangle_batched", observe_disentangle)
+    monkeypatch.setattr(merger.ranker, "rank_weights_batched", observe_rank)
+    actual = merger.filter_delta_batched(weights[0], backbone)
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    assert live_at_rank == [0, 0]
+    assert all(ref() is None for ref in refs)
 
 
 # AC: @widen-core ac-9

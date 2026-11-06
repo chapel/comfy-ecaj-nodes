@@ -22,10 +22,10 @@ from collections import defaultdict
 from collections.abc import Sequence
 
 import torch
-from safetensors import safe_open
 
 from ..executor import DeltaSpec
 from .base import LoRALoader
+from .validation import read_pairs
 
 __all__ = ["SDXLCLIPLoader"]
 
@@ -185,72 +185,13 @@ class SDXLCLIPLoader(LoRALoader):
         self._affected: set[str] = set()
 
     def load(self, path: str, strength: float = 1.0, set_id: str | None = None) -> None:
-        """Load a LoRA safetensors file into the given set.
-
-        # AC: @sdxl-clip-lora-loader ac-1
-        Maps lora_te1_* keys to CLIP-L model keys.
-
-        # AC: @sdxl-clip-lora-loader ac-2
-        Maps lora_te2_* keys to CLIP-G model keys.
-
-        # AC: @sdxl-clip-lora-loader ac-3
-        LoRAs with only UNet keys result in empty affected_keys.
-
-        # AC: @sdxl-clip-lora-loader ac-5
-        Implements load(path, strength, set_id).
-        """
-        # Use a default set_id if none provided (backward compat)
+        """Validate the whole package before publishing factors to this set."""
+        pending = read_pairs(path, strength, _parse_clip_lora_key, clip=True)
         effective_set_id = set_id if set_id is not None else "__default__"
-
-        # Collect up/down pairs keyed by model key
-        layer_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
-        # Collect alpha values keyed by LoRA base path
-        alpha_values: dict[str, float] = {}
-        # Map from model_key to LoRA base path (for alpha lookup)
-        lora_base_paths: dict[str, str] = {}
-
-        with safe_open(path, framework="pt", device="cpu") as f:
-            for lora_key in f.keys():
-                # Check for alpha keys (e.g. "lora_te1_text_model_encoder_layers_0.alpha")
-                if lora_key.endswith(".alpha"):
-                    alpha_tensor = f.get_tensor(lora_key)
-                    if alpha_tensor.numel() == 1:
-                        alpha_values[lora_key[: -len(".alpha")]] = alpha_tensor.item()
-                    continue
-
-                model_key, direction = _parse_clip_lora_key(lora_key)
-                if model_key is None:
-                    continue
-
-                tensor = f.get_tensor(lora_key)
-                layer_tensors[model_key][direction] = tensor
-
-                # Extract LoRA base path for alpha lookup
-                # e.g. "lora_te1_text_model_encoder_layers_0_self_attn_k_proj.lora_up.weight"
-                #    → "lora_te1_text_model_encoder_layers_0_self_attn_k_proj"
-                lora_base = lora_key.rsplit(".lora_", 1)[0]
-                lora_base_paths[model_key] = lora_base
-
-        # Build delta specs for complete up/down pairs
-        for model_key, tensors in layer_tensors.items():
-            if "up" not in tensors or "down" not in tensors:
-                continue
-
-            up = tensors["up"]
-            down = tensors["down"]
-
-            # Compute scale: strength * alpha / rank
-            # Alpha is read from the file if available, otherwise defaults to rank
-            rank = down.shape[0]
-            alpha = float(rank)
-            lora_base = lora_base_paths.get(model_key)
-            if lora_base is not None and lora_base in alpha_values:
-                alpha = alpha_values[lora_base]
-            scale = strength * alpha / rank
-
-            self._lora_data_by_set[effective_set_id][model_key].append((up, down, scale))
-            self._affected_by_set[effective_set_id].add(model_key)
-            self._affected.add(model_key)
+        for key, up, down, scale, extra in pending:
+            self._lora_data_by_set[effective_set_id][key].append((up, down, scale))
+            self._affected_by_set[effective_set_id].add(key)
+            self._affected.add(key)
 
     @property
     def affected_keys(self) -> frozenset[str]:

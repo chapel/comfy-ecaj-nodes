@@ -15,6 +15,7 @@ explicit compatibility table instead of relying on broad underscore rewriting.
 
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -24,6 +25,7 @@ from safetensors import safe_open
 
 from ..executor import DeltaSpec
 from .base import LoRALoader
+from .validation import validate_alpha, validate_tensor
 
 __all__ = [
     "KREA2_COMPATIBILITY_FAMILIES",
@@ -254,12 +256,17 @@ class Krea2Loader(LoRALoader):
         a later Exit execution from reporting success after applying only a
         subset of the package.
         """
+        if not math.isfinite(strength):
+            raise ValueError("LoRA strength must be finite")
+        seen_factors = set()
+        source_stems = {}
         effective_set_id = set_id if set_id is not None else "__default__"
 
         layer_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
         lokr_tensors: dict[str, dict[str, torch.Tensor]] = defaultdict(dict)
         direct_tensors: dict[str, torch.Tensor] = {}
         alpha_values: dict[str, float] = {}
+        alpha_stems: dict[str, str] = {}
         unsupported: list[str] = []
         shape_errors: list[str] = []
 
@@ -267,15 +274,21 @@ class Krea2Loader(LoRALoader):
             for lora_key in f.keys():
                 if lora_key.endswith(".alpha"):
                     alpha_tensor = f.get_tensor(lora_key)
+                    try:
+                        alpha = validate_alpha(alpha_tensor, lora_key)
+                    except ValueError as exc:
+                        shape_errors.append(str(exc))
+                        continue
                     alpha_base_key = lora_key[: -len(".alpha")]
                     normalized_alpha = _normalize_base_path(alpha_base_key)
                     if normalized_alpha is None:
                         unsupported.append(lora_key)
-                    elif alpha_tensor.numel() != 1:
-                        shape_errors.append(f"{lora_key} alpha must be scalar")
                     else:
                         model_key = f"diffusion_model.{normalized_alpha}.weight"
-                        alpha_values[model_key] = float(alpha_tensor.item())
+                        if model_key in alpha_values:
+                            raise ValueError(f"Duplicate alpha aliases for {model_key}")
+                        alpha_values[model_key] = alpha
+                        alpha_stems[model_key] = alpha_base_key
                     continue
 
                 parsed = _parse_krea2_lora_key(lora_key)
@@ -284,12 +297,31 @@ class Krea2Loader(LoRALoader):
                     continue
 
                 tensor = f.get_tensor(lora_key)
+                validate_tensor(tensor, lora_key)
+                stem = (
+                    lora_key[: -len(".diff_b")]
+                    if parsed.direct_delta
+                    else _strip_lora_suffix(lora_key)[0]
+                )
+                previous = source_stems.setdefault(parsed.model_key, stem)
+                if previous != stem:
+                    raise ValueError(f"Duplicate LoRA group aliases for {parsed.model_key}")
+                identity = (parsed.model_key, parsed.direction, parsed.direct_delta)
+                if identity in seen_factors:
+                    raise ValueError(f"Duplicate LoRA aliases for {parsed.model_key}")
+                seen_factors.add(identity)
                 if parsed.direct_delta:
                     direct_tensors[parsed.model_key] = tensor
                 elif parsed.direction in ("lokr_w1", "lokr_w2"):
                     lokr_tensors[parsed.group_key][parsed.direction] = tensor
                 else:
                     layer_tensors[parsed.group_key][parsed.direction] = tensor
+
+        for model_key, stem in alpha_stems.items():
+            if model_key not in layer_tensors and model_key not in lokr_tensors:
+                unsupported.append(f"orphan alpha: {stem}.alpha")
+            elif source_stems[model_key] != stem:
+                raise ValueError(f"Duplicate LoRA group aliases for {model_key}: alpha {stem}")
 
         incomplete_lora = [
             key
@@ -325,6 +357,8 @@ class Krea2Loader(LoRALoader):
                 continue
             alpha = alpha_values.get(model_key, float(rank))
             scale = strength * alpha / rank
+            if not math.isfinite(scale):
+                raise ValueError(f"Non-finite LoRA scale for {model_key}")
             pending_lora[model_key].append((up, down, scale))
 
         for model_key, tensors in lokr_tensors.items():

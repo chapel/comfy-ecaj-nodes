@@ -270,6 +270,7 @@ def _apply_widen_filter_per_block(
 
         # Write back to result using indexed assignment
         result[indices] = sub_result
+        del sub_lora, sub_backbone, sub_result
 
     return result
 
@@ -349,5 +350,6 @@ def _apply_widen_merge_per_block(
 
         # Write back to result using indexed assignment
         result[indices] = sub_result
+        del sub_branches, sub_backbone, sub_result
 
     return result

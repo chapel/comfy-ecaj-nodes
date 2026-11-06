@@ -7,6 +7,7 @@ This module is pure torch and stdlib - no ComfyUI imports.
 """
 
 import logging
+import math
 
 import torch
 import torch.nn as nn
@@ -48,12 +49,9 @@ class SparsemaxFunction(Function):
             1, sorted_input.size(dim) + 1, device=input.device, dtype=input.dtype
         )
 
-        if dim == -1:
-            k_array = k_array.view(1, -1)
-        else:
-            shape = [1] * input.ndim
-            shape[dim] = -1
-            k_array = k_array.view(*shape)
+        shape = [1] * input.ndim
+        shape[dim] = -1
+        k_array = k_array.view(*shape)
 
         # Compute threshold
         support = sorted_input - (cumsum - 1) / k_array > 0
@@ -139,6 +137,10 @@ class EntmaxFunction(Function):
         Returns:
             Entmax output
         """
+        if not isinstance(alpha, (int, float)) or not math.isfinite(alpha) or not 1 <= alpha <= 2:
+            raise ValueError("alpha must be finite and in [1, 2]")
+        if isinstance(n_iter, bool) or not isinstance(n_iter, int) or n_iter <= 0:
+            raise ValueError("n_iter must be a positive integer")
         ctx._entmax_alpha = alpha
 
         if alpha == 1.0:
@@ -149,12 +151,43 @@ class EntmaxFunction(Function):
             # Special case: sparsemax (no ctx saved — delegates to SparsemaxFunction)
             return SparsemaxFunction.apply(input, dim)
 
+        if alpha < 1.1:
+            # With a=alpha-1, the ordinary base a*x-tau rounds away logit
+            # differences near tau=-1 (error amplified by 1/a). Reparameterize
+            # tau=-1+a*t and evaluate exp(log1p(a*(x-t))/a) instead: no addition
+            # to one, and the exact softmax limit as a approaches zero.
+            # Promote low-precision inputs before subtracting/scaling; FP64
+            # stays FP64. The default alpha=1.5 path is unchanged.
+            work = input.float() if input.dtype in (torch.float16, torch.bfloat16) else input
+            shifted = work - work.max(dim=dim, keepdim=True)[0]
+            a = alpha - 1
+            lo = torch.zeros_like(shifted.sum(dim=dim, keepdim=True))
+            # At t=0 max-logit mass is one. At t=log(n), log1p(u)<=u
+            # bounds each probability by exp(x-t), so total mass is <=1.
+            hi = lo + math.log(input.size(dim))
+
+            def probabilities(threshold):
+                return torch.exp(torch.log1p(torch.clamp(a * (shifted - threshold), min=-1)) / a)
+
+            for _ in range(n_iter):
+                mid = (lo + hi) / 2
+                excess = probabilities(mid).sum(dim=dim, keepdim=True) > 1
+                lo = torch.where(excess, mid, lo)
+                hi = torch.where(excess, hi, mid)
+            output = probabilities((lo + hi) / 2)
+            output = (output / output.sum(dim=dim, keepdim=True)).to(input.dtype)
+            ctx.save_for_backward(output)
+            ctx.alpha = alpha
+            ctx.dim = dim
+            return output
+
         # General case: use bisection algorithm
         input_shifted = input - input.max(dim=dim, keepdim=True)[0]
 
-        # Bisection bounds
-        tau_min = input_shifted.min(dim=dim, keepdim=True)[0] - 1
-        tau_max = input_shifted.max(dim=dim, keepdim=True)[0]
+        # Shifted maximum is zero. At tau=-1 its mass alone is one;
+        # at tau=0 all mass is zero, independent of logit range and alpha.
+        tau_max = torch.zeros_like(input_shifted.sum(dim=dim, keepdim=True))
+        tau_min = tau_max - 1
 
         # Bisection iterations
         for _ in range(n_iter):
@@ -168,8 +201,9 @@ class EntmaxFunction(Function):
             constraint = y.sum(dim=dim, keepdim=True) - 1
 
             # Update bounds
-            tau_min = torch.where(constraint < 0, tau, tau_min)
-            tau_max = torch.where(constraint > 0, tau, tau_max)
+            # Mass decreases with tau: excess mass raises the lower bound.
+            tau_min = torch.where(constraint > 0, tau, tau_min)
+            tau_max = torch.where(constraint <= 0, tau, tau_max)
 
         # Final computation
         tau = (tau_min + tau_max) / 2
@@ -180,7 +214,7 @@ class EntmaxFunction(Function):
         output = output / (output.sum(dim=dim, keepdim=True) + 1e-12)
 
         # Save for backward
-        ctx.save_for_backward(output, input)
+        ctx.save_for_backward(output)
         ctx.alpha = alpha
         ctx.dim = dim
 
@@ -209,7 +243,7 @@ class EntmaxFunction(Function):
                 f"Use torch.no_grad() at the call site or use alpha != {alpha}."
             )
 
-        output, _ = ctx.saved_tensors
+        (output,) = ctx.saved_tensors
         alpha = ctx.alpha
         dim = ctx.dim
 

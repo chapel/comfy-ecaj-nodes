@@ -390,6 +390,8 @@ _SDXL_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
 
 # Layer type patterns for Z-Image/S3-DiT
 _ZIMAGE_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
+    ("attention.qkv", "attention"),
+    ("attention.out", "attention"),
     # Attention patterns (including q_norm/k_norm per ac-7)
     ("attn.qkv", "attention"),
     ("attn.out", "attention"),
@@ -412,6 +414,10 @@ _ZIMAGE_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
 
 # Layer type patterns for Qwen
 _QWEN_LAYER_PATTERNS: tuple[tuple[str, str], ...] = (
+    # Native Qwen MLP projections are not attention projections.
+    (".img_mlp.", "feed_forward"),
+    (".txt_mlp.", "feed_forward"),
+    (".ff.net.", "feed_forward"),
     # Attention patterns
     (".attn.", "attention"),
     ("to_q", "attention"),
@@ -679,7 +685,7 @@ def filter_changed_keys(
             result.add(key)
             continue
         if changed_layer_types:
-            layer_type = classify_layer_type(key, arch)
+            layer_type = classify_layer_type(key, arch, domain)
             if layer_type is not None and layer_type in changed_layer_types:
                 result.add(key)
 
