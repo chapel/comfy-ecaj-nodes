@@ -383,97 +383,39 @@ def _chunked_eval_to_sink_impl(
     """
     avail_ram = get_available_ram_bytes() if device != "cpu" else 0
 
-    for chunk_keys in chunked(keys, batch_size):
-        try:
-            # Stack base tensors and move to GPU
-            # AC: @memory-management ac-9 — gate pin_memory on available RAM
-            base_stack = torch.stack([base_tensors[k].cpu() for k in chunk_keys])
-            tensor_bytes = base_stack.nelement() * base_stack.element_size()
-            if device != "cpu" and base_stack.numel() > 65536:
-                # 3x headroom: original stack + pinned copy + GC margin
-                if avail_ram > tensor_bytes * 3:
-                    base_gpu = base_stack.pin_memory().to(device, dtype=dtype)
-                else:
-                    base_gpu = base_stack.to(device, dtype=dtype)
+    def evaluate_chunk(chunk_keys: list[str]) -> torch.Tensor:
+        # Stack base tensors and move to GPU
+        # AC: @memory-management ac-9 — gate pin_memory on available RAM
+        base_stack = torch.stack([base_tensors[k].cpu() for k in chunk_keys])
+        tensor_bytes = base_stack.nelement() * base_stack.element_size()
+        if device != "cpu" and base_stack.numel() > 65536:
+            # 3x headroom: original stack + pinned copy + GC margin
+            if avail_ram > tensor_bytes * 3:
+                base_gpu = base_stack.pin_memory().to(device, dtype=dtype)
             else:
                 base_gpu = base_stack.to(device, dtype=dtype)
-            del base_stack
+        else:
+            base_gpu = base_stack.to(device, dtype=dtype)
+        del base_stack
 
-            # Evaluate the chunk
-            merged_gpu = eval_fn(chunk_keys, base_gpu)
-            del base_gpu
+        # Evaluate the chunk
+        merged_gpu = eval_fn(chunk_keys, base_gpu)
+        del base_gpu
 
-            merged_cpu = merged_gpu.cpu()
-            del merged_gpu
+        merged_cpu = merged_gpu.cpu()
+        del merged_gpu
 
-            # AC: @batched-executor ac-5, ac-6
-            # Hand each tensor to the sink immediately after dtype conversion
-            for i, key in enumerate(chunk_keys):
-                key_dtype = base_tensors[key].dtype if storage_dtype is None else storage_dtype
-                receive_fn(key, merged_cpu[i].to(dtype=key_dtype))
+        return merged_cpu
 
-            # Release the chunk's CPU tensor immediately so the previous
-            # group's results are not resident while the next chunk is built.
-            del merged_cpu
-
-            # AC: @memory-management ac-1
-            # GPU tensors freed via del statements above after results
-            # transfer to CPU. Periodic gc.collect() runs between
-            # OpSignature groups (in exit.py), not per-chunk, to avoid
-            # GPU sync overhead that blocks kernel queuing.
-
+    for chunk_keys in chunked(keys, batch_size):
+        try:
+            merged_cpu = evaluate_chunk(chunk_keys)
         except torch.cuda.OutOfMemoryError:
             # AC: @batched-executor ac-4
-            # OOM backoff: clear cache and retry with batch_size=1
-            gc.collect()
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-
-            for key in chunk_keys:
-                try:
-                    base_tensor = base_tensors[key].unsqueeze(0)
-                    base_gpu = base_tensor.to(device, dtype=dtype)
-
-                    merged_gpu = eval_fn([key], base_gpu)
-                    del base_gpu
-
-                    # AC: @batched-executor ac-5, ac-6
-                    key_dtype = base_tensors[key].dtype if storage_dtype is None else storage_dtype
-                    merged_cpu = merged_gpu.to("cpu", dtype=key_dtype)
-                    del merged_gpu
-
-                    receive_fn(key, merged_cpu[0])
-                    del merged_cpu
-
-                    # AC: @memory-management ac-1
-                    # Free GPU memory after each single-key evaluation in OOM path
-                    gc.collect()
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-
-                except torch.cuda.OutOfMemoryError:
-                    # Even single-key evaluation failed; propagate
-                    gc.collect()
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-                    raise
-                except (MemoryError, RuntimeError) as inner_e:
-                    # AC: @memory-management ac-11
-                    gc.collect()
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-                    if isinstance(inner_e, MemoryError) or (
-                        isinstance(inner_e, RuntimeError)
-                        and (
-                            "not enough memory" in str(inner_e).lower()
-                            or "out of memory" in str(inner_e).lower()
-                        )
-                    ):
-                        raise RuntimeError(
-                            f"System memory exhausted during single-key retry for '{key}'"
-                        ) from inner_e
-                    raise
-
+            # A single key cannot be split further. Preserve the CUDA OOM.
+            if len(chunk_keys) == 1:
+                raise
+            merged_cpu = None
         except MemoryError as e:
             # AC: @memory-management ac-11
             # System RAM exhaustion during chunk evaluation
@@ -491,6 +433,68 @@ def _chunked_eval_to_sink_impl(
                     torch.cuda.empty_cache()
                 raise RuntimeError("System memory exhausted during chunked evaluation") from e
             raise
+
+        else:
+            # Sink delivery is not retryable: an earlier key may already have
+            # been persisted. Never replay successful writes on a sink error.
+            # AC: @batched-executor ac-5, ac-6
+            for i, key in enumerate(chunk_keys):
+                key_dtype = base_tensors[key].dtype if storage_dtype is None else storage_dtype
+                receive_fn(key, merged_cpu[i].to(dtype=key_dtype))
+            del merged_cpu
+            continue
+
+        # Leave the OOM handler before collecting or retrying. Its traceback
+        # owns the failed evaluation frame (and registers/deltas); the helper
+        # also keeps base_stack/base_gpu out of this long-lived loop frame.
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        for key in chunk_keys:
+            try:
+                base_tensor = base_tensors[key].unsqueeze(0)
+                base_gpu = base_tensor.to(device, dtype=dtype)
+
+                merged_gpu = eval_fn([key], base_gpu)
+                del base_gpu
+
+                # AC: @batched-executor ac-5, ac-6
+                key_dtype = base_tensors[key].dtype if storage_dtype is None else storage_dtype
+                merged_cpu = merged_gpu.to("cpu", dtype=key_dtype)
+                del merged_gpu
+
+                receive_fn(key, merged_cpu[0])
+                del merged_cpu
+
+                # AC: @memory-management ac-1
+                # Free GPU memory after each single-key evaluation in OOM path
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+
+            except torch.cuda.OutOfMemoryError:
+                # Even single-key evaluation failed; propagate
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                raise
+            except (MemoryError, RuntimeError) as inner_e:
+                # AC: @memory-management ac-11
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                if isinstance(inner_e, MemoryError) or (
+                    isinstance(inner_e, RuntimeError)
+                    and (
+                        "not enough memory" in str(inner_e).lower()
+                        or "out of memory" in str(inner_e).lower()
+                    )
+                ):
+                    raise RuntimeError(
+                        f"System memory exhausted during single-key retry for '{key}'"
+                    ) from inner_e
+                raise
 
 
 def evaluate_to_sink(

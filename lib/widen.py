@@ -460,22 +460,19 @@ class WIDEN:
             if weights_list[0].ndim == 2:
                 return self._merge_1d_params_batched(weights_list, backbone)
 
-            # Step 1: Disentangle all weights
+            # Steps 1-2: Score each branch immediately, retaining only compact
+            # per-column divergences rather than N full-sized directions/deltas.
             m_backbone, D_backbone = self._disentangle_batched(backbone)
-            m_list, D_list, delta_W_list = [], [], []
+            delta_m_list, delta_D_list = [], []
 
             for W in weights_list:
                 m, D = self._disentangle_batched(W)
-                m_list.append(m)
-                D_list.append(D)
-                delta_W_list.append(W - backbone)
-
-            # Step 2: Compute divergences
-            delta_m_list = [torch.abs(m - m_backbone) for m in m_list]
-            delta_D_list = [
-                self.divergence_calc.compute_direction_divergence_batched(D, D_backbone)
-                for D in D_list
-            ]
+                delta_m_list.append(torch.abs(m - m_backbone))
+                delta_D_list.append(
+                    self.divergence_calc.compute_direction_divergence_batched(D, D_backbone)
+                )
+                del m, D
+            del m_backbone, D_backbone
 
             # Step 3: Rank SEPARATELY
             ranked_m = [self.ranker.rank_weights_batched(dm) for dm in delta_m_list]
@@ -496,10 +493,11 @@ class WIDEN:
 
             # Step 6: Delta merge (accumulate weighted deltas, add backbone at end)
             S_0 = (M[0] + D_scores[0]) / 2
-            W_merged = S_0 * delta_W_list[0]
+            # Materialize each delta only for its original-order accumulation.
+            W_merged = S_0 * (weights_list[0] - backbone)
             for n in range(1, N):
                 S_n = (M[n] + D_scores[n]) / 2
-                W_merged += S_n * delta_W_list[n]
+                W_merged += S_n * (weights_list[n] - backbone)
             W_merged += backbone
 
             return W_merged
